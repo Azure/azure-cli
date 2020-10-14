@@ -575,8 +575,6 @@ class VMOSDiskSize(ScenarioTest):
 
 
 class VMManagedDiskScenarioTest(ScenarioTest):
-    
-    @unittest.skip("abbhar:Need to check this")
     @ResourceGroupPreparer(name_prefix='cli_test_managed_disk')
     def test_vm_managed_disk(self, resource_group):
 

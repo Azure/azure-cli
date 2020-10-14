@@ -216,7 +216,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
             'disks': '2019-07-01',
-            'disk_encryption_sets': '2019-07-01'
+            'disk_encryption_sets': '2019-07-01',
+            'snapshots': '2019-07-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2018-05-01',
