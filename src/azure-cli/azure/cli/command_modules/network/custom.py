@@ -1086,7 +1086,8 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None,
+                                   priority=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -1100,6 +1101,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
+        priority=priority,
         backend_address_pool=SubResource(id=address_pool) if address_pool else None,
         backend_http_settings=SubResource(id=http_settings) if http_settings else None,
         http_listener=SubResource(id=http_listener),
@@ -1117,7 +1119,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
                                    http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
-                                   rule_type=None, rewrite_rule_set=None):
+                                   rule_type=None, rewrite_rule_set=None, priority=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
@@ -1133,6 +1135,8 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.rule_type = rule_type
     if rewrite_rule_set is not None:
         instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
+    with cmd.update_context(instance) as c:
+        c.set_param('priority', priority)
     return parent
 
 
@@ -1597,43 +1601,61 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                                           rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type:
+        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
             for rule_override in rule_set.rule_group_overrides:
                 if rule_override.rule_group_name == rule_group_name:
+                    # Add one rule
                     rule_override.rules.extend(managed_rule_overrides)
                     break
             else:
+                # Add one rule group
                 if rule_group_override is not None:
                     rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
+        # Add new rule set
         waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
 
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 
 
-def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name, rules=None):
+def update_waf_managed_rule_set(cmd, instance, rule_set_type, rule_set_version, rule_group_name=None, rules=None):
     """
     Update(Override) existing rule set of a WAF policy managed rules.
     """
-    ManagedRuleGroupOverride, ManagedRuleOverride = cmd.get_models('ManagedRuleGroupOverride', 'ManagedRuleOverride')
+    ManagedRuleSet, ManagedRuleGroupOverride, ManagedRuleOverride = \
+        cmd.get_models('ManagedRuleSet', 'ManagedRuleGroupOverride', 'ManagedRuleOverride')
 
     managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules else None
 
     rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
                                                    rules=managed_rule_overrides) if managed_rule_overrides else None
 
+    new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
+                                          rule_set_version=rule_set_version,
+                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
+
+    updated_rule_set = None
+
     for rule_set in instance.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type == rule_set_type:
-            for rule_group in rule_set.rule_group_overrides:
-                if rule_group.rule_group_name == rule_group_name:
-                    rule_group.rules = managed_rule_overrides
-                    break
+        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version != rule_set_version:
+            updated_rule_set = rule_set
+            break
+
+        if rule_set.rule_set_type == rule_set_type and rule_set.rule_set_version == rule_set_version:
+            if rule_group_name is None:
+                updated_rule_set = rule_set
+                break
+
+            rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
+            if rg:
+                rg.rules = managed_rule_overrides   # differentiate with add_waf_managed_rule_set()
             else:
                 rule_set.rule_group_overrides.append(rule_group_override)
-            break
-    else:
-        raise CLIError('Managed rule group: [ {} ] not found. Add it first'.format(rule_group_name))
+
+    if updated_rule_set:
+        instance.managed_rules.managed_rule_sets.remove(updated_rule_set)
+        instance.managed_rules.managed_rule_sets.append(new_managed_rule_set)
 
     return instance
 
@@ -1645,17 +1667,22 @@ def remove_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
     """
     waf_policy = client.get(resource_group_name, policy_name)
 
-    for rule_set in waf_policy.managed_rules.managed_rule_sets:
-        if rule_set.rule_set_type != rule_set_type:
-            continue
+    delete_rule_set = None
 
-        if rule_group_name is None:
-            rule_set.rule_group_overrides = []
-        else:
+    for rule_set in waf_policy.managed_rules.managed_rule_sets:
+        if rule_set.rule_set_type == rule_set_type or rule_set.rule_set_version == rule_set_version:
+            if rule_group_name is None:
+                delete_rule_set = rule_set
+                break
+
+            # Remove one rule from rule group
             rg = next((rg for rg in rule_set.rule_group_overrides if rg.rule_group_name == rule_group_name), None)
             if rg is None:
                 raise CLIError('Rule set group [ {} ] not found.'.format(rule_group_name))
             rule_set.rule_group_overrides.remove(rg)
+
+    if delete_rule_set:
+        waf_policy.managed_rules.managed_rule_sets.remove(delete_rule_set)
 
     return client.create_or_update(resource_group_name, policy_name, waf_policy)
 

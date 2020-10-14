@@ -52,7 +52,10 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
+        connection_str = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
+                                  .format(storage_account, resource_group)).output
 
+        # Test with account key
         filesystem1 = self.create_random_name(prefix='filesystem', length=24)
         self.storage_cmd('storage fs create -n {} --public-access file', account_info, filesystem1)
         self.storage_cmd('storage fs exists -n {}', account_info, filesystem1) \
@@ -61,10 +64,12 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('name', filesystem1)) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'file'))
 
+        # Test with connection string
         filesystem2 = self.create_random_name(prefix='filesystem', length=24)
-        self.storage_cmd('storage fs create -n {} --public-access filesystem', account_info, filesystem2)
+        self.cmd('storage fs create -n {} --public-access filesystem --connection-string {}'.format(
+            filesystem2, connection_str))
 
-        self.storage_cmd('storage fs show -n {}', account_info, filesystem2) \
+        self.cmd('storage fs show -n {} --connection-string {}'.format(filesystem2, connection_str)) \
             .assert_with_checks(JMESPathCheck('name', filesystem2)) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'filesystem'))
 

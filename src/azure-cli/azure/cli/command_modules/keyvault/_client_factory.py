@@ -159,7 +159,8 @@ def keyvault_data_plane_factory(cli_ctx, _):
 
 
 def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
-    from .vendored_sdks.azure_keyvault_t1 import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1 import (
+        KeyVaultAuthentication, KeyVaultClient)
     from azure.cli.core.util import should_disable_connection_verify
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))

@@ -17,9 +17,13 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
-from azure.cli.core.azclierror import AzCLIErrorType
-from azure.cli.core.azclierror import AzCLIError
 from azure.cli.core.command_recommender import CommandRecommender
+from azure.cli.core.azclierror import UnrecognizedArgumentError
+from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import ArgumentParseError
+from azure.cli.core.azclierror import CommandNotFoundError
+from azure.cli.core.azclierror import ValidationError
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -155,7 +159,7 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        az_error = AzCLIError(AzCLIErrorType.ValidationError, message, command=self.prog)
+        az_error = ValidationError(message)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -168,7 +172,14 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendation = recommender.recommend_a_command()
 
-        az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, message, command=self.prog)
+        az_error = ArgumentParseError(message)
+        if 'unrecognized arguments' in message:
+            az_error = UnrecognizedArgumentError(message)
+        elif 'arguments are required' in message:
+            az_error = RequiredArgumentMissingError(message)
+        elif 'invalid' in message:
+            az_error = InvalidArgumentValueError(message)
+
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
@@ -457,7 +468,7 @@ class AzCliCommandParser(CLICommandParser):
                 if not error_msg:
                     # parser has no `command_source`, value is part of command itself
                     error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
-                az_error = AzCLIError(AzCLIErrorType.CommandNotFoundError, error_msg, command=self.prog)
+                az_error = CommandNotFoundError(error_msg)
 
             else:
                 # `command_source` indicates command values have been parsed, value is an argument
@@ -465,7 +476,7 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'.".format(
                     prog=self.prog, value=value, param=parameter)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
-                az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg, command=self.prog)
+                az_error = InvalidArgumentValueError(error_msg)
 
             command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
@@ -479,7 +490,7 @@ class AzCliCommandParser(CLICommandParser):
                 az_error.set_recommendation("Try this: '{}'".format(recommended_command))
 
             # remind user to check extensions if we can not find a command to recommend
-            if az_error.error_type == AzCLIErrorType.CommandNotFoundError \
+            if isinstance(az_error, CommandNotFoundError) \
                     and not az_error.recommendations and self.prog == 'az' \
                     and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)

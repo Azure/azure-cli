@@ -94,6 +94,16 @@ examples:
         --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
         --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
         --cluster-users-group-dns MyGroup
+  - name: Create a cluster with the Enterprise Security Package (ESP) and enable HDInsight ID Broker.
+    text: |-
+        az hdinsight create --esp --idbroker -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
+        --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
+        --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
+        --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
+        --cluster-users-group-dns MyGroup
   - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
     text: |-
         az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
