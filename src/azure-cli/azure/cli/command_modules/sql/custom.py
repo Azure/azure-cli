@@ -19,7 +19,6 @@ from azure.mgmt.sql.models import (
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
-    DatabaseEdition,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -45,6 +44,7 @@ from azure.mgmt.sql.models import (
 )
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from ._util import (
     get_sql_capabilities_operations,
@@ -462,6 +462,30 @@ class ComputeModelType(str, Enum):
     serverless = "Serverless"
 
 
+class DatabaseEdition(str, Enum):
+
+    web = "Web"
+    business = "Business"
+    basic = "Basic"
+    standard = "Standard"
+    premium = "Premium"
+    premium_rs = "PremiumRS"
+    free = "Free"
+    stretch = "Stretch"
+    data_warehouse = "DataWarehouse"
+    system = "System"
+    system2 = "System2"
+    general_purpose = "GeneralPurpose"
+    business_critical = "BusinessCritical"
+    hyperscale = "Hyperscale"
+
+
+class AuthenticationType(str, Enum):
+
+    sql = "SQL"
+    ad_password = "ADPassword"
+
+
 def _get_server_dns_suffx(cli_ctx):
     '''
     Gets the DNS suffix for servers in this Azure environment.
@@ -793,6 +817,35 @@ def _db_dw_create(
                        parameters=kwargs)
 
 
+def _should_show_backup_storage_redundancy_warnings(target_db_location):
+    if target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        return True
+    return False
+
+
+def _backup_storage_redundancy_specify_geo_warning():
+    print("""Selected value for backup storage redundancy is geo-redundant storage.
+    Note that database backups will be geo-replicated to the paired region.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
+def _confirm_backup_storage_redundancy_take_geo_warning():
+    # if not storage_account_type:
+    confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+    which will default to geo-redundant storage. Note that database backups will be geo-replicated
+    to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+    Do you want to proceed?""")
+    if not confirmation:
+        return False
+    return True
+
+
+def _backup_storage_redundancy_take_source_warning():
+    print("""You have not specified the value for backup storage redundancy
+    which will default to source's backup storage redundancy.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
 def db_create(
         cmd,
         client,
@@ -800,10 +853,24 @@ def db_create(
         server_name,
         resource_group_name,
         no_wait=False,
+        yes=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
     '''
+
+    # Check backup storage redundancy configurations
+    location = _get_server_location(
+        cmd.cli_ctx,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    if not yes and _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            if not _confirm_backup_storage_redundancy_take_geo_warning():
+                return None
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -861,6 +928,16 @@ def db_copy(
         resource_group_name,
         kwargs)
 
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=dest_server_name,
+                                    resource_group_name=dest_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
+
     return _db_dw_create(
         cmd.cli_ctx,
         client,
@@ -902,6 +979,16 @@ def db_create_replica(
         server_name,
         resource_group_name,
         kwargs)
+
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=partner_server_name,
+                                    resource_group_name=partner_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     # Replica must have the same database name as the source db
     return _db_dw_create(
@@ -969,6 +1056,14 @@ def db_restore(
     kwargs['restore_point_in_time'] = restore_point_in_time
     kwargs['source_database_deletion_date'] = source_database_deletion_date
     kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
+
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -1188,7 +1283,7 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.create_import_operation(
+    return client.import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1247,7 +1342,8 @@ def db_update(
         read_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
-        compute_model=None):
+        compute_model=None,
+        storage_account_type=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1255,6 +1351,12 @@ def db_update(
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
+
+    # Check backup storage redundancy configuration
+    location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if storage_account_type == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     #####
     # Set sku-related properties
@@ -1782,6 +1884,7 @@ def restore_long_term_retention_backup(
         target_database_name,
         target_server_name,
         target_resource_group_name,
+        storage_account_type,
         **kwargs):
     '''
     Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
@@ -1802,6 +1905,14 @@ def restore_long_term_retention_backup(
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+    kwargs['storage_account_type'] = storage_account_type
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return client.create_or_update(
         database_name=target_database_name,
@@ -2713,6 +2824,23 @@ def managed_instance_create(
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
 
+    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        if kwargs['storage_account_type'] == 'GRS':
+            confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+             Note that database backups will be geo-replicated to the paired region.
+             To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+             Do you want to proceed?""")
+            if not confirmation:
+                return
+
+        if not kwargs['storage_account_type']:
+            confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+            which will default to geo-redundant storage. Note that database backups will be geo-replicated
+            to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+            Do you want to proceed?""")
+            if not confirmation:
+                return
+
     # Create
     return client.create_or_update(
         managed_instance_name=managed_instance_name,
@@ -3354,6 +3482,43 @@ def restore_long_term_retention_mi_backup(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_log_replay_start(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        auto_complete,
+        last_backup_name,
+        storage_container_uri,
+        storage_container_sas_token,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_external_backup.value
+
+    if auto_complete and not last_backup_name:
+        raise CLIError('Please specify a last backup name when using auto complete flag.')
+
+    kwargs['auto_complete'] = auto_complete
+    kwargs['last_backup_name'] = last_backup_name
+
+    kwargs['storageContainerUri'] = storage_container_uri
+    kwargs['storageContainerSasToken'] = storage_container_sas_token
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
         parameters=kwargs)
 
 ###############################################

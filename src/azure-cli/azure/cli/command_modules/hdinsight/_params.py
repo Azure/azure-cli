@@ -73,6 +73,9 @@ def load_arguments(self, _):
         c.argument('esp', arg_group='Cluster', action='store_true',
                    help='Specify to create cluster with Enterprise Security Package. If omitted, '
                         'creating cluster with Enterprise Security Package will not not allowed.')
+        c.argument('idbroker', arg_group='Cluster', action='store_true',
+                   help='Specify to create ESP cluster with HDInsight ID Broker. If omitted, '
+                        'creating ESP cluster with HDInsight ID Broker will not not allowed.')
         c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
                    arg_group='Cluster', help='The minimal supported TLS version.')
 
@@ -184,10 +187,12 @@ def load_arguments(self, _):
 
         # Private Link Network Settings
         c.argument('public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.')
+                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.',
+                   deprecate_info=c.deprecate(expiration='2.14.0'))
         c.argument('outbound_public_network_access_type', arg_group='Private Link Network Settings',
                    arg_type=get_enum_type(OutboundOnlyPublicNetworkAccessType),
-                   help='The outbound only public network access type.')
+                   help='The outbound only public network access type.',
+                   deprecate_info=c.deprecate(expiration='2.14.0'))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),

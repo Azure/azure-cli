@@ -12,8 +12,8 @@ from azure.mgmt.sql.models import (
     Database,
     ElasticPool,
     ElasticPoolPerDatabaseSettings,
-    ImportExtensionRequest,
-    ExportRequest,
+    ImportExistingDatabaseDefinition,
+    ExportDatabaseDefinition,
     InstancePool,
     ManagedDatabase,
     ManagedInstance,
@@ -21,7 +21,6 @@ from azure.mgmt.sql.models import (
     Server,
     ServerAzureADAdministrator,
     Sku,
-    AuthenticationType,
     BlobAuditingPolicyState,
     CatalogCollationType,
     CreateMode,
@@ -59,12 +58,14 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
     SqlServerMinimalTlsVersionType,
-    SqlManagedInstanceMinimalTlsVersionType
+    SqlManagedInstanceMinimalTlsVersionType,
+    AuthenticationType
 )
 
 from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
+    validate_backup_storage_redundancy,
     validate_subnet
 )
 
@@ -101,6 +102,14 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
         return 'Size (in {}) - valid units are {}.'.format(
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
+def get_internal_backup_storage_redundancy(self):
+    return {
+        'local': 'LRS',
+        'zone': 'ZRS',
+        'geo': 'GRS',
+    }.get(self.lower(), 'Invalid')
 
 
 #####
@@ -209,6 +218,12 @@ storage_param_type = CLIArgumentType(
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
 
+backup_storage_redundancy_param_type = CLIArgumentType(
+    options_list=['--backup-storage-redundancy', '--bsr'],
+    type=get_internal_backup_storage_redundancy,
+    help='Backup storage redundancy used to store backups. Allowed values include: Local, Zone, Geo.',
+    validator=validate_backup_storage_redundancy)
+
 grace_period_param_type = CLIArgumentType(
     help='Interval in hours before automatic failover is initiated '
     'if an outage occurs on the primary server. '
@@ -311,6 +326,9 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
+
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -400,7 +418,8 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count'
+            'read_replica_count',
+            'storage_account_type'
         ])
 
     # Create args that will be used to build up the Database's Sku object
@@ -524,6 +543,13 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
+
     with self.argument_context('sql db copy') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
@@ -539,6 +565,9 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -567,6 +596,9 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -621,10 +653,13 @@ def load_arguments(self, _):
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
     with self.argument_context('sql db export') as c:
-        # Create args that will be used to build up the ExportRequest object
+        # Create args that will be used to build up the ExportDatabaseDefinition object
         create_args_for_complex_type(
-            c, 'parameters', ExportRequest, [
+            c, 'parameters', ExportDatabaseDefinition, [
                 'administrator_login',
                 'administrator_login_password',
                 'authentication_type',
@@ -647,8 +682,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        # Create args that will be used to build up the ImportExtensionRequest object
-        create_args_for_complex_type(c, 'parameters', ImportExtensionRequest, [
+        # Create args that will be used to build up the ImportExistingDatabaseDefinition object
+        create_args_for_complex_type(c, 'parameters', ImportExistingDatabaseDefinition, [
             'administrator_login',
             'administrator_login_password',
             'authentication_type',
@@ -739,6 +774,9 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -765,6 +803,7 @@ def load_arguments(self, _):
     #           sql db audit-policy & threat-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
+
         storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
@@ -936,6 +975,10 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   required=False,
+                   arg_type=backup_storage_redundancy_param_type)
 
     ###############################################
     #                sql db str                   #
@@ -1526,6 +1569,8 @@ def load_arguments(self, _):
                 'public_data_endpoint_enabled',
                 'timezone_id',
                 'tags',
+                'storage_account_type',
+                'yes'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1561,6 +1606,13 @@ def load_arguments(self, _):
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1837,6 +1889,50 @@ def load_arguments(self, _):
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
+
+        c.argument('storage_account_type',
+                   arg_type=backup_storage_redundancy_param_type)
+
+    with self.argument_context('sql midb log-replay start') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'auto_complete',
+                'last_backup_name',
+                'storage_container_uri',
+                'storage_container_sas_token'
+            ])
+
+        c.argument('auto_complete',
+                   required=False,
+                   options_list=['--auto-complete', '-a'],
+                   action='store_true',
+                   help='The flag that in usage with last_backup_name automatically completes log replay servise.')
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
+
+        c.argument('storage_container_uri',
+                   required=True,
+                   options_list=['--storage-uri', '--su'],
+                   help='The URI of the storage container where backups are.')
+
+        c.argument('storage_container_sas_token',
+                   required=True,
+                   options_list=['--storage-sas', '--ss'],
+                   help='The authorization Sas token to access storage container where backups are.')
+
+    with self.argument_context('sql midb log-replay complete') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'last_backup_name'
+            ])
+
+        c.argument('last_backup_name',
+                   required=False,
+                   options_list=['--last-backup-name', '--last-bn'],
+                   help='The name of the last backup to restore.')
 
     ###############################################
     #                sql virtual cluster          #

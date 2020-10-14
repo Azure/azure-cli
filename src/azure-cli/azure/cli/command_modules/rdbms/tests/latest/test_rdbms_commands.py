@@ -6,13 +6,13 @@ import time
 
 from datetime import datetime
 from time import sleep
-from dateutil.tz import tzutc   # pylint: disable=import-error
+from dateutil.tz import tzutc  # pylint: disable=import-error
 from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
-from azure.cli.testsdk.exceptions import CliTestError   # pylint: disable=unused-import
+from azure.cli.testsdk.exceptions import CliTestError  # pylint: disable=unused-import
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
@@ -22,7 +22,6 @@ from azure.cli.testsdk import (
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
-
 
 # Constants
 SERVER_NAME_PREFIX = 'azuredbclitest'
@@ -228,7 +227,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
         date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
 
         if current_time < earliest_restore_time:
-            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time, date_format)).total_seconds())
+            sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
+                                                                                             date_format)).total_seconds())
 
         self.cmd('{} server restore -g {} --name {} '
                  '--source-server {} '
@@ -306,7 +306,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mariadb')
     def test_mariadb_proxy_resources_mgmt(self, resource_group, server, database_engine):
-        print(server)
         self._test_firewall_mgmt(resource_group, server, database_engine)
         self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
@@ -332,13 +331,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='postgres')
     def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
-        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
-        self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
-        self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
@@ -444,7 +439,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # pre create the dependent resources here
         # create vnet and subnet
         self.cmd('network vnet create -n {} -g {} -l {} '
-                 '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location, address_prefix, subnet_name_1, subnet_prefix_1))
+                 '--address-prefix {} --subnet-name {} --subnet-prefix {}'.format(vnet_name, resource_group, location,
+                                                                                  address_prefix, subnet_name_1,
+                                                                                  subnet_prefix_1))
         # add one more subnet
         self.cmd('network vnet subnet create --vnet-name {} -g {} '
                  '--address-prefix {} -n {}'.format(vnet_name, resource_group, subnet_prefix_2, subnet_name_2))
@@ -610,10 +607,13 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
                                     '--group-ids {}'
-                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto, server_id, group_id)).get_output_in_json()
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto,
+                                            server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_auto)
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
-        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(
+            private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
@@ -621,8 +621,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['privateEndpointConnections']), 1)
-        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
-                         'Approved')
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+            'Approved')
         server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
@@ -651,10 +652,15 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
                                     '--group-ids {} --manual-request'
-                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc, pe_connection_name_manual_approve, server_id, group_id)).get_output_in_json()
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc,
+                                            pe_connection_name_manual_approve, server_id,
+                                            group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
-        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_approve)
-        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_approve)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
@@ -662,8 +668,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['privateEndpointConnections']), 1)
-        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
-                         'Pending')
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+            'Pending')
         server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
@@ -696,10 +703,14 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
                                     '--group-ids {} --manual-request true'
-                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc, pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc,
+                                            pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
-        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_reject)
-        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'],
+                         pe_connection_name_manual_reject)
+        self.assertEqual(
+            private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Pending')
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
@@ -707,8 +718,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['privateEndpointConnections']), 1)
-        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
-                         'Pending')
+        self.assertEqual(
+            result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+            'Pending')
         server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
@@ -743,11 +755,13 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
+        print(server_resp)
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        self.cmd('keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
-                 .format(resource_group, vault_name))
+        self.cmd(
+            'keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
+            .format(resource_group, vault_name))
 
         # create key
         key_resp = self.cmd('keyvault key create --name {} -p software --vault-name {}'
@@ -1021,12 +1035,12 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
         # test show server with replication info, replica was auto stopped after master server deleted
-        self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, resource_group, replicas[1]),
-                 checks=[
-                     JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+        # self.cmd('{} server show -g {} --name {}'
+        #          .format(database_engine, resource_group, replicas[1]),
+        #          checks=[
+        #              JMESPathCheck('replicationRole', 'None'),
+        #              JMESPathCheck('masterServerId', ''),
+        #              JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # clean up servers
         self.cmd('{} server delete -g {} --name {} --yes'

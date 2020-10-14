@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, too-many-locals
+# pylint: disable=line-too-long, too-many-locals, too-many-statements
 
 import json
 import time
@@ -13,15 +13,19 @@ from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._constants import FeatureFlagConstants, KeyVaultConstants
-from ._utils import resolve_connection_string, user_confirmation
-from ._azconfig.azconfig_client import AzconfigClient
-from ._azconfig.constants import StatusCodes
-from ._azconfig.exceptions import HTTPException
-from ._azconfig.models import (KeyValue,
-                               ModifyKeyValueOptions,
-                               QueryKeyValueCollectionOptions,
-                               QueryKeyValueOptions)
+from azure.appconfiguration import (ConfigurationSetting,
+                                    ResourceReadOnlyError)
+from azure.core import MatchConditions
+from azure.core.exceptions import (HttpResponseError,
+                                   ResourceNotFoundError,
+                                   ResourceModifiedError)
+
+from ._constants import (FeatureFlagConstants, KeyVaultConstants,
+                         SearchFilterOptions, StatusCodes)
+from ._models import (convert_configurationsetting_to_keyvalue,
+                      convert_keyvalue_to_configurationsetting)
+from ._utils import get_appconfig_data_client, user_confirmation, prep_null_label_for_url_encoding
+
 from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read_features_from_file,
                           __write_kv_and_features_to_file, __read_kv_from_config_store, __is_json_content_type,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
@@ -41,6 +45,8 @@ def import_config(cmd,
                   yes=False,
                   skip_features=False,
                   content_type=None,
+                  auth_mode="key",
+                  endpoint=None,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -52,6 +58,8 @@ def import_config(cmd,
                   src_key=None,
                   src_label=None,
                   preserve_labels=False,
+                  src_auth_mode="key",
+                  src_endpoint=None,
                   # from-appservice parameters
                   appservice_account=None):
     src_features = []
@@ -59,6 +67,8 @@ def import_config(cmd,
     dest_kvs = []
     source = source.lower()
     format_ = format_.lower() if format_ else None
+
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     # fetch key values from source
     if source == 'file':
@@ -87,6 +97,8 @@ def import_config(cmd,
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
     elif source == 'appconfig':
+        src_azconfig_client = get_appconfig_data_client(cmd, src_name, src_connection_string, src_auth_mode, src_endpoint)
+
         if label is not None and preserve_labels:
             raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
         if preserve_labels:
@@ -95,15 +107,18 @@ def import_config(cmd,
             # as we check preserve_labels again before labelling KVs.
             label = src_label
 
-        src_kvs = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
-                                              key=src_key, label=src_label, prefix_to_add=prefix)
+        src_kvs = __read_kv_from_config_store(src_azconfig_client,
+                                              key=src_key,
+                                              label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
+                                              prefix_to_add=prefix)
         # We need to separate KV from feature flags
         __discard_features_from_retrieved_kv(src_kvs)
 
         if not skip_features:
             # Get all Feature flags with matching label
-            all_features = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
-                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=src_label)
+            all_features = __read_kv_from_config_store(src_azconfig_client,
+                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                       label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL)
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     src_features.append(feature)
@@ -115,8 +130,9 @@ def import_config(cmd,
     # if customer needs preview & confirmation
     if not yes:
         # fetch key values from user's configstore
-        dest_kvs = __read_kv_from_config_store(
-            cmd, name=name, connection_string=connection_string, key=None, label=label)
+        dest_kvs = __read_kv_from_config_store(azconfig_client,
+                                               key=SearchFilterOptions.ANY_KEY,
+                                               label=label if label else SearchFilterOptions.EMPTY_LABEL)
         __discard_features_from_retrieved_kv(dest_kvs)
 
         # generate preview and wait for user confirmation
@@ -127,8 +143,9 @@ def import_config(cmd,
         need_feature_change = False
         if src_features and not skip_features:
             # Append all features to dest_features list
-            all_features = __read_kv_from_config_store(
-                cmd, name=name, connection_string=connection_string, key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=label)
+            all_features = __read_kv_from_config_store(azconfig_client,
+                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
+                                                       label=label if label else SearchFilterOptions.EMPTY_LABEL)
             for feature in all_features:
                 if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     dest_features.append(feature)
@@ -146,10 +163,8 @@ def import_config(cmd,
     src_kvs.extend(src_features)
 
     # import into configstore
-    __write_kv_and_features_to_config_store(cmd,
+    __write_kv_and_features_to_config_store(azconfig_client,
                                             key_values=src_kvs,
-                                            name=name,
-                                            connection_string=connection_string,
                                             label=label,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type)
@@ -165,6 +180,8 @@ def export_config(cmd,
                   yes=False,
                   skip_features=False,
                   skip_keyvault=False,
+                  auth_mode="key",
+                  endpoint=None,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -176,6 +193,8 @@ def export_config(cmd,
                   dest_connection_string=None,
                   dest_label=None,
                   preserve_labels=False,
+                  dest_auth_mode="key",
+                  dest_endpoint=None,
                   # to-app-service parameters
                   appservice_account=None):
     src_features = []
@@ -185,6 +204,9 @@ def export_config(cmd,
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    dest_azconfig_client = None
     if destination == 'appconfig':
         if dest_label is not None and preserve_labels:
             raise CLIError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
@@ -193,15 +215,14 @@ def export_config(cmd,
             # This will have no effect on label while writing to config store
             # as we check preserve_labels again before labelling KVs.
             dest_label = label
+        dest_azconfig_client = get_appconfig_data_client(cmd, dest_name, dest_connection_string, dest_auth_mode, dest_endpoint)
 
     # fetch key values from user's configstore
-    src_kvs = __read_kv_from_config_store(cmd,
-                                          name=name,
-                                          connection_string=connection_string,
+    src_kvs = __read_kv_from_config_store(azconfig_client,
                                           key=key,
-                                          label=label,
+                                          label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                           prefix_to_remove=prefix,
-                                          resolve_keyvault=resolve_keyvault)
+                                          cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
@@ -218,27 +239,32 @@ def export_config(cmd,
             # src_features is a list of FeatureFlag objects
             src_features = list_feature(cmd,
                                         feature='*',
-                                        label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
+                                        label=label if label else SearchFilterOptions.EMPTY_LABEL,
                                         name=name,
                                         connection_string=connection_string,
-                                        all_=True)
+                                        all_=True,
+                                        auth_mode=auth_mode,
+                                        endpoint=endpoint)
 
     # if customer needs preview & confirmation
     if not yes:
         if destination == 'appconfig':
             # dest_kvs contains features and KV that match the label
-            dest_kvs = __read_kv_from_config_store(
-                cmd, name=dest_name, connection_string=dest_connection_string, key=None, label=dest_label)
+            dest_kvs = __read_kv_from_config_store(dest_azconfig_client,
+                                                   key=SearchFilterOptions.ANY_KEY,
+                                                   label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL)
             __discard_features_from_retrieved_kv(dest_kvs)
 
             if not skip_features:
                 # Append all features to dest_features list
                 dest_features = list_feature(cmd,
                                              feature='*',
-                                             label=QueryKeyValueCollectionOptions.empty_label if dest_label is None else dest_label,
+                                             label=dest_label if dest_label else SearchFilterOptions.EMPTY_LABEL,
                                              name=dest_name,
                                              connection_string=dest_connection_string,
-                                             all_=True)
+                                             all_=True,
+                                             auth_mode=dest_auth_mode,
+                                             endpoint=dest_endpoint)
 
         elif destination == 'appservice':
             dest_kvs = __read_kv_from_app_service(cmd, appservice_account=appservice_account)
@@ -265,8 +291,8 @@ def export_config(cmd,
                                         format_=format_, separator=separator, skip_features=skip_features,
                                         naming_convention=naming_convention)
     elif destination == 'appconfig':
-        __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
-                                                connection_string=dest_connection_string, label=dest_label, preserve_labels=preserve_labels)
+        __write_kv_and_features_to_config_store(dest_azconfig_client, key_values=src_kvs, features=src_features,
+                                                label=dest_label, preserve_labels=preserve_labels)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
@@ -279,10 +305,10 @@ def set_key(cmd,
             tags=None,
             value=None,
             yes=False,
-            connection_string=None):
-    connection_string = resolve_connection_string(
-        cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+            connection_string=None,
+            auth_mode="key",
+            endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if content_type:
         if content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
@@ -293,12 +319,18 @@ def set_key(cmd,
     retry_times = 3
     retry_interval = 1
 
-    label = label if label and label != ModifyKeyValueOptions.empty_label else None
+    label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
     for i in range(0, retry_times):
+        retrieved_kv = None
+        set_kv = None
+        new_kv = None
+
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(str(exception))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            logger.debug("Key '%s' with label '%s' not found. A new key-value will be created.", key, label)
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
             if content_type and __is_json_content_type(content_type):
@@ -309,7 +341,11 @@ def set_key(cmd,
                 except ValueError:
                     raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
-            set_kv = KeyValue(key, value, label, tags, content_type)
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=value,
+                                          content_type=content_type,
+                                          tags=tags)
         else:
             value = retrieved_kv.value if value is None else value
             content_type = retrieved_kv.content_type if content_type is None else content_type
@@ -319,13 +355,13 @@ def set_key(cmd,
                     json.loads(value)
                 except (TypeError, ValueError):
                     raise CLIError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
-
-            set_kv = KeyValue(key=key,
-                              label=label,
-                              value=value,
-                              content_type=content_type,
-                              tags=retrieved_kv.tags if tags is None else tags)
-            set_kv.etag = retrieved_kv.etag
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=value,
+                                          content_type=content_type,
+                                          tags=retrieved_kv.tags if tags is None else tags,
+                                          read_only=retrieved_kv.read_only,
+                                          etag=retrieved_kv.etag)
 
         verification_kv = {
             "key": set_kv.key,
@@ -340,18 +376,23 @@ def set_key(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            return azconfig_client.add_keyvalue(set_kv, ModifyKeyValueOptions()) if set_kv.etag is None else azconfig_client.update_keyvalue(set_kv, ModifyKeyValueOptions())
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying setting %s times with exception: concurrent setting operations', i + 1)
+            if set_kv.etag is None:
+                new_kv = azconfig_client.add_configuration_setting(set_kv)
+            else:
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+            return convert_configurationsetting_to_keyvalue(new_kv)
+
+        except ResourceReadOnlyError:
+            raise CLIError("Failed to update read only key-value. Unlock the key-value before updating it.")
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to set the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
-    raise CLIError(
-        "Fail to set the key '{}' due to a conflicting operation.".format(key))
+            raise CLIError("Failed to set the key-value due to an exception: " + str(exception))
+    raise CLIError("Failed to set the key '{}' due to a conflicting operation.".format(key))
 
 
 def set_keyvault(cmd,
@@ -361,30 +402,42 @@ def set_keyvault(cmd,
                  label=None,
                  tags=None,
                  yes=False,
-                 connection_string=None):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                 connection_string=None,
+                 auth_mode="key",
+                 endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
     retry_times = 3
     retry_interval = 1
 
-    label = label if label and label != ModifyKeyValueOptions.empty_label else None
+    label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
     for i in range(0, retry_times):
+        retrieved_kv = None
+        set_kv = None
+        new_kv = None
+
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(str(exception))
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            logger.debug("Key '%s' with label '%s' not found. A new key-vault reference will be created.", key, label)
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
         if retrieved_kv is None:
-            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=keyvault_ref_value,
+                                          content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
+                                          tags=tags)
         else:
-            set_kv = KeyValue(key=key,
-                              label=label,
-                              value=keyvault_ref_value,
-                              content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
-                              tags=retrieved_kv.tags if tags is None else tags)
-            set_kv.etag = retrieved_kv.etag
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=keyvault_ref_value,
+                                          content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
+                                          tags=retrieved_kv.tags if tags is None else tags,
+                                          read_only=retrieved_kv.read_only,
+                                          etag=retrieved_kv.etag)
 
         verification_kv = {
             "key": set_kv.key,
@@ -398,18 +451,23 @@ def set_keyvault(cmd,
         user_confirmation(confirmation_message, yes)
 
         try:
-            return azconfig_client.add_keyvalue(set_kv, ModifyKeyValueOptions()) if set_kv.etag is None else azconfig_client.update_keyvalue(set_kv, ModifyKeyValueOptions())
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying setting %s times with exception: concurrent setting operations', i + 1)
+            if set_kv.etag is None:
+                new_kv = azconfig_client.add_configuration_setting(set_kv)
+            else:
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified)
+            return convert_configurationsetting_to_keyvalue(new_kv)
+
+        except ResourceReadOnlyError:
+            raise CLIError("Failed to update read only key vault reference. Unlock the key vault reference before updating it.")
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
-    raise CLIError(
-        "Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
+            raise CLIError("Failed to set the keyvault reference due to an exception: " + str(exception))
+    raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
 
 
 def delete_key(cmd,
@@ -417,127 +475,147 @@ def delete_key(cmd,
                name=None,
                label=None,
                yes=False,
-               connection_string=None):
-    connection_string = resolve_connection_string(
-        cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+               connection_string=None,
+               auth_mode="key",
+               endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    delete_one_version_message = "Are you sure you want to delete the key '{}'".format(
-        key)
-    confirmation_message = delete_one_version_message
+    # list_configuration_settings returns kv with null label when:
+    # label = ASCII null 0x00, or URL encoded %00
+    # In delete, import and export commands, we treat missing --label as null label
+    # In list, restore and revision commands, we treat missing --label as all labels
+
+    entries = __read_kv_from_config_store(azconfig_client,
+                                          key=key,
+                                          label=label if label else SearchFilterOptions.EMPTY_LABEL)
+    confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
 
-    try:
-        entries = __read_kv_from_config_store(cmd,
-                                              connection_string=connection_string,
-                                              key=key,
-                                              label=label if label else QueryKeyValueCollectionOptions.empty_label)
-    except HTTPException as exception:
-        raise CLIError('Deletion operation failed. ' + str(exception))
-
     deleted_entries = []
-    not_deleted_entries = []
-    http_exception = None
+    exception_messages = []
     for entry in entries:
         try:
-            deleted_entries.append(azconfig_client.delete_keyvalue(
-                entry, ModifyKeyValueOptions()))
-        except HTTPException as exception:
-            not_deleted_entries.append(entry.__dict__)
-            http_exception = exception
-        except Exception as exception:
-            raise CLIError(str(exception))
+            deleted_kv = azconfig_client.delete_configuration_setting(key=entry.key,
+                                                                      label=entry.label,
+                                                                      etag=entry.etag,
+                                                                      match_condition=MatchConditions.IfNotModified)
+            deleted_entries.append(convert_configurationsetting_to_keyvalue(deleted_kv))
 
-    # Log errors if partial successed
-    if not_deleted_entries:
+        except ResourceReadOnlyError:
+            exception = "Failed to delete read-only key-value with key '{}' and label '{}'. Unlock the key-value before deleting it.".format(entry.key, entry.label)
+            exception_messages.append(exception)
+        except ResourceModifiedError:
+            exception = "Failed to delete key-value with key '{}' and label '{}' due to a conflicting operation.".format(entry.key, entry.label)
+            exception_messages.append(exception)
+        except HttpResponseError as ex:
+            exception_messages.append(str(ex))
+            raise CLIError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
+
+    # Log errors if partially succeeded
+    if exception_messages:
         if deleted_entries:
-            logger.error('Deletion operation partially succeed. Some keys are not successfully deleted. \n %s',
-                         json.dumps(not_deleted_entries, indent=2, ensure_ascii=False))
+            logger.error('Delete operation partially failed. The following error(s) occurred:\n%s\n',
+                         json.dumps(exception_messages, indent=2, ensure_ascii=False))
         else:
-            raise CLIError('Deletion operation failed.' + str(http_exception))
+            raise CLIError('Delete operation failed. \n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
     return deleted_entries
 
 
-def lock_key(cmd, key, label=None, name=None, connection_string=None, yes=False):
-    connection_string = resolve_connection_string(
-        cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+def lock_key(cmd,
+             key,
+             label=None,
+             name=None,
+             connection_string=None,
+             yes=False,
+             auth_mode="key",
+             endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(exception)
-        if retrieved_kv is None:
-            raise CLIError("The key you are trying to lock does not exist.")
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
-        confirmation_message = "Are you sure you want to lock the key '{}'".format(key)
+        confirmation_message = "Are you sure you want to lock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
 
         try:
-            return azconfig_client.lock_keyvalue(retrieved_kv, ModifyKeyValueOptions())
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying locking %s times with exception: concurrent setting operations', i + 1)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, match_condition=MatchConditions.IfNotModified)
+            return convert_configurationsetting_to_keyvalue(new_kv)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying lock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
-    raise CLIError(
-        "Fail to lock the key '{}' due to a conflicting operation.".format(key))
+            raise CLIError("Failed to lock the key-value due to an exception: " + str(exception))
+    raise CLIError("Failed to lock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
-def unlock_key(cmd, key, label=None, name=None, connection_string=None, yes=False):
-    connection_string = resolve_connection_string(
-        cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+def unlock_key(cmd,
+               key,
+               label=None,
+               name=None,
+               connection_string=None,
+               yes=False,
+               auth_mode="key",
+               endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     retry_times = 3
     retry_interval = 1
     for i in range(0, retry_times):
         try:
-            retrieved_kv = azconfig_client.get_keyvalue(key, QueryKeyValueOptions(label))
-        except HTTPException as exception:
-            raise CLIError(exception)
-        if retrieved_kv is None:
-            raise CLIError("The key you are trying to unlock does not exist.")
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label)
+        except ResourceNotFoundError:
+            raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+        except HttpResponseError as exception:
+            raise CLIError("Failed to retrieve key-values from config store. " + str(exception))
 
-        confirmation_message = "Are you sure you want to unlock the key '{}'".format(key)
+        confirmation_message = "Are you sure you want to unlock the key '{}' with label '{}'".format(key, label)
         user_confirmation(confirmation_message, yes)
 
         try:
-            return azconfig_client.unlock_keyvalue(retrieved_kv, ModifyKeyValueOptions())
-        except HTTPException as exception:
-            if exception.status == StatusCodes.PRECONDITION_FAILED:
-                logger.debug(
-                    'Retrying unlocking %s times with exception: concurrent setting operations', i + 1)
+            new_kv = azconfig_client.set_read_only(retrieved_kv, read_only=False, match_condition=MatchConditions.IfNotModified)
+            return convert_configurationsetting_to_keyvalue(new_kv)
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying unlock operation %s times with exception: concurrent setting operations', i + 1)
                 time.sleep(retry_interval)
             else:
-                raise CLIError(str(exception))
+                raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
         except Exception as exception:
-            raise CLIError(str(exception))
-    raise CLIError(
-        "Fail to unlock the key '{}' due to a conflicting operation.".format(key))
+            raise CLIError("Failed to unlock the key-value due to an exception: " + str(exception))
+    raise CLIError("Failed to unlock the key '{}' with label '{}' due to a conflicting operation.".format(key, label))
 
 
-def show_key(cmd, key, name=None, label=None, datetime=None, connection_string=None):
-    connection_string = resolve_connection_string(
-        cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
-
-    query_option = QueryKeyValueOptions(label=label, query_datetime=datetime)
+def show_key(cmd,
+             key,
+             name=None,
+             label=None,
+             datetime=None,
+             connection_string=None,
+             auth_mode="key",
+             endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     try:
-        key_value = azconfig_client.get_keyvalue(key, query_option)
+        key_value = azconfig_client.get_configuration_setting(key=key, label=label, accept_datetime=datetime)
         if key_value is None:
             raise CLIError("The key-value does not exist.")
-        return key_value
-    except Exception as exception:
-        raise CLIError(str(exception))
+        return convert_configurationsetting_to_keyvalue(key_value)
+    except ResourceNotFoundError:
+        raise CLIError("Key '{}' with label '{}' does not exist.".format(key, label))
+    except HttpResponseError as exception:
+        raise CLIError('Failed to retrieve key-values from config store. ' + str(exception))
+
+    raise CLIError("Failed to get the key '{}' with label '{}'.".format(key, label))
 
 
 def list_key(cmd,
@@ -549,20 +627,22 @@ def list_key(cmd,
              connection_string=None,
              top=None,
              all_=False,
-             resolve_keyvault=False):
+             resolve_keyvault=False,
+             auth_mode="key",
+             endpoint=None):
     if fields and resolve_keyvault:
         raise CLIError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
 
-    keyvalues = __read_kv_from_config_store(cmd,
-                                            name=name,
-                                            connection_string=connection_string,
-                                            key=key if key else QueryKeyValueCollectionOptions.any_key,
-                                            label=label if label else QueryKeyValueCollectionOptions.any_label,
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    keyvalues = __read_kv_from_config_store(azconfig_client,
+                                            key=key if key else SearchFilterOptions.ANY_KEY,
+                                            label=label if label else SearchFilterOptions.ANY_LABEL,
                                             datetime=datetime,
                                             fields=fields,
                                             top=top,
                                             all_=all_,
-                                            resolve_keyvault=resolve_keyvault)
+                                            cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
     return keyvalues
 
 
@@ -572,25 +652,22 @@ def restore_key(cmd,
                 name=None,
                 label=None,
                 connection_string=None,
-                yes=False):
+                yes=False,
+                auth_mode="key",
+                endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
-
-    if label == '':
-        label = QueryKeyValueCollectionOptions.empty_label
-
-    query_option_then = QueryKeyValueCollectionOptions(key_filter=key,
-                                                       label_filter=label,
-                                                       query_datetime=datetime)
-    query_option_now = QueryKeyValueCollectionOptions(key_filter=key,
-                                                      label_filter=label)
+    exception_messages = []
+    restore_keyvalues = __read_kv_from_config_store(azconfig_client,
+                                                    key=key if key else SearchFilterOptions.ANY_KEY,
+                                                    label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                    datetime=datetime)
+    current_keyvalues = __read_kv_from_config_store(azconfig_client,
+                                                    key=key if key else SearchFilterOptions.ANY_KEY,
+                                                    label=label if label else SearchFilterOptions.ANY_LABEL)
 
     try:
-        restore_keyvalues = azconfig_client.get_keyvalues(query_option_then)
-        current_keyvalues = azconfig_client.get_keyvalues(query_option_now)
         kvs_to_restore, kvs_to_modify, kvs_to_delete = __compare_kvs_for_restore(restore_keyvalues, current_keyvalues)
-
         if not yes:
             need_change = __print_restore_preview(kvs_to_restore, kvs_to_modify, kvs_to_delete)
             if need_change is False:
@@ -601,25 +678,42 @@ def restore_key(cmd,
         restored_so_far = 0
 
         for kv in chain(kvs_to_restore, kvs_to_modify):
+            set_kv = convert_keyvalue_to_configurationsetting(kv)
             try:
-                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+                azconfig_client.set_configuration_setting(set_kv)
                 restored_so_far += 1
-            except HTTPException as exception:
-                logger.error('Error while setting the keyvalue:%s', kv)
-                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
-                raise CLIError(str(exception))
+            except ResourceReadOnlyError:
+                exception = "Failed to update read-only key-value with key '{}' and label '{}'. Unlock the key-value before updating it.".format(set_kv.key, set_kv.label)
+                exception_messages.append(exception)
+            except ResourceModifiedError:
+                exception = "Failed to update key-value with key '{}' and label '{}' due to a conflicting operation.".format(set_kv.key, set_kv.label)
+                exception_messages.append(exception)
+
         for kv in kvs_to_delete:
             try:
-                azconfig_client.delete_keyvalue(kv, ModifyKeyValueOptions())
+                azconfig_client.delete_configuration_setting(key=kv.key,
+                                                             label=kv.label,
+                                                             etag=kv.etag,
+                                                             match_condition=MatchConditions.IfNotModified)
                 restored_so_far += 1
-            except HTTPException as exception:
-                logger.error('Error while setting the keyvalue:%s', kv)
-                logger.error('Failed after restoring %d out of %d keys', restored_so_far, keys_to_restore)
-                raise CLIError(str(exception))
+            except ResourceReadOnlyError:
+                exception = "Failed to delete read-only key-value with key '{}' and label '{}'. Unlock the key-value before deleting it.".format(kv.key, kv.label)
+                exception_messages.append(exception)
+            except ResourceModifiedError:
+                exception = "Failed to delete key-value with key '{}' and label '{}' due to a conflicting operation.".format(kv.key, kv.label)
+                exception_messages.append(exception)
 
-        logger.debug('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
-    except Exception as exception:
-        raise CLIError(str(exception))
+        if restored_so_far != keys_to_restore:
+            logger.error('Failed after restoring %d out of %d keys. The following error(s) occurred:\n%s\n',
+                         restored_so_far, keys_to_restore, json.dumps(exception_messages, indent=2, ensure_ascii=False))
+        else:
+            logger.debug('Successfully restored %d out of %d keys', restored_so_far, keys_to_restore)
+        return
+
+    except HttpResponseError as ex:
+        exception_messages.append(str(ex))
+
+    raise CLIError('Restore operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
 
 def list_revision(cmd,
@@ -630,17 +724,21 @@ def list_revision(cmd,
                   datetime=None,
                   connection_string=None,
                   top=None,
-                  all_=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
+                  all_=False,
+                  auth_mode="key",
+                  endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
-    query_option = QueryKeyValueCollectionOptions(key_filter=key,
-                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
-                                                  query_datetime=datetime,
-                                                  fields=fields)
+    key = key if key else SearchFilterOptions.ANY_KEY
+    label = label if label else SearchFilterOptions.ANY_LABEL
+    if label == SearchFilterOptions.EMPTY_LABEL:
+        label = prep_null_label_for_url_encoding(label)
+
     try:
-        revisions_iterable = azconfig_client.read_keyvalue_revisions(
-            query_option)
+        revisions_iterable = azconfig_client.list_revisions(key_filter=key,
+                                                            label_filter=label,
+                                                            accept_datetime=datetime,
+                                                            fields=fields)
         retrieved_revisions = []
         count = 0
 
@@ -650,17 +748,17 @@ def list_revision(cmd,
             top = 100
 
         for revision in revisions_iterable:
+            kv_revision = convert_configurationsetting_to_keyvalue(revision)
             if fields:
                 partial_revision = {}
                 for field in fields:
-                    partial_revision[field.name.lower()] = revision.__dict__[
-                        field.name.lower()]
+                    partial_revision[field.name.lower()] = kv_revision.__dict__[field.name.lower()]
                 retrieved_revisions.append(partial_revision)
             else:
-                retrieved_revisions.append(revision)
+                retrieved_revisions.append(kv_revision)
             count += 1
             if count >= top:
                 return retrieved_revisions
         return retrieved_revisions
-    except Exception as exception:
-        raise CLIError(str(exception))
+    except HttpResponseError as ex:
+        raise CLIError('List revision operation failed.\n' + str(ex))
