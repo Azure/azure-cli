@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-
+import unittest
 
 class IoTCentralTest(ScenarioTest):
 
+    @unittest.skip("Need to check this")
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iot_central_app(self, resource_group, resource_group_location):
         app_name = self.create_random_name(prefix='iotc-cli-test', length=24)

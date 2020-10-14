@@ -56,7 +56,7 @@ class DateTimeParseTest(unittest.TestCase):
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
-    @unittest.skip("abbhar:Need to check this")
+    @unittest.skip("Need to check this")
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
         self.kwargs.update({
