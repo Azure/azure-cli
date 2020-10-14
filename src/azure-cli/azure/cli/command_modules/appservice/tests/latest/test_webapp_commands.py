@@ -206,13 +206,11 @@ class WebappQuickCreateTest(ScenarioTest):
             'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
         self.cmd("webapp create -g {} -n {} --plan {} --multicontainer-config-file \"{}\" "
                  "--multicontainer-config-type COMPOSE".format(resource_group, webapp_name, plan, config_file))
-        self.cmd("webapp show -g {} -n {}".format(resource_group, webapp_name)).assert_with_checks([
-               JMESPathCheck('kind', "app,linux,container")
-        ])
+        self.cmd("webapp show -g {} -n {}".format(resource_group, webapp_name))\
+            .assert_with_checks([JMESPathCheck('kind', "app,linux,container")])
 
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=400)
         self.assertTrue('Hello World! I have been' in str(r.content))
-
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_quick_create_cd(self, resource_group):
@@ -324,6 +322,7 @@ class AppServiceLogTest(ScenarioTest):
         zip_ref.extractall(log_dir)
         self.assertTrue(os.path.isdir(os.path.join(
             log_dir, 'LogFiles', 'kudu', 'trace')))
+
 
 class AppServicePlanScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -790,6 +789,7 @@ class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
             'webapp create-remote-connection -g {} -n {} --timeout 5'.format(resource_group, webapp))
         time.sleep(30)
 
+
 @unittest.skip("Remote connection feature is a preview feature that doesn't work on Linux, need to get update from Linux team")
 class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
@@ -808,8 +808,8 @@ class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
         self.cmd(
             'webapp config set --remote-debugging-enabled true -g {} -n {}'.format(resource_group, webapp))\
             .assert_with_checks(JMESPathCheck('remoteDebuggingEnabled', True))
-        self.cmd(
-             'webapp create-remote-connection -g {} -n {} --timeout 5 &'.format(resource_group, webapp))
+        self.cmd('webapp create-remote-connection -g {} -n {} --timeout 5 &'.format(resource_group, webapp))
+
 
 class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
@@ -2662,6 +2662,7 @@ class WebappZipDeployScenarioTest(ScenarioTest):
             JMESPathCheck('complete', True)
         ])
 
+
 class WebappImplictIdentityTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -2821,7 +2822,7 @@ class WebappContinuousWebJobE2ETest(ScenarioTest):
 
 class WebappWindowsContainerBasicE2ETest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='webapp_hyperv_e2e',location='westus2')
+    @ResourceGroupPreparer(name_prefix='webapp_hyperv_e2e', location='westus2')
     def test_webapp_hyperv_e2e(self, resource_group):
         webapp_name = self.create_random_name(
             prefix='webapp-hyperv-e2e', length=24)
