@@ -149,7 +149,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory(), validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
-        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp config backup') as g:
@@ -225,25 +225,25 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
 
-    with self.command_group('webapp hybrid-connection', is_preview=True) as g:
+    with self.command_group('webapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
         g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
 
-    with self.command_group('functionapp hybrid-connection', is_preview=True) as g:
+    with self.command_group('functionapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
         g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
 
-    with self.command_group('appservice hybrid-connection', is_preview=True) as g:
+    with self.command_group('appservice hybrid-connection') as g:
         g.custom_command('set-key', 'set_hc_key')
 
-    with self.command_group('webapp vnet-integration', is_preview=True) as g:
+    with self.command_group('webapp vnet-integration') as g:
         g.custom_command('add', 'add_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
-    with self.command_group('functionapp vnet-integration', is_preview=True) as g:
+    with self.command_group('functionapp vnet-integration') as g:
         g.custom_command('add', 'add_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
@@ -260,7 +260,7 @@ def load_command_table(self, _):
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
-    with self.command_group('appservice vnet-integration', is_preview=True) as g:
+    with self.command_group('appservice vnet-integration') as g:
         g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
@@ -299,7 +299,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('unbind', 'unbind_ssl_cert')
         g.custom_command('delete', 'delete_ssl_cert')
-        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('functionapp deployment source') as g:
@@ -365,19 +365,19 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_function_keys')
         g.custom_command('delete', 'delete_function_key')
 
-    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions) as g:
         g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
 
-    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
+    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions) as g:
         g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
 
-    with self.command_group('appservice ase', custom_command_type=appservice_environment, is_preview=True) as g:
+    with self.command_group('appservice ase', custom_command_type=appservice_environment) as g:
         g.custom_command('list', 'list_appserviceenvironments')
         g.custom_command('list-addresses', 'list_appserviceenvironment_addresses')
         g.custom_command('list-plans', 'list_appserviceenvironment_plans')
