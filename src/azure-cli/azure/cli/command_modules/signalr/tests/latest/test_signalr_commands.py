@@ -36,10 +36,11 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
             'update_service_mode': update_service_mode,
             'added_allowed_origins': ' '.join(added_allowed_origins),
+            'default_action': "Deny",
         })
 
         # Test create
-        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags} --service-mode {service_mode} --allowed-origins {allowed_origins}',
+        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags} --service-mode {service_mode} --allowed-origins {allowed_origins} --default-action {default_action}',
                  checks=[
                      self.check('name', '{signalr_name}'),
                      self.check('location', '{location}'),
@@ -52,6 +53,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.exists('hostName'),
                      self.exists('publicPort'),
                      self.exists('serverPort'),
+                     self.check('networkAcLs.defaultAction', '{default_action}')
                  ])
 
         # Test show
@@ -67,6 +69,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.exists('publicPort'),
             self.exists('serverPort'),
             self.exists('externalIp'),
+            self.check('networkAcLs.defaultAction', '{default_action}')
         ])
 
         # Test list
@@ -81,7 +84,8 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.exists('[0].hostName'),
             self.exists('[0].publicPort'),
             self.exists('[0].serverPort'),
-            self.exists('[0].externalIp')
+            self.exists('[0].externalIp'),
+            self.check('[0].networkAcLs.defaultAction', '{default_action}')
         ])
 
         # Test update
@@ -96,7 +100,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
-                     self.exists('serverPort'),
+                     self.exists('serverPort')
                  ])
 
         # Test CORS operations

@@ -19,7 +19,7 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
             'vnetname': sname,
             'kind': 'Face',
             'sku': 'S0',
-            'location': 'centraluseuap',
+            'location': 'westus',
             'customdomain': customdomain,
         })
 
@@ -31,11 +31,11 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
                            ' --vnet-name {vnetname} --address-prefixes 10.0.1.0/24').get_output_in_json()
 
         self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location}'
-                 ' --custom-domain {customdomain}',
+                 ' --custom-domain {customdomain} --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         rules = self.cmd('az cognitiveservices account network-rule list -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(len(rules['ipRules']), 0)

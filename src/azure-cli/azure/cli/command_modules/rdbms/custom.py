@@ -9,8 +9,8 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.mariadb.operations.servers_operations import ServersOperations as MariaDBServersOperations
+from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
+from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, get_postgresql_management_client
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
@@ -18,7 +18,8 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled'):
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
+                   assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -35,6 +36,9 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
+                public_network_access=public_network_access,
+                infrastructure_encryption=infrastructure_encryption,
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -42,6 +46,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                     storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
+        if assign_identity:
+            parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
@@ -51,6 +57,9 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                minimal_tls_version=minimal_tls_version,
+                public_network_access=public_network_access,
+                infrastructure_encryption=infrastructure_encryption,
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -58,6 +67,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                     storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
+        if assign_identity:
+            parameters.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMariaDB':
         from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
@@ -67,6 +78,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                public_network_access=public_network_access,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -283,7 +295,10 @@ def _server_update_custom_func(instance,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None,
-                               auto_grow=None):
+                               auto_grow=None,
+                               assign_identity=False,
+                               public_network_access=None,
+                               minimal_tls_version=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -311,7 +326,21 @@ def _server_update_custom_func(instance,
                                     administrator_login_password=administrator_login_password,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
-                                    tags=tags)
+                                    tags=tags,
+                                    public_network_access=public_network_access,
+                                    minimal_tls_version=minimal_tls_version)
+
+    if assign_identity:
+        if server_module_path.find('postgres'):
+            from azure.mgmt.rdbms import postgresql
+            if instance.identity is None:
+                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
+        elif server_module_path.find('mysql'):
+            from azure.mgmt.rdbms import mysql
+            if instance.identity is None:
+                instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
 
     return params
 
@@ -337,6 +366,20 @@ def _server_update_get(client, resource_group_name, server_name):
 
 def _server_update_set(client, resource_group_name, server_name, parameters):
     return client.update(resource_group_name, server_name, parameters)
+
+
+def _server_delete(cmd, client, resource_group_name, server_name):
+    database_engine = 'postgres'
+    if isinstance(client, MySqlServersOperations):
+        database_engine = 'mysql'
+
+    result = client.delete(resource_group_name, server_name)
+
+    if cmd.cli_ctx.local_context.is_on:
+        local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
+        local_context_file.remove_option('{} server'.format(database_engine), 'server_name')
+
+    return result
 
 
 def _get_sku_name(tier, family, capacity):
@@ -425,3 +468,131 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+
+# region private_endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, server_name=server_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = 'Approved' if is_approved else 'Rejected'
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   server_name=server_name,
+                                   private_endpoint_connection_name=private_endpoint_connection_name,
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                        description=None):
+    """Approve a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
+        description=description)
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                       description=None):
+    """Reject a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
+        description=description)
+
+
+def server_key_create(client, resource_group_name, server_name, kid):
+
+    """Create Server Key."""
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        uri=kid
+    )
+
+
+def server_key_get(client, resource_group_name, server_name, kid):
+
+    """Get Server Key."""
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def server_key_delete(cmd, client, resource_group_name, server_name, kid):
+
+    """Drop Server Key."""
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def _get_server_key_name_from_uri(uri):
+    '''
+    Gets the key's name to use as a server key.
+
+    The SQL server key API requires that the server key has a specific name
+    based on the vault, key and key version.
+    '''
+    import re
+
+    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+
+    if match is None:
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    vault = uri.split('.')[0].split('/')[-1]
+    key = uri.split('/')[-2]
+    version = uri.split('/')[-1]
+    return '{}_{}_{}'.format(vault, key, version)
+
+
+def server_ad_admin_set(client, resource_group_name, server_name, login=None, sid=None):
+    '''
+    Sets a server's AD admin.
+    '''
+
+    if isinstance(client, MySqlServersOperations):
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+    else:
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=parameters)
+
+
+def _get_tenant_id():
+    '''
+    Gets tenantId from current subscription.
+    '''
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
+# endregion

@@ -9,15 +9,8 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
+VERSION = "2.13.0"
 
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
-
-VERSION = "2.0.79"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,10 +35,7 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -53,23 +43,25 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2',
+    'adal~=1.2.3',
     'argcomplete~=1.8',
-    'azure-cli-telemetry',
-    'colorama>=0.3.9',
-    'humanfriendly~=4.7',
+    'azure-cli-telemetry==1.0.6',
+    'colorama~=0.4.1',
+    'humanfriendly>=4.7,<9.0',
     'jmespath',
-    'knack~=0.6.2',
+    'knack==0.7.2',
+    'msal~=1.0.0',
+    'msal-extensions~=0.1.3',
     'msrest>=0.4.4',
-    'msrestazure>=0.6.2',
+    'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml',
-    'requests~=2.20',
+    'requests~=2.22',
     'six~=1.12',
-    'wheel==0.30.0',
-    'azure-mgmt-resource~=6.0',
+    'pkginfo>=1.5.0.1',
+    'azure-mgmt-resource==10.2.0',
+    'azure-mgmt-core==1.2.0'
 ]
 
 TESTS_REQUIRE = [
@@ -93,8 +85,6 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extension',
@@ -105,11 +95,8 @@ setup(
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
         ':python_version<"3.0"': ['futures'],
-        ":python_version<'3.0'": ['antlr4-python2-runtime'],
-        ":python_version>='3.0'": ['antlr4-python3-runtime'],
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
-    package_data={'azure.cli.core': ['auth_landing_pages/*.html']},
-    cmdclass=cmdclass
+    package_data={'azure.cli.core': ['auth_landing_pages/*.html']}
 )

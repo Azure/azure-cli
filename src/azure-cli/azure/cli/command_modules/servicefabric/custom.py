@@ -22,6 +22,8 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
+from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -188,10 +190,6 @@ def new_cluster(cmd,
         if file_extension is None or file_extension.lower() != '.pfx'.lower():
             raise CLIError('\'--certificate_file\' should be a valid pfx file')
 
-    import datetime
-    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    deployment_name = 'AzurePSDeployment-' + suffix
-
     vault_id = None
     certificate_uri = None
     cert_thumbprint = None
@@ -249,16 +247,7 @@ def new_cluster(cmd,
         cert_thumbprint = parameters[CERTIFICATE_THUMBPRINT]['value']
         template = get_file_json(template_file)
 
-    logger.info("Validating the deployment")
-    validate_result = _deploy_arm_template_core(
-        cli_ctx, resource_group_name, template, parameters, deployment_name, 'incremental', True)
-    if validate_result.error is not None:
-        errors_detailed = _build_detailed_error(validate_result.error, [])
-        errors_detailed.insert(0, "Error validating template. See below for more information.")
-        raise CLIError('\n'.join(errors_detailed))
-    logger.info("Deployment is valid, and begin to deploy")
-    _deploy_arm_template_core(cli_ctx, resource_group_name, template,
-                              parameters, deployment_name, 'incremental', False)
+    validate_and_deploy_arm_template(cmd, resource_group_name, template, parameters)
 
     output_dict = {}
     output_dict['vm_user_name'] = vm_user_name
@@ -307,7 +296,7 @@ def add_app_cert(cmd,
                                  certificate_subject_name,
                                  secret_identifier)
 
-    _add_cert_to_all_vmss(cli_ctx, resource_group_name, result[0], result[1])
+    _add_cert_to_all_vmss(cli_ctx, resource_group_name, None, result[0], result[1])
     return client.get(resource_group_name, cluster_name)
 
 
@@ -485,22 +474,22 @@ def add_cluster_cert(cmd,
     thumbprint = result[2]
 
     compute_client = compute_client_factory(cli_ctx)
-    primary_node_type = [
-        n for n in cluster.node_types if n.is_primary is True][0]
-    vmss_name = primary_node_type.name
-    vmss = compute_client.virtual_machine_scale_sets.get(
-        resource_group_name, vmss_name)
-    fabric_ext = [ext for ext in vmss.virtual_machine_profile.extension_profile.extensions
-                  if ext.type.lower() == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or ext.type.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]
+    primary_node_type = [n for n in cluster.node_types if n.is_primary is True][0]
+    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, primary_node_type.name)
+    fabric_ext = _get_sf_vm_extension(vmss)
     if fabric_ext is None:
         raise CLIError("Failed to find service fabric extension")
 
+    # add cert to sf extension
     import json
     seconday_setting = json.loads(
         '{{"thumbprint":"{0}","x509StoreName":"{1}"}}'.format(thumbprint, 'my'))
-    fabric_ext[0].settings["certificateSecondary"] = seconday_setting
-    _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url)
+    fabric_ext.settings["certificateSecondary"] = seconday_setting
 
+    # add cert and star vmss update
+    _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster.cluster_id, vault_id, secret_url)
+
+    # cluser update
     patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
     patch_request.certificate.thumbprint_secondary = thumbprint
     return client.update(resource_group_name, cluster_name, patch_request)
@@ -537,15 +526,18 @@ def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, 
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
 
-    vmss = compute_client.virtual_machine_scale_sets.get(
-        resource_group_name, node_type.name)
+    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
     vmss.sku.capacity = vmss.sku.capacity + number_of_nodes_to_add
+
+    # update vmss
     vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
     LongRunningOperation(cli_ctx)(vmss_poll)
-    node_type.vm_instance_count = vmss.sku.capacity
 
+    # update cluster
+    node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
+
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
@@ -561,62 +553,68 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
         raise CLIError("Failed to find the node type in the cluster")
 
     node_type = node_types[0]
-    if node_type.durability_level.lower() == 'bronze':
-        raise CLIError("Can't delete node if durability level is bronze")
-    reliability_level = _get_target_instance(cluster.reliability_level)
-    vmss = compute_client.virtual_machine_scale_sets.get(
-        resource_group_name, node_type.name)
+    reliability_required_instance_count = _get_target_instance(cluster.reliability_level)
+    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
     vmss.sku.capacity = vmss.sku.capacity - number_of_nodes_to_remove
-    if node_type.is_primary:
-        if vmss.sku.capacity < reliability_level:
-            raise CLIError("Can't delete node since current reliability level is {}".format(
-                reliability_level))
+    if vmss.sku.capacity < reliability_required_instance_count:
+        raise CLIError("Can't delete node since current reliability level is {} requires at least {} nodes.".format(
+            cluster.reliability_level,
+            reliability_required_instance_count))
+
+    # update vmss
     vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
     LongRunningOperation(cli_ctx)(vmss_poll)
-    node_type.vm_instance_count = vmss.sku.capacity
 
+    # update cluster
+    node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
+
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
 def update_cluster_durability(cmd, client, resource_group_name, cluster_name, node_type, durability_level):
     cli_ctx = cmd.cli_ctx
+
+    # get cluster node type durablity
     cluster = client.get(resource_group_name, cluster_name)
-    node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
-    if node_types is None:
-        raise CLIError("Failed to find the node type in the cluster")
+    node_type_refs = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
+    if not node_type_refs:
+        raise CLIError("Failed to find the node type in the cluster.")
+    node_type_ref = node_type_refs[0]
+    curr_node_type_durability = node_type_ref.durability_level
 
+    # get vmss extension durability
     compute_client = compute_client_factory(cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(
-        resource_group_name, node_type)
-    fabric_exts = [ext for ext in vmss.virtual_machine_profile.extension_profile.extensions
-                   if ext.type.lower() == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or ext.type.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]
-    if fabric_exts is None:
-        raise CLIError("Failed to find service fabric extension")
-    fabric_ext = fabric_exts[0]
-    if fabric_ext.settings['durabilityLevel'] == durability_level:
-        return cluster
-    fabric_ext.settings['durabilityLevel'] = durability_level
-    fabric_ext.settings['enableParallelJobs'] = True
-    vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
-        resource_group_name, vmss.name, vmss)
+    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type)
+    _get_sf_vm_extension(vmss)
+    fabric_ext_ref = _get_sf_vm_extension(vmss)
+    if fabric_ext_ref is None:
+        raise CLIError("Failed to find service fabric extension.")
 
-    node_type = node_types[0]
-    node_type.durability_level = durability_level
-    patch_request = ClusterUpdateParameters(node_types=node_types)
-    update_cluster_poll = client.update(
-        resource_group_name, cluster_name, patch_request)
+    curr_vmss_durability_level = fabric_ext_ref.settings['durabilityLevel']
 
-    def wait(ctx, poller):
-        return LongRunningOperation(ctx)(poller)
-    import threading
-    t1 = threading.Thread(target=wait, args=[cli_ctx, vmss_poll])
-    t2 = threading.Thread(target=wait, args=[cli_ctx, update_cluster_poll])
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    # check upgrade
+    if curr_node_type_durability.lower() != curr_vmss_durability_level.lower():
+        logger.warning(
+            "The durability level is currently mismatched between the cluster ('%s') and the VM extension ('%s').",
+            curr_node_type_durability,
+            curr_vmss_durability_level)
+
+    # update cluster node type durability
+    if curr_node_type_durability.lower() != durability_level.lower():
+        node_type_ref.durability_level = durability_level
+        patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
+        update_cluster_poll = client.update(resource_group_name, cluster_name, patch_request)
+        LongRunningOperation(cli_ctx)(update_cluster_poll)
+
+    # update vmss sf extension durability
+    if curr_vmss_durability_level.lower() != durability_level.lower():
+        fabric_ext_ref.settings['durabilityLevel'] = durability_level
+        fabric_ext_ref.settings['enableParallelJobs'] = True
+        vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss.name, vmss)
+        LongRunningOperation(cli_ctx)(vmss_poll)
+
     return client.get(resource_group_name, cluster_name)
 
 
@@ -726,8 +724,7 @@ def update_cluster_reliability_level(cmd,
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
     compute_client = compute_client_factory(cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(
-        resource_group_name, node_type.name)
+    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
     if instance_target == instance_now:
         return cluster
     if instance_target > instance_now:
@@ -742,7 +739,7 @@ def update_cluster_reliability_level(cmd,
 
     node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(
-        node_types=node_types, reliability_level=reliability_level)
+        node_types=cluster.node_types, reliability_level=reliability_level)
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
@@ -936,12 +933,9 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                                                                                                                                                     load_balancer_inbound_nat_pools=inbound_nat_pools,
                                                                                                                                                                                                     subnet=ApiEntityReference(id=subnet.id))])])
     compute_client = compute_client_factory(cli_ctx)
-    vmsses = list(compute_client.virtual_machine_scale_sets.list(
-        resource_group_name))
-    vmss = [vm for vm in vmsses
-            if len([e for e in vm.virtual_machine_profile.extension_profile.extensions if e.type.lower() == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or e.type.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]) > 0]
 
-    vmss = vmss[0]
+    node_type_name_ref = cluster.node_types[0].name
+    vmss_reference = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type_name_ref)
 
     def create_vhd(cli_ctx, resource_group_name, cluster_name, node_type, location):
         storage_name = '{}{}'.format(cluster_name.lower(), node_type.lower())
@@ -994,13 +988,13 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     os_profile = VirtualMachineScaleSetOSProfile(computer_name_prefix=node_type_name,
                                                  admin_password=vm_password,
                                                  admin_username=vm_user_name,
-                                                 secrets=vmss.virtual_machine_profile.os_profile.secrets)
+                                                 secrets=vmss_reference.virtual_machine_profile.os_profile.secrets)
 
     diagnostics_storage_name = cluster.diagnostics_storage_account_config.storage_account_name
 
     diagnostics_ext = None
     fabric_ext = None
-    diagnostics_exts = [e for e in vmss.virtual_machine_profile.extension_profile.extensions if e.type.lower(
+    diagnostics_exts = [e for e in vmss_reference.virtual_machine_profile.extension_profile.extensions if e.type1.lower(
     ) == 'IaaSDiagnostics'.lower()]
     if any(diagnostics_exts):
         diagnostics_ext = diagnostics_exts[0]
@@ -1016,8 +1010,8 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         json_data['storageAccountEndPoint'] = "https://core.windows.net/"
         diagnostics_ext.protected_settings = json_data
 
-    fabric_exts = [e for e in vmss.virtual_machine_profile.extension_profile.extensions if e.type.lower(
-    ) == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or e.type.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]
+    fabric_exts = [e for e in vmss_reference.virtual_machine_profile.extension_profile.extensions if e.type1.lower(
+    ) == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or e.type1.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]
     if any(fabric_exts):
         fabric_ext = fabric_exts[0]
 
@@ -1059,6 +1053,19 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                                                    mode=UpgradeMode.automatic),
                                                                                                virtual_machine_profile=virtual_machine_scale_set_profile))
     LongRunningOperation(cli_ctx)(poller)
+
+
+def _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster_id, node_type_name):
+
+    vmsses = list(compute_client.virtual_machine_scale_sets.list(resource_group_name))
+
+    for vmss in vmsses:
+        fabric_ext = _get_sf_vm_extension(vmss)
+        if fabric_ext is not None:
+            curr_cluster_id = _get_cluster_id_in_sf_extension(fabric_ext)
+            if curr_cluster_id.lower() == cluster_id.lower() and fabric_ext.settings["nodeTypeRef"].lower() == node_type_name.lower():
+                return vmss
+    raise CLIError("Failed to find vmss in resource group {} for cluster id {} and node type {}".format(resource_group_name, cluster_id, node_type_name))
 
 
 def _verify_cert_function_parameter(certificate_file=None,
@@ -1152,7 +1159,7 @@ def _create_certificate(cmd,
                 vault = _create_keyvault(
                     cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
-            certificate_name = _get_certificate_name(resource_group_name)
+            certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
             logger.info("Import certificate")
             result = import_certificate(
                 cli_ctx, vault_uri, certificate_name, certificate_file, password=certificate_password)
@@ -1174,7 +1181,7 @@ def _create_certificate(cmd,
                 logger.info("Wait for key vault ready")
                 time.sleep(20)
             vault_uri = vault.properties.vault_uri
-            certificate_name = _get_certificate_name(resource_group_name)
+            certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
 
             policy = _get_default_policy(cli_ctx, certificate_subject_name)
             logger.info("Creating self-signed certificate")
@@ -1197,63 +1204,63 @@ def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
     compute_client = compute_client_factory(cli_ctx)
     secrets = [
         s for s in vmss.virtual_machine_profile.os_profile.secrets if s.source_vault.id == vault_id]
-    if secrets is not None:
+    if secrets is None or secrets == []:
+        if vmss.virtual_machine_profile.os_profile.secrets is None:
+            vmss.virtual_machine_profile.os_profile.secrets = []
+        new_vault_certificates = []
+        new_vault_certificates.append(VaultCertificate(certificate_url=secret_url, certificate_store='my'))
+        new_source_vault = SubResource(id=vault_id)
+        vmss.virtual_machine_profile.os_profile.secrets.append(VaultSecretGroup(source_vault=new_source_vault,
+                                                                                vault_certificates=new_vault_certificates))
+    else:
         if secrets[0].vault_certificates is not None:
             certs = [
                 c for c in secrets[0].vault_certificates if c.certificate_url == secret_url]
-            if certs is None:
+            if certs is None or certs == []:
                 secrets[0].vault_certificates.append(
-                    VaultCertificate(secret_url, 'my'))
+                    VaultCertificate(certificate_url=secret_url, certificate_store='my'))
             else:
                 return
         else:
             secrets[0].vault_certificates = []
             secrets[0].vault_certificates.append(
                 VaultCertificate(secret_url, 'my'))
-    else:
-        vmss.virtual_machine_profile.os_profile.secrets = []
-        new_vault_certificates = []
-        new_vault_certificates.append(VaultCertificate(secret_url, 'my'))
-        vmss.virtual_machine_profile.os_profile.secrets.append(VaultSecretGroup(SubResource(vault_id),
-                                                                                new_vault_certificates))
 
     poller = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
     return LongRunningOperation(cli_ctx)(poller)
 
 
-def _add_cert_to_all_vmss(cli_ctx, resource_group_name, vault_id, secret_url):
+def _get_sf_vm_extension(vmss):
+    fabric_ext = [ext for ext in vmss.virtual_machine_profile.extension_profile.extensions
+                  if ext.type1 is not None and (ext.type1.lower() == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or ext.type1.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME)]
+    if fabric_ext is None or fabric_ext == []:
+        return None
+    return fabric_ext[0]
+
+
+def _get_cluster_id_in_sf_extension(fabric_ext):
+    cluster_endpoint = fabric_ext.settings["clusterEndpoint"]
+    endpoint_list = cluster_endpoint.split('/')
+    cluster_id = endpoint_list[len(endpoint_list) - 1]
+    return cluster_id
+
+
+def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, secret_url):
     threads = []
     import threading
     compute_client = compute_client_factory(cli_ctx)
-    vmsses = list(compute_client.virtual_machine_scale_sets.list(
-        resource_group_name))
+    vmsses = list(compute_client.virtual_machine_scale_sets.list(resource_group_name))
     if vmsses is not None:
         for vmss in vmsses:
-            t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
-            t.start()
-            threads.append(t)
+            fabric_ext = _get_sf_vm_extension(vmss)
+            if fabric_ext is not None and (cluster_id is None or _get_cluster_id_in_sf_extension(fabric_ext).lower() == cluster_id.lower()):
+                t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
+                t.start()
+                threads.append(t)
 
     for t in threads:
         t.join()
-
-
-def _get_resource_group_by_name(cli_ctx, resource_group_name):
-    try:
-        resouce_client = resource_client_factory(cli_ctx).resource_groups
-        return resouce_client.get(resource_group_name)
-    except Exception as ex:  # pylint: disable=broad-except
-        error = getattr(ex, 'Azure Error', ex)
-        if error != 'ResourceGroupNotFound':
-            return None
-        raise
-
-
-def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
-    ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
-    client = resource_client_factory(cli_ctx).resource_groups
-    parameters = ResourceGroup(location=location, tags=tags)
-    client.create_or_update(rg_name, parameters)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -1274,13 +1281,13 @@ def _get_target_instance(reliability_level):
 # pylint: disable=inconsistent-return-statements
 def _get_reliability_level(cluster_size):
     size = int(cluster_size)
-    if size > 0 and size < 3:
+    if 0 < size < 3:
         return 'None'
-    if size >= 3 and size < 5:
+    if 3 <= size < 5:
         return 'Bronze'
-    if size >= 5 and size < 7:
+    if 5 <= size < 7:
         return 'Silver'
-    if size >= 7 and size < 9:
+    if 7 <= size < 9:
         return 'Gold'
     if size >= 9:
         return 'Platinum'
@@ -1314,7 +1321,7 @@ def _dict_to_fabric_settings(setting_dict):
     return settings
 
 
-def _deploy_arm_template_core(cli_ctx,
+def _deploy_arm_template_core(cmd,
                               resource_group_name,
                               template,
                               parameters,
@@ -1322,18 +1329,30 @@ def _deploy_arm_template_core(cli_ctx,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
-
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
-    client = resource_client_factory(cli_ctx)
-    if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
+    client = resource_client_factory(cmd.cli_ctx)
 
-    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                              deployment_name, properties)
-    result = LongRunningOperation(cli_ctx)(deploy_poll)
-    return result
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate_only:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                                      deployment)
+        else:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
+                                      deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                           properties)
+
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name, deployment_name,
+                              properties)
+    return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
 
 def _get_vault_name(resource_group_name, vault_name):
@@ -1342,16 +1361,24 @@ def _get_vault_name(resource_group_name, vault_name):
     return vault_name
 
 
-def _get_certificate_name(resource_group_name):
-    certificate_name = resource_group_name
+def _get_certificate_name(certificate_subject_name, resource_group_name):
+    if certificate_subject_name is None:
+        certificate_name = resource_group_name
+    else:
+        certificate_name = certificate_subject_name
+
     name = ""
     for n in certificate_name:
         if n.isalpha() or n == '-' or n.isdigit():
             name += n
     certificate_name = name
-    import datetime
-    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    return "{}{}".format(certificate_name, suffix)
+
+    if certificate_subject_name is None:
+        import datetime
+        suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
+        certificate_name = "{}{}".format(certificate_name, suffix)
+
+    return certificate_name
 
 
 # pylint: disable=inconsistent-return-statements
@@ -1665,9 +1692,9 @@ def _create_keyvault(cmd,
     KeyVaultSku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT)
     AccessPolicyEntry = cmd.get_models('AccessPolicyEntry', resource_type=ResourceType.MGMT_KEYVAULT)
     Permissions = cmd.get_models('Permissions', resource_type=ResourceType.MGMT_KEYVAULT)
-    CertificatePermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#CertificatePermissions')
-    KeyPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#KeyPermissions')
-    SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models.key_vault_management_client_enums#SecretPermissions')
+    CertificatePermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#CertificatePermissions')
+    KeyPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#KeyPermissions')
+    SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#SecretPermissions')
     KeyVaultSkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT)
 
     if not sku:

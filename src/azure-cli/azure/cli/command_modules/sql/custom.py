@@ -5,6 +5,9 @@
 
 # pylint: disable=C0302
 from enum import Enum
+import calendar
+from datetime import datetime
+from dateutil.parser import parse
 
 from azure.cli.core.util import (
     CLIError,
@@ -16,7 +19,6 @@ from azure.mgmt.sql.models import (
     CapabilityGroup,
     CapabilityStatus,
     CreateMode,
-    DatabaseEdition,
     FailoverGroup,
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
@@ -26,6 +28,8 @@ from azure.mgmt.sql.models import (
     ReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
+    SensitivityLabel,
+    SensitivityLabelSource,
     ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
@@ -35,16 +39,20 @@ from azure.mgmt.sql.models import (
     ManagedInstancePairInfo,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
-    InstanceFailoverGroupReadWriteEndpoint
+    InstanceFailoverGroupReadWriteEndpoint,
+    ServerPublicNetworkAccess
 )
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations,
-    get_sql_managed_instances_operations
+    get_sql_managed_instances_operations,
+    get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
 )
+
 
 logger = get_logger(__name__)
 
@@ -63,6 +71,18 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
+
+
+def _get_managed_restorable_dropped_database_backup_short_term_retention_client(cli_ctx):
+    '''
+    Returns client for managed restorable dropped databases.
+    '''
+
+    server_client = \
+        get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(cli_ctx, None)
+
+    # pylint: disable=no-member
+    return server_client
 
 
 def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
@@ -423,10 +443,47 @@ class FailoverPolicyType(Enum):
     manual = 'Manual'
 
 
+class SqlServerMinimalTlsVersionType(Enum):
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
+class SqlManagedInstanceMinimalTlsVersionType(Enum):
+    no_tls = "None"
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
 class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
     serverless = "Serverless"
+
+
+class DatabaseEdition(str, Enum):
+
+    web = "Web"
+    business = "Business"
+    basic = "Basic"
+    standard = "Standard"
+    premium = "Premium"
+    premium_rs = "PremiumRS"
+    free = "Free"
+    stretch = "Stretch"
+    data_warehouse = "DataWarehouse"
+    system = "System"
+    system2 = "System2"
+    general_purpose = "GeneralPurpose"
+    business_critical = "BusinessCritical"
+    hyperscale = "Hyperscale"
+
+
+class AuthenticationType(str, Enum):
+
+    sql = "SQL"
+    ad_password = "ADPassword"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -445,14 +502,62 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     '''
 
     # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='databases',
+        child_name_1=database_name)
+
+
+def _to_filetimeutc(dateTime):
+    '''
+    Changes given datetime to filetimeutc string
+    '''
+
+    NET_epoch = datetime(1601, 1, 1)
+    UNIX_epoch = datetime(1970, 1, 1)
+
+    epoch_delta = (UNIX_epoch - NET_epoch)
+
+    log_time = parse(dateTime)
+
+    net_ts = calendar.timegm((log_time + epoch_delta).timetuple())
+
+    # units of seconds since NET epoch
+    filetime_utc_ts = net_ts * (10**7) + log_time.microsecond * 10
+
+    return filetime_utc_ts
+
+
+def _get_managed_dropped_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        deleted_time):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
     from six.moves.urllib.parse import quote  # pylint: disable=import-error
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
 
-    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}/databases/{}'.format(
-        quote(get_subscription_id(cli_ctx)),
-        quote(resource_group_name),
-        quote(managed_instance_name),
-        quote(database_name))
+    return (resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='restorableDroppedDatabases',
+        child_name_1='{},{}'.format(
+            quote(database_name),
+            _to_filetimeutc(deleted_time))))
 
 
 def db_show_conn_str(
@@ -712,6 +817,35 @@ def _db_dw_create(
                        parameters=kwargs)
 
 
+def _should_show_backup_storage_redundancy_warnings(target_db_location):
+    if target_db_location.lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        return True
+    return False
+
+
+def _backup_storage_redundancy_specify_geo_warning():
+    print("""Selected value for backup storage redundancy is geo-redundant storage.
+    Note that database backups will be geo-replicated to the paired region.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
+def _confirm_backup_storage_redundancy_take_geo_warning():
+    # if not storage_account_type:
+    confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+    which will default to geo-redundant storage. Note that database backups will be geo-replicated
+    to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+    Do you want to proceed?""")
+    if not confirmation:
+        return False
+    return True
+
+
+def _backup_storage_redundancy_take_source_warning():
+    print("""You have not specified the value for backup storage redundancy
+    which will default to source's backup storage redundancy.
+    To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
 def db_create(
         cmd,
         client,
@@ -719,10 +853,24 @@ def db_create(
         server_name,
         resource_group_name,
         no_wait=False,
+        yes=None,
         **kwargs):
     '''
     Creates a DB (with 'Default' create mode.)
     '''
+
+    # Check backup storage redundancy configurations
+    location = _get_server_location(
+        cmd.cli_ctx,
+        server_name=server_name,
+        resource_group_name=resource_group_name)
+
+    if not yes and _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            if not _confirm_backup_storage_redundancy_take_geo_warning():
+                return None
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     return _db_dw_create(
         cmd.cli_ctx,
@@ -780,6 +928,16 @@ def db_copy(
         resource_group_name,
         kwargs)
 
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=dest_server_name,
+                                    resource_group_name=dest_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
+
     return _db_dw_create(
         cmd.cli_ctx,
         client,
@@ -821,6 +979,16 @@ def db_create_replica(
         server_name,
         resource_group_name,
         kwargs)
+
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx,
+                                    server_name=partner_server_name,
+                                    resource_group_name=partner_resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     # Replica must have the same database name as the source db
     return _db_dw_create(
@@ -889,6 +1057,14 @@ def db_restore(
     kwargs['source_database_deletion_date'] = source_database_deletion_date
     kwargs['create_mode'] = CreateMode.restore.value if is_deleted else CreateMode.point_in_time_restore.value
 
+    # Check backup storage redundancy configurations
+    location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
+
     return _db_dw_create(
         cmd.cli_ctx,
         client,
@@ -924,7 +1100,7 @@ def db_failover(
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
     # If a replica is secondary, then it has exactly 1 link (to its primary).
-    primary_link = next((l for l in links if l.partner_role == ReplicationRole.primary), None)
+    primary_link = next((link for link in links if link.partner_role == ReplicationRole.primary), None)
     if not primary_link:
         # No link to a primary, so this must already be a primary. Do nothing.
         return
@@ -1052,7 +1228,7 @@ def db_delete_replica_link(
 
     # The link doesn't tell us the partner resource group name, so we just have to count on
     # partner server name being unique
-    link = next((l for l in links if l.partner_server == partner_server_name), None)
+    link = next((link for link in links if link.partner_server == partner_server_name), None)
     if not link:
         # No link exists, nothing to be done
         return
@@ -1107,7 +1283,7 @@ def db_import(
     kwargs['storage_key_type'] = storage_key_type
     kwargs['storage_key'] = storage_key
 
-    return client.create_import_operation(
+    return client.import_method(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
@@ -1166,7 +1342,8 @@ def db_update(
         read_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
-        compute_model=None):
+        compute_model=None,
+        storage_account_type=None):
     '''
     Applies requested parameters to a db resource instance for a DB update.
     '''
@@ -1174,6 +1351,12 @@ def db_update(
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
+
+    # Check backup storage redundancy configuration
+    location = _get_server_location(cmd.cli_ctx, server_name=server_name, resource_group_name=resource_group_name)
+    if _should_show_backup_storage_redundancy_warnings(location):
+        if storage_account_type == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
 
     #####
     # Set sku-related properties
@@ -1416,6 +1599,7 @@ def db_audit_policy_update(
     # Apply state
     if state:
         instance.state = BlobAuditingPolicyState[state.lower()]
+
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
@@ -1432,10 +1616,271 @@ def db_audit_policy_update(
     if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
     if retention_days:
         instance.retention_days = retention_days
 
     return instance
+
+
+def server_audit_policy_update(
+        cmd,
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        retention_days=None):
+    '''
+    Updates an audit policy. Custom update function to apply parameters to instance.
+    '''
+
+    # Apply state
+    if state:
+        instance.state = BlobAuditingPolicyState[state.lower()]
+
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
+
+    # Set storage-related properties
+    _db_security_policy_update(
+        cmd.cli_ctx,
+        instance,
+        enabled,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        instance.is_storage_secondary_key_in_use)
+
+    # Set other properties
+    if audit_actions_and_groups:
+        instance.audit_actions_and_groups = audit_actions_and_groups
+
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
+    if retention_days:
+        instance.retention_days = retention_days
+
+    return instance
+
+
+def update_long_term_retention(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        weekly_retention=None,
+        monthly_retention=None,
+        yearly_retention=None,
+        week_of_year=None,
+        **kwargs):
+    '''
+    Updates long term retention for managed database
+    '''
+    if not (weekly_retention or monthly_retention or yearly_retention):
+        raise CLIError('Please specify retention setting(s).  See \'--help\' for more details.')
+
+    if yearly_retention and not week_of_year:
+        raise CLIError('Please specify week of year for yearly retention.')
+
+    kwargs['weekly_retention'] = weekly_retention
+
+    kwargs['monthly_retention'] = monthly_retention
+
+    kwargs['yearly_retention'] = yearly_retention
+
+    kwargs['week_of_year'] = week_of_year
+
+    policy = client.create_or_update(
+        database_name=database_name,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+    return policy
+
+
+def _list_by_database_long_term_retention_backups(
+        client,
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups for a Managed Database
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_database(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            long_term_retention_server_name=long_term_retention_server_name,
+            long_term_retention_database_name=long_term_retention_database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_database(
+            location_name=location_name,
+            long_term_retention_server_name=long_term_retention_server_name,
+            long_term_retention_database_name=long_term_retention_database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def _list_by_server_long_term_retention_backups(
+        client,
+        location_name,
+        long_term_retention_server_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups within a Managed Instance
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_server(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            long_term_retention_server_name=long_term_retention_server_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_server(
+            location_name=location_name,
+            long_term_retention_server_name=long_term_retention_server_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def _list_by_location_long_term_retention_backups(
+        client,
+        location_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups within a specified region.
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_location(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_location(
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def list_long_term_retention_backups(
+        client,
+        location_name,
+        long_term_retention_server_name=None,
+        long_term_retention_database_name=None,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Lists the long term retention backups for a specified location, instance, or database.
+    '''
+
+    if long_term_retention_server_name:
+        if long_term_retention_database_name:
+            backups = _list_by_database_long_term_retention_backups(
+                client,
+                location_name,
+                long_term_retention_server_name,
+                long_term_retention_database_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+
+        else:
+            backups = _list_by_server_long_term_retention_backups(
+                client,
+                location_name,
+                long_term_retention_server_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+    else:
+        backups = _list_by_location_long_term_retention_backups(
+            client,
+            location_name,
+            resource_group_name,
+            only_latest_per_database,
+            database_state)
+
+    return backups
+
+
+def restore_long_term_retention_backup(
+        cmd,
+        client,
+        long_term_retention_backup_resource_id,
+        target_database_name,
+        target_server_name,
+        target_resource_group_name,
+        storage_account_type,
+        **kwargs):
+    '''
+    Restores an existing database (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
+    '''
+
+    if not target_resource_group_name or not target_server_name or not target_database_name:
+        raise CLIError('Please specify target resource(s). '
+                       'Target resource group, target server, and target database '
+                       'are all required to restore LTR backup.')
+
+    if not long_term_retention_backup_resource_id:
+        raise CLIError('Please specify a long term retention backup.')
+
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+    kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+    kwargs['storage_account_type'] = storage_account_type
+
+    # Check backup storage redundancy configurations
+    if _should_show_backup_storage_redundancy_warnings(kwargs['location']):
+        if not kwargs['storage_account_type']:
+            _backup_storage_redundancy_take_source_warning()
+        if kwargs['storage_account_type'] == 'GRS':
+            _backup_storage_redundancy_specify_geo_warning()
+
+    return client.create_or_update(
+        database_name=target_database_name,
+        server_name=target_server_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
 
 
 def db_threat_detection_policy_update(
@@ -1482,6 +1927,99 @@ def db_threat_detection_policy_update(
         instance.email_account_admins = email_account_admins
 
     return instance
+
+
+def db_sensitivity_label_show(
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name):
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        SensitivityLabelSource.current)
+
+
+def db_sensitivity_label_update(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name,
+        label_name=None,
+        information_type=None):
+    '''
+    Updates a sensitivity label. Custom update function to apply parameters to instance.
+    '''
+
+    # Get the information protection policy
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.security import SecurityCenter
+    from msrestazure.azure_exceptions import CloudError
+
+    security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
+
+    information_protection_policy = security_center_client.information_protection_policies.get(
+        scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
+        information_protection_policy_name="effective")
+
+    sensitivity_label = SensitivityLabel()
+
+    # Get the current label
+    try:
+        current_label = client.get(
+            resource_group_name,
+            server_name,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            SensitivityLabelSource.current)
+        # Initialize with existing values
+        sensitivity_label.label_name = current_label.label_name
+        sensitivity_label.label_id = current_label.label_id
+        sensitivity_label.information_type = current_label.information_type
+        sensitivity_label.information_type_id = current_label.information_type_id
+
+    except CloudError as ex:
+        if not(ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
+            raise ex
+
+    # Find the label id and information type id in the policy by the label name provided
+    label_id = None
+    if label_name:
+        label_id = next((id for id in information_protection_policy.labels
+                         if information_protection_policy.labels[id].display_name.lower() ==
+                         label_name.lower()),
+                        None)
+        if label_id is None:
+            raise CLIError('The provided label name was not found in the information protection policy.')
+        sensitivity_label.label_id = label_id
+        sensitivity_label.label_name = label_name
+    information_type_id = None
+    if information_type:
+        information_type_id = next((id for id in information_protection_policy.information_types
+                                    if information_protection_policy.information_types[id].display_name.lower() ==
+                                    information_type.lower()),
+                                   None)
+        if information_type_id is None:
+            raise CLIError('The provided information type was not found in the information protection policy.')
+        sensitivity_label.information_type_id = information_type_id
+        sensitivity_label.information_type = information_type
+
+    return client.create_or_update(
+        resource_group_name, server_name, database_name, schema_name, table_name, column_name, sensitivity_label)
 
 
 ###############################################
@@ -1795,6 +2333,82 @@ def elastic_pool_list_capabilities(
 
     return editions
 
+###############################################
+#                sql instance-pool            #
+###############################################
+
+
+def instance_pool_list(
+        client,
+        resource_group_name=None):
+    '''
+    Lists servers in a resource group or subscription
+    '''
+
+    if resource_group_name:
+        # List all instance pools in the resource group
+        return client.list_by_resource_group(
+            resource_group_name=resource_group_name)
+
+    # List all instance pools in the subscription
+    return client.list()
+
+
+def instance_pool_create(
+        cmd,
+        client,
+        instance_pool_name,
+        resource_group_name,
+        no_wait=False,
+        sku=None,
+        **kwargs):
+    '''
+    Creates a new instance pool
+    '''
+
+    kwargs['sku'] = _find_instance_pool_sku_from_capabilities(
+        cmd.cli_ctx, kwargs['location'], sku)
+
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       instance_pool_name=instance_pool_name,
+                       resource_group_name=resource_group_name,
+                       parameters=kwargs)
+
+
+def _find_instance_pool_sku_from_capabilities(cli_ctx, location, sku):
+    '''
+    Validate if the sku family and edition input by user are permissible in the region using
+    capabilities API and get the SKU name
+    '''
+
+    logger.debug('_find_instance_pool_sku_from_capabilities input: %s', sku)
+
+    # Get location capability
+    loc_capability = _get_location_capability(
+        cli_ctx, location, CapabilityGroup.supported_managed_instance_versions)
+
+    # Get default server version capability
+    managed_instance_version_capability = _get_default_capability(
+        loc_capability.supported_managed_instance_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(
+        sku, managed_instance_version_capability.supported_instance_pool_editions)
+
+    # Find family level capability, based on requested sku properties
+    _find_family_capability(
+        sku, edition_capability.supported_families)
+
+    result = Sku(
+        name="instance-pool",
+        tier=sku.tier,
+        family=sku.family)
+
+    logger.debug(
+        '_find_instance_pool_sku_from_capabilities return: %s',
+        result)
+    return result
+
 
 ###############################################
 #                sql server                   #
@@ -1806,6 +2420,7 @@ def server_create(
         server_name,
         assign_identity=False,
         no_wait=False,
+        enable_public_network=None,
         **kwargs):
     '''
     Creates a server.
@@ -1813,6 +2428,11 @@ def server_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    if enable_public_network is not None:
+        kwargs['public_network_access'] = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1839,7 +2459,9 @@ def server_list(
 def server_update(
         instance,
         administrator_login_password=None,
-        assign_identity=False):
+        assign_identity=False,
+        minimal_tls_version=None,
+        enable_public_network=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -1851,6 +2473,13 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
+
+    if enable_public_network is not None:
+        instance.public_network_access = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     return instance
 
@@ -1874,7 +2503,7 @@ def server_ad_admin_set(
     return client.create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        properties=kwargs)
+        parameters=kwargs)
 
 
 def server_ad_admin_update(
@@ -1892,7 +2521,6 @@ def server_ad_admin_update(
     instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
-
 
 #####
 #           sql server firewall-rule
@@ -2099,19 +2727,17 @@ def encryption_protector_update(
 ###############################################
 
 
-def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+def _find_managed_instance_sku_from_capabilities(
+        cli_ctx,
+        location,
+        sku):
     '''
     Given a requested sku which may have some properties filled in
-    (e.g. tier and capacity), finds the canonical matching sku
+    (e.g. tier and family), finds the canonical matching sku
     from the given location's capabilities.
     '''
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
-
-    if sku.name:
-        # User specified sku.name, so nothing else needs to be resolved.
-        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
-        return sku
 
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
@@ -2160,6 +2786,23 @@ def managed_instance_create(
     kwargs['sku'] = _find_managed_instance_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
     kwargs['subnet_id'] = virtual_network_subnet_id
 
+    if not kwargs['yes'] and kwargs['location'].lower() in ['southeastasia', 'brazilsouth', 'eastasia']:
+        if kwargs['storage_account_type'] == 'GRS':
+            confirmation = prompt_y_n("""Selected value for backup storage redundancy is geo-redundant storage.
+             Note that database backups will be geo-replicated to the paired region.
+             To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+             Do you want to proceed?""")
+            if not confirmation:
+                return
+
+        if not kwargs['storage_account_type']:
+            confirmation = prompt_y_n("""You have not specified the value for backup storage redundancy
+            which will default to geo-redundant storage. Note that database backups will be geo-replicated
+            to the paired region. To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.
+            Do you want to proceed?""")
+            if not confirmation:
+                return
+
     # Create
     return client.create_or_update(
         managed_instance_name=managed_instance_name,
@@ -2183,6 +2826,7 @@ def managed_instance_list(
 
 
 def managed_instance_update(
+        cmd,
         instance,
         administrator_login_password=None,
         license_type=None,
@@ -2190,7 +2834,11 @@ def managed_instance_update(
         storage_size_in_gb=None,
         assign_identity=False,
         proxy_override=None,
-        public_data_endpoint_enabled=None):
+        public_data_endpoint_enabled=None,
+        tier=None,
+        family=None,
+        minimal_tls_version=None,
+        tags=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2210,9 +2858,24 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
+
+    instance.sku.name = None
+    instance.sku.tier = (
+        tier or instance.sku.tier)
+    instance.sku.family = (
+        family or instance.sku.family)
+    instance.sku = _find_managed_instance_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
+
+    if tags is not None:
+        instance.tags = tags
 
     return instance
 
@@ -2376,6 +3039,7 @@ def managed_db_restore(
         target_managed_database_name,
         target_managed_instance_name=None,
         target_resource_group_name=None,
+        deleted_time=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2395,16 +3059,428 @@ def managed_db_restore(
         resource_group_name=resource_group_name)
 
     kwargs['create_mode'] = CreateMode.point_in_time_restore.value
-    kwargs['source_database_id'] = _get_managed_db_resource_id(
-        cmd.cli_ctx,
-        resource_group_name,
-        managed_instance_name,
-        database_name)
+
+    if deleted_time:
+        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name,
+            deleted_time)
+    else:
+        kwargs['source_database_id'] = _get_managed_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name)
 
     return client.create_or_update(
         database_name=target_managed_database_name,
         managed_instance_name=target_managed_instance_name,
         resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def update_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        retention_days,
+        deleted_time=None):
+    '''
+    Updates short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.create_or_update(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+    else:
+        policy = client.create_or_update(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+
+    return policy
+
+
+def get_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        deleted_time=None):
+    '''
+    Gets short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.get(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+    else:
+        policy = client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+
+    return policy
+
+
+def _is_int(retention):
+    try:
+        int(retention)
+        return True
+    except ValueError:
+        return False
+
+
+def update_long_term_retention_mi(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        weekly_retention=None,
+        monthly_retention=None,
+        yearly_retention=None,
+        week_of_year=None,
+        **kwargs):
+    '''
+    Updates long term retention for managed database
+    '''
+
+    if not (weekly_retention or monthly_retention or yearly_retention):
+        raise CLIError('Please specify retention setting(s).  See \'--help\' for more details.')
+
+    if yearly_retention and not week_of_year:
+        raise CLIError('Please specify week of year for yearly retention.')
+
+    # if an int is provided for retention, convert to ISO 8601 using days
+    if (weekly_retention and _is_int(weekly_retention)):
+        weekly_retention = 'P%sD' % weekly_retention
+        print(weekly_retention)
+
+    if (monthly_retention and _is_int(monthly_retention)):
+        monthly_retention = 'P%sD' % monthly_retention
+
+    if (yearly_retention and _is_int(yearly_retention)):
+        yearly_retention = 'P%sD' % yearly_retention
+
+    kwargs['weekly_retention'] = weekly_retention
+
+    kwargs['monthly_retention'] = monthly_retention
+
+    kwargs['yearly_retention'] = yearly_retention
+
+    kwargs['week_of_year'] = week_of_year
+
+    policy = client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+    return policy
+
+
+def _get_backup_id_resource_values(backup_id):
+    '''
+    Extract resource values from the backup id
+    '''
+
+    backup_id = backup_id.replace('\'', '')
+    backup_id = backup_id.replace('"', '')
+
+    if backup_id[0] == '/':
+        # remove leading /
+        backup_id = backup_id[1:]
+
+    resources_list = backup_id.split('/')
+    resources_dict = {resources_list[i]: resources_list[i + 1] for i in range(0, len(resources_list), 2)}
+
+    if not ('locations'.casefold() in resources_dict and
+            'longTermRetentionManagedInstances'.casefold() not in resources_dict and
+            'longTermRetentionDatabases'.casefold() not in resources_dict and
+            'longTermRetentionManagedInstanceBackups'.casefold() not in resources_dict):
+
+        # backup ID should contain all these
+        raise CLIError('Please provide a valid resource URI.  See --help for example.')
+
+    return resources_dict
+
+
+def get_long_term_retention_mi_backup(
+        client,
+        location_name=None,
+        managed_instance_name=None,
+        database_name=None,
+        backup_name=None,
+        backup_id=None):
+    '''
+    Gets the requested long term retention backup.
+    '''
+
+    if backup_id:
+        resources_dict = _get_backup_id_resource_values(backup_id)
+
+        location_name = resources_dict['locations']
+        managed_instance_name = resources_dict['longTermRetentionManagedInstances']
+        database_name = resources_dict['longTermRetentionDatabases']
+        backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
+
+    return client.get(
+        location_name=location_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        backup_name=backup_name)
+
+
+def _list_by_database_long_term_retention_mi_backups(
+        client,
+        location_name,
+        managed_instance_name,
+        database_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups for a Managed Database
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_database(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            database_name=database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_database(
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            database_name=database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def _list_by_instance_long_term_retention_mi_backups(
+        client,
+        location_name,
+        managed_instance_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups within a Managed Instance
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_instance(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_instance(
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def _list_by_location_long_term_retention_mi_backups(
+        client,
+        location_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Gets the long term retention backups within a specified region.
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_location(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_location(
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def list_long_term_retention_mi_backups(
+        client,
+        location_name,
+        managed_instance_name=None,
+        database_name=None,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    Lists the long term retention backups for a specified location, instance, or database.
+    '''
+
+    if managed_instance_name:
+        if database_name:
+            backups = _list_by_database_long_term_retention_mi_backups(
+                client,
+                location_name,
+                managed_instance_name,
+                database_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+
+        else:
+            backups = _list_by_instance_long_term_retention_mi_backups(
+                client,
+                location_name,
+                managed_instance_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+    else:
+        backups = _list_by_location_long_term_retention_mi_backups(
+            client,
+            location_name,
+            resource_group_name,
+            only_latest_per_database,
+            database_state)
+
+    return backups
+
+
+def delete_long_term_retention_mi_backup(
+        client,
+        location_name=None,
+        managed_instance_name=None,
+        database_name=None,
+        backup_name=None,
+        backup_id=None):
+    '''
+    Deletes the requested long term retention backup.
+    '''
+
+    if backup_id:
+        resources_dict = _get_backup_id_resource_values(backup_id)
+
+        location_name = resources_dict['locations']
+        managed_instance_name = resources_dict['longTermRetentionManagedInstances']
+        database_name = resources_dict['longTermRetentionDatabases']
+        backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
+
+    return client.delete(
+        location_name=location_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        backup_name=backup_name)
+
+
+def restore_long_term_retention_mi_backup(
+        cmd,
+        client,
+        long_term_retention_backup_resource_id,
+        target_managed_database_name,
+        target_managed_instance_name,
+        target_resource_group_name,
+        **kwargs):
+    '''
+    Restores an existing managed DB (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
+    '''
+
+    if not target_resource_group_name or not target_managed_instance_name or not target_managed_database_name:
+        raise CLIError('Please specify target resource(s). '
+                       'Target resource group, target instance, and target database '
+                       'are all required for restore LTR backup.')
+
+    if not long_term_retention_backup_resource_id:
+        raise CLIError('Please specify a long term retention backup.')
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+    kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
+
+    return client.create_or_update(
+        database_name=target_managed_database_name,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
+def managed_db_log_replay_start(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        auto_complete,
+        last_backup_name,
+        storage_container_uri,
+        storage_container_sas_token,
+        **kwargs):
+
+    # Determine managed instance location
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_external_backup.value
+
+    if auto_complete and not last_backup_name:
+        raise CLIError('Please specify a last backup name when using auto complete flag.')
+
+    kwargs['auto_complete'] = auto_complete
+    kwargs['last_backup_name'] = last_backup_name
+
+    kwargs['storageContainerUri'] = storage_container_uri
+    kwargs['storageContainerSasToken'] = storage_container_sas_token
+
+    # Create
+    return client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
         parameters=kwargs)
 
 ###############################################

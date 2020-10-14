@@ -31,7 +31,7 @@ EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client'])
 
 
 # pylint:disable=too-many-lines
-class ArmTemplateBuilder(object):
+class ArmTemplateBuilder:
 
     def __init__(self):
         template = OrderedDict()
@@ -179,7 +179,6 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
 def register_ids_argument(cli_ctx):
 
     from knack import events
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     ids_metadata = {}
 
@@ -220,10 +219,11 @@ def register_ids_argument(cli_ctx):
                 'metavar': 'ID',
                 'help': "One or more resource IDs (space-delimited). "
                         "It should be a complete resource ID containing all information of '{gname}' arguments. "
-                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
+                        "You should provide either --ids or other '{gname}' arguments.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
+                'is_experimental': id_arg.settings.get('is_experimental', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }
@@ -296,7 +296,7 @@ def register_ids_argument(cli_ctx):
                 if not isinstance(json_vals, list):
                     json_vals = [json_vals]
                 for json_val in json_vals:
-                    if 'id' in json_val:
+                    if isinstance(json_val, dict) and 'id' in json_val:
                         full_id_list += [json_val['id']]
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
@@ -304,6 +304,7 @@ def register_ids_argument(cli_ctx):
         if full_id_list:
             setattr(namespace, '_ids', full_id_list)
 
+        from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
         for val in full_id_list:
             if not is_valid_resource_id(val):
                 raise CLIError('invalid resource ID: {}'.format(val))
@@ -565,7 +566,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         if setter_arg_name == 'parameters':
             result = cached_put(cmd, setter, **setterargs)
         else:
-            result = cached_put(cmd, setter, setterargs[setter_arg_name], **setterargs)
+            result = cached_put(cmd, setter, setterargs[setter_arg_name], setter_arg_name=setter_arg_name, **setterargs)
 
         if supports_no_wait and no_wait_enabled:
             return None
@@ -635,6 +636,10 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
             properties = getattr(instance, 'properties', None)
             if properties:
                 provisioning_state = getattr(properties, 'provisioning_state', None)
+                # some SDK, like keyvault, has 'provisioningState' under 'properties.additional_properties'
+                if not provisioning_state:
+                    additional_properties = getattr(properties, 'additional_properties', {})
+                    provisioning_state = additional_properties.get('provisioningState')
         return provisioning_state
 
     def handler(args):
@@ -681,10 +686,12 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                     return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
-                if provisioning_state == 'Failed':
+                if provisioning_state:
+                    provisioning_state = provisioning_state.lower()
+                if provisioning_state == 'failed':
                     progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if ((wait_for_created or wait_for_updated) and provisioning_state == 'Succeeded') or \
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'succeeded') or \
                         custom_condition and bool(verify_property(instance, custom_condition)):
                     progress_indicator.end()
                     return None
@@ -755,8 +762,11 @@ def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
         import sys
         from azure.cli.core.azlogging import CommandLoggerContext
+        from azure.cli.core.azclierror import ResourceNotFoundError
         with CommandLoggerContext(logger):
-            logger.error(getattr(ex, 'message', ex))
+            az_error = ResourceNotFoundError(getattr(ex, 'message', ex))
+            az_error.print_error()
+            az_error.send_telemetry()
             sys.exit(3)
     raise ex
 
@@ -922,6 +932,8 @@ def remove_properties(instance, argument_values):
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
+        except AttributeError:
+            raise CLIError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
 
 def throw_and_show_options(instance, part, path):
@@ -1061,7 +1073,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
         assignment_name = _gen_guid()
-        for l in range(0, retry_times):
+        for retry_time in range(0, retry_times):
             try:
                 assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
                                           parameters=parameters)
@@ -1070,9 +1082,9 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break
-                elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                elif retry_time < retry_times and ' does not exist in the directory ' in ex.message:
                     time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                    logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                    retry_times)
                     continue
                 else:
@@ -1159,11 +1171,11 @@ def get_arm_resource_by_id(cli_ctx, arm_id, api_version=None):
             from azure.cli.core.parser import IncorrectUsageError
             raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         try:
-            # if the service specifies, use the default API version
-            api_version = rt.default_api_version
-        except AttributeError:
-            # if the service doesn't specify, use the most recent non-preview API version unless there is only a
-            # single API version. API versions are returned by the service in a sorted list
+            # Use the most recent non-preview API version unless there is only a
+            # single API version. API versions are returned by the service in a sorted list.
             api_version = next((x for x in rt.api_versions if not x.endswith('preview')), rt.api_versions[0])
+        except AttributeError:
+            err = "No API versions found for resource type '{}'."
+            raise CLIError(err.format(resource_type_str))
 
     return client.resources.get_by_id(arm_id, api_version)

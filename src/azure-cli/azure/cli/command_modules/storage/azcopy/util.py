@@ -23,35 +23,52 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.1.0'
+AZCOPY_VERSION = '10.5.0'
 
 
-class AzCopy(object):
+class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
-        if not os.path.isfile(install_location):
-            install_dir = os.path.dirname(install_location)
-            if not os.path.exists(install_dir):
-                os.makedirs(install_dir)
-            base_url = 'https://azcopyvnext.azureedge.net/release20190423/azcopy_{}_amd64_10.1.0.{}'
-            if self.system == 'Windows':
-                file_url = base_url.format('windows', 'zip')
-            elif self.system == 'Linux':
-                file_url = base_url.format('linux', 'tar.gz')
-            elif self.system == 'Darwin':
-                file_url = base_url.format('darwin', 'zip')
-            else:
-                raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
-            try:
-                _urlretrieve(file_url, install_location)
-                os.chmod(install_location,
-                         os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-            except IOError as err:
-                raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
-
         self.executable = install_location
         self.creds = creds
+        if not os.path.isfile(install_location) or self.check_version() != AZCOPY_VERSION:
+            self.install_azcopy(install_location)
+
+    def install_azcopy(self, install_location):
+        install_dir = os.path.dirname(install_location)
+        if not os.path.exists(install_dir):
+            os.makedirs(install_dir)
+        base_url = 'https://azcopyvnext.azureedge.net/release20200709/azcopy_{}_{}_{}.{}'
+
+        if self.system == 'Windows':
+            if platform.machine().endswith('64'):
+                file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
+            else:
+                file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
+        elif self.system == 'Linux':
+            file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION, 'tar.gz')
+        elif self.system == 'Darwin':
+            file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
+        else:
+            raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
+        try:
+            _urlretrieve(file_url, install_location)
+            os.chmod(install_location,
+                     os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        except IOError as err:
+            raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
+
+    def check_version(self):
+        try:
+            import re
+            args = [self.executable] + ["--version"]
+            out_bytes = subprocess.check_output(args)
+            out_text = out_bytes.decode('utf-8')
+            version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
+            return version
+        except subprocess.CalledProcessError:
+            return ""
 
     def run_command(self, args):
         args = [self.executable] + args
@@ -59,7 +76,9 @@ class AzCopy(object):
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
-        subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        if result > 0:
+            raise CLIError('Failed to perform {} operation.'.format(args[1]))
 
     def copy(self, source, destination, flags=None):
         flags = flags or []
@@ -74,7 +93,7 @@ class AzCopy(object):
         self.run_command(['sync', source, destination] + flags)
 
 
-class AzCopyCredentials(object):  # pylint: disable=too-few-public-methods
+class AzCopyCredentials:  # pylint: disable=too-few-public-methods
     def __init__(self, sas_token=None, token_info=None):
         self.sas_token = sas_token
         self.token_info = token_info
@@ -161,12 +180,16 @@ def _get_default_install_location():
     if system == 'Windows':
         home_dir = os.environ.get('USERPROFILE')
         if not home_dir:
-            return None
+            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
+                           'as the installation location.')
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
         install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
-        install_location = None
+        raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
+                       'please refer to the document for supported platforms: '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       .format(system))
     return install_location
 
 

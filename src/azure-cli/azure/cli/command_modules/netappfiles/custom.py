@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -23,6 +23,8 @@ def _update_mapper(existing, new, keys):
         new_value = getattr(new, key)
         setattr(new, key, new_value if new_value is not None else existing_value)
 
+
+# -- account --
 
 # pylint: disable=unused-argument
 # account update - active_directory is amended with subgroup commands
@@ -74,6 +76,8 @@ def patch_account(cmd, instance, account_name, resource_group_name, tags=None):
     return body
 
 
+# -- pool --
+
 def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None):
     body = CapacityPool(service_level=service_level, size=int(size) * tib_scale, location=location, tags=tags)
     return client.create_or_update(body, resource_group_name, account_name, pool_name)
@@ -89,7 +93,9 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
     return body
 
 
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, tags=None):
+# -- volume --
+# pylint: disable=too-many-locals
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None, endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None, snapshot_id=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -119,6 +125,18 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     else:
         volume_export_policy = None
 
+    # if we have a data protection volume requested then build the component
+    if volume_type == "DataProtection":
+        replication = ReplicationObject(
+            endpoint_type=endpoint_type,
+            replication_schedule=replication_schedule,
+            remote_volume_resource_id=remote_volume_resource_id
+        )
+
+        data_protection = VolumePropertiesDataProtection(replication=replication)
+    else:
+        data_protection = None
+
     subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet, subnet)
     body = Volume(
         usage_threshold=int(usage_threshold) * gib_scale,
@@ -128,9 +146,17 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         subnet_id=subnet_id,
         protocol_types=protocol_types,
         export_policy=volume_export_policy,
-        tags=tags)
+        volume_type=volume_type,
+        data_protection=data_protection,
+        tags=tags,
+        snapshot_id=snapshot_id)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
+
+
+# volume revert
+def revert_snapshot(cmd, client, account_name, pool_name, volume_name, resource_group_name, snapshot_id):
+    return client.revert(resource_group_name, account_name, pool_name, volume_name, snapshot_id)
 
 
 # volume update
@@ -144,6 +170,7 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protoc
     return params
 
 
+# -- volume export policy --
 # add new rule to policy
 def add_export_policy_rule(cmd, instance, allowed_clients, rule_index, unix_read_only, unix_read_write, cifs, nfsv3, nfsv41):
     rules = []
@@ -171,14 +198,38 @@ def list_export_policy_rules(cmd, client, account_name, pool_name, volume_name, 
 
 # delete rule by specific index
 def remove_export_policy_rule(cmd, instance, rule_index):
+    rules = []
+    # Note this commented out way created a patch request that included some mount target properties causing validation issues server side
+    # need to investigate why, leave this for now remove after this has been ivestigated before next release please
     # look for the rule and remove
+    # for rule in instance.export_policy.rules:
+    #    if rule.rule_index == int(rule_index):
+    #        instance.export_policy.rules.remove(rule)
+
+    # return instance
+
     for rule in instance.export_policy.rules:
-        if rule.rule_index == int(rule_index):
-            instance.export_policy.rules.remove(rule)
+        if rule.rule_index != int(rule_index):
+            rules.append(rule)
 
-    return instance
+    volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
+    params = VolumePatch(
+        export_policy=volume_export_policy,
+        service_level=instance.service_level,
+        usage_threshold=instance.usage_threshold)
+    _update_mapper(instance, params, ['export_policy'])
+    return params
 
 
-def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location, file_system_id=None):
-    body = Snapshot(location=location, file_system_id=file_system_id)
-    return client.create(body, resource_group_name, account_name, pool_name, volume_name, snapshot_name)
+# -- volume replication --
+
+# authorize replication (targets source volume with destination volume in payload)
+def authorize_replication(cmd, client, resource_group_name, account_name, pool_name, volume_name, remote_volume_resource_id):
+    return client.authorize_replication(resource_group_name, account_name, pool_name, volume_name, remote_volume_resource_id)
+
+
+# -- snapshot --
+
+def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location):
+    body = Snapshot(location=location)
+    return client.create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body.location)

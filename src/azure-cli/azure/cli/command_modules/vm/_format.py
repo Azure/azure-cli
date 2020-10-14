@@ -83,11 +83,6 @@ def transform_sku_for_table_output(skus):
             order_dict['zones'] = ','.join(sorted(k['locationInfo'][0].get('zones', [])))
         else:
             order_dict['zones'] = 'None'
-        if k['capabilities']:
-            temp = ['{}={}'.format(pair['name'], pair['value']) for pair in k['capabilities']]
-            order_dict['capabilities'] = str(temp) if len(temp) > 1 else temp[0]
-        else:
-            order_dict['capabilities'] = 'None'
         if k['restrictions']:
             reasons = [x['reasonCode'] for x in k['restrictions']]
             order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]

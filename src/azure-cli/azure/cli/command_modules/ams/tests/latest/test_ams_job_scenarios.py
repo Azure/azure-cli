@@ -102,12 +102,12 @@ class AmsJobTests(ScenarioTest):
         assert job['state'] == 'Canceled' or job['state'] == 'Canceling'
 
         _RETRY_TIMES = 5
-        for l in range(0, _RETRY_TIMES):
+        for retry_time in range(0, _RETRY_TIMES):
             try:
                 self.cmd('az ams job delete -n {jobName} -a {amsname} -g {rg} -t {transformName}')
                 break
             except Exception:  # pylint: disable=broad-except
-                if l < _RETRY_TIMES:
+                if retry_time < _RETRY_TIMES:
                     time.sleep(5)
                 else:
                     raise

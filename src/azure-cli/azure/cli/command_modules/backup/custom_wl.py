@@ -3,13 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.backup.custom_help as cust_help
-import azure.cli.command_modules.backup.custom_common as common
+from uuid import uuid4
+
 # pylint: disable=import-error
 # pylint: disable=broad-except
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 
-from uuid import uuid4
-from azure.cli.command_modules.backup._validators import datetime_type
+from knack.log import get_logger
 
 from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
@@ -18,11 +19,13 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
+from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+import azure.cli.command_modules.backup.custom_help as cust_help
+import azure.cli.command_modules.backup.custom_common as common
 
-from knack.log import get_logger
 
 fabric_name = "Azure"
 logger = get_logger(__name__)
@@ -113,8 +116,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -149,8 +151,7 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -163,8 +164,7 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
             """)
 
     # Trigger unregister and wait for completion
-    result = sdk_no_wait(True, client.unregister,
-                         vault_name, resource_group_name, fabric_name, container_name)
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -184,8 +184,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     param = ProtectedItemResource(properties=item_properties)
 
     # Update policy
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -213,14 +213,24 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items):
     if policy_name is None:
         raise CLIError(
             """
             Policy name is required for set policy.
             """)
 
-    policy_object = cust_help.get_policy_from_json(client, policy)
+    if policy is not None:
+        policy_object = cust_help.get_policy_from_json(client, policy)
+    else:
+        if fix_for_inconsistent_items:
+            policy_object = common.show_policy(client, resource_group_name, vault_name, policy_name)
+            policy_object.properties.make_policy_consistent = True
+        else:
+            raise CLIError(
+                """
+                Please provide policy object.
+                """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
@@ -325,8 +335,8 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger enable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_name, item_name, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_name, item_name, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -356,9 +366,8 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     param = BackupRequestResource(properties=properties)
 
     # Trigger backup and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                         param)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -375,8 +384,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
             """)
 
     if delete_backup_data:
-        result = sdk_no_wait(True, client.delete,
-                             vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     properties = _get_protected_item_instance(backup_item_type)
@@ -385,8 +393,8 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -461,22 +469,30 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     database_name = recovery_config_object['database_name']
     container_id = recovery_config_object['container_id']
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
+    recovery_mode = recovery_config_object['recovery_mode']
+    filepath = recovery_config_object['filepath']
 
     # Construct trigger restore request object
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
     trigger_restore_properties.recovery_type = restore_mode
 
     if restore_mode == 'AlternateLocation':
-        setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
-        setattr(trigger_restore_properties, 'target_info', TargetRestoreInfo(overwrite_option='Overwrite',
-                                                                             database_name=database_name,
-                                                                             container_id=container_id))
-        if 'sql' in item_type.lower():
-            directory_map = []
-            for i in alternate_directory_paths:
-                directory_map.append(SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
-                                                             source_logical_name=i[2], target_path=i[3]))
-            setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
+        if recovery_mode != "FileRecovery":
+            setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
+            setattr(trigger_restore_properties, 'target_info', TargetRestoreInfo(overwrite_option='Overwrite',
+                                                                                 database_name=database_name,
+                                                                                 container_id=container_id))
+            if 'sql' in item_type.lower():
+                directory_map = []
+                for i in alternate_directory_paths:
+                    directory_map.append(SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
+                                                                 source_logical_name=i[2], target_path=i[3]))
+                setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
+        else:
+            target_info = TargetRestoreInfo(overwrite_option='Overwrite', container_id=container_id,
+                                            target_directory_for_file_restore=filepath)
+            setattr(trigger_restore_properties, 'target_info', target_info)
+            trigger_restore_properties.recovery_mode = recovery_mode
 
     if log_point_in_time is not None:
         setattr(trigger_restore_properties, 'point_in_time', datetime_type(log_point_in_time))
@@ -486,14 +502,14 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
     # Trigger restore and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, recovery_point_id,
-                         trigger_restore_request)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
-                         rp_name, target_item, target_item_name, log_point_in_time):
+                         rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
+                         filepath, target_container):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -510,6 +526,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                 """
                 Target Item must be either of type HANAInstance or SQLInstance.
                 """)
+
+    if restore_mode == 'RestoreAsFiles' and target_container is None:
+        raise CLIError("Target Container must be provided.")
 
     if rp_name is None and log_point_in_time is None:
         raise CLIError(
@@ -531,7 +550,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
     # Mapping of restore mode
     restore_mode_map = {'OriginalWorkloadRestore': 'OriginalLocation',
-                        'AlternateWorkloadRestore': 'AlternateLocation'}
+                        'AlternateWorkloadRestore': 'AlternateLocation',
+                        'RestoreAsFiles': 'AlternateLocation'}
+
+    if rp_name is None and restore_mode == "RestoreAsFiles" and from_full_rp_name is not None:
+        rp_name = from_full_rp_name
     rp_name = rp_name if rp_name is not None else 'DefaultRangeRecoveryPoint'
 
     if rp_name == 'DefaultRangeRecoveryPoint':
@@ -573,6 +596,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
 
+    recovery_mode = None
+    if restore_mode == 'RestoreAsFiles':
+        recovery_mode = 'FileRecovery'
+        container_id = target_container.id
+
     return {
         'restore_mode': restore_mode_map[restore_mode],
         'container_uri': item.properties.container_name,
@@ -583,6 +611,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
+        'recovery_mode': recovery_mode,
+        'filepath': filepath,
         'alternate_directory_paths': alternate_directory_paths}
 
 

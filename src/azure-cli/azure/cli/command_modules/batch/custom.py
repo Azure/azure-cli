@@ -12,15 +12,17 @@ from knack.log import get_logger
 from msrest.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagementClient
-from azure.mgmt.batch.models import (BatchAccountCreateParameters,
+from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
                                      AutoStorageBaseProperties,
-                                     Application)
+                                     Application, EncryptionProperties,
+                                     KeyVaultProperties, BatchAccountIdentity)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
-                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
+                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation,
+                                )
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -73,12 +75,26 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
-                   keyvault=None, keyvault_url=None, no_wait=False):
+                   keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
+                   encryption_key_source=None, encryption_key_identifier=None, identity_type=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+    if (encryption_key_source and
+            encryption_key_source.tolower() == "microsoft.keyvault" and not encryption_key_identifier):
+        raise ValueError("The --encryption-key-identifier property is required when "
+                         "--encryption-key-source is set to Microsoft.KeyVault")
+    encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
+        if encryption_key_identifier else None
+    encryption = EncryptionProperties(
+        key_source=encryption_key_source,
+        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
-                                              auto_storage=properties)
+                                              auto_storage=properties,
+                                              public_network_access=public_network_access,
+                                              encryption=encryption,
+                                              identity=identity)
     if keyvault:
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
@@ -89,13 +105,29 @@ def create_account(client,
 
 @transfer_doc(AutoStorageBaseProperties)
 def update_account(client, resource_group_name, account_name,
-                   tags=None, storage_account=None):
+                   tags=None, storage_account=None, encryption_key_source=None,
+                   encryption_key_identifier=None, identity_type=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    if (encryption_key_source and
+            encryption_key_source.lower() == "microsoft.keyvault" and not
+            encryption_key_identifier):
+        raise ValueError("The --encryption-key-identifier property is required when "
+                         "--encryption-key-source is set to Microsoft.KeyVault")
+    encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
+        if encryption_key_identifier else None
+    encryption = EncryptionProperties(
+        key_source=encryption_key_source,
+        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
+    identity = BatchAccountIdentity(type=identity_type) if identity_type else None
+    parameters = BatchAccountUpdateParameters(
+        tags=tags,
+        encryption=encryption,
+        identity=identity,
+        auto_storage=properties)
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
-                         tags=tags,
-                         auto_storage=properties)
+                         parameters=parameters)
 
 
 # pylint: disable=inconsistent-return-statements

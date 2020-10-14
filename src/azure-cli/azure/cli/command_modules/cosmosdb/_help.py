@@ -65,6 +65,11 @@ type: command
 short-summary: Update the throughput of the Cassandra keyspace under an Azure Cosmos DB account.
 """
 
+helps['cosmosdb cassandra keyspace throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the Cassandra keyspace between autoscale and manually provisioned.
+"""
+
 helps['cosmosdb cassandra table'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Cassandra tables.
@@ -120,6 +125,11 @@ examples:
     text: |
         az cosmosdb cassandra table throughput update --account-name MyAccount --keyspace-name MyKeyspace --name MyTable --resource-group MyResourceGroup --throughput "500"
     crafted: true
+"""
+
+helps['cosmosdb cassandra table throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the Cassandra table between autoscale and manually provisioned.
 """
 
 helps['cosmosdb cassandra table update'] = """
@@ -279,6 +289,11 @@ type: command
 short-summary: Update the throughput of the Gremlin database under an Azure Cosmos DB account.
 """
 
+helps['cosmosdb gremlin database throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the Gremlin database between autoscale and manually provisioned.
+"""
+
 helps['cosmosdb gremlin graph'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Gremlin graphs.
@@ -321,6 +336,11 @@ short-summary: Get the throughput of the Gremlin graph under an Azure Cosmos DB 
 helps['cosmosdb gremlin graph throughput update'] = """
 type: command
 short-summary: Update the throughput of the Gremlin graph under an Azure Cosmos DB Gremlin database.
+"""
+
+helps['cosmosdb gremlin graph throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the Gremlin Graph between autoscale and manually provisioned.
 """
 
 helps['cosmosdb gremlin graph update'] = """
@@ -423,6 +443,11 @@ type: command
 short-summary: Update the throughput of the MongoDB collection under an Azure Cosmos DB MongoDB database.
 """
 
+helps['cosmosdb mongodb collection throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the MongoDB collection between autoscale and manually provisioned.
+"""
+
 helps['cosmosdb mongodb collection update'] = """
 type: command
 short-summary: Update an MongoDB collection under an Azure Cosmos DB MongoDB database.
@@ -481,9 +506,65 @@ examples:
     crafted: true
 """
 
+helps['cosmosdb mongodb database throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the MongoDB database between autoscale and manually provisioned.
+"""
+
 helps['cosmosdb network-rule'] = """
 type: group
 short-summary: Manage Azure Comsos DB network rules.
+"""
+
+helps['cosmosdb private-endpoint-connection'] = """
+type: group
+short-summary: Manage Azure Comsos DB private endpoint connections.
+"""
+
+helps['cosmosdb private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Approve the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Approved"
+"""
+
+helps['cosmosdb private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Delete the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
+
+"""
+
+helps['cosmosdb private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Reject the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Rejected"
+"""
+
+helps['cosmosdb private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Show details of a private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection show --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb private-link-resource'] = """
+type: group
+short-summary: Manage Azure Comsos DB private link resources.
+"""
+
+helps['cosmosdb private-link-resource list'] = """
+type: command
+short-summary: List the private link resources supported for Azure Comsos DB.
+example:
+  - name: List the private link resources supported for Azure Comsos DB.
+    text: cosmosdb private-link-resource list --account-name MyAccount --resource-group MyResourceGroup
 """
 
 helps['cosmosdb regenerate-key'] = """
@@ -507,6 +588,98 @@ examples:
 helps['cosmosdb sql'] = """
 type: group
 short-summary: Manage SQL resources of Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql stored-procedure'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL stored procedures.
+"""
+
+helps['cosmosdb sql stored-procedure create'] = """
+type: command
+short-summary: Create an SQL stored procedure under an Azure Cosmos DB SQL container.
+examples:
+  - name: Create an Azure Cosmos DB SQL stored procedure.
+    text: az cosmosdb sql stored-procedure create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyStoredProcedure -b StoredProcedureBody
+    crafted: true
+"""
+
+helps['cosmosdb sql stored-procedure delete'] = """
+type: command
+short-summary: Delete the SQL stored procedure under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql stored-procedure list'] = """
+type: command
+short-summary: List the SQL stored procedures under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql stored-procedure show'] = """
+type: command
+short-summary: Show the details of a SQL stored procedure under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql'] = """
+type: group
+short-summary: Manage SQL resources of Azure Cosmos DB account.
+"""
+
+helps['cosmosdb sql trigger'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL triggers.
+"""
+
+helps['cosmosdb sql trigger create'] = """
+type: command
+short-summary: Create an SQL trigger under an Azure Cosmos DB SQL container.
+examples:
+  - name: Create an Azure Cosmos DB SQL trigger.
+    text: az cosmosdb sql trigger create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyTrigger -b TriggerBody
+    crafted: true
+"""
+
+helps['cosmosdb sql trigger delete'] = """
+type: command
+short-summary: Delete the SQL trigger under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql trigger list'] = """
+type: command
+short-summary: List the SQL triggers under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql trigger show'] = """
+type: command
+short-summary: Show the details of a SQL trigger under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql user-defined-function'] = """
+type: group
+short-summary: Manage Azure Cosmos DB SQL user defined functions.
+"""
+
+helps['cosmosdb sql user-defined-function create'] = """
+type: command
+short-summary: Create an SQL user defined function under an Azure Cosmos DB SQL container.
+examples:
+  - name: Create an Azure Cosmos DB SQL user defined function.
+    text: az cosmosdb sql user-defined-function create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyUserDefinedFunction -b UserDefinedFunctionBody
+    crafted: true
+"""
+
+helps['cosmosdb sql user-defined-function delete'] = """
+type: command
+short-summary: Delete the SQL user defined function under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql user-defined-function list'] = """
+type: command
+short-summary: List the SQL user defined functions under an Azure Cosmos DB SQL container.
+"""
+
+helps['cosmosdb sql user-defined-function show'] = """
+type: command
+short-summary: Show the details of a SQL user defined function under an Azure Cosmos DB SQL container.
 """
 
 helps['cosmosdb sql container'] = """
@@ -551,6 +724,11 @@ short-summary: Get the throughput of the SQL container under an Azure Cosmos DB 
 helps['cosmosdb sql container throughput update'] = """
 type: command
 short-summary: Update the throughput of the SQL container under an Azure Cosmos DB SQL database.
+"""
+
+helps['cosmosdb sql container throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the SQL container between autoscale and manually provisioned.
 """
 
 helps['cosmosdb sql container update'] = """
@@ -602,6 +780,11 @@ type: command
 short-summary: Update the throughput of the SQL database under an Azure Cosmos DB account.
 """
 
+helps['cosmosdb sql database throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the SQL database between autoscale and manually provisioned.
+"""
+
 helps['cosmosdb table'] = """
 type: group
 short-summary: Manage Table resources of Azure Cosmos DB account.
@@ -640,6 +823,11 @@ short-summary: Get the throughput of the Table under an Azure Cosmos DB account.
 helps['cosmosdb table throughput update'] = """
 type: command
 short-summary: Update the throughput of the Table under an Azure Cosmos DB account.
+"""
+
+helps['cosmosdb table throughput migrate'] = """
+type: command
+short-summary: Migrate the throughput of the Table between autoscale and manually provisioned.
 """
 
 helps['cosmosdb update'] = """

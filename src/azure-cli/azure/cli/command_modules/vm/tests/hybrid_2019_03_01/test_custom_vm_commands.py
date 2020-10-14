@@ -65,7 +65,7 @@ class TestVmCustom(unittest.TestCase):
         publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
             None, _WINDOWS_ACCESS_EXT)
         self.assertEqual('Microsoft.Compute', publisher)
-        self.assertEqual('2.0', version)
+        self.assertEqual('2.4', version)
         self.assertEqual(None, auto_upgrade)
 
         # when there is existing extension with higher version, stick to that
@@ -100,18 +100,6 @@ class TestVmCustom(unittest.TestCase):
                          vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
         mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
-
-    @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
-    @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
-    def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
-        vm_fake = mock.MagicMock()
-        cmd = _get_test_cmd()
-        mock_vm_get.return_value = vm_fake
-        vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
-        vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'https://storage_uri1'
-        enable_boot_diagnostics(cmd, 'g1', 'vm1', 'https://storage_uri1')
-        self.assertTrue(mock_vm_get.called)
-        self.assertFalse(mock_vm_set.called)
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)

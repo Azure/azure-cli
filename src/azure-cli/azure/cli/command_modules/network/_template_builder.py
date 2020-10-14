@@ -5,7 +5,9 @@
 
 
 def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, private_ip_address=None,
-                              private_ip_allocation=None, zone=None, private_ip_address_version=None):
+                              private_ip_allocation=None, zone=None, private_ip_address_version=None,
+                              enable_private_link=False,
+                              private_link_configuration_id=None):
     frontend_ip_config = {
         'name': name
     }
@@ -31,7 +33,28 @@ def _build_frontend_ip_config(cmd, name, public_ip_id=None, subnet_id=None, priv
     if private_ip_address_version and cmd.supported_api_version(min_api='2019-04-01'):
         frontend_ip_config['properties']['privateIPAddressVersion'] = private_ip_address_version
 
+    if enable_private_link is True and cmd.supported_api_version(min_api='2020-05-01'):
+        frontend_ip_config['properties'].update({
+            'privateLinkConfiguration': {'id': private_link_configuration_id}
+        })
+
     return frontend_ip_config
+
+
+def _build_appgw_private_link_ip_configuration(name,
+                                               private_link_ip_address,
+                                               private_link_ip_allocation_method,
+                                               private_link_primary,
+                                               private_link_subnet_id):
+    return {
+        'name': name,
+        'properties': {
+            'privateIPAddress': private_link_ip_address,
+            'privateIPAllocationMethod': private_link_ip_allocation_method,
+            'primary': private_link_primary,
+            'subnet': {'id': private_link_subnet_id}
+        }
+    }
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -42,10 +65,17 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
                                        custom_error_pages, firewall_policy, max_capacity,
-                                       user_assigned_identity):
+                                       user_assigned_identity,
+                                       enable_private_link=False,
+                                       private_link_name=None,
+                                       private_link_ip_address=None,
+                                       private_link_ip_allocation_method=None,
+                                       private_link_primary=None,
+                                       private_link_subnet_id=None):
 
     # set the default names
-    frontend_ip_name = 'appGatewayFrontendIP'
+    frontend_public_ip_name = 'appGatewayFrontendIP'
+    frontend_private_ip_name = 'appGatewayPrivateFrontendIP'
     backend_pool_name = 'appGatewayBackendPool'
     frontend_port_name = 'appGatewayFrontendPort'
     http_listener_name = 'appGatewayHttpListener'
@@ -55,8 +85,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     ssl_cert = None
 
-    frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id,
-                                                   private_ip_address, private_ip_allocation)
     backend_address_pool = {'name': backend_pool_name}
     if servers:
         backend_address_pool['properties'] = {'BackendAddresses': servers}
@@ -64,13 +92,54 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     def _ag_subresource_id(_type, name):
         return "[concat(variables('appGwID'), '/{}/{}')]".format(_type, name)
 
-    frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_ip_name)
     frontend_port_id = _ag_subresource_id('frontendPorts', frontend_port_name)
     http_listener_id = _ag_subresource_id('httpListeners', http_listener_name)
     backend_address_pool_id = _ag_subresource_id('backendAddressPools', backend_pool_name)
     backend_http_settings_id = _ag_subresource_id('backendHttpSettingsCollection',
                                                   http_settings_name)
     ssl_cert_id = _ag_subresource_id('sslCertificates', ssl_cert_name)
+
+    private_link_configuration_id = None
+    privateLinkConfigurations = []
+    if cmd.supported_api_version(min_api='2020-05-01') and enable_private_link:
+        private_link_configuration_id = _ag_subresource_id('privateLinkConfigurations',
+                                                           private_link_name)
+
+        default_private_link_ip_config = _build_appgw_private_link_ip_configuration(
+            'PrivateLinkDefaultIPConfiguration',
+            private_link_ip_address,
+            private_link_ip_allocation_method,
+            private_link_primary,
+            private_link_subnet_id
+        )
+        privateLinkConfigurations.append({
+            'name': private_link_name,
+            'properties': {
+                'ipConfigurations': [default_private_link_ip_config]
+            }
+        })
+
+    frontend_ip_configs = []
+
+    if private_ip_address is not None or public_ip_id is None:
+        enable_private_link = False if public_ip_id else enable_private_link
+        frontend_private_ip = _build_frontend_ip_config(cmd, frontend_private_ip_name,
+                                                        subnet_id=subnet_id,
+                                                        private_ip_address=private_ip_address,
+                                                        private_ip_allocation=private_ip_allocation,
+                                                        enable_private_link=enable_private_link,
+                                                        private_link_configuration_id=private_link_configuration_id)
+        frontend_ip_configs.append(frontend_private_ip)
+
+        frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_private_ip_name)
+    if public_ip_id:
+        frontend_public_ip = _build_frontend_ip_config(cmd, frontend_public_ip_name,
+                                                       public_ip_id=public_ip_id,
+                                                       enable_private_link=enable_private_link,
+                                                       private_link_configuration_id=private_link_configuration_id)
+        frontend_ip_configs.append(frontend_public_ip)
+
+        frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_public_ip_name)
 
     http_listener = {
         'name': http_listener_name,
@@ -118,7 +187,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     ag_properties = {
         'backendAddressPools': [backend_address_pool],
         'backendHttpSettingsCollection': [backend_http_settings],
-        'frontendIPConfigurations': [frontend_ip_config],
+        'frontendIPConfigurations': frontend_ip_configs,
         'frontendPorts': [
             {
                 'name': frontend_port_name,
@@ -129,7 +198,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ],
         'gatewayIPConfigurations': [
             {
-                'name': frontend_ip_name,
+                'name': frontend_public_ip_name,
                 'properties': {
                     'subnet': {'id': subnet_id}
                 }
@@ -151,7 +220,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                     'backendHttpSettings': {'id': backend_http_settings_id}
                 }
             }
-        ]
+        ],
+        'privateLinkConfigurations': privateLinkConfigurations,
     }
     if ssl_cert:
         ag_properties.update({'sslCertificates': [ssl_cert]})
@@ -247,7 +317,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
     return public_ip
 
 
-def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None):
+def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, subnet_prefix=None, dns_servers=None,
+                        enable_private_link=False, private_link_subnet=None, private_link_subnet_prefix=None):
     vnet = {
         'name': name,
         'type': 'Microsoft.Network/virtualNetworks',
@@ -257,6 +328,7 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
         'tags': tags,
         'properties': {
             'addressSpace': {'addressPrefixes': [vnet_prefix]},
+            'subnets': []
         }
     }
     if dns_servers:
@@ -264,12 +336,21 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
             'dnsServers': dns_servers
         }
     if subnet:
-        vnet['properties']['subnets'] = [{
+        vnet['properties']['subnets'].append({
             'name': subnet,
             'properties': {
                 'addressPrefix': subnet_prefix
             }
-        }]
+        })
+    if enable_private_link:
+        vnet['properties']['subnets'].append({
+            'name': private_link_subnet,
+            'properties': {
+                'addressPrefix': private_link_subnet_prefix,
+                'privateLinkServiceNetworkPolicies': 'Disabled',
+            }
+        })
+
     return vnet
 
 

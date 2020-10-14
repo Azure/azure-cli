@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer
+import unittest
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
+from knack.util import CLIError
 
 
 class MonitorTests(ScenarioTest):
@@ -78,6 +81,55 @@ class MonitorTests(ScenarioTest):
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='test_metrics_alert_metric_name_with_special_characters')
+    @StorageAccountPreparer()
+    def test_metrics_alert_metric_name_with_special_characters(self, resource_group):
+        self.kwargs.update({
+            'alert_name': 'MS-ERRORCODE-SU001',
+            'rg': resource_group
+        })
+
+        storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
+        storage_account_id = storage_account['id']
+        self.kwargs.update({
+            'storage_account_id': storage_account_id
+        })
+
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE-SU001'):
+            self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
+                     ' --scopes {storage_account_id}'
+                     ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
+
+        with self.assertRaisesRegexp(CLIError, 'were not found: MS-ERRORCODE|,-SU001'):
+            self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
+                     ' --scopes {storage_account_id}'
+                     ' --condition "count account.MS-ERRORCODE|,-SU001 > 4" --description "Cloud_lumico"')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_special_char')
+    def test_metric_alert_special_char_scenario(self, resource_group):
+        self.kwargs.update({
+            'alert': 'alert1',
+        })
+        self.cmd('network application-gateway create -g {rg} -n ag1 --public-ip-address ip1')
+        gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
+        self.kwargs.update({
+            'ag_id': gateway_json['id'],
+        })
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ag_id} --description "Test"'
+                 ' --condition "avg UnhealthyHostCount>= 1 where BackendSettingsPool includes address-pool-dcc-blue~backendHttpSettings"',
+                 checks=[
+                     self.check('description', 'Test'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(criteria.allOf)', 1),
+                     self.check('length(criteria.allOf[0].dimensions)', 1),
+                     self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
+                 ])
+
+    @unittest.skip('skip')
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'
@@ -212,6 +264,52 @@ class MonitorTests(ScenarioTest):
             self.check('evaluationFrequency', '0:01:00'),
             self.check('length(scopes)', 2),
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group_2')
+    @VMPreparer(parameter_name='vm1')
+    @VMPreparer(parameter_name='vm2', resource_group_parameter_name='resource_group_2')
+    def test_metric_alert_for_rg_and_sub(self, resource_group, resource_group_2):
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'rg-alert',
+            'alert2': 'sub-alert',
+            'ag1': 'ag1',
+            'sub': self.get_subscription_id(),
+            'rg': resource_group,
+            'rg_id_1': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id()),
+            'rg_id_2': resource_id(
+                resource_group=resource_group_2,
+                subscription=self.get_subscription_id()),
+            'sub_id': resource_id(subscription=self.get_subscription_id()),
+            'resource_type': 'Microsoft.Compute/virtualMachines',
+            'resource_region': 'westus'
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {sub_id} '
+                 '--target-resource-type {resource_type} --target-resource-region {resource_region} '
+                 '--action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"',
+                 checks=[
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 1),
+                 ])
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {rg_id_1} {rg_id_2} '
+                 '--target-resource-type {resource_type} --target-resource-region {resource_region} '
+                 '--action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"',
+                 checks=[
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 2),
+                 ])
 
 
 if __name__ == '__main__':

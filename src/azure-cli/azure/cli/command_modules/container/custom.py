@@ -35,7 +35,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network)
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -351,11 +352,12 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     from msrestazure.tools import parse_resource_id
-    log_analytics_client = cf_log_analytics(cli_ctx)
+    log_analytics_workspace_client = cf_log_analytics_workspace(cli_ctx)
+    log_analytics_workspace_shared_keys_client = cf_log_analytics_workspace_shared_keys(cli_ctx)
 
-    for workspace in log_analytics_client.list():
+    for workspace in log_analytics_workspace_client.list():
         if log_analytics_workspace in (workspace.name, workspace.customer_id):
-            keys = log_analytics_client.get_shared_keys(
+            keys = log_analytics_workspace_shared_keys_client.get_shared_keys(
                 parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
             log_analytics = LogAnalytics(

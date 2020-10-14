@@ -4,6 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.profiles import ResourceType
+
+from azure.cli.command_modules.rdbms.validators import (
+    validate_private_endpoint_connection_id)
 
 from azure.cli.command_modules.rdbms._client_factory import (
     cf_mariadb_servers,
@@ -13,6 +17,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mariadb_config,
     cf_mariadb_log,
     cf_mariadb_replica,
+    cf_mariadb_private_endpoint_connections_operations,
+    cf_mariadb_private_link_resources_operations,
     cf_mysql_servers,
     cf_mysql_db,
     cf_mysql_firewall_rules,
@@ -20,18 +26,25 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_config,
     cf_mysql_log,
     cf_mysql_replica,
+    cf_mysql_private_endpoint_connections_operations,
+    cf_mysql_private_link_resources_operations,
+    cf_mysql_server_keys_operations,
+    cf_mysql_server_ad_administrators_operations,
     cf_postgres_servers,
     cf_postgres_db,
     cf_postgres_firewall_rules,
     cf_postgres_virtual_network_rules_operations,
     cf_postgres_config,
     cf_postgres_log,
-    cf_postgres_replica)
+    cf_postgres_replica,
+    cf_postgres_private_endpoint_connections_operations,
+    cf_postgres_private_link_resources_operations,
+    cf_postgres_server_keys_operations,
+    cf_postgres_server_ad_administrators_operations)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
-
     rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
 
     mariadb_servers_sdk = CliCommandType(
@@ -139,6 +152,66 @@ def load_command_table(self, _):
         client_factory=cf_postgres_db
     )
 
+    mariadb_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mariadb.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_mariadb_private_endpoint_connections_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mariadb_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mariadb.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_mariadb_private_link_resources_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_mysql_private_endpoint_connections_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_mysql_private_link_resources_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_postgres_private_endpoint_connections_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_postgres_private_link_resources_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_key_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerKeysOperations.{}',
+        client_factory=cf_mysql_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_key_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerKeysOperations.{}',
+        client_factory=cf_postgres_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_mysql_server_ad_administrators_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_postgres_server_ad_administrators_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
     with self.command_group('mariadb server', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
@@ -152,12 +225,14 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mariadb_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
@@ -166,12 +241,14 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
         g.custom_wait_command('wait', '_server_mysql_get')
         g.command('restart', 'restart')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', '_server_delete', confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
         g.generic_update_command('update',
@@ -297,3 +374,87 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')
+
+    with self.command_group('mariadb server private-endpoint-connection',
+                            mariadb_private_endpoint_connections_sdk,
+                            client_factory=cf_mariadb_private_endpoint_connections_operations) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('mariadb server private-link-resource',
+                            mariadb_private_link_resources_sdk,
+                            client_factory=cf_mariadb_private_link_resources_operations) as g:
+        g.show_command('list', 'list_by_server')
+
+    with self.command_group('mysql server private-endpoint-connection',
+                            mysql_private_endpoint_connections_sdk,
+                            client_factory=cf_mysql_private_endpoint_connections_operations) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('mysql server private-link-resource',
+                            mysql_private_link_resources_sdk,
+                            client_factory=cf_mysql_private_link_resources_operations) as g:
+        g.show_command('list', 'list_by_server')
+
+    with self.command_group('postgres server private-endpoint-connection',
+                            postgres_private_endpoint_connections_sdk,
+                            client_factory=cf_postgres_private_endpoint_connections_operations) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('postgres server private-link-resource',
+                            postgres_private_link_resources_sdk,
+                            client_factory=cf_postgres_private_link_resources_operations) as g:
+        g.show_command('list', 'list_by_server')
+
+    with self.command_group('mysql server key',
+                            mysql_key_sdk,
+                            client_factory=cf_mysql_server_keys_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_key_create')
+        g.custom_command('delete', 'server_key_delete', confirmation=True)
+        g.custom_show_command('show', 'server_key_get')
+        g.command('list', 'list')
+
+    with self.command_group('postgres server key',
+                            postgres_key_sdk,
+                            client_factory=cf_postgres_server_keys_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_key_create')
+        g.custom_command('delete', 'server_key_delete', confirmation=True)
+        g.custom_show_command('show', 'server_key_get')
+        g.command('list', 'list')
+
+    with self.command_group('mysql server ad-admin',
+                            mysql_adadmin_sdk,
+                            client_factory=cf_mysql_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
+        g.command('list', 'list')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_wait_command('wait', 'server_ad_admin_get')
+        g.wait_command('wait')
+
+    with self.command_group('postgres server ad-admin',
+                            postgres_adadmin_sdk,
+                            client_factory=cf_postgres_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
+        g.command('list', 'list')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.wait_command('wait')

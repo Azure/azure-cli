@@ -5,7 +5,7 @@
 
 from time import sleep
 import unittest
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only, live_only
 from azure.cli.command_modules.resource.custom import _parse_lock_id
 
 
@@ -24,7 +24,7 @@ class ResourceLockTests(ScenarioTest):
 
             locks_list = self.cmd('az lock list').get_output_in_json()
             self.assertTrue(locks_list)
-            self.assertIn(lock_name, [l['name'] for l in locks_list])
+            self.assertIn(lock_name, [lock['name'] for lock in locks_list])
 
             lock = self.cmd('az lock show -n {}'.format(lock_name)).get_output_in_json()
             lock_from_id = self.cmd('az lock show --ids {}'.format(lock_id)).get_output_in_json()
@@ -287,6 +287,23 @@ class ResourceLockTests(ScenarioTest):
 
         self.cmd('resource lock delete --name {} --resource {}'.format(vnet_lock_name, vnet_id))
         self.cmd('lock delete --name {} --resource {}'.format(subnet_lock_name, subnet_id))
+
+        self._sleep_for_lock_operation()
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_lock_with_resource_id')
+    def test_lock_with_three_level_resource_id(self, resource_group):
+        cosmos_name = self.create_random_name('cli-cosmos', 30)
+        db_name = self.create_random_name('cli-db', 30)
+        collection_name = self.create_random_name('cli-collection', 50)
+
+        self.cmd('cosmosdb create --kind MongoDB -n {} -g {}'.format(cosmos_name, resource_group)).get_output_in_json()
+        self.cmd('cosmosdb mongodb database create -n {} --account-name {} -g {}'.format(db_name, cosmos_name, resource_group)).get_output_in_json()
+        collection_id = self.cmd('cosmosdb mongodb collection create -n {} -d {} -a {} -g {} --shard "ShardingKey"'
+                                 .format(collection_name, db_name, cosmos_name, resource_group)).get_output_in_json()['id']
+        lock_name = self.create_random_name('cli-lock', 30)
+        self.cmd('lock create -n {} --resource {} --lock-type CanNotDelete'.format(lock_name, collection_id))
+        self.cmd('lock delete --name {} --resource {}'.format(lock_name, collection_id))
 
         self._sleep_for_lock_operation()
 

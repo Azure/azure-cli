@@ -29,25 +29,44 @@ def web_client_factory(cli_ctx, **_):
 
 
 def zip_contents_from_dir(dirPath, lang):
-    relroot = os.path.abspath(os.path.join(dirPath, os.pardir))
+    import tempfile
+    import uuid
+    relroot = os.path.abspath(tempfile.gettempdir())
     path_and_file = os.path.splitdrive(dirPath)[1]
     file_val = os.path.split(path_and_file)[1]
-    zip_file_path = relroot + os.path.sep + file_val + ".zip"
+    file_val_unique = file_val + str(uuid.uuid4())[:259]
+    zip_file_path = relroot + os.path.sep + file_val_unique + ".zip"
     abs_src = os.path.abspath(dirPath)
-    with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
-        for dirname, subdirs, files in os.walk(dirPath):
-            # skip node_modules folder for Node apps,
-            # since zip_deployment will perform the build operation
-            if lang.lower() == NODE_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
-            elif lang.lower() == NETCORE_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
-            elif lang.lower() == PYTHON_RUNTIME_NAME:
-                subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
-            for filename in files:
-                absname = os.path.abspath(os.path.join(dirname, filename))
-                arcname = absname[len(abs_src) + 1:]
-                zf.write(absname, arcname)
+    try:
+        with zipfile.ZipFile("{}".format(zip_file_path), "w", zipfile.ZIP_DEFLATED) as zf:
+            for dirname, subdirs, files in os.walk(dirPath):
+                # skip node_modules folder for Node apps,
+                # since zip_deployment will perform the build operation
+                if lang.lower() == NODE_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if 'node_modules' not in d]
+                elif lang.lower() == NETCORE_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if d not in ['obj', 'bin']]
+                elif lang.lower() == PYTHON_RUNTIME_NAME:
+                    subdirs[:] = [d for d in subdirs if 'env' not in d]  # Ignores dir that contain env
+
+                    filtered_files = []
+                    for filename in files:
+                        if filename == '.env':
+                            logger.info("Skipping file: %s/%s", dirname, filename)
+                        else:
+                            filtered_files.append(filename)
+                    files[:] = filtered_files
+
+                for filename in files:
+                    absname = os.path.abspath(os.path.join(dirname, filename))
+                    arcname = absname[len(abs_src) + 1:]
+                    zf.write(absname, arcname)
+    except IOError as e:
+        if e.errno == 13:
+            raise CLIError('Insufficient permissions to create a zip in current directory. '
+                           'Please re-run the command with administrator privileges')
+        raise CLIError(e)
+
     return zip_file_path
 
 
@@ -156,8 +175,9 @@ def get_lang_from_content(src_path, html=False):
         runtime_details_dict['file_loc'] = package_netcore_file
         runtime_details_dict['default_sku'] = 'F1'
     else:  # TODO: Update the doc when the detection logic gets updated
-        raise CLIError("Could not auto-detect the runtime stack of your app, "
-                       "see 'https://go.microsoft.com/fwlink/?linkid=2109470' for more information")
+        raise CLIError("Could not auto-detect the runtime stack of your app.\n"
+                       "HINT: Are you in the right folder?\n"
+                       "For more information, see 'https://go.microsoft.com/fwlink/?linkid=2109470'")
     return runtime_details_dict
 
 
@@ -250,16 +270,11 @@ def detect_node_version_tocreate(detected_ver):
     # get major version & get the closest version from supported list
     major_ver = int(detected_ver.split('.')[0])
     node_ver = NODE_VERSION_DEFAULT
-    if major_ver < 4:
+    # TODO: Handle checking for minor versions if node major version is 10
+    if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 4 and major_ver < 6:
-        node_ver = '4.5'
-    elif major_ver >= 6 and major_ver < 8:
-        node_ver = '6.9'
-    elif major_ver >= 8 and major_ver < 10:
-        node_ver = NODE_VERSION_DEFAULT
-    elif major_ver >= 10:
-        node_ver = '10.14'
+    else:
+        node_ver = '12.9'
     return node_ver
 
 
@@ -293,17 +308,15 @@ def should_create_new_rg(cmd, rg_name, is_linux):
     return True
 
 
-def does_app_already_exist(cmd, name):
+def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
-    site_availability = client.check_name_availability(name, 'Microsoft.Web/sites')
-    # check availability returns true to name_available  == site does not exist
-    return site_availability.name_available
+    return client.check_name_availability(name, 'Microsoft.Web/sites')
 
 
 def get_app_details(cmd, name):
     client = web_client_factory(cmd.cli_ctx)
-    data = (list(filter(lambda x: name.lower() in x.name.lower(), client.web_apps.list())))
+    data = (list(filter(lambda x: name.lower() == x.name.lower(), client.web_apps.list())))
     _num_items = len(data)
     if _num_items > 0:
         return data[0]
@@ -318,7 +331,8 @@ def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
             return rg_name
         raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
                                                                                                            os_name))
-    rg_name = default_rg
+    if rg_name is None:
+        rg_name = default_rg
     return rg_name
 
 

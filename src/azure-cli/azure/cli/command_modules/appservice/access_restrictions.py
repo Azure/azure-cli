@@ -38,7 +38,7 @@ def add_webapp_access_restriction(
     configs = get_site_configs(cmd, resource_group_name, name, slot)
 
     if (ip_address and subnet) or (not ip_address and not subnet):
-        raise CLIError('Usage error: --subnet | --ip_address')
+        raise CLIError('Usage error: --subnet | --ip-address')
 
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions

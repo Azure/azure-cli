@@ -186,6 +186,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ])
 
+        self.cmd("backup policy set -g {rg} -v {vault} --backup-management-type AzureWorkload --fix-for-inconsistent-items -n {policy_new}", checks=[
+            self.check('name', '{policy_new}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
         self.cmd('backup policy show -g {rg} -v {vault} -n {policy_new}', checks=[
             self.check('name', '{policy_new}'),
             self.check('resourceGroup', '{rg}')
@@ -924,3 +929,42 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
+
+    @record_only()
+    def test_backup_wl_sql_restore_as_files(self):
+        self.kwargs.update({
+            'vault': "iaasvmsqlworkloadexistingvault1",
+            'name': "VMAppContainer;compute;iaasvmsqlworkload.existing;iaassqlext-win",
+            'wt': 'MSSQL',
+            'sub': "38304e13-357e-405e-9e9a-220351dcce8c",
+            'rg': "iaasvmsqlworkload.existing.vaults",
+            'item': "SQLDataBase;mssqlserver;navigate-testdb2"
+        })
+
+        self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload', checks=[
+            self.check('properties.protectedItemHealthStatus', 'Healthy'),
+            self.check('properties.protectionState', 'Protected'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [0]').get_output_in_json()
+        self.kwargs['rp'] = self.kwargs['rp']['name']
+
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode RestoreAsFiles --rp-name {rp} --filepath "C:\" --target-container-name {container1} --item-name {item} --container-name {container1}  --workload-type {wt}').get_output_in_json(), separators=(',', ':'))
+        with open("recoveryconfig.json", "w") as f:
+            f.write(self.kwargs['rc'])
+
+        self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        self.kwargs['job'] = self.kwargs['backup_job']['name']
+
+        self.cmd('backup job wait -v {vault} -g {rg} -n {job}')
+
+        os.remove("recoveryconfig.json")

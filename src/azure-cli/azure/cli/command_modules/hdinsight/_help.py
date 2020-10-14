@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
 # pylint: disable=line-too-long, too-many-lines
 
 helps['hdinsight'] = """
@@ -61,9 +62,41 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount
+  - name: Create a cluster with minimal tls version.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --minimal-tls-version 1.2
+  - name: Create a cluster which enables encryption in transit.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --encryption-in-transit true
+  - name: Create a cluster with encryption at host.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --encryption-at-host true
+  - name: Create a cluster with private link settings.
+    text: |-
+        az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
+        --public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
+        --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
+        --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
+        --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
+        --cluster-users-group-dns MyGroup
+  - name: Create a cluster with the Enterprise Security Package (ESP) and enable HDInsight ID Broker.
+    text: |-
+        az hdinsight create --esp --idbroker -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
@@ -107,6 +140,17 @@ examples:
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount \\
         --cluster-configuration @config.json
+  - name: Create a cluster which Load-based Autoscale.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --autoscale-type Load --autoscale-min-workernode-count 3 --autoscale-max-workernode-count 5
+  - name: Create a cluster which Schedule-based Autoscale.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
+        --time 09:00 --autoscale-workernode-count 5
 """
 
 helps['hdinsight list'] = """
@@ -157,7 +201,149 @@ examples:
         --persist-on-success
 """
 
+helps['hdinsight host'] = """
+type: group
+short-summary: Manage HDInsight cluster's virtual hosts.
+"""
+
+helps['hdinsight host list'] = """
+type: command
+short-summary: List the hosts of the specified HDInsight cluster.
+examples:
+  - name: List the hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host list --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight host restart'] = """
+type: command
+short-summary: Restart the specific hosts of the specified HDInsight cluster.
+examples:
+  - name: Restart the specific hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host restart --resource-group MyResourceGroup --cluster-name MyCluster --host-names hostname1 hostname2
+"""
+
+helps['hdinsight autoscale'] = """
+type: group
+short-summary: Manage HDInsight cluster's Autoscale configuration.
+"""
+
+helps['hdinsight autoscale create'] = """
+type: command
+short-summary: Enable Autoscale for a running cluster.
+examples:
+  - name: Enable Load-based Autoscale for a running cluster.
+    text: |-
+        az hdinsight autoscale create --resource-group MyResourceGroup --cluster-name MyCluster --type Load \\
+        --min-workernode-count 3 --max-workernode-count 5
+  - name: Enable Schedule-based Autoscale for a running cluster.
+    text: |-
+        az hdinsight autoscale create --resource-group MyResourceGroup --cluster-name MyCluster --type Schedule \\
+        --timezone "Pacific Standard Time" --days Monday Tuesday --time 09:00 --workernode-count 5
+"""
+
+helps['hdinsight autoscale update'] = """
+type: command
+short-summary: Update the Autoscale configuration.
+examples:
+  - name: Update Load-based Autoscale related configuration.
+    text: |-
+        az hdinsight autoscale update --resource-group MyResourceGroup --cluster-name MyCluster --max-workernode-count 5
+  - name: Update Schedule-based Autoscale related configuration.
+    text: |-
+        az hdinsight autoscale update --resource-group MyResourceGroup --cluster-name MyCluster --timezone "China Standard Time"
+"""
+
+helps['hdinsight autoscale show'] = """
+type: command
+short-summary: Get the Autoscale configuration of a specified cluster.
+examples:
+  - name: Get the Autoscale configuration.
+    text: |-
+        az hdinsight autoscale show --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight autoscale delete'] = """
+type: command
+short-summary: Disable Autoscale for a running cluster.
+examples:
+  - name: Disable Autoscale for a running cluster.
+    text: |-
+        az hdinsight autoscale delete --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight autoscale list-timezones'] = """
+type: command
+short-summary: List the available timezone name when enabling Schedule-based Autoscale.
+examples:
+  - name: List the available timezone name.
+    text: |-
+        az hdinsight autoscale list-timezones
+"""
+
+helps['hdinsight autoscale wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
+helps['hdinsight autoscale condition'] = """
+type: group
+short-summary: Manage schedule condition of the HDInsight cluster which enabled Schedule-based Autoscale.
+"""
+
+helps['hdinsight autoscale condition create'] = """
+type: command
+short-summary: Add a new schedule condition.
+examples:
+  - name: Add a new schedule condition.
+    text: |-
+        az hdinsight autoscale condition create --resource-group MyResourceGroup --cluster-name MyCluster \\
+        --days Monday Tuesday --time 09:00 --workernode-count 5
+"""
+
+helps['hdinsight autoscale condition update'] = """
+type: command
+short-summary: Update a schedule condition.
+examples:
+  - name: Update a schedule condition.
+    text: |-
+        az hdinsight autoscale condition update --resource-group MyResourceGroup --cluster-name MyCluster --index 0\\
+        --time 10:00 --workernode-count 5
+"""
+
+helps['hdinsight autoscale condition list'] = """
+type: command
+short-summary: List all schedule conditions.
+examples:
+  - name: List all schedule conditions.
+    text: |-
+        az hdinsight autoscale condition list --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight autoscale condition delete'] = """
+type: command
+short-summary: Delete schedule condition.
+examples:
+  - name: Delete a schedule condition.
+    text: |-
+        az hdinsight autoscale condition delete --resource-group MyResourceGroup --cluster-name MyCluster --index 0
+  - name: Delete multiple schedule conditions.
+    text: |-
+        az hdinsight autoscale condition delete --resource-group MyResourceGroup --cluster-name MyCluster --index 0 1
+"""
+
+helps['hdinsight autoscale condition wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
 helps['hdinsight wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
+helps['hdinsight autoscale wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until an operation is complete.
 """

@@ -21,22 +21,26 @@ import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
-    BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
+    BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
 
+
 from knack.arguments import CLICommandArgument
-from knack.commands import CLICommand, CommandGroup
+from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
 from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
+from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
 from knack.log import get_logger
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
+from knack.validators import DefaultStr
 
 try:
     t_JSONDecodeError = json.JSONDecodeError
@@ -114,7 +118,7 @@ def _pre_command_table_create(cli_ctx, args):
 
 
 # pylint: disable=too-many-instance-attributes
-class CacheObject(object):
+class CacheObject:
 
     def path(self, args, kwargs):
         from azure.cli.core._environment import get_config_dir
@@ -283,9 +287,24 @@ class AzCliCommand(CLICommand):
         self._add_vscode_extension_metadata(arg, overrides)
 
         # same blunt mechanism like we handled id-parts, for create command, no name default
-        if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
-            return
-        super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+        if not (self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME'):
+            super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+
+        self._resolve_default_value_from_local_context(arg, overrides)
+
+    def _resolve_default_value_from_local_context(self, arg, overrides):
+        if self.cli_ctx.local_context.is_on:
+            lca = overrides.settings.get('local_context_attribute', None)
+            if not lca or not lca.actions or LocalContextAction.GET not in lca.actions:
+                return
+            if lca.name:
+                local_context = self.cli_ctx.local_context
+                value = local_context.get(self.name, lca.name)
+                if value:
+                    logger.debug("local context '%s' for arg %s", value, arg.name)
+                    overrides.settings['default'] = DefaultStr(value)
+                    overrides.settings['required'] = False
+                    overrides.settings['default_value_source'] = 'Local Context'
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -330,7 +349,7 @@ class AzCliCommand(CLICommand):
                                    operation_group=operation_group)
 
     def update_context(self, obj_inst):
-        class UpdateContext(object):
+        class UpdateContext:
             def __init__(self, instance):
                 self.instance = instance
 
@@ -403,15 +422,21 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
-
+def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', **kwargs):
+    """
+    setter_arg_name: The name of the argument in the setter which corresponds to the object being updated.
+    In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
+    in the setter which corresponds to the object being updated is not 'parameters'.
+    """
     def _put_operation():
         result = None
         if args:
             extended_args = args + (parameters,)
             result = operation(*extended_args)
         elif kwargs is not None:
-            result = operation(parameters=parameters, **kwargs)
+            kwargs[setter_arg_name] = parameters
+            result = operation(**kwargs)
+            del kwargs[setter_arg_name]
         return result
 
     # early out if the command does not use the cache
@@ -552,8 +577,29 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
-
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
+
+        # print local context warning
+        if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table:
+            local_context_args = []
+            arguments = self.commands_loader.command_table[command].arguments
+            specified_arguments = self.parser.subparser_map[command].specified_arguments \
+                if command in self.parser.subparser_map else []
+            for name, argument in arguments.items():
+                default_value_source = argument.type.settings.get('default_value_source', None)
+                dest_name = argument.type.settings.get('dest', None)
+                options = argument.type.settings.get('options_list', None)
+                if default_value_source == 'Local Context' and dest_name not in specified_arguments and options:
+                    value = getattr(parsed_args, name)
+                    local_context_args.append((options[0], value))
+            if local_context_args:
+                logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                               'run `az local-context off` to turn it off.',
+                               self.cli_ctx.local_context.effective_working_directory())
+                args_str = []
+                for name, value in local_context_args:
+                    args_str.append('{}: {}'.format(name, value))
+                logger.warning('Command argument values from local context: %s', ', '.join(args_str))
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
@@ -618,6 +664,12 @@ class AzCliCommandInvoker(CommandInvoker):
 
         event_data = {'result': results}
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+
+        # save to local context if it is turned on after command executed successfully
+        if self.cli_ctx.local_context.is_on and command and command in self.commands_loader.command_table and \
+                command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
+            self.cli_ctx.save_local_context(parsed_args, self.commands_loader.command_table[command].arguments,
+                                            self.parser.subparser_map[command].specified_arguments)
 
         return CommandResultItem(
             event_data['result'],
@@ -686,8 +738,6 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        import colorama
-
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
@@ -724,12 +774,31 @@ class AzCliCommandInvoker(CommandInvoker):
                 del preview_kwargs['_get_message']
                 previews.append(ImplicitPreviewItem(**preview_kwargs))
 
-        colorama.init()
-        for d in deprecations:
-            print(d.message, file=sys.stderr)
-        for p in previews:
-            print(p.message, file=sys.stderr)
-        colorama.deinit()
+        experimentals = [] + getattr(parsed_args, '_argument_experimentals', [])
+        if cmd.experimental_info:
+            experimentals.append(cmd.experimental_info)
+        else:
+            # search for implicit command experimental status
+            path_comps = cmd.name.split()[:-1]
+            implicit_experimental_info = None
+            while path_comps and not implicit_experimental_info:
+                implicit_experimental_info = resolve_experimental_info(self.cli_ctx, ' '.join(path_comps))
+                del path_comps[-1]
+
+            if implicit_experimental_info:
+                experimental_kwargs = implicit_experimental_info.__dict__.copy()
+                experimental_kwargs['object_type'] = 'command'
+                del experimental_kwargs['_get_tag']
+                del experimental_kwargs['_get_message']
+                experimentals.append(ImplicitExperimentalItem(**experimental_kwargs))
+
+        if not self.cli_ctx.only_show_errors:
+            for d in deprecations:
+                print(d.message, file=sys.stderr)
+            for p in previews:
+                print(p.message, file=sys.stderr)
+            for e in experimentals:
+                print(e.message, file=sys.stderr)
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
@@ -758,11 +827,13 @@ class AzCliCommandInvoker(CommandInvoker):
 
     @staticmethod
     def remove_additional_prop_layer(obj, converted_dic):
-        from msrest.serialization import Model
-        if isinstance(obj, Model):
-            # let us make sure this is the additional properties auto-generated by SDK
-            if ('additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict)):
+        # Follow EAFP to flatten `additional_properties` auto-generated by SDK
+        # See https://docs.python.org/3/glossary.html#term-eafp
+        try:
+            if 'additionalProperties' in converted_dic and isinstance(obj.additional_properties, dict):
                 converted_dic.update(converted_dic.pop('additionalProperties'))
+        except AttributeError:
+            pass
         return converted_dic
 
     def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
@@ -774,12 +845,17 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
-        from msrest.exceptions import ValidationError
+        from azure.cli.core.azclierror import AzCLIError
         for validator in getattr(ns, '_argument_validators', []):
             try:
                 validator(**self._build_kwargs(validator, ns))
-            except ValidationError:
-                logger.debug('Validation error in %s.', str(validator))
+            except AzCLIError:
+                raise
+            except Exception as ex:
+                # Delay the import and mimic an exception handler
+                from msrest.exceptions import ValidationError
+                if isinstance(ex, ValidationError):
+                    logger.debug('Validation error in %s.', str(validator))
                 raise
         try:
             delattr(ns, '_argument_validators')
@@ -787,7 +863,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
 
-class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
+class LongRunningOperation:  # pylint: disable=too-few-public-methods
     def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
 
         self.cli_ctx = cli_ctx
@@ -864,11 +940,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                                 logger.info(result)
 
     def __call__(self, poller):
-        import colorama
         from msrest.exceptions import ClientException
-
-        # https://github.com/azure/azure-cli/issues/3555
-        colorama.init()
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
@@ -910,7 +982,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-        colorama.deinit()
 
         return result
 
@@ -946,6 +1017,13 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 def _load_command_loader(loader, args, name, prefix):
     module = import_module(prefix + name)
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    if not loader_cls:
+        try:
+            get_command_loader = getattr(module, 'get_command_loader', None)
+            loader_cls = get_command_loader(loader.cli_ctx)
+        except (ImportError, AttributeError, TypeError):
+            logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
+
     command_table = {}
 
     if loader_cls:
@@ -973,15 +1051,16 @@ def _load_module_command_loader(loader, args, mod):
     return _load_command_loader(loader, args, mod, 'azure.cli.command_modules.')
 
 
-class ExtensionCommandSource(object):
+class ExtensionCommandSource:
     """ Class for commands contributed by an extension """
 
-    def __init__(self, overrides_command=False, extension_name=None, preview=False):
+    def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
         super(ExtensionCommandSource, self).__init__()
         # True if the command overrides a CLI command
         self.overrides_command = overrides_command
         self.extension_name = extension_name
         self.preview = preview
+        self.experimental = experimental
 
     def get_command_warn_msg(self):
         if self.overrides_command:
@@ -996,6 +1075,12 @@ class ExtensionCommandSource(object):
     def get_preview_warn_msg(self):
         if self.preview:
             return "The extension is in preview"
+        return None
+
+    def get_experimental_warn_msg(self):
+        if self.experimental:
+            return "The extension is experimental and not covered by customer support. " \
+                   "Please use with discretion."
         return None
 
 
@@ -1025,7 +1110,8 @@ def _is_paged(obj):
             and not isinstance(obj, list) \
             and not isinstance(obj, dict):
         from msrest.paging import Paged
-        return isinstance(obj, Paged)
+        from azure.core.paging import ItemPaged as AzureCorePaged
+        return isinstance(obj, (AzureCorePaged, Paged))
     return False
 
 
@@ -1046,7 +1132,7 @@ def _merge_kwargs(patch_kwargs, base_kwargs, supported_kwargs=None):
 
 
 # pylint: disable=too-few-public-methods
-class CliCommandType(object):
+class CliCommandType:
 
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):
@@ -1155,13 +1241,8 @@ class AzCommandGroup(CommandGroup):
     def _command(self, name, method_name, custom_command=False, **kwargs):
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
-        # don't inherit deprecation or preview info from command group
-        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        if kwargs.get('is_preview', False):
-            merged_kwargs['preview_info'] = PreviewItem(
-                self.command_loader.cli_ctx,
-                object_type='command'
-            )
+        self._apply_tags(merged_kwargs, kwargs, name)
+
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
@@ -1201,9 +1282,7 @@ class AzCommandGroup(CommandGroup):
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg())
         merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
-        # don't inherit deprecation or preview info from command group
-        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        self._apply_tags(merged_kwargs, kwargs, name)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -1234,9 +1313,7 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_wait_command
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
-        # don't inherit deprecation or preview info from command group
-        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        self._apply_tags(merged_kwargs, kwargs, name)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
@@ -1254,15 +1331,29 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_show_command
         self._check_stale()
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
-        # don't inherit deprecation or preview info from command group
-        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        self._apply_tags(merged_kwargs, kwargs, name)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
         _cli_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                           custom_command=custom_command, **merged_kwargs)
+
+    def _apply_tags(self, merged_kwargs, kwargs, command_name):
+        # don't inherit deprecation or preview info from command group
+        merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
+
+        # transform is_preview and is_experimental to StatusTags
+        merged_kwargs['preview_info'] = None
+        merged_kwargs['experimental_info'] = None
+        is_preview = kwargs.get('is_preview', False)
+        is_experimental = kwargs.get('is_experimental', False)
+        if is_preview and is_experimental:
+            raise CLIError(PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format("command", self.group_name + " " + command_name))
+        if is_preview:
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
+        if is_experimental:
+            merged_kwargs['experimental_info'] = ExperimentalItem(self.command_loader.cli_ctx, object_type='command')
 
 
 def register_cache_arguments(cli_ctx):

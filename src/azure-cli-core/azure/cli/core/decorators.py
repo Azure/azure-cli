@@ -17,7 +17,7 @@ from knack.log import get_logger
 
 
 # pylint: disable=too-few-public-methods
-class Completer(object):
+class Completer:
 
     def __init__(self, func):
         self.func = func
@@ -72,8 +72,9 @@ def suppress_all_exceptions(fallback_return=None, **kwargs):  # pylint: disable=
         def _wrapped_func(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception as ex:  # nopa pylint: disable=broad-except
-                get_logger(__name__).info('Suppress exception %s', ex)
+            except Exception:  # nopa pylint: disable=broad-except
+                import traceback
+                get_logger(__name__).info('Suppress exception:\n%s', traceback.format_exc())
                 if fallback_return is not None:
                     return fallback_return
         return _wrapped_func

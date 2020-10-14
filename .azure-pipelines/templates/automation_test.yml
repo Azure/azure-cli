@@ -1,0 +1,23 @@
+parameters:
+  pythonVersion: ''
+  profile: ''
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: ${{ parameters.pythonVersion }}
+      displayName: "Use Python ${{ parameters.pythonVersion }}"
+  - template: ./azdev_setup.yml
+  - bash: |
+      set -ev
+
+      source env/bin/activate
+
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        azdev test --series --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }}
+      else
+        azdev test --series --profile ${{ parameters.profile }}
+      fi
+    displayName: "Test on Profile ${{ parameters.profile }}"
+    env:
+      ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)

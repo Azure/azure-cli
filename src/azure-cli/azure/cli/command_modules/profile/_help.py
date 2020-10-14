@@ -14,10 +14,10 @@ helps['login'] = """
         - name: Log in interactively.
           text: >
             az login
-        - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled.
+        - name: Log in with user name and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
           text: >
             az login -u johndoe@contoso.com -p VerySecret
-        - name: Log in with a service principal using client secret.
+        - name: Log in with a service principal using client secret. Use -p=secret if the first character of the password is '-'.
           text: >
             az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p VerySecret --tenant contoso.onmicrosoft.com
         - name: Log in with a service principal using client certificate.
@@ -75,6 +75,19 @@ helps['account get-access-token'] = """
     long-summary: >
         The token will be valid for at least 5 minutes with the maximum at 60 minutes.
         If the subscription argument isn't specified, the current account is used.
+    examples:
+        - name: Get an access token for the current account
+          text: >
+            az account get-access-token
+        - name: Get an access token for a specific subscription
+          text: >
+            az account get-access-token --subscription 00000000-0000-0000-0000-000000000000
+        - name: Get an access token for a specific tenant
+          text: >
+            az account get-access-token --tenant 00000000-0000-0000-0000-000000000000
+        - name: Get an access token to use with MS Graph API
+          text: >
+            az account get-access-token --resource-type ms-graph
 """
 
 helps['self-test'] = """

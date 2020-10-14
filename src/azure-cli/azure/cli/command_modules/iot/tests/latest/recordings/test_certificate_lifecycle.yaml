@@ -17,12 +17,13 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkNameAvailability?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkNameAvailability?api-version=2020-03-01
   response:
     body:
       string: '{"nameAvailable":true,"reason":"Invalid","message":null}'
@@ -34,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:37:09 GMT
+      - Tue, 14 Jul 2020 11:32:49 GMT
       expires:
       - '-1'
       pragma:
@@ -50,7 +51,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1189'
     status:
       code: 200
       message: OK
@@ -68,15 +69,16 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T15:36:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-14T11:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -85,7 +87,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:37:10 GMT
+      - Tue, 14 Jul 2020 11:32:50 GMT
       expires:
       - '-1'
       pragma:
@@ -101,7 +103,12 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "properties": {"eventHubEndpoints": {"events": {"retentionTimeInDays":
-      1, "partitionCount": 2}}}, "sku": {"name": "S1", "capacity": 1}}'
+      1, "partitionCount": 4}}, "storageEndpoints": {"$default": {"sasTtlAsIso8601":
+      "PT1H", "connectionString": "", "containerName": ""}}, "messagingEndpoints":
+      {"fileNotifications": {"ttlAsIso8601": "PT1H", "maxDeliveryCount": 10}}, "enableFileUploadNotifications":
+      false, "cloudToDevice": {"maxDeliveryCount": 10, "defaultTtlAsIso8601": "PT1H",
+      "feedback": {"lockDurationAsIso8601": "PT5S", "ttlAsIso8601": "PT1H", "maxDeliveryCount":
+      10}}}, "sku": {"name": "S1", "capacity": 1}}'
     headers:
       Accept:
       - application/json
@@ -112,32 +119,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '158'
+      - '570'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":2},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":2}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTJhZDI5ODktYmJlMi00MDg4LTlhZDAtMmE5MTZkZThmMWQ2?api-version=2019-03-22-preview&operationSource=os_ih&asyncinfo
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
       cache-control:
       - no-cache
       content-length:
-      - '990'
+      - '1210'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:37:15 GMT
+      - Tue, 14 Jul 2020 11:32:56 GMT
       expires:
       - '-1'
       pragma:
@@ -167,10 +175,11 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTJhZDI5ODktYmJlMi00MDg4LTlhZDAtMmE5MTZkZThmMWQ2?api-version=2019-03-22-preview&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -182,7 +191,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:37:47 GMT
+      - Tue, 14 Jul 2020 11:33:28 GMT
       expires:
       - '-1'
       pragma:
@@ -214,10 +223,11 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTJhZDI5ODktYmJlMi00MDg4LTlhZDAtMmE5MTZkZThmMWQ2?api-version=2019-03-22-preview&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -229,7 +239,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:38:20 GMT
+      - Tue, 14 Jul 2020 11:33:58 GMT
       expires:
       - '-1'
       pragma:
@@ -261,10 +271,11 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTJhZDI5ODktYmJlMi00MDg4LTlhZDAtMmE5MTZkZThmMWQ2?api-version=2019-03-22-preview&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -276,7 +287,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:38:52 GMT
+      - Tue, 14 Jul 2020 11:34:29 GMT
       expires:
       - '-1'
       pragma:
@@ -308,10 +319,11 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTJhZDI5ODktYmJlMi00MDg4LTlhZDAtMmE5MTZkZThmMWQ2?api-version=2019-03-22-preview&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -323,7 +335,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:25 GMT
+      - Tue, 14 Jul 2020 11:35:00 GMT
       expires:
       - '-1'
       pragma:
@@ -355,23 +367,24 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","etag":"AAAAAAjt3mA=","properties":{"locations":[{"location":"West
-        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot-hub-for-cert-test000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":2,"partitionIds":["0","1"],"path":"iot-hub-for-cert-testebpv","endpoint":"sb://iothub-ns-iot-hub-fo-2349891-689847b46f.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","etag":"AAAAAFSFzEE=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot-hub-for-cert-test000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot-hub-for-cert-test73ly","endpoint":"sb://iothub-ns-iot-hub-fo-3829634-daf086971e.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1738'
+      - '1746'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:26 GMT
+      - Tue, 14 Jul 2020 11:35:01 GMT
       expires:
       - '-1'
       pragma:
@@ -403,12 +416,13 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates?api-version=2020-03-01
   response:
     body:
       string: '{"value":[]}'
@@ -420,7 +434,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:30 GMT
+      - Tue, 14 Jul 2020 11:35:03 GMT
       expires:
       - '-1'
       pragma:
@@ -439,7 +453,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIMaBkPeWdxFswDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRnc3NhZ2x0dTdreGFndHJuMB4XDTE5MTAyMDE1MzY1OFoXDTE5\r\nMTAyNDE1MzY1OFowIzEhMB8GA1UEAwwYVEVTVENFUlRnc3NhZ2x0dTdreGFndHJu\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA9LL0XC5Yop9qdENWY04F/\r\nO5kHxioNS5m4EsHhmdKwVnCWgqnQ1Ch5ccTcn7urHX6ir/eckDYXnkxpxem+Vu+P\r\n3n4qRSspzoJyxGSMM8cyJvO6m5rVjcj8pEXgd9Jbm1lUkegmUs4y13zN8f0V2TIU\r\nv/jYER+76nI8XafPDI1yM0zruv7IGn4rguKI3C79VyZtocSJJs5stqF8Xx2UbKuU\r\nEOzkJt6IXMZUDYveY+BPlednllLFeyayyGXx5NhW0LmBWr83AOkZGDS9ZUoAwT7R\r\nvwk/zUosEWfUtJJFZJ1fs+sfBXx/C/Rk+o2MFIr4l/S7O/FkeNuxmKZYe7mQkY6/\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAvBzLP37C/tz0dE4OC82JxYm1xzvTC3kwysD5Qr7T3\r\ni/A3NFPVp5JRx4cqj8vrdwdjHvXNheTY0Zi9YBMAn/i9dwo8sIR15iIgCD6nSXm0\r\ny0pmh/9Fi2/Kb4Rm4/f83YMwXQQ2iQFO2RutMiEgGe8EWbsuj4XE/oY4scRUWsxP\r\nGQnp9LVMvqXqXMPJMUbLBc0hTPtsOPA6sZHhG76oa19imznGCgC3/ju6r+U5YfOE\r\nIDo6c+WOZI5i1Oeyg5cAaMuVbckJj28cg90yvL5SSQwZi0EJ2TrIx5W4atcyMpXE\r\nqOqb7umKreEfhZR/n1b4TX8scJqmBiGNS62pKBgaz1Fn\r\n-----END
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIFaphRoc8+ZowDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzI0N1oXDTIw\r\nMDcxNzExMzI0N1owIzEhMB8GA1UEAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5m\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA6PBd9yWNMNsNamiWE7eyF\r\nz2H+Io4TaCj5dRwZD2HOSUVnffh28ejAkflOZXiSQvv39pCHSusdlk181sgoi95d\r\nREB8JNf7oTRCHi1N/k1tVloWn3NgcdCApvJNflqXeyeNfujCX3697YhHNqDzeViJ\r\nlWlLaGAOXnrrxf6ONGcnb1XR6mouYNFhHZcDpGGLx9EJ7XIQxFVJ7gKuVl9gt7P6\r\n33lV5SLp6g2cyyKaPUbpRTos8NnSGatkYO/F//RYTxsuTPi6VcoV/Uesg/0/0qot\r\nxncf8tJuK+CryUAN727vDktoFADDEY4F6rpwHL/Q7hFAKUct8r4rT9GP+HC8aqD9\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAg2FfnuwQEmPWWnENFuEqN6J2+H94drmZOOb9ZdZat\r\nITBniO/EIcynE+vl1Yk6Y6RMZd/aZLW8w8BGSurLvrHqI/WefaA9FDyAv1myVmZH\r\nxHAu7skeWro2xwUmQCMU+eSHWmildJ+SIxuiylUDUNZOMhelSUzy5T+TvQMJG1wh\r\n7GthGCgQT+kTi0TXDC9rF2boOwTViMCXHh/WxCyi7I7sYFYDQmBHefNiJ78uOkR1\r\nHJZeI31vlXlx6Bim1qzhuQJ1399aHpRfJSi3geb83Xqr/nKV+hRl1kCpaWKV5K3F\r\nSbVINcLn1Lop6+LELZdBhQtrrwa7X4oh/7096Wv5ram5\r\n-----END
       CERTIFICATE-----\r\n"}'
     headers:
       Accept:
@@ -457,19 +471,20 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n -p
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Thu, 24 Oct 2019
-        15:36:58 GMT","thumbprint":"71813EC09987FB153521F5030FA62BBB449DA52C","isVerified":false,"created":"Mon,
-        21 Oct 2019 15:39:33 GMT","updated":"Mon, 21 Oct 2019 15:39:33 GMT","certificate":"-----BEGIN
-        CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIMaBkPeWdxFswDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRnc3NhZ2x0dTdreGFndHJuMB4XDTE5MTAyMDE1MzY1OFoXDTE5\r\nMTAyNDE1MzY1OFowIzEhMB8GA1UEAwwYVEVTVENFUlRnc3NhZ2x0dTdreGFndHJu\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA9LL0XC5Yop9qdENWY04F/\r\nO5kHxioNS5m4EsHhmdKwVnCWgqnQ1Ch5ccTcn7urHX6ir/eckDYXnkxpxem+Vu+P\r\n3n4qRSspzoJyxGSMM8cyJvO6m5rVjcj8pEXgd9Jbm1lUkegmUs4y13zN8f0V2TIU\r\nv/jYER+76nI8XafPDI1yM0zruv7IGn4rguKI3C79VyZtocSJJs5stqF8Xx2UbKuU\r\nEOzkJt6IXMZUDYveY+BPlednllLFeyayyGXx5NhW0LmBWr83AOkZGDS9ZUoAwT7R\r\nvwk/zUosEWfUtJJFZJ1fs+sfBXx/C/Rk+o2MFIr4l/S7O/FkeNuxmKZYe7mQkY6/\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAvBzLP37C/tz0dE4OC82JxYm1xzvTC3kwysD5Qr7T3\r\ni/A3NFPVp5JRx4cqj8vrdwdjHvXNheTY0Zi9YBMAn/i9dwo8sIR15iIgCD6nSXm0\r\ny0pmh/9Fi2/Kb4Rm4/f83YMwXQQ2iQFO2RutMiEgGe8EWbsuj4XE/oY4scRUWsxP\r\nGQnp9LVMvqXqXMPJMUbLBc0hTPtsOPA6sZHhG76oa19imznGCgC3/ju6r+U5YfOE\r\nIDo6c+WOZI5i1Oeyg5cAaMuVbckJj28cg90yvL5SSQwZi0EJ2TrIx5W4atcyMpXE\r\nqOqb7umKreEfhZR/n1b4TX8scJqmBiGNS62pKBgaz1Fn\r\n-----END
-        CERTIFICATE-----\r\n"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAjt3wI="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
+        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
+        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":"-----BEGIN
+        CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIFaphRoc8+ZowDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzI0N1oXDTIw\r\nMDcxNzExMzI0N1owIzEhMB8GA1UEAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5m\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA6PBd9yWNMNsNamiWE7eyF\r\nz2H+Io4TaCj5dRwZD2HOSUVnffh28ejAkflOZXiSQvv39pCHSusdlk181sgoi95d\r\nREB8JNf7oTRCHi1N/k1tVloWn3NgcdCApvJNflqXeyeNfujCX3697YhHNqDzeViJ\r\nlWlLaGAOXnrrxf6ONGcnb1XR6mouYNFhHZcDpGGLx9EJ7XIQxFVJ7gKuVl9gt7P6\r\n33lV5SLp6g2cyyKaPUbpRTos8NnSGatkYO/F//RYTxsuTPi6VcoV/Uesg/0/0qot\r\nxncf8tJuK+CryUAN727vDktoFADDEY4F6rpwHL/Q7hFAKUct8r4rT9GP+HC8aqD9\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAg2FfnuwQEmPWWnENFuEqN6J2+H94drmZOOb9ZdZat\r\nITBniO/EIcynE+vl1Yk6Y6RMZd/aZLW8w8BGSurLvrHqI/WefaA9FDyAv1myVmZH\r\nxHAu7skeWro2xwUmQCMU+eSHWmildJ+SIxuiylUDUNZOMhelSUzy5T+TvQMJG1wh\r\n7GthGCgQT+kTi0TXDC9rF2boOwTViMCXHh/WxCyi7I7sYFYDQmBHefNiJ78uOkR1\r\nHJZeI31vlXlx6Bim1qzhuQJ1399aHpRfJSi3geb83Xqr/nKV+hRl1kCpaWKV5K3F\r\nSbVINcLn1Lop6+LELZdBhQtrrwa7X4oh/7096Wv5ram5\r\n-----END
+        CERTIFICATE-----\r\n"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}'
     headers:
       cache-control:
       - no-cache
@@ -478,7 +493,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:32 GMT
+      - Tue, 14 Jul 2020 11:35:03 GMT
       expires:
       - '-1'
       pragma:
@@ -494,7 +509,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1134'
     status:
       code: 200
       message: OK
@@ -512,17 +527,18 @@ interactions:
       ParameterSetName:
       - --hub-name -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates?api-version=2020-03-01
   response:
     body:
-      string: '{"value":[{"properties":{"subject":"TESTCERT000001","expiry":"Thu,
-        24 Oct 2019 15:36:58 GMT","thumbprint":"71813EC09987FB153521F5030FA62BBB449DA52C","isVerified":false,"created":"Mon,
-        21 Oct 2019 15:39:33 GMT","updated":"Mon, 21 Oct 2019 15:39:33 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAjt3wI="}]}'
+      string: '{"value":[{"properties":{"subject":"TESTCERT000001","expiry":"Fri,
+        17 Jul 2020 11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
+        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}]}'
     headers:
       cache-control:
       - no-cache
@@ -531,7 +547,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:36 GMT
+      - Tue, 14 Jul 2020 11:35:05 GMT
       expires:
       - '-1'
       pragma:
@@ -563,17 +579,18 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Thu, 24 Oct 2019
-        15:36:58 GMT","thumbprint":"71813EC09987FB153521F5030FA62BBB449DA52C","isVerified":false,"created":"Mon,
-        21 Oct 2019 15:39:33 GMT","updated":"Mon, 21 Oct 2019 15:39:33 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAjt3wI="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
+        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
+        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}'
     headers:
       cache-control:
       - no-cache
@@ -582,7 +599,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:39 GMT
+      - Tue, 14 Jul 2020 11:35:07 GMT
       expires:
       - '-1'
       pragma:
@@ -614,21 +631,22 @@ interactions:
       Content-Length:
       - '0'
       If-Match:
-      - AAAAAAjt3wI=
+      - AAAAAFSGTeM=
       ParameterSetName:
       - --hub-name -g -n --etag
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/generateVerificationCode?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/generateVerificationCode?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"verificationCode":"03952BAFDCE87CFD9AA275C4F82028A49DED53EA300B7B15","subject":"TESTCERT000001","expiry":"Thu,
-        24 Oct 2019 15:36:58 GMT","thumbprint":"71813EC09987FB153521F5030FA62BBB449DA52C","isVerified":false,"created":"Mon,
-        21 Oct 2019 15:39:33 GMT","updated":"Mon, 21 Oct 2019 15:39:43 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAjt3xg="}'
+      string: '{"properties":{"verificationCode":"206ABC001B5676EE67FF5304E52411C1A7D59126AB093B06","subject":"TESTCERT000001","expiry":"Fri,
+        17 Jul 2020 11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
+        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:09 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGT6k="}'
     headers:
       cache-control:
       - no-cache
@@ -637,7 +655,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:42 GMT
+      - Tue, 14 Jul 2020 11:35:09 GMT
       expires:
       - '-1'
       pragma:
@@ -658,7 +676,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIICF4MVMTtSXMwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRnc3NhZ2x0dTdreGFndHJuMB4XDTE5MTAyMDE1Mzk0M1oXDTE5\r\nMTAyNDE1Mzk0M1owOzE5MDcGA1UEAwwwMDM5NTJCQUZEQ0U4N0NGRDlBQTI3NUM0\r\nRjgyMDI4QTQ5REVENTNFQTMwMEI3QjE1MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQA4sg9gY4Og4lEW23UUt8i8/HmcCvbnbN0xKt304NmT/Ry0r+ZJqeDi\r\nkBiBUynsVJHzHF6HLJlDbG9OU/JtdDeOCdhMeYa2GCS+KbTT9xKCNA2WRu8fWXAt\r\nxcXPYW2ETRjoWJcf8SNrA1PUoeOomg9JCR8ITdtYxe1oeSrPMu0ec0O6W083Lvlv\r\nSehhMQxnWepGfp2SJ5jBnW1eUqjIvSFLZrxrxttLHV6HZPqAxAfvt4Hf/ArT0dMp\r\n8lA/dPx1Fn3v34Hef1UdyoG0YZkJs1OvjLaSoFsctaQ2LQhOtzszAnAEeu2XCZ0K\r\nH1ke4dXyO5gyhm6hSNVvqTb+/bbcazSBAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQA2XorizSoFnN1H\r\n1AUtlLsjvd1qC6f1iu/I2ws3U3JdbXt49CukUUVQs4QU/PI3uyhKxd7Yq7NqQqUe\r\nrsxXO4KoP3L6gzS8Pfw7jPucyiFD8n/XM6QLJ0Ue9WsRMj93QIz3LJTLB/3YAAX/\r\nN/Va7rcbRyI1HnCO2U+zGovBBiO8fFY20Q2WIacFXntAdYw9P+s8j15dafhPxWPa\r\nUe218hnoW8GCHDKf7EFYF14/21Q2IReufqsQPrgvaoF4vTpmzoQmjmnCyK+bOEWE\r\nh411iqyMyvmgDE0XpZFNwfF/lONdukCm9E8AhNUCp+U0s6KPPDvitMLtJTxypBnq\r\nNqTTmV+j\r\n-----END
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIIMB8GQtH2G8AwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzUxMFoXDTIw\r\nMDcxNzExMzUxMFowOzE5MDcGA1UEAwwwMjA2QUJDMDAxQjU2NzZFRTY3RkY1MzA0\r\nRTUyNDExQzFBN0Q1OTEyNkFCMDkzQjA2MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQAxLricd/AJoPKkITZL0IRBRgdkBJoYa2T6HhAhhLYuYBbGRsg8wIAz\r\nkWGk5eidaq6Rqiiqxib//4AuIbWy56930N37XKZUh7BtqBq0pjExaiBoU7mNCM2l\r\ntXMtiNrjVCcQXkRSgECi5+8HbhpFwpc6wMblWrPTAqr7vBV0SI75pePB9NM6S+g3\r\nWoqWXM6bKsHbL5aVvX7ciF1VnSEy4BYKK4+O8oXbj/colkNlBHw90RU+wTmwf0on\r\nLV1T8mTZJ2Xjr2Fu8i1h2UhDokY1XnrB/7Dz1mdgvJXCFEaC1g6+A7VN1fKKrKxv\r\n3Bz+KOrSkq6OlCCy0W36e3mBCkFMpiztAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQANtcYW9+FwKu0f\r\nk70DuRx4VAaAe85EMJOs5EKCO9/pHw8oflUowi247w3R+/od082go26PrELkpfM7\r\nzvtWvMoFcSqEYZyHLa1fL7n4hKMnJX5Y9VZz1ajnAJRcwQarAyGl3jI3AHH0EAcu\r\nEZ3R/YD3xgxTKJhcgCb1vEEL96tvvXvvWCN91j5FaZRivaFw6L0wNUWSnP3Ky11j\r\nL38sN7jrOWmFiHvELlDhur5PWMfwG/w5lWb8e/5xdfEgJP2PbDe2Q7xycmbALaWq\r\nPJ+UeFM/QIUGlwzUY7JtgW2jlqEmXNtgt8+btWak+bpZw3MtqjIB+6Z5R6fjfU1C\r\nKQ+cwEvT\r\n-----END
       CERTIFICATE-----\r\n"}'
     headers:
       Accept:
@@ -674,21 +692,22 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       If-Match:
-      - AAAAAAjt3xg=
+      - AAAAAFSGT6k=
       ParameterSetName:
       - --hub-name -g -n -p --etag
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/verify?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/verify?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Thu, 24 Oct 2019
-        15:36:58 GMT","thumbprint":"71813EC09987FB153521F5030FA62BBB449DA52C","isVerified":true,"created":"Mon,
-        21 Oct 2019 15:39:33 GMT","updated":"Mon, 21 Oct 2019 15:39:46 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAjt3x0="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
+        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":true,"created":"Tue,
+        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:11 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGT7g="}'
     headers:
       cache-control:
       - no-cache
@@ -697,7 +716,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2019 15:39:46 GMT
+      - Tue, 14 Jul 2020 11:35:10 GMT
       expires:
       - '-1'
       pragma:
@@ -713,7 +732,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1193'
     status:
       code: 200
       message: OK
@@ -731,16 +750,17 @@ interactions:
       Content-Length:
       - '0'
       If-Match:
-      - AAAAAAjt3x0=
+      - AAAAAFSGT7g=
       ParameterSetName:
       - --hub-name -g -n --etag
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-iothub/0.8.2 Azure-SDK-For-Python AZURECLI/2.0.75
+      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
+        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
+        AZURECLI/2.9.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2019-03-22-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2020-03-01
   response:
     body:
       string: ''
@@ -750,7 +770,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 21 Oct 2019 15:39:50 GMT
+      - Tue, 14 Jul 2020 11:35:13 GMT
       expires:
       - '-1'
       pragma:
@@ -762,7 +782,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14983'
     status:
       code: 200
       message: OK

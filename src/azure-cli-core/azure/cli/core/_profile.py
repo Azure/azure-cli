@@ -14,7 +14,9 @@ import re
 import string
 from copy import deepcopy
 from enum import Enum
-from six.moves import BaseHTTPServer
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
@@ -22,8 +24,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -34,7 +34,12 @@ logger = get_logger(__name__)
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
+# Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
+# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
+# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+_HOME_TENANT_ID = 'homeTenantId'
+_MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLOUD_SHELL_ID = 'cloudShellID'
@@ -135,7 +140,7 @@ def _get_cloud_console_token_endpoint():
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes
-class Profile(object):
+class Profile:
 
     _global_creds_cache = None
 
@@ -209,9 +214,12 @@ class Profile(object):
                     username, password, tenant, self._ad_resource_uri)
 
         if not allow_no_subscriptions and not subscriptions:
-            raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level access".format(
-                               username))
+            if username:
+                msg = "No subscriptions found for {}.".format(username)
+            else:
+                # Don't show username if bare 'az login' is used
+                msg = "No subscriptions found."
+            raise CLIError(msg)
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -248,7 +256,7 @@ class Profile(object):
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
-            consolidated.append({
+            subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
                 _STATE: s.state.value,
@@ -259,7 +267,15 @@ class Profile(object):
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
-            })
+            }
+            # For subscription account from Subscriptions - List 2019-06-01 and later.
+            if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
+                if hasattr(s, 'home_tenant_id'):
+                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
+                if hasattr(s, 'managed_by_tenants'):
+                    subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+
+            consolidated.append(subscription_dict)
 
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
@@ -291,18 +307,18 @@ class Profile(object):
 
         import jwt
         from requests import HTTPError
-        from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
         if identity_id:
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
+                msi_creds = MSIAuthenticationWrapper(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
                 try:
-                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
+                    msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
                 except HTTPError as ex:
@@ -314,7 +330,7 @@ class Profile(object):
                 if not authenticated:
                     try:
                         identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                        msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
@@ -327,7 +343,7 @@ class Profile(object):
 
         else:
             identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIAuthentication(resource=resource)
+            msi_creds = MSIAuthenticationWrapper(resource=resource)
 
         token_entry = msi_creds.token
         token = token_entry['access_token']
@@ -372,8 +388,8 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        from msrestazure.azure_active_directory import MSIAuthentication
-        auth = MSIAuthentication(resource=resource)
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
+        auth = MSIAuthenticationWrapper(resource=resource)
         auth.set_token()
         token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
@@ -521,7 +537,10 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+        if aux_tenants and aux_subscriptions:
+            raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
+
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -530,12 +549,14 @@ class Profile(object):
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
         external_tenants_info = []
-        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
-        for ext_sub in ext_subs:
-            sub = self.get_subscription(ext_sub)
-            if sub[_TENANT_ID] != account[_TENANT_ID]:
-                # external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
-                external_tenants_info.append(sub)
+        if aux_tenants:
+            external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
+        if aux_subscriptions:
+            ext_subs = [aux_sub for aux_sub in aux_subscriptions if aux_sub != subscription_id]
+            for ext_sub in ext_subs:
+                sub = self.get_subscription(ext_sub)
+                if sub[_TENANT_ID] != account[_TENANT_ID]:
+                    external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
             def _retrieve_token():
@@ -551,13 +572,13 @@ class Profile(object):
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
-                for s in external_tenants_info:
+                for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, s[_TENANT_ID], resource))
+                            username_or_sp_id, sub_tenant_id, resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, s[_TENANT_ID], resource))
+                            username_or_sp_id, resource, sub_tenant_id, resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -571,6 +592,18 @@ class Profile(object):
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
+
+    def get_msal_token(self, scopes, data):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID] or 'common'
+        _, refresh_token, _, _ = self.get_refresh_token()
+        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
+        return username, certificate
 
     def get_refresh_token(self, resource=None,
                           subscription=None):
@@ -587,7 +620,9 @@ class Profile(object):
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
-    def get_raw_token(self, resource=None, subscription=None):
+    def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        if subscription and tenant:
+            raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -595,23 +630,34 @@ class Profile(object):
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
+            # MSI
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for MSI account")
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             msi_creds.set_token()
             token_entry = msi_creds.token
             creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            # Cloud Shell
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             creds = self._get_token_from_cloud_shell(resource)
-
-        elif user_type == _USER:
-            creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                              account[_TENANT_ID], resource)
         else:
-            creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           resource,
-                                                                           account[_TENANT_ID])
+            tenant_dest = tenant if tenant else account[_TENANT_ID]
+            if user_type == _USER:
+                # User
+                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                  tenant_dest, resource)
+            else:
+                # Service Principal
+                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
+                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                               resource,
+                                                                               tenant_dest,
+                                                                               use_cert_sn_issuer)
         return (creds,
-                str(account[_SUBSCRIPTION_ID]),
-                str(account[_TENANT_ID]))
+                None if tenant else str(account[_SUBSCRIPTION_ID]),
+                str(tenant if tenant else account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
@@ -700,9 +746,12 @@ class Profile(object):
         endpoint_mappings['sql_management'] = 'sqlManagementEndpointUrl'
         endpoint_mappings['gallery'] = 'galleryEndpointUrl'
         endpoint_mappings['management'] = 'managementEndpointUrl'
-
+        from azure.cli.core.cloud import CloudEndpointNotSetException
         for e in endpoint_mappings:
-            result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            try:
+                result[endpoint_mappings[e]] = getattr(get_active_cloud(self.cli_ctx).endpoints, e)
+            except CloudEndpointNotSetException:
+                result[endpoint_mappings[e]] = None
         return result
 
     def get_installation_id(self):
@@ -714,7 +763,7 @@ class Profile(object):
         return installation_id
 
 
-class MsiAccountTypes(object):
+class MsiAccountTypes:
     # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
@@ -728,19 +777,19 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from msrestazure.azure_active_directory import MSIAuthentication
+        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthentication(resource=resource)
+            return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthentication(resource=resource, client_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthentication(resource=resource, object_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
         if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
         raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
-class SubscriptionFinder(object):
+class SubscriptionFinder:
     '''finds all subscriptions for a user or service principal'''
 
     def __init__(self, cli_ctx, auth_context_factory, adal_token_cache, arm_client_factory=None):
@@ -838,11 +887,19 @@ class SubscriptionFinder(object):
         from msrest.authentication import BasicTokenAuthentication
 
         all_subscriptions = []
+        empty_tenants = []
+        mfa_tenants = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            # display_name is available since /tenants?api-version=2018-06-01,
+            # not available in /tenants?api-version=2016-06-01
+            if not hasattr(t, 'display_name'):
+                t.display_name = None
+            if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
+                t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
@@ -850,13 +907,54 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    # The tenant requires MFA and can't be accessed with home tenant's refresh token
+                    mfa_tenants.append(t)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
-            all_subscriptions.extend(subscriptions)
 
+            if not subscriptions:
+                empty_tenants.append(t)
+
+            # When a subscription can be listed by multiple tenants, only the first appearance is retained
+            for sub_to_add in subscriptions:
+                add_sub = True
+                for sub_to_compare in all_subscriptions:
+                    if sub_to_add.subscription_id == sub_to_compare.subscription_id:
+                        logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
+                                       "To select a specific tenant when accessing this subscription, "
+                                       "use 'az login --tenant TENANT_ID'.",
+                                       sub_to_add.subscription_id, sub_to_add.display_name,
+                                       sub_to_compare.tenant_id, sub_to_add.tenant_id)
+                        add_sub = False
+                        break
+                if add_sub:
+                    all_subscriptions.append(sub_to_add)
+
+        # Show warning for empty tenants
+        if empty_tenants:
+            logger.warning("The following tenants don't contain accessible subscriptions. "
+                           "Use 'az login --allow-no-subscriptions' to have tenant level access.")
+            for t in empty_tenants:
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
+
+        # Show warning for MFA tenants
+        if mfa_tenants:
+            logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
+                           "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
+            for t in mfa_tenants:
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
@@ -867,13 +965,16 @@ class SubscriptionFinder(object):
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
+            # map tenantId from REST API to homeTenantId
+            if hasattr(s, "tenant_id"):
+                setattr(s, 'home_tenant_id', s.tenant_id)
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
 
 
-class CredsCache(object):
+class CredsCache:
     '''Caches AAD tokena and service principal secrets, and persistence will
     also be handled
     '''
@@ -924,14 +1025,36 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
+    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
+        tenant = tenant or 'organizations'
+        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
+        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
+
+        return result["access_token"]
+
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
-                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise CLIError("Please run 'az account set' to select active account.")
-        cred = matched[0]
-        context = self._auth_ctx_factory(self._ctx, cred[_SERVICE_PRINCIPAL_TENANT], None)
+            raise CLIError("Could not retrieve credential from local cache for service principal {}. "
+                           "Please run 'az login' for this service principal."
+                           .format(sp_id))
+        matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        if matched_with_tenant:
+            cred = matched_with_tenant[0]
+        else:
+            logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
+                           "Trying credential under tenant %s, assuming that is an app credential.",
+                           sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
+            cred = matched[0]
+
+        context = self._auth_ctx_factory(self._ctx, tenant, None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None),
                                        use_cert_sn_issuer)
@@ -1009,27 +1132,30 @@ class CredsCache(object):
         _delete_file(self._token_file)
 
 
-class ServicePrincipalAuth(object):
+class ServicePrincipalAuth:
 
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
             self.public_certificate = None
-            with open(certificate_file, 'r') as file_reader:
-                self.cert_file_string = file_reader.read()
-                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                self.thumbprint = cert.digest("sha1").decode()
-                if use_cert_sn_issuer:
-                    # low-tech but safe parsing based on
-                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
-                                      self.cert_file_string, re.I)
-                    self.public_certificate = match.group('public').strip()
+            try:
+                with open(certificate_file, 'r') as file_reader:
+                    self.cert_file_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                    self.thumbprint = cert.digest("sha1").decode()
+                    if use_cert_sn_issuer:
+                        # low-tech but safe parsing based on
+                        # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                          self.cert_file_string, re.I)
+                        self.public_certificate = match.group('public').strip()
+            except UnicodeDecodeError:
+                raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
 
@@ -1053,43 +1179,43 @@ class ServicePrincipalAuth(object):
         return entry
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
-    query_params = {}
-
-
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    # pylint: disable=line-too-long
-
-    def do_GET(self):
-        try:
-            from urllib.parse import parse_qs
-        except ImportError:
-            from urlparse import parse_qs  # pylint: disable=import-error
-
-        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
-            self.send_response(204)
-            return
-
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
-        self.server.query_params = query
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
-                                    'ok.html' if 'code' in query else 'fail.html')
-        with open(landing_file, 'rb') as html_file:
-            self.wfile.write(html_file.read())
-
-    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        pass  # this prevent http server from dumping messages to stdout
-
-
 def _get_authorization_code_worker(authority_url, resource, results):
+    # pylint: disable=too-many-statements
     import socket
     import random
+    import http.server
+
+    class ClientRedirectServer(http.server.HTTPServer):  # pylint: disable=too-few-public-methods
+        query_params = {}
+
+    class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
+        # pylint: disable=line-too-long
+
+        def do_GET(self):
+            try:
+                from urllib.parse import parse_qs
+            except ImportError:
+                from urlparse import parse_qs  # pylint: disable=import-error
+
+            if self.path.endswith('/favicon.ico'):  # deal with legacy IE
+                self.send_response(204)
+                return
+
+            query = self.path.split('?', 1)[-1]
+            query = parse_qs(query, keep_blank_values=True)
+            self.server.query_params = query
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
+                                        'ok.html' if 'code' in query else 'fail.html')
+            with open(landing_file, 'rb') as html_file:
+                self.wfile.write(html_file.read())
+
+        def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
+            pass  # this prevent http server from dumping messages to stdout
 
     reply_url = None
 
@@ -1109,6 +1235,11 @@ def _get_authorization_code_worker(authority_url, resource, results):
             break
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+        except UnicodeDecodeError:
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
+                           "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
+            break
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")

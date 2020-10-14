@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: hybrid-2019-03-01. Python module name can't begin with a digit.
     target_profile=hybrid_${target_profile//-/_}
 fi
-echo Pick up profile: $target_profile 
+echo Pick up profile: $target_profile
 
 ##############################################
 # Define colored output func
@@ -92,10 +92,7 @@ CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',

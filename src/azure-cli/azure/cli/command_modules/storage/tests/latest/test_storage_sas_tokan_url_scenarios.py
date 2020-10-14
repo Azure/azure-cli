@@ -47,23 +47,30 @@ class StorageBlobShareScenarios(StorageScenarioMixin, LiveScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
         source_file = self.create_temp_file(128, full_random=False)
-        blob = "blob"
+        blob = "blob 1"
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.storage_cmd('storage container exists -n {}', account_info, container) \
             .assert_with_checks(JMESPathCheck('exists', True))
 
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {}', account_info,
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n "{}"', account_info,
                          container, source_file, blob)
-        self.storage_cmd('storage blob exists -c {} -n {}', account_info, container, blob) \
+        self.storage_cmd('storage blob exists -c {} -n "{}"', account_info, container, blob) \
             .assert_with_checks(JMESPathCheck('exists', True))
 
-        sas_token = self.cmd(
-            'storage blob generate-sas -c {} -n {} --permissions rw --https-only --expiry {} --account-name {} -otsv'.format(
-                container, blob, expiry, storage_account)).output.strip()
+        sas_token = self.storage_cmd(
+            'storage blob generate-sas -c {} -n "{}" --permissions rw --https-only --expiry {} --account-name {} -otsv',
+            account_info, container, blob, expiry, storage_account).output.strip()
         # print(sas_token
-        blob_url = self.cmd(
-            'storage blob url -c {} -n {} --account-name {} --sas-token "{}" -otsv'.format(
-                container, blob, storage_account, sas_token)).output.strip()
+        blob_url = self.storage_cmd(
+            'storage blob url -c {} -n "{}" --account-name {} --sas-token "{}" -otsv', account_info,
+            container, blob, storage_account, sas_token).output.strip()
         self.assertIn('?' + sas_token, blob_url)
         self.assertEqual(requests.get(blob_url).status_code, 200)
+
+        sas_token_uri = self.storage_cmd(
+            'storage blob generate-sas -c {} -n "{}" --permissions rw --https-only --expiry {} --account-name {} --full-uri -otsv',
+            account_info, container, blob, expiry, storage_account).output.strip()
+
+        self.assertIn("blob%201", sas_token_uri)
+        self.assertEqual(sas_token_uri, blob_url)

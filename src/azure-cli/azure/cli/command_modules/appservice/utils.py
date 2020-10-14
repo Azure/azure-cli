@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from knack.util import CLIError
 
 
@@ -39,6 +40,8 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
         return 'PREMIUM'
     if tier in ['P1V2', 'P2V2', 'P3V2']:
         return 'PREMIUMV2'
+    if tier in ['P1V3', 'P2V3', 'P3V3']:
+        return 'PREMIUMV3'
     if tier in ['PC2', 'PC3', 'PC4']:
         return 'PremiumContainer'
     if tier in ['EP1', 'EP2', 'EP3']:
@@ -46,3 +49,19 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     if tier in ['I1', 'I2', 'I3']:
         return 'Isolated'
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
+def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
+    def decorate(func):
+        def call(*args, **kwargs):
+            current_retry = retries
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except excpt_type as exception:  # pylint: disable=broad-except
+                    current_retry -= 1
+                    if current_retry <= 0:
+                        raise exception
+                time.sleep(interval_sec)
+        return call
+    return decorate

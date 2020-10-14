@@ -9,10 +9,11 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-set PYTHON_VERSION=3.6.6
+set PYTHON_VERSION=3.6.8
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
-set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python366-32.zip"
+set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python368-32.zip"
+set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
@@ -25,13 +26,14 @@ mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
-set PYTHON_DIR=%ARTIFACTS_DIR%\Python366-32
+set PYTHON_DIR=%ARTIFACTS_DIR%\Python368-32
+set PROPAGATE_ENV_CHANGE_DIR=%~dp0..\propagate_env_change
 
 set REPO_ROOT=%~dp0..\..\..
 
 ::reset working folders
 if exist %BUILDING_DIR% rmdir /s /q %BUILDING_DIR%
-::rmdir always returns 0, so check folder's existence 
+::rmdir always returns 0, so check folder's existence
 if exist %BUILDING_DIR% (
     echo Failed to delete %BUILDING_DIR%.
     goto ERROR
@@ -73,10 +75,10 @@ if not exist %PYTHON_DIR% (
     mkdir %PYTHON_DIR%
     pushd %PYTHON_DIR%
     echo Downloading Python.
-    curl -o Python366-32.zip %PYTHON_DOWNLOAD_URL% -k
-    unzip -q Python366-32.zip
+    curl -o Python368-32.zip %PYTHON_DOWNLOAD_URL% -k
+    unzip -q Python368-32.zip
     if %errorlevel% neq 0 goto ERROR
-    del Python366-32.zip
+    del Python368-32.zip
     echo Python downloaded and extracted successfully.
     popd
 )
@@ -84,28 +86,16 @@ set PYTHON_EXE=%PYTHON_DIR%\python.exe
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
-:: Build & install all the packages with bdist_wheel
-%BUILDING_DIR%\python.exe -m pip install wheel
-echo Building CLI packages...
 set CLI_SRC=%REPO_ROOT%\src
-for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
+for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
-   %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
+   %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
    popd
 )
-echo Built CLI packages successfully.
+%BUILDING_DIR%\python.exe -m pip install -r %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
 if %errorlevel% neq 0 goto ERROR
-
-set ALL_MODULES=
-for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
-    set ALL_MODULES=!ALL_MODULES! %%i
-)
-echo All modules: %ALL_MODULES%
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir %ALL_MODULES%
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall urllib3==1.24.2
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe %~dp0\patch_models_v2.py
@@ -114,9 +104,11 @@ popd
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
 copy %REPO_ROOT%\build_scripts\windows\scripts\az.cmd %BUILDING_DIR%\wbin\
+copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
 copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING_DIR%
+copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 :: Use universal files and remove Py3 only files
 pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt
@@ -128,6 +120,11 @@ for /f %%a in ('dir /b /s *_py3.*.pyc') do (
     set PY3_FILE=%%a
     if exist !PY3_FILE! del !PY3_FILE!
 )
+popd
+
+:: Remove unused Network SDK API versions
+pushd %BUILDING_DIR%\Lib\site-packages\azure\mgmt\network
+rmdir /s /q v2016_09_01 v2016_12_01 v2017_03_01 v2017_06_01 v2017_08_01 v2017_09_01 v2017_11_01 v2018_02_01 v2018_04_01 v2018_06_01 v2018_10_01 v2018_12_01 v2019_04_01 v2019_08_01 v2019_09_01 v2019_11_01 v2019_12_01 v2020_03_01
 popd
 
 :: Remove .py and only deploy .pyc files
@@ -153,6 +150,20 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
 )
 
 if %errorlevel% neq 0 goto ERROR
+
+::ensure propagate_env_change.exe is available
+if exist "%PROPAGATE_ENV_CHANGE_DIR%\propagate_env_change.exe" (
+    echo Using existing propagate_env_change.exe at %PROPAGATE_ENV_CHANGE_DIR%
+) else (
+    pushd %PROPAGATE_ENV_CHANGE_DIR%
+    echo Downloading propagate_env_change.exe.
+    curl -o propagate_env_change.zip %PROPAGATE_ENV_CHANGE_DOWNLOAD_URL% -k
+    unzip -q propagate_env_change.zip
+    if %errorlevel% neq 0 goto ERROR
+    del propagate_env_change.zip
+    echo propagate_env_change.exe downloaded and extracted successfully.
+    popd
+)
 
 echo Building MSI...
 msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj

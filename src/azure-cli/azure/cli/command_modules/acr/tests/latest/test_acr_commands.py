@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
+from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
 from azure.cli.command_modules.acr.custom import DEF_DIAG_SETTINGS_NAME_TEMPLATE
 
 
@@ -80,7 +81,7 @@ class AcrCommandsTests(ScenarioTest):
         assert password2 != renewed_password2
 
         # test acr delete
-        self.cmd('acr delete -n {} -g {}'.format(registry_name, resource_group))
+        self.cmd('acr delete -n {} -g {} -y'.format(registry_name, resource_group))
 
     def test_check_name_availability(self):
         # the chance of this randomly generated name has a duplication is rare
@@ -178,13 +179,14 @@ class AcrCommandsTests(ScenarioTest):
         # test webhook delete
         self.cmd('acr webhook delete -n {webhook_name} -r {registry_name}')
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
         # replication location should be different from registry location
-        replication_location = 'southcentralus'
+        replication_location = 'centralus'
         replication_name = replication_location
 
         self.kwargs.update({
@@ -207,25 +209,41 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc}',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('location', '{replication_loc}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('regionEndpointEnabled', True)])
 
         self.cmd('acr replication list -r {registry_name}',
                  checks=[self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[1].provisioningState', 'Succeeded')])
+
         self.cmd('acr replication show -n {replication_name} -r {registry_name}',
                  checks=[self.check('name', '{replication_name}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('regionEndpointEnabled', True)
+                         ])
 
         # update replication
-        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags}',
+        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --region-endpoint-enabled false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded'),
+                         self.check('regionEndpointEnabled', False),
                          self.check('tags', {'key': 'value'})])
 
         # test replication delete
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
+
+        # test create replication disable on home region
+        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --region-endpoint-enabled false',
+                 checks=[self.check('name', '{replication_name}'),
+                         self.check('location', '{replication_loc}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('regionEndpointEnabled', False)])
+
+        # test replication delete
+        self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
+
         # test acr delete
-        self.cmd('acr delete -n {registry_name} -g {rg}')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
     @ResourceGroupPreparer()
     @record_only()
@@ -340,3 +358,217 @@ class AcrCommandsTests(ScenarioTest):
             self.check('logs[1].category', 'ContainerRegistryLoginEvents'),
             self.check('metrics[0].category', 'AllMetrics'),
         ])
+
+    @ResourceGroupPreparer()
+    @KeyVaultPreparer()
+    def test_acr_encryption_with_cmk(self, key_vault, resource_group):
+        self.kwargs.update({
+            'key_vault': key_vault,
+            'key_name': self.create_random_name('testkey', 20),
+            'rotate_key_name': self.create_random_name('rotatekey', 20),
+            'identity_name': self.create_random_name('testidentity', 20),
+            'identity_permissions': "get unwrapkey wrapkey",
+            'registry_name': self.create_random_name('testreg', 20),
+        })
+
+        # update kv key protection settings and create a new key
+        self.cmd('keyvault update --name {key_vault} --enable-soft-delete --enable-purge-protection')
+        result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
+        self.kwargs['key_id'] = result.get_output_in_json()['key']['kid']
+
+        # create a user-assigned identity and give it access to the key
+        result = self.cmd('identity create --name {identity_name} -g {rg}')
+        self.kwargs['principal_id'] = result.get_output_in_json()['principalId']
+        self.kwargs['identity_id'] = result.get_output_in_json()['id']
+        self.kwargs['client_id'] = result.get_output_in_json()['clientId']
+
+        self.cmd('keyvault set-policy --object-id {principal_id} --name {key_vault} --key-permissions {identity_permissions}')
+
+        # create the registry with CMK encryption enabled using the user-assigned identity
+        result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
+            self.check('identity.type', 'UserAssigned'),
+            self.check('encryption.status', 'enabled'),
+            self.check('encryption.keyVaultProperties.identity', '{client_id}'),
+            self.check('encryption.keyVaultProperties.keyIdentifier', '{key_id}')
+        ])
+
+        self.assertTrue(bool(result.get_output_in_json()['identity']['userAssignedIdentities']))
+
+        # rotate key and show encryption
+        result = self.cmd('keyvault key create --name {rotate_key_name} --vault-name {key_vault}')
+        self.kwargs['rotate_key_id'] = result.get_output_in_json()['key']['kid']
+        self.cmd('acr encryption rotate-key --name {registry_name} --identity {identity_id} --key-encryption-key {rotate_key_id} -g {rg}',
+                 self.check('encryption.keyVaultProperties.keyIdentifier', '{rotate_key_id}'))
+
+        # show encryption
+        self.cmd('acr encryption show --name {registry_name} -g {rg}', self.check('keyVaultProperties.keyIdentifier', '{rotate_key_id}'))
+
+    @ResourceGroupPreparer()
+    def test_acr_identity(self, resource_group):
+        self.kwargs.update({
+            'identity_name': self.create_random_name('testidentity', 30),
+            'second_identity_name': self.create_random_name('testidentity2', 30),
+            'registry_name': self.create_random_name('testreg', 25),
+            'system_identity': '[system]'
+        })
+
+        # create registry
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium')
+
+        # create user-assigned identities
+        result = self.cmd('identity create --name {identity_name} -g {rg}')
+        self.kwargs['identity_id'] = result.get_output_in_json()['id']
+
+        result = self.cmd('identity create --name {second_identity_name} -g {rg}')
+        self.kwargs['second_identity_id'] = result.get_output_in_json()['id']
+
+        # add identities
+        self.cmd('acr identity assign --name {registry_name} --identities "{system_identity}" "{identity_id}"')
+
+        # show identity
+        result = self.cmd('acr identity show --name {registry_name}').get_output_in_json()
+        self.assertTrue('SystemAssigned' in result['type'])
+        self.assertTrue('UserAssigned' in result['type'])
+        self.assertTrue(len(result['userAssignedIdentities']) == 1)
+        self.assertEquals(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
+
+        # remove identities
+        import time
+        time.sleep(10)
+        self.cmd('acr identity remove --name {registry_name} --identities "{system_identity}" "{identity_id}"', self.check('identity', None))
+
+        # try different combinations of adds and deletes
+        # system
+        self.cmd('acr identity assign --name {registry_name} --identities {system_identity}', self.check('identity.type', 'SystemAssigned'))
+        time.sleep(10)
+        self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
+        # user
+        self.cmd('acr identity assign --name {registry_name} --identities {identity_id}', self.check('identity.type', 'UserAssigned'))
+        time.sleep(10)
+        self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity', None))
+
+        # add multiple identities
+        result = self.cmd('acr identity assign --name {registry_name} --identities "{system_identity}" "{identity_id}"',
+                          self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
+        self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
+        # add another user identity to existing
+        time.sleep(10)
+        result = self.cmd('acr identity assign --name {registry_name} --identities {second_identity_id}',
+                          self.check('identity.type', 'SystemAssigned, UserAssigned')).get_output_in_json()
+        self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower(), self.kwargs['second_identity_id'].lower()], result['identity'])
+
+        # remove identities and validate result
+        time.sleep(10)
+        self.cmd('acr identity remove --name {registry_name} --identities {second_identity_id}', self.check('identity.type', 'SystemAssigned, UserAssigned'))
+
+        self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'SystemAssigned'))
+        self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
+
+    @ResourceGroupPreparer()
+    def test_acr_with_dedicated_data_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+            'rg_loc': resource_group_location,
+            'replication_loc': 'southcentralus'
+        })
+        login_server = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()['loginServer']
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 1),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
+            self.check('dataEndpoints[0].region', resource_group_location),
+            self.check('loginServer', login_server)
+        ])
+        suffix = login_server.split('.', 1)[1]
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('dataEndpoints[0].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['rg_loc'], suffix)),
+        ])
+        self.cmd('acr replication create -r {registry_name} -l {replication_loc}')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 2),
+            self.check('dataEndpoints[0].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['replication_loc'], suffix)),
+            self.check('dataEndpoints[1].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['rg_loc'], suffix)),
+        ])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled false')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 2),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
+            self.check('dataEndpoints[1].endpoint', '*.blob.core.windows.net'),
+        ])
+
+    @ResourceGroupPreparer()
+    def test_acr_with_public_network_access(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
+                 checks=self.check('publicNetworkAccess', 'Enabled'))
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
+                 checks=self.check('publicNetworkAccess', 'Disabled'))
+
+    @ResourceGroupPreparer(location='centraluseuap')
+    def test_acr_with_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+            'vnet_name': self.create_random_name('testvnet', 20),
+            'subnet_name': self.create_random_name('testsubnet', 20),
+            'endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'second_endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'second_endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'description_msg': 'somedescription'
+        })
+
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()
+        self.kwargs['registry_id'] = result['id']
+
+        # add an endpoint and approve it
+        result = self.cmd('network private-endpoint create -n {endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name}  '
+                          '--private-connection-resource-id {registry_id} --group-ids registry --connection-name {endpoint_conn_name} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd('acr private-endpoint-connection list -g {rg} --registry-name {registry_name}').get_output_in_json()
+        self.kwargs['endpoint_request'] = result[0]['name']
+
+        self.cmd('acr private-endpoint-connection approve -g {rg} --registry-name {registry_name} -n {endpoint_request} --description {description_msg}', checks=[
+            self.check('privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('privateLinkServiceConnectionState.description', '{description_msg}')
+        ])
+
+        # add an endpoint and then reject it
+        self.cmd('network private-endpoint create -n {second_endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name} --private-connection-resource-id {registry_id} --group-ids registry --connection-name {second_endpoint_conn_name} --manual-request')
+        result = self.cmd('az acr private-endpoint-connection list -g {rg} -r {registry_name}').get_output_in_json()
+
+        # the connection request name starts with the registry / resource name
+        self.kwargs['second_endpoint_request'] = [conn['name'] for conn in result if self.kwargs['second_endpoint_name'].lower() in conn['privateEndpoint']['id'].lower()][0]
+
+        self.cmd('acr private-endpoint-connection reject -g {rg} -r {registry_name} -n {second_endpoint_request} --description {description_msg}', checks=[
+            self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('privateLinkServiceConnectionState.description', '{description_msg}')
+        ])
+
+        # list endpoints
+        self.cmd('acr private-endpoint-connection list -g {rg} -r {registry_name}', checks=[
+            self.check('length(@)', '2'),
+        ])
+
+        # remove endpoints
+        self.cmd('acr private-endpoint-connection delete -g {rg} --registry-name {registry_name} -n {second_endpoint_request}')
+        self.cmd('acr private-endpoint-connection show -g {rg} -r {registry_name} -n {endpoint_request}', checks=[
+            self.check('privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('privateLinkServiceConnectionState.description', '{description_msg}'),
+            self.check('name', '{endpoint_request}')
+        ])
+
+        self.cmd('acr private-endpoint-connection delete -g {rg} --registry-name {registry_name} -n {endpoint_request}')
+        result = self.cmd('acr private-endpoint-connection list -g {rg} -r {registry_name}').get_output_in_json()
+        self.assertFalse(result)
+
+    def assertUserIdentitiesExpected(self, query_identities, result):
+        result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
+        self.assertEqual(len(result['userAssignedIdentities']), len(query_identities))
+        self.assertEqual(sorted(result_identities), sorted(query_identities))
