@@ -123,6 +123,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up)
     helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
+    if runtime:
+        runtime = helper.remove_delimiters(runtime)
 
     current_stack = None
     if is_linux:
@@ -2534,6 +2536,11 @@ class _StackRuntimeHelper:
         self._linux = linux
         self._stacks = []
 
+    def remove_delimiters(self, runtime):
+        import re
+        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        return '|'.join(filter(None, runtime))
+
     def resolve(self, display_name):
         self._load_stacks_hardcoded()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
@@ -3558,8 +3565,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         raise CLIError('Conflicting parameters: cannot have both --runtime and --html specified.')
 
     if runtime:
-        # TODO calvin: Change helper.resolve to accept different separators ('|', ',', etc)
         helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
+        runtime = helper.remove_delimiters(runtime)
         match = helper.resolve(runtime)
         if not match:
             if _is_linux:
@@ -3615,7 +3622,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
-                           "'{}'. Please create a new app"
+                           "'{}'. Please create a new app "
                            "to continue this operation.".format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
