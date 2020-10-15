@@ -358,6 +358,8 @@ jobs:
         pip install pytest-html
         pip install pytest-rerunfailures
 
+        azdev setup -c azure-cli -r azure-cli-extensions
+
         # Remove ext- prefix
         FinalTarget="$(Target)"
         if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
@@ -367,8 +369,6 @@ jobs:
           azdev extension add ${FinalTarget}
         fi
         echo ${FinalTarget}
-
-        azdev setup -c azure-cli -r azure-cli-extensions
 
         az -v
         # az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
