@@ -11,10 +11,6 @@ from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 
-static_account_name = 'sdktest2'
-static_rg = 'sdktest'
-
-
 class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
     def _get_test_data_file(self, filename):
@@ -52,11 +48,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('thumbprintAlgorithm', 'sha1'),
             self.check('state', 'deleting')])
 
-    # Since this test requires core quota, we must statically create an account with quota
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_pool_cmd(
             self,
-            resource_group=static_rg,
-            batch_account_name=static_account_name):
+            resource_group,
+            batch_account_name):
         endpoint = self.get_account_endpoint(
             batch_account_name,
             resource_group).replace("https://", "")
@@ -132,10 +129,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_job_list_cmd(
             self,
-            resource_group=static_rg,
-            batch_account_name=static_account_name):
+            resource_group,
+            batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
             'j_id': 'xplatJob',
@@ -275,10 +274,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # TODO: test task commands
 
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer()
     def test_batch_pools_and_nodes(
             self,
-            resource_group=static_rg,
-            batch_account_name=static_account_name):  # pylint:disable=too-many-statements
+            resource_group,
+            batch_account_name):  # pylint:disable=too-many-statements
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
             'pool_p': "azure-cli-test-paas",

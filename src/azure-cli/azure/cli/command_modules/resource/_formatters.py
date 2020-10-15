@@ -62,16 +62,16 @@ _property_change_type_to_weight = {
 
 def format_what_if_operation_result(what_if_operation_result, enable_color=True):
     builder = ColoredStringBuilder(enable_color)
-    _format_preview_notice(builder)
+    _format_noise_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
     _format_resource_changes(builder, what_if_operation_result.changes)
     _format_resource_changes_stats(builder, what_if_operation_result.changes)
     return builder.build()
 
 
-def _format_preview_notice(builder):
+def _format_noise_notice(builder):
     builder.append_line(
-        """Note: As What-If is currently in preview, the result may contain false positive predictions (noise).
+        """Note: The result may contain false positive predictions (noise).
 You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues."""
     )
     builder.append_line()

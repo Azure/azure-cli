@@ -1973,6 +1973,7 @@ def list_publish_profiles(cmd, resource_group_name, name, slot=None, xml=False):
                 new[key.lstrip('@')] = profile[key]
             converted.append(new)
         return converted
+    cmd.cli_ctx.invocation.data['output'] = 'tsv'
     return full_xml
 
 
@@ -3660,11 +3661,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path)
-    # Remove the file after deployment, handling exception if user removed the file manually
-    try:
-        os.remove(zip_file_path)
-    except OSError:
-        pass
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -3760,7 +3756,7 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
     if timeout:
         time.sleep(int(timeout))
     else:
-        while t.isAlive():
+        while t.is_alive():
             time.sleep(5)
 
 
@@ -3782,7 +3778,7 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     if timeout:
         time.sleep(int(timeout))
     else:
-        while s.isAlive() and t.isAlive():
+        while s.is_alive() and t.is_alive():
             time.sleep(5)
 
 

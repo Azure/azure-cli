@@ -24,6 +24,7 @@ import threading
 import time
 import uuid
 import webbrowser
+from math import isnan
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
@@ -95,6 +96,8 @@ from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _s
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
+
+from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
 
 logger = get_logger(__name__)
 
@@ -1449,11 +1452,14 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     addon_profiles = instance.addon_profiles or {}
     # addon name is case insensitive
     addon_profile = next((addon_profiles[k] for k in addon_profiles if k.lower() == 'kubeDashboard'.lower()),
-                         ManagedClusterAddonProfile(enabled=True))
+                         ManagedClusterAddonProfile(enabled=False))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
-                       'To use "az aks browse" first enable the add-on\n'
-                       'by running "az aks enable-addons --addons kube-dashboard".')
+                       'To use "az aks browse" first enable the add-on '
+                       'by running "az aks enable-addons --addons kube-dashboard".\n'
+                       'Starting with Kubernetes 1.19, AKS no longer support installation of '
+                       'the managed kube-dashboard addon.\n'
+                       'Please use the Kubernetes resources view in the Azure portal (preview) instead.')
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
@@ -1584,6 +1590,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                admin_username="azureuser",
                windows_admin_username=None,
                windows_admin_password=None,
+               enable_ahub=False,
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
@@ -1698,9 +1705,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 raise CLIError(
                     'Please specify both username and password in non-interactive mode.')
 
+        windows_license_type = None
+        if enable_ahub:
+            windows_license_type = 'Windows_Server'
+
         windows_profile = ManagedClusterWindowsProfile(
             admin_username=windows_admin_username,
-            admin_password=windows_admin_password)
+            admin_password=windows_admin_password,
+            license_type=windows_license_type)
 
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
@@ -2092,6 +2104,8 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_aad=False,
                aad_tenant_id=None,
                aad_admin_group_object_ids=None,
+               enable_ahub=False,
+               disable_ahub=False,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2108,7 +2122,9 @@ def aks_update(cmd, client, resource_group_name, name,
             not uptime_sla and
             api_server_authorized_ip_ranges is None and
             not enable_aad and
-            not update_aad_profile):
+            not update_aad_profile and
+            not enable_ahub and
+            not disable_ahub):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2123,7 +2139,9 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
-                       '"--aad-admin-group-object-ids"')
+                       '"--aad-admin-group-object-ids" or '
+                       '"--enable-ahub" or '
+                       '"--disable-ahub"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2232,6 +2250,14 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(aad_admin_group_object_ids)
+
+    if enable_ahub and disable_ahub:
+        raise CLIError('Cannot specify "--enable-ahub" and "--disable-ahub" at the same time')
+
+    if enable_ahub:
+        instance.windows_profile.license_type = 'Windows_Server'
+    if disable_ahub:
+        instance.windows_profile.license_type = 'None'
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2403,8 +2429,12 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # addon name is case insensitive
-        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
+
+        # honor addon names defined in Azure CLI
+        for key in list(addon_profiles):
+            if key.lower() == addon.lower() and key != addon:
+                addon_profiles[addon] = addon_profiles.pop(key)
+
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -2714,8 +2744,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
-    if 'loganalyticsworkspaceresourceid' in addon.config:
-        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+    for key in list(addon.config):
+        if key.lower() == 'loganalyticsworkspaceresourceid' and key != 'logAnalyticsWorkspaceResourceID':
+            addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop(key)
 
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
 
@@ -2880,6 +2911,9 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+                      eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
+                      spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
                       mode="User",
@@ -2919,10 +2953,17 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
+        scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         mode=mode
     )
+
+    if priority == CONST_SCALE_SET_PRIORITY_SPOT:
+        agent_pool.scale_set_eviction_policy = eviction_policy
+        if isnan(spot_max_price):
+            spot_max_price = -1
+        agent_pool.spot_max_price = spot_max_price
 
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
 

@@ -6,7 +6,7 @@
 import array
 
 from knack.util import CLIError
-from .byte_shares import ByteShares
+from azure.cli.command_modules.keyvault.security_domain.byte_shares import ByteShares
 
 
 class SharedSecret:
