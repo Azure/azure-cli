@@ -6,6 +6,7 @@ Release History
 0.6.0
 ++++++
 * Remove module iotcentral.
+* Support testing Azure CLI extensions.
 
 0.5.0
 ++++++
