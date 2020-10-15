@@ -303,3 +303,24 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # and recheck the other properties are unchanged
         assert volume['usageThreshold'] == 200 * GIB_SCALE
         assert volume['serviceLevel'] == "Standard"
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
+    def test_change_pool(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool2_name = self.create_random_name(prefix='cli-pool-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # create a new pool to move the volume to
+        pool2 = self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s" % ('{rg}', account_name, pool2_name, RG_LOCATION, POOL_DEFAULT)).get_output_in_json()
+        assert pool2['name'] == account_name + '/' + pool2_name
+
+        # change volume to pool2
+        self.cmd("az netappfiles volume pool_change -g {rg} -a %s -p %s -v %s -d %s" % (account_name, pool_name, volume_name, pool2['id']))
+
+        # Make sure that the volume was changed to pool2
+        volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s" % (account_name, pool2_name, volume_name)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool2_name + '/' + volume_name

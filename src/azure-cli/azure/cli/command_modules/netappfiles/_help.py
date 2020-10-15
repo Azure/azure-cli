@@ -599,3 +599,21 @@ examples:
     text: >
         az netappfiles volume update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --service-level ultra --usage-threshold 100 --tags mytag=specialvol
 """
+
+helps['netappfiles volume pool_change'] = """
+type: command
+short-summary: Get the specified ANF volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --new_pool_resource_id -d
+    short-summary: The resource id of the new ANF pool
+examples:
+  - name: Returns the properties of the given ANF volume
+    text: >
+        az netappfiles volume pool_change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""

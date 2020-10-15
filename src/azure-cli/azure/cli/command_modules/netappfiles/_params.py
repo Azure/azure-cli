@@ -59,6 +59,9 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
         c.argument('snapshot_id', options_list=['--snapshot-id', '-s'], help='Resource id of the snapshot', id_part=None)
 
+    with self.argument_context('netappfiles volume pool_change') as c:
+        c.argument('new_pool_resource_id', options_list=['--new-pool-resource-id', '-d'], help='Resource id of the new pool', id_part=None)
+
     with self.argument_context('netappfiles volume export-policy list') as c:
         c.argument('account_name', id_part=None)
         c.argument('pool_name', pool_name_type, id_part=None)
