@@ -716,49 +716,34 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='southeastasia')
-    @SqlServerPreparer(location='southeastasia')
-    def test_sql_db_short_term_retention(self, resource_group, resource_group_location, server):
-        database_name = "cliautomationdb"
-
-        # Create db
-        print('Creating sql db...\n')
-        self.cmd('sql db create -g {} -s {} -n {}'
-                 .format(resource_group, server, database_name))
-
-        # Update arguments
-        print('Updating arguments...\n')
+    def test_sql_db_short_term_retention(self):
+    
+        # Initial parameters. default_diffbackup_hours will be changed to 24 soon. 
         self.kwargs.update({
-            'resource_group': resource_group,
-            'server_name': server,
-            'database_name': database_name,
-            'retention_days': '7',
-            'diffbackup_hours': '24'
-        })
-
-        # Test update short term retention policy on live database
-        print('Testing sql db str-policy set...\n')
-        self.cmd(
-            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days} --diffbackup-hours {diffbackup_hours}',
-            checks=[
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours}')])
-
-        # Test get short term retention policy on live database
-        print('Testing sql db str-policy show...\n')
+            'resource_group': 'ConvertSPOResourceGroup',
+            'server_name': 'convertsposerver1',
+            'database_name': 'testdb1',
+            'default_retention_days': 7,
+            'default_diffbackup_hours': 12,
+            'target_retention_days': 6,
+            'target_diffbackup_hours': 24
+        })    
+        
+        # Test GET short term retention policy on live database
         self.cmd(
             'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours}')])
-
-        # Delete by group/server/name
-        print('Deleting sql db...\n')
-        self.cmd('az sql db delete --name {database_name} --resource-group {resource_group} --server {server_name}',
-                 checks=[NoneCheck()])
-
+                self.check('retentionDays', '{default_retention_days}'),
+                self.check('diffBackupIntervalInHours', '{default_diffbackup_hours}')])
+                
+        # Test UPDATE short term retention policy on live database
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {target_retention_days} --diffbackup-hours {target_diffbackup_hours}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{target_retention_days}'),
+                self.check('diffBackupIntervalInHours', '{target_diffbackup_hours}')])
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
