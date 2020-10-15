@@ -2027,7 +2027,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_create_with_ppg(self, resource_group, resource_group_location):
+    def test_aks_create_with_ppg(self, resource_group, resource_group_location, sp_name, sp_password)):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -2037,6 +2037,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
             'dns_name_prefix': self.create_random_name('cliaksdns', 16),
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
@@ -2047,7 +2049,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
             '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-            '--ppg={ppg} '
+            '--service-principal={service_principal} --client-secret={client_secret} --ppg={ppg} '
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
