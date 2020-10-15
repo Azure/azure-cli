@@ -409,7 +409,6 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
-
     @live_only()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_choose_os(self, resource_group):

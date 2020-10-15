@@ -60,7 +60,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src, get_current_stack_from_runtime)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
 
 logger = get_logger(__name__)
 
@@ -92,7 +92,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
-    node_default_version = NODE_VERSION_DEFAULT
+    node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = client.check_name_availability(name, 'Site')
@@ -2536,7 +2536,8 @@ class _StackRuntimeHelper:
         self._linux = linux
         self._stacks = []
 
-    def remove_delimiters(self, runtime):
+    @staticmethod
+    def remove_delimiters(runtime):
         import re
         runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
         return '|'.join(filter(None, runtime))
@@ -3547,8 +3548,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, os_type=None, runtime=None, dryrun=False,  # pylint: disable=too-many-statements,
-              logs=False, launch_browser=False, html=False):
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
+              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
