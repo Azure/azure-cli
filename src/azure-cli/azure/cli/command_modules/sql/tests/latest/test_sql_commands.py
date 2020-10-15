@@ -717,33 +717,42 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
-    
-        # Initial parameters. default_diffbackup_hours will be changed to 24 soon. 
+
+        # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
             'resource_group': 'ConvertSPOResourceGroup',
             'server_name': 'convertsposerver1',
             'database_name': 'testdb1',
-            'default_retention_days': 7,
-            'default_diffbackup_hours': 12,
-            'target_retention_days': 6,
-            'target_diffbackup_hours': 24
+            'retention_days_v1': 7,
+            'diffbackup_hours_v1': 12,
+            'retention_days_v2': 6,
+            'diffbackup_hours_v2': 24
         })    
-        
-        # Test GET short term retention policy on live database
+
+        # Test UPDATE short term retention policy on live database, value updated to v1.
+        self.cmd(
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v1} --diffbackup-hours {diffbackup_hours_v1}',
+            checks=[
+                self.check('resourceGroup', '{resource_group}'),
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')]) 
+
+        # Test GET short term retention policy on live database, value equals to v1.
         self.cmd(
             'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{default_retention_days}'),
-                self.check('diffBackupIntervalInHours', '{default_diffbackup_hours}')])
-                
-        # Test UPDATE short term retention policy on live database
+                self.check('retentionDays', '{retention_days_v1}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
+
+        # Test UPDATE short term retention policy on live database, value updated to v2.
         self.cmd(
-            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {target_retention_days} --diffbackup-hours {target_diffbackup_hours}',
+            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v2} --diffbackup-hours {diffbackup_hours_v2}',
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{target_retention_days}'),
-                self.check('diffBackupIntervalInHours', '{target_diffbackup_hours}')])
+                self.check('retentionDays', '{retention_days_v2}'),
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
+
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_long_term_retention(
