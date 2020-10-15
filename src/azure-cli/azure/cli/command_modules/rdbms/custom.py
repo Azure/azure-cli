@@ -28,9 +28,9 @@ DEFAULT_DB_NAME = 'defaultdb'
 
 # pylint: disable=too-many-locals, too-many-statements
 def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, no_wait=False,
-                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                    assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
+                   location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
+                   assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
