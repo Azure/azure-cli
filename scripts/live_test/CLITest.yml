@@ -361,6 +361,8 @@ jobs:
         # Remove ext- prefix
         FinalTarget="$(Target)"
         if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
+          echo "It is an extention"
+          echo $(Target)
           FinalTarget=${FinalTarget:4}
           azdev extension add ${FinalTarget}
         fi
