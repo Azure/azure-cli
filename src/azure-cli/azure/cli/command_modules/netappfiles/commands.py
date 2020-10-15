@@ -177,7 +177,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          client_factory=volumes_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.command('pool-change', 'pool_change')
+        g.command('pool_change', 'pool_change')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
