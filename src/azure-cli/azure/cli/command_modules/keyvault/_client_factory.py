@@ -110,6 +110,7 @@ def get_client(cli_ctx, resource_type, client_name=''):
 
 def is_azure_stack_profile(cmd):
     return cmd.cli_ctx.cloud.profile in [
+        '2020-09-01-hybrid',
         '2019-03-01-hybrid',
         '2018-03-01-hybrid',
         '2017-03-09-profile'
