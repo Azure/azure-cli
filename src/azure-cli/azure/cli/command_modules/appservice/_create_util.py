@@ -405,7 +405,11 @@ def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, 
         # based on SKU or not
         data_sorted = sorted(_asp_list, key=lambda x: x.name)
         _plan_info = data_sorted[_num_asp - 1]
-        _asp_num = int(_plan_info.name.split('_')[4]) + 1  # default asp created by CLI can be of type plan_num
+        _asp_num = 1
+        try:
+            _asp_num = int(_plan_info.name.split('_')[-1]) + 1  # default asp created by CLI can be of type plan_num
+        except ValueError:
+            pass
         return '{}_{}'.format(_asp_generic, _asp_num)
     return plan_name
 
