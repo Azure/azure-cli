@@ -360,7 +360,7 @@ jobs:
 
         # Remove ext- prefix
         FinalTarget="$(Target)"
-        if [[ "${FinalTarget}" =~ ^ext-.* ]]
+        if [[ "${FinalTarget}" =~ ^ext-.* ]]; then
           FinalTarget=${FinalTarget:4}
           azdev extension add ${FinalTarget}
         fi
