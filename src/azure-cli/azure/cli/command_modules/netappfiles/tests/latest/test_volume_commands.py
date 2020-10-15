@@ -140,7 +140,6 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # rg_r = self.create_random_name(prefix='cli-rg-', length=24)
         rg_r = replication_resourcegroup
         subs_id = self.current_subscription()
-        #  self.cmd("az group create -n %s --subscription %s -l %s" % (rg_r, subs_id, DP_RG_LOCATION)).get_output_in_json()
 
         self.setup_vnet(rg_r, vnet_name, subnet_name, '10.1.0.0', DP_RG_LOCATION)
         self.cmd("az netappfiles account create -g %s -a %s -l %s" % (rg_r, account_name_r, DP_RG_LOCATION)).get_output_in_json()
@@ -168,7 +167,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.wait_for_replication_status("Mirrored", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # break
-        self.cmd("az netappfiles volume replication suspend -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
+        self.cmd("az netappfiles volume replication suspend -g %s -a %s -p %s -v %s -f %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, True))
         self.wait_for_replication_status("Broken", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # delete

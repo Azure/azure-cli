@@ -407,6 +407,8 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
     short-summary: The name of the replication destination volume
+  - name: --force --force-break-replication -f
+    short-summary: Force break the replication
 examples:
   - name: Suspend the replication process
     text: >

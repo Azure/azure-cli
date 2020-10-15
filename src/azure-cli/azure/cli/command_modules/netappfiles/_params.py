@@ -70,6 +70,9 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
         c.argument('remote_volume_resource_id', options_list=['--remote-volume-resource-id', '-d'], help='The id of the destination replication volume', id_part=None)
 
+    with self.argument_context('netappfiles volume replication suspend') as c:
+        c.argument('force_break_replication', options_list=['--force', '--force-break-replication', '-f'], arg_type=get_three_state_flag(), id_part=None)
+
     with self.argument_context('netappfiles volume export-policy add') as c:
         c.argument('unix_read_only', help="Indication of read only access", arg_type=get_three_state_flag())
         c.argument('unix_read_write', help="Indication of read and write access", arg_type=get_three_state_flag())
