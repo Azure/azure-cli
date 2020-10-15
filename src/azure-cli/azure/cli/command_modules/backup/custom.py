@@ -178,6 +178,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
+
 def create_policy(client, resource_group_name, vault_name, name, policy):
     policy_object = _get_policy_from_json(client, policy)
     policy_object.name = name
