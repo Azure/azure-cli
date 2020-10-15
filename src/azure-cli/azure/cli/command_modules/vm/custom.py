@@ -3177,10 +3177,12 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
-                         hyper_v_generation='V1'):
+                         hyper_v_generation='V1', features=None):
     # pylint: disable=line-too-long
-    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
-        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
+    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, \
+    ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
+        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed',\
+        'ImagePurchasePlan', 'GalleryImageFeature')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
@@ -3197,11 +3199,19 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if any([plan_name, plan_publisher, plan_product]):
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
+    feature_list = []
+    for item in features.split():
+        try:
+            key, value = item.split('=', 1)
+            feature_list.append(GalleryImageFeature(name=key, value=value))
+        except ValueError:
+            raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_vgeneration=hyper_v_generation)
+                         hyper_vgeneration=hyper_v_generation, features=feature_list)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
