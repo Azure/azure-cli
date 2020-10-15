@@ -3199,13 +3199,14 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if any([plan_name, plan_publisher, plan_product]):
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
-    feature_list = []
-    for item in features.split():
-        try:
-            key, value = item.split('=', 1)
-            feature_list.append(GalleryImageFeature(name=key, value=value))
-        except ValueError:
-            raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+    feature_list = None
+    if features:
+        for item in features.split():
+            try:
+                key, value = item.split('=', 1)
+                feature_list.append(GalleryImageFeature(name=key, value=value))
+            except ValueError:
+                raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
