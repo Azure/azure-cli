@@ -206,17 +206,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')
-        g.command('re-initialize', 're_initialize_replication')
-
-
-def load_backups_command_groups(self, netappfiles_backups_sdk):
-    with self.command_group('netappfiles volume backup', netappfiles_backups_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'delete')
-        g.command('update', 'update')
-        g.command('create', 'create')
-
+        g.command('re_initialize', 're_initialize_replication')
 
 def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
     with self.command_group('netappfiles snapshot', netappfiles_snapshots_sdk) as g:

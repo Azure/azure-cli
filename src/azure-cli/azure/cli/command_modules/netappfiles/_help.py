@@ -606,7 +606,7 @@ examples:
         az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
-helps['netappfiles volume replication re-initialize'] = """
+helps['netappfiles volume replication re_initialize'] = """
 type: command
 short-summary: Re-initialise a volume replication for the specified destination volume. The replication process is resumed from source to destination.
 parameters:

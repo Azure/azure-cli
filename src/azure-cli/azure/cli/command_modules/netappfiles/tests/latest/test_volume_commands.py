@@ -160,8 +160,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # approve
         self.cmd("az netappfiles volume replication approve -g %s -a %s -p %s -v %s --remote-volume-resource-id %s" % (rg, account_name, pool_name, volume_name, dst_volume['id']))
 
-        # re-initialize
-        self.cmd("az netappfiles volume replication re-initialize -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
+        # re_initialize
+        self.cmd("az netappfiles volume replication re_initialize -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
         self.wait_for_replication_status("Mirrored", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # break
