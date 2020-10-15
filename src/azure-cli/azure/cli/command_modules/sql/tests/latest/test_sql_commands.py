@@ -727,7 +727,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
             'diffbackup_hours_v1': 12,
             'retention_days_v2': 6,
             'diffbackup_hours_v2': 24
-        })    
+        })
 
         # Test UPDATE short term retention policy on live database, value updated to v1.
         self.cmd(
@@ -735,7 +735,7 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
             checks=[
                 self.check('resourceGroup', '{resource_group}'),
                 self.check('retentionDays', '{retention_days_v1}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')]) 
+                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
 
         # Test GET short term retention policy on live database, value equals to v1.
         self.cmd(
