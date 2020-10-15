@@ -447,6 +447,22 @@ examples:
         az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
+helps['netappfiles volume replication re_initialize'] = """
+type: command
+short-summary: Re-initialise a volume replication for the specified destination volume. The replication process is resumed from source to destination.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication destination volume
+examples:
+  - name: Re-initialises the replication process
+    text: >
+        az netappfiles volume replication re-initialize -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
 helps['netappfiles volume replication status'] = """
 type: command
 short-summary: Get the replication status for the specified replication volume.

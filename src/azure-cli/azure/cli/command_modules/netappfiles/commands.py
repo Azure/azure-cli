@@ -132,6 +132,7 @@ def load_command_table(self, _):
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')
+        g.command('re_initialize', 're_initialize_replication')
 
     with self.command_group('netappfiles snapshot', netappfiles_snapshots_sdk) as g:
         g.show_command('show', 'get')
