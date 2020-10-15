@@ -30,8 +30,6 @@ SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 GROUP_NAME_PREFIX = 'azuredbclitest-'
 GROUP_NAME_MAX_LENGTH = 20
-SERVER_LOGIN_PREFIX = 'cliUser'
-SERVER_LOGIN_MAX_LENGTH = 12
 SERVER_LOGIN_PWD_PREFIX = 'cliPwd'
 SERVER_LOGIN_PWD_MAX_LENGTH = 15
 
@@ -456,12 +454,14 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    @live_only()
     def test_postgres_flexible_server_connect(self, resource_group):
         self._test_successful_connect('postgres', resource_group)
         self._test_vnet_connect('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @live_only()
     def test_mysql_flexible_server_connect(self, resource_group):
         self._test_successful_connect('mysql', resource_group)
         self._test_vnet_connect('mysql', resource_group)
@@ -469,9 +469,9 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
     def _test_successful_connect(self, database_engine, resource_group):
         # setup variables for commands
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        generated_username = self.create_random_name(SERVER_LOGIN_PREFIX, SERVER_LOGIN_MAX_LENGTH)
+        username = 'cliuser'
         storage_size = 32
-        public_access = '0.0.0.0'
+        public_access = 'none'
         simple_query = '"select 1;"'
         if database_engine == 'postgres':
             version = '12'
@@ -484,7 +484,7 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # create server with public access enabled for all IPs
         self.cmd('{} flexible-server create -g {} -n {} -l {} --admin-user {} --storage-size {} --version {} --public-access {}'.
-                 format(database_engine, resource_group, server_name, location, generated_username, storage_size, version, public_access))
+                 format(database_engine, resource_group, server_name, location, username, storage_size, version, public_access))
 
         # update password for generated username and server with a generated password
         generated_password = self.create_random_name(SERVER_LOGIN_PWD_PREFIX, SERVER_LOGIN_PWD_MAX_LENGTH)
@@ -492,11 +492,11 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # test connect without firewall
         self.cmd('{} flexible-server connect -n {} -u {} -p {}'.
-                 format(database_engine, server_name, generated_username, generated_password),
+                 format(database_engine, server_name, username, generated_password),
                  expect_failure=True)
 
         # add firewall
-        firewall_rule_name = 'all_ips'
+        firewall_rule_name = 'allIps'
         start_ip_address = '0.0.0.0'
         end_ip_address = '255.255.255.255'
         firewall_rule_checks = [JMESPathCheck('name', firewall_rule_name),
@@ -505,32 +505,30 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # firewall-rule create
         self.cmd('{} flexible-server firewall-rule create -g {} -s {} --name {} '
-                 '--start-ip-address {} --end-ip-address {} '
+                 '--start-ip-address {} --end-ip-address {}'
                  .format(database_engine, resource_group, server_name, firewall_rule_name, start_ip_address, end_ip_address),
                  checks=firewall_rule_checks)
 
         # test connection to the server without command/database specified
         self.cmd('{} flexible-server connect -n {} -u {} -p {}'.
-                 format(database_engine, server_name, generated_username, generated_password),
+                 format(database_engine, server_name, username, generated_password),
                  checks=NoneCheck())
 
         # test connection to the server with a simple query
         self.cmd('{} flexible-server connect -n {} -u {} -p {} -d {} -c {}'
-                 .format(database_engine, server_name, generated_username, generated_password, default_database, simple_query),
+                 .format(database_engine, server_name, username, generated_password, default_database, simple_query),
                  checks=[JMESPathCheck('length(@)', 1)])
 
         # test with invalid username
-        username = 'fakeusername'
+        username_wrong = 'fakeusername'
         self.cmd('{} flexible-server connect -n {} -u {} -p {} -d {} -c {}'
-                 .format(database_engine, server_name, username, generated_password, default_database, simple_query),
+                 .format(database_engine, server_name, username_wrong, generated_password, default_database, simple_query),
                  expect_failure=True)
-
-        self.cmd('{} flexible-server delete -g {} -n {} --force'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
     def _test_vnet_connect(self, database_engine, resource_group):
         # setup variables for commands
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        generated_username = self.create_random_name(SERVER_LOGIN_PREFIX, SERVER_LOGIN_MAX_LENGTH)
+        username = 'cliuser'
         storage_size = 32
         if database_engine == 'postgres':
             version = '12'
@@ -541,7 +539,7 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # create server with vnet access
         self.cmd('{} flexible-server create -g {} -n {} -l {} --admin-user {} --storage-size {} --version {}'.
-                 format(database_engine, resource_group, server_name, location, generated_username, storage_size, version))
+                 format(database_engine, resource_group, server_name, location, username, storage_size, version))
 
         # update password for generated username and server with a generated password
         generated_password = self.create_random_name(SERVER_LOGIN_PWD_PREFIX, SERVER_LOGIN_PWD_MAX_LENGTH)
@@ -549,7 +547,7 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # test connect with vnet and no firewall
         self.cmd('{} flexible-server connect -n {} -u {} -p {}'
-                 .format(database_engine, server_name, generated_username, generated_password), expect_failure=True)
+                 .format(database_engine, server_name, username, generated_password), expect_failure=True)
 
         # add firewall
         firewall_rule_name = 'all_ips'
@@ -567,7 +565,5 @@ class FlexibleServerConnectMgmtScenarioTest(ScenarioTest):
 
         # test connection to the server without command/database specified and with firewall, but vnet
         self.cmd('{} flexible-server connect -n {} -u {} -p {}'.
-                 format(database_engine, server_name, generated_username, generated_password),
+                 format(database_engine, server_name, username, generated_password),
                  expect_failure=True)
-
-        self.cmd('{} flexible-server delete -g {} -n {} --force'.format(database_engine, resource_group, server_name), checks=NoneCheck())

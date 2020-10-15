@@ -365,7 +365,7 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
         connection.set_session(autocommit=True)
         logger.warning('Successfully connected to PostgreSQL.')
     except Exception as e:
-        logger.warning('Failed connection to MySQL. Check error and validate firewall and public access settings.')
+        logger.warning('Failed connection to PostgreSQL. Check error and validate firewall and public access settings.')
         raise CLIError("Unable to connect to PostgreSQL Server: {}".format(e))
 
     # execute query if passed in
