@@ -213,8 +213,7 @@ def load_command_table(self, _):
     )
 
     with self.command_group('mariadb server', mariadb_servers_sdk, client_factory=cf_mariadb_servers) as g:
-        # g.custom_command('create', '_server_create')
-        g.custom_command('create', '_server_create2')
+        g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
@@ -230,8 +229,7 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
-        # g.custom_command('create', '_server_create')
-        g.custom_command('create', '_server_create2')
+        g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)
@@ -247,8 +245,7 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
-        # g.custom_command('create', '_server_create')
-        g.custom_command('create', '_server_create2')
+        g.custom_command('create', '_server_create')
         g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.custom_command('georestore', '_server_georestore', supports_no_wait=True)
         g.custom_command('delete', '_server_delete', confirmation=True)

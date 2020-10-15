@@ -23,11 +23,11 @@ logger = get_logger(__name__)
 
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
-DEFAULT_DB_NAME = 'mysqldb'
+DEFAULT_DB_NAME = 'defaultdb'
 
 
 # pylint: disable=too-many-locals, too-many-statements
-def _server_create2(cmd, client, resource_group_name=None, server_name=None, sku_name=None, no_wait=False,
+def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, no_wait=False,
                     location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                     geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
                     assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
@@ -163,90 +163,16 @@ def _server_create2(cmd, client, resource_group_name=None, server_name=None, sku
     if engine_name == 'postgres':
         return form_response(user, sku, loc, server_id, host, version,
                              administrator_login_password if administrator_login_password is not None else '*****',
-                             create_postgresql_connection_string(host, user, administrator_login_password), None,
-                             firewall_id)
+                             create_postgresql_connection_string(host, user, administrator_login_password),
+                             infrastructure_encryption, None, firewall_id)
     # Serves both - MySQL and MariaDB
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
     create_database(cmd, resource_group_name, server_name, database_name, engine_name)
     return form_response(user, sku, loc, server_id, host, version,
                          administrator_login_password if administrator_login_password is not None else '*****',
-                         create_mysql_connection_string(host, database_name, user, administrator_login_password),
-                         database_name, firewall_id)
-
-
-def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
-                   location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
-                   geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
-    provider = 'Microsoft.DBforPostgreSQL'
-    if isinstance(client, MySqlServersOperations):
-        provider = 'Microsoft.DBforMySQL'
-    elif isinstance(client, MariaDBServersOperations):
-        provider = 'Microsoft.DBforMariaDB'
-
-    parameters = None
-    if provider == 'Microsoft.DBforMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=sku_name),
-            properties=mysql.models.ServerPropertiesForDefaultCreate(
-                administrator_login=administrator_login,
-                administrator_login_password=administrator_login_password,
-                version=version,
-                ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
-                public_network_access=public_network_access,
-                infrastructure_encryption=infrastructure_encryption,
-                storage_profile=mysql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb,
-                    storage_autogrow=auto_grow)),
-            location=location,
-            tags=tags)
-        if assign_identity:
-            parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForDefaultCreate(
-                administrator_login=administrator_login,
-                administrator_login_password=administrator_login_password,
-                version=version,
-                ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
-                public_network_access=public_network_access,
-                infrastructure_encryption=infrastructure_encryption,
-                storage_profile=postgresql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb,
-                    storage_autogrow=auto_grow)),
-            location=location,
-            tags=tags)
-        if assign_identity:
-            parameters.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
-    elif provider == 'Microsoft.DBforMariaDB':
-        from azure.mgmt.rdbms import mariadb
-        parameters = mariadb.models.ServerForCreate(
-            sku=mariadb.models.Sku(name=sku_name),
-            properties=mariadb.models.ServerPropertiesForDefaultCreate(
-                administrator_login=administrator_login,
-                administrator_login_password=administrator_login_password,
-                version=version,
-                ssl_enforcement=ssl_enforcement,
-                public_network_access=public_network_access,
-                storage_profile=mariadb.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb,
-                    storage_autogrow=auto_grow)),
-            location=location,
-            tags=tags)
-
-    return client.create(resource_group_name, server_name, parameters)
+                         create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),
+                         infrastructure_encryption, database_name, firewall_id)
 
 
 # Need to replace source server name with source server id, so customer server restore function
@@ -758,30 +684,31 @@ def _get_tenant_id():
 
 
 # region new create experience
-def create_mysql_connection_string(host, database_name, user_name, password):
+def create_mysql_connection_string(server_name, host, database_name, user_name, password):
     connection_kwargs = {
         'host': host,
         'dbname': database_name,
         'username': user_name,
+        'servername': server_name,
         'password': password if password is not None else '{password}'
     }
-    return 'mysql {dbname} --host {host} --user {username} --password={password}'.format(**connection_kwargs)
+    return 'mysql {dbname} --host {host} --user {username}@{servername} --password={password}'.format(**connection_kwargs)
 
 
 def create_database(cmd, resource_group_name, server_name, database_name, engine_name):
     if engine_name == 'mysql':
-       # check for existing database, create if not
+        # check for existing database, create if not present
         database_client = cf_mysql_db(cmd.cli_ctx, None)
     elif engine_name == 'mariadb':
         database_client = cf_mariadb_db(cmd.cli_ctx, None)
     try:
-        database_client.get(resource_group_name, server_name, database_name)
+        database_client.get(resource_group_name, server_name, database_name).result()
     except CloudError:
         logger.warning('Creating %s database \'%s\'...', engine_name, database_name)
-        database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8')
+        database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8').result()
 
 
-def form_response(username, sku, location, server_id, host, version, password, connection_string, database_name=None, firewall_id=None):
+def form_response(username, sku, location, server_id, host, version, password, connection_string, infrastructure_encryption, database_name=None, firewall_id=None):
     output = {
         'host': host,
         'username': username,
@@ -796,6 +723,8 @@ def form_response(username, sku, location, server_id, host, version, password, c
         output['firewallName'] = firewall_id
     if database_name is not None:
         output['databaseName'] = database_name
+    if str(infrastructure_encryption).lower() == 'enabled':
+        output['infrastructureEncryption'] = infrastructure_encryption
     return output
 
 
@@ -805,7 +734,7 @@ def create_postgresql_connection_string(host, user, password):
         'host': host,
         'password': password if password is not None else '{password}'
     }
-    return 'postgresql://{user}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
+    return 'postgres://{user}:\'{password}\'@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
 def check_server_name_availability(check_name_client, server_name, service_name):

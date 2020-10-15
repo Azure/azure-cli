@@ -18,6 +18,7 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
+    StringContainCheck,
     live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -93,7 +94,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbclipublicazureservices', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
@@ -104,7 +107,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'eastus'
+        loc = 'westus2'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
         minimal_tls_version = 'TLS1_2'
@@ -114,6 +117,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoBackupRetention = 20
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
+        database_name = 'defaultdb'
 
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
@@ -126,8 +130,16 @@ class ServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('publicNetworkAccess', default_public_network_access),
                        JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]
 
+        create_list_checks = [JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine)),
+                              JMESPathCheck('resourceGroup', resource_group_1),
+                              JMESPathCheck('username', admin_login),
+                              JMESPathCheck('skuname', skuname)]
+
         if database_engine != 'mariadb':
             list_checks.append(JMESPathCheck('minimalTlsVersion', default_minimal_tls_version))
+
+        if database_engine == 'mysql' or database_engine == 'mariadb':
+            create_list_checks.append(JMESPathCheck('databaseName', database_name))
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -137,7 +149,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0], loc,
                          admin_login, admin_passwords[0], skuname,
                          geoRedundantBackup, backupRetention),
-                 checks=list_checks)
+                 checks=create_list_checks)
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
@@ -266,18 +278,39 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group_1, servers[3], loc,
                              admin_login, admin_passwords[0], skuname,
                              geoRedundantBackup, backupRetention, infrastructureEncryption),
-                     checks=[
-                         JMESPathCheck('name', servers[3]),
+                     checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[3], database_engine)),
+                             JMESPathCheck('resourceGroup', resource_group_1),
+                             JMESPathCheck('username', admin_login),
+                             JMESPathCheck('skuname', skuname),
+                             JMESPathCheck('infrastructureEncryption', 'Enabled')])
+
+        # test public access for all IPs on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                 '--backup-retention {} --public {}'
+                 .format(database_engine, resource_group_1, servers[4], loc,
+                         admin_login, admin_passwords[0], skuname,
+                         geoRedundantBackup, backupRetention, 'all'),
+                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[4], database_engine)),
                          JMESPathCheck('resourceGroup', resource_group_1),
-                         JMESPathCheck('administratorLogin', admin_login),
-                         JMESPathCheck('sslEnforcement', 'Enabled'),
-                         JMESPathCheck('infrastructureEncryption', 'Enabled'),
-                         JMESPathCheck('tags.key', '1'),
-                         JMESPathCheck('sku.capacity', old_cu),
-                         JMESPathCheck('sku.tier', edition),
-                         JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
-                         JMESPathCheck('publicNetworkAccess', default_public_network_access),
-                         JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+                         JMESPathCheck('username', admin_login),
+                         JMESPathCheck('skuname', skuname),
+                         StringContainCheck('AllowAll_')])
+
+        # test public access for all azure services on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                 '--backup-retention {} --public {}'
+                 .format(database_engine, resource_group_1, servers[5], loc,
+                         admin_login, admin_passwords[0], skuname,
+                         geoRedundantBackup, backupRetention, '0.0.0.0'),
+                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[5], database_engine)),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('username', admin_login),
+                         JMESPathCheck('skuname', skuname),
+                         StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_')])
 
         # test list servers
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
@@ -292,6 +325,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} -n {} --yes'
                  .format(database_engine, resource_group_2, servers[1]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group_1, servers[5]), checks=NoneCheck())
+
         if database_engine != 'mariadb':
             self.cmd('{} server delete -g {} -n {} --yes'
                      .format(database_engine, resource_group_1, servers[3]), checks=NoneCheck())
