@@ -282,7 +282,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.custom_command('what-if', 'what_if_deploy_arm_template_at_subscription_scope', validator=process_deployment_create_namespace,
-                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-07-01')
+                         exception_handler=handle_template_based_exception, min_api='2019-07-01')
         g.custom_command('export', 'export_template_at_subscription_scope')
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope')
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope')
@@ -315,7 +315,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'deploy_arm_template_at_resource_group', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.custom_command('what-if', 'what_if_deploy_arm_template_at_resource_group', validator=process_deployment_create_namespace,
-                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-07-01')
+                         exception_handler=handle_template_based_exception, min_api='2019-07-01')
         g.custom_command('export', 'export_template_at_resource_group')
         g.custom_wait_command('wait', 'get_deployment_at_resource_group')
         g.custom_command('cancel', 'cancel_deployment_at_resource_group')
@@ -334,7 +334,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'deploy_arm_template_at_management_group', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.custom_command('what-if', 'what_if_deploy_arm_template_at_management_group', validator=process_deployment_create_namespace,
-                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-10-01')
+                         exception_handler=handle_template_based_exception, min_api='2019-10-01')
         g.custom_command('export', 'export_template_at_management_group')
         g.custom_wait_command('wait', 'get_deployment_at_management_group')
         g.custom_command('cancel', 'cancel_deployment_at_management_group')
@@ -353,7 +353,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'deploy_arm_template_at_tenant_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
         g.custom_command('what-if', 'what_if_deploy_arm_template_at_tenant_scope', validator=process_deployment_create_namespace,
-                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-10-01')
+                         exception_handler=handle_template_based_exception, min_api='2019-10-01')
         g.custom_command('export', 'export_template_at_tenant_scope')
         g.custom_wait_command('wait', 'get_deployment_at_tenant_scope')
         g.custom_command('cancel', 'cancel_deployment_at_tenant_scope')
