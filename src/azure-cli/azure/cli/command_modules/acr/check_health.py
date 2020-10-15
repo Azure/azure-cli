@@ -238,6 +238,13 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
     from requests.exceptions import SSLError, RequestException
     from azure.cli.core.util import should_disable_connection_verify
 
+    # Get client's external ip, useful for firewall allowed ip list check. Note, Python doesn't have built-in support on this,
+    # so we use external endpoint as a best of effort
+    try:
+        print_pass("Your IP address: {}".format(requests.get('https://api.ipify.org').text))
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.error("Failed to retrieve IP address due to ex: %s", ex)
+
     try:
         challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     except SSLError:
