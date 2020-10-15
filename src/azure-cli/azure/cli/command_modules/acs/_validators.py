@@ -313,6 +313,15 @@ def validate_vnet_subnet_id(namespace):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
 
 
+def validate_ppg(namespace):
+    if namespace.ppg is not None:
+        if namespace.ppg == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.ppg):
+            raise CLIError("--ppg is not a valid Azure resource ID.")
+
+
 def validate_nodepool_labels(namespace):
     """Validates that provided node labels is a valid format"""
 
