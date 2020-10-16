@@ -235,6 +235,6 @@ An example title of hotfix change PR:
 
 > {Packaging} Hotfix: Fix dependency error
 
-Step 2: After a new version is released, submit a PR to merge `release` branch back to `dev` (e.g. [#15505](https://github.com/Azure/azure-cli/pull/15505)).
+Step 2: After the hotfix version is released, submit a PR to merge `release` branch back to `dev` (e.g. [#15505](https://github.com/Azure/azure-cli/pull/15505)).
 
 ⚠ Do **NOT** squash merge this PR. After the PR gets approved by code owners, merge `release` to `dev` by creating a **merge commit** on your local machine, then push `dev` to upstream repository. The PR will automatically be marked as **Merged**.
