@@ -350,10 +350,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')
 
-    with self.command_group('storage blob',
-                            custom_command_type=get_custom_sdk('blob', cf_blob_client)) as g:
-        g.storage_custom_command_oauth('set-tier', 'set_blob_tier_v2')
-
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
