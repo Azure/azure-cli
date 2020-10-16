@@ -564,7 +564,7 @@ class Profile:
                 #   - Track 1 SDK, use `resource` specified by CLI
                 #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
                 token_resource = sdk_resource or resource
-                logger.debug("Retrieving token for resource %r", token_resource)
+                logger.debug("Retrieving token from ADAL for resource %r", token_resource)
 
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                     return self._get_token_from_cloud_shell(token_resource)
@@ -578,7 +578,7 @@ class Profile:
 
             def _retrieve_tokens_from_external_tenants(sdk_resource=None):
                 token_resource = sdk_resource or resource
-                logger.debug("Retrieving token for external tenants and resource %r", token_resource)
+                logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
 
                 external_tokens = []
                 for sub_tenant_id in external_tenants_info:
