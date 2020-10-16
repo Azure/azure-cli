@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -103,11 +103,7 @@ def patch_pool(cmd, instance, size=None, tags=None):
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path,
                   usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
-                  snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
-                  policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
-                  kerberos5_r=None, kerberos5_rw=None, kerberos5i_r=None,
-                  kerberos5i_rw=None, kerberos5p_r=None, kerberos5p_rw=None,
-                  has_root_access=None, snapshot_dir_visible=None):
+                  snapshot_id=None, snapshot_policy_id=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -148,18 +144,14 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     data_protection = None
     replication = None
     snapshot = None
-    backup = None
 
     if volume_type == "DataProtection":
         replication = ReplicationObject(endpoint_type=endpoint_type, replication_schedule=replication_schedule,
                                         remote_volume_resource_id=remote_volume_resource_id)
     if snapshot_policy_id is not None:
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
-    if backup_policy_id is not None:
-        backup = VolumeBackupProperties(backup_policy_id=backup_policy_id, policy_enforced=policy_enforced,
-                                        vault_id=vault_id, backup_enabled=backup_enabled)
-    if replication is not None or snapshot is not None or backup is not None:
-        data_protection = VolumePropertiesDataProtection(replication=replication, snapshot=snapshot, backup=backup)
+    if replication is not None or snapshot is not None:
+        data_protection = VolumePropertiesDataProtection(replication=replication, snapshot=snapshot)
 
     subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet, subnet)
     body = Volume(
@@ -274,38 +266,38 @@ def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_
 
 
 def create_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
-                           hourly_snapshots=0, hourly_minute=0,
-                           daily_snapshots=0, daily_minute=0, daily_hour=0,
-                           weekly_snapshots=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
-                           monthly_snapshots=0, monthly_minute=0, monthly_hour=0, monthly_days=None,
+                           hourly_snapshots_to_keep=0, hourly_minute=0,
+                           daily_snapshots_to_keep=0, daily_minute=0, daily_hour=0,
+                           weekly_snapshots_to_keep=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
+                           monthly_snapshots_to_keep=0, monthly_minute=0, monthly_hour=0, monthly_days_of_month=None,
                            enabled=False, tags=None):
     body = SnapshotPolicy(
         location=location,
-        hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
-        daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
-        weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
+        hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots_to_keep, minute=hourly_minute),
+        daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots_to_keep, minute=daily_minute, hour=daily_hour),
+        weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots_to_keep, minute=weekly_minute,
                                        hour=weekly_hour, day=weekly_day),
-        monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
-                                         hour=monthly_hour, days_of_month=monthly_days),
+        monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots_to_keep, minute=monthly_minute,
+                                         hour=monthly_hour, days_of_month=monthly_days_of_month),
         enabled=enabled,
         tags=tags)
     return client.create(body, resource_group_name, account_name, snapshot_policy_name)
 
 
 def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_policy_name, location,
-                          hourly_snapshots=0, hourly_minute=0,
-                          daily_snapshots=0, daily_minute=0, daily_hour=0,
-                          weekly_snapshots=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
-                          monthly_snapshots=0, monthly_minute=0, monthly_hour=0, monthly_days=None,
+                          hourly_snapshots_to_keep=0, hourly_minute=0,
+                          daily_snapshots_to_keep=0, daily_minute=0, daily_hour=0,
+                          weekly_snapshots_to_keep=0, weekly_minute=0, weekly_hour=0, weekly_day=None,
+                          monthly_snapshots_to_keep=0, monthly_minute=0, monthly_hour=0, monthly_days_of_month=None,
                           enabled=False):
     body = SnapshotPolicyPatch(
         location=location,
-        hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots, minute=hourly_minute),
-        daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots, minute=daily_minute, hour=daily_hour),
-        weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots, minute=weekly_minute,
+        hourly_schedule=HourlySchedule(snapshots_to_keep=hourly_snapshots_to_keep, minute=hourly_minute),
+        daily_schedule=DailySchedule(snapshots_to_keep=daily_snapshots_to_keep, minute=daily_minute, hour=daily_hour),
+        weekly_schedule=WeeklySchedule(snapshots_to_keep=weekly_snapshots_to_keep, minute=weekly_minute,
                                        hour=weekly_hour, day=weekly_day),
-        monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots, minute=monthly_minute,
-                                         hour=monthly_hour, days_of_month=monthly_days),
+        monthly_schedule=MonthlySchedule(snapshots_to_keep=monthly_snapshots_to_keep, minute=monthly_minute,
+                                         hour=monthly_hour, days_of_month=monthly_days_of_month),
         enabled=enabled)
     return client.update(body, resource_group_name, account_name, snapshot_policy_name)
 
@@ -313,32 +305,3 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 def list_volumes(client, account_name, resource_group_name, snapshot_policy_name):
     return client.list_volumes(resource_group_name, account_name, snapshot_policy_name)
 
-
-# -- backup policies --
-
-
-def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
-                         daily_backups=0, weekly_backups=0, monthly_backups=0,
-                         yearly_backups=0, enabled=False, tags=None):
-    body = BackupPolicy(
-        location=location,
-        daily_backups_to_keep=daily_backups,
-        weekly_backups_to_keep=weekly_backups,
-        monthly_backups_to_keep=monthly_backups,
-        yearly_backups_to_keep=yearly_backups,
-        enabled=enabled,
-        tags=tags)
-    return client.create(resource_group_name, account_name, backup_policy_name, body)
-
-
-def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
-                        daily_backups=0, weekly_backups=0, monthly_backups=0,
-                        yearly_backups=0, enabled=False):
-    body = BackupPolicyPatch(
-        location=location,
-        daily_backups_to_keep=daily_backups,
-        weekly_backups_to_keep=weekly_backups,
-        monthly_backups_to_keep=monthly_backups,
-        yearly_backups_to_keep=yearly_backups,
-        enabled=enabled)
-    return client.update(resource_group_name, account_name, backup_policy_name, body)

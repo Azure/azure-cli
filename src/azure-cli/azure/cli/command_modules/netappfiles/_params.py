@@ -128,18 +128,8 @@ def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_
         c.argument('volume_name', options_list=['--volume-name', '-v'], help='The name of the ANF volume', id_part=None)
 
     with self.argument_context('netappfiles snapshot policy') as c:
-        c.argument('account_name', account_name_type)
-        c.argument('snapshot_policy_name', help='The name of the snapshot policy', id_part='child_name_1')
-        c.argument('hourly_snapshots', options_list=['--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
-        c.argument('daily_snapshots', options_list=['--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)
-        c.argument('weekly_snapshots', options_list=['--weekly-snapshots', '-w'], help='The amount of weekly snapshots to keep', id_part=None)
-        c.argument('monthly_snapshots', options_list=['--monthly-snapshots', '-m'], help='The amount of monthly snapshots to keep', id_part=None)
-
-    with self.argument_context('netappfiles snapshot policy list') as c:
-        c.argument('account_name', account_name_type, id_part=None)
-        c.argument('snapshot_policy_name', options_list=['--snapshot-policy-name', '--name', '-n'], help='The name of the snapshot policy', id_part=None)
-
-
-def load_vaultArguments(self, account_name_type):
-    with self.argument_context('netappfiles vault list') as c:
-        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('snapshot_policy_name', options_list=['--name', '--snapshot-policy-name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
+        c.argument('hourly_snapshots_to_keep', options_list=['--hourly-snapshots-to-keep', '--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
+        c.argument('daily_snapshots_to_keep', options_list=['--daily-snapshots-to-keep', '--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)
+        c.argument('weekly_snapshots_to_keep', options_list=['--weekly-snapshots-to-keep', '--weekly-snapshots', '-w'], help='The amount of weekly snapshots to keep', id_part=None)
+        c.argument('monthly_snapshots_to_keep', options_list=['--monthly-snapshots-to-keep', '--monthly-snapshots', '-m'], help='The amount of monthly snapshots to keep', id_part=None)
