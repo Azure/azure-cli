@@ -3201,6 +3201,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 
     feature_list = None
     if features:
+        feature_list = []
         for item in features.split():
             try:
                 key, value = item.split('=', 1)
