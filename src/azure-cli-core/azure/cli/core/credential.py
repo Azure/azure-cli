@@ -35,7 +35,7 @@ class CredentialAdaptor:
     def _get_token(self, *scopes):
         external_tenant_tokens = []
         scopes = scopes or resource_to_scopes(self._resource)
-        logger.debug("Retrieving token for scopes %r", scopes)
+        logger.debug("Retrieving token from MSAL for scopes %r", scopes)
         try:
             token = self._credential.get_token(*scopes)
             if self._external_credentials:
