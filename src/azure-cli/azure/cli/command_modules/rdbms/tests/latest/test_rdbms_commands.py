@@ -90,13 +90,67 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('postgres', resource_group_1, resource_group_2)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_mariadb_server_mgmt_public_paramter(self, resource_group_1):
+        self._test_server_mgmt_public_paramter('mariadb', resource_group_1)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_mysql_server_mgmt_public_paramter(self, resource_group_1):
+        self._test_server_mgmt_public_paramter('mysql', resource_group_1)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_postgres_server_mgmt_public_paramter(self, resource_group_1):
+        self._test_server_mgmt_public_paramter('postgres', resource_group_1)
+
+    def _test_server_mgmt_public_paramter(self, database_engine, resource_group_1):
+        servers = [self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbclipublicazureservices', SERVER_NAME_MAX_LENGTH)]
+        admin_login = 'cloudsa'
+        admin_password = 'SecretPassword123'
+        old_cu = 2
+        family = 'Gen5'
+        skuname = 'GP_{}_{}'.format(family, old_cu)
+        loc = 'westus2'
+
+        # test public access for all IPs on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --public {}'
+                 .format(database_engine, resource_group_1, servers[0], loc,
+                         admin_login, admin_password, skuname, 'all'),
+                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine)),
+                         JMESPathCheck('resourceGroup', resource_group_1), JMESPathCheck('username', admin_login),
+                         JMESPathCheck('skuname', skuname), StringContainCheck('AllowAll_')])
+
+        # test public access for all azure services on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --public {}'
+                 .format(database_engine, resource_group_1, servers[1], loc,
+                         admin_login, admin_password, skuname, '0.0.0.0'),
+                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine)),
+                         JMESPathCheck('resourceGroup', resource_group_1), JMESPathCheck('username', admin_login),
+                         JMESPathCheck('skuname', skuname),
+                         StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_')])
+        # test delete server
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group_1, servers[1]), checks=NoneCheck())
+        # test list server should be 0
+        self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
+
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbclipublicazureservices', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
@@ -284,34 +338,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                              JMESPathCheck('skuname', skuname),
                              JMESPathCheck('infrastructureEncryption', 'Enabled')])
 
-        # test public access for all IPs on server
-        self.cmd('{} server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
-                 '--backup-retention {} --public {}'
-                 .format(database_engine, resource_group_1, servers[4], loc,
-                         admin_login, admin_passwords[0], skuname,
-                         geoRedundantBackup, backupRetention, 'all'),
-                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[4], database_engine)),
-                         JMESPathCheck('resourceGroup', resource_group_1),
-                         JMESPathCheck('username', admin_login),
-                         JMESPathCheck('skuname', skuname),
-                         StringContainCheck('AllowAll_')])
-
-        # test public access for all azure services on server
-        self.cmd('{} server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
-                 '--backup-retention {} --public {}'
-                 .format(database_engine, resource_group_1, servers[5], loc,
-                         admin_login, admin_passwords[0], skuname,
-                         geoRedundantBackup, backupRetention, '0.0.0.0'),
-                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[5], database_engine)),
-                         JMESPathCheck('resourceGroup', resource_group_1),
-                         JMESPathCheck('username', admin_login),
-                         JMESPathCheck('skuname', skuname),
-                         StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_')])
-
         # test list servers
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
                  checks=[JMESPathCheck('type(@)', 'array')])
@@ -325,10 +351,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} -n {} --yes'
                  .format(database_engine, resource_group_2, servers[1]), checks=NoneCheck())
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
-        self.cmd('{} server delete -g {} -n {} --yes'
-                 .format(database_engine, resource_group_1, servers[5]), checks=NoneCheck())
 
         if database_engine != 'mariadb':
             self.cmd('{} server delete -g {} -n {} --yes'
@@ -896,13 +918,9 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name GP_Gen5_2'
                           .format(database_engine, resource_group, server),
-                          checks=[
-                              JMESPathCheck('name', server),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2'),
-                              JMESPathCheck('replicationRole', 'None'),
-                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
+                          checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(server, database_engine)),
+                                  JMESPathCheck('resourceGroup', resource_group),
+                                  JMESPathCheck('skuname', 'GP_Gen5_2')]).get_output_in_json()
 
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l westus --sku-name GP_Gen5_4 '
@@ -955,7 +973,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  checks=[
                      JMESPathCheck('name', replicas[1]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('sku.name', result['skuname']),
                      JMESPathCheck('replicationRole', 'Replica'),
                      JMESPathCheck('masterServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
@@ -1000,13 +1018,9 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name {}'
                           .format(database_engine, resource_group, server, skuName),
-                          checks=[
-                              JMESPathCheck('name', server),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', skuName),
-                              JMESPathCheck('replicationRole', 'None'),
-                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
+                          checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(server, database_engine)),
+                                  JMESPathCheck('resourceGroup', resource_group),
+                                  JMESPathCheck('skuname', skuName)]).get_output_in_json()
 
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
@@ -1064,7 +1078,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  checks=[
                      JMESPathCheck('name', replicas[1]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('sku.name', result['skuname']),
                      JMESPathCheck('replicationRole', 'Replica'),
                      JMESPathCheck('masterServerId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')])
