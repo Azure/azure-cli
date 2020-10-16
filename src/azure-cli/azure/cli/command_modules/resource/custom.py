@@ -1751,14 +1751,13 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, ui_definition_file=None):
     artifacts = None
-    input_template = None
+    input_ui_definition = None
     if location is None:
         rcf = _resource_client_factory(cmd.cli_ctx)
         location = rcf.resource_groups.get(resource_group_name).location
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
-
     if version:
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
@@ -1773,8 +1772,11 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
             template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
             rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
+        if ui_definition_file:
+            ui_definition_content = _remove_comments_from_json(read_file_content(ui_definition_file))
+            input_ui_definition = json.loads(json.dumps(ui_definition_content))
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=None)
+        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, ui_definition=input_ui_definition, tags=None)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
 
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
@@ -1783,7 +1785,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, ui_definition_file=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1802,6 +1804,10 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         input_template = getattr(packed_template, 'RootTemplate')
         artifacts = getattr(packed_template, 'Artifacts')
 
+    if ui_definition_file:
+        ui_definition_content = _remove_comments_from_json(read_file_content(ui_definition_file))
+        input_ui_definition = json.loads(json.dumps(ui_definition_content))
+
     if version:
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
@@ -1811,10 +1817,12 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
             version_description = getattr(existing_template, 'description')
         if template_file is None:
             input_template = getattr(existing_template, 'template')
+        if ui_definition_file is None:
+            input_ui_definition = getattr(existing_template, 'ui_definition')
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
 
-        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=version_tags)
+        updated_template_spec = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=version_tags, ui_definition=input_ui_definition)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, updated_template_spec)
 
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)

@@ -18,7 +18,9 @@ MSI_LOCAL_ID = '[system]'
 
 def _validate_template_input(namespace):
     if namespace.template_file and not os.path.isfile(namespace.template_file):
-        raise CLIError('Please enter a valid file path')
+        raise CLIError('Please enter a valid template file path')
+    if namespace.ui_definition_file and not os.path.isfile(namespace.ui_definition_file):
+        raise CLIError('Please enter a valid ui definition file path')
 
 
 def _validate_template_spec(namespace):

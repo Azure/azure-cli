@@ -716,6 +716,7 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            "uif": os.path.join(curr_dir, 'template_spec_ui_definition.json').replace('\\', '\\\\'),
         })
 
         path = os.path.join(curr_dir, 'artifacts')
@@ -725,11 +726,12 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description} --ui-definition-file "{uif}"', checks=[
             self.check('artifacts.length([])', 3),
             self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
             self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
-            self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
+            self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json'),
+            self.check('uiDefinition.parameters.basics.name', 'clusterName')
         ]).get_output_in_json()
 
         # clean up
@@ -748,26 +750,31 @@ class TemplateSpecsTest(ScenarioTest):
             'display_name': self.create_random_name('create-spec', 20),
             'description': '"AzCLI test root template spec"',
             'version_description': '"AzCLI test version of root template spec"',
+            'uif': os.path.join(curr_dir, 'template_spec_ui_definition.json').replace('\\', '\\\\'),
+            "uif1": os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\'),
         })
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', checks=[
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"  --ui-definition-file "{uif}"', checks=[
                           self.check('name', '1.0'),
                           self.check('description', None),
                           self.check('display_name', None),
+                          self.check('uiDefinition.parameters.basics[0].name', 'clusterName'),
                           self.check('artifacts.length([])', 0)]).get_output_in_json()
         self.kwargs['template_spec_version_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
-        self.cmd('ts update -s {template_spec_id} --display-name {display_name} --description {description} --yes', checks=[
+        self.cmd('ts update -s {template_spec_id} --display-name {display_name} --description {description} --yes --ui-definition-file "{uif1}"', checks=[
                  self.check('name', self.kwargs['template_spec_name']),
                  self.check('description', self.kwargs['description'].replace('"', '')),
-                 self.check('displayName', self.kwargs['display_name'].replace('"', ''))
+                 self.check('displayName', self.kwargs['display_name'].replace('"', '')),
+                 self.check('uiDefinition.parameters.basics[0].name', 'adminUsername')
                  ])
 
         self.cmd('ts update -s {template_spec_version_id} --version-description {version_description} --yes', checks=[
                  self.check('name', '1.0'),
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
-                 self.check('artifacts', None)
+                 self.check('artifacts', None),
+                 self.check('uiDefinition.parameters.basics[0].name', 'adminUsername')
                  ])
 
         path = os.path.join(curr_dir, 'artifacts')
@@ -777,7 +784,7 @@ class TemplateSpecsTest(ScenarioTest):
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes --ui-definition-file "{uif1}"', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
                  self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),

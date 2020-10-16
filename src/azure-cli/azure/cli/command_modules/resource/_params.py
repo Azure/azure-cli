@@ -85,6 +85,9 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
+    ts_version_ui_definiton_file_type = CLIArgumentType(options_list=['--ui-definition-file'],
+                                                        help='The uiDefinition file path in the file system for the template spec version.',
+                                                        completer=FilesCompleter(), type=file_type)
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -540,6 +543,7 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('ui_definition_file', arg_type=ts_version_ui_definiton_file_type)
 
     with self.argument_context('ts update') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
@@ -548,6 +552,7 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('ui_definition_file', arg_type=ts_version_ui_definiton_file_type)
 
     with self.argument_context('ts show') as c:
         c.argument('template_spec', arg_type=deployment_template_spec_type)
