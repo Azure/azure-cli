@@ -32,7 +32,6 @@ from azure.cli.command_modules.backup._client_factory import (
 logger = get_logger(__name__)
 
 fabric_name = "Azure"
-backup_management_type = "AzureIaasVM"
 default_policy_name = "DefaultPolicy"
 os_windows = 'Windows'
 os_linux = 'Linux'
@@ -179,11 +178,10 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def create_policy(client, resource_group_name, vault_name, name, policy):
+def create_policy(client, resource_group_name, vault_name, name, policy, backup_management_type="AzureIaasVM"):
     policy_object = _get_policy_from_json(client, policy)
     policy_object.name = name
-    if backup_management_type is not None:
-        policy_object.properties.backup_management_type = backup_management_type
+    policy_object.properties.backup_management_type = backup_management_type
     return client.create_or_update(vault_name, resource_group_name, name, policy_object)
 
 
