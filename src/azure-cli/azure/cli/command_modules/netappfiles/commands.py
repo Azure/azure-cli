@@ -10,7 +10,8 @@ from ._client_factory import (
     accounts_mgmt_client_factory,
     pools_mgmt_client_factory,
     volumes_mgmt_client_factory,
-    snapshots_mgmt_client_factory)
+    snapshots_mgmt_client_factory,
+    snapshot_policies_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
 
@@ -36,6 +37,12 @@ def load_command_table(self, _):
     netappfiles_snapshots_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._snapshots_operations#SnapshotsOperations.{}',
         client_factory=snapshots_mgmt_client_factory,
+        exception_handler=netappfiles_exception_handler
+    )
+
+    netappfiles_snapshot_policies_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.netapp.operations._snapshot_policies_operations#SnapshotPoliciesOperations.{}',
+        client_factory=snapshot_policies_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
 
@@ -143,6 +150,24 @@ def load_command_table(self, _):
                          client_factory=snapshots_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Snapshot',
                          exception_handler=netappfiles_exception_handler)
+
+    with self.command_group('netappfiles snapshot policy', netappfiles_snapshot_policies_sdk) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('volumes', 'list_volumes',
+                         client_factory=snapshot_policies_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
+                         exception_handler=netappfiles_exception_handler)
+        g.command('delete', 'delete')
+        g.custom_command('update', 'patch_snapshot_policy',
+                         client_factory=snapshot_policies_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
+                         exception_handler=netappfiles_exception_handler)
+        g.custom_command('create', 'create_snapshot_policy',
+                         client_factory=snapshot_policies_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
+                         exception_handler=netappfiles_exception_handler)
+
 
     with self.command_group('netappfiles', is_preview=True) as g:
         pass

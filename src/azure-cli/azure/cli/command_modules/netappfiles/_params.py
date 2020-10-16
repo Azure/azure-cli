@@ -23,6 +23,7 @@ def load_arguments(self, _):
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='The name of the ANF snapshot')
         c.argument('tag', tags_type)
         c.argument('service_level', options_list=['--service-level'], arg_type=get_enum_type(['Standard', 'Premium', 'Ultra']), help='Service level')
+        c.argument('enabled', options_list=['--enabled', '-e'], arg_type=get_three_state_flag(), id_part=None)
 
     with self.argument_context('netappfiles account') as c:
         c.argument('account_name', account_name_type, options_list=['--name', '--account-name', '-n', '-a'])
@@ -92,3 +93,10 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
     with self.argument_context('netappfiles snapshot list') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('volume_name', options_list=['--volume-name', '-v'], help='The name of the ANF volume', id_part=None)
+
+    with self.argument_context('netappfiles snapshot policy') as c:
+        c.argument('snapshot_policy_name', options_list=['--name', '--snapshot-policy-name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
+        c.argument('hourly_snapshots_to_keep', options_list=['--hourly-snapshots-to-keep', '--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
+        c.argument('daily_snapshots_to_keep', options_list=['--daily-snapshots-to-keep', '--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)
+        c.argument('weekly_snapshots_to_keep', options_list=['--weekly-snapshots-to-keep', '--weekly-snapshots', '-w'], help='The amount of weekly snapshots to keep', id_part=None)
+        c.argument('monthly_snapshots_to_keep', options_list=['--monthly-snapshots-to-keep', '--monthly-snapshots', '-m'], help='The amount of monthly snapshots to keep', id_part=None)

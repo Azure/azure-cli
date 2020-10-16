@@ -617,3 +617,149 @@ examples:
     text: >
         az netappfiles volume pool_change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
+
+
+helps['netappfiles snapshot policy'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Snapshot Policy Resources.
+"""
+
+helps['netappfiles snapshot policy create'] = """
+type: command
+short-summary: Create a new Azure NetApp Files (ANF) snapshot policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --snapshot-policy-name -n -name
+    short-summary: The name of the ANF snapshot policy
+  - name: --hourly-snapshots-to-keep
+    short-summary: Hourly snapshots count to keep
+  - name: --daily-snapshots-to-keep
+    short-summary: Daily snapshots count to keep
+  - name: --weekly-snapshots-to-keep
+    short-summary: Weekly snapshots count to keep
+  - name: --monthly-snapshots-to-keep
+    short-summary: Monthly snapshots count to keep
+  - name: --hourly-minute
+    short-summary: Which minute the hourly snapshot should be taken
+  - name: --daily-minute
+    short-summary: Which minute the daily snapshot should be taken
+  - name: --daily-hour
+    short-summary: Which hour in UTC timezone the daily snapshot should be taken
+  - name: --weekly-minute
+    short-summary: Which minute the weekly snapshot should be taken
+  - name: --weekly-hour
+    short-summary: Which hour in UTC timezone the weekly snapshot should be taken
+  - name: --weekly-day
+    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english  
+  - name: --monthly-minute
+    short-summary: Which minute the monthly snapshot should be taken
+  - name: --monthly-hour
+    short-summary: Which hour in UTC timezone the monthly snapshot should be taken
+  - name: --monthly-days
+    short-summary: Which days of the month the weekly snapshot should be taken, accepts a comma separated list of days
+  - name: --enabled
+    short-summary: The property to decide policy is enabled or not
+  - name: --tags
+    short-summary: Space-separated tags in `key[=value]` format
+examples:
+  - name: Create an ANF snapshot policy
+    text: >
+        az netappfiles snapshot policy create -g mygroup --account-name myaccountname --name mysnapshotpolicyname -l westus2 --hourly-snapshots-to-keep 1 --enabled true
+"""
+
+helps['netappfiles snapshot policy delete'] = """
+type: command
+short-summary: Delete the specified ANF snapshot policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --snapshot-policy-name -n -name
+    short-summary: The name of the ANF snapshot policy
+examples:
+  - name: Delete an ANF snapshot policy
+    text: >
+        az netappfiles snapshot policy delete -g mygroup --account-name myaccname --name mysnapshotpolicyname
+"""
+
+helps['netappfiles snapshot policy list'] = """
+type: command
+short-summary: List the ANF snapshot policies for the specified account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+examples:
+  - name: List the snapshot policy for the ANF account
+    text: >
+        az netappfiles snapshot policy list -g mygroup --account-name myname
+"""
+
+helps['netappfiles snapshot policy show'] = """
+type: command
+short-summary: Get the specified ANF snapshot policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --snapshot-policy-name -n -name
+    short-summary: The name of the ANF snapshot policy
+examples:
+  - name: Get an ANF snapshot policy
+    text: >
+        az netappfiles snapshot policy show -g mygroup --account-name myaccname --name mysnapshotpolicyname
+"""
+
+helps['netappfiles snapshot policy volumes'] = """
+type: command
+short-summary: Get the all ANF volumes associated with snapshot policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --snapshot-policy-name -n -name
+    short-summary: The name of the ANF snapshot policy
+examples:
+  - name: Get ANF volumes associated with snapshot policy
+    text: >
+        az netappfiles snapshot policy volumes -g mygroup --account-name myaccname --name mysnapshotpolicyname
+"""
+
+helps['netappfiles snapshot policy update'] = """
+type: command
+short-summary: Update the specified ANF snapshot policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --snapshot-policy-name -n -name
+    short-summary: The name of the ANF snapshot policy
+  - name: --hourly-snapshots-to-keep
+    short-summary: Hourly snapshots count to keep
+  - name: --daily-snapshots-to-keep
+    short-summary: Daily snapshots count to keep
+  - name: --weekly-snapshots-to-keep
+    short-summary: Weekly snapshots count to keep
+  - name: --monthly-snapshots-to-keep
+    short-summary: Monthly snapshots count to keep
+  - name: --hourly-minute
+    short-summary: Which minute the hourly snapshot should be taken
+  - name: --daily-minute
+    short-summary: Which minute the daily snapshot should be taken
+  - name: --daily-hour
+    short-summary: Which hour in UTC timezone the daily snapshot should be taken
+  - name: --weekly-minute
+    short-summary: Which minute the weekly snapshot should be taken
+  - name: --weekly-hour
+    short-summary: Which hour in UTC timezone the weekly snapshot should be taken
+  - name: --weekly-day
+    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english  
+  - name: --monthly-minute
+    short-summary: Which minute the monthly snapshot should be taken
+  - name: --monthly-hour
+    short-summary: Which hour in UTC timezone the monthly snapshot should be taken
+  - name: --monthly-days
+    short-summary: Which days of the month the weekly snapshot should be taken, accepts a comma separated list of days
+  - name: --enabled
+    short-summary: The property to decide policy is enabled or not
+examples:
+  - name: Update specific values for an ANF snapshot policy
+    text: >
+        az netappfiles snapshot policy update -g mygroup --account-name myaccountname --name mysnapshotpolicyname -l westus2 --daily-backups-to-keep 1 --enabled false
+"""
