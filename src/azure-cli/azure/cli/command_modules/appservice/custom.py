@@ -2399,23 +2399,48 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, certificate_name, key_vault=None):
-    Certificate = cmd.get_models('Certificate')
+def import_ssl_cert(cmd, resource_group_name, name, certificate=None, key_vault_certificate_name=None,
+                    key_vault=None):
+    Certificate_Model = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        err_msg = "'{}' app doesn't exist in resource group {}".format(name, resource_group_name)
+        raise ResourceNotFoundError(err_msg)
     server_farm_id = webapp.server_farm_id
     location = webapp.location
 
-    (kv_id, kv_secret_name) = get_import_kv_details(cmd, client, certificate_name, key_vault)
+    cert_subscription = ''
+    if certificate and key_vault_certificate_name:
+        no_two_certs = "Provide only one certificate name, use \'--certificate-name\'."
+        logger.warning(no_two_certs)
+        return
+    if certificate:
+        if is_valid_resource_id(certificate):
+            cert_id_parts = parse_resource_id(certificate)
+            cert = cert_id_parts['name']
+            cert_subscription = cert_id_parts['subscription']
+        else:
+            cert = certificate
+    elif key_vault_certificate_name:
+        cert = key_vault_certificate_name
+    else:
+        no_cert_msg = 'You must provide a certificate name, use \'--certificate-name\'.'
+        logger.warning(no_cert_msg)
+        return
+
+    (kv_id, kv_secret_name, error) = get_import_kv_details(cmd, client, cert, key_vault, cert_subscription)
+
+    if error:
+        logger.warning(error)
+        return
 
     if kv_id is None:
         kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
                  'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
                  '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
                  '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
-                 'vaults/{0}'.format(key_vault, name, resource_group_name, certificate_name)
+                 'vaults/{0}'.format(key_vault, name, resource_group_name, cert)
         logger.warning(kv_msg)
         return
 
@@ -2425,9 +2450,9 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name, key_vault=
     kv_subscription = kv_id_parts['subscription']
     if not key_vault:
         r = random.randrange(0, 99999)
-        cert_name = '{}-{}-{}'.format(certificate_name, resource_group_name, r)
+        cert_name = '{}-{}-{}'.format(cert, resource_group_name, r)
     else:
-        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, certificate_name)
+        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, cert)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
     if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
@@ -2435,19 +2460,24 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name, key_vault=
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
         logger.warning(lnk_msg)
 
-    kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
-
+    kv_cert_def = Certificate_Model(location=location, key_vault_id=kv_id, password='',
+                                    key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
 
 
-def get_import_kv_details(cmd, client, certificate_name, key_vault):
+def get_import_kv_details(cmd, client, certificate_name, key_vault, cert_subscription):
     kv_id = None
     kv_secret_name = certificate_name
     # if key_vault is not populated, we are attempting to import an App Service Certificate
     if not key_vault:
-        certs = client.app_service_certificate_orders.list()
+        if cert_subscription.lower() != client.config.subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=cert_subscription)
+            certs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            certs = client.app_service_certificate_orders.list()
+
         cert = None
         for c in certs:
             if c.name == certificate_name:
@@ -2456,14 +2486,12 @@ def get_import_kv_details(cmd, client, certificate_name, key_vault):
 
         if not cert:
             no_cert_msg = 'An App Service Certificate with this name does not exist in this subscription.'
-            logger.warning(no_cert_msg)
-            return
+            return (None, None, no_cert_msg)
 
         kv_id = cert.key_vault_id
         if kv_id is None:
             no_kv_msg = 'This App Service Certificate has not been added to a KeyVault, and cannot be imported.'
-            logger.warning(no_kv_msg)
-            return
+            return (None, None, no_kv_msg)
         kv_secret_name = cert.key_vault_secret_name
 
     else:
@@ -2476,7 +2504,8 @@ def get_import_kv_details(cmd, client, certificate_name, key_vault):
                     break
         else:
             kv_id = key_vault
-    return (kv_id, kv_secret_name)
+
+    return (kv_id, kv_secret_name, None)
 
 
 def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
