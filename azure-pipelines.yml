@@ -23,7 +23,7 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
-        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
           echo "Hotfix PR should target release branch."
           exit 1
         fi
@@ -688,7 +688,7 @@ jobs:
         distro: stretch
       Buster:
         deb_system: debian
-        distro: buster 
+        distro: buster
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -742,7 +742,7 @@ jobs:
         distro: stretch
       Buster:
         deb_system: debian
-        distro: buster      
+        distro: buster
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
