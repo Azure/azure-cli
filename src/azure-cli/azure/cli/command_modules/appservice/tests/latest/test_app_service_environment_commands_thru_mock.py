@@ -14,7 +14,7 @@ from knack.util import CLIError
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostingEnvironmentProfile
 from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule)
-from azure.cli.core.adal_authentication import AdalAuthentication
+from azure.cli.core.credential import CredentialAdaptor
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
                                                                          list_appserviceenvironments,
@@ -30,7 +30,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.mock_logger = mock.MagicMock()
         self.mock_cmd = mock.MagicMock()
         self.mock_cmd.cli_ctx = mock.MagicMock()
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
+        self.client = WebSiteManagementClient(CredentialAdaptor(lambda: ('bearer', 'secretToken')), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_show(self, ase_client_factory_mock):

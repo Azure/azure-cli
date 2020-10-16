@@ -840,7 +840,7 @@ class MsiAccountTypes:
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
+        from azure.cli.core.credential import MSIAuthenticationWrapper
         if cli_account_name == MsiAccountTypes.system_assigned:
             return MSIAuthenticationWrapper(resource=resource)
         if cli_account_name == MsiAccountTypes.user_assigned_client_id:

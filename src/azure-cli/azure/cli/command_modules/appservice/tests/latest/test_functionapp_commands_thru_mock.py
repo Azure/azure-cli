@@ -7,7 +7,7 @@ import mock
 import os
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.adal_authentication import AdalAuthentication
+from azure.cli.core.credential import CredentialAdaptor
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
@@ -34,7 +34,7 @@ def _get_test_cmd():
 
 class TestFunctionappMocked(unittest.TestCase):
     def setUp(self):
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
+        self.client = WebSiteManagementClient(CredentialAdaptor(lambda: ('bearer', 'secretToken')), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.parse_resource_id')

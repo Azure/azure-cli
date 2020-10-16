@@ -73,7 +73,7 @@ class CredentialAdaptor:
         return token, external_tenant_tokens
 
     def signed_session(self, session=None):
-        logger.debug("AdalAuthentication.signed_session invoked by Track 1 SDK")
+        logger.debug("CredentialAdaptor.signed_session invoked by Track 1 SDK")
         session = session or requests.Session()
         token, external_tenant_tokens = self._get_token()
         header = "{} {}".format('Bearer', token.token)

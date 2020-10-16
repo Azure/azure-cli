@@ -8,7 +8,7 @@ import mock
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.cli.core.adal_authentication import AdalAuthentication
+from azure.cli.core.credential import CredentialAdaptor
 from knack.util import CLIError
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
@@ -48,7 +48,7 @@ def _get_test_cmd():
 
 class TestWebappMocked(unittest.TestCase):
     def setUp(self):
-        self.client = WebSiteManagementClient(AdalAuthentication(lambda: ('bearer', 'secretToken')), '123455678')
+        self.client = WebSiteManagementClient(CredentialAdaptor(lambda: ('bearer', 'secretToken')), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
