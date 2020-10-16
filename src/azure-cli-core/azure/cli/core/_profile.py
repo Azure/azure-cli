@@ -273,6 +273,16 @@ class Profile:
                 if hasattr(s, 'home_tenant_id'):
                     subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
                 if hasattr(s, 'managed_by_tenants'):
+                    if s.managed_by_tenants is None:
+                        # managedByTenants is missing from the response. This is a known service issue:
+                        # https://github.com/Azure/azure-rest-api-specs/issues/9567
+                        # pylint: disable=line-too-long
+                        from azure.cli.core.azclierror import UserFault
+                        raise UserFault("Invalid profile is used for cloud '{cloud_name}'. "
+                                        "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>`. "
+                                        "For more information about using Azure CLI with Azure Stack, see "
+                                        "https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-version-profiles-azurecli2#connect-to-azure-stack"
+                                        .format(cloud_name=self.cli_ctx.cloud.name))
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
             consolidated.append(subscription_dict)
