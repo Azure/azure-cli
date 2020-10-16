@@ -1,5 +1,7 @@
 # Quoting issues with PowerShell
 
+This issue is being tracked at [#15529](https://github.com/Azure/azure-cli/issues/15529).
+
 ## Symptom
 
 On Windows, there is a known issue of PowerShell when calling native `.exe` executables or `.bat`, `.cmd` Command Prompt scripts: https://github.com/PowerShell/PowerShell/issues/1995.
