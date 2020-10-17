@@ -265,14 +265,14 @@ blob_storage_target_state_param_type = CLIArgumentType(
     arg_group=storage_arg_group,
     options_list=['--blob-storage-target-state', '--bsts'],
     configured_default='sql-server',
-    help='Indicates whether blob storage is a destination for audit records.',
+    help='Indicate whether blob storage is a destination for audit records.',
     arg_type=get_enum_type(BlobAuditingPolicyState))
 
 log_analytics_target_state_param_type = CLIArgumentType(
     arg_group=log_analytics_arg_group,
     options_list=['--log-analytics-target-state', '--lats'],
     configured_default='sql-server',
-    help='Indicates whether log analytics is a destination for audit records.',
+    help='Indicate whether log analytics is a destination for audit records.',
     arg_type=get_enum_type(BlobAuditingPolicyState))
 
 log_analytics_workspace_resource_id_param_type = CLIArgumentType(
@@ -286,7 +286,7 @@ event_hub_target_state_param_type = CLIArgumentType(
     arg_group=event_hub_arg_group,
     options_list=['--event-hub-target-state', '--ehts'],
     configured_default='sql-server',
-    help='Indicates whether event hub is a destination for audit records.',
+    help='Indicate whether event hub is a destination for audit records.',
     arg_type=get_enum_type(BlobAuditingPolicyState))
 
 event_hub_authorization_rule_id_param_type = CLIArgumentType(
