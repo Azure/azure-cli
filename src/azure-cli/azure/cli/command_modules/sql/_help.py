@@ -24,7 +24,7 @@ short-summary: Manage a database's auditing policy.
 
 helps['sql db audit-policy wait'] = """
 type: command
-short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+short-summary: Place the CLI in a waiting state until a condition of the database's audit policy is met.
 """
 
 helps['sql db audit-policy update'] = """
@@ -1009,7 +1009,7 @@ short-summary: Manage a server's auditing policy.
 
 helps['sql server audit-policy wait'] = """
 type: command
-short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+short-summary: Place the CLI in a waiting state until a condition of the server's audit policy is met.
 """
 
 helps['sql server audit-policy update'] = """
