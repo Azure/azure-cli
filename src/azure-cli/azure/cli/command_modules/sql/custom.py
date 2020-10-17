@@ -43,9 +43,9 @@ from azure.mgmt.sql.models import (
     ServerPublicNetworkAccess
 )
 
-from azure.mgmt.monitor import MonitorManagementClient
 from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.command_modules.monitor._client_factory import cf_monitor
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
 
 from knack.log import get_logger
@@ -1629,7 +1629,7 @@ def _get_diagnostic_settings(
     diagnostic_settings_url = _get_diagnostic_settings_url(
         cmd=cmd, resource_group_name=resource_group_name,
         server_name=server_name, database_name=database_name)
-    azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
     return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
 
@@ -1851,9 +1851,12 @@ def _audit_policy_create_diagnostic_setting(
         name += '_' + str(uuid.uuid4())
 
     diagnostic_settings_url = _get_diagnostic_settings_url(
-        cmd=cmd, resource_group_name=resource_group_name,
-        server_name=server_name, database_name=database_name)
-    azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
     return create_diagnostics_settings(
         client=azure_monitor_client.diagnostic_settings,
@@ -1892,9 +1895,12 @@ def _audit_policy_update_diagnostic_settings(
         raise CLIError('Multiple audit diagnostics settings are already enabled')
 
     diagnostic_settings_url = _get_diagnostic_settings_url(
-        cmd=cmd, resource_group_name=resource_group_name,
-        server_name=server_name, database_name=database_name)
-    azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
     # If no audit diagnostic settings found then create one if azure monitor is enabled
     if num_of_audit_diagnostic_settings == 0:
@@ -2205,7 +2211,7 @@ def _audit_policy_update_rollback(
         server_name=server_name,
         database_name=database_name)
 
-    azure_monitor_client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
     for rd in rollback_data:
         rollback_diagnostic_setting = rd[1]
