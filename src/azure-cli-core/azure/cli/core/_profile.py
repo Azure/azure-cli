@@ -1140,7 +1140,7 @@ class ServicePrincipalAuth:
                            'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
             self.certificate_file = certificate_file
             self.public_certificate = None
             try:
@@ -1154,7 +1154,7 @@ class ServicePrincipalAuth:
                         match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
                                           self.cert_file_string, re.I)
                         self.public_certificate = match.group('public').strip()
-            except UnicodeDecodeError:
+            except [UnicodeDecodeError, Error]:
                 raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value

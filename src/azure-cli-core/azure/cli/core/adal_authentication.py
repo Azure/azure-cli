@@ -93,3 +93,16 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
+
+    def set_token(self):
+        from .azclierror import AzureConnectionError, AzureResponseError
+        try:
+            super(MSIAuthenticationWrapper, self).set_token()
+        except requests.exceptions.ConnectionError as err:
+            raise AzureConnectionError('Authentication failed: may have network connection issues. '
+                                       'Error detail: {}'.format(str(err)))
+        except requests.exceptions.HTTPError as err:
+            raise AzureResponseError('Authentication failed: got an error response when visit {}: {}'
+                                     .format(err.request, err.response))
+        except TimeoutError as err:
+            raise AzureConnectionError('Authentication timeout. Error detail: {}'.format(str(err)))
