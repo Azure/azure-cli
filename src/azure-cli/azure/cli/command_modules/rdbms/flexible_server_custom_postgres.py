@@ -337,9 +337,10 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
 
 def flexible_server_connection_string(
-        server_name='{server}', database_name='{database}', administrator_login='{login}',
+        cmd, server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
-    host = '{}.postgres.database.azure.com'.format(server_name)
+    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    host = '{}{}'.format(server_name, postgresql_server_endpoint)
     return {
         'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
                                                                    administrator_login_password, database_name)
@@ -347,7 +348,8 @@ def flexible_server_connection_string(
 
 
 def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, postgres_query=None):
-    host = '{}.postgres.database.azure.com'.format(server_name)
+    postgresql_server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+    host = '{}{}'.format(server_name, postgresql_server_endpoint)
     cursor = None
     json_data = None
     if database_name is None:
@@ -363,10 +365,10 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
         }
         connection = psycopg2.connect(**connection_kwargs)
         connection.set_session(autocommit=True)
-        logger.warning('Successfully connected to PostgreSQL.')
+        logger.warning('Successfully connected to %s.', server_name)
     except Exception as e:
-        logger.warning('Failed connection to PostgreSQL. Check error and validate firewall and public access settings.')
-        raise CLIError("Unable to connect to PostgreSQL Server: {}".format(e))
+        logger.warning('Failed connection to %s. Check error and validate firewall and public access settings.', server_name)
+        raise CLIError("Unable to connect to flexible server: {}".format(e))
 
     # execute query if passed in
     if postgres_query is not None:
@@ -382,12 +384,12 @@ def connect_to_flexible_server_postgresql(cmd, server_name, administrator_login,
             for rv in result:
                 json_data.append(dict(zip(row_headers, rv)))
         except Exception as e:
-            raise CLIError("Unable to execute query '{0}' on PostgreSQL Server: {1}".format(postgres_query, e))
+            raise CLIError("Unable to execute query '{0}': {1}".format(postgres_query, e))
         finally:
             if cursor is not None:
                 try:
                     cursor.close()
-                    logger.warning("Closed the connection to %s", host)
+                    logger.warning("Closed the connection to %s", server_name)
                 except Exception:  # pylint: disable=broad-except
                     logger.warning('Unable to close connection cursor.')
     return json_data

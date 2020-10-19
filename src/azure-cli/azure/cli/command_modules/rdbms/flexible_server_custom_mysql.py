@@ -415,9 +415,10 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
 
 def flexible_server_connection_string(
-        server_name='{server}', database_name='{database}', administrator_login='{login}',
+        cmd, server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
-    host = '{}.mysql.database.azure.com'.format(server_name)
+    mysql_server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
+    host = '{}{}'.format(server_name, mysql_server_endpoint)
     if database_name is None:
         database_name = 'mysql'
     return {
@@ -427,7 +428,8 @@ def flexible_server_connection_string(
 
 
 def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, mysql_query=None):
-    host = '{}.mysql.database.azure.com'.format(server_name)
+    mysql_server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
+    host = '{}{}'.format(server_name, mysql_server_endpoint)
     cursor = None
     json_data = None
     if database_name is None:
@@ -442,10 +444,10 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
             'password': administrator_login_password
         }
         connection = mysql_connector.connect(**connection_kwargs)
-        logger.warning('Successfully connected to MySQL.')
+        logger.warning('Successfully connected to %s.', server_name)
     except Exception as e:
-        logger.warning('Failed connection to MySQL. Check error and validate firewall and public access settings.')
-        raise CLIError("Unable to connect to MySQL Server: {0}.".format(e))
+        logger.warning('Failed connection to %s. Check error and validate firewall and public access settings.', server_name)
+        raise CLIError("Unable to connect to flexible server: {}".format(e))
 
     # execute query if passed in
     if mysql_query is not None:
@@ -461,12 +463,12 @@ def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, admi
             for rv in result:
                 json_data.append(dict(zip(row_headers, rv)))
         except mysql_connector.errors.Error as e:
-            raise CLIError("Unable to execute query '{0}' on MySQL Server: {1}".format(mysql_query, e))
+            raise CLIError("Unable to execute query '{0}': {1}".format(mysql_query, e))
         finally:
             if cursor is not None:
                 try:
                     cursor.close()
-                    logger.warning("Closed the connection to %s", host)
+                    logger.warning("Closed the connection to %s", server_name)
                 except Exception:  # pylint: disable=broad-except
                     logger.warning('Unable to close connection cursor.')
     return json_data
