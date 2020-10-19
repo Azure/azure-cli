@@ -3179,10 +3179,8 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
                          hyper_v_generation='V1', features=None):
     # pylint: disable=line-too-long
-    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, \
-    ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
-        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed',\
-        'ImagePurchasePlan', 'GalleryImageFeature')
+    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
+        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
