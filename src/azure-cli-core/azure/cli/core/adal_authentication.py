@@ -99,10 +99,11 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         try:
             super(MSIAuthenticationWrapper, self).set_token()
         except requests.exceptions.ConnectionError as err:
-            raise AzureConnectionError('Authentication failed: may have network connection issues. '
+            raise AzureConnectionError('Authentication failed: May have network connection issues. \n'
                                        'Error detail: {}'.format(str(err)))
         except requests.exceptions.HTTPError as err:
-            raise AzureResponseError('Authentication failed: got an error response when visit {}: {}'
-                                     .format(err.request, err.response))
+            raise AzureResponseError('Authentication failed: Got an error response when visit {}.\n'
+                                     'Error code: {}, reason: {}'
+                                     .format(err.request, err.response.status, err.response.reason))
         except TimeoutError as err:
             raise AzureConnectionError('Authentication timeout. Error detail: {}'.format(str(err)))
