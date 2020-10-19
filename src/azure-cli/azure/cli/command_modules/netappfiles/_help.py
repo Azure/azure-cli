@@ -40,13 +40,13 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
-  - name: --kdc-ip
+  - name: --kdc_ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: --ad-name
+  - name: ad_name
     short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: --server-root-ca-cert
+  - name: server_root_ca_certificate
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
-  - name: --backup-operators
+  - name: backup_operators
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
 examples:
   - name: Add an active directory to the account

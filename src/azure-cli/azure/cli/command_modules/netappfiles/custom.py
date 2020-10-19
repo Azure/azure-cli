@@ -38,12 +38,12 @@ def create_account(cmd, client, account_name, resource_group_name, location, tag
 # current limitation is 1 AD/subscription
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
-                         server_root_ca_cert=None, backup_operators=None):
+                         server_root_ca_certificate=None, backup_operators=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
-                                       server_root_ca_certificate=server_root_ca_cert)
+                                       server_root_ca_certificate=server_root_ca_certificate)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
