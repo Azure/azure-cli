@@ -1751,7 +1751,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, prompt=False):
+                         description=None, version=None, version_description=None, no_prompt=False):
     artifacts = None
     input_template = None
     if location is None:
@@ -1761,7 +1761,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
     if version:
         Exists = False
-        if not prompt:
+        if no_prompt is False:
             try:  # Check if child template spec already exists.
                 existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
                 from knack.prompting import prompt_y_n

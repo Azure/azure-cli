@@ -540,7 +540,7 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
-        c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
+        c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     with self.argument_context('ts update') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
