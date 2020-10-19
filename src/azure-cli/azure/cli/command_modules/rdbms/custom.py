@@ -149,7 +149,6 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     version = server_result.version
     sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
-    replica_capacity = server_result.replica_capacity
 
     # Adding firewall rule
     if public_network_access is not None and start_ip != '':
@@ -165,7 +164,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         return form_response(user, sku, loc, server_id, host, version,
                              administrator_login_password if administrator_login_password is not None else '*****',
                              create_postgresql_connection_string(server_name, host, user, administrator_login_password),
-                             infrastructure_encryption, replica_capacity, None, firewall_id)
+                             infrastructure_encryption, None, firewall_id)
     # Serves both - MySQL and MariaDB
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
@@ -173,7 +172,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     return form_response(user, sku, loc, server_id, host, version,
                          administrator_login_password if administrator_login_password is not None else '*****',
                          create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),
-                         infrastructure_encryption, replica_capacity, database_name, firewall_id)
+                         infrastructure_encryption, database_name, firewall_id)
 
 
 # Need to replace source server name with source server id, so customer server restore function
@@ -709,7 +708,7 @@ def create_database(cmd, resource_group_name, server_name, database_name, engine
         database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8').result()
 
 
-def form_response(username, sku, location, server_id, host, version, password, connection_string, infrastructure_encryption, replica_capacity, database_name=None, firewall_id=None):
+def form_response(username, sku, location, server_id, host, version, password, connection_string, infrastructure_encryption, database_name=None, firewall_id=None):
     output = {
         'host': host,
         'username': username,
@@ -719,7 +718,6 @@ def form_response(username, sku, location, server_id, host, version, password, c
         'id': server_id,
         'version': version,
         'connectionString': connection_string,
-        'replicaCapacity': replica_capacity
     }
     if firewall_id is not None:
         output['firewallName'] = firewall_id

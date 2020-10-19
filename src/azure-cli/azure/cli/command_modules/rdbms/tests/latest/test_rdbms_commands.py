@@ -931,16 +931,14 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
+                     JMESPathCheck('masterServerId', result['id'])])
 
         # test show server with replication info
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'Master'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # test replica list
         self.cmd('{} server replica list -g {} -s {}'
@@ -955,16 +953,14 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # test delete master server
         self.cmd('{} server replica create -g {} -n {} '
@@ -975,8 +971,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', result['skuname']),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
+                     JMESPathCheck('masterServerId', result['id'])])
 
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
@@ -986,8 +981,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  .format(database_engine, resource_group, replicas[1]),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # clean up servers
         self.cmd('{} server delete -g {} --name {} --yes'
@@ -1043,16 +1037,14 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', testSkuName),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
+                     JMESPathCheck('masterServerId', result['id'])])
 
         # test show server with replication info
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'Master'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # test replica list
         self.cmd('{} server replica list -g {} -s {}'
@@ -1068,8 +1060,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', ''),
-                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
+                     JMESPathCheck('masterServerId', '')])
 
         # test delete master server
         self.cmd('{} server replica create -g {} -n {} '
@@ -1080,8 +1071,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', result['skuname']),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')])
+                     JMESPathCheck('masterServerId', result['id'])])
 
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
