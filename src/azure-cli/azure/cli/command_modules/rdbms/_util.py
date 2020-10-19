@@ -49,7 +49,7 @@ def parse_public_network_access_input(public_network_access):
         elif len(parsed_input) == 2:
             return parsed_input[0], parsed_input[1]
         else:
-            raise CLIError('incorrect usage: --public/--public_network_access. Acceptable values are \'all\','
+            raise CLIError('incorrect usage: --public/--public-network-access. Acceptable values are \'all\','
                            ' \'enabled\', \'disabled\', \'<startIP>\' and \'<startIP>-<destinationIP>\' '
                            'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
 
