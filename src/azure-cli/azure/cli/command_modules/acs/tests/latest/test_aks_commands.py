@@ -2024,6 +2024,51 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('spotMaxPrice', spot_max_price)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_ppg(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('p', 10)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ppg': self.generate_ppg_id(resource_group, resource_group_location)
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+            '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+            '--service-principal={service_principal} --client-secret={client_secret} --ppg={ppg} '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].proximityPlacementGroupId', '{ppg}')
+        ])
+
+        # add node pool
+        create_ppg_node_pool_cmd = 'aks nodepool add ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name} ' \
+            '-n {node_pool_name} ' \
+            '--ppg={ppg} '
+        self.cmd(create_ppg_node_pool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', node_pool_name),
+            self.check('proximityPlacementGroupId', '{ppg}')
+        ])
+
     @classmethod
     def generate_ssh_keys(cls):
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
@@ -2040,6 +2085,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
+
+    def generate_ppg_id(self, resource_group, location):
+        ppg_name = self.create_random_name('clippg', 16)
+        ppg = self.cmd('az ppg create -n {} -g {} --location {}'
+                       .format(ppg_name, resource_group, location)).get_output_in_json()
+        return ppg.get("id")
 
     def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
