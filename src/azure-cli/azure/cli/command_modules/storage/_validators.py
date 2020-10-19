@@ -391,7 +391,7 @@ def validate_storage_data_plane_list(namespace):
         namespace.num_results = int(namespace.num_results)
 
 
-def get_content_setting_validator(settings_class, update, guess_from_file=None):
+def get_content_setting_validator(settings_class, update, guess_from_file=None, process_md5=False):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
@@ -454,6 +454,10 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
         else:
             if guess_from_file:
                 new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
+
+        if process_md5:
+            from .track2_util import string_to_bytes
+            new_props.content_md5 = string_to_bytes(new_props.content_md5)
 
         ns['content_settings'] = new_props
 
@@ -570,6 +574,31 @@ def get_file_path_validator(default_file_param=None):
         namespace.directory_name = dir_name
         namespace.file_name = file_name
         del namespace.path
+
+    return validator
+
+
+def get_file_path_validator_v2(default_file_param=None):
+    """ Allows another path-type parameter to be named which can supply a default filename. """
+
+    def validator(namespace):
+        if not hasattr(namespace, 'path'):
+            return
+
+        path = namespace.path
+        del namespace.path
+
+        if not path:
+            namespace.file_path = os.path.split(getattr(namespace, default_file_param))[1]
+            return
+
+        dir_name, file_name = os.path.split(path) if path else (None, '')
+
+        if default_file_param and '.' not in file_name:
+            dir_name = path
+            file_name = os.path.split(getattr(namespace, default_file_param))[1]
+
+        namespace.file_path = dir_name + '/' + file_name if dir_name else file_name
 
     return validator
 
@@ -810,6 +839,29 @@ def add_progress_callback(cmd, namespace):
     del namespace.no_progress
 
 
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
 def process_container_delete_parameters(cmd, namespace):
     """Process the parameters for storage container delete command"""
     # check whether to use mgmt or data-plane
@@ -931,6 +983,7 @@ def process_file_upload_batch_parameters(cmd, namespace):
             namespace.account_name = identifier.account_name
 
     namespace.source = os.path.realpath(namespace.source)
+    namespace.share_name = namespace.destination
 
 
 def process_file_download_batch_parameters(cmd, namespace):

@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
-                                                               cf_or_policy, cf_container_client)
+                                                               cf_or_policy, cf_container_client, cf_share_client,
+                                                               cf_share_file_client)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -303,6 +304,22 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
 
+    file_client_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.fileshare._file_client#ShareFileClient.{}',
+        client_factory=cf_share_client,
+        resource_type=ResourceType.DATA_STORAGE_FILESHARE
+    )
+
+    with self.command_group('storage file', file_client_sdk, resource_type=ResourceType.DATA_STORAGE_FILESHARE,
+                            min_api='2019-02-02',
+                            custom_command_type=get_custom_sdk('file', client_factory=cf_share_file_client,
+                                                               resource_type=ResourceType.DATA_STORAGE_FILESHARE)) as g:
+        from ._transformers import transform_file_upload
+
+        g.storage_custom_command('upload', 'storage_file_upload', transform=transform_file_upload)
+        g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
+                                 custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
+
     with self.command_group('storage blob lease', blob_lease_client_sdk, resource_type=ResourceType.DATA_STORAGE_BLOB,
                             min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob', client_factory=cf_blob_lease_client,
@@ -576,13 +593,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command(
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_command('download', 'get_file_to_path')
-        g.storage_command('upload', 'create_file_from_path')
         g.storage_command('metadata show', 'get_file_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_file_metadata')
         g.storage_command('copy start', 'copy_file')
         g.storage_command('copy cancel', 'abort_copy_file')
-        g.storage_custom_command('upload-batch', 'storage_file_upload_batch')
         g.storage_custom_command(
             'download-batch', 'storage_file_download_batch')
         g.storage_custom_command('delete-batch', 'storage_file_delete_batch')

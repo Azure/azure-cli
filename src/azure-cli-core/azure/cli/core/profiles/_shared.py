@@ -170,7 +170,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-12-12',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
-        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
+        ResourceType.DATA_STORAGE_FILESHARE: '2019-12-12',
         ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',

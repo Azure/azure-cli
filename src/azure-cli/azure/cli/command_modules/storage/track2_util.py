@@ -45,6 +45,12 @@ def _encode_bytes(b):
     return b
 
 
+def string_to_bytes(data, encoding="utf-8"):
+    if isinstance(data, str):
+        return data.encode(encoding)
+    return data
+
+
 def transform_dict_keys_to_hump(data_dict):
     new_dict = {}
     if not data_dict:
@@ -80,3 +86,16 @@ def list_generator(pages, num_results):
         result += page
 
     return result
+
+
+def make_file_url(client, directory_name, file_name, sas_token=None):
+
+    if not directory_name:
+        url = '{}/{}'.format(client.primary_endpoint, file_name)
+    else:
+        url = '{}/{}/{}'.format(client.primary_endpoint, directory_name, file_name)
+
+    if sas_token:
+        url += '?' + sas_token
+
+    return url

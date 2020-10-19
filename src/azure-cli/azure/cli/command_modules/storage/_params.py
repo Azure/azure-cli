@@ -20,7 +20,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy,
+                          add_progress_callback_v2)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -71,6 +72,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
+    progress_type_v2 = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
+                                       action='store_true', validator=add_progress_callback_v2)
     socket_timeout_type = CLIArgumentType(help='The socket timeout(secs), used by the service to regulate data flow.',
                                           type=int)
     large_file_share_type = CLIArgumentType(
@@ -1255,11 +1258,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage file upload') as c:
         t_file_content_settings = self.get_sdk('file.models#ContentSettings')
 
-        c.register_path_argument(default_file_param='local_file_path')
-        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
-        c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
-        c.extra('no_progress', progress_type)
-        c.argument('max_connections', type=int)
+        c.register_path_argument_v2(default_file_param='local_file_path')
+        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path',
+                                             process_md5=True)
+        c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter(),
+                   help='Path of the local file to upload as the file content.')
+        c.extra('no_progress', progress_type_v2)
+        c.argument('max_connections', type=int, help='Maximum number of parallel connections to use.')
+        c.extra('share_name', share_name_type, required=True)
+        c.argument('validate_content', action='store_true', min_api='2016-05-31',
+                   help='If true, calculates an MD5 hash for each range of the file. The storage service checks the '
+                        'hash of the content that has arrived with the hash that was sent. This is primarily valuable '
+                        'for detecting bitflips on the wire if using http instead of https as https (the default) will '
+                        'already validate. Note that this MD5 hash is not stored with the file.')
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument()
@@ -1269,10 +1280,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', arg_group='Download Control', type=int)
+        c.argument('max_connections', arg_group='Upload Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.extra('no_progress', progress_type)
+        c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings',
+                                             process_md5=True)
+        c.extra('no_progress', progress_type_v2)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters

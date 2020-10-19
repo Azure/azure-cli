@@ -246,3 +246,8 @@ def transform_restore_policy_output(result):
     if hasattr(result, 'restore_policy') and hasattr(result.restore_policy, 'last_enabled_time'):
         del result.restore_policy.last_enabled_time
     return result
+
+
+def transform_file_upload(result):
+    return None
+

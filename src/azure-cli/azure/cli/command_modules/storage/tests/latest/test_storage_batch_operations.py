@@ -195,6 +195,35 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          src_share, local_folder)
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # upload to specifying share path
+        src_share = self.create_share(storage_account_info)
+        local_folder = self.create_temp_dir()
+        sub_dir = 'test_dir/sub_dir'
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --pattern */file_0 --destination-path {} ',
+                         storage_account_info, test_dir, src_share, sub_dir)
+        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share + "/" + sub_dir,
+                         local_folder)
+        self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # upload with content settings
+        src_share = self.create_share(storage_account_info)
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --pattern apple/file_0 '
+                         '--content-cache-control no-cache '
+                         '--content-disposition attachment '
+                         '--content-encoding compress '
+                         '--content-language en-US '
+                         '--content-type "multipart/form-data;" '
+                         '--metadata key=val', storage_account_info, test_dir, src_share)
+        self.storage_cmd('storage file show -s {} -p "{}" ', storage_account_info, src_share, 'apple/file_0').\
+            assert_with_checks(JMESPathCheck('name', 'file_0'),
+                               JMESPathCheck('properties.contentSettings.cacheControl', 'no-cache'),
+                               JMESPathCheck('properties.contentSettings.contentDisposition', 'attachment'),
+                               JMESPathCheck('properties.contentSettings.contentEncoding', 'compress'),
+                               JMESPathCheck('properties.contentSettings.contentLanguage', 'en-US'),
+                               JMESPathCheck('properties.contentSettings.contentType', 'multipart/form-data;'),
+                               JMESPathCheck('metadata', {'key': 'val'}))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='src_account')
     @StorageAccountPreparer(parameter_name='dst_account')
