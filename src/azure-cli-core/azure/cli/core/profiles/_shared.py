@@ -218,10 +218,15 @@ AZURE_API_PROFILES = {
             'disks': '2019-07-01',
             'disk_encryption_sets': '2019-07-01',
             'disk_accesses': '2020-05-01',
-            'snapshots': '2019-07-01'
+            'snapshots': '2019-07-01',
+            'galleries': '2019-12-01',
+            'gallery_images': '2019-12-01',
+            'gallery_image_versions': '2019-12-01',
+            'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
-        ResourceType.MGMT_RESOURCE_LINKS: '2018-05-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2019-10-01',
