@@ -104,7 +104,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
                   snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
-                  policy_enforced=None, vault_id=None):
+                  policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None,
+                  throughput_mibps=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -170,6 +171,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         volume_type=volume_type,
         data_protection=data_protection,
         backup_id=backup_id,
+        kerberos_enabled=kerberos_enabled,
+        security_style=security_style,
+        throughput_mibps=throughput_mibps,
         tags=tags,
         snapshot_id=snapshot_id)
 
@@ -183,7 +187,7 @@ def revert_snapshot(cmd, client, account_name, pool_name, volume_name, resource_
 
 # volume update
 def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None, vault_id=None,
-                 backup_enabled=False, backup_policy_id=None, policy_enforced=False):
+                 backup_enabled=False, backup_policy_id=None, policy_enforced=False, throughput_mibps=None):
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
@@ -191,8 +195,9 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protoc
         data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
             backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
                                           backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
-        tags=tags)
-    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
+        tags=tags,
+        throughput_mibps=throughput_mibps)
+    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection', 'throughput_mibps'])
     return params
 
 
