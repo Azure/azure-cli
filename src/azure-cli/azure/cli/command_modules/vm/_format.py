@@ -84,7 +84,14 @@ def transform_sku_for_table_output(skus):
         else:
             order_dict['zones'] = 'None'
         if k['restrictions']:
-            reasons = [x['reasonCode'] for x in k['restrictions']]
+            reasons = []
+            for x in k['restrictions']:
+                reason = x['reasonCode']
+                if x['restrictionInfo']['locations']:
+                    reason += ', locations: ' + ','.join(x['restrictionInfo']['locations'])
+                if x['restrictionInfo']['zones']:
+                    reason += ', zones: ' + ','.join(x['restrictionInfo']['zones'])
+                reasons.append(reason)
             order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]
         else:
             order_dict['restrictions'] = 'None'
