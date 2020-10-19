@@ -104,8 +104,10 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
                   usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
                   snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
-                  policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None,
-                  throughput_mibps=None):
+                  policy_enforced=None, vault_id=None, kerberos_enabled=None, security_style=None, throughput_mibps=None,
+                  kerberos5_read_only=None, kerberos5_read_write=None, kerberos5i_read_only=None,
+                  kerberos5i_read_write=None, kerberos5p_read_only=None, kerberos5p_read_write=None,
+                  has_root_access=None, snapshot_directory_visible=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -128,7 +130,15 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     # add export policy subcommand
     if (protocol_types is not None) and ("NFSv4.1" in protocol_types):
         rules = []
-        export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, cifs=False, nfsv3=False, nfsv41=True, allowed_clients="0.0.0.0/0")
+        export_policy = ExportPolicyRule(rule_index=1, unix_read_only=False, unix_read_write=True, cifs=False,
+                                         nfsv3=False, nfsv41=True, allowed_clients="0.0.0.0/0",
+                                         kerberos5_read_only=kerberos5_read_only,
+                                         kerberos5_read_write=kerberos5_read_write,
+                                         kerberos5i_read_only=kerberos5i_read_only,
+                                         kerberos5i_read_write=kerberos5i_read_write,
+                                         kerberos5p_read_only=kerberos5p_read_only,
+                                         kerberos5p_read_write=kerberos5p_read_write,
+                                         has_root_access=has_root_access)
         rules.append(export_policy)
 
         volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
@@ -164,8 +174,9 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         data_protection=data_protection,
         backup_id=backup_id,
         kerberos_enabled=kerberos_enabled,
-        security_style=security_style,
         throughput_mibps=throughput_mibps,
+        snapshot_directory_visible=snapshot_directory_visible,
+        security_style=security_style,
         tags=tags,
         snapshot_id=snapshot_id)
 
