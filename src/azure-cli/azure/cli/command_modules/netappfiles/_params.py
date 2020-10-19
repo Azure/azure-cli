@@ -55,8 +55,9 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('account_name', id_part='name')
         c.argument('pool_name', pool_name_type)
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'])
-        c.argument('backup_enabled', options_list=['--backup-enabled'], arg_type=get_three_state_flag(), id_part=None)
-        c.argument('policy_enforced', options_list=['--policy-enforced'], arg_type=get_three_state_flag(), id_part=None)
+        c.argument('backup_enabled', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('policy_enforced', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('kerberos-enabled', arg_type=get_three_state_flag(), id_part=None)
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)

@@ -84,6 +84,9 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['volumeType'] is None
         assert volume['dataProtection'] is None
 
+        assert volume['kerberosEnabled'] is False
+        assert volume['securityStyle'] == 'Unix'
+
         volume_list = self.cmd("netappfiles volume list --resource-group {rg} --account-name %s --pool-name %s" % (account_name, pool_name)).get_output_in_json()
         assert len(volume_list) == 1
 
