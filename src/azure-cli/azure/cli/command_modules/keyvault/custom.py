@@ -444,7 +444,8 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
                                 no_wait=no_wait)
 
 
-def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
+def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
+                        bypass, default_action):
     if network_acls_json is None:
         network_acls_json = {}
 
@@ -466,7 +467,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    network_acls = _create_network_rule_set(cmd)
+    network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     from msrestazure.tools import is_valid_resource_id
 
@@ -661,9 +662,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we will parse it from parameter `--network-acls`
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        network_acls = _create_network_rule_set(cmd, bypass, default_action) \
-            if bypass or default_action else \
-            _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets)
+        if network_acls or network_acls_ips or network_acls_vnets:
+            network_acls = _parse_network_acls(
+                cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+        else:
+            network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
