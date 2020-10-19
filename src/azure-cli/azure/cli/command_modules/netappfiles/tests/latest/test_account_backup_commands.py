@@ -10,7 +10,6 @@ LOCATION = "southcentralus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
-
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
@@ -56,8 +55,8 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
 
             # create backup policy
             backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
-            backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s "
-                                     "--backup-policy-name %s -l %s --daily-backups 1" %
+            backup_policy = self.cmd("az netappfiles account backup_policy create -g {rg} -a %s "
+                                     "--backup-policy-name %s -l %s --daily-backups-to-keep 1" %
                                      (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
             # volume update with backup policy
@@ -70,6 +69,21 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
         backup = self.cmd("az netappfiles volume backup create -g {rg} -a %s -p %s -v %s -l %s --backup-name %s" %
                           (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
         return backup
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
+    def test_get_account_backups(self):
+        raise unittest.SkipTest("Skipping - Not working properly")
+        # create backup
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        backup_name = self.create_random_name(prefix='cli-backup-', length=24)
+        self.create_backup(account_name, pool_name, volume_name, backup_name)
+
+        backup = self.cmd("az netappfiles account backup show -g {rg} -a %s --backup-name %s" %
+                          (account_name, backup_name)).get_output_in_json()
+
+        assert backup['name'] == backup_name
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
     def test_list_account_backups(self):

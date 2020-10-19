@@ -5,7 +5,6 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "southcentralus"
 
-
 class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %
@@ -51,8 +50,8 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
 
             # create backup policy
             backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
-            backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s "
-                                     "--backup-policy-name %s -l %s --daily-backups 1" %
+            backup_policy = self.cmd("az netappfiles account backup_policy create -g {rg} -a %s "
+                                     "--backup-policy-name %s -l %s --daily-backups-to-keep 1" %
                                      (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
             # volume update with backup policy
@@ -116,7 +115,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         # get backup and validate
-        backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
+        backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
                           (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
         assert backup is not None
         assert backup['name'] == account_name + "/" + pool_name + "/" + volume_name + "/" + backup_name
@@ -180,8 +179,8 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --vault-id %s --backup-enabled %s" %
                  (account_name, pool_name, volume_name, vaults[0]['id'], False)).get_output_in_json()
 
-        self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
-                 (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
+        backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
+                          (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
 
         # Backup not completely ready, not able to retrieve backupId at the moment since swagger is not updated
         # create new volume and restore backup
