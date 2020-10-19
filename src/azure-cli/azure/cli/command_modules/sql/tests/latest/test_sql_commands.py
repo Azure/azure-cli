@@ -1689,6 +1689,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                                  server_name_1, server_name_2, server_name_3):
 
         database_name = "cliautomationdb01"
+        target_database_name = "cliautomationdb02"
         service_objective = 'GP_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
@@ -1743,16 +1744,16 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
-        # Delete replica in second server and recreate with explicit service objective
+        # Delete replica in second server and recreate with explicit service objective and name
         self.cmd('sql db delete -g {} -s {} -n {} --yes'
                  .format(s2.group, s2.name, database_name))
 
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} '
-                 ' --service-objective {}'
+                 ' --service-objective {} --partner-database {}'
                  .format(s1.group, s1.name, database_name,
-                         s2.name, service_objective),
+                         s2.name, service_objective, target_database_name),
                  checks=[
-                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective)])
 

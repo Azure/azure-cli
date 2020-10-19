@@ -953,8 +953,8 @@ def db_create_replica(
         database_name,
         server_name,
         resource_group_name,
-        # Replica must have the same database name as the source db
         partner_server_name,
+        partner_database_name=None,
         partner_resource_group_name=None,
         no_wait=False,
         **kwargs):
@@ -966,6 +966,7 @@ def db_create_replica(
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
+    partner_database_name = partner_database_name or database_name
 
     # Set create mode
     kwargs['create_mode'] = CreateMode.secondary.value
@@ -995,7 +996,7 @@ def db_create_replica(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
         **kwargs)
 
