@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from knack.log import get_logger
-from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties
+from azure.mgmt.netapp.models import ActiveDirectory, NetAppAccount, NetAppAccountPatch, CapacityPool, CapacityPoolPatch, Volume, VolumePatch, VolumePropertiesExportPolicy, ExportPolicyRule, Snapshot, ReplicationObject, VolumePropertiesDataProtection, SnapshotPolicy, SnapshotPolicyPatch, HourlySchedule, DailySchedule, WeeklySchedule, MonthlySchedule, VolumeSnapshotProperties, VolumeBackupProperties, BackupPolicy, BackupPolicyPatch, VolumePatchPropertiesDataProtection
 from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
@@ -98,7 +98,8 @@ def patch_pool(cmd, instance, size=None, tags=None):
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path,
                   usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None,
                   endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None,
-                  snapshot_id=None, snapshot_policy_id=None):
+                  snapshot_id=None, snapshot_policy_id=None, backup_policy_id=None, backup_enabled=None, backup_id=None,
+                  policy_enforced=None, vault_id=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -131,14 +132,18 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     data_protection = None
     replication = None
     snapshot = None
+    backup = None
 
     if volume_type == "DataProtection":
         replication = ReplicationObject(endpoint_type=endpoint_type, replication_schedule=replication_schedule,
                                         remote_volume_resource_id=remote_volume_resource_id)
     if snapshot_policy_id is not None:
         snapshot = VolumeSnapshotProperties(snapshot_policy_id=snapshot_policy_id)
-    if replication is not None or snapshot is not None:
-        data_protection = VolumePropertiesDataProtection(replication=replication, snapshot=snapshot)
+    if backup_policy_id is not None:
+        backup = VolumeBackupProperties(backup_policy_id=backup_policy_id, policy_enforced=policy_enforced,
+                                        vault_id=vault_id, backup_enabled=backup_enabled)
+    if replication is not None or snapshot is not None or backup is not None:
+        data_protection = VolumePropertiesDataProtection(replication=replication, snapshot=snapshot, backup=backup)
 
     subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, subnet_rg, vnet, subnet)
     body = Volume(
@@ -151,6 +156,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         export_policy=volume_export_policy,
         volume_type=volume_type,
         data_protection=data_protection,
+        backup_id=backup_id,
         tags=tags,
         snapshot_id=snapshot_id)
 
@@ -163,13 +169,17 @@ def revert_snapshot(cmd, client, account_name, pool_name, volume_name, resource_
 
 
 # volume update
-def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
+def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None, vault_id=None,
+                 backup_enabled=False, backup_policy_id=None, policy_enforced=False):
     params = VolumePatch(
         usage_threshold=None if usage_threshold is None else int(usage_threshold) * gib_scale,
         service_level=service_level,
         protocol_types=protocol_types,
+        data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
+            backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
+                                          backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
         tags=tags)
-    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags'])
+    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
     return params
 
 
@@ -280,4 +290,34 @@ def patch_snapshot_policy(client, resource_group_name, account_name, snapshot_po
 
 def list_volumes(client, account_name, resource_group_name, snapshot_policy_name):
     return client.list_volumes(resource_group_name, account_name, snapshot_policy_name)
+
+
+# -- backup policies --
+
+
+def create_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
+                         daily_backups_to_keep=0, weekly_backups_to_keep=0, monthly_backups_to_keep=0,
+                         yearly_backups_to_keep=0, enabled=False, tags=None):
+    body = BackupPolicy(
+        location=location,
+        daily_backups_to_keep=daily_backups_to_keep,
+        weekly_backups_to_keep=weekly_backups_to_keep,
+        monthly_backups_to_keep=monthly_backups_to_keep,
+        yearly_backups_to_keep=yearly_backups_to_keep,
+        enabled=enabled,
+        tags=tags)
+    return client.create(resource_group_name, account_name, backup_policy_name, body)
+
+
+def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
+                        daily_backups_to_keep=0, weekly_backups_to_keep=0, monthly_backups_to_keep=0,
+                        yearly_backups_to_keep=0, enabled=False):
+    body = BackupPolicyPatch(
+        location=location,
+        daily_backups_to_keep=daily_backups_to_keep,
+        weekly_backups_to_keep=weekly_backups_to_keep,
+        monthly_backups_to_keep=monthly_backups_to_keep,
+        yearly_backups_to_keep=yearly_backups_to_keep,
+        enabled=enabled)
+    return client.update(resource_group_name, account_name, backup_policy_name, body)
 

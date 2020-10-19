@@ -134,6 +134,98 @@ examples:
 """
 
 
+helps['netappfiles account backup_policy'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Backup Policy Resources.
+"""
+
+helps['netappfiles account backup_policy create'] = """
+type: command
+short-summary: Create a new Azure NetApp Files (ANF) backup policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --backup-policy-name -n -name
+    short-summary: The name of the ANF backup policy
+  - name: --daily_backups_to_keep
+    short-summary: Daily backups count to keep
+  - name: --weekly_backups_to_keep
+    short-summary: Weekly backups count to keep
+  - name: --monthly_backups_to_keep
+    short-summary: Monthly backups count to keep
+  - name: --enabled
+    short-summary: The property to decide policy is enabled or not
+  - name: --tags
+    short-summary: Space-separated tags in `key[=value]` format
+examples:
+  - name: Create an ANF backup policy
+    text: >
+        az netappfiles backup policy create -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups-to-keep 1 --enabled true
+"""
+
+helps['netappfiles account backup_policy delete'] = """
+type: command
+short-summary: Delete the specified ANF backup policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --backup-policy-name -n -name
+    short-summary: The name of the ANF backup policy
+examples:
+  - name: Delete an ANF backup policy
+    text: >
+        az netappfiles backup policy delete -g mygroup --account-name myaccname --name mybackuppolicyname
+"""
+
+helps['netappfiles account backup_policy list'] = """
+type: command
+short-summary: List the ANF backup policy for the specified account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+examples:
+  - name: List the backup policy for the ANF account
+    text: >
+        az netappfiles backup policy list -g mygroup --account-name myname
+"""
+
+helps['netappfiles account backup_policy show'] = """
+type: command
+short-summary: Get the specified ANF backup policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --backup-policy-name -n -name
+    short-summary: The name of the ANF backup policy
+examples:
+  - name: Get an ANF backup policy
+    text: >
+        az netappfiles backup policy show -g mygroup --account-name myaccname --name mybackuppolicyname
+"""
+
+helps['netappfiles account backup_policy update'] = """
+type: command
+short-summary: Update the specified ANF backup policy.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --name --pool-name -n -name
+    short-summary: The name of the ANF backup policy
+    - name: --daily_backups_to_keep
+    short-summary: Daily backups count to keep
+  - name: --weekly_backups_to_keep
+    short-summary: Weekly backups count to keep
+  - name: --monthly_backups_to_keep
+    short-summary: Monthly backups count to keep
+  - name: --enabled
+    short-summary: The property to decide policy is enabled or not
+examples:
+  - name: Update specific values for an ANF backup policy
+    text: >
+        az netappfiles backup policy update -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups-to-keep 1 --enabled false
+"""
+
+
 helps['netappfiles pool'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Pool Resources.
@@ -619,6 +711,77 @@ examples:
 """
 
 
+helps['netappfiles volume backup create'] = """
+type: command
+short-summary: Create specified ANF volume backup.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --backup-name -b
+    short-summary: The name of the ANF backup
+examples:
+  - name: Returns the created ANF backup
+    text: >
+        az netappfiles volume backup -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+helps['netappfiles volume backup list'] = """
+type: command
+short-summary: List the ANF Backups for the specified volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF pool
+examples:
+  - name: List the ANF backups of the volume
+    text: >
+        az netappfiles volume backup list -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume backup show'] = """
+type: command
+short-summary: Get the specified ANF Backup.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF pool
+  - name: --backup-name -b
+    short-summary: The name of the ANF backup
+examples:
+  - name: Returns the properties of the given ANF backup
+    text: >
+        az netappfiles volume backup show -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+helps['netappfiles volume backup update'] = """
+type: command
+short-summary: Update the specified ANF backup with the values provided.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --backup-name -b
+    short-summary: The name of the ANF backup
+examples:
+  - name: Update an ANF backup
+    text: >
+        az netappfiles volume backup update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+"""
+
+
 helps['netappfiles snapshot policy'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Snapshot Policy Resources.
@@ -762,4 +925,16 @@ examples:
   - name: Update specific values for an ANF snapshot policy
     text: >
         az netappfiles snapshot policy update -g mygroup --account-name myaccountname --name mysnapshotpolicyname -l westus2 --daily-backups-to-keep 1 --enabled false
+"""
+
+helps['netappfiles vault list'] = """
+type: command
+short-summary: List the ANF vaults for NetApp Account.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+examples:
+  - name: List the vaults of the ANF account
+    text: >
+        az netappfiles vault list -g mygroup --account-name myname
 """
