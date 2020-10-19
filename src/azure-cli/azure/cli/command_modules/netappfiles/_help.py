@@ -551,41 +551,41 @@ parameters:
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
   - name: --snapshot-id
-    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot-id "9760acf5-4638-11e7-9bdb-020073ca3333"
-  - name: --snapshot-policy-id
+    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot_id "9760acf5-4638-11e7-9bdb-020073ca3333"
+  - name: --snapshot_policy_id
     short-summary: Snapshot Policy ResourceId
-  - name: --backup-policy-id
+  - name: --backup_policy_id
     short-summary: Backup Policy Resource ID
-  - name: --backup-enabled
+  - name: --backup_enabled
     short-summary: Backup Enabled
-  - name: --backup-id
+  - name: --backup_id
     short-summary: Backup ID. UUID v4 or resource identifier used to identify the Backup
-  - name: --policy-enforced
+  - name: --policy_enforced
     short-summary: Policy Enforced
-  - name: --vault-id
+  - name: --vault_id
     short-summary: Vault Resource ID
-  - name: --kerberos-enabled
-    short-summary: Describe if a volume is KerberosEnabled
-  - name: --throughput-mibps
-    short-summary: Maximum throughput in Mibps that can be achieved by this volume
-  - name: --snapshot-dir-visible
+  - name: --kerberos_enabled
+    short-summary: Describe if a volume is KerberosEnabled 
+  - name: --throughput_mibps
+    short-summary: Maximum throughput in Mibps that can be achieved by this volume  
+  - name: --snapshot_directory_visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
-  - name: --security-style
-    short-summary: The security style of volume
-  - name: --kerberos5-r
+  - name: --security_style
+    short-summary: The security style of volume. Possible values include: 'ntfs', 'unix'
+  - name: --kerberos5_read_only
     short-summary: Kerberos5 Read only access
-  - name: --kerberos5-rw
+  - name: --kerberos5_read_write
     short-summary: Kerberos5 Read and write access
-  - name: --kerberos5i-r
+  - name: --kerberos5i_read_only
     short-summary: Kerberos5i Read only access
-  - name: --kerberos5i-rw
+  - name: --kerberos5i_read_write
     short-summary: Kerberos5i Read and write access
-  - name: --kerberos5p-r
+  - name: --kerberos5p_read_only
     short-summary: Kerberos5p Read only access
-  - name: --kerberos5p-rw
+  - name: --kerberos5p_read_write
     short-summary: Kerberos5p Read and write access
-  - name: --has-root-access
-    short-summary: Has root access to volume
+  - name: --has_root_access
+    short-summary: Has root access to volume. Default value: True
 examples:
   - name: Create an ANF volume
     text: >
