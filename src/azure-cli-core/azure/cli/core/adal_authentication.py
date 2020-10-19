@@ -99,11 +99,11 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         try:
             super(MSIAuthenticationWrapper, self).set_token()
         except requests.exceptions.ConnectionError as err:
-            raise AzureConnectionError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                       'Error detail: {}'.format(str(err)))
+            raise AzureConnectionError('Failed to connect to MSI. Please make sure MSI is configured correctly '
+                                       'and check the network connection.\nError detail: {}'.format(str(err)))
         except requests.exceptions.HTTPError as err:
             raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                     'Error code: {}, reason: {}'
+                                     'Get Token request returned http error: {}, reason: {}'
                                      .format(err.response.status, err.response.reason))
         except TimeoutError as err:
             raise AzureConnectionError('MSI endpoint is not responding. Please make sure MSI is configured correctly.\n'
