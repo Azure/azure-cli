@@ -251,7 +251,10 @@ class CommandRecommender():
             if parameter_table:
                 for argument in parameter_table.values():
                     options = argument.type.settings['options_list']
-                    options = (option for option in options if not isinstance(option, Deprecated))
+                    options = [option for option in options if not isinstance(option, Deprecated)]
+                    # skip the positional arguments
+                    if not options:
+                        continue
                     try:
                         sorted_options = sorted(options, key=len, reverse=True)
                         standard_form = sorted_options[0]
