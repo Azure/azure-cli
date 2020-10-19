@@ -107,6 +107,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         pool = self.cmd("az netappfiles pool create -g {rg} -a %s -p %s -l %s %s" % (account_name, pool_name, LOCATION, POOL_DEFAULT)).get_output_in_json()
 
         assert pool['name'] == account_name + '/' + pool_name
-        pool = self.cmd("az netappfiles pool update --resource-group {rg} -a %s -p %s --tags %s" % (account_name, pool_name, tag)).get_output_in_json()
+        pool = self.cmd("az netappfiles pool update --resource-group {rg} -a %s -p %s --tags %s --qos-type %s" % (account_name, pool_name, tag, "Manual")).get_output_in_json()
         assert pool['name'] == account_name + '/' + pool_name
+        assert pool['qosType'] == "Manual"
         assert pool['tags']['Tag1'] == 'Value1'

@@ -89,12 +89,12 @@ def create_pool(cmd, client, account_name, pool_name, resource_group_name, servi
 
 
 # pool update
-def patch_pool(cmd, instance, size=None, tags=None):
+def patch_pool(cmd, instance, size=None, qos_type=None, tags=None):
     # put operation to update the record
     if size is not None:
         size = int(size) * tib_scale
-    body = CapacityPoolPatch(size=size, tags=tags)
-    _update_mapper(instance, body, ['size', 'tags'])
+    body = CapacityPoolPatch(qos_type=qos_type, size=size, tags=tags)
+    _update_mapper(instance, body, ['qos_type', 'size', 'tags'])
     return body
 
 
