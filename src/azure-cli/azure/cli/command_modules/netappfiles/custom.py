@@ -83,18 +83,18 @@ def patch_account(cmd, instance, account_name, resource_group_name, tags=None):
 
 # -- pool --
 
-def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None):
-    body = CapacityPool(service_level=service_level, size=int(size) * tib_scale, location=location, tags=tags)
+def create_pool(cmd, client, account_name, pool_name, resource_group_name, service_level, location, size, tags=None, qos_type=None):
+    body = CapacityPool(service_level=service_level, size=int(size) * tib_scale, location=location, tags=tags, qos_type=qos_type)
     return client.create_or_update(body, resource_group_name, account_name, pool_name)
 
 
 # pool update
-def patch_pool(cmd, instance, size=None, tags=None):
+def patch_pool(cmd, instance, size=None, qos_type=None, tags=None):
     # put operation to update the record
     if size is not None:
         size = int(size) * tib_scale
-    body = CapacityPoolPatch(size=size, tags=tags)
-    _update_mapper(instance, body, ['size', 'tags'])
+    body = CapacityPoolPatch(qos_type=qos_type, size=size, tags=tags)
+    _update_mapper(instance, body, ['qos_type', 'size', 'tags'])
     return body
 
 

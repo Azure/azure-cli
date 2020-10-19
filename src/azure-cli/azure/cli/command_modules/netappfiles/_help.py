@@ -251,6 +251,8 @@ parameters:
     short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
   - name: --service-level
     short-summary: The service level for the ANF pool
+  - name: --qos-ype
+    short-summary: The qos type of the ANF pool. Possible values include: 'Auto', 'Manual'. Default value: "Auto" 
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
@@ -311,6 +313,8 @@ parameters:
     short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
   - name: --service-level
     short-summary: The service level for the ANF pool
+  - name: --qos-type
+    short-summary: The qos type of the ANF pool. Possible values include: 'Auto', 'Manual'. Default value: "Auto" 
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
