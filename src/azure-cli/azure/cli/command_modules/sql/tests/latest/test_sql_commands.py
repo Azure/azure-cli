@@ -984,7 +984,7 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
 
         self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid), checks=[])
         
-        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group),checks=[])
+        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group), checks=[])
         self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group), checks=[])
         self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
 
@@ -1065,9 +1065,9 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
                      self.check('login', '{user}'),
                      self.check('sid', '{oid}')])
 
-        self.cmd ('sql mi ad-only-auth enable -n {managed_instance_name} -g {rg}', checks=[])
-        self.cmd ('sql mi ad-only-auth disable -n {managed_instance_name} -g {rg}', checks=[])
-        self.cmd ('sql mi ad-only-auth get -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd('sql mi ad-only-auth enable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd('sql mi ad-only-auth disable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd('sql mi ad-only-auth get -n {managed_instance_name} -g {rg}', checks=[])
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
