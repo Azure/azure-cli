@@ -59,7 +59,8 @@ from azure.cli.command_modules.network._validators import (
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace)
+    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
+    process_appgw_waf_policy_update)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -524,9 +525,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
         g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
 
-    waf_config_deprecate_info = self.deprecate(redirect='network application-gateway waf-policy', hide=False)
-    with self.command_group('network application-gateway waf-config',
-                            deprecate_info=waf_config_deprecate_info) as g:
+    with self.command_group('network application-gateway waf-config') as g:
         g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
@@ -606,7 +605,8 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  command_type=network_ag_waf_sdk,
                                  client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_managed_rule_set')
+                                 custom_func_name='update_waf_managed_rule_set',
+                                 validator=process_appgw_waf_policy_update)
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
 
@@ -637,7 +637,7 @@ def load_command_table(self, _):
     # endregion
 
     # region DNS
-    with self.command_group('network dns', network_dns_reference_sdk) as g:
+    with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
         g.command('list-references', 'get_by_target_resources')
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:

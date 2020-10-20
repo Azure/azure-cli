@@ -1,6 +1,6 @@
 # Some content of this file is generated.
 
-name: CLI TEST RUN $(USER_TARGET) $(USER_LIVE) $(Date:yyyyMMdd)$(Rev:.r)
+name: CLI TEST RUN $(USER_TARGET) $(USER_LIVE) $(USER_USERNAME) $(Date:yyyyMMdd)$(Rev:.r)
 
 trigger:
   branches:
@@ -272,6 +272,7 @@ jobs:
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
         pip install sendgrid
         pip install mysql-connector-python
+        pip install requests
         # pip install certifi
         # Send notification
         az -v

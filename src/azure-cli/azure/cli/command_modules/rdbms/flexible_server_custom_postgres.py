@@ -14,8 +14,10 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation, server_list_custom_func
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
-    parse_public_access_input, generate_password, parse_maintenance_window
+    parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
+    DEFAULT_LOCATION_PG
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
+from .validators import pg_arguments_validator
 
 
 logger = get_logger(__name__)
@@ -34,7 +36,15 @@ def flexible_server_create(cmd, client,
                            assign_identity=False, subnet_arm_resource_id=None,
                            high_availability=None, zone=None, vnet_resource_id=None,
                            vnet_address_prefix=None, subnet_address_prefix=None):
+    # validator
+    if location is None:
+        location = DEFAULT_LOCATION_PG
+    sku_info = get_postgres_list_skus_info(cmd, location)
+    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, version=version)
+    storage_mb *= 1024
+
     from azure.mgmt.rdbms import postgresql_flexibleservers
+
     try:
         db_context = DbContext(
             azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
@@ -59,7 +69,8 @@ def flexible_server_create(cmd, client,
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                 server_name)
+                                                                                 server_name, 'postgres')
+        server_name = server_name.lower()
 
         # Handle Vnet scenario
         if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
@@ -121,7 +132,7 @@ def flexible_server_create(cmd, client,
 
         return _form_response(user, sku, loc, server_id, host, version,
                               administrator_login_password if administrator_login_password is not None else '*****',
-                              _create_postgresql_connection_string(host, administrator_login_password), firewall_id,
+                              _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
                               subnet_id)
     except Exception as ex:  # pylint: disable=broad-except
         logger.error(ex)
@@ -161,7 +172,7 @@ def flexible_server_restore(cmd, client,
 
 
 # Update Flexible server command
-def flexible_server_update_custom_func(instance,
+def flexible_server_update_custom_func(cmd, instance,
                                        sku_name=None,
                                        tier=None,
                                        storage_mb=None,
@@ -171,7 +182,14 @@ def flexible_server_update_custom_func(instance,
                                        maintenance_window=None,
                                        assign_identity=False,
                                        tags=None):
+
+    # validator
+    location = ''.join(instance.location.lower().split())
+    sku_info = get_postgres_list_skus_info(cmd, location)
+    pg_arguments_validator(tier, sku_name, storage_mb, sku_info, instance=instance)
+
     from importlib import import_module
+
     server_module_path = instance.__module__
     module = import_module(server_module_path)
     ServerForUpdate = getattr(module, 'ServerForUpdate')
@@ -183,7 +201,7 @@ def flexible_server_update_custom_func(instance,
         instance.sku.tier = tier
 
     if storage_mb:
-        instance.storage_profile.storage_mb = storage_mb
+        instance.storage_profile.storage_mb = storage_mb * 1024
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
@@ -329,7 +347,7 @@ def flexible_server_connection_string(
 
 def _create_postgresql_connection_strings(host, user, password, database):
     result = {
-        'psql_cmd': "psql --host={host} --port=5432 --username={user} --dbname=postgres",
+        'psql_cmd': "postgresql://{user}:{password}@{host}/postgres?sslmode=require",
         'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user};Password={password};",
         'jdbc': "jdbc:postgresql://{host}:5432/postgres?user={user}&password={password}",
         'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:5432/postgres  "
@@ -355,12 +373,13 @@ def _create_postgresql_connection_strings(host, user, password, database):
     return result
 
 
-def _create_postgresql_connection_string(host, password):
+def _create_postgresql_connection_string(host, user, password):
     connection_kwargs = {
+        'user': user,
         'host': host,
         'password': password if password is not None else '{password}'
     }
-    return 'postgres://postgres:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
+    return 'postgresql://{user}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
 
 
 def _form_response(username, sku, location, server_id, host, version, password, connection_string, firewall_id=None,

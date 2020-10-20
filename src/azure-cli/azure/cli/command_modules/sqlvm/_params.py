@@ -33,7 +33,8 @@ from ._validators import (
     validate_load_balancer,
     validate_public_ip_address,
     validate_subnet,
-    validate_sqlmanagement
+    validate_sqlmanagement,
+    validate_expand
 )
 
 
@@ -158,8 +159,10 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
         c.argument('expand',
-                   help='Get the SQLIaaSExtension configuration settings.',
-                   arg_type=get_enum_type(['*']))
+                   help='Get the SQLIaaSExtension configuration settings. To view all settings, use *. To select only a few, the settings must be space-separted.',
+                   nargs='+',
+                   validator=validate_expand,
+                   arg_type=get_enum_type(['*', 'AutoBackupSettings', 'AutoPatchingSettings', 'KeyVaultCredentialSettings', 'ServerConfigurationsManagementSettings']))
         c.argument('sql_management_mode',
                    help='SQL Server management type. If NoAgent selected, please provide --image-sku and --offer-type.',
                    options_list=['--sql-mgmt-type'],
