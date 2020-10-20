@@ -971,6 +971,105 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                      self.check('[0].sid', None)])
 
 
+class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    def test_aadonly(self, resource_group, server):
+        print('\n********************')
+        print("Server: {}".format(server))
+        print('********************\n')
+
+        user = 'DSEngAll'
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+
+        self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid), checks=[])
+        
+        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group),checks=[])
+        self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group), checks=[])
+        self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
+
+
+class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+
+    # Remove when issue #9393 is fixed.
+    @live_only()
+    def test_sql_mi_aad_admin(self):
+
+        print('Test is started...\n')
+
+        self.kwargs.update({
+            'loc': 'westeurope',
+            'vnet_name': 'vcCliTestVnetAad',
+            'subnet_name': 'vcCliTestSubnetAad',
+            'route_table_name': 'vcCliTestRouteTableAad',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'rg': 'DejanDuVnetRG'
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet update -g {rg} -n {vnet_name} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        print('Vnet is created...\n')
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('identity', None),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')])
+
+        print('Managed instance is created...\n')
+
+        self.kwargs.update({
+            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
+            'user': 'DSEngAll',
+        })
+
+        print('Arguments are updated with login and sid data')
+
+        self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
+
+        self.cmd ('sql mi ad-only-auth enable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd ('sql mi ad-only-auth disable -n {managed_instance_name} -g {rg}', checks=[])
+        self.cmd ('sql mi ad-only-auth get -n {managed_instance_name} -g {rg}', checks=[])
+
+
 class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
