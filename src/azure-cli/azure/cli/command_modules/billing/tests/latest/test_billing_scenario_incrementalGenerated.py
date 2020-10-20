@@ -90,7 +90,7 @@ def step__billingaccounts_patch_updatebillingaccount(test):
 @try_manual
 def step__billingprofiles_put_createbillingprofile(test):
     test.cmd('az billing profile create '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myBillingProfile}" '
              '--bill-to address-line1="Test Address 1" city="Redmond" country="US" first-name="Test" last-name="User" '
              'postal-code="12345" region="WA" '
@@ -139,7 +139,7 @@ def step__billingprofiles_put_createbillingprofile(test):
 @try_manual
 def step__billingprofiles_get_billingprofile(test):
     test.cmd('az billing profile show '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myBillingProfile}"',
              checks=[
                  test.check("name", "{myBillingProfile}", case_sensitive=False),
@@ -152,7 +152,7 @@ def step__billingprofiles_get_billingprofile(test):
 @try_manual
 def step__billingprofiles_get(test):
     test.cmd('az billing profile list '
-             '--billing-account-name "{myBillingAccount}"',
+             '--account-name "{myBillingAccount}"',
              checks=[
                  test.check('length(@)', 1),
              ])
@@ -163,7 +163,7 @@ def step__billingprofiles_get(test):
 def step__billingprofiles_get2(test):
     test.cmd('az billing profile list '
              '--expand "invoiceSections" '
-             '--billing-account-name "{myBillingAccount}"',
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -172,7 +172,7 @@ def step__billingprofiles_get2(test):
 def step__billingprofiles_get_billingprofilewithexpand(test):
     test.cmd('az billing profile show '
              '--expand "invoiceSections" '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myBillingProfile}"',
              checks=[
                  test.check("name", "{myBillingProfile}", case_sensitive=False),
@@ -185,22 +185,22 @@ def step__billingprofiles_get_billingprofilewithexpand(test):
 @try_manual
 def step__availablebalances_get(test):
     test.cmd('az billing balance show '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
 # EXAMPLE: /BillingProperty/get/BillingProperty
 @try_manual
 def step__billingproperty_get_billingproperty(test):
-    test.cmd('az billing billing-property show',
+    test.cmd('az billing property show',
              checks=[])
 
 
 # EXAMPLE: /BillingProperty/patch/UpdateBillingProperty
 @try_manual
 def step__billingproperty_patch_updatebillingproperty(test):
-    test.cmd('az billing billing-property update '
+    test.cmd('az billing property update '
              '--cost-center "1010"',
              checks=[])
 
@@ -209,7 +209,7 @@ def step__billingproperty_patch_updatebillingproperty(test):
 @try_manual
 def step__customers_get_customer(test):
     test.cmd('az billing customer show '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myCustomer}"',
              checks=[])
 
@@ -218,8 +218,8 @@ def step__customers_get_customer(test):
 @try_manual
 def step__customers_get_customerslistbybillingaccount(test):
     test.cmd('az billing customer list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
@@ -227,8 +227,8 @@ def step__customers_get_customerslistbybillingaccount(test):
 @try_manual
 def step__customers_get_customerslistbybillingaccount(test):
     test.cmd('az billing customer list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
@@ -237,7 +237,7 @@ def step__customers_get_customerslistbybillingaccount(test):
 def step__customers_get_customerwithexpand(test):
     test.cmd('az billing customer show '
              '--expand "enabledAzurePlans,resellers" '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myCustomer}"',
              checks=[])
 
@@ -246,7 +246,7 @@ def step__customers_get_customerwithexpand(test):
 @try_manual
 def step__billingsubscriptions_get_billingsubscription(test):
     test.cmd('az billing subscription show '
-             '--billing-account-name "{myBillingAccount}"',
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -254,7 +254,7 @@ def step__billingsubscriptions_get_billingsubscription(test):
 @try_manual
 def step__billingsubscriptions_get(test):
     test.cmd('az billing subscription list '
-             '--billing-account-name "{myBillingAccount}"',
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -262,8 +262,8 @@ def step__billingsubscriptions_get(test):
 @try_manual
 def step__billingsubscriptions_get2(test):
     test.cmd('az billing subscription list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
@@ -271,7 +271,7 @@ def step__billingsubscriptions_get2(test):
 @try_manual
 def step__billingsubscriptions_get3(test):
     test.cmd('az billing subscription list '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--customer-name "{myCustomer}"',
              checks=[])
 
@@ -280,8 +280,8 @@ def step__billingsubscriptions_get3(test):
 @try_manual
 def step__billingsubscriptions_get4(test):
     test.cmd('az billing subscription list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}" '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
              '--invoice-section-name "{invoiceSectionName}"',
              checks=[])
 
@@ -290,7 +290,7 @@ def step__billingsubscriptions_get4(test):
 @try_manual
 def step__billingsubscriptions_patch(test):
     test.cmd('az billing subscription update '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--cost-center "ABC1234"',
              checks=[])
 
@@ -299,7 +299,7 @@ def step__billingsubscriptions_patch(test):
 @try_manual
 def step__billingsubscriptions_post(test):
     test.cmd('az billing subscription move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}"',
              checks=[])
@@ -309,7 +309,7 @@ def step__billingsubscriptions_post(test):
 @try_manual
 def step__billingsubscriptions_post2(test):
     test.cmd('az billing subscription validate-move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}"',
              checks=[])
@@ -319,7 +319,7 @@ def step__billingsubscriptions_post2(test):
 @try_manual
 def step__billingsubscriptions_post3(test):
     test.cmd('az billing subscription validate-move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}"',
              checks=[])
@@ -329,8 +329,8 @@ def step__billingsubscriptions_post3(test):
 @try_manual
 def step__policies_put_updatepolicy(test):
     test.cmd('az billing policy update '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}" '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
              '--marketplace-purchases "OnlyFreeAllowed" '
              '--reservation-purchases "NotAllowed" '
              '--view-charges "Allowed"',
@@ -341,7 +341,7 @@ def step__policies_put_updatepolicy(test):
 @try_manual
 def step__policies_get_policybycustomer(test):
     test.cmd('az billing policy show '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--customer-name "{myCustomer}"',
              checks=[])
 
@@ -350,7 +350,7 @@ def step__policies_get_policybycustomer(test):
 @try_manual
 def step__products_get_product(test):
     test.cmd('az billing product show '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--name "{myProduct}"',
              checks=[])
 
@@ -359,7 +359,7 @@ def step__products_get_product(test):
 @try_manual
 def step__products_get_productslistbybillingaccount(test):
     test.cmd('az billing product list '
-             '--billing-account-name "{myBillingAccount}"',
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -367,8 +367,8 @@ def step__products_get_productslistbybillingaccount(test):
 @try_manual
 def step__products_get_productslistbybillingprofile(test):
     test.cmd('az billing product list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
@@ -376,8 +376,8 @@ def step__products_get_productslistbybillingprofile(test):
 @try_manual
 def step__products_get_productslistbyinvoicesection(test):
     test.cmd('az billing product list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}" '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
              '--invoice-section-name "{invoiceSectionName}"',
              checks=[])
 
@@ -386,8 +386,8 @@ def step__products_get_productslistbyinvoicesection(test):
 @try_manual
 def step__products_get_productslistbyinvoicesection(test):
     test.cmd('az billing product list '
-             '--billing-account-name "{myBillingAccount}" '
-             '--billing-profile-name "{myBillingProfile}" '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
              '--invoice-section-name "{invoiceSectionName}"',
              checks=[])
 
@@ -396,7 +396,7 @@ def step__products_get_productslistbyinvoicesection(test):
 @try_manual
 def step__products_patch_updatebillingproperty(test):
     test.cmd('az billing product update '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--auto-renew "Off" '
              '--name "{myProduct}"',
              checks=[
@@ -409,7 +409,7 @@ def step__products_patch_updatebillingproperty(test):
 @try_manual
 def step__products_post_moveproduct(test):
     test.cmd('az billing product move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}" '
              '--name "{myProduct}"',
@@ -420,7 +420,7 @@ def step__products_post_moveproduct(test):
 @try_manual
 def step__products_post(test):
     test.cmd('az billing product validate-move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}" '
              '--name "{myProduct}"',
@@ -431,7 +431,7 @@ def step__products_post(test):
 @try_manual
 def step__products_post2(test):
     test.cmd('az billing product validate-move '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
              'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}" '
              '--name "{myProduct}"',
@@ -442,7 +442,7 @@ def step__products_post2(test):
 @try_manual
 def step__transactions_get_transactionslistbyinvoice(test):
     test.cmd('az billing transaction list '
-             '--billing-account-name "{myBillingAccount}" '
+             '--account-name "{myBillingAccount}" '
              '--invoice-name "{invoiceName}"',
              checks=[])
 

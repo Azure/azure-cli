@@ -48,5 +48,5 @@ def cf_policy(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).policies
 
 
-def cf_billing_property(cli_ctx, *_):
+def cf_property(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_property

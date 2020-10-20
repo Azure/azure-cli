@@ -28,14 +28,14 @@ def load_arguments(self, _):
                    help='May be used to expand the soldTo, invoice sections and billing profiles.')
 
     with self.argument_context('billing account show') as c:
-        c.argument('billing_account_name', options_list=['--name', '-n', '--billing-account-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing account.')
+        c.argument('account_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing account.')
         c.argument('expand', type=str,
                    help='May be used to expand the soldTo, invoice sections and billing profiles.')
 
     with self.argument_context('billing account update') as c:
-        c.argument('billing_account_name', options_list=['--name', '-n', '--billing-account-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing account.')
+        c.argument('account_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing account.')
         c.argument('display_name', type=str, help='The billing account name.')
         c.argument('sold_to', action=AddSoldTo, nargs='*', help='The address of the individual or organization that is '
                    'responsible for the billing account.')
@@ -47,29 +47,29 @@ def load_arguments(self, _):
                    'the billing account. Expected value: json-string/@json-file.')
 
     with self.argument_context('billing account wait') as c:
-        c.argument('billing_account_name', options_list=['--name', '-n', '--billing-account-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing account.')
+        c.argument('account_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing account.')
         c.argument('expand', type=str,
                    help='May be used to expand the soldTo, invoice sections and billing profiles.')
 
     with self.argument_context('billing balance show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
 
     with self.argument_context('billing profile list') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')
 
     with self.argument_context('billing profile show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', options_list=['--name', '-n', '--billing-profile-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing profile.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')
 
     with self.argument_context('billing profile create') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', options_list=['--name', '-n', '--billing-profile-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing profile.')
         c.argument('display_name', type=str, help='The name of the billing profile.')
         c.argument('po_number', type=str, help='The purchase order name that will appear on the invoices generated for '
                    'the billing profile.')
@@ -82,9 +82,9 @@ def load_arguments(self, _):
                    'billing profile. Expected value: json-string/@json-file.')
 
     with self.argument_context('billing profile update') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', options_list=['--name', '-n', '--billing-profile-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing profile.')
         c.argument('display_name', type=str, help='The name of the billing profile.')
         c.argument('po_number', type=str, help='The purchase order name that will appear on the invoices generated for '
                    'the billing profile.')
@@ -97,36 +97,36 @@ def load_arguments(self, _):
                    'billing profile. Expected value: json-string/@json-file.')
 
     with self.argument_context('billing profile wait') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', options_list=['--name', '-n', '--billing-profile-name'], type=str, help=''
-                   'The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a '
+                   'billing profile.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')
 
     with self.argument_context('billing customer list') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('search', type=str, help='Used for searching customers by their name. Any customer with name '
                    'containing the search text will be included in the response')
         c.argument('filter_', options_list=['--filter'], type=str,
                    help='May be used to filter the list of customers.')
 
     with self.argument_context('billing customer show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('customer_name', options_list=['--name', '-n', '--customer-name'], type=str, help='The ID that '
                    'uniquely identifies a customer.')
         c.argument('expand', type=str, help='May be used to expand enabledAzurePlans and resellers')
 
     with self.argument_context('billing subscription list') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
         c.argument('customer_name', type=str, help='The ID that uniquely identifies a customer.')
 
     with self.argument_context('billing subscription show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
 
     with self.argument_context('billing subscription update') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('subscription_billing_status', arg_type=get_enum_type(['Active', 'Inactive', 'Abandoned', 'Deleted',
                                                                           'Warning']), help='The current billing '
                    'status of the subscription.')
@@ -134,19 +134,19 @@ def load_arguments(self, _):
         c.argument('sku_id', type=str, help='The sku ID of the Azure plan for the subscription.')
 
     with self.argument_context('billing subscription move') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('destination_invoice_section_id', type=str, help='The destination invoice section id.')
 
     with self.argument_context('billing subscription validate-move') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('destination_invoice_section_id', type=str, help='The destination invoice section id.')
 
     with self.argument_context('billing subscription wait') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
 
     with self.argument_context('billing product list') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
         c.argument('filter_', options_list=['--filter'], type=str, help='May be used to filter by product type. The '
                    'filter supports \'eq\', \'lt\', \'gt\', \'le\', \'ge\', and \'and\'. It does not currently support '
@@ -155,12 +155,12 @@ def load_arguments(self, _):
         c.argument('customer_name', type=str, help='The ID that uniquely identifies a customer.')
 
     with self.argument_context('billing product show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('product_name', options_list=['--name', '-n', '--product-name'], type=str, help='The ID that '
                    'uniquely identifies a product.')
 
     with self.argument_context('billing product update') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('product_name', options_list=['--name', '-n', '--product-name'], type=str, help='The ID that '
                    'uniquely identifies a product.')
         c.argument('auto_renew', arg_type=get_enum_type(['Off', 'On']), help='Indicates whether auto renewal is turned '
@@ -172,28 +172,28 @@ def load_arguments(self, _):
                    'frequency at which the product will be billed.')
 
     with self.argument_context('billing product move') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('product_name', options_list=['--name', '-n', '--product-name'], type=str, help='The ID that '
                    'uniquely identifies a product.')
         c.argument('destination_invoice_section_id', type=str, help='The destination invoice section id.')
 
     with self.argument_context('billing product validate-move') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('product_name', options_list=['--name', '-n', '--product-name'], type=str, help='The ID that '
                    'uniquely identifies a product.')
         c.argument('destination_invoice_section_id', type=str, help='The destination invoice section id.')
 
     with self.argument_context('billing transaction list') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('invoice_name', type=str, help='The ID that uniquely identifies an invoice.')
 
     with self.argument_context('billing policy show') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('customer_name', type=str, help='The ID that uniquely identifies a customer.')
 
     with self.argument_context('billing policy update') as c:
-        c.argument('billing_account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('billing_profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('marketplace_purchases', arg_type=get_enum_type(['AllAllowed', 'OnlyFreeAllowed', 'NotAllowed']),
                    help='The policy that controls whether Azure marketplace purchases are allowed for a billing '
                    'profile.')
@@ -202,5 +202,5 @@ def load_arguments(self, _):
         c.argument('view_charges', arg_type=get_enum_type(['Allowed', 'NotAllowed']), help='The policy that controls '
                    'whether users with Azure RBAC access to a subscription can view its charges.')
 
-    with self.argument_context('billing billing-property update') as c:
+    with self.argument_context('billing property update') as c:
         c.argument('cost_center', type=str, help='The cost center applied to the subscription.')

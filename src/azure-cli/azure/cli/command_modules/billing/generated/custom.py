@@ -18,14 +18,14 @@ def billing_account_list(client,
 
 
 def billing_account_show(client,
-                         billing_account_name,
+                         account_name,
                          expand=None):
-    return client.get(billing_account_name=billing_account_name,
+    return client.get(billing_account_name=account_name,
                       expand=expand)
 
 
 def billing_account_update(client,
-                           billing_account_name,
+                           account_name,
                            display_name=None,
                            sold_to=None,
                            departments=None,
@@ -41,36 +41,36 @@ def billing_account_update(client,
     parameters['billing_profiles']['value'] = billing_profiles_value
     return sdk_no_wait(no_wait,
                        client.update,
-                       billing_account_name=billing_account_name,
+                       billing_account_name=account_name,
                        parameters=parameters)
 
 
 def billing_balance_show(client,
-                         billing_account_name,
-                         billing_profile_name):
-    return client.get(billing_account_name=billing_account_name,
-                      billing_profile_name=billing_profile_name)
+                         account_name,
+                         profile_name):
+    return client.get(billing_account_name=account_name,
+                      billing_profile_name=profile_name)
 
 
 def billing_profile_list(client,
-                         billing_account_name,
+                         account_name,
                          expand=None):
-    return client.list_by_billing_account(billing_account_name=billing_account_name,
+    return client.list_by_billing_account(billing_account_name=account_name,
                                           expand=expand)
 
 
 def billing_profile_show(client,
-                         billing_account_name,
-                         billing_profile_name,
+                         account_name,
+                         profile_name,
                          expand=None):
-    return client.get(billing_account_name=billing_account_name,
-                      billing_profile_name=billing_profile_name,
+    return client.get(billing_account_name=account_name,
+                      billing_profile_name=profile_name,
                       expand=expand)
 
 
 def billing_profile_create(client,
-                           billing_account_name,
-                           billing_profile_name,
+                           account_name,
+                           profile_name,
                            display_name=None,
                            po_number=None,
                            bill_to=None,
@@ -88,14 +88,14 @@ def billing_profile_create(client,
     parameters['invoice_sections']['value'] = invoice_sections_value
     return sdk_no_wait(no_wait,
                        client.create_or_update,
-                       billing_account_name=billing_account_name,
-                       billing_profile_name=billing_profile_name,
+                       billing_account_name=account_name,
+                       billing_profile_name=profile_name,
                        parameters=parameters)
 
 
 def billing_profile_update(client,
-                           billing_account_name,
-                           billing_profile_name,
+                           account_name,
+                           profile_name,
                            display_name=None,
                            po_number=None,
                            bill_to=None,
@@ -113,60 +113,60 @@ def billing_profile_update(client,
     parameters['invoice_sections']['value'] = invoice_sections_value
     return sdk_no_wait(no_wait,
                        client.create_or_update,
-                       billing_account_name=billing_account_name,
-                       billing_profile_name=billing_profile_name,
+                       billing_account_name=account_name,
+                       billing_profile_name=profile_name,
                        parameters=parameters)
 
 
 def billing_customer_list(client,
-                          billing_account_name,
-                          billing_profile_name=None,
+                          account_name,
+                          profile_name=None,
                           search=None,
                           filter_=None):
-    if billing_account_name is not None and billing_profile_name is not None:
-        return client.list_by_billing_profile(billing_account_name=billing_account_name,
-                                              billing_profile_name=billing_profile_name,
+    if account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
                                               search=search,
                                               filter=filter_)
-    return client.list_by_billing_account(billing_account_name=billing_account_name,
+    return client.list_by_billing_account(billing_account_name=account_name,
                                           search=search,
                                           filter=filter_)
 
 
 def billing_customer_show(client,
-                          billing_account_name,
+                          account_name,
                           customer_name,
                           expand=None):
-    return client.get(billing_account_name=billing_account_name,
+    return client.get(billing_account_name=account_name,
                       customer_name=customer_name,
                       expand=expand)
 
 
 def billing_subscription_list(client,
-                              billing_account_name,
-                              billing_profile_name=None,
+                              account_name,
+                              profile_name=None,
                               invoice_section_name=None,
                               customer_name=None):
-    if billing_account_name is not None and billing_profile_name is not None and invoice_section_name is not None:
-        return client.list_by_invoice_section(billing_account_name=billing_account_name,
-                                              billing_profile_name=billing_profile_name,
+    if account_name is not None and profile_name is not None and invoice_section_name is not None:
+        return client.list_by_invoice_section(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
                                               invoice_section_name=invoice_section_name)
-    elif billing_account_name is not None and customer_name is not None:
-        return client.list_by_customer(billing_account_name=billing_account_name,
+    elif account_name is not None and customer_name is not None:
+        return client.list_by_customer(billing_account_name=account_name,
                                        customer_name=customer_name)
-    elif billing_account_name is not None and billing_profile_name is not None:
-        return client.list_by_billing_profile(billing_account_name=billing_account_name,
-                                              billing_profile_name=billing_profile_name)
-    return client.list_by_billing_account(billing_account_name=billing_account_name)
+    elif account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name)
+    return client.list_by_billing_account(billing_account_name=account_name)
 
 
 def billing_subscription_show(client,
-                              billing_account_name):
-    return client.get(billing_account_name=billing_account_name)
+                              account_name):
+    return client.get(billing_account_name=account_name)
 
 
 def billing_subscription_update(client,
-                                billing_account_name,
+                                account_name,
                                 subscription_billing_status=None,
                                 cost_center=None,
                                 sku_id=None):
@@ -174,58 +174,58 @@ def billing_subscription_update(client,
     parameters['subscription_billing_status'] = subscription_billing_status
     parameters['cost_center'] = cost_center
     parameters['sku_id'] = sku_id
-    return client.update(billing_account_name=billing_account_name,
+    return client.update(billing_account_name=account_name,
                          parameters=parameters)
 
 
 def billing_subscription_move(client,
-                              billing_account_name,
+                              account_name,
                               destination_invoice_section_id,
                               no_wait=False):
     return sdk_no_wait(no_wait,
                        client.move,
-                       billing_account_name=billing_account_name,
+                       billing_account_name=account_name,
                        destination_invoice_section_id=destination_invoice_section_id)
 
 
 def billing_subscription_validate_move(client,
-                                       billing_account_name,
+                                       account_name,
                                        destination_invoice_section_id):
-    return client.validate_move(billing_account_name=billing_account_name,
+    return client.validate_move(billing_account_name=account_name,
                                 destination_invoice_section_id=destination_invoice_section_id)
 
 
 def billing_product_list(client,
-                         billing_account_name,
-                         billing_profile_name=None,
+                         account_name,
+                         profile_name=None,
                          invoice_section_name=None,
                          filter_=None,
                          customer_name=None):
-    if billing_account_name is not None and billing_profile_name is not None and invoice_section_name is not None:
-        return client.list_by_invoice_section(billing_account_name=billing_account_name,
-                                              billing_profile_name=billing_profile_name,
+    if account_name is not None and profile_name is not None and invoice_section_name is not None:
+        return client.list_by_invoice_section(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
                                               invoice_section_name=invoice_section_name,
                                               filter=filter_)
-    elif billing_account_name is not None and billing_profile_name is not None:
-        return client.list_by_billing_profile(billing_account_name=billing_account_name,
-                                              billing_profile_name=billing_profile_name,
+    elif account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
                                               filter=filter_)
-    elif billing_account_name is not None and customer_name is not None:
-        return client.list_by_customer(billing_account_name=billing_account_name,
+    elif account_name is not None and customer_name is not None:
+        return client.list_by_customer(billing_account_name=account_name,
                                        customer_name=customer_name)
-    return client.list_by_billing_account(billing_account_name=billing_account_name,
+    return client.list_by_billing_account(billing_account_name=account_name,
                                           filter=filter_)
 
 
 def billing_product_show(client,
-                         billing_account_name,
+                         account_name,
                          product_name):
-    return client.get(billing_account_name=billing_account_name,
+    return client.get(billing_account_name=account_name,
                       product_name=product_name)
 
 
 def billing_product_update(client,
-                           billing_account_name,
+                           account_name,
                            product_name,
                            auto_renew=None,
                            status=None,
@@ -234,46 +234,46 @@ def billing_product_update(client,
     parameters['auto_renew'] = auto_renew
     parameters['status'] = status
     parameters['billing_frequency'] = billing_frequency
-    return client.update(billing_account_name=billing_account_name,
+    return client.update(billing_account_name=account_name,
                          product_name=product_name,
                          parameters=parameters)
 
 
 def billing_product_move(client,
-                         billing_account_name,
+                         account_name,
                          product_name,
                          destination_invoice_section_id=None):
-    return client.move(billing_account_name=billing_account_name,
+    return client.move(billing_account_name=account_name,
                        product_name=product_name,
                        destination_invoice_section_id=destination_invoice_section_id)
 
 
 def billing_product_validate_move(client,
-                                  billing_account_name,
+                                  account_name,
                                   product_name,
                                   destination_invoice_section_id=None):
-    return client.validate_move(billing_account_name=billing_account_name,
+    return client.validate_move(billing_account_name=account_name,
                                 product_name=product_name,
                                 destination_invoice_section_id=destination_invoice_section_id)
 
 
 def billing_transaction_list(client,
-                             billing_account_name,
+                             account_name,
                              invoice_name):
-    return client.list_by_invoice(billing_account_name=billing_account_name,
+    return client.list_by_invoice(billing_account_name=account_name,
                                   invoice_name=invoice_name)
 
 
 def billing_policy_show(client,
-                        billing_account_name,
+                        account_name,
                         customer_name):
-    return client.get_by_customer(billing_account_name=billing_account_name,
+    return client.get_by_customer(billing_account_name=account_name,
                                   customer_name=customer_name)
 
 
 def billing_policy_update(client,
-                          billing_account_name,
-                          billing_profile_name,
+                          account_name,
+                          profile_name,
                           marketplace_purchases=None,
                           reservation_purchases=None,
                           view_charges=None):
@@ -281,15 +281,15 @@ def billing_policy_update(client,
     parameters['marketplace_purchases'] = marketplace_purchases
     parameters['reservation_purchases'] = reservation_purchases
     parameters['view_charges'] = view_charges
-    return client.update(billing_account_name=billing_account_name,
-                         billing_profile_name=billing_profile_name,
+    return client.update(billing_account_name=account_name,
+                         billing_profile_name=profile_name,
                          parameters=parameters)
 
 
-def billing_billing_property_show(client):
+def billing_property_show(client):
     return client.get()
 
 
-def billing_billing_property_update(client,
-                                    cost_center=None):
+def billing_property_update(client,
+                            cost_center=None):
     return client.update(cost_center=cost_center)

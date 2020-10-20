@@ -91,11 +91,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'billing_policy_show')
         g.custom_command('update', 'billing_policy_update')
 
-    from ..generated._client_factory import cf_billing_property
-    billing_billing_property = CliCommandType(
+    from ..generated._client_factory import cf_property
+    billing_property = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#BillingPropertyOperations.{}',
-        client_factory=cf_billing_property)
-    with self.command_group('billing billing-property', billing_billing_property, client_factory=cf_billing_property,
-                            is_preview=True) as g:
-        g.custom_show_command('show', 'billing_billing_property_show')
-        g.custom_command('update', 'billing_billing_property_update')
+        client_factory=cf_property)
+    with self.command_group('billing property', billing_property, client_factory=cf_property, is_preview=True) as g:
+        g.custom_show_command('show', 'billing_property_show')
+        g.custom_command('update', 'billing_property_update')
