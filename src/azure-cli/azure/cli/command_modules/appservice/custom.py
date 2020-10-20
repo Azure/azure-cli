@@ -3132,8 +3132,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
-                           -n {} -g {}""".format(res_dict, name, rg_name))
+            raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
+                           "-n {} -g {}".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
@@ -3684,10 +3684,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
             logger.warning('Updating runtime version from %s to %s',
                            site_config.linux_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
+            logger.warning('Waiting for runtime version to propagate ...')
+            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently there is no way to poll for this
         elif os_name.lower() == 'windows' and site_config.windows_fx_version != runtime_version:
             logger.warning('Updating runtime version from %s to %s',
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
+            logger.warning('Waiting for runtime version to propagate ...')
+            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently there is no way to poll for this
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
