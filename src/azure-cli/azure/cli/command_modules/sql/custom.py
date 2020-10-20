@@ -2038,6 +2038,7 @@ def _audit_policy_update_diagnostic_settings(
 
     return rollback_data
 
+
 def _audit_policy_update_apply_blob_storage_details(
         cmd,
         instance,
@@ -2140,9 +2141,6 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
 def _audit_policy_update_global_settings(
         cmd,
         instance,
-        server_name,
-        resource_group_name,
-        database_name=None,
         diagnostic_settings=None,
         state=None,
         blob_storage_target_state=None,
@@ -2189,7 +2187,7 @@ def _audit_policy_update_global_settings(
             diagnostic_settings=diagnostic_settings,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
-    
+
 
 def _audit_policy_update_rollback(
         cmd,
@@ -2289,9 +2287,6 @@ def _audit_policy_update(
         _audit_policy_update_global_settings(
             cmd=cmd,
             instance=instance,
-            server_name=server_name,
-            resource_group_name=resource_group_name,
-            database_name=database_name,
             diagnostic_settings=diagnostic_settings,
             state=state,
             blob_storage_target_state=blob_storage_target_state,
