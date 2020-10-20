@@ -1758,7 +1758,8 @@ def _audit_policy_validate_arguments(
 
     blob_storage_arguments_provided = blob_storage_target_state is not None or\
         storage_account is not None or storage_endpoint is not None or\
-        storage_account_access_key is not None
+        storage_account_access_key is not None or\
+        retention_days is not None
 
     log_analytics_arguments_provided = log_analytics_target_state is not None or\
         log_analytics_workspace_resource_id is not None
@@ -1783,16 +1784,25 @@ def _audit_policy_validate_arguments(
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
-            (storage_account is not None or storage_endpoint is not None or storage_account_access_key is not None):
+            (storage_account is not None or storage_endpoint is not None or
+             storage_account_access_key is not None or retention_days is not None):
         raise CLIError('Blob storage account arguments cannot be specified'
                        ' if blob-storage-target-state is not provided or disabled')
 
     if _is_audit_policy_state_enabled(blob_storage_target_state):
         if storage_account is not None and storage_endpoint is not None:
-            raise CLIError('Blob storage account and blob storage endpoint cannot be provided at the same time')
+            raise CLIError('storage-account and storage-endpoint cannot be provided at the same time')
 
-        if storage_account is None and storage_endpoint is None:
-            raise CLIError('Either blob storage account or blob storage endpoint argument must be provided')
+        if storage_account is None and storage_endpoint is None and retention_days is None:
+            raise CLIError('Either storage-account or storage-endpoint or retention-days must be provided')
+
+    # Server upper limit
+    max_retention_days = 3285
+
+    if retention_days is not None and\
+            (not retention_days.isdigit() or int(retention_days) <= 0 or int(retention_days) >= max_retention_days):
+        raise CLIError('retention-days must be a positive number greater than zero and lower than {}'
+                       .format(max_retention_days))
 
     if _is_audit_policy_state_none_or_disabled(log_analytics_target_state) and\
             log_analytics_workspace_resource_id is not None:
@@ -1810,14 +1820,6 @@ def _audit_policy_validate_arguments(
 
     if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
-
-    # Server upper limit
-    max_retention_days = 3285
-
-    if retention_days is not None and\
-            (not retention_days.isdigit() or int(retention_days) <= 0 or int(retention_days) >= max_retention_days):
-        raise CLIError('retention-days must be a positive number greater than zero and lower than {}'
-                       .format(max_retention_days))
 
 
 def _audit_policy_create_diagnostic_setting(
@@ -2036,62 +2038,67 @@ def _audit_policy_update_diagnostic_settings(
 
     return rollback_data
 
-
 def _audit_policy_update_apply_blob_storage_details(
         cmd,
-        audit_policy,
+        instance,
         blob_storage_target_state,
         storage_account,
         storage_endpoint,
-        storage_account_access_key):
+        storage_account_access_key,
+        retention_days):
     '''
     Apply blob storage details on policy update
     '''
 
     if blob_storage_target_state is None:
         # Original audit policy has no storage_endpoint
-        if not audit_policy.storage_endpoint:
-            audit_policy.storage_endpoint = None
-            audit_policy.storage_account_access_key = None
+        if not instance.storage_endpoint:
+            instance.storage_endpoint = None
+            instance.storage_account_access_key = None
         else:
             # Resolve storage_account_access_key based on original storage_endpoint
-            storage_account = _get_storage_account_name(audit_policy.storage_endpoint)
+            storage_account = _get_storage_account_name(instance.storage_endpoint)
             storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
 
-            audit_policy.storage_account_access_key = _get_storage_key(
+            instance.storage_account_access_key = _get_storage_key(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=audit_policy.is_storage_secondary_key_in_use)
+                use_secondary_key=instance.is_storage_secondary_key_in_use)
     elif _is_audit_policy_state_enabled(blob_storage_target_state):
         # Resolve storage_endpoint using provided storage_account
         if storage_account is not None:
             storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
             storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
 
-        audit_policy.storage_endpoint = storage_endpoint
+        if storage_endpoint is not None:
+            instance.storage_endpoint = storage_endpoint
 
         if storage_account_access_key is not None:
-            audit_policy.storage_account_access_key = storage_account_access_key
-        else:
+            instance.storage_account_access_key = storage_account_access_key
+        elif storage_endpoint is not None:
             # Resolve storage_account if not provided
             if storage_account is None:
                 storage_account = _get_storage_account_name(storage_endpoint)
                 storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
 
             # Resolve storage_account_access_key based on storage_account
-            audit_policy.storage_account_access_key = _get_storage_key(
+            instance.storage_account_access_key = _get_storage_key(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=audit_policy.is_storage_secondary_key_in_use)
+                use_secondary_key=instance.is_storage_secondary_key_in_use)
+
+        # Apply retenation days
+        if retention_days is not None:
+            instance.retention_days = retention_days
     else:
-        audit_policy.storage_endpoint = None
-        audit_policy.storage_account_access_key = None
+        instance.storage_endpoint = None
+        instance.storage_account_access_key = None
 
 
 def _audit_policy_update_apply_azure_monitor_target_enabled(
-        audit_policy,
+        instance,
         diagnostic_settings,
         log_analytics_target_state,
         event_hub_target_state):
@@ -2105,7 +2112,7 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
 
     if _is_audit_policy_state_enabled(log_analytics_target_state) or\
             _is_audit_policy_state_enabled(event_hub_target_state):
-        audit_policy.is_azure_monitor_target_enabled = True
+        instance.is_azure_monitor_target_enabled = True
     else:
         # Sort received diagnostic settings by name and get first element to ensure consistency
         # between command executions
@@ -2126,17 +2133,16 @@ def _audit_policy_update_apply_azure_monitor_target_enabled(
         if _is_audit_policy_state_disabled(event_hub_target_state):
             updated_event_hub_authorization_rule_id = None
 
-        audit_policy.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
+        instance.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
             updated_event_hub_authorization_rule_id is not None
 
 
 def _audit_policy_update_global_settings(
         cmd,
-        client,
+        instance,
         server_name,
         resource_group_name,
         database_name=None,
-        no_wait=None,
         diagnostic_settings=None,
         state=None,
         blob_storage_target_state=None,
@@ -2151,68 +2157,39 @@ def _audit_policy_update_global_settings(
     Update audit policy's global settings
     '''
 
-    # Request audit policy
-    if database_name is None:
-        audit_policy = client.get(
-            resource_group_name=resource_group_name,
-            server_name=server_name)
-    else:
-        audit_policy = client.get(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            database_name=database_name)
-
     # Apply state
     if state is not None:
-        audit_policy.state = BlobAuditingPolicyState[state.lower()]
+        instance.state = BlobAuditingPolicyState[state.lower()]
 
     # Apply additional command line arguments only if policy's state is enabled
-    if _is_audit_policy_state_enabled(audit_policy.state):
+    if _is_audit_policy_state_enabled(instance.state):
         # Apply blob_storage_target_state and all storage account details
         _audit_policy_update_apply_blob_storage_details(
             cmd=cmd,
-            audit_policy=audit_policy,
+            instance=instance,
             blob_storage_target_state=blob_storage_target_state,
             storage_account=storage_account,
             storage_endpoint=storage_endpoint,
-            storage_account_access_key=storage_account_access_key)
+            storage_account_access_key=storage_account_access_key,
+            retention_days=retention_days)
 
         # Apply audit_actions_and_groups
         if audit_actions_and_groups is not None:
-            audit_policy.audit_actions_and_groups = audit_actions_and_groups
+            instance.audit_actions_and_groups = audit_actions_and_groups
 
-        if not audit_policy.audit_actions_and_groups or audit_policy.audit_actions_and_groups == []:
-            audit_policy.audit_actions_and_groups = [
+        if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
+            instance.audit_actions_and_groups = [
                 "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
                 "FAILED_DATABASE_AUTHENTICATION_GROUP",
                 "BATCH_COMPLETED_GROUP"]
 
-        # Apply retenation days
-        if retention_days is not None:
-            audit_policy.retention_days = retention_days
-
         # Apply is_azure_monitor_target_enabled
         _audit_policy_update_apply_azure_monitor_target_enabled(
-            audit_policy=audit_policy,
+            instance=instance,
             diagnostic_settings=diagnostic_settings,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
-
-    # Update audit policy - for server operation 'no_wait' argument is taken into account
-    if database_name is None:
-        return sdk_no_wait(
-            no_wait=no_wait,
-            func=client.create_or_update,
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            parameters=audit_policy)
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        database_name=database_name,
-        parameters=audit_policy)
-
+    
 
 def _audit_policy_update_rollback(
         cmd,
@@ -2252,11 +2229,10 @@ def _audit_policy_update_rollback(
 
 def _audit_policy_update(
         cmd,
-        client,
+        instance,
         server_name,
         resource_group_name,
         database_name=None,
-        no_wait=None,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2310,13 +2286,12 @@ def _audit_policy_update(
 
     # Update auditing global settings
     try:
-        return _audit_policy_update_global_settings(
+        _audit_policy_update_global_settings(
             cmd=cmd,
-            client=client,
+            instance=instance,
             server_name=server_name,
             resource_group_name=resource_group_name,
             database_name=database_name,
-            no_wait=no_wait,
             diagnostic_settings=diagnostic_settings,
             state=state,
             blob_storage_target_state=blob_storage_target_state,
@@ -2327,6 +2302,8 @@ def _audit_policy_update(
             retention_days=retention_days,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
+
+        return instance
     except Exception as err:
         logger.debug(err)
 
@@ -2344,10 +2321,9 @@ def _audit_policy_update(
 
 def server_audit_policy_update(
         cmd,
-        client,
+        instance,
         server_name,
         resource_group_name,
-        no_wait=False,
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2366,11 +2342,10 @@ def server_audit_policy_update(
 
     return _audit_policy_update(
         cmd=cmd,
-        client=client,
+        instance=instance,
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=None,
-        no_wait=no_wait,
         state=state,
         blob_storage_target_state=blob_storage_target_state,
         storage_account=storage_account,
@@ -2387,7 +2362,7 @@ def server_audit_policy_update(
 
 def db_audit_policy_update(
         cmd,
-        client,
+        instance,
         server_name,
         resource_group_name,
         database_name,
@@ -2409,11 +2384,10 @@ def db_audit_policy_update(
 
     return _audit_policy_update(
         cmd=cmd,
-        client=client,
+        instance=instance,
         server_name=server_name,
         resource_group_name=resource_group_name,
         database_name=database_name,
-        no_wait=None,
         state=state,
         blob_storage_target_state=blob_storage_target_state,
         storage_account=storage_account,
