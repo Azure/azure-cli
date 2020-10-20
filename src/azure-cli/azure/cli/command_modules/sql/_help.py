@@ -638,16 +638,25 @@ short-summary: Manage a Managed Instance's Azure Active Directly only settings.
 helps['sql mi ad-only-auth enable'] = """
 type: command
 short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Enable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth enable --resource-group mygroup --name myMI
 """
 
 helps['sql mi ad-only-auth disable'] = """
 type: command
 short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Disable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth disable --resource-group mygroup --name myMI
 """
 
 helps['sql mi ad-only-auth get'] = """
 type: command
 short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a managed instance
+    text: az sql mi ad-only-auth get --resource-group mygroup --name myMI
 """
 
 helps['sql mi create'] = """
@@ -937,27 +946,31 @@ short-summary: Update an existing server Active Directory administrator.
 
 helps['sql server ad-only-auth'] = """
 type: group
-short-summary: Manage a Server's Azure Active Directly only settings.
-"""
-
-helps['sql server ad-only-auth enable'] = """
-type: command
 short-summary: Manage Azure Active Directly only Authentication settings for this Server.
 """
 
 helps['sql server ad-only-auth enable'] = """
 type: command
 short-summary: Enable Azure Active Directly only Authentication for this Server.
+examples:
+  - name: Enable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth enable --resource-group mygroup --name myServer
 """
 
 helps['sql server ad-only-auth disable'] = """
 type: command
 short-summary: Disable Azure Active Directly only Authentication for this Server.
+examples:
+  - name: Disable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth disable --resource-group mygroup --name myServer
 """
 
 helps['sql server ad-only-auth get'] = """
 type: command
 short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a sql server
+    text: az sql server ad-only-auth get --resource-group mygroup --name myServer
 """
 
 helps['sql server audit-policy'] = """

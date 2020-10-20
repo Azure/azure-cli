@@ -582,7 +582,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'server_aad_only_disable')
         g.custom_command('enable', 'server_aad_only_enable')
-        g.command('get', 'get')
+        g.show_command('get', 'get')
 
     ###############################################
     #                sql managed instance         #
@@ -660,7 +660,7 @@ def load_command_table(self, _):
 
         g.custom_command('disable', 'mi_aad_only_disable')
         g.custom_command('enable', 'mi_aad_only_enable')
-        g.command('get', 'get')
+        g.show_command('get', 'get')
 
     ###############################################
     #                sql managed db               #
