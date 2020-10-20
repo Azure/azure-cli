@@ -17,7 +17,8 @@ from azure.cli.core.commands.parameters import (
 from azure.cli.core.commands.validators import validate_file_or_dict
 from ..action import (
     AddSoldTo,
-    AddEnabledAzurePlans
+    AddEnabledAzurePlans,
+    AddLabels
 )
 
 
@@ -116,6 +117,40 @@ def load_arguments(self, _):
                    'uniquely identifies a customer.')
         c.argument('expand', type=str, help='May be used to expand enabledAzurePlans and resellers')
 
+    with self.argument_context('billing invoice section list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+
+    with self.argument_context('billing invoice section show') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', options_list=['--name', '-n', '--invoice-section-name'], type=str, help=''
+                   'The ID that uniquely identifies an invoice section.')
+
+    with self.argument_context('billing invoice section create') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', options_list=['--name', '-n', '--invoice-section-name'], type=str, help=''
+                   'The ID that uniquely identifies an invoice section.')
+        c.argument('display_name', type=str, help='The name of the invoice section.')
+        c.argument('labels', action=AddLabels, nargs='*', help='Dictionary of metadata associated with the invoice '
+                   'section. Expect value: KEY1=VALUE1 KEY2=VALUE2 ...')
+
+    with self.argument_context('billing invoice section update') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', options_list=['--name', '-n', '--invoice-section-name'], type=str, help=''
+                   'The ID that uniquely identifies an invoice section.')
+        c.argument('display_name', type=str, help='The name of the invoice section.')
+        c.argument('labels', action=AddLabels, nargs='*', help='Dictionary of metadata associated with the invoice '
+                   'section. Expect value: KEY1=VALUE1 KEY2=VALUE2 ...')
+
+    with self.argument_context('billing invoice section wait') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', options_list=['--name', '-n', '--invoice-section-name'], type=str, help=''
+                   'The ID that uniquely identifies an invoice section.')
+
     with self.argument_context('billing subscription list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
@@ -182,6 +217,19 @@ def load_arguments(self, _):
         c.argument('product_name', options_list=['--name', '-n', '--product-name'], type=str, help='The ID that '
                    'uniquely identifies a product.')
         c.argument('destination_invoice_section_id', type=str, help='The destination invoice section id.')
+
+    with self.argument_context('billing invoice list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('period_start_date', type=str, help='The start date to fetch the invoices. The date should be '
+                   'specified in MM-DD-YYYY format.')
+        c.argument('period_end_date', type=str, help='The end date to fetch the invoices. The date should be specified '
+                   'in MM-DD-YYYY format.')
+
+    with self.argument_context('billing invoice show') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('invoice_name', options_list=['--name', '-n', '--invoice-name'], type=str, help='The ID that '
+                   'uniquely identifies an invoice.')
 
     with self.argument_context('billing transaction list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')

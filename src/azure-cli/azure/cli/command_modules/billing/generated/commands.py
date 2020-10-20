@@ -51,6 +51,18 @@ def load_command_table(self, _):
         g.custom_command('list', 'billing_customer_list')
         g.custom_show_command('show', 'billing_customer_show')
 
+    from ..generated._client_factory import cf_invoice_section
+    billing_invoice_section = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#InvoiceSectionsOperations.{}',
+        client_factory=cf_invoice_section)
+    with self.command_group('billing invoice section', billing_invoice_section,
+                            client_factory=cf_invoice_section) as g:
+        g.custom_command('list', 'billing_invoice_section_list')
+        g.custom_show_command('show', 'billing_invoice_section_show')
+        g.custom_command('create', 'billing_invoice_section_create', supports_no_wait=True)
+        g.custom_command('update', 'billing_invoice_section_update', supports_no_wait=True)
+        g.custom_wait_command('wait', 'billing_invoice_section_show')
+
     from ..generated._client_factory import cf_subscription
     billing_subscription = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#BillingSubscriptionsOperations.{}',
@@ -74,6 +86,14 @@ def load_command_table(self, _):
         g.custom_command('update', 'billing_product_update')
         g.custom_command('move', 'billing_product_move')
         g.custom_command('validate-move', 'billing_product_validate_move')
+
+    from ..generated._client_factory import cf_invoice
+    billing_invoice = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#InvoicesOperations.{}',
+        client_factory=cf_invoice)
+    with self.command_group('billing invoice', billing_invoice, client_factory=cf_invoice) as g:
+        g.custom_command('list', 'billing_invoice_list')
+        g.custom_show_command('show', 'billing_invoice_show')
 
     from ..generated._client_factory import cf_transaction
     billing_transaction = CliCommandType(

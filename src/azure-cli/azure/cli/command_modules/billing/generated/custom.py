@@ -7,6 +7,7 @@
 # Changes may cause incorrect behavior and will be lost if the code is
 # regenerated.
 # --------------------------------------------------------------------------
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
 from azure.cli.core.util import sdk_no_wait
@@ -142,6 +143,54 @@ def billing_customer_show(client,
                       expand=expand)
 
 
+def billing_invoice_section_list(client,
+                                 account_name,
+                                 profile_name):
+    return client.list_by_billing_profile(billing_account_name=account_name,
+                                          billing_profile_name=profile_name)
+
+
+def billing_invoice_section_show(client,
+                                 account_name,
+                                 profile_name,
+                                 invoice_section_name):
+    return client.get(billing_account_name=account_name,
+                      billing_profile_name=profile_name,
+                      invoice_section_name=invoice_section_name)
+
+
+def billing_invoice_section_create(client,
+                                   account_name,
+                                   profile_name,
+                                   invoice_section_name,
+                                   display_name=None,
+                                   labels=None,
+                                   no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.create_or_update,
+                       billing_account_name=account_name,
+                       billing_profile_name=profile_name,
+                       invoice_section_name=invoice_section_name,
+                       display_name=display_name,
+                       labels=labels)
+
+
+def billing_invoice_section_update(client,
+                                   account_name,
+                                   profile_name,
+                                   invoice_section_name,
+                                   display_name=None,
+                                   labels=None,
+                                   no_wait=False):
+    return sdk_no_wait(no_wait,
+                       client.create_or_update,
+                       billing_account_name=account_name,
+                       billing_profile_name=profile_name,
+                       invoice_section_name=invoice_section_name,
+                       display_name=display_name,
+                       labels=labels)
+
+
 def billing_subscription_list(client,
                               account_name,
                               profile_name=None,
@@ -255,6 +304,31 @@ def billing_product_validate_move(client,
     return client.validate_move(billing_account_name=account_name,
                                 product_name=product_name,
                                 destination_invoice_section_id=destination_invoice_section_id)
+
+
+def billing_invoice_list(client,
+                         period_start_date,
+                         period_end_date,
+                         account_name=None,
+                         profile_name=None):
+    if account_name is not None and profile_name is not None and period_start_date is not None and period_end_date is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
+                                              period_start_date=period_start_date,
+                                              period_end_date=period_end_date)
+    elif account_name is not None and period_start_date is not None and period_end_date is not None:
+        return client.list_by_billing_account(billing_account_name=account_name,
+                                              period_start_date=period_start_date,
+                                              period_end_date=period_end_date)
+    return client.list_by_billing_subscription(period_start_date=period_start_date,
+                                               period_end_date=period_end_date)
+
+
+def billing_invoice_show(client,
+                         account_name,
+                         invoice_name):
+    return client.get(billing_account_name=account_name,
+                      invoice_name=invoice_name)
 
 
 def billing_transaction_list(client,

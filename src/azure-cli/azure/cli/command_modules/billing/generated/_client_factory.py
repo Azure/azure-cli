@@ -32,12 +32,20 @@ def cf_customer(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).customers
 
 
+def cf_invoice_section(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).invoice_sections
+
+
 def cf_subscription(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_subscriptions
 
 
 def cf_product(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).products
+
+
+def cf_invoice(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).invoices
 
 
 def cf_transaction(cli_ctx, *_):

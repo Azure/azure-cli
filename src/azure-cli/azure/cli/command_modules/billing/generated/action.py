@@ -80,3 +80,23 @@ class AddEnabledAzurePlans(argparse._AppendAction):
             if kl == 'sku-id':
                 d['sku_id'] = v[0]
         return d
+
+
+class AddLabels(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.labels = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k].append(v)
+            properties = dict(properties)
+        except ValueError:
+            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+        d = {}
+        for k in properties:
+            v = properties[k]
+            d[k] = v[0]
+        return d

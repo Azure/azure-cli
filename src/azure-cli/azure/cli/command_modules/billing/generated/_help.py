@@ -252,6 +252,65 @@ type Microsoft Partner Agreement."
 --name "{customerName}"
 """
 
+helps['billing invoice section'] = """
+    type: group
+    short-summary: billing invoice section
+"""
+
+helps['billing invoice section list'] = """
+    type: command
+    short-summary: "Lists the invoice sections that a user has access to. The operation is supported only for billing \
+accounts with agreement type Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSectionsListByBillingProfile
+        text: |-
+               az billing invoice section list --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}"
+"""
+
+helps['billing invoice section show'] = """
+    type: command
+    short-summary: "Gets an invoice section by its ID. The operation is supported only for billing accounts with \
+agreement type Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSection
+        text: |-
+               az billing invoice section show --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{invoiceSectionName}"
+"""
+
+helps['billing invoice section create'] = """
+    type: command
+    short-summary: "Creates or updates an invoice section. The operation is supported only for billing accounts with \
+agreement type Microsoft Customer Agreement."
+    examples:
+      - name: PutInvoiceSection
+        text: |-
+               az billing invoice section create --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{invoiceSectionName}" --display-name "invoiceSection1" --labels costCategory="Support" \
+pcCode="A123456"
+"""
+
+helps['billing invoice section update'] = """
+    type: command
+    short-summary: "Creates or updates an invoice section. The operation is supported only for billing accounts with \
+agreement type Microsoft Customer Agreement."
+"""
+
+helps['billing invoice section wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the billing invoice section is met.
+    examples:
+      - name: Pause executing next line of CLI script until the billing invoice section is successfully created.
+        text: |-
+               az billing invoice section wait --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{invoiceSectionName}" --created
+      - name: Pause executing next line of CLI script until the billing invoice section is successfully updated.
+        text: |-
+               az billing invoice section wait --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{invoiceSectionName}" --updated
+"""
+
 helps['billing subscription'] = """
     type: group
     short-summary: billing subscription
@@ -394,6 +453,44 @@ Microsoft Customer Agreement."
                az billing product validate-move --account-name "{billingAccountName}" --destination-invoice-section-id \
 "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections\
 /{newInvoiceSectionName}" --name "{productName}"
+"""
+
+helps['billing invoice'] = """
+    type: group
+    short-summary: billing invoice
+"""
+
+helps['billing invoice list'] = """
+    type: command
+    short-summary: "Lists the invoices for a subscription."
+    examples:
+      - name: InvoicesListByBillingProfile
+        text: |-
+               az billing invoice list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--period-end-date "2018-06-30" --period-start-date "2018-01-01"
+      - name: InvoicesListByBillingProfileWithRebillDetails
+        text: |-
+               az billing invoice list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--period-end-date "2018-06-30" --period-start-date "2018-01-01"
+"""
+
+helps['billing invoice show'] = """
+    type: command
+    short-summary: "Gets an invoice by billing account name and ID. The operation is supported for billing accounts \
+with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: CreditNote
+        text: |-
+               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+      - name: Invoice
+        text: |-
+               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+      - name: InvoiceWithRebillDetails
+        text: |-
+               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+      - name: VoidInvoice
+        text: |-
+               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
 """
 
 helps['billing transaction'] = """

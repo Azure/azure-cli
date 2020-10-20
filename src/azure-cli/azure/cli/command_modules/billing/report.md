@@ -13,8 +13,10 @@
 |az billing balance|AvailableBalances|[commands](#CommandsInAvailableBalances)|
 |az billing profile|BillingProfiles|[commands](#CommandsInBillingProfiles)|
 |az billing customer|Customers|[commands](#CommandsInCustomers)|
+|az billing invoice section|InvoiceSections|[commands](#CommandsInInvoiceSections)|
 |az billing subscription|BillingSubscriptions|[commands](#CommandsInBillingSubscriptions)|
 |az billing product|Products|[commands](#CommandsInProducts)|
+|az billing invoice|Invoices|[commands](#CommandsInInvoices)|
 |az billing transaction|Transactions|[commands](#CommandsInTransactions)|
 |az billing policy|Policies|[commands](#CommandsInPolicies)|
 |az billing property|BillingProperty|[commands](#CommandsInBillingProperty)|
@@ -38,6 +40,22 @@
 |[az billing customer list](#CustomersListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersCustomersListByBillingProfile)|[Example](#ExamplesCustomersListByBillingProfile)|
 |[az billing customer list](#CustomersListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersCustomersListByBillingAccount)|[Example](#ExamplesCustomersListByBillingAccount)|
 |[az billing customer show](#CustomersGet)|Get|[Parameters](#ParametersCustomersGet)|[Example](#ExamplesCustomersGet)|
+
+### <a name="CommandsInInvoices">Commands in `az billing invoice` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing invoice list](#InvoicesListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersInvoicesListByBillingProfile)|[Example](#ExamplesInvoicesListByBillingProfile)|
+|[az billing invoice list](#InvoicesListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersInvoicesListByBillingAccount)|[Example](#ExamplesInvoicesListByBillingAccount)|
+|[az billing invoice list](#InvoicesListByBillingSubscription)|ListByBillingSubscription|[Parameters](#ParametersInvoicesListByBillingSubscription)|[Example](#ExamplesInvoicesListByBillingSubscription)|
+|[az billing invoice show](#InvoicesGet)|Get|[Parameters](#ParametersInvoicesGet)|[Example](#ExamplesInvoicesGet)|
+
+### <a name="CommandsInInvoiceSections">Commands in `az billing invoice section` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing invoice section list](#InvoiceSectionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersInvoiceSectionsListByBillingProfile)|[Example](#ExamplesInvoiceSectionsListByBillingProfile)|
+|[az billing invoice section show](#InvoiceSectionsGet)|Get|[Parameters](#ParametersInvoiceSectionsGet)|[Example](#ExamplesInvoiceSectionsGet)|
+|[az billing invoice section create](#InvoiceSectionsCreateOrUpdate#Create)|CreateOrUpdate#Create|[Parameters](#ParametersInvoiceSectionsCreateOrUpdate#Create)|[Example](#ExamplesInvoiceSectionsCreateOrUpdate#Create)|
+|[az billing invoice section update](#InvoiceSectionsCreateOrUpdate#Update)|CreateOrUpdate#Update|[Parameters](#ParametersInvoiceSectionsCreateOrUpdate#Update)|Not Found|
 
 ### <a name="CommandsInPolicies">Commands in `az billing policy` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -200,6 +218,129 @@ az billing customer show --expand "enabledAzurePlans,resellers" --account-name "
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
 |**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
 |**--expand**|string|May be used to expand enabledAzurePlans and resellers|expand|$expand|
+
+### group `az billing invoice`
+#### <a name="InvoicesListByBillingProfile">Command `az billing invoice list`</a>
+
+##### <a name="ExamplesInvoicesListByBillingProfile">Example</a>
+```
+az billing invoice list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --period-end-date \
+"2018-06-30" --period-start-date "2018-01-01"
+```
+##### <a name="ExamplesInvoicesListByBillingProfile">Example</a>
+```
+az billing invoice list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --period-end-date \
+"2018-06-30" --period-start-date "2018-01-01"
+```
+##### <a name="ParametersInvoicesListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--period-start-date**|string|The start date to fetch the invoices. The date should be specified in MM-DD-YYYY format.|period_start_date|periodStartDate|
+|**--period-end-date**|string|The end date to fetch the invoices. The date should be specified in MM-DD-YYYY format.|period_end_date|periodEndDate|
+
+#### <a name="InvoicesListByBillingAccount">Command `az billing invoice list`</a>
+
+##### <a name="ExamplesInvoicesListByBillingAccount">Example</a>
+```
+az billing invoice list --account-name "{billingAccountName}" --period-end-date "2018-06-30" --period-start-date \
+"2018-01-01"
+```
+##### <a name="ExamplesInvoicesListByBillingAccount">Example</a>
+```
+az billing invoice list --account-name "{billingAccountName}" --period-end-date "2018-06-30" --period-start-date \
+"2018-01-01"
+```
+##### <a name="ParametersInvoicesListByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="InvoicesListByBillingSubscription">Command `az billing invoice list`</a>
+
+##### <a name="ExamplesInvoicesListByBillingSubscription">Example</a>
+```
+az billing invoice list --period-end-date "2018-06-30" --period-start-date "2018-01-01"
+```
+##### <a name="ParametersInvoicesListByBillingSubscription">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="InvoicesGet">Command `az billing invoice show`</a>
+
+##### <a name="ExamplesInvoicesGet">Example</a>
+```
+az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+```
+##### <a name="ExamplesInvoicesGet">Example</a>
+```
+az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+```
+##### <a name="ExamplesInvoicesGet">Example</a>
+```
+az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+```
+##### <a name="ExamplesInvoicesGet">Example</a>
+```
+az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+```
+##### <a name="ParametersInvoicesGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--invoice-name**|string|The ID that uniquely identifies an invoice.|invoice_name|invoiceName|
+
+### group `az billing invoice section`
+#### <a name="InvoiceSectionsListByBillingProfile">Command `az billing invoice section list`</a>
+
+##### <a name="ExamplesInvoiceSectionsListByBillingProfile">Example</a>
+```
+az billing invoice section list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersInvoiceSectionsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+
+#### <a name="InvoiceSectionsGet">Command `az billing invoice section show`</a>
+
+##### <a name="ExamplesInvoiceSectionsGet">Example</a>
+```
+az billing invoice section show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{invoiceSectionName}"
+```
+##### <a name="ParametersInvoiceSectionsGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+
+#### <a name="InvoiceSectionsCreateOrUpdate#Create">Command `az billing invoice section create`</a>
+
+##### <a name="ExamplesInvoiceSectionsCreateOrUpdate#Create">Example</a>
+```
+az billing invoice section create --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{invoiceSectionName}" --display-name "invoiceSection1" --labels costCategory="Support" pcCode="A123456"
+```
+##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Create">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+|**--display-name**|string|The name of the invoice section.|display_name|displayName|
+|**--labels**|dictionary|Dictionary of metadata associated with the invoice section.|labels|labels|
+
+#### <a name="InvoiceSectionsCreateOrUpdate#Update">Command `az billing invoice section update`</a>
+
+##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Update">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+|**--display-name**|string|The name of the invoice section.|display_name|displayName|
+|**--labels**|dictionary|Dictionary of metadata associated with the invoice section.|labels|labels|
 
 ### group `az billing policy`
 #### <a name="PoliciesGetByCustomer">Command `az billing policy show`</a>
