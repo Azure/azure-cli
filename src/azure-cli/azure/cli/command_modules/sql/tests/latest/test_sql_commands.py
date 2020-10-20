@@ -983,7 +983,7 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
         oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
 
         self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid), checks=[])
-        
+
         self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group), checks=[])
         self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group), checks=[])
         self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
