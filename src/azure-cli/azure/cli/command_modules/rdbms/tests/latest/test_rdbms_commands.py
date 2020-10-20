@@ -300,6 +300,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2), checks=[NoneCheck()])
 
+        self.cmd('{} server list-skus -l {}'.format(database_engine, loc),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 

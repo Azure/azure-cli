@@ -394,6 +394,34 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
+        # add a key-value with null label
+        kv_with_null_label = 'KvWithNullLabel'
+        self.kwargs.update({
+            'key': kv_with_null_label
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} -y',
+                 checks=[self.check('key', kv_with_null_label),
+                         self.check('label', None)])
+
+        # List key-values with null label
+        null_label_pattern = "\\0"
+        self.kwargs.update({
+            'null_label': null_label_pattern
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{null_label}"').get_output_in_json()
+        assert len(list_keys) == 2
+
+        # List key-values with multiple labels
+        multi_labels = entry_label + ',' + null_label_pattern
+        self.kwargs.update({
+            'multi_labels': multi_labels
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{multi_labels}"').get_output_in_json()
+        assert len(list_keys) == 3
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @KeyVaultPreparer()
