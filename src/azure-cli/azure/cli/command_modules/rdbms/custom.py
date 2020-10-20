@@ -161,18 +161,18 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     if engine_name == 'postgres':
-        return form_response(user, sku, loc, server_id, host, version,
-                             administrator_login_password if administrator_login_password is not None else '*****',
-                             create_postgresql_connection_string(server_name, host, user, administrator_login_password),
-                             infrastructure_encryption, None, firewall_id)
+        return form_response(username=user, sku=sku, location=loc, server_id=server_id, host=host, version=version,
+                             password=administrator_login_password if administrator_login_password is not None else '*****',
+                             connection_string=create_postgresql_connection_string(server_name, host, user, administrator_login_password),
+                             infrastructure_encryption=infrastructure_encryption, database_name=None, firewall_id=firewall_id)
     # Serves both - MySQL and MariaDB
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
     create_database(cmd, resource_group_name, server_name, database_name, engine_name)
-    return form_response(user, sku, loc, server_id, host, version,
-                         administrator_login_password if administrator_login_password is not None else '*****',
-                         create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),
-                         infrastructure_encryption, database_name, firewall_id)
+    return form_response(username=user, sku=sku, location=loc, server_id=server_id, host=host, version=version,
+                         password=administrator_login_password if administrator_login_password is not None else '*****',
+                         connection_string=create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),
+                         infrastructure_encryption=infrastructure_encryption, database_name=database_name, firewall_id=firewall_id)
 
 
 # Need to replace source server name with source server id, so customer server restore function
