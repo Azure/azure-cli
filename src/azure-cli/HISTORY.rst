@@ -3,11 +3,6 @@
 Release History
 ===============
 
-
-**SQL**
-
-* Add support for --partner-database to sql db replica create command
-
 2.13.0
 ++++++
 
