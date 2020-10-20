@@ -2428,6 +2428,15 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
 
+def sync_kv_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+    Certificate = cmd.get_models('Certificate')
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = client.web_apps.get(resource_group_name, name)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+
 
 def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
     Certificate = cmd.get_models('Certificate')
