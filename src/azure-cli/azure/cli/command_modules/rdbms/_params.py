@@ -31,24 +31,20 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     }
 
     def _complex_params(command_group):
-
-        server_name_setter_arg_type = CLIArgumentType(metavar='NAME',
-                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET], scopes=['{} server'.format(command_group)]))
-
-        server_name_getter_arg_type = CLIArgumentType(metavar='NAME',
-                                                      help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
-
-        server_name_arg_type = CLIArgumentType(metavar='NAME',
-                                               help="Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.",
-                                               local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=['{} server'.format(command_group)]))
-
+        server_name_help = "Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. " + \
+                           "Minimum 3 characters and maximum 63 characters."
+        server_name_scope = ['{}'.format(command_group)]
+        server_name_setter_arg_type = CLIArgumentType(metavar='NAME', help=server_name_help, id_part='name',
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET], scopes=server_name_scope))
+        server_name_getter_arg_type = CLIArgumentType(metavar='NAME', help=server_name_help, id_part='name',
+                                                      local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=server_name_scope))
+        server_name_arg_type = CLIArgumentType(metavar='NAME', help=server_name_help, id_part='name',
+                                               local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=server_name_scope))
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
         with self.argument_context(command_group) as c:
             c.argument('name', options_list=['--sku-name'], required=True)
-            c.argument('server_name', arg_type=server_name_arg_type, completer=server_completers[command_group], options_list=['--server-name', '-s'], help='Name of the server. The name can contain only lowercase letters, numbers, and the hyphen (-) character. Minimum 3 characters and maximum 63 characters.')
+            c.argument('server_name', arg_type=server_name_arg_type, completer=server_completers[command_group], options_list=['--server-name', '-s'])
 
         with self.argument_context('{} server'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
@@ -129,9 +125,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time, default value is 72.')
             c.argument('filename_contains', help='The pattern that file name should match.')
 
+        with self.argument_context('{} server-logs list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, help='Name of the Server.')
+
         with self.argument_context('{} db'.format(command_group)) as c:
-            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
             c.argument('database_name', options_list=['--name', '-n'])
+
+        with self.argument_context('{} db list'.format(command_group)) as c:
+            c.argument('server_name', id_part=None, help='Name of the Server.')
 
         with self.argument_context('{} server firewall-rule'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
@@ -175,6 +176,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server private-link-resource'.format(command_group)) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')
+
+        with self.argument_context('{} server list-skus'.format(command_group)) as c:
+            c.argument('location_name', options_list=['--location', '-l'])
 
         if command_group != 'mariadb':
             with self.argument_context('{} server key'.format(command_group)) as c:
