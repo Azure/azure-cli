@@ -1239,6 +1239,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 def get_vm_for_generic_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vm = client.virtual_machines.get(resource_group_name, vm_name)
+    # To avoid unnecessary permission check of image
     vm.storage_profile.image_reference = None
     return vm
 
@@ -3291,9 +3292,11 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
+# pylint: disable=line-too-long
 def get_image_version_for_generic_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
     client = _compute_client_factory(cmd.cli_ctx)
     version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
+    # To avoid unnecessary permission check of image
     version.storage_profile.source = None
     return version
 
