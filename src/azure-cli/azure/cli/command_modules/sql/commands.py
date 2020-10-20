@@ -19,6 +19,8 @@ from ._format import (
     server_table_format,
     usage_table_format,
     LongRunningOperationResultTransform,
+    mi_transform,
+    mi_list_transform
 )
 
 from ._util import (
@@ -593,11 +595,11 @@ def load_command_table(self, _):
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
-        g.custom_command('create', 'managed_instance_create', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.show_command('show', 'get')
-        g.custom_command('list', 'managed_instance_list')
-        g.generic_update_command('update', custom_func_name='managed_instance_update', supports_no_wait=True)
+        g.custom_command('create', 'managed_instance_create', transform=mi_transform, supports_no_wait=True)
+        g.command('delete', 'delete', transform=mi_transform, confirmation=True, supports_no_wait=True)
+        g.show_command('show', 'get', transform=mi_transform)
+        g.custom_command('list', 'managed_instance_list', transform=mi_list_transform)
+        g.generic_update_command('update', custom_func_name='managed_instance_update', transform=mi_transform, supports_no_wait=True)
         g.command('failover', 'failover', supports_no_wait=True)
 
     managed_instance_keys_operations = CliCommandType(
