@@ -25,6 +25,9 @@ short-summary: Manage a database's auditing policy.
 helps['sql db audit-policy wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the database's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that database's audit policy exists
+    text: az sql db audit-policy wait -g mygroup -s myserver -n mydb --exists
 """
 
 helps['sql db audit-policy update'] = """
@@ -1010,6 +1013,9 @@ short-summary: Manage a server's auditing policy.
 helps['sql server audit-policy wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the server's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that server's audit policy exists
+    text: az sql server audit-policy wait -g mygroup -n myserver --exists
 """
 
 helps['sql server audit-policy update'] = """
