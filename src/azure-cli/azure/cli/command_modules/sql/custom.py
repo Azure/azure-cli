@@ -43,7 +43,7 @@ from azure.mgmt.sql.models import (
     ServerPublicNetworkAccess
 )
 
-from azure.mgmt.monitor.models import (RetentionPolicy, LogSettings)
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.monitor._client_factory import cf_monitor
 from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
@@ -1455,7 +1455,6 @@ def _find_storage_account_resource_group(cli_ctx, name):
     resource group just to update some unrelated property, which is annoying and makes no sense to
     the customer.
     '''
-    from azure.cli.core.profiles import ResourceType
 
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
@@ -1858,6 +1857,16 @@ def _audit_policy_create_diagnostic_setting(
 
     azure_monitor_client = cf_monitor(cmd.cli_ctx)
 
+    LogSettings = cmd.get_models(
+        'LogSettings',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    RetentionPolicy = cmd.get_models(
+        'RetentionPolicy',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
     return create_diagnostics_settings(
         client=azure_monitor_client.diagnostic_settings,
         name=name,
@@ -1976,6 +1985,16 @@ def _audit_policy_update_diagnostic_settings(
 
     # Build updated logs list with disabled 'SQLSecurityAuditEvents' category
     updated_logs = []
+
+    LogSettings = cmd.get_models(
+        'LogSettings',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    RetentionPolicy = cmd.get_models(
+        'RetentionPolicy',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
 
     for log in audit_diagnostic_setting.logs:
         if log.category == "SQLSecurityAuditEvents":
