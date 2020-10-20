@@ -290,6 +290,18 @@ def cf_postgres_check_resource_availability_sterling(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).check_name_availability
 
 
+def cf_mysql_location_based_performance_tier_operations(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).location_based_performance_tier
+
+
+def cf_postgres_location_based_performance_tier_operations(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).location_based_performance_tier
+
+
+def cf_mariadb_location_based_performance_tier_operations(cli_ctx, _):
+    return get_mariadb_management_client(cli_ctx).location_based_performance_tier
+
+
 # Meru operations for flexible servers
 def cf_mysql_flexible_servers(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).servers
