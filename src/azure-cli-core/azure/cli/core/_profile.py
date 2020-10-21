@@ -306,7 +306,6 @@ class Profile:
         # pylint: disable=too-many-statements
 
         import jwt
-        from requests import HTTPError
         from msrestazure.tools import is_valid_resource_id
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
