@@ -8,22 +8,38 @@
 
 from azure.cli.core.commands import CliCommandType
 
-from ._validators import billing_invoice_download_validator
+from ._validators import (
+    billing_invoice_download_validator,
+    billing_invoice_show_validator,
+)
 
 
 def load_command_table(self, _):
 
     from ..generated._client_factory import cf_invoice_section
+
     billing_invoice_section = CliCommandType(
-        operations_tmpl='azure.mgmt.billing.operations#InvoiceSectionsOperations.{}',
-        client_factory=cf_invoice_section)
-    with self.command_group('billing invoice section', billing_invoice_section,
-                            client_factory=cf_invoice_section, is_preview=True):
-        pass    # inherit commands from generated/
+        operations_tmpl="azure.mgmt.billing.operations#InvoiceSectionsOperations.{}",
+        client_factory=cf_invoice_section,
+    )
+    with self.command_group("billing invoice section",
+                            billing_invoice_section,
+                            client_factory=cf_invoice_section,
+                            is_preview=True):
+        pass  # inherit commands from generated/ and add is_preview=True
 
     from ..generated._client_factory import cf_invoice
+
     billing_invoice = CliCommandType(
-        operations_tmpl='azure.mgmt.billing.operations#InvoicesOperations.{}',
-        client_factory=cf_invoice)
-    with self.command_group('billing invoice', billing_invoice, client_factory=cf_invoice) as g:
-        g.custom_command('download', 'billing_invoice_download', validator=billing_invoice_download_validator)
+        operations_tmpl="azure.mgmt.billing.operations#InvoicesOperations.{}",
+        client_factory=cf_invoice,
+    )
+    with self.command_group("billing invoice", billing_invoice, client_factory=cf_invoice) as g:
+        g.custom_command(
+            "download",
+            "billing_invoice_download",
+            validator=billing_invoice_download_validator,
+        )
+        g.custom_show_command(
+            "show", "billing_invoice_show", validator=billing_invoice_show_validator
+        )

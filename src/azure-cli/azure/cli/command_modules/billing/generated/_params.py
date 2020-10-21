@@ -228,8 +228,8 @@ def load_arguments(self, _):
 
     with self.argument_context('billing invoice show') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('invoice_name', options_list=['--name', '-n', '--invoice-name'], type=str, help='The ID that '
-                   'uniquely identifies an invoice.')
+        c.argument('name', options_list=['--name', '-n'], type=str,
+                   help='The ID that uniquely identifies an invoice.')
 
     with self.argument_context('billing transaction list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')

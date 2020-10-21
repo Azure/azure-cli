@@ -13,15 +13,11 @@ def billing_invoice_download_validator(namespace):
         MutuallyExclusiveArgumentError,
     )
 
-    from pprint import pprint
-
-    pprint(vars(namespace))
-
     valid_combs = (
         "only --account-name, --invoice-name, --download-token / "
         "--account-name, --download-urls / "
         "--download-urls /"
-        "--invoice-name, --download-token are valid"
+        "--invoice-name, --download-token is valid"
     )
 
     if namespace.account_name:
@@ -77,3 +73,22 @@ def billing_invoice_download_validator(namespace):
             raise MutuallyExclusiveArgumentError(
                 "--download-urls can't be used with --invoice-name"
             )
+
+
+def billing_invoice_show_validator(namespace):
+    from azure.cli.core.azclierror import (
+        RequiredArgumentMissingError,
+        MutuallyExclusiveArgumentError,
+    )
+
+    valid_combs = "only --account-name, --name / --name / --name, --by-subscription is valid"
+
+    if namespace.account_name is not None:
+        if namespace.by_subscription is not None:
+            raise MutuallyExclusiveArgumentError(valid_combs)
+        if namespace.name is None:
+            raise RequiredArgumentMissingError("--name is also required")
+
+    if namespace.by_subscription is not None:
+        if namespace.name is None:
+            raise RequiredArgumentMissingError("--name is also required")

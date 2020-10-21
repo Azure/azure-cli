@@ -124,7 +124,7 @@ az billing account list --expand "soldTo,billingProfiles,billingProfiles/invoice
 ```
 az billing account list --expand "enrollmentDetails,departments,enrollmentAccounts"
 ```
-##### <a name="ParametersBillingAccountsList">Parameters</a>
+##### <a name="ParametersBillingAccountsList">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--expand**|string|May be used to expand the soldTo, invoice sections and billing profiles.|expand|$expand|
@@ -140,7 +140,7 @@ az billing account show --expand "soldTo,billingProfiles,billingProfiles/invoice
 ```
 az billing account show --name "{billingAccountName}"
 ```
-##### <a name="ParametersBillingAccountsGet">Parameters</a>
+##### <a name="ParametersBillingAccountsGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -154,7 +154,7 @@ az billing account update --name "{billingAccountName}" --display-name "Test Acc
 Address 1" city="Redmond" company-name="Contoso" country="US" first-name="Test" last-name="User" postal-code="12345" \
 region="WA"
 ```
-##### <a name="ParametersBillingAccountsUpdate">Parameters</a>
+##### <a name="ParametersBillingAccountsUpdate">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -171,7 +171,7 @@ region="WA"
 ```
 az billing balance show --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 ```
-##### <a name="ParametersAvailableBalancesGet">Parameters</a>
+##### <a name="ParametersAvailableBalancesGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -184,7 +184,7 @@ az billing balance show --account-name "{billingAccountName}" --profile-name "{b
 ```
 az billing customer list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 ```
-##### <a name="ParametersCustomersListByBillingProfile">Parameters</a>
+##### <a name="ParametersCustomersListByBillingProfile">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -198,7 +198,7 @@ az billing customer list --account-name "{billingAccountName}" --profile-name "{
 ```
 az billing customer list --account-name "{billingAccountName}"
 ```
-##### <a name="ParametersCustomersListByBillingAccount">Parameters</a>
+##### <a name="ParametersCustomersListByBillingAccount">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="CustomersGet">Command `az billing customer show`</a>
@@ -212,7 +212,7 @@ az billing customer show --account-name "{billingAccountName}" --name "{customer
 az billing customer show --expand "enabledAzurePlans,resellers" --account-name "{billingAccountName}" --name \
 "{customerName}"
 ```
-##### <a name="ParametersCustomersGet">Parameters</a>
+##### <a name="ParametersCustomersGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -232,7 +232,7 @@ az billing invoice list --account-name "{billingAccountName}" --profile-name "{b
 az billing invoice list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --period-end-date \
 "2018-06-30" --period-start-date "2018-01-01"
 ```
-##### <a name="ParametersInvoicesListByBillingProfile">Parameters</a>
+##### <a name="ParametersInvoicesListByBillingProfile">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -252,7 +252,7 @@ az billing invoice list --account-name "{billingAccountName}" --period-end-date 
 az billing invoice list --account-name "{billingAccountName}" --period-end-date "2018-06-30" --period-start-date \
 "2018-01-01"
 ```
-##### <a name="ParametersInvoicesListByBillingAccount">Parameters</a>
+##### <a name="ParametersInvoicesListByBillingAccount">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="InvoicesListByBillingSubscription">Command `az billing invoice list`</a>
@@ -261,7 +261,7 @@ az billing invoice list --account-name "{billingAccountName}" --period-end-date 
 ```
 az billing invoice list --period-end-date "2018-06-30" --period-start-date "2018-01-01"
 ```
-##### <a name="ParametersInvoicesListByBillingSubscription">Parameters</a>
+##### <a name="ParametersInvoicesListByBillingSubscription">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="InvoicesGet">Command `az billing invoice show`</a>
@@ -282,11 +282,11 @@ az billing invoice show --account-name "{billingAccountName}" --name "{invoiceNa
 ```
 az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
 ```
-##### <a name="ParametersInvoicesGet">Parameters</a>
+##### <a name="ParametersInvoicesGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
-|**--invoice-name**|string|The ID that uniquely identifies an invoice.|invoice_name|invoiceName|
+|**--name**|string|The ID that uniquely identifies an invoice.|name|invoiceName|
 
 ### group `az billing invoice section`
 #### <a name="InvoiceSectionsListByBillingProfile">Command `az billing invoice section list`</a>
@@ -295,7 +295,7 @@ az billing invoice show --account-name "{billingAccountName}" --name "{invoiceNa
 ```
 az billing invoice section list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 ```
-##### <a name="ParametersInvoiceSectionsListByBillingProfile">Parameters</a>
+##### <a name="ParametersInvoiceSectionsListByBillingProfile">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -308,7 +308,7 @@ az billing invoice section list --account-name "{billingAccountName}" --profile-
 az billing invoice section show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
 "{invoiceSectionName}"
 ```
-##### <a name="ParametersInvoiceSectionsGet">Parameters</a>
+##### <a name="ParametersInvoiceSectionsGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -322,7 +322,7 @@ az billing invoice section show --account-name "{billingAccountName}" --profile-
 az billing invoice section create --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
 "{invoiceSectionName}" --display-name "invoiceSection1" --labels costCategory="Support" pcCode="A123456"
 ```
-##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Create">Parameters</a>
+##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Create">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -333,7 +333,7 @@ az billing invoice section create --account-name "{billingAccountName}" --profil
 
 #### <a name="InvoiceSectionsCreateOrUpdate#Update">Command `az billing invoice section update`</a>
 
-##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Update">Parameters</a>
+##### <a name="ParametersInvoiceSectionsCreateOrUpdate#Update">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -349,7 +349,7 @@ az billing invoice section create --account-name "{billingAccountName}" --profil
 ```
 az billing policy show --account-name "{billingAccountName}" --customer-name "{customerName}"
 ```
-##### <a name="ParametersPoliciesGetByCustomer">Parameters</a>
+##### <a name="ParametersPoliciesGetByCustomer">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -362,7 +362,7 @@ az billing policy show --account-name "{billingAccountName}" --customer-name "{c
 az billing policy update --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
 --marketplace-purchases "OnlyFreeAllowed" --reservation-purchases "NotAllowed" --view-charges "Allowed"
 ```
-##### <a name="ParametersPoliciesUpdate">Parameters</a>
+##### <a name="ParametersPoliciesUpdate">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -379,7 +379,7 @@ az billing policy update --account-name "{billingAccountName}" --profile-name "{
 az billing product list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
 --invoice-section-name "{invoiceSectionName}"
 ```
-##### <a name="ParametersProductsListByInvoiceSection">Parameters</a>
+##### <a name="ParametersProductsListByInvoiceSection">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -393,7 +393,7 @@ az billing product list --account-name "{billingAccountName}" --profile-name "{b
 ```
 az billing product list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 ```
-##### <a name="ParametersProductsListByBillingProfile">Parameters</a>
+##### <a name="ParametersProductsListByBillingProfile">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="ProductsListByCustomer">Command `az billing product list`</a>
@@ -402,7 +402,7 @@ az billing product list --account-name "{billingAccountName}" --profile-name "{b
 ```
 az billing product list --account-name "{billingAccountName}" --customer-name "{customerName}"
 ```
-##### <a name="ParametersProductsListByCustomer">Parameters</a>
+##### <a name="ParametersProductsListByCustomer">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
@@ -413,7 +413,7 @@ az billing product list --account-name "{billingAccountName}" --customer-name "{
 ```
 az billing product list --account-name "{billingAccountName}"
 ```
-##### <a name="ParametersProductsListByBillingAccount">Parameters</a>
+##### <a name="ParametersProductsListByBillingAccount">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="ProductsGet">Command `az billing product show`</a>
@@ -422,7 +422,7 @@ az billing product list --account-name "{billingAccountName}"
 ```
 az billing product show --account-name "{billingAccountName}" --name "{productName}"
 ```
-##### <a name="ParametersProductsGet">Parameters</a>
+##### <a name="ParametersProductsGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -434,7 +434,7 @@ az billing product show --account-name "{billingAccountName}" --name "{productNa
 ```
 az billing product update --account-name "{billingAccountName}" --auto-renew "Off" --name "{productName}"
 ```
-##### <a name="ParametersProductsUpdate">Parameters</a>
+##### <a name="ParametersProductsUpdate">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -451,7 +451,7 @@ az billing product move --account-name "{billingAccountName}" --destination-invo
 "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections\
 /{newInvoiceSectionName}" --name "{productName}"
 ```
-##### <a name="ParametersProductsMove">Parameters</a>
+##### <a name="ParametersProductsMove">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -472,7 +472,7 @@ az billing product validate-move --account-name "{billingAccountName}" --destina
 "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections\
 /{newInvoiceSectionName}" --name "{productName}"
 ```
-##### <a name="ParametersProductsValidateMove">Parameters</a>
+##### <a name="ParametersProductsValidateMove">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -490,7 +490,7 @@ az billing profile list --account-name "{billingAccountName}"
 ```
 az billing profile list --expand "invoiceSections" --account-name "{billingAccountName}"
 ```
-##### <a name="ParametersBillingProfilesListByBillingAccount">Parameters</a>
+##### <a name="ParametersBillingProfilesListByBillingAccount">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -506,7 +506,7 @@ az billing profile show --account-name "{billingAccountName}" --name "{billingPr
 ```
 az billing profile show --expand "invoiceSections" --account-name "{billingAccountName}" --name "{billingProfileName}"
 ```
-##### <a name="ParametersBillingProfilesGet">Parameters</a>
+##### <a name="ParametersBillingProfilesGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -522,7 +522,7 @@ address-line1="Test Address 1" city="Redmond" country="US" first-name="Test" las
 region="WA" --display-name "Finance" --enabled-azure-plans sku-id="0001" --enabled-azure-plans sku-id="0002" \
 --invoice-email-opt-in true --po-number "ABC12345"
 ```
-##### <a name="ParametersBillingProfilesCreateOrUpdate#Create">Parameters</a>
+##### <a name="ParametersBillingProfilesCreateOrUpdate#Create">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -536,7 +536,7 @@ region="WA" --display-name "Finance" --enabled-azure-plans sku-id="0001" --enabl
 
 #### <a name="BillingProfilesCreateOrUpdate#Update">Command `az billing profile update`</a>
 
-##### <a name="ParametersBillingProfilesCreateOrUpdate#Update">Parameters</a>
+##### <a name="ParametersBillingProfilesCreateOrUpdate#Update">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -555,7 +555,7 @@ region="WA" --display-name "Finance" --enabled-azure-plans sku-id="0001" --enabl
 ```
 az billing property show
 ```
-##### <a name="ParametersBillingPropertyGet">Parameters</a>
+##### <a name="ParametersBillingPropertyGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="BillingPropertyUpdate">Command `az billing property update`</a>
@@ -564,7 +564,7 @@ az billing property show
 ```
 az billing property update --cost-center "1010"
 ```
-##### <a name="ParametersBillingPropertyUpdate">Parameters</a>
+##### <a name="ParametersBillingPropertyUpdate">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--cost-center**|string|The cost center applied to the subscription.|cost_center|costCenter|
@@ -577,7 +577,7 @@ az billing property update --cost-center "1010"
 az billing subscription list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
 --invoice-section-name "{invoiceSectionName}"
 ```
-##### <a name="ParametersBillingSubscriptionsListByInvoiceSection">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsListByInvoiceSection">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -590,7 +590,7 @@ az billing subscription list --account-name "{billingAccountName}" --profile-nam
 ```
 az billing subscription list --account-name "{billingAccountName}" --customer-name "{customerName}"
 ```
-##### <a name="ParametersBillingSubscriptionsListByCustomer">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsListByCustomer">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
@@ -601,7 +601,7 @@ az billing subscription list --account-name "{billingAccountName}" --customer-na
 ```
 az billing subscription list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 ```
-##### <a name="ParametersBillingSubscriptionsListByBillingProfile">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsListByBillingProfile">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="BillingSubscriptionsListByBillingAccount">Command `az billing subscription list`</a>
@@ -610,7 +610,7 @@ az billing subscription list --account-name "{billingAccountName}" --profile-nam
 ```
 az billing subscription list --account-name "{billingAccountName}"
 ```
-##### <a name="ParametersBillingSubscriptionsListByBillingAccount">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsListByBillingAccount">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 #### <a name="BillingSubscriptionsGet">Command `az billing subscription show`</a>
@@ -619,7 +619,7 @@ az billing subscription list --account-name "{billingAccountName}"
 ```
 az billing subscription show --account-name "{billingAccountName}"
 ```
-##### <a name="ParametersBillingSubscriptionsGet">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsGet">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -630,7 +630,7 @@ az billing subscription show --account-name "{billingAccountName}"
 ```
 az billing subscription update --account-name "{billingAccountName}" --cost-center "ABC1234"
 ```
-##### <a name="ParametersBillingSubscriptionsUpdate">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsUpdate">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -646,7 +646,7 @@ az billing subscription move --account-name "{billingAccountName}" --destination
 "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections\
 /{newInvoiceSectionName}"
 ```
-##### <a name="ParametersBillingSubscriptionsMove">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsMove">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -666,7 +666,7 @@ az billing subscription validate-move --account-name "{billingAccountName}" --de
 "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billingProfiles/{billingProfileName}/invoiceSections\
 /{newInvoiceSectionName}"
 ```
-##### <a name="ParametersBillingSubscriptionsValidateMove">Parameters</a>
+##### <a name="ParametersBillingSubscriptionsValidateMove">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
@@ -679,7 +679,7 @@ az billing subscription validate-move --account-name "{billingAccountName}" --de
 ```
 az billing transaction list --account-name "{billingAccountName}" --invoice-name "{invoiceName}"
 ```
-##### <a name="ParametersTransactionsListByInvoice">Parameters</a>
+##### <a name="ParametersTransactionsListByInvoice">Parameters</a> 
 |Option|Type|Description|Path (SDK)|Swagger name|
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|

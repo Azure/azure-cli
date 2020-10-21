@@ -326,9 +326,9 @@ def billing_invoice_list(client,
 
 def billing_invoice_show(client,
                          account_name,
-                         invoice_name):
+                         name):
     return client.get(billing_account_name=account_name,
-                      invoice_name=invoice_name)
+                      invoice_name=name)
 
 
 def billing_transaction_list(client,

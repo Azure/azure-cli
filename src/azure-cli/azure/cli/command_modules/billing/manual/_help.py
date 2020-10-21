@@ -472,21 +472,36 @@ helps['billing invoice list'] = """
 
 helps['billing invoice show'] = """
     type: command
-    short-summary: "Gets an invoice by billing account name and ID. The operation is supported for billing accounts \
+    short-summary: "Gets an invoice. The operation is supported for billing accounts \
 with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
     examples:
-      - name: CreditNote
+      - name: Show an invoice by billing account name and ID
         text: |-
                az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
-      - name: Invoice
+      - name: Show an invoice by ID
         text: |-
-               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
-      - name: InvoiceWithRebillDetails
+               az billing invoice show --name "{invoiceName}"
+      - name: Show an invoice by subscription ID and invoice ID
         text: |-
-               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
-      - name: VoidInvoice
+               az billing invoice show --name "{invoiceName}" --by-subscription
+"""
+
+helps['billing invoice download'] = """
+    type: command
+    short-summary: "Get URL to download invoice"
+    examples:
+      - name: Get a URL to download an invoice. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
         text: |-
-               az billing invoice show --account-name "{billingAccountName}" --name "{invoiceName}"
+               az billing invoice download --account-name "{billingAccountName}" --invoice-name "{invoiceName}" --download-token "{downloadToken}"
+      - name: Get a URL to download an multiple invoices documents (invoice pdf, tax receipts, credit notes) as a zip file. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+        text: |-
+               az billing invoice download --account-name "{billingAccountName}" --download-urls "{ListOfDownloadURLs}"
+      - name: Gets a URL to download multiple invoices documents (invoice pdf, tax receipts, credit notes) as a zip file.
+        text: |-
+               az billing invoice download --download-urls "{ListOfDownloadURLs}"
+      - name: Gets a URL to download an invoice.
+        text: |-
+               az billing invoice download --invoice-name "{invoiceName}" --download-token "{downloadToken}"
 """
 
 helps['billing transaction'] = """

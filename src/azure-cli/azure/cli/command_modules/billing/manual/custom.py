@@ -11,13 +11,9 @@ def billing_invoice_download(client,
                              account_name=None,
                              invoice_name=None,
                              download_token=None,
-                             download_urls=None
-                             ):
+                             download_urls=None):
     """
-    Support download_invoice(account_name, invoice_name, download_token)
-    Support download_billing_subscription_invoice(invoice_name, download_token)
-    Support download_multiple_billing_subscription_invoice(download_urls)
-    Support download_multiple_modern_invoice(account_name, download_urls)
+    Get URL to download invoice
 
     :param account_name: The ID that uniquely identifies a billing account.
     :param invoice_name: The ID that uniquely identifies an invoice.
@@ -33,7 +29,29 @@ def billing_invoice_download(client,
         return client.download_multiple_billing_subscription_invoice(download_urls)
 
     if invoice_name and download_token:
-        return client.download_billing_subscription_invoice(invoice_name, download_token)
+        return client.download_billing_subscription_invoice(
+            invoice_name, download_token
+        )
 
     from azure.cli.core.azclierror import CLIInternalError
-    raise CLIInternalError("Uncaught argument parameter combinations for Azure CLI to handle")
+
+    raise CLIInternalError(
+        "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
+    )
+
+
+def billing_invoice_show(client, account_name=None, name=None, by_subscription=None):
+
+    if account_name is not None and name is not None:
+        return client.get(billing_account_name=account_name, invoice_name=name)
+
+    if name is not None and not by_subscription:
+        return client.get_by_id(name)
+
+    if by_subscription and name:
+        return client.get_by_subscription_and_invoice_id(name)
+
+    from azure.cli.core.azclierror import CLIInternalError
+    raise CLIInternalError(
+        "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
+    )
