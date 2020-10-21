@@ -30,9 +30,8 @@ class StorageScenarioMixin:
         """Returns the storage account name and key in a tuple"""
         return name, self.get_account_key(group, name)
 
-    def oauth_cmd(self, cmd, *args):
-        cmd = cmd.format(*args)
-        return self.cmd(cmd + ' --auth-mode login')
+    def oauth_cmd(self, cmd, *args, **kwargs):
+        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
 
     def storage_cmd(self, cmd, account_info, *args):
         cmd = cmd.format(*args)

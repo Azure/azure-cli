@@ -44,7 +44,7 @@ def remove_access_control_recursive(client, acl, **kwargs):
     def progress_callback(acl_changes):
         # keep track of failed entries if there are any
         if acl_changes.batch_failures:
-            failed_entries = acl_changes.batch_failures
+            failed_entries.extend(acl_changes.batch_failures)
 
     result = client.remove_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
     result = todict(result)
@@ -59,7 +59,7 @@ def set_access_control_recursive(client, acl, **kwargs):
     def progress_callback(acl_changes):
         # keep track of failed entries if there are any
         if acl_changes.batch_failures:
-            failed_entries = acl_changes.batch_failures
+            failed_entries.extend(acl_changes.batch_failures)
 
     result = client.set_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
     result = todict(result)
@@ -74,7 +74,7 @@ def update_access_control_recursive(client, acl, **kwargs):
     def progress_callback(acl_changes):
         # keep track of failed entries if there are any
         if acl_changes.batch_failures:
-            failed_entries = acl_changes.batch_failures
+            failed_entries.extend(acl_changes.batch_failures)
 
     result = client.update_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
     result = todict(result)
