@@ -95,16 +95,25 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
     def set_token(self):
+        import traceback
+        from knack.log import get_logger
+        logger = get_logger(__name__)
         from .azclierror import AzureConnectionError, AzureResponseError
         try:
             super(MSIAuthenticationWrapper, self).set_token()
         except requests.exceptions.ConnectionError as err:
+            logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n{}'
+                         .format(traceback.format_exc()))
             raise AzureConnectionError('Failed to connect to MSI. Please make sure MSI is configured correctly '
                                        'and check the network connection.\nError detail: {}'.format(str(err)))
         except requests.exceptions.HTTPError as err:
+            logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n{}'
+                         .format(traceback.format_exc()))
             raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
                                      'Get Token request returned http error: {}, reason: {}'
                                      .format(err.response.status, err.response.reason))
         except TimeoutError as err:
+            logger.debug('throw TimeoutError when doing MSIAuthentication: \n{}'
+                         .format(traceback.format_exc()))
             raise AzureConnectionError('MSI endpoint is not responding. Please make sure MSI is configured correctly.\n'
                                        'Error detail: {}'.format(str(err)))
