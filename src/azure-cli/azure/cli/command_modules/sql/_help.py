@@ -22,29 +22,59 @@ type: group
 short-summary: Manage a database's auditing policy.
 """
 
+helps['sql db audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the database's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that database's audit policy exists
+    text: az sql db audit-policy wait -g mygroup -s myserver -n mydb --exists
+"""
+
 helps['sql db audit-policy update'] = """
 type: command
 short-summary: Update a database's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled --storage-account mystorage
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
-  - name: Add an audit action.
-    text: |
-        az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --event-hub-target-state Disabled
 """
 
 helps['sql db copy'] = """
@@ -980,29 +1010,59 @@ type: group
 short-summary: Manage a server's auditing policy.
 """
 
+helps['sql server audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the server's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that server's audit policy exists
+    text: az sql server audit-policy wait -g mygroup -n myserver --exists
+"""
+
 helps['sql server audit-policy update'] = """
 type: command
 short-summary: Update a server's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql server audit-policy update -g mygroup -n myserver --state Enabled --storage-account mystorage
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql server audit-policy update -g mygroup -n myserver \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
-  - name: Add an audit action.
-    text: |
-        az sql server audit-policy update -g mygroup -n myserver \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql server audit-policy update -g mygroup -n myserver --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql server audit-policy update -g mygroup -n myserver --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --event-hub-target-state Disabled
 """
 
 helps['sql server conn-policy'] = """
