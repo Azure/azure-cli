@@ -115,7 +115,7 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('delete', 'delete')
 
-    with self.command_group('netappfiles account backup_policy', netappfiles_backup_policies_sdk) as g:
+    with self.command_group('netappfiles account backup-policy', netappfiles_backup_policies_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
@@ -163,7 +163,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          client_factory=volumes_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.command('pool_change', 'pool_change')
+        g.command('pool-change', 'pool_change')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
@@ -192,7 +192,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')
-        g.command('re_initialize', 're_initialize_replication')
+        g.command('re-initialize', 're_initialize_replication')
 
     with self.command_group('netappfiles volume backup', netappfiles_backups_sdk) as g:
         g.show_command('show', 'get')

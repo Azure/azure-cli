@@ -40,13 +40,13 @@ parameters:
     short-summary: NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes. Must be 10 characters or less
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
-  - name: --kdc_ip
+  - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: ad_name
+  - name: ad-name
     short-summary: Name of the active directory machine. This optional parameter is used only while creating kerberos volume
-  - name: server_root_ca_certificate
+  - name: server-root-ca-certificate
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
-  - name: backup_operators
+  - name: backup-operators
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
 examples:
   - name: Add an active directory to the account
@@ -257,12 +257,12 @@ examples:
 """
 
 
-helps['netappfiles account backup_policy'] = """
+helps['netappfiles account backup-policy'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Backup Policy Resources.
 """
 
-helps['netappfiles account backup_policy create'] = """
+helps['netappfiles account backup-policy create'] = """
 type: command
 short-summary: Create a new Azure NetApp Files (ANF) backup policy.
 parameters:
@@ -270,11 +270,11 @@ parameters:
     short-summary: The name of the ANF account
   - name: --name --backup-policy-name -n -name
     short-summary: The name of the ANF backup policy
-  - name: --daily_backups_to_keep
+  - name: --daily-backups-to-keep
     short-summary: Daily backups count to keep
-  - name: --weekly_backups_to_keep
+  - name: --weekly-backups-to-keep
     short-summary: Weekly backups count to keep
-  - name: --monthly_backups_to_keep
+  - name: --monthly-backups-to-keep
     short-summary: Monthly backups count to keep
   - name: --enabled
     short-summary: The property to decide policy is enabled or not
@@ -286,7 +286,7 @@ examples:
         az netappfiles backup policy create -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups-to-keep 1 --enabled true
 """
 
-helps['netappfiles account backup_policy delete'] = """
+helps['netappfiles account backup-policy delete'] = """
 type: command
 short-summary: Delete the specified ANF backup policy.
 parameters:
@@ -300,7 +300,7 @@ examples:
         az netappfiles backup policy delete -g mygroup --account-name myaccname --name mybackuppolicyname
 """
 
-helps['netappfiles account backup_policy list'] = """
+helps['netappfiles account backup-policy list'] = """
 type: command
 short-summary: List the ANF backup policy for the specified account.
 parameters:
@@ -312,7 +312,7 @@ examples:
         az netappfiles backup policy list -g mygroup --account-name myname
 """
 
-helps['netappfiles account backup_policy show'] = """
+helps['netappfiles account backup-policy show'] = """
 type: command
 short-summary: Get the specified ANF backup policy.
 parameters:
@@ -326,7 +326,7 @@ examples:
         az netappfiles backup policy show -g mygroup --account-name myaccname --name mybackuppolicyname
 """
 
-helps['netappfiles account backup_policy update'] = """
+helps['netappfiles account backup-policy update'] = """
 type: command
 short-summary: Update the specified ANF backup policy.
 parameters:
@@ -334,11 +334,11 @@ parameters:
     short-summary: The name of the ANF account
   - name: --name --pool-name -n -name
     short-summary: The name of the ANF backup policy
-    - name: --daily_backups_to_keep
+    - name: --daily-backups-to-keep
     short-summary: Daily backups count to keep
-  - name: --weekly_backups_to_keep
+  - name: --weekly-backups-to-keep
     short-summary: Weekly backups count to keep
-  - name: --monthly_backups_to_keep
+  - name: --monthly-backups-to-keep
     short-summary: Monthly backups count to keep
   - name: --enabled
     short-summary: The property to decide policy is enabled or not
@@ -551,40 +551,40 @@ parameters:
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
   - name: --snapshot-id
-    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot_id "9760acf5-4638-11e7-9bdb-020073ca3333"
-  - name: --snapshot_policy_id
+    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot-id "9760acf5-4638-11e7-9bdb-020073ca3333"
+  - name: --snapshot-policy-id
     short-summary: Snapshot Policy ResourceId
-  - name: --backup_policy_id
+  - name: --backup-policy-id
     short-summary: Backup Policy Resource ID
-  - name: --backup_enabled
+  - name: --backup-enabled
     short-summary: Backup Enabled
-  - name: --backup_id
+  - name: --backup-id
     short-summary: Backup ID. UUID v4 or resource identifier used to identify the Backup
-  - name: --policy_enforced
+  - name: --policy-enforced
     short-summary: Policy Enforced
-  - name: --vault_id
+  - name: --vault-id
     short-summary: Vault Resource ID
-  - name: --kerberos_enabled
+  - name: --kerberos-enabled
     short-summary: Describe if a volume is KerberosEnabled 
-  - name: --throughput_mibps
+  - name: --throughput-mibps
     short-summary: Maximum throughput in Mibps that can be achieved by this volume  
-  - name: --snapshot_directory_visible
+  - name: --snapshot-directory-visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
-  - name: --security_style
+  - name: --security-style
     short-summary: The security style of volume. Possible values include: 'ntfs', 'unix'
-  - name: --kerberos5_read_only
+  - name: --kerberos5-read-only
     short-summary: Kerberos5 Read only access
-  - name: --kerberos5_read_write
+  - name: --kerberos5-read-write
     short-summary: Kerberos5 Read and write access
-  - name: --kerberos5i_read_only
+  - name: --kerberos5i-read-only
     short-summary: Kerberos5i Read only access
-  - name: --kerberos5i_read_write
+  - name: --kerberos5i-read-write
     short-summary: Kerberos5i Read and write access
-  - name: --kerberos5p_read_only
+  - name: --kerberos5p-read-only
     short-summary: Kerberos5p Read only access
-  - name: --kerberos5p_read_write
+  - name: --kerberos5p-read-write
     short-summary: Kerberos5p Read and write access
-  - name: --has_root_access
+  - name: --has-root-access
     short-summary: Has root access to volume. Default value: True
 examples:
   - name: Create an ANF volume
@@ -700,7 +700,7 @@ examples:
         az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
-helps['netappfiles volume replication re_initialize'] = """
+helps['netappfiles volume replication re-initialize'] = """
 type: command
 short-summary: Re-initialise a volume replication for the specified destination volume. The replication process is resumed from source to destination.
 parameters:
@@ -861,7 +861,7 @@ examples:
         az netappfiles volume update -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --service-level ultra --usage-threshold 100 --tags mytag=specialvol
 """
 
-helps['netappfiles volume pool_change'] = """
+helps['netappfiles volume pool-change'] = """
 type: command
 short-summary: Get the specified ANF volume.
 parameters:
@@ -871,12 +871,12 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
     short-summary: The name of the ANF volume
-  - name: --new_pool_resource_id -d
+  - name: --new-pool-resource-id -d
     short-summary: The resource id of the new ANF pool
 examples:
   - name: Returns the properties of the given ANF volume
     text: >
-        az netappfiles volume pool_change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+        az netappfiles volume pool-change -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
 

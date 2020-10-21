@@ -34,7 +34,7 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
-    with self.argument_context('netappfiles account backup_policy') as c:
+    with self.argument_context('netappfiles account backup-policy') as c:
         c.argument('backup_policy_name', options_list=['--backup-policy-name'], help='The name of the backup policy', id_part='child_name_1')
         c.argument('daily_backups_to_keep', options_list=['--daily-backups-to-keep', '-d'], help='Daily backups count to keep', id_part=None)
         c.argument('weekly_backups_to_keep', options_list=['--weekly-backups-to-keep', '-w'], help='Weekly backups count to keep', id_part=None)
@@ -79,7 +79,7 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
         c.argument('snapshot_id', options_list=['--snapshot-id', '-s'], help='Resource id of the snapshot', id_part=None)
 
-    with self.argument_context('netappfiles volume pool_change') as c:
+    with self.argument_context('netappfiles volume pool-change') as c:
         c.argument('new_pool_resource_id', options_list=['--new-pool-resource-id', '-d'], help='Resource id of the new pool', id_part=None)
 
     with self.argument_context('netappfiles volume export-policy list') as c:

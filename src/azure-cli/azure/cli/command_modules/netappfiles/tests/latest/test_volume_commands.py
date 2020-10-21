@@ -160,8 +160,8 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # approve
         self.cmd("az netappfiles volume replication approve -g %s -a %s -p %s -v %s --remote-volume-resource-id %s" % (rg, account_name, pool_name, volume_name, dst_volume['id']))
 
-        # re_initialize
-        self.cmd("az netappfiles volume replication re_initialize -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
+        # re-initialize
+        self.cmd("az netappfiles volume replication re-initialize -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
         self.wait_for_replication_status("Mirrored", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # break
@@ -322,7 +322,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert pool2['name'] == account_name + '/' + pool2_name
 
         # change volume to pool2
-        self.cmd("az netappfiles volume pool_change -g {rg} -a %s -p %s -v %s -d %s" % (account_name, pool_name, volume_name, pool2['id']))
+        self.cmd("az netappfiles volume pool-change -g {rg} -a %s -p %s -v %s -d %s" % (account_name, pool_name, volume_name, pool2['id']))
 
         # Make sure that the volume was changed to pool2
         volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s" % (account_name, pool2_name, volume_name)).get_output_in_json()

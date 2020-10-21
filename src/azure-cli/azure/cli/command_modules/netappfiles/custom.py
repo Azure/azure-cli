@@ -198,9 +198,10 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protoc
         data_protection=None if vault_id is None else VolumePatchPropertiesDataProtection(
             backup=VolumeBackupProperties(vault_id=vault_id, backup_enabled=backup_enabled,
                                           backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
-        tags=tags,
-        throughput_mibps=throughput_mibps)
-    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection', 'throughput_mibps'])
+        tags=tags)
+    if throughput_mibps is not None:
+        params.throughput_mibps=throughput_mibps
+    _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
     return params
 
 
