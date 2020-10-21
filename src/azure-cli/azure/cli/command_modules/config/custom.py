@@ -8,7 +8,11 @@ from knack.util import CLIError
 
 from azure.cli.core.util import ScopedConfig
 
+import azure.cli.core.telemetry as telemetry
+
 logger = get_logger(__name__)
+
+telemetry_allowed_sections = {'auto-upgrade', 'extension'}
 
 
 def _normalize_config_value(value):
@@ -20,6 +24,7 @@ def _normalize_config_value(value):
 def config_set(cmd, key_value=None, local=False):
     if key_value:
         with ScopedConfig(cmd.cli_ctx.config, local):
+            telemetry_content = []
             for kv in key_value:
                 # core.no_color=true
                 parts = kv.split('=', 1)
@@ -36,6 +41,10 @@ def config_set(cmd, key_value=None, local=False):
                 name = parts[1]
 
                 cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
+                if section in telemetry_allowed_sections:
+                    telemetry_content.append('{}={}'.format(key, value))
+            if telemetry_content:
+                telemetry.set_debug_info('Config', ' '.join(telemetry_content))
 
 
 def config_get(cmd, key=None, local=False):
