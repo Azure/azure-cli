@@ -345,8 +345,10 @@ def get_profile_username():
     return user
 
 
-def get_sku_to_use(src_dir, html=False, sku=None):
+def get_sku_to_use(src_dir, html=False, sku=None, runtime=None):
     if sku is None:
+        if runtime:  # user overrided language detection by specifiying runtime
+            return 'F1'
         lang_details = get_lang_from_content(src_dir, html)
         return lang_details.get("default_sku")
     logger.info("Found sku argument, skipping use default sku")
@@ -373,6 +375,15 @@ def get_plan_to_use(cmd, user, os_name, loc, sku, create_rg, resource_group_name
     return plan
 
 
+# Portal uses the current_stack property in the app metadata to display the correct stack
+# This value should be one of: ['dotnet', 'dotnetcore', 'node', 'php', 'python', 'java']
+def get_current_stack_from_runtime(runtime):
+    language = runtime.split('|')[0].lower()
+    if language == 'aspnet':
+        return 'dotnet'
+    return language
+
+
 # if plan name not provided we need to get a plan name based on the OS, location & SKU
 def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, sku, create_rg):
     client = web_client_factory(cmd.cli_ctx)
@@ -394,7 +405,11 @@ def _determine_if_default_plan_to_use(cmd, plan_name, resource_group_name, loc, 
         # based on SKU or not
         data_sorted = sorted(_asp_list, key=lambda x: x.name)
         _plan_info = data_sorted[_num_asp - 1]
-        _asp_num = int(_plan_info.name.split('_')[4]) + 1  # default asp created by CLI can be of type plan_num
+        _asp_num = 1
+        try:
+            _asp_num = int(_plan_info.name.split('_')[-1]) + 1  # default asp created by CLI can be of type plan_num
+        except ValueError:
+            pass
         return '{}_{}'.format(_asp_generic, _asp_num)
     return plan_name
 
