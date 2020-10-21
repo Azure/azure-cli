@@ -467,15 +467,6 @@ def step__policies_put_updatepolicy(test):
              checks=[])
 
 
-# EXAMPLE: /Policies/get/PolicyByCustomer
-@try_manual
-def step__policies_get_policybycustomer(test):
-    test.cmd('az billing policy show '
-             '--account-name "{myBillingAccount}" '
-             '--customer-name "{myCustomer}"',
-             checks=[])
-
-
 # EXAMPLE: /Products/get/Product
 @try_manual
 def step__products_get_product(test):
@@ -627,7 +618,6 @@ def call_scenario(test):
     step__billingsubscriptions_post2(test)
     step__billingsubscriptions_post3(test)
     step__policies_put_updatepolicy(test)
-    step__policies_get_policybycustomer(test)
     step__products_get_product(test)
     step__products_get_productslistbybillingaccount(test)
     step__products_get_productslistbybillingprofile(test)

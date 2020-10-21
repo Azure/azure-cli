@@ -513,16 +513,6 @@ helps['billing policy'] = """
     short-summary: billing policy
 """
 
-helps['billing policy show'] = """
-    type: command
-    short-summary: "Lists the policies for a customer. This operation is supported only for billing accounts with \
-agreement type Microsoft Partner Agreement."
-    examples:
-      - name: PolicyByCustomer
-        text: |-
-               az billing policy show --account-name "{billingAccountName}" --customer-name "{customerName}"
-"""
-
 helps['billing policy update'] = """
     type: command
     short-summary: "Updates the policies for a billing profile. This operation is supported only for billing accounts \

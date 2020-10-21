@@ -55,3 +55,16 @@ def billing_invoice_show(client, account_name=None, name=None, by_subscription=N
     raise CLIInternalError(
         "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
     )
+
+
+def billing_policy_show(client, account_name, profile_name=None, customer_name=None):
+    if profile_name:
+        return client.get_by_billing_profile(account_name, profile_name)
+
+    if customer_name:
+        return client.get_by_customer(account_name, customer_name)
+
+    from azure.cli.core.azclierror import CLIInternalError
+    return CLIInternalError(
+        "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
+    )

@@ -338,13 +338,6 @@ def billing_transaction_list(client,
                                   invoice_name=invoice_name)
 
 
-def billing_policy_show(client,
-                        account_name,
-                        customer_name):
-    return client.get_by_customer(billing_account_name=account_name,
-                                  customer_name=customer_name)
-
-
 def billing_policy_update(client,
                           account_name,
                           profile_name,

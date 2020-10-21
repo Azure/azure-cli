@@ -60,7 +60,6 @@
 ### <a name="CommandsInPolicies">Commands in `az billing policy` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
 |---------|------------|--------|-----------|
-|[az billing policy show](#PoliciesGetByCustomer)|GetByCustomer|[Parameters](#ParametersPoliciesGetByCustomer)|[Example](#ExamplesPoliciesGetByCustomer)|
 |[az billing policy update](#PoliciesUpdate)|Update|[Parameters](#ParametersPoliciesUpdate)|[Example](#ExamplesPoliciesUpdate)|
 
 ### <a name="CommandsInProducts">Commands in `az billing product` group</a>
@@ -343,18 +342,6 @@ az billing invoice section create --account-name "{billingAccountName}" --profil
 |**--labels**|dictionary|Dictionary of metadata associated with the invoice section.|labels|labels|
 
 ### group `az billing policy`
-#### <a name="PoliciesGetByCustomer">Command `az billing policy show`</a>
-
-##### <a name="ExamplesPoliciesGetByCustomer">Example</a>
-```
-az billing policy show --account-name "{billingAccountName}" --customer-name "{customerName}"
-```
-##### <a name="ParametersPoliciesGetByCustomer">Parameters</a> 
-|Option|Type|Description|Path (SDK)|Swagger name|
-|------|----|-----------|----------|------------|
-|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
-|**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
-
 #### <a name="PoliciesUpdate">Command `az billing policy update`</a>
 
 ##### <a name="ExamplesPoliciesUpdate">Example</a>

@@ -118,7 +118,7 @@ accounts with agreement type Microsoft Customer Agreement or Microsoft Partner A
 
 helps['billing profile show'] = """
     type: command
-    short-summary: "Gets a billing profile by its ID. The operation is supported for billing accounts with agreement \
+    short-summary: "Gets a 1111 billing profile by its ID. The operation is supported for billing accounts with agreement \
 type Microsoft Customer Agreement or Microsoft Partner Agreement."
     examples:
       - name: BillingProfile
@@ -526,12 +526,15 @@ helps['billing policy'] = """
 
 helps['billing policy show'] = """
     type: command
-    short-summary: "Lists the policies for a customer. This operation is supported only for billing accounts with \
+    short-summary: Show the policies for a customer or for a billing profile. This operation is supported only for billing accounts with \
 agreement type Microsoft Partner Agreement."
     examples:
-      - name: PolicyByCustomer
+      - name: Lists the policies for a customer
         text: |-
                az billing policy show --account-name "{billingAccountName}" --customer-name "{customerName}"
+      - name: Lists the policies for a billing profile
+        text: |-
+               az billing policy show --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 """
 
 helps['billing policy update'] = """

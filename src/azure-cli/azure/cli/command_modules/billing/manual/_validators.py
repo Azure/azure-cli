@@ -92,3 +92,11 @@ def billing_invoice_show_validator(namespace):
     if namespace.by_subscription is not None:
         if namespace.name is None:
             raise RequiredArgumentMissingError("--name is also required")
+
+
+def billing_profile_show_validator(namespace):
+
+    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+
+    if namespace.profile_name is not None and namespace.customer_name is not None:
+        raise MutuallyExclusiveArgumentError("--profile-name can't be used with --customer-name")

@@ -235,10 +235,6 @@ def load_arguments(self, _):
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('invoice_name', type=str, help='The ID that uniquely identifies an invoice.')
 
-    with self.argument_context('billing policy show') as c:
-        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
-        c.argument('customer_name', type=str, help='The ID that uniquely identifies a customer.')
-
     with self.argument_context('billing policy update') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')

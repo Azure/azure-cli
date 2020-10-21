@@ -108,7 +108,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.billing.operations#PoliciesOperations.{}',
         client_factory=cf_policy)
     with self.command_group('billing policy', billing_policy, client_factory=cf_policy, is_preview=True) as g:
-        g.custom_show_command('show', 'billing_policy_show')
         g.custom_command('update', 'billing_policy_update')
 
     from ..generated._client_factory import cf_property
