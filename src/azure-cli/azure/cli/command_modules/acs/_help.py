@@ -274,7 +274,7 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -450,7 +450,7 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
