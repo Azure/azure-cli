@@ -1342,14 +1342,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage queue list') as c:
-        c.argument('include_metadata', help='Specifies that queue metadata be returned in the response.')
+        c.argument('include_metadata', help='Specify that queue metadata be returned in the response.')
         c.argument('marker', arg_type=marker_type)
         c.argument('num_results', arg_type=num_results_type)
-        c.argument('prefix', help='Filters the results to return only queues whose names '
+        c.argument('prefix', help='Filter the results to return only queues whose names '
                                   'begin with the specified prefix.')
         c.argument('show_next_marker', action='store_true',
                    help='Show nextMarker in result when specified.')
-        c.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.extra('timeout', help='Request timeout in seconds. Apply to each call to the service.', type=int)
 
     with self.argument_context('storage queue create') as c:
         c.argument('queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
