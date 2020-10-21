@@ -991,8 +991,6 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
-    # Remove when issue #9393 is fixed.
-    @live_only()
     def test_sql_mi_aad_admin(self):
 
         print('Test is started...\n')
