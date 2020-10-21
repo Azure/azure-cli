@@ -1630,7 +1630,7 @@ type: command
 short-summary: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
 parameters:
     - name: --acl
-      short-summary: Remove POSIX access control rights on files and directories. The value is a comma-separated 
+      short-summary: Remove POSIX access control rights on files and directories. The value is a comma-separated
         list of access control entries. Each access control entry (ACE) consists of a scope, a type, and a user or
         group identifier in the format "[scope:][type]:[id]".
 examples:

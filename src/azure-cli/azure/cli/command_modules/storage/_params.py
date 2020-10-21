@@ -20,8 +20,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy,
-                          add_acl_progress_hook)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines

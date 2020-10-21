@@ -29,7 +29,6 @@ def list_fs_directories(client, path=None, recursive=True, num_results=None, tim
 
 
 def get_directory_properties(client, timeout=None):
-    from knack.util import todict
     from .._transformers import transform_fs_access_output
     prop = todict(client.get_directory_properties(timeout=timeout))
     acl = transform_fs_access_output(client.get_access_control(timeout=timeout))

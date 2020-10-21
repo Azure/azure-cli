@@ -202,7 +202,7 @@ class StorageCommandGroup(AzCommandGroup):
             self._register_data_plane_oauth_arguments(command_name)
 
     def storage_command_oauth(self, *args, **kwargs):
-        #_merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
         self.storage_command(*args, oauth=True, **kwargs)
 
     def storage_custom_command(self, name, method_name, oauth=False, **kwargs):

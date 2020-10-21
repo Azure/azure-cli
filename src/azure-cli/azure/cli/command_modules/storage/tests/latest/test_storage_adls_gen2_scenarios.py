@@ -53,8 +53,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_access_recursive_scenarios(self, resource_group, sp_name, sp_password, storage_account):
         import os
-        #TODO: add back when other is ready
-        #import time
+        # TODO: add back when other is ready
+        # import time
         # self.cmd('role assignment create --role "Storage Blob Data Contributor" --assignee {} '.format('http://' + sp_name))
         # time.sleep(10)
         # self.cmd('login --service-principal -u {} -p {} --tenant 54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'.format(sp_name, sp_password))
