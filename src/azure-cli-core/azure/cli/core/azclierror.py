@@ -131,6 +131,13 @@ class ArgumentParseError(UserFault):
     pass
 
 
+class UsageError(UserFault):
+    """ Fallback of the argument usage related errors.
+    Avoid using this class unless the error can not be classified
+    into the above Argument related error types. """
+    pass
+
+
 # Response related error types
 class BadRequestError(UserFault):
     """ Bad request from client: 400 error """

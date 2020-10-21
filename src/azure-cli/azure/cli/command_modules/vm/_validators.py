@@ -14,6 +14,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import UsageError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
@@ -98,7 +99,7 @@ def process_vm_secret_format(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id
     from azure.cli.core._output import (get_output_format, set_output_format)
 
-    keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
+    keyvault_usage = UsageError('Specify either all of (--keyvault NAME, --resource-group NAME) or --keyvault ID')
     kv = namespace.keyvault
     rg = namespace.resource_group_name
 
@@ -358,7 +359,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     # specialized is only for image
     if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
-        raise CLIError('usage error: --specialized is only configurable when --image is specified.')
+        raise UsageError('--specialized is only configurable when --image is specified.')
 
     # use minimal parameters to resolve the expected storage profile
     if getattr(namespace, 'attach_os_disk', None) and not namespace.image:
@@ -488,7 +489,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
         else:
-            raise CLIError('usage error: unrecognized image information "{}"'.format(namespace.image))
+            raise UsageError('unrecognized image information "{}"'.format(namespace.image))
 
         # pylint: disable=no-member
 
@@ -619,10 +620,10 @@ def _validate_vm_create_dedicated_host(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if namespace.dedicated_host and namespace.dedicated_host_group:
-        raise CLIError('usage error: User cannot specify both --host and --host-group properties.')
+        raise UsageError('User cannot specify both --host and --host-group properties.')
 
     if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host):
-        raise CLIError('usage error: --host is not a valid resource ID.')
+        raise UsageError('--host is not a valid resource ID.')
 
     if namespace.dedicated_host_group:
         if not is_valid_resource_id(namespace.dedicated_host_group):
@@ -822,7 +823,7 @@ def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
         result = '{0:08b}{1:08b}{2:08b}{3:08b}'.format(a, b, c, d)
         return int(result[:-bit_mask_len], 2)
 
-    error_msg = "usage error: --subnet-address-prefix value should be a subrange of --vnet-address-prefix's"
+    error_msg = "--subnet-address-prefix value should be a subrange of --vnet-address-prefix's"
     # extract vnet information needed to verify the defaults we are coming out
     vnet_ip_address, mask = vnet_cidr.split('/')
     vnet_bit_mask_len = 32 - int(mask)
@@ -832,13 +833,13 @@ def _get_next_subnet_addr_suffix(vnet_cidr, subnet_cidr, new_mask):
     subnet_bit_mask_len = 32 - int(mask)
 
     if vnet_bit_mask_len <= subnet_bit_mask_len:
-        raise CLIError(error_msg)
+        raise UsageError(error_msg)
 
     candidate_int = _convert_to_int(subnet_ip_address, subnet_bit_mask_len) + 1
     if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:  # overflows?
         candidate_int = candidate_int - 2  # try the other way around
         if (candidate_int >> (vnet_bit_mask_len - subnet_bit_mask_len)) > vnet_int:
-            raise CLIError(error_msg)
+            raise UsageError(error_msg)
 
     # format back to the cidr
     candaidate_str = '{0:32b}'.format(candidate_int << subnet_bit_mask_len)
@@ -1101,20 +1102,20 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
                 identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
                                                  'userAssignedIdentities', 'Microsoft.ManagedIdentity')
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
-            raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
+            raise UsageError("'--role {}' is not applicable as the '--scope' is not provided".format(
                 namespace.identity_role))
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
-            raise CLIError('usage error: user assigned identity is only available under profile '
+            raise UsageError('user assigned identity is only available under profile '
                            'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
-                raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+                raise UsageError("'--scope'/'--role' is only applicable when assign system identity")
             # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
                                                                     namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
-        raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+        raise UsageError('--assign-identity [--scope SCOPE] [--role ROLE]')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1171,7 +1172,7 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
     if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM')
+        raise UsageError('--license-type is only applicable on Windows VM')
     _validate_vm_vmss_msi(cmd, namespace)
     if namespace.boot_diagnostics_storage:
         namespace.boot_diagnostics_storage = get_storage_blob_uri(cmd.cli_ctx, namespace.boot_diagnostics_storage)
@@ -1311,7 +1312,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 else:
                     err = "'Standard' load balancer is required because 'single placement group' is turned off"
 
-                raise CLIError('usage error:{}'.format(err))
+                raise UsageError(err)
 
 
 def get_network_client(cli_ctx):
@@ -1400,7 +1401,7 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.vnet_name
         ]
         if any(param is not None for param in banned_params):
-            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
+            raise UsageError('In VM mode, only name, resource-group, location, '
                            'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         return
     validate_tags(namespace)
@@ -1432,19 +1433,19 @@ def process_vmss_create_namespace(cmd, namespace):
         _validate_secrets(namespace.secrets, namespace.os_type)
 
     if namespace.license_type and namespace.os_type.lower() != 'windows':
-        raise CLIError('usage error: --license-type is only applicable on Windows VM scaleset')
+        raise UsageError('--license-type is only applicable on Windows VM scaleset')
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
-        raise CLIError('usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+        raise UsageError('--vm-domain-name can only be used when --public-ip-per-vm is enabled')
 
     if namespace.eviction_policy and not namespace.priority:
-        raise CLIError('usage error: --priority PRIORITY [--eviction-policy POLICY]')
+        raise UsageError('--priority PRIORITY [--eviction-policy POLICY]')
 
 
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
-            raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
+            raise UsageError("protection policies can only be applied to VM instances within a VMSS."
                            " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
@@ -1462,23 +1463,23 @@ def validate_vmss_disk(cmd, namespace):
         namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
                                           namespace.resource_group_name, 'disks', 'Microsoft.Compute')
     if bool(namespace.disk) == bool(namespace.size_gb):
-        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
+        raise UsageError('--disk EXIST_DISK --instance-id ID | --size-gb GB')
     if bool(namespace.disk) != bool(namespace.instance_id):
-        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
+        raise UsageError('--disk EXIST_DISK --instance-id ID')
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
     if namespace.source:
-        usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
+        usage_error = '--source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot = _figure_out_storage_source(
                 cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
-                raise CLIError(usage_error)
+                raise UsageError(usage_error)
         except CloudError:
-            raise CLIError(usage_error)
+            raise UsageError(usage_error)
 
 
 def process_image_create_namespace(cmd, namespace):
@@ -1521,7 +1522,7 @@ def process_image_create_namespace(cmd, namespace):
                 if source_snapshot:
                     namespace.data_snapshots.append(source_snapshot)
         if not namespace.os_type:
-            raise CLIError("usage error: os type is required to create the image, "
+            raise UsageError("os type is required to create the image, "
                            "please specify '--os-type OS_TYPE'")
 
 
@@ -1587,8 +1588,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
     if namespace.target_regions:
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
             if len(namespace.target_regions) != len(namespace.target_region_encryption):
-                raise CLIError(
-                    'usage error: Length of --target-region-encryption should be as same as length of target regions')
+                raise UsageError(
+                    'Length of --target-region-encryption should be as same as length of target regions')
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
             parts = t.split('=', 2)
@@ -1602,7 +1603,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                 except ValueError:
                     storage_account_type = parts[1]
                     if parts[1].lower() not in storage_account_types_list:
-                        raise CLIError("usage error: {} is an invalid target region argument. The second part is "
+                        raise UsageError("{} is an invalid target region argument. The second part is "
                                        "neither an integer replica count or a valid storage account type. "
                                        "Storage account types must be one of {}."
                                        .format(t, storage_account_types_str))
@@ -1613,11 +1614,11 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     replica_count = int(parts[1])   # raises ValueError if this is not a replica count, try other order.
                     storage_account_type = parts[2]
                     if storage_account_type not in storage_account_types_list:
-                        raise CLIError("usage error: {} is an invalid target region argument. The third part is "
+                        raise UsageError("{} is an invalid target region argument. The third part is "
                                        "not a valid storage account type. Storage account types must be one of {}."
                                        .format(t, storage_account_types_str))
                 except ValueError:
-                    raise CLIError("usage error: {} is an invalid target region argument. "
+                    raise UsageError("{} is an invalid target region argument. "
                                    "The second part must be a valid integer replica count.".format(t))
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
@@ -1636,7 +1637,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     data_disk_images = terms[1:]
                     data_disk_images_len = len(data_disk_images)
                     if data_disk_images_len % 2 != 0:
-                        raise CLIError('usage error: LUN and disk encryption set for data disk should appear '
+                        raise UsageError('LUN and disk encryption set for data disk should appear '
                                        'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
                     data_disk_image_encryption_list = []
                     for j in range(int(data_disk_images_len / 2)):
@@ -1691,9 +1692,9 @@ def _validate_vmss_update_terminate_notification_related(cmd, namespace):  # pyl
     If enable_terminate_notification is true, must specify terminate_notification_time
     """
     if namespace.enable_terminate_notification is False and namespace.terminate_notification_time is not None:
-        raise CLIError("usage error: please enable --enable-terminate-notification")
+        raise UsageError("please enable --enable-terminate-notification")
     if namespace.enable_terminate_notification is True and namespace.terminate_notification_time is None:
-        raise CLIError("usage error: please set --terminate-notification-time")
+        raise UsageError("please set --terminate-notification-time")
     _validate_vmss_terminate_notification(cmd, namespace)
 
 
@@ -1708,16 +1709,16 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.automatic_repairs_grace_period is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
-            raise CLIError("usage error: --load-balancer and --health-probe are required "
+            raise UsageError("--load-balancer and --health-probe are required "
                            "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
-        raise CLIError("usage error: please enable --enable-automatic-repairs")
+        raise UsageError("please enable --enable-automatic-repairs")
     if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+        raise UsageError("please set --automatic-repairs-grace-period")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 

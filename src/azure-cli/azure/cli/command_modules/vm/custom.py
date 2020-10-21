@@ -21,6 +21,7 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import UsageError
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
 
@@ -302,7 +303,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_name)
 
     if upload_size_bytes is not None and for_upload is not True:
-        raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
+        raise UsageError('--upload-size-bytes should be used together with --for-upload')
 
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
@@ -318,7 +319,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                                              disk_version)
                 image_reference = response.id
             else:  # error
-                raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
+                raise UsageError('--image-reference should be ID or URN (publisher:offer:sku:version).')
         # image_reference is an ID now
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:
@@ -337,7 +338,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                                  logical_sector_size=logical_sector_size)
 
     if size_gb is None and upload_size_bytes is None and (option == DiskCreateOption.empty or for_upload):
-        raise CLIError('usage error: --size-gb or --upload-size-bytes required to create an empty disk')
+        raise UsageError('--size-gb or --upload-size-bytes required to create an empty disk')
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         disk_encryption_set = resource_id(
@@ -418,7 +419,7 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
     if disk_encryption_set is not None:
         if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
                 encryption_type != 'EncryptionAtRestWithCustomerKey':
-            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
+            raise UsageError('Please set --encryption-type to EncryptionAtRestWithCustomerKey')
         if not is_valid_resource_id(disk_encryption_set):
             disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -547,7 +548,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
 
     if disk_encryption_set is not None and encryption_type is None:
-        raise CLIError('usage error: Please specify --encryption-type.')
+        raise UsageError('Please specify --encryption-type.')
     if encryption_type is not None:
         encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
     else:
@@ -589,7 +590,7 @@ def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryptio
     if disk_encryption_set is not None:
         if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
                 encryption_type != 'EncryptionAtRestWithCustomerKey':
-            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
+            raise UsageError('Please set --encryption-type to EncryptionAtRestWithCustomerKey')
         if not is_valid_resource_id(disk_encryption_set):
             disk_encryption_set = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
@@ -975,7 +976,7 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
         return client.global_schedules.delete(resource_group_name, name)
 
     if time is None:
-        raise CLIError('usage error: --time is a required parameter')
+        raise UsageError('--time is a required parameter')
     daily_recurrence = {'time': time}
     notification_settings = None
     if webhook:
@@ -1777,10 +1778,10 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
 def _terms_prepare(cmd, urn, publisher, offer, plan):
     if urn:
         if any([publisher, offer, plan]):
-            raise CLIError('usage error: If using --urn, do not use any of --plan, --offer, --publisher.')
+            raise UsageError('If using --urn, do not use any of --plan, --offer, --publisher.')
         terms = urn.split(':')
         if len(terms) != 4:
-            raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+            raise UsageError('urn should be in the format of publisher:offer:sku:version.')
         publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
         if not image.plan:
@@ -1788,8 +1789,8 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
         plan = image.plan.name
     else:
         if not all([publisher, offer, plan]):
-            raise CLIError(
-                'usage error: If not using --urn, all of --plan, --offer and --publisher should be provided.')
+            raise UsageError(
+                'If not using --urn, all of --plan, --offer and --publisher should be provided.')
     return publisher, offer, plan
 
 
@@ -2038,7 +2039,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     if not _is_linux_os(vm):
         certificate_store = certificate_store or 'My'
     elif certificate_store:
-        raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
+        raise UsageError('--certificate-store is only applicable on Windows VM')
     vault_cert = VaultCertificate(certificate_url=certificate, certificate_store=certificate_store)
     vault_secret_group = next((x for x in vm.os_profile.secrets
                                if x.source_vault and x.source_vault.id.lower() == keyvault.lower()), None)
@@ -2575,7 +2576,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
     elif orchestration_mode.lower() == vm_str.lower():
         if platform_fault_domain_count is None:
-            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
+            raise UsageError("--platform-fault-domain-count is required in VM mode")
         vmss_resource = {
             'type': 'Microsoft.Compute/virtualMachineScaleSets',
             'name': vmss_name,
@@ -2595,7 +2596,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 'id': proximity_placement_group
             }
     else:
-        raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
+        raise UsageError('--orchestration-mode (ScaleSet | VM)')
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
@@ -3205,7 +3206,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                 key, value = item.split('=', 1)
                 feature_list.append(GalleryImageFeature(name=key, value=value))
             except ValueError:
-                raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+                raise UsageError('--features KEY=VALUE [KEY=VALUE ...]')
 
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
@@ -3250,7 +3251,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
         if managed_image is None and os_snapshot is None:
-            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
+            raise UsageError('Please provide --managed-image or --os-snapshot')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -3261,10 +3262,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
         if data_snapshot_luns and not data_snapshots:
-            raise CLIError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
+            raise UsageError('--data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
             if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
-                raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
+                raise UsageError('Length of --data-snapshots and --data-snapshot-luns should be equal.')
             if not data_snapshot_luns:
                 data_snapshot_luns = [i for i in range(len(data_snapshots))]
             data_disk_images = []
@@ -3277,7 +3278,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                      storage_profile=storage_profile)
     else:
         if managed_image is None:
-            raise CLIError('usage error: Please provide --managed-image')
+            raise UsageError('Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
     return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
@@ -3328,7 +3329,7 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
 
     if ppg_type and ppg_type not in choices:
         logger.info("Valid choices: %s", str(choices))
-        raise CLIError("Usage error: invalid value for --type/-t")
+        raise UsageError("invalid value for --type/-t")
 
     ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
                                          location=location, tags=(tags or {}))

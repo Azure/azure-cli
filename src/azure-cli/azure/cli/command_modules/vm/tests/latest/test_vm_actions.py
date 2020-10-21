@@ -305,7 +305,7 @@ class TestActions(unittest.TestCase):
 
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
+        self.assertTrue("'--role reader' is not applicable as the '--scope' is "
                         "not provided" in str(err.exception))
 
         # check throw on : az vm/vmss create --scope "some scope"
@@ -314,7 +314,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = 'foo-scope'
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
+        self.assertTrue('--assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
         # check throw on : az vm/vmss create --role "reader"
         np_mock = mock.MagicMock()
@@ -322,7 +322,7 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(cmd, np_mock)
-        self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
+        self.assertTrue('--assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
         # check we set right role id
         np_mock = mock.MagicMock()

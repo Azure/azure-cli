@@ -8,6 +8,7 @@ from enum import Enum
 
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import UsageError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -399,8 +400,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         data_disks = [v for k, v in disk_info.items() if k != 'os']
         if data_disk_encryption_sets:
             if len(data_disk_encryption_sets) != len(data_disks):
-                raise CLIError(
-                    'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
+                raise UsageError(
+                    'Number of --data-disk-encryption-sets mismatches with number of data disks.')
             for i, data_disk in enumerate(data_disks):
                 data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
@@ -781,18 +782,18 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     data_disks = [v for k, v in disk_info.items() if k != 'os']
     if data_disk_encryption_sets:
         if len(data_disk_encryption_sets) != len(data_disks):
-            raise CLIError(
-                'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
+            raise UsageError(
+                'Number of --data-disk-encryption-sets mismatches with number of data disks.')
         for i, data_disk in enumerate(data_disks):
             data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
     if data_disk_iops:
         if len(data_disk_iops) != len(data_disks):
-            raise CLIError('usage error: Number of --data-disk-iops mismatches with number of data disks.')
+            raise UsageError('Number of --data-disk-iops mismatches with number of data disks.')
         for i, data_disk in enumerate(data_disks):
             data_disk['diskIOPSReadWrite'] = data_disk_iops[i]
     if data_disk_mbps:
         if len(data_disk_mbps) != len(data_disks):
-            raise CLIError('usage error: Number of --data-disk-mbps mismatches with number of data disks.')
+            raise UsageError('Number of --data-disk-mbps mismatches with number of data disks.')
         for i, data_disk in enumerate(data_disks):
             data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:

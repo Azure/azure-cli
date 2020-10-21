@@ -14,6 +14,8 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import UsageError
+
 logger = get_logger(__name__)
 
 
@@ -227,7 +229,7 @@ def normalize_disk_info(image_data_disks=None,
     if is_lv_size:
         for v in info.values():
             if v.get('caching', 'None').lower() != 'none':
-                raise CLIError('usage error: for Lv series of machines, "None" is the only supported caching mode')
+                raise UsageError('for Lv series of machines, "None" is the only supported caching mode')
 
     result_info = {'os': info['os']}
 
@@ -266,7 +268,7 @@ def update_disk_caching(model, caching_settings):
     else:
         for x in caching_settings:
             if '=' not in x:
-                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+                raise UsageError("please use 'LUN=VALUE' to configure caching on individual disk")
             lun, value = x.split('=', 1)
             lun = lun.lower()
             lun = int(lun) if lun != 'os' else lun
@@ -300,7 +302,7 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
     else:
         for x in write_accelerator_settings:
             if '=' not in x:
-                raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
+                raise UsageError("please use 'LUN=VALUE' to configure write accelerator"
                                " on individual disk")
             lun, value = x.split('=', 1)
             lun = lun.lower()

@@ -24,6 +24,7 @@ from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
+from azure.cli.core.azclierror import UsageError
 from azure.cli.core.commands import cached_get, cached_put
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
@@ -326,7 +327,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     if len(outputs) != 1:
         err = "Supplied outputs: {}".format(outputs)
         logger.debug(err)
-        raise CLIError("Usage error: must supply exactly one destination type to add. Supplied {}".format(len(outputs)))
+        raise UsageError("must supply exactly one destination type to add. Supplied {}".format(len(outputs)))
 
     if namespace.managed_image:
         if not is_valid_resource_id(namespace.managed_image):
@@ -340,7 +341,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     if namespace.gallery_image_definition:
         if not is_valid_resource_id(namespace.gallery_image_definition):
             if not namespace.gallery_name:
-                raise CLIError("Usage error: gallery image definition is a name and not an ID.")
+                raise UsageError("gallery image definition is a name and not an ID.")
 
             namespace.gallery_image_definition = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
@@ -350,7 +351,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
             )
 
     if namespace.is_vhd and not namespace.output_name:
-        raise CLIError("Usage error: If --is-vhd is used, a run output name must be provided via --output-name.")
+        raise UsageError("If --is-vhd is used, a run output name must be provided via --output-name.")
 
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
     location_names = [location.name for location in subscription_locations]
@@ -432,7 +433,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         template_source = ImageTemplatePlatformImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.ISO_URI:
         # It was supported before but is removed in the current service version.
-        raise CLIError('usage error: Source type ISO URI is not supported.')
+        raise UsageError('Source type ISO URI is not supported.')
     elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
         template_source = ImageTemplateManagedImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.SIG_VERSION:
