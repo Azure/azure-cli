@@ -317,12 +317,13 @@ class Profile:
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
+                from .azclierror import AzureResponseError
                 try:
                     msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                except AzureResponseError as ex:
+                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
                         logger.info('Sniff: not an MSI client id')
                     else:
                         raise
@@ -332,8 +333,8 @@ class Profile:
                         identity_type = MsiAccountTypes.user_assigned_object_id
                         msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
-                    except HTTPError as ex:
-                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                    except AzureResponseError as ex:
+                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
                             logger.info('Sniff: not an MSI object id')
                         else:
                             raise
