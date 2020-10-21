@@ -1625,6 +1625,19 @@ type: group
 short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs access remove-recursive'] = """
+type: command
+short-summary: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+parameters:
+    - name: --acl
+      short-summary: Remove POSIX access control rights on files and directories. The value is a comma-separated 
+        list of access control entries. Each access control entry (ACE) consists of a scope, a type, and a user or
+        group identifier in the format "[scope:][type]:[id]".
+examples:
+    - name: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access remove-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access set'] = """
 type: command
 short-summary: Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
@@ -1671,12 +1684,28 @@ examples:
       text: az storage fs access set --group 68390a19-a897-236b-b453-488abf67b4dc -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
 """
 
+helps['storage fs access set-recursive'] = """
+type: command
+short-summary: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access set-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923:rwx" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access show'] = """
 type: command
 short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
 examples:
     - name: Show the access control properties of a path.
       text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs access update-recursive'] = """
+type: command
+short-summary: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access update-recursive --acl "user::r-x" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage fs create'] = """

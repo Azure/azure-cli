@@ -1560,6 +1560,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['set-recursive', 'update-recursive', 'remove-recursive']:
         with self.argument_context('storage fs access {}'.format(item)) as c:
             c.register_fs_directory_arguments()
+            c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
+                       'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
+                       'format "[scope:][type]:[id]:[permissions]".')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
