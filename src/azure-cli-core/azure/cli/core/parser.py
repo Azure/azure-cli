@@ -223,7 +223,7 @@ class AzCliCommandParser(CLICommandParser):
     def enable_autocomplete(self):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
-                                 default_completer=lambda _: ())
+                                 default_completer=lambda *args, **kw: ())
 
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.
