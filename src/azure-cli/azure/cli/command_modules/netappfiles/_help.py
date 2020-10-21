@@ -219,7 +219,7 @@ parameters:
     short-summary: The name of the ANF account
   - name: --name --pool-name -n -name
     short-summary: The name of the ANF backup policy
-    - name: --daily-backups-to-keep
+  - name: --daily-backups-to-keep
     short-summary: Daily backups count to keep
   - name: --weekly-backups-to-keep
     short-summary: Weekly backups count to keep
@@ -252,7 +252,7 @@ parameters:
   - name: --service-level
     short-summary: The service level for the ANF pool
   - name: --qos-ype
-    short-summary: The qos type of the ANF pool. Possible values include: 'Auto', 'Manual'. Default value: "Auto" 
+    short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
@@ -314,7 +314,7 @@ parameters:
   - name: --service-level
     short-summary: The service level for the ANF pool
   - name: --qos-type
-    short-summary: The qos type of the ANF pool. Possible values include: 'Auto', 'Manual'. Default value: "Auto" 
+    short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
@@ -456,7 +456,7 @@ parameters:
   - name: --snapshot-directory-visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
   - name: --security-style
-    short-summary: The security style of volume. Possible values include: 'ntfs', 'unix'
+    short-summary: The security style of volume
   - name: --kerberos5-read-only
     short-summary: Kerberos5 Read only access
   - name: --kerberos5-read-write
