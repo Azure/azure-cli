@@ -585,7 +585,7 @@ parameters:
   - name: --kerberos5p-read-write
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
-    short-summary: Has root access to volume. Default value: True
+    short-summary: Has root access to volume
 examples:
   - name: Create an ANF volume
     text: >
