@@ -354,6 +354,21 @@ short-summary: Create a Managed Certificate for a hostname in a function app.
 examples:
   - name: Create a Managed Certificate for cname.mycustomdomain.com.
     text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
+  - name: Create a Managed Certificate for $fqdn.
+    text: az functionapp config ssl create --resource-group MyResourceGroup --name MyFunctionApp --hostname $fqdn
+"""
+
+helps['functionapp config ssl sync'] = """
+type: command
+short-summary: Sync a single imported certificate on an app with the current version in KeyVault, or sync all certificates in that KeyVault. The KeyVault can be provided as the vault name, or Resource Id if it is in a different subscription.
+examples:
+  - name: Sync all certificates imported to the app that are backed up by the KeyVault name provided
+    text: az functionapp config ssl sync --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVaultName
+  - name: Sync just the certificate with the thumbprint provided with the version in the KeyVault
+    text: az functionapp config ssl sync --resource-group MyResourceGroup --name MyFunctionApp --thumbprint CertificateThumbprint --key-vault MyKeyVaultName
+  - name: Sync all certificates backed up by the KeyVault with the Resource ID provided
+    text: az functionapp config ssl sync --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]'
+
 """
 
 helps['functionapp cors'] = """
@@ -1346,6 +1361,19 @@ short-summary: Create a Managed Certificate for a hostname in a webapp app.
 examples:
   - name: Create a Managed Certificate for cname.mycustomdomain.com.
     text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
+"""
+
+helps['webapp config ssl sync'] = """
+type: command
+short-summary: Sync a single imported certificate on an app with the current version in KeyVault, or sync all certificates in that KeyVault. The KeyVault can be provided as the vault name, or Resource Id if it is in a different subscription.
+examples:
+  - name: Sync all certificates imported to the app that are backed up by the KeyVault name provided
+    text: az webapp config ssl sync --resource-group MyResourceGroup --name MyWebApp --key-vault MyKeyVaultName
+  - name: Sync just the certificate with the thumbprint provided with the version in the KeyVault
+    text: az webapp config ssl sync --resource-group MyResourceGroup --name MyWebApp --thumbprint CertificateThumbprint --key-vault MyKeyVaultName
+  - name: Sync all certificates backed up by the KeyVault with the Resource ID provided
+    text: az webapp config ssl sync --resource-group MyResourceGroup --name MyWebApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]'
+
 """
 
 helps['webapp config storage-account'] = """

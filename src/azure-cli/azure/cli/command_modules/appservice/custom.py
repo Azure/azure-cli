@@ -2420,7 +2420,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
         key_vaults = kv_client.vaults.list_by_subscription()
         for kv in key_vaults:
-            if key_vault == kv.name:
+            if key_vault.lower() == kv.name.lower():
                 kv_id = kv.id
                 break
     else:
@@ -2475,14 +2475,73 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
 
-def sync_kv_cert(cmd, resource_group_name, name, key_vault, key_vault_certificate_name):
+
+def sync_kv_cert(cmd, resource_group_name, name, key_vault, thumbprint=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        err_msg = "'{}' app doesn't exist in resource group {}".format(name, resource_group_name)
+        raise ResourceNotFoundError(err_msg)
     server_farm_id = webapp.server_farm_id
     location = webapp.location
+
+    key_vault_id = None
+    if not is_valid_resource_id(key_vault):
+        kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+        key_vaults = kv_client.vaults.list_by_subscription()
+        for kv in key_vaults:
+            if key_vault.lower() == kv.name.lower():
+                key_vault_id = kv.id
+                break
+    else:
+        key_vault_id = key_vault
+
+    if thumbprint:
+        certs = list(client.certificates.list_by_resource_group(resource_group_name,
+                                                                filter=f"ServerFarmId eq {'server_farm_id'}"))
+        cert = None
+        for c in certs:
+            if (c.thumbprint == thumbprint and c.key_vault_id.lower() == key_vault_id.lower()):
+                cert = c
+
+        if cert is None:
+            no_cert_msg = "no certificate with that thumbprint found associated with that site"
+            logger.warning(no_cert_msg)
+            return
+
+        kv_cert_def = Certificate(location=location, key_vault_id=cert.key_vault_id, password='',
+                                  key_vault_secret_name=cert.key_vault_secret_name, server_farm_id=server_farm_id)
+
+        return client.certificates.create_or_update(name=cert.name, resource_group_name=resource_group_name,
+                                                    certificate_envelope=kv_cert_def)
+
+    certs = list(client.certificates.list_by_resource_group(resource_group_name,
+                                                            filter=f"ServerFarmId eq {'server_farm_id'}"))
+    if certs is None:
+        no_certs_msg = "There are no certs associated with this website to sync from this keyvault"
+        logger.warning(no_certs_msg)
+        return
+
+    num_synced_certs = 0
+    for cert in certs:
+        if cert.key_vault_id.lower() == key_vault_id.lower():
+            kv_cert_def = Certificate(location=location, key_vault_id=cert.key_vault_id, password='',
+                                      key_vault_secret_name=cert.key_vault_secret_name,
+                                      server_farm_id=server_farm_id)
+            old_thumbprint = cert.thumbprint
+            new_cert = client.certificates.create_or_update(name=cert.name,
+                                                            resource_group_name=resource_group_name,
+                                                            certificate_envelope=kv_cert_def)
+            new_thumbprint = new_cert.thumbprint
+            if new_thumbprint != old_thumbprint:
+                logger.warning("Updated a cert from thumbprint: %s to %s", old_thumbprint, new_thumbprint)
+                logger.warning(new_cert)
+                num_synced_certs = num_synced_certs + 1
+    if num_synced_certs == 0:
+        logger.warning("No certificates needed to be synced")
+        return
+    return
 
 
 def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):

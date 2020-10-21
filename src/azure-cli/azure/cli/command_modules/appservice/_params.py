@@ -231,6 +231,9 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+        with self.argument_context(scope + ' config ssl sync') as c:
+            c.argument('thumbprint', help='The current thumbprint of the certificate to be synced')
+            c.argument('key_vault', help='The name or resource ID of the Key Vault backing this cert, where the data will be synced from')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
         with self.argument_context(scope + ' config ssl show') as c:
