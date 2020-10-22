@@ -17,13 +17,13 @@ helps['billing account list'] = """
     type: command
     short-summary: "Lists the billing accounts that a user has access to."
     examples:
-      - name: BillingAccountsList
+      - name: List billing accounts
         text: |-
                az billing account list
-      - name: BillingAccountsListWithExpand
+      - name: List billing account with desired expanded arguments
         text: |-
                az billing account list --expand "soldTo,billingProfiles,billingProfiles/invoiceSections"
-      - name: BillingAccountsListWithExpandForEnrollmentDetails
+      - name: List billing account with desired expanded arguments
         text: |-
                az billing account list --expand "enrollmentDetails,departments,enrollmentAccounts"
 """
@@ -32,11 +32,11 @@ helps['billing account show'] = """
     type: command
     short-summary: "Gets a billing account by its ID."
     examples:
-      - name: BillingAccountWithExpand
+      - name: Show an billing acount with expanded properties
         text: |-
                az billing account show --expand "soldTo,billingProfiles,billingProfiles/invoiceSections" --name \
 "{billingAccountName}"
-      - name: BillingAccounts
+      - name: Show an billing acount with default properties
         text: |-
                az billing account show --name "{billingAccountName}"
 """
@@ -51,20 +51,6 @@ The operation is supported only for billing accounts with agreement type Microso
         long-summary: |
             Usage: --sold-to first-name=XX last-name=XX company-name=XX address-line1=XX address-line2=XX \
 address-line3=XX city=XX district=XX region=XX country=XX postal-code=XX email=XX phone-number=XX
-
-            first-name: First name.
-            last-name: Last name.
-            company-name: Company name.
-            address-line1: Required. Address line 1.
-            address-line2: Address line 2.
-            address-line3: Address line 3.
-            city: Address city.
-            district: Address district.
-            region: Address region.
-            country: Required. Country code uses ISO2, 2-digit format.
-            postal-code: Postal code.
-            email: Email address.
-            phone-number: Phone number.
     examples:
       - name: UpdateBillingAccount
         text: |-
@@ -100,31 +86,31 @@ Microsoft Customer Agreement."
 
 helps['billing profile'] = """
     type: group
-    short-summary: billing profile
+    short-summary: Manage billing profile of billing account
 """
 
 helps['billing profile list'] = """
     type: command
-    short-summary: "Lists the billing profiles that a user has access to. The operation is supported for billing \
+    short-summary: "List the billing profiles that a user has access to. The operation is supported for billing \
 accounts with agreement type Microsoft Customer Agreement or Microsoft Partner Agreement."
     examples:
-      - name: BillingProfilesListByBillingAccount
+      - name: List billing profiles with default properties
         text: |-
                az billing profile list --account-name "{billingAccountName}"
-      - name: BillingProfilesListWithExpand
+      - name: List billing profiles with desired expanded properties
         text: |-
                az billing profile list --expand "invoiceSections" --account-name "{billingAccountName}"
 """
 
 helps['billing profile show'] = """
     type: command
-    short-summary: "Gets a 1111 billing profile by its ID. The operation is supported for billing accounts with agreement \
+    short-summary: "Get a billing profile by its ID. The operation is supported for billing accounts with agreement \
 type Microsoft Customer Agreement or Microsoft Partner Agreement."
     examples:
-      - name: BillingProfile
+      - name: Show a billing profile with default properties
         text: |-
                az billing profile show --account-name "{billingAccountName}" --name "{billingProfileName}"
-      - name: BillingProfileWithExpand
+      - name: Show a billing profile with expaned properties
         text: |-
                az billing profile show --expand "invoiceSections" --account-name "{billingAccountName}" --name \
 "{billingProfileName}"
@@ -140,30 +126,14 @@ agreement type Microsoft Customer Agreement or Microsoft Partner Agreement."
         long-summary: |
             Usage: --bill-to first-name=XX last-name=XX company-name=XX address-line1=XX address-line2=XX \
 address-line3=XX city=XX district=XX region=XX country=XX postal-code=XX email=XX phone-number=XX
-
-            first-name: First name.
-            last-name: Last name.
-            company-name: Company name.
-            address-line1: Required. Address line 1.
-            address-line2: Address line 2.
-            address-line3: Address line 3.
-            city: Address city.
-            district: Address district.
-            region: Address region.
-            country: Required. Country code uses ISO2, 2-digit format.
-            postal-code: Postal code.
-            email: Email address.
-            phone-number: Phone number.
       - name: --enabled-azure-plans
         short-summary: "Information about the enabled azure plans."
         long-summary: |
             Usage: --enabled-azure-plans sku-id=XX
-
             sku-id: The sku id.
-
             Multiple actions can be specified by using more than one --enabled-azure-plans argument.
     examples:
-      - name: CreateBillingProfile
+      - name: Create a billing profile
         text: |-
                az billing profile create --account-name "{billingAccountName}" --name "{billingProfileName}" --bill-to \
 address-line1="Test Address 1" city="Redmond" country="US" first-name="Test" last-name="User" postal-code="12345" \

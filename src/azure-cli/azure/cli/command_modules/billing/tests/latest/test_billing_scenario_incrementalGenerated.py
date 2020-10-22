@@ -9,7 +9,7 @@
 # --------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 from .. import try_manual, raise_if, calc_coverage
 
 
@@ -515,7 +515,7 @@ def step__products_get_productslistbyinvoicesection(test):
 
 # EXAMPLE: /Products/patch/UpdateBillingProperty
 @try_manual
-def step__products_patch_updatebillingproperty(test):
+def step__products_patch_updatebillingproperty(test, checks=None):
     test.cmd('az billing product update '
              '--account-name "{myBillingAccount}" '
              '--auto-renew "Off" '
@@ -599,7 +599,9 @@ def call_scenario(test):
     step__billingsubscriptions_get(test)
     step__billingsubscriptions_get_billingsubscription(test)
     step__billingsubscriptions_get2(test)
-    step__billingsubscriptions_get3(test)
+    step__billingsubscriptions_get3(test, checs=[
+        self.check()
+    ])
     step__billingsubscriptions_get4(test)
     step__billingsubscriptions_patch(test)
     step__invoices_get_billingaccountinvoiceslist(test)
@@ -691,6 +693,7 @@ class BillingScenarioTest(ScenarioTest):
         raise_if()
 
 
+@record_only()
 @try_manual
 class BillingAccountScenarioTest(ScenarioTest):
     def test_billing_account_list_and_show(self):
@@ -722,3 +725,28 @@ class BillingAccountScenarioTest(ScenarioTest):
 
         # # show and check for updated properties
         # step__billingaccounts_get_billingaccountwithexpand(self)
+
+
+class BillingProfileScenarioTest(ScenarioTest):
+    def test_biiling_profile_list_and_show(self):
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31"   # This name is give by service team
+        })
+
+        # list billing profiles under a certain billing account
+        step__billingprofiles_get(self)
+
+        # list billing profiles with expanded arguments
+        step__billingprofiles_get2(self)
+
+        self.kwargs.update({
+            "myBillingProfile": "DN7P-GKOI-BG7-AJ4D-SGB"
+        })
+
+        # show a billing profile with default properties
+        step__billingprofiles_get_billingprofile(self)
+        # show a billing profile with expaned properties
+        step__billingprofiles_get_billingprofilewithexpand(self)
+
+    def test_billing_profile_create_and_update(self):
+        pass
