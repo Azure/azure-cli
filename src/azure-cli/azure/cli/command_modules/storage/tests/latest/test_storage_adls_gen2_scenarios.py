@@ -76,7 +76,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(16)
 
         # Prepare files
-        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {} '.format(
+        self.oauth_cmd('storage fs directory create -n "{}" -f {} --account-name {} '.format(
             dir0, filesystem, storage_account))
         self.oauth_cmd('storage fs directory create -n "{}" -f {} --account-name {} '.format(
             subdir0, filesystem, storage_account))
