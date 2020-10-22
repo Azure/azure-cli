@@ -200,7 +200,7 @@ parameters:
   - name: --name --backup-policy-name -n -name
     short-summary: The name of the ANF backup policy
   - name: --location -l
-   short-summary: The location of the backup
+    short-summary: The location of the backup
   - name: --daily-backups
     short-summary: Daily backups count to keep
   - name: --weekly-backups
