@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails
 
@@ -35,6 +35,14 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
                      tags=None, no_wait=False):
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
+
+
+def get_resource_group_by_workspace_name(cmd, client, workspace_name):
+    try:
+        return next(workspace for workspace in list_workspaces(cmd, client)
+                    if workspace.name == workspace_name).managed_resource_group_name
+    except StopIteration:
+        raise CLIError('A workspace with name {} does not exist.'.format(workspace_name))
 
 
 def custom_check_name_availability(cmd, client, name):
