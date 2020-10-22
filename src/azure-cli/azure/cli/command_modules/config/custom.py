@@ -12,11 +12,6 @@ import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
 
-# Put a section or key (section.name) in the set to allow recording the config
-# values in the section or for the key
-telemetry_allowed_sections_or_keys = {'auto-upgrade', 'extension', 'core', 'logging.enable_log_file',
-                                      'output.show_survey_link'}
-
 
 def _normalize_config_value(value):
     if value:
@@ -27,7 +22,7 @@ def _normalize_config_value(value):
 def config_set(cmd, key_value=None, local=False):
     if key_value:
         with ScopedConfig(cmd.cli_ctx.config, local):
-            telemetry_content = []
+            telemetry_contents = []
             for kv in key_value:
                 # core.no_color=true
                 parts = kv.split('=', 1)
@@ -44,8 +39,8 @@ def config_set(cmd, key_value=None, local=False):
                 name = parts[1]
 
                 cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
-                telemetry_content.append((key, section, value))
-            telemetry.set_debug_info('ConfigSet', telemetry_content)
+                telemetry_contents.append((key, section, value))
+            telemetry.set_debug_info('ConfigSet', telemetry_contents)
 
 
 def config_get(cmd, key=None, local=False):
