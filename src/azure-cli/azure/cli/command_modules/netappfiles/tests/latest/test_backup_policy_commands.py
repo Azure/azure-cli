@@ -20,8 +20,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         enabled = True
         tags = "Tag1=Value1 Tag2=Value2"
         backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s "
-                                 "--location %s --daily-backups-to-keep %s --weekly-backups-to-keep %s "
-                                 "--monthly-backups-to-keep %s --enabled %s --tags %s" %
+                                 "--location %s --daily-backups %s --weekly-backups %s "
+                                 "--monthly-backups %s --enabled %s --tags %s" %
                                  (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
                                   weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
         assert backup_policy['name'] == account_name + "/" + backup_policy_name
@@ -75,7 +75,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                            self.create_random_name(prefix='cli', length=16)]
         for backup_policy_name in backup_policies:
             self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                     "--daily-backups-to-keep 1" % (account_name, backup_policy_name, LOCATION))
+                     "--daily-backups 1" % (account_name, backup_policy_name, LOCATION))
 
         # validate that both backup policies exist
         backup_policy_list = self.cmd("az netappfiles account backup-policy list -g {rg} -a '%s'" %
@@ -101,7 +101,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         # create backup policy
         backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
         self.cmd("az netappfiles account backup-policy create -g {rg} -a %s --backup-policy-name %s -l %s "
-                 "--daily-backups-to-keep 1" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
+                 "--daily-backups 1" % (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
         # get backup policy by name and validate
         backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
