@@ -40,7 +40,7 @@ def billing_invoice_download(client,
     )
 
 
-def billing_invoice_show(client, account_name=None, name=None, by_subscription=None):
+def billing_invoice_show(client, name, account_name=None, by_subscription=None):
 
     if account_name is not None and name is not None:
         return client.get(billing_account_name=account_name, invoice_name=name)
