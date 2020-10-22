@@ -93,6 +93,14 @@ def agentpool_output_format(result):
     return _output_format(result, _agentpool_format_group)
 
 
+def connected_acr_output_format(result):
+    return _output_format(result, _connected_acr_format_group)
+
+
+def connected_acr_list_output_format(result):
+    return _output_format(result, _connected_acr_list_format_group)
+
+
 def helm_list_output_format(result):
     if isinstance(result, dict):
         obj_list = []
@@ -240,6 +248,29 @@ def _agentpool_format_group(item):
         ('STATE', _get_value(item, 'provisioningState')),
         ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId')),
         ('OS', _get_value(item, 'os'))
+    ])
+
+
+def _connected_acr_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('STATUS', _get_value(item, 'status')),
+        ('PARENT', _get_value(item, 'parent')),
+        ('LOGIN NAME', _get_value(item, 'loginName')),
+        ('AUTO UPDATE', _get_value(item, 'autoUpdate')),
+        ('LAST UPDATED', _get_value(item, 'lastUpdated')),
+        ('NEXT UPDATE', _get_value(item, 'nextUpdate')),
+        ('SYNC SCHEDULE', _get_value(item, 'syncSchedule')),
+        ('SYNC WINDOW', _get_value(item, 'syncWindow'))
+    ])
+
+def _connected_acr_list_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('STATUS', _get_value(item, 'status')),
+        ('PARENT', _get_value(item, 'parent')),
+        ('LOGIN NAME', _get_value(item, 'loginName')),
+        ('AUTO UPDATE', _get_value(item, 'autoUpdate'))
     ])
 
 

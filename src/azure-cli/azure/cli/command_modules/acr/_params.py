@@ -381,6 +381,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('key_encryption_key', help="key vault key uri")
         c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
 
+    with self.argument_context('acr connected-acr') as c:
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='The name of the resource group where the Connected ACR registry will be created. Must be the same as the resource group for the --registry.', required=False)
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
+        c.argument('connected_acr', options_list=['--name', '-n'], help='Name for the Connected ACR. Name must start with a letter and contain only alphanumeric characters (including ‘_’) optionally separated by a ‘-’. 5 to 40 chars long. Name must be unique under the Cloud ACR hierarchy.', required=True)
+        c.argument('mode', options_list=['--mode', '-m'], type=int, help='Can be one of the two operating modes: registry or mirror.', required=False, default="registry")
+        c.argument('parent', options_list=['--parent', '-p'], type=int, help='The name of the parent ACR. If omitted, the cloud ACR will be assumed (the value from --registry).', required=False)
+        c.argument('repositories', options_list=['--repositories', '-t'], type=int, help='Specifies the repositories that need to be synched to the Connected ACR. It can include wildcards to select multiple repositories. It can be in the format [REPO01] [REPO02]...', required=True)
+        c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], type=int, help='Optional parameter to define the start of the synch schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online', required=False)
+        c.argument('sync_window', options_list=['--sync-window', '-w'], type=int, help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
+        c.argument('disable_auto_update', options_list=['--disable-auto-update', '-a'], type=int, help='Use to disable automatically updates during synch schedule.', required=False, arg_type=get_three_state_flag())
+        c.argument('next-update', options_list=['--next-update'], type=int, help='Optional ISO 8601 timestamp parameter used to specify when the next update for the instance will happen.', required=False)
+        c.argument('log_level', options_list=['--log-level'], type=int, help='Sets the log level for logging on the instance.', required=False, default="registry")
+        c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], type=int, help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+        c.argument('disable_sync_audit_logs', options_list=['--disable-sync-audit-logs'], type=int, help='Disables synchronization of audit logs. ', required=False, arg_type=get_three_state_flag())
 
 def _get_helm_default_install_location():
     exe_name = 'helm'
