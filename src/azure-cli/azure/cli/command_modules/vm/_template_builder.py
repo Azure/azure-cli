@@ -6,8 +6,6 @@
 
 from enum import Enum
 
-from knack.util import CLIError
-
 from azure.cli.core.azclierror import UsageError
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType

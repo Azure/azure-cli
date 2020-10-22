@@ -303,7 +303,7 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
         for x in write_accelerator_settings:
             if '=' not in x:
                 raise UsageError("please use 'LUN=VALUE' to configure write accelerator"
-                               " on individual disk")
+                                 " on individual disk")
             lun, value = x.split('=', 1)
             lun = lun.lower()
             lun = int(lun) if lun != 'os' else lun

@@ -1107,7 +1107,7 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
             raise UsageError('user assigned identity is only available under profile '
-                           'with minimum Compute API version of 2017-12-01')
+                             'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
                 raise UsageError("'--scope'/'--role' is only applicable when assign system identity")
@@ -1402,7 +1402,7 @@ def process_vmss_create_namespace(cmd, namespace):
         ]
         if any(param is not None for param in banned_params):
             raise UsageError('In VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
+                             'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         return
     validate_tags(namespace)
     if namespace.vm_sku is None:
@@ -1446,7 +1446,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
             raise UsageError("protection policies can only be applied to VM instances within a VMSS."
-                           " Please use --instance-id to specify a VM instance")
+                             " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
 # endregion
@@ -1523,7 +1523,7 @@ def process_image_create_namespace(cmd, namespace):
                     namespace.data_snapshots.append(source_snapshot)
         if not namespace.os_type:
             raise UsageError("os type is required to create the image, "
-                           "please specify '--os-type OS_TYPE'")
+                             "please specify '--os-type OS_TYPE'")
 
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
@@ -1604,9 +1604,9 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     storage_account_type = parts[1]
                     if parts[1].lower() not in storage_account_types_list:
                         raise UsageError("{} is an invalid target region argument. The second part is "
-                                       "neither an integer replica count or a valid storage account type. "
-                                       "Storage account types must be one of {}."
-                                       .format(t, storage_account_types_str))
+                                         "neither an integer replica count or a valid storage account type. "
+                                         "Storage account types must be one of {}."
+                                         .format(t, storage_account_types_str))
 
             # Region specified, but also replica count and storage account type
             elif len(parts) == 3:
@@ -1615,11 +1615,11 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     storage_account_type = parts[2]
                     if storage_account_type not in storage_account_types_list:
                         raise UsageError("{} is an invalid target region argument. The third part is "
-                                       "not a valid storage account type. Storage account types must be one of {}."
-                                       .format(t, storage_account_types_str))
+                                         "not a valid storage account type. Storage account types must be one of {}."
+                                         .format(t, storage_account_types_str))
                 except ValueError:
                     raise UsageError("{} is an invalid target region argument. "
-                                   "The second part must be a valid integer replica count.".format(t))
+                                     "The second part must be a valid integer replica count.".format(t))
 
             # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
             encryption = None
@@ -1638,7 +1638,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     data_disk_images_len = len(data_disk_images)
                     if data_disk_images_len % 2 != 0:
                         raise UsageError('LUN and disk encryption set for data disk should appear '
-                                       'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
+                                         'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
                     data_disk_image_encryption_list = []
                     for j in range(int(data_disk_images_len / 2)):
                         lun = data_disk_images[j * 2]
@@ -1710,7 +1710,7 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
     if namespace.automatic_repairs_grace_period is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise UsageError("--load-balancer and --health-probe are required "
-                           "when creating vmss with automatic repairs")
+                             "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
