@@ -819,6 +819,11 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
+        c.argument('partner_database_name',
+                   options_list=['--partner-database'],
+                   help='Name of the new replica.'
+                   ' If unspecified, defaults to the source database name.')
+
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type)
 
