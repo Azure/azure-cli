@@ -5,6 +5,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = "eastus2euap"
 
+
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_backup_policy_')
     def test_create_delete_backup_policies(self):

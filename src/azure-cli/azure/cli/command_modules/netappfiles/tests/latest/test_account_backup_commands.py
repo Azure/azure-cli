@@ -10,6 +10,7 @@ LOCATION = "southcentralus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
+
 class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, vnet_name, subnet_name):
         self.cmd("az network vnet create -n %s -g {rg} -l %s --address-prefix 10.5.0.0/16" %

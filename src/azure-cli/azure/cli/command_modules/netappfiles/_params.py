@@ -35,10 +35,15 @@ def load_arguments(self, _):
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
     with self.argument_context('netappfiles account backup-policy') as c:
-        c.argument('backup_policy_name', options_list=['--backup-policy-name'], help='The name of the backup policy', id_part='child_name_1')
+        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
+        c.argument('backup_policy_name', options_list=['--backup-policy-name', '--name', '-n'], help='The name of the backup policy', id_part='child_name_1')
         c.argument('daily_backups', options_list=['--daily-backups', '-d'], help='Daily backups count to keep', id_part=None)
         c.argument('weekly_backups', options_list=['--weekly-backups', '-w'], help='Weekly backups count to keep', id_part=None)
         c.argument('monthly_backups', options_list=['--monthly-backups', '-m'], help='Monthly backups count to keep', id_part=None)
+
+    with self.argument_context('netappfiles account backup') as c:
+        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
+        c.argument('backup-policy-name', options_list=['--name', '--backup-name', '-n'], id_part=None)
 
     load_additionalArguments(self, account_name_type, pool_name_type, volume_name_type)
 
@@ -94,7 +99,7 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('nfsv41', help="Indication that NFSv4.1 protocol is allowed", arg_type=get_three_state_flag())
 
     with self.argument_context('netappfiles volume backup') as c:
-        c.argument('backup_name', options_list=['--backup-name'], id_part='child_name_3')
+        c.argument('backup_name', options_list=['--backup-name', '-b'], id_part='child_name_3')
 
     with self.argument_context('netappfiles snapshot') as c:
         c.argument('account_name', account_name_type)
@@ -107,6 +112,7 @@ def load_additionalArguments(self, account_name_type, pool_name_type, volume_nam
         c.argument('volume_name', options_list=['--volume-name', '-v'], help='The name of the ANF volume', id_part=None)
 
     with self.argument_context('netappfiles snapshot policy') as c:
+        c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
         c.argument('snapshot_policy_name', options_list=['--name', '--snapshot-policy-name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
         c.argument('hourly_snapshots', options_list=['--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
         c.argument('daily_snapshots', options_list=['--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)
