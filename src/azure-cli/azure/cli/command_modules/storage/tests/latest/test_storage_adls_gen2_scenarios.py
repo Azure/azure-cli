@@ -66,12 +66,12 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         subdir1 = '/'.join([dir0, 'dir1'])
         subdir2 = '/'.join([dir0, 'dir2'])
 
-        file1 = os.path.join(subdir1, self.create_random_name(prefix="file1", length=12))
-        file2 = os.path.join(subdir1, self.create_random_name(prefix="file2", length=12))
-        file3 = os.path.join(subdir1, self.create_random_name(prefix="file3", length=12))
-        file4 = os.path.join(subdir2, self.create_random_name(prefix="file4", length=12))
-        file5 = os.path.join(subdir2, self.create_random_name(prefix="file5", length=12))
-        file6 = os.path.join(subdir2, self.create_random_name(prefix="file6", length=12))
+        file1 = '/'.join([subdir1, self.create_random_name(prefix="file1", length=12)])
+        file2 = '/'.join([subdir1, self.create_random_name(prefix="file2", length=12)])
+        file3 = '/'.join([subdir1, self.create_random_name(prefix="file3", length=12)])
+        file4 = '/'.join([subdir2, self.create_random_name(prefix="file4", length=12)])
+        file5 = '/'.join([subdir2, self.create_random_name(prefix="file5", length=12)])
+        file6 = '/'.join([subdir2, self.create_random_name(prefix="file6", length=12)])
 
         local_file = self.create_temp_file(16)
 
