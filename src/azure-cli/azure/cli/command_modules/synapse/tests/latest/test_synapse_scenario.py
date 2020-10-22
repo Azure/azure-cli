@@ -1069,6 +1069,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
 
+    @record_only()
     def test_integration_runtime(self):
         self.kwargs.update({
             'rg': 'rg',
@@ -1081,6 +1082,9 @@ class SynapseScenarioTests(ScenarioTest):
         # create integration runtime
         self.cmd(
             'az synapse integration-runtime create --resource-group {rg} --workspace-name {workspace} --name {name} --type {type}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
 
         # get integration runtime
         self.cmd(

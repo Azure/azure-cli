@@ -600,6 +600,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse notebook delete') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+
     # synapse integration runtime
     with self.argument_context('synapse integration-runtime show') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
