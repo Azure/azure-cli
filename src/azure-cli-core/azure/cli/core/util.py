@@ -126,9 +126,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = AzCLIErrorType(error_msg)
 
         elif isinstance(ex, HTTPError):
-            status_code = 'Unknown Code'
-            if ex.response and ex.response.status_code:
-                status_code = ex.response.status_code
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
