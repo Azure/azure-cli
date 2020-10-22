@@ -791,7 +791,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         skip_authorization_header = True
 
     # Handle User-Agent
-    agents = [get_az_user_agent()]
+    agents = [get_az_rest_user_agent()]
 
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
@@ -1073,6 +1073,17 @@ def get_az_user_agent():
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
     # if ENV_ADDITIONAL_USER_AGENT in os.environ:
     #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+
+    return ' '.join(agents)
+
+
+def get_az_rest_user_agent():
+    """Get User-Agent for az rest calls"""
+
+    agents = ['python/{}'.format(platform.python_version()),
+              '({})'.format(platform.platform()),
+              get_az_user_agent()
+              ]
 
     return ' '.join(agents)
 
