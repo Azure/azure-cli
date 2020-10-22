@@ -62,9 +62,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         filesystem = self.create_file_system(account_info)
 
         dir0 = self.create_random_name(prefix="dir0", length=12)
-        subdir0 = os.path.join(dir0, 'dir0')
-        subdir1 = os.path.join(dir0, 'dir1')
-        subdir2 = os.path.join(dir0, 'dir2')
+        subdir0 = '/'.join([dir0, 'dir0'])
+        subdir1 = '/'.join([dir0, 'dir1'])
+        subdir2 = '/'.join([dir0, 'dir2'])
 
         file1 = os.path.join(subdir1, self.create_random_name(prefix="file1", length=12))
         file2 = os.path.join(subdir1, self.create_random_name(prefix="file2", length=12))
