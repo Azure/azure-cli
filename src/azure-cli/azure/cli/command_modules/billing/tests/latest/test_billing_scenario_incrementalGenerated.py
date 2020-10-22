@@ -19,8 +19,6 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # Env setup
 @try_manual
 def setup(test):
-
-
     pass
 
 
@@ -752,6 +750,7 @@ class BillingProfileScenarioTest(ScenarioTest):
         # show that billing profile
         step__billingprofiles_get_billingprofile(self)
 
+
 @record_only()
 class BillingAccountScenarioTest(ScenarioTest):
     def test_billing_balance_show(self):
@@ -761,6 +760,7 @@ class BillingAccountScenarioTest(ScenarioTest):
             "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB"
         })
         step__availablebalances_get(self)
+
 
 @record_only()
 class BillingCustomerScenarioTest(ScenarioTest):
@@ -783,6 +783,7 @@ class BillingCustomerScenarioTest(ScenarioTest):
         step__customers_get_customer(self)
         step__customers_get_customerslistbybillingaccount(self)
 
+
 @record_only()
 class BillingPolicyScenarioTest(ScenarioTest):
 
@@ -800,6 +801,7 @@ class BillingPolicyScenarioTest(ScenarioTest):
 
         step__policies_showpolicybycustomer(self)
         step__policies_showpolicybyprofile(self)
+
 
 @record_only()
 class BillingPropertyScenarioTest(ScenarioTest):
@@ -823,6 +825,7 @@ class BillingInvoiceScenarioTest(ScenarioTest):
         # step__invoices_get2(self)
         # list by billing account and billing profile
         # step__invoices_get_invoiceslistbybillingprofile(self)
+
 
 @record_only()
 class BillingInvoiceSectionScenarioTest(ScenarioTest):

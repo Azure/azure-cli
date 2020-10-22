@@ -23,7 +23,6 @@ class AddSoldTo(argparse.Action):
         if hasattr(namespace, 'bill_to'):
             namespace.bill_to = action
 
-
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
             properties = defaultdict(list)
