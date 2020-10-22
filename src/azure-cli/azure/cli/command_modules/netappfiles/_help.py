@@ -169,7 +169,7 @@ parameters:
 examples:
   - name: Get an ANF account backup
     text: >
-        az netappfiles account backup show -g mygroup --account-name myaccountname --name mybackuppolicyname
+        az netappfiles account backup show -g mygroup --account-name myaccountname --backup-name mybackuppolicyname
 """
 
 helps['netappfiles account backup delete'] = """
@@ -280,7 +280,7 @@ parameters:
 examples:
   - name: Update specific values for an ANF backup policy
     text: >
-        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --name mybackuppolicyname --daily-backups 1 --enabled false
+        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
 """
 
 
@@ -920,7 +920,7 @@ parameters:
   - name: --weekly-hour
     short-summary: Which hour in UTC timezone the weekly snapshot should be taken
   - name: --weekly-day
-    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english  
+    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english
   - name: --monthly-minute
     short-summary: Which minute the monthly snapshot should be taken
   - name: --monthly-hour
