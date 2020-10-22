@@ -710,3 +710,15 @@ class BillingAccountScenarioTest(ScenarioTest):
         step__billingaccounts_get_billingaccounts(self)
         # show billing account with expaned arguments
         step__billingaccounts_get_billingaccountwithexpand(self)
+
+    def test_billing_account_update(self):
+        pass
+
+        # # show
+        # step__billingaccounts_get_billingaccountwithexpand(self)
+
+        # # update
+        # step__billingaccounts_patch_updatebillingaccount(self)
+
+        # # show and check for updated properties
+        # step__billingaccounts_get_billingaccountwithexpand(self)
