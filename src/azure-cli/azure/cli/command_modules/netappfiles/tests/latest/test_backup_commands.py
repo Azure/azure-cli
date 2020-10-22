@@ -51,7 +51,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             # create backup policy
             backup_policy_name = self.create_random_name(prefix='cli-sn-pol-', length=16)
             backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s "
-                                     "--backup-policy-name %s -l %s --daily-backups-to-keep 1" %
+                                     "--backup-policy-name %s -l %s --daily-backups 1" %
                                      (account_name, backup_policy_name, LOCATION)).get_output_in_json()
 
             # volume update with backup policy

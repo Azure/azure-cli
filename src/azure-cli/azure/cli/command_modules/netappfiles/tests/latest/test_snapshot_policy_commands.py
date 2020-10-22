@@ -59,8 +59,8 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         enabled = True
         tags = "Tag1=Value1"
         snapshot_policy = self.cmd("az netappfiles snapshot policy create -g {rg} -a %s --snapshot-policy-name %s "
-                                   "--location %s --hourly-snapshots-to-keep %s --daily-snapshots-to-keep %s "
-                                   "--weekly-snapshots-to-keep %s --monthly-snapshots-to-keep %s --hourly-minute %s "
+                                   "--location %s --hourly-snapshots %s --daily-snapshots %s "
+                                   "--weekly-snapshots %s --monthly-snapshots %s --hourly-minute %s "
                                    "--daily-minute %s --weekly-minute %s --monthly-minute %s --daily-hour %s "
                                    "--weekly-hour %s --monthly-hour %s --weekly-day %s --monthly-days %s "
                                    "--enabled %s --tags %s" %
