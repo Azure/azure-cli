@@ -68,3 +68,30 @@ def billing_policy_show(client, account_name, profile_name=None, customer_name=N
     return CLIInternalError(
         "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
     )
+
+
+def billing_policy_update(client,
+                          account_name,
+                          profile_name=None,
+                          customer_name=None,
+                          marketplace_purchases=None,
+                          reservation_purchases=None,
+                          view_charges=None):
+    if customer_name is None:
+        parameters = {}
+        parameters['marketplace_purchases'] = marketplace_purchases
+        parameters['reservation_purchases'] = reservation_purchases
+        parameters['view_charges'] = view_charges
+        return client.update(billing_account_name=account_name,
+                             billing_profile_name=profile_name,
+                             parameters=parameters)
+
+    if account_name is not None and customer_name is not None:
+        return client.update_customer(billing_account_name=account_name,
+                                      customer_name=customer_name,
+                                      view_charges=view_charges)
+
+    from azure.cli.core.azclierror import CLIInternalError
+    return CLIInternalError(
+        "Uncaught argument combinations for Azure CLI to handle. Please submit an issue"
+    )

@@ -11,7 +11,8 @@ from azure.cli.core.commands import CliCommandType
 from ._validators import (
     billing_invoice_download_validator,
     billing_invoice_show_validator,
-    billing_profile_show_validator
+    billing_profile_show_validator,
+    billing_policy_update_validator
 )
 
 
@@ -51,3 +52,4 @@ def load_command_table(self, _):
         client_factory=cf_policy)
     with self.command_group('billing policy', billing_policy, client_factory=cf_policy, is_preview=True) as g:
         g.custom_show_command('show', 'billing_policy_show', validator=billing_profile_show_validator)
+        g.custom_command('update', 'billing_policy_update', validator=billing_policy_update_validator)

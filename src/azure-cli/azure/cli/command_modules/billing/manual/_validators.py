@@ -81,7 +81,9 @@ def billing_invoice_show_validator(namespace):
         MutuallyExclusiveArgumentError,
     )
 
-    valid_combs = "only --account-name, --name / --name / --name, --by-subscription is valid"
+    valid_combs = (
+        "only --account-name, --name / --name / --name, --by-subscription is valid"
+    )
 
     if namespace.account_name is not None:
         if namespace.by_subscription is not None:
@@ -99,4 +101,33 @@ def billing_profile_show_validator(namespace):
     from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
     if namespace.profile_name is not None and namespace.customer_name is not None:
-        raise MutuallyExclusiveArgumentError("--profile-name can't be used with --customer-name")
+        raise MutuallyExclusiveArgumentError(
+            "--profile-name can't be used with --customer-name"
+        )
+
+
+def billing_policy_update_validator(namespace):
+    from azure.cli.core.azclierror import (
+        RequiredArgumentMissingError,
+        MutuallyExclusiveArgumentError,
+    )
+
+    if namespace.customer_name is not None:
+        mutual_exclusive_arguments = (
+            namespace.profile_name,
+            namespace.marketplace_purchases,
+            namespace.reservation_purchases,
+        )
+        if any(mutual_exclusive_arguments):
+            raise MutuallyExclusiveArgumentError(
+                "--customer-name can't be used with "
+                "--profile-name / --marketplace-purchases / --reservation-purchases"
+            )
+
+    if namespace.profile_name is None or namespace.customer_name is None:
+        raise RequiredArgumentMissingError(
+            "only "
+            "--account-name, --profile-name, [--marketplace-purchases, --reservation-purchases, --view-charges] / "
+            "--account-name, --customer-name, [--view-charges] "
+            "is valid"
+        )
