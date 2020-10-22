@@ -70,9 +70,10 @@ class AzureNetAppFilesAccountBackupServiceScenarioTest(ScenarioTest):
                           (account_name, pool_name, volume_name, LOCATION, backup_name)).get_output_in_json()
         return backup
 
+    @unittest.skip("This function is not working as expected. Waiting on a fix.")
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_backup_')
     def test_get_account_backups(self):
-        raise unittest.SkipTest("Skipping - Not working properly")
+        raise unittest.SkipTest("Skipping - Not working properly. Backup not found error.")
         # create backup
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
