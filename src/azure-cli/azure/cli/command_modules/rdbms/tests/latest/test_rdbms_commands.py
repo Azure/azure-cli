@@ -18,7 +18,6 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StringContainCheck,
     live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -32,7 +31,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -90,62 +89,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('postgres', resource_group_1, resource_group_2)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @live_only()
-    def test_mariadb_server_mgmt_public_paramter(self, resource_group_1):
-        self._test_server_mgmt_public_paramter('mariadb', resource_group_1)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @live_only()
-    def test_mysql_server_mgmt_public_paramter(self, resource_group_1):
-        self._test_server_mgmt_public_paramter('mysql', resource_group_1)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @live_only()
-    def test_postgres_server_mgmt_public_paramter(self, resource_group_1):
-        self._test_server_mgmt_public_paramter('postgres', resource_group_1)
-
-    def _test_server_mgmt_public_paramter(self, database_engine, resource_group_1):
-        servers = [self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbclipublicazureservices', SERVER_NAME_MAX_LENGTH)]
-        admin_login = 'cloudsa'
-        admin_password = 'SecretPassword123'
-        old_cu = 2
-        family = 'Gen5'
-        skuname = 'GP_{}_{}'.format(family, old_cu)
-        loc = 'westus2'
-
-        # test public access for all IPs on server
-        self.cmd('{} server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1 --public {}'
-                 .format(database_engine, resource_group_1, servers[0], loc,
-                         admin_login, admin_password, skuname, 'all'),
-                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine)),
-                         JMESPathCheck('resourceGroup', resource_group_1), JMESPathCheck('username', admin_login),
-                         JMESPathCheck('skuname', skuname), StringContainCheck('AllowAll_')])
-
-        # test public access for all azure services on server
-        self.cmd('{} server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1 --public {}'
-                 .format(database_engine, resource_group_1, servers[1], loc,
-                         admin_login, admin_password, skuname, '0.0.0.0'),
-                 checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine)),
-                         JMESPathCheck('resourceGroup', resource_group_1), JMESPathCheck('username', admin_login),
-                         JMESPathCheck('skuname', skuname),
-                         StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_')])
-        # test delete server
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
-        self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, resource_group_1, servers[1]), checks=NoneCheck())
-        # test list server should be 0
-        self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
-
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
@@ -161,7 +104,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'westus2'
+        loc = 'eastus'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
         minimal_tls_version = 'TLS1_2'
@@ -171,7 +114,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoBackupRetention = 20
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
-        database_name = 'defaultdb'
 
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
@@ -184,16 +126,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('publicNetworkAccess', default_public_network_access),
                        JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]
 
-        create_list_checks = [JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine)),
-                              JMESPathCheck('resourceGroup', resource_group_1),
-                              JMESPathCheck('username', admin_login),
-                              JMESPathCheck('skuname', skuname)]
-
         if database_engine != 'mariadb':
             list_checks.append(JMESPathCheck('minimalTlsVersion', default_minimal_tls_version))
-
-        if database_engine == 'mysql' or database_engine == 'mariadb':
-            create_list_checks.append(JMESPathCheck('databaseName', database_name))
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -203,7 +137,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0], loc,
                          admin_login, admin_passwords[0], skuname,
                          geoRedundantBackup, backupRetention),
-                 checks=create_list_checks)
+                 checks=list_checks)
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
@@ -332,11 +266,18 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group_1, servers[3], loc,
                              admin_login, admin_passwords[0], skuname,
                              geoRedundantBackup, backupRetention, infrastructureEncryption),
-                     checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[3], database_engine)),
-                             JMESPathCheck('resourceGroup', resource_group_1),
-                             JMESPathCheck('username', admin_login),
-                             JMESPathCheck('skuname', skuname),
-                             JMESPathCheck('infrastructureEncryption', 'Enabled')])
+                     checks=[
+                         JMESPathCheck('name', servers[3]),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('administratorLogin', admin_login),
+                         JMESPathCheck('sslEnforcement', 'Enabled'),
+                         JMESPathCheck('infrastructureEncryption', 'Enabled'),
+                         JMESPathCheck('tags.key', '1'),
+                         JMESPathCheck('sku.capacity', old_cu),
+                         JMESPathCheck('sku.tier', edition),
+                         JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                         JMESPathCheck('publicNetworkAccess', default_public_network_access),
+                         JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test list servers
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
@@ -351,7 +292,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} -n {} --yes'
                  .format(database_engine, resource_group_2, servers[1]), checks=NoneCheck())
-
         if database_engine != 'mariadb':
             self.cmd('{} server delete -g {} -n {} --yes'
                      .format(database_engine, resource_group_1, servers[3]), checks=NoneCheck())
@@ -394,9 +334,13 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(engine_type='postgres')
     def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
+        self._test_vnet_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('postgres', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
@@ -485,7 +429,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'westus'
+        location = 'eastus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -818,7 +762,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
-        print(server_resp)
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
@@ -921,9 +864,14 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name GP_Gen5_2'
                           .format(database_engine, resource_group, server),
-                          checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(server, database_engine)),
-                                  JMESPathCheck('resourceGroup', resource_group),
-                                  JMESPathCheck('skuname', 'GP_Gen5_2')]).get_output_in_json()
+                          checks=[
+                              JMESPathCheck('name', server),
+                              JMESPathCheck('resourceGroup', resource_group),
+                              #JMESPathCheck('sslEnforcement', 'Enabled'),
+                              JMESPathCheck('sku.name', 'GP_Gen5_2'),
+                              JMESPathCheck('replicationRole', 'None'),
+                              #JMESPathCheck('masterServerId', '')
+                              ]).get_output_in_json()
 
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l westus --sku-name GP_Gen5_4 '
@@ -934,14 +882,16 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id'])])
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
         # test show server with replication info
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'Master'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test replica list
         self.cmd('{} server replica list -g {} -s {}'
@@ -956,14 +906,16 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', 'GP_Gen5_4'),
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test delete master server
         self.cmd('{} server replica create -g {} -n {} '
@@ -972,9 +924,10 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  checks=[
                      JMESPathCheck('name', replicas[1]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['skuname']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id'])])
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
@@ -984,7 +937,8 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                  .format(database_engine, resource_group, replicas[1]),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # clean up servers
         self.cmd('{} server delete -g {} --name {} --yes'
@@ -1015,9 +969,13 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name {}'
                           .format(database_engine, resource_group, server, skuName),
-                          checks=[JMESPathCheck('host', '{}.{}.database.azure.com'.format(server, database_engine)),
-                                  JMESPathCheck('resourceGroup', resource_group),
-                                  JMESPathCheck('skuname', skuName)]).get_output_in_json()
+                          checks=[
+                              JMESPathCheck('name', server),
+                              JMESPathCheck('resourceGroup', resource_group),
+                              JMESPathCheck('sslEnforcement', 'Enabled'),
+                              JMESPathCheck('sku.name', skuName),
+                              JMESPathCheck('replicationRole', 'None'),
+                              JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
@@ -1040,14 +998,16 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.name', testSkuName),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id'])])
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
         # test show server with replication info
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'Master'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test replica list
         self.cmd('{} server replica list -g {} -s {}'
@@ -1063,7 +1023,8 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, server),
                  checks=[
                      JMESPathCheck('replicationRole', 'None'),
-                     JMESPathCheck('masterServerId', '')])
+                     JMESPathCheck('masterServerId', ''),
+                     JMESPathCheck('replicaCapacity', result['replicaCapacity'])])
 
         # test delete master server
         self.cmd('{} server replica create -g {} -n {} '
@@ -1072,9 +1033,10 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  checks=[
                      JMESPathCheck('name', replicas[1]),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.name', result['skuname']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replicationRole', 'Replica'),
-                     JMESPathCheck('masterServerId', result['id'])])
+                     JMESPathCheck('masterServerId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')])
 
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())

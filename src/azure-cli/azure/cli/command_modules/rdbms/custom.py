@@ -161,18 +161,18 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
     update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     if engine_name == 'postgres':
-        return form_response(administrator_login_password if administrator_login_password is not None else '*****',
-                             username=user, sku=sku, location=loc, server_id=server_id, host=host, version=version,
+        return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
+                             host=host,
                              connection_string=create_postgresql_connection_string(server_name, host, user, administrator_login_password),
-                             infrastructure_encryption=infrastructure_encryption, database_name=None, firewall_id=firewall_id)
+                             database_name=None, firewall_id=firewall_id)
     # Serves both - MySQL and MariaDB
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
     create_database(cmd, resource_group_name, server_name, database_name, engine_name)
-    return form_response(administrator_login_password if administrator_login_password is not None else '*****',
-                         username=user, sku=sku, location=loc, server_id=server_id, host=host, version=version,
+    return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
+                         host=host,
                          connection_string=create_mysql_connection_string(server_name, host, database_name, user, administrator_login_password),
-                         infrastructure_encryption=infrastructure_encryption, database_name=database_name, firewall_id=firewall_id)
+                         database_name=database_name, firewall_id=firewall_id)
 
 
 # Need to replace source server name with source server id, so customer server restore function
@@ -708,24 +708,16 @@ def create_database(cmd, resource_group_name, server_name, database_name, engine
         database_client.create_or_update(resource_group_name, server_name, database_name, 'utf8').result()
 
 
-def form_response(password, username, sku, location, server_id, host, version, connection_string, infrastructure_encryption, database_name=None, firewall_id=None):
-    output = {
-        'host': host,
-        'username': username,
-        'password': password,
-        'skuname': sku,
-        'location': location,
-        'id': server_id,
-        'version': version,
-        'connectionString': connection_string,
-    }
+def form_response(server_result, password, host, connection_string, database_name=None, firewall_id=None):
+    from knack.util import todict
+    result = todict(server_result)
+    result['connectionString'] = connection_string
+    result['password'] = password
     if firewall_id is not None:
-        output['firewallName'] = firewall_id
+        result['firewallName'] = firewall_id
     if database_name is not None:
-        output['databaseName'] = database_name
-    if str(infrastructure_encryption).lower() == 'enabled':
-        output['infrastructureEncryption'] = infrastructure_encryption
-    return output
+        result['databaseName'] = database_name
+    return result
 
 
 def create_postgresql_connection_string(server_name, host, user, password):
