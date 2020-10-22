@@ -800,3 +800,25 @@ class BillingPolicyScenarioTest(ScenarioTest):
 
         step__policies_showpolicybycustomer(self)
         step__policies_showpolicybyprofile(self)
+
+
+class BillingPropertyScenarioTest(ScenarioTest):
+
+    def test_billing_property_show(self):
+        # have to set a subscription first
+        # removed sensitive information manually from recording file
+        step__billingproperty_get_billingproperty(self)
+
+
+# class BillingInvoiceScenarioTest(ScenarioTest):
+#     def test_billing_invoice_list_and_show(self):
+#         pass
+
+
+# class BillingTransactionScenarioTest(ScenarioTest):
+#     def test_billing_transaction_list(self):
+#         self.kwargs.update({
+#             "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+#             "myInvoice": ""
+#         })
+#         step__transactions_get_transactionslistbyinvoice(self)
