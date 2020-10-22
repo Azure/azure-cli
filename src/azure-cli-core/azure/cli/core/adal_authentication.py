@@ -98,7 +98,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         import traceback
         from knack.log import get_logger
         logger = get_logger(__name__)
-        from .azclierror import AzureConnectionError, AzureResponseError
+        from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
         try:
             super(MSIAuthenticationWrapper, self).set_token()
         except requests.exceptions.ConnectionError as err:

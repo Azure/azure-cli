@@ -1154,7 +1154,7 @@ class ServicePrincipalAuth:
                         match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
                                           self.cert_file_string, re.I)
                         self.public_certificate = match.group('public').strip()
-            except [UnicodeDecodeError, Error]:
+            except (UnicodeDecodeError, Error):
                 raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
