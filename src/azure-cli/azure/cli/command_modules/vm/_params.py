@@ -483,8 +483,7 @@ def load_arguments(self, _):
                    help="Replace the host automatically if a failure occurs")
         c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
                    help="The software license type that will be applied to the VMs deployed on the dedicated host.")
-        c.argument('sku', arg_type=get_enum_type(['DSv3-Type1', 'ESv3-Type1', 'FSv2-Type2']),
-                   help="Sku of the dedicated host.")
+        c.argument('sku', help="SKU of the dedicated host. Available SKUs: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/dedicated-host/")
 
     with self.argument_context('vm host list') as c:
         c.argument('host_group_name', id_part=None)
