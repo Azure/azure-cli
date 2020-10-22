@@ -61,7 +61,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
-    from requests.exceptions import SSLError
+    from requests.exceptions import SSLError, HTTPError
     import azure.cli.core.azclierror as azclierror
     import traceback
 
@@ -122,6 +122,11 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             message, status_code = extract_http_operation_error(ex)
             if message:
                 error_msg = message
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
+
+        elif isinstance(ex, HTTPError):
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
@@ -211,7 +216,7 @@ def get_error_type_by_status_code(status_code):
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 
-    return azclierror.AzureResponseError
+    return azclierror.UnknownError
 
 
 def is_azure_connection_error(error_msg):
