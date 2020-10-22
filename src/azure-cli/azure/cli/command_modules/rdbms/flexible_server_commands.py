@@ -111,7 +111,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_firewall_rules,
                             is_preview=True) as g:
-        g.command('create', 'create_or_update')
+        g.custom_command('create', 'firewall_rule_create_func', custom_command_type=flexible_server_custom_common)
         g.custom_command('delete', 'firewall_rule_delete_func', custom_command_type=flexible_server_custom_common)
         g.show_command('show', 'get')
         g.command('list', 'list_by_server')

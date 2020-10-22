@@ -12,11 +12,11 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db
+    cf_mysql_flexible_db, cf_mysql_check_resource_availability
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
-from .flexible_server_custom_common import user_confirmation, server_list_custom_func
+from .flexible_server_custom_common import user_confirmation
 from .flexible_server_virtual_network import create_vnet, prepare_vnet
 from .validators import mysql_arguments_validator
 
@@ -26,8 +26,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforMySQL/flexibleServers"
 
 
 # region create without args
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-locals, too-many-statements
 def flexible_server_create(cmd, client, resource_group_name=None, server_name=None, sku_name=None, tier=None,
                            location=None, storage_mb=None, administrator_login=None,
                            administrator_login_password=None, version=None,
@@ -64,6 +63,14 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
         server_result = firewall_id = subnet_id = None
 
+        # Check availability for server name if it is supplied by the user
+        if server_name is not None:
+            check_name_client = cf_mysql_check_resource_availability(cmd.cli_ctx, None)
+            server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
+            if not server_availability.name_available:
+                raise CLIError("The server name '{}' already exists.Please re-run command with some "
+                               "other server name.".format(server_name))
+
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
                                                                                  server_name, 'mysql')
@@ -82,19 +89,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                 subnet_arm_resource_id=subnet_id)
         else:
             delegated_subnet_arguments = None
-
-        # Get list of servers in the current sub
-        server_list = server_list_custom_func(client)
-
-        # Ensure that the server name is not in the rg and in the subscription
-        for key in server_list:
-            if server_name == key.name and key.id.find(resource_group_name) != -1:
-                logger.warning('Found existing MySQL server \'%s\' in group \'%s\'',
-                               server_name, resource_group_name)
-                server_result = client.get(resource_group_name, server_name)
-            elif server_name == key.name:
-                raise CLIError("The server name '{}' exists in this subscription.Please re-run command with a "
-                               "valid server name.".format(server_name))
 
         administrator_login_password = generate_password(administrator_login_password)
         if server_result is None:
@@ -262,14 +256,14 @@ def flexible_server_update_custom_func(cmd, instance,
     return params
 
 
-def server_delete_func(cmd, client, resource_group_name=None, server_name=None, force=None):
-    confirm = force
+def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+    confirm = yes
     result = None  # default return value
-    if not force:
+    if not yes:
         confirm = user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
                                                                                               resource_group_name),
-            yes=force)
+            yes=yes)
     if confirm:
         try:
             result = client.delete(resource_group_name, server_name)
@@ -299,49 +293,38 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 # Replica commands
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
-def flexible_replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
+def flexible_replica_create(cmd, client, resource_group_name, replica_name, server_name, no_wait=False, location=None, sku_name=None, tier=None, **kwargs):
     provider = 'Microsoft.DBforMySQL'
 
     # set source server id
-    if not is_valid_resource_id(source_server):
-        if len(source_server.split('/')) == 1:
-            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                        resource_group=resource_group_name,
-                                        namespace=provider,
-                                        type='flexibleServers',
-                                        name=source_server)
+    if not is_valid_resource_id(server_name):
+        if len(server_name.split('/')) == 1:
+            server_name = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                      resource_group=resource_group_name,
+                                      namespace=provider,
+                                      type='flexibleServers',
+                                      name=server_name)
         else:
-            raise CLIError('The provided source-server {} is invalid.'.format(source_server))
+            raise CLIError('The provided source-server {} is invalid.'.format(server_name))
 
-    source_server_id_parts = parse_resource_id(source_server)
+    source_server_id_parts = parse_resource_id(server_name)
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except CloudError as e:
         raise CLIError('Unable to get source server: {}.'.format(str(e)))
 
-    # if location is None:
-    #     location = source_server_object.location
-
-    # if sku_name is None:
-    #     sku_name = source_server_object.sku.name
-    # if tier is None:
-    #     tier = source_server_object.sku.tier
     location = source_server_object.location
     sku_name = source_server_object.sku.name
     tier = source_server_object.sku.tier
-
-    # validation
-    # sku_info = get_mysql_list_skus_info(cmd, location)
-    # mysql_arguments_validator(tier, sku_name, None, None, sku_info)
 
     from azure.mgmt.rdbms import mysql_flexibleservers
 
     parameters = mysql_flexibleservers.models.Server(
         sku=mysql_flexibleservers.models.Sku(name=sku_name, tier=tier),
-        source_server_id=source_server,
+        source_server_id=server_name,
         location=location,
         create_mode="Replica")
-    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, replica_name, parameters)
 
 
 def flexible_replica_stop(client, resource_group_name, server_name):
@@ -505,7 +488,7 @@ def _create_mysql_connection_string(host, database_name, user_name, password):
         'username': user_name,
         'password': password if password is not None else '{password}'
     }
-    return 'server={host};database={dbname};uid={username};pwd={password}'.format(**connection_kwargs)
+    return 'mysql {dbname} --host {host} --user {username} --password={password}'.format(**connection_kwargs)
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
