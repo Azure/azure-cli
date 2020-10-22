@@ -11,6 +11,7 @@ import math
 import os
 import re
 import struct
+import sys
 import time
 import uuid
 
@@ -725,6 +726,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     if not sku:
         sku = 'standard'
 
+    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+        enable_soft_delete = True
+        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+              'The value will be changed to true.', file=sys.stderr)
+
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku),
                                  access_policies=access_policies,
@@ -800,6 +806,10 @@ def update_vault(cmd, instance,
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
 
     if enable_soft_delete is not None:
+        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+            enable_soft_delete = True
+            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+                  'The value will be changed to true.', file=sys.stderr)
         instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
