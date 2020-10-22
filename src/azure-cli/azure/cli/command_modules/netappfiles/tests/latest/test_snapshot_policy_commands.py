@@ -259,6 +259,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['enabled'] == enabled
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
 
+    @unittest.skip("Waiting for a fix on swagger and sdk")
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_policy_')
     def test_snapshot_policy_list_volumes(self):
         raise unittest.SkipTest("Skipping - need to fix NFSAAS-12189")
