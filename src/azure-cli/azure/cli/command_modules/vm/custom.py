@@ -1781,7 +1781,7 @@ def _terms_prepare(cmd, urn, publisher, offer, plan):
             raise UsageError('If using --urn, do not use any of --plan, --offer, --publisher.')
         terms = urn.split(':')
         if len(terms) != 4:
-            raise UsageError('urn should be in the format of publisher:offer:sku:version.')
+            raise UsageError('--urn should be in the format of publisher:offer:sku:version.')
         publisher, offer = terms[0], terms[1]
         image = show_vm_image(cmd, urn)
         if not image.plan:
@@ -3329,7 +3329,7 @@ def create_proximity_placement_group(cmd, client, proximity_placement_group_name
 
     if ppg_type and ppg_type not in choices:
         logger.info("Valid choices: %s", str(choices))
-        raise UsageError("invalid value for --type/-t")
+        raise UsageError("Invalid value for --type/-t")
 
     ppg_params = ProximityPlacementGroup(name=proximity_placement_group_name, proximity_placement_group_type=ppg_type,
                                          location=location, tags=(tags or {}))

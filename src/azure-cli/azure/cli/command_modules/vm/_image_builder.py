@@ -327,7 +327,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     if len(outputs) != 1:
         err = "Supplied outputs: {}".format(outputs)
         logger.debug(err)
-        raise UsageError("must supply exactly one destination type to add. Supplied {}".format(len(outputs)))
+        raise UsageError("Must supply exactly one destination type to add. Supplied {}".format(len(outputs)))
 
     if namespace.managed_image:
         if not is_valid_resource_id(namespace.managed_image):
@@ -341,7 +341,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
     if namespace.gallery_image_definition:
         if not is_valid_resource_id(namespace.gallery_image_definition):
             if not namespace.gallery_name:
-                raise UsageError("gallery image definition is a name and not an ID.")
+                raise UsageError("Gallery image definition is a name and not an ID.")
 
             namespace.gallery_image_definition = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,

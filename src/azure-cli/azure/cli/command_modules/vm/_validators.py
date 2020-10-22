@@ -489,7 +489,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
         else:
-            raise UsageError('unrecognized image information "{}"'.format(namespace.image))
+            raise UsageError('Unrecognized image information "{}"'.format(namespace.image))
 
         # pylint: disable=no-member
 
@@ -1106,7 +1106,7 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
                 namespace.identity_role))
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not cmd.supported_api_version(min_api='2017-12-01'):
-            raise UsageError('user assigned identity is only available under profile '
+            raise UsageError('User assigned identity is only available under profile '
                              'with minimum Compute API version of 2017-12-01')
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
@@ -1445,7 +1445,7 @@ def process_vmss_create_namespace(cmd, namespace):
 def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-argument
     if not namespace.instance_id:
         if namespace.protect_from_scale_in is not None or namespace.protect_from_scale_set_actions is not None:
-            raise UsageError("protection policies can only be applied to VM instances within a VMSS."
+            raise UsageError("Protection policies can only be applied to VM instances within a VMSS."
                              " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
     _validate_vmss_update_automatic_repairs(cmd, namespace)
@@ -1522,7 +1522,7 @@ def process_image_create_namespace(cmd, namespace):
                 if source_snapshot:
                     namespace.data_snapshots.append(source_snapshot)
         if not namespace.os_type:
-            raise UsageError("os type is required to create the image, "
+            raise UsageError("OS type is required to create the image, "
                              "please specify '--os-type OS_TYPE'")
 
 
@@ -1692,9 +1692,9 @@ def _validate_vmss_update_terminate_notification_related(cmd, namespace):  # pyl
     If enable_terminate_notification is true, must specify terminate_notification_time
     """
     if namespace.enable_terminate_notification is False and namespace.terminate_notification_time is not None:
-        raise UsageError("please enable --enable-terminate-notification")
+        raise UsageError("Please enable --enable-terminate-notification")
     if namespace.enable_terminate_notification is True and namespace.terminate_notification_time is None:
-        raise UsageError("please set --terminate-notification-time")
+        raise UsageError("Please set --terminate-notification-time")
     _validate_vmss_terminate_notification(cmd, namespace)
 
 
@@ -1716,9 +1716,9 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
 
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
-        raise UsageError("please enable --enable-automatic-repairs")
+        raise UsageError("Please enable --enable-automatic-repairs")
     if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
-        raise UsageError("please set --automatic-repairs-grace-period")
+        raise UsageError("Please set --automatic-repairs-grace-period")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
