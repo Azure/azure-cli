@@ -165,8 +165,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                              filesystem, local_file)
         # set recursive
         result = self.oauth_cmd('storage fs access set-recursive -f {} -p "{}" --acl {} --batch-size 2 --max-batches 2 '
-                                '--continue-on-failure --account-name {}'.format(
-                                filesystem, dir0, acl1, storage_account)).get_output_in_json()
+                                '--continue-on-failure --account-name {}'
+                                .format(filesystem, dir0, acl1, storage_account)).get_output_in_json()
 
         self.assertIsNotNone(result['continuation'])
         self.assertEqual(result['counters']['directoriesSuccessful'], 3)
