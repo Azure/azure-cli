@@ -20,12 +20,6 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             self.assertIsNone(invoice['downloadUrl'])
 
     @record_only()
-    def test_get_latest_invoice(self):
-        create_cmd = 'billing invoice show'
-        invoice = self.cmd(create_cmd).get_output_in_json()
-        self._validate_invoice(invoice, True)
-
-    @record_only()
     def test_list_billing_periods(self):
         # list
         periods_list = self.cmd('billing period list').get_output_in_json()

@@ -555,122 +555,122 @@ def cleanup(test):
 
 
 # Testcase
-@try_manual
-def call_scenario(test):
-    setup(test)
-    step__billingaccounts_get_billingaccounts(test)
-    step__billingaccounts_get_billingaccountslist(test)
-    step__billingaccounts_get(test)
-    step__billingaccounts_get2(test)
-    step__billingaccounts_get_billingaccountwithexpand(test)
-    step__billingaccounts_patch_updatebillingaccount(test)
-    step__billingprofiles_put_createbillingprofile(test)
-    step__billingprofiles_get_billingprofile(test)
-    step__billingprofiles_get(test)
-    step__billingprofiles_get2(test)
-    step__billingprofiles_get_billingprofilewithexpand(test)
-    step__availablebalances_get(test)
-    step__billingproperty_get_billingproperty(test)
-    step__billingproperty_patch_updatebillingproperty(test)
-    step__customers_get_customer(test)
-    step__customers_get_customerslistbybillingaccount(test)
-    step__customers_get_customerslistbybillingaccount(test)
-    step__customers_get_customerwithexpand(test)
-    step__billingsubscriptions_get(test)
-    step__billingsubscriptions_get_billingsubscription(test)
-    step__billingsubscriptions_get2(test)
-    step__billingsubscriptions_get3(test, checs=[
-        self.check()
-    ])
-    step__billingsubscriptions_get4(test)
-    step__billingsubscriptions_patch(test)
-    step__invoices_get_billingaccountinvoiceslist(test)
-    step__invoices_get(test)
-    step__invoices_get2(test)
-    step__billingsubscriptions_post(test)
-    step__invoices_get_invoice(test)
-    step__invoices_get_invoiceslistbybillingprofile(test)
-    step__invoices_get_creditnote(test)
-    step__invoices_get3(test)
-    step__invoices_get_invoicewithrebilldetails(test)
-    step__invoices_get_voidinvoice(test)
-    step__invoicesections_put_putinvoicesection(test)
-    step__invoicesections_get_invoicesection(test)
-    step__invoicesections_get(test)
-    step__billingsubscriptions_post2(test)
-    step__billingsubscriptions_post3(test)
-    step__policies_put_updatepolicy(test)
-    step__products_get_product(test)
-    step__products_get_productslistbybillingaccount(test)
-    step__products_get_productslistbybillingprofile(test)
-    step__products_get_productslistbyinvoicesection(test)
-    step__products_get_productslistbyinvoicesection(test)
-    step__products_patch_updatebillingproperty(test)
-    step__products_post_moveproduct(test)
-    step__products_post(test)
-    step__products_post2(test)
-    step__transactions_get_transactionslistbyinvoice(test)
-    cleanup(test)
+# @try_manual
+# def call_scenario(test):
+#     setup(test)
+#     step__billingaccounts_get_billingaccounts(test)
+#     step__billingaccounts_get_billingaccountslist(test)
+#     step__billingaccounts_get(test)
+#     step__billingaccounts_get2(test)
+#     step__billingaccounts_get_billingaccountwithexpand(test)
+#     step__billingaccounts_patch_updatebillingaccount(test)
+#     step__billingprofiles_put_createbillingprofile(test)
+#     step__billingprofiles_get_billingprofile(test)
+#     step__billingprofiles_get(test)
+#     step__billingprofiles_get2(test)
+#     step__billingprofiles_get_billingprofilewithexpand(test)
+#     step__availablebalances_get(test)
+#     step__billingproperty_get_billingproperty(test)
+#     step__billingproperty_patch_updatebillingproperty(test)
+#     step__customers_get_customer(test)
+#     step__customers_get_customerslistbybillingaccount(test)
+#     step__customers_get_customerslistbybillingaccount(test)
+#     step__customers_get_customerwithexpand(test)
+#     step__billingsubscriptions_get(test)
+#     step__billingsubscriptions_get_billingsubscription(test)
+#     step__billingsubscriptions_get2(test)
+#     step__billingsubscriptions_get3(test, checs=[
+#         self.check()
+#     ])
+#     step__billingsubscriptions_get4(test)
+#     step__billingsubscriptions_patch(test)
+#     step__invoices_get_billingaccountinvoiceslist(test)
+#     step__invoices_get(test)
+#     step__invoices_get2(test)
+#     step__billingsubscriptions_post(test)
+#     step__invoices_get_invoice(test)
+#     step__invoices_get_invoiceslistbybillingprofile(test)
+#     step__invoices_get_creditnote(test)
+#     step__invoices_get3(test)
+#     step__invoices_get_invoicewithrebilldetails(test)
+#     step__invoices_get_voidinvoice(test)
+#     step__invoicesections_put_putinvoicesection(test)
+#     step__invoicesections_get_invoicesection(test)
+#     step__invoicesections_get(test)
+#     step__billingsubscriptions_post2(test)
+#     step__billingsubscriptions_post3(test)
+#     step__policies_put_updatepolicy(test)
+#     step__products_get_product(test)
+#     step__products_get_productslistbybillingaccount(test)
+#     step__products_get_productslistbybillingprofile(test)
+#     step__products_get_productslistbyinvoicesection(test)
+#     step__products_get_productslistbyinvoicesection(test)
+#     step__products_patch_updatebillingproperty(test)
+#     step__products_post_moveproduct(test)
+#     step__products_post(test)
+#     step__products_post2(test)
+#     step__transactions_get_transactionslistbyinvoice(test)
+#     cleanup(test)
 
 
-@try_manual
-class BillingManagementClientScenarioTest(ScenarioTest):
+# @try_manual
+# class BillingManagementClientScenarioTest(ScenarioTest):
 
-    def test_billing(self):
+#     def test_billing(self):
 
-        self.kwargs.update({
-            'myBillingAccount': '{billingAccountName}',
-            'myBillingProfile': '{billingProfileName}',
-            'myCustomer': '{customerName}',
-            'myInvoiceSection': '{invoiceSectionName}',
-            'myProduct': '{productName}',
-            'myInvoice': '{invoiceName}',
-        })
+#         self.kwargs.update({
+#             'myBillingAccount': '{billingAccountName}',
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
 
-        call_scenario(self)
-        calc_coverage(__file__)
-        raise_if()
+#         call_scenario(self)
+#         calc_coverage(__file__)
+#         raise_if()
 # Testcase2
-@try_manual
-def call_scenario2 (test):
-    setup(test)
-    step__billingprofiles_put_createbillingprofile(test)
-    step__billingprofiles_get_billingprofile(test)
-    step__billingprofiles_get(test)
-    step__billingprofiles_get2(test)
-    step__billingprofiles_get_billingprofilewithexpand(test)
-    step__customers_get_customer(test)
+# @try_manual
+# def call_scenario2 (test):
+#     setup(test)
+#     step__billingprofiles_put_createbillingprofile(test)
+#     step__billingprofiles_get_billingprofile(test)
+#     step__billingprofiles_get(test)
+#     step__billingprofiles_get2(test)
+#     step__billingprofiles_get_billingprofilewithexpand(test)
+#     step__customers_get_customer(test)
 
-@try_manual
-class BillingScenarioTest(ScenarioTest):
+# @try_manual
+# class BillingScenarioTest(ScenarioTest):
 
-    def test_billing(self):
+#     def test_billing(self):
 
-        self.kwargs.update({
-            'myBillingProfile': '{billingProfileName}',
-            'myCustomer': '{customerName}',
-            'myInvoiceSection': '{invoiceSectionName}',
-            'myProduct': '{productName}',
-            'myInvoice': '{invoiceName}',
-        })
+#         self.kwargs.update({
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
 
-        call_scenario(self)
-        calc_coverage(__file__)
-        raise_if()
+#         call_scenario(self)
+#         calc_coverage(__file__)
+#         raise_if()
 
-    def test_billing2(self):
+#     def test_billing2(self):
 
-        self.kwargs.update({
-            'myBillingProfile': '{billingProfileName}',
-            'myCustomer': '{customerName}',
-            'myInvoiceSection': '{invoiceSectionName}',
-            'myProduct': '{productName}',
-            'myInvoice': '{invoiceName}',
-        })
+#         self.kwargs.update({
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
 
-        call_scenario2(self)
-        calc_coverage(__file__)
-        raise_if()
+#         call_scenario2(self)
+#         calc_coverage(__file__)
+#         raise_if()
 
 
 @record_only()
