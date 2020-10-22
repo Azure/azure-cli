@@ -1751,7 +1751,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, no_prompt=False):
     artifacts = None
     input_template = None
     if location is None:
@@ -1760,18 +1760,31 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if version:
+        Exists = False
+        if no_prompt is False:
+            try:  # Check if child template spec already exists.
+                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                from knack.prompting import prompt_y_n
+                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                if not confirmation:
+                    return None
+                Exists = True
+            except Exception:  # pylint: disable=broad-except
+                pass
+
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
             packed_template = pack(cmd, template_file)
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        try:  # Check if parent template spec already exists.
-            rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
-        except Exception:  # pylint: disable=broad-except
-            TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-            template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
-            rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
+        if not Exists:
+            try:  # Check if parent template spec already exists.
+                rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+            except Exception:  # pylint: disable=broad-except
+                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
+                rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
         template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=None)
