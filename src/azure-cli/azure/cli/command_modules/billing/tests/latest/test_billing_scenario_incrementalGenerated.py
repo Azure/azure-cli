@@ -694,7 +694,8 @@ class BillingAccountScenarioTest(ScenarioTest):
         # step__billingaccounts_get_billingaccountwithexpand(self)
 
 
-# @try_manual
+@record_only()
+@try_manual
 class BillingProfileScenarioTest(ScenarioTest):
 
     def setUp(self):
