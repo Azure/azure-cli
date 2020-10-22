@@ -396,7 +396,7 @@ class TestActions(unittest.TestCase):
         # error on lv/lv2 machines with caching mode other than "None"
         with self.assertRaises(CLIError) as err:
             normalize_disk_info(data_disk_cachings=['ReadWrite'], data_disk_sizes_gb=[1, 2], size='standard_L16s_v2')
-        self.assertTrue('for Lv series of machines, "None" is the only supported caching mode' in str(err.exception))
+        self.assertTrue('For Lv series of machines, "None" is the only supported caching mode' in str(err.exception))
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     def test_validate_vm_vmss_accelerated_networking(self, client_factory_mock):
