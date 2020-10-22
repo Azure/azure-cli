@@ -316,7 +316,7 @@ class Profile:
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
-                from .azclierror import AzureResponseError
+                from azure.cli.core.azclierror import AzureResponseError
                 try:
                     msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id

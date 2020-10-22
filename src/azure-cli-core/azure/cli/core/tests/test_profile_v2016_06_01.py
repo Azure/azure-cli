@@ -1053,7 +1053,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
                                                                             mock_msi_auth):
-        from ..azclierror import AzureResponseError
+        from azure.cli.core.azclierror import AzureResponseError
 
         class SubscriptionFinderStub:
             def find_from_raw_token(self, tenant, token):
