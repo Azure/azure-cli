@@ -1080,13 +1080,8 @@ def get_az_user_agent():
 def get_az_rest_user_agent():
     """Get User-Agent for az rest calls"""
 
-    from msrest import __version__ as msrest_version
-    from msrestazure import __version__ as msrestazure_version
-
     agents = ['python/{}'.format(platform.python_version()),
               '({})'.format(platform.platform()),
-              'msrest/{}'.format(msrest_version),
-              'msrest_azure/{}'.format(msrestazure_version),
               get_az_user_agent()
               ]
 
