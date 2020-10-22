@@ -44,12 +44,8 @@ def config_set(cmd, key_value=None, local=False):
                 name = parts[1]
 
                 cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
-                if section in telemetry_allowed_sections_or_keys or key in telemetry_allowed_sections_or_keys:
-                    telemetry_content.append('{}={}'.format(key, value))
-                else:
-                    telemetry_content.append('{}=***'.format(key))
-            if telemetry_content:
-                telemetry.set_debug_info('ConfigSet', ' '.join(telemetry_content))
+                telemetry_content.append((key, section, value))
+            telemetry.set_debug_info('ConfigSet', telemetry_content)
 
 
 def config_get(cmd, key=None, local=False):
