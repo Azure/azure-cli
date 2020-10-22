@@ -689,3 +689,24 @@ class BillingScenarioTest(ScenarioTest):
         call_scenario2(self)
         calc_coverage(__file__)
         raise_if()
+
+
+@try_manual
+class BillingAccountScenarioTest(ScenarioTest):
+    def test_billing_account_list_and_show(self):
+
+        # list billing accounts without any arguments
+        step__billingaccounts_get_billingaccountslist(self)
+
+        # list billing accounts with expanded arguments
+        step__billingaccounts_get(self)
+        step__billingaccounts_get2(self)
+
+        self.kwargs.update({
+            "myBillingAccount": "PLAMUATT2NetNew"   # This name is give by service team
+        })
+
+        # show billing account with name
+        step__billingaccounts_get_billingaccounts(self)
+        # show billing account with expaned arguments
+        step__billingaccounts_get_billingaccountwithexpand(self)
