@@ -185,14 +185,13 @@ def step__customers_get_customer(test):
 @try_manual
 def step__customers_get_customerslistbybillingaccount(test):
     test.cmd('az billing customer list '
-             '--account-name "{myBillingAccount}" '
-             '--profile-name "{myBillingProfile}"',
+             '--account-name "{myBillingAccount}" ',
              checks=[])
 
 
 # EXAMPLE: /Customers/get/CustomersListByBillingAccount
 @try_manual
-def step__customers_get_customerslistbybillingaccount(test):
+def step__customers_get_customerslistbybillingprofile(test):    # manually correct
     test.cmd('az billing customer list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}"',
@@ -431,6 +430,20 @@ def step__policies_put_updatepolicy(test):
              '--marketplace-purchases "OnlyFreeAllowed" '
              '--reservation-purchases "NotAllowed" '
              '--view-charges "Allowed"',
+             checks=[])
+
+
+def step__policies_showpolicybycustomer(test):
+    test.cmd('az billing policy show '
+             '--account-name "{myBillingAccount}" '
+             '--customer-name "{myCustomerName}"',
+             checks=[])
+
+
+def step__policies_showpolicybyprofile(test):
+    test.cmd('az billing policy show '
+             '--account-name {myBillingAccount} '
+             '--profile-name {myBillingProfile}',
              checks=[])
 
 
@@ -748,3 +761,24 @@ class BillingAccountScenarioTest(ScenarioTest):
             "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB"
         })
         step__availablebalances_get(self)
+
+
+class BillingCustomerScenarioTest(ScenarioTest):
+
+    def test_billing_customer_list_and_show(self):
+
+        self.kwargs.update({
+            # This name is give by service team
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+        })
+
+        step__customers_get_customerslistbybillingaccount(self)
+        step__customers_get_customerslistbybillingprofile(self)
+
+        self.kwargs.update({
+            "myCustomer": "ba897bfa-7111-465b-8a03-2729e540ef86"
+        })
+
+        step__customers_get_customer(self)
+        step__customers_get_customerslistbybillingaccount(self)
