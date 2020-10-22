@@ -752,7 +752,7 @@ class BillingProfileScenarioTest(ScenarioTest):
         # show that billing profile
         step__billingprofiles_get_billingprofile(self)
 
-
+@record_only()
 class BillingAccountScenarioTest(ScenarioTest):
     def test_billing_balance_show(self):
         self.kwargs.update({
@@ -762,7 +762,7 @@ class BillingAccountScenarioTest(ScenarioTest):
         })
         step__availablebalances_get(self)
 
-
+@record_only()
 class BillingCustomerScenarioTest(ScenarioTest):
 
     def test_billing_customer_list_and_show(self):
@@ -783,7 +783,7 @@ class BillingCustomerScenarioTest(ScenarioTest):
         step__customers_get_customer(self)
         step__customers_get_customerslistbybillingaccount(self)
 
-
+@record_only()
 class BillingPolicyScenarioTest(ScenarioTest):
 
     def test_billing_policy_show_and_update(self):
@@ -801,7 +801,7 @@ class BillingPolicyScenarioTest(ScenarioTest):
         step__policies_showpolicybycustomer(self)
         step__policies_showpolicybyprofile(self)
 
-
+@record_only()
 class BillingPropertyScenarioTest(ScenarioTest):
 
     def test_billing_property_show(self):
@@ -810,9 +810,42 @@ class BillingPropertyScenarioTest(ScenarioTest):
         step__billingproperty_get_billingproperty(self)
 
 
-# class BillingInvoiceScenarioTest(ScenarioTest):
-#     def test_billing_invoice_list_and_show(self):
-#         pass
+# All of operations are forbidden
+@record_only()
+class BillingInvoiceScenarioTest(ScenarioTest):
+    def test_billing_invoice_list_and_show(self):
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+        })
+
+        # list by billing account
+        # step__invoices_get_billingaccountinvoiceslist(self)
+        # step__invoices_get2(self)
+        # list by billing account and billing profile
+        # step__invoices_get_invoiceslistbybillingprofile(self)
+
+@record_only()
+class BillingInvoiceSectionScenarioTest(ScenarioTest):
+    def setUp(self):
+        super().setUp()
+
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+            "myInvoiceSection": "7S7S-YONO-PJA-AJ4D-SGB"
+        })
+
+    def test_billing_invoice_section_list_and_show(self):
+        step__invoicesections_get(self)
+        step__invoicesections_get_invoicesection(self)
+
+    def test_billing_section_create(self):
+        self.kwargs.update({
+            "myInvoiceSection": "7S7S-YONO-PJA-AJ4D-123"
+        })
+        step__invoicesections_put_putinvoicesection(self)
+        step__invoicesections_get(self)
+        step__invoicesections_get_invoicesection(self)
 
 
 # class BillingTransactionScenarioTest(ScenarioTest):
