@@ -3441,6 +3441,41 @@ def encryption_protector_update(
         server_key_name=key_name
     )
 
+#####
+#           sql server aad-only
+#####
+
+
+def server_aad_only_disable(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Disables a servers aad-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        azure_ad_only_authentication=False
+    )
+
+
+def server_aad_only_enable(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Enables a servers aad-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        azure_ad_only_authentication=True
+    )
+
+
 ###############################################
 #                sql managed instance         #
 ###############################################
@@ -3717,10 +3752,47 @@ def mi_ad_admin_delete(
     '''
     Deletes a managed instance active directory administrator.
     '''
+
     return client.delete(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name
     )
+
+
+#####
+#           sql managed instance aad-only
+#####
+
+
+def mi_aad_only_disable(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Disables the managed instance AAD-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=False
+    )
+
+
+def mi_aad_only_enable(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Enables the AAD-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=True
+    )
+
 
 ###############################################
 #                sql managed db               #
