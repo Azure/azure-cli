@@ -21,20 +21,13 @@ def billing_invoice_download_validator(namespace):
     )
 
     if namespace.account_name:
-        if (
-            namespace.download_token is None
-            and namespace.invoice_name is None
-            and namespace.download_urls is None
-        ):
+        if namespace.download_token is None and namespace.invoice_name is None and namespace.download_urls is None:
             raise RequiredArgumentMissingError(
                 "--download-urls / --download-token, --invoice-name is also required"
             )
 
         if namespace.download_urls is not None:
-            if (
-                namespace.download_token is not None
-                or namespace.invoice_name is not None
-            ):
+            if namespace.download_token is not None or namespace.invoice_name is not None:
                 raise MutuallyExclusiveArgumentError(valid_combs)
         if namespace.download_urls is None:
             if namespace.download_token is None and namespace.invoice_name is None:

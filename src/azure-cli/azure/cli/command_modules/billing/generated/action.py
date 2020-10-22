@@ -22,8 +22,7 @@ class AddSoldTo(argparse.Action):
             namespace.sold_to = action
         if hasattr(namespace, 'bill_to'):
             namespace.bill_to = action
-        else:
-            raise Exception("Unrecognized arguments")
+
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:
