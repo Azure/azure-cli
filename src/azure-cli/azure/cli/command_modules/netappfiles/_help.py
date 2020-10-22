@@ -147,7 +147,7 @@ short-summary: Manage Azure NetApp Files (ANF) Account Backup Resources.
 """
 
 helps['netappfiles account backup list'] = """
-type: group
+type: command
 short-summary: Get list of all Azure NetApp Files (ANF) Account Backups.
 parameters:
   - name: --account-name -a
@@ -159,13 +159,13 @@ examples:
 """
 
 helps['netappfiles account backup show'] = """
-type: group
+type: command
 short-summary: Get the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --backup-policy-name -n -name
-    short-summary: The name of the ANF backup policy
+  - name: --backup-name --name -n
+    short-summary: The name of the ANF backup
 examples:
   - name: Get an ANF account backup
     text: >
@@ -173,17 +173,17 @@ examples:
 """
 
 helps['netappfiles account backup delete'] = """
-type: group
+type: command
 short-summary: Delete the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --backup-policy-name -n -name
-    short-summary: The name of the ANF backup policy
+  - name: --backup-name --name -n
+    short-summary: The name of the ANF backup
 examples:
   - name: Delete an ANF account backup
     text: >
-        az netappfiles account backup delete -g mygroup --account-name myaccountname --name mybackuppolicyname
+        az netappfiles account backup delete -g mygroup --account-name myaccountname --backup-name mybackuppolicyname
 """
 
 helps['netappfiles account backup-policy'] = """
@@ -216,7 +216,7 @@ parameters:
 examples:
   - name: Create an ANF backup policy
     text: >
-        az netappfiles account backup-policy create -g mygroup --account-name myaccountname --name mybackuppolicyname --daily-backups 1 --enabled true
+        az netappfiles account backup-policy create -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups 1 --enabled true
 """
 
 helps['netappfiles account backup-policy delete'] = """
@@ -273,6 +273,8 @@ parameters:
     short-summary: Weekly backups count to keep
   - name: --monthly-backups
     short-summary: Monthly backups count to keep
+  - name: --yearly-backups
+    short-summary: Yearly backups count to keep, not in use at the moment
   - name: --enabled
     short-summary: The property to decide policy is enabled or not
 examples:
@@ -299,7 +301,7 @@ parameters:
     short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
   - name: --service-level
     short-summary: The service level for the ANF pool
-  - name: --qos-ype
+  - name: --qos-type
     short-summary: The qos type of the ANF pool
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
@@ -359,8 +361,6 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --size
     short-summary: The size for the ANF pool. Must be an integer number of tebibytes in multiples of 4
-  - name: --service-level
-    short-summary: The service level for the ANF pool
   - name: --qos-type
     short-summary: The qos type of the ANF pool
   - name: --tags
@@ -498,9 +498,9 @@ parameters:
   - name: --vault-id
     short-summary: Vault Resource ID
   - name: --kerberos-enabled
-    short-summary: Describe if a volume is KerberosEnabled 
+    short-summary: Describe if a volume is KerberosEnabled
   - name: --throughput-mibps
-    short-summary: Maximum throughput in Mibps that can be achieved by this volume  
+    short-summary: Maximum throughput in Mibps that can be achieved by this volume
   - name: --snapshot-dir-visible
     short-summary: If enabled (true) the volume will contain a read-only .snapshot directory which provides access to each of the volume's snapshots (default to true).
   - name: --security-style
@@ -783,7 +783,7 @@ parameters:
   - name: --backup-enabled
     short-summary: Backup Enabled
   - name: --backup-policy-id
-    short-summary:
+    short-summary: Backup Policy Resource ID
   - name: --policy-enforced
     short-summary: Backup Policy Enforced
   - name: --vault-id
@@ -832,7 +832,7 @@ parameters:
 examples:
   - name: Returns the created ANF backup
     text: >
-        az netappfiles volume backup create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --backup-name mybackupname
+        az netappfiles volume backup create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --backup-name mybackupname
 """
 
 helps['netappfiles volume backup list'] = """
@@ -1018,7 +1018,7 @@ parameters:
   - name: --weekly-hour
     short-summary: Which hour in UTC timezone the weekly snapshot should be taken
   - name: --weekly-day
-    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english  
+    short-summary: Which weekday the weekly snapshot should be taken, accepts a comma separated list of week day names in english
   - name: --monthly-minute
     short-summary: Which minute the monthly snapshot should be taken
   - name: --monthly-hour

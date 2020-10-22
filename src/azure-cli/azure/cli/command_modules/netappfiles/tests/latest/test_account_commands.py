@@ -114,4 +114,3 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account = self.cmd("netappfiles account show -g {rg} -n %s" % account_name).get_output_in_json()
         assert account['name'] == account_name
         assert account['activeDirectories'] is None
-

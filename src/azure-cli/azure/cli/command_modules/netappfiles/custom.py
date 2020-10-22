@@ -200,7 +200,7 @@ def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protoc
                                           backup_policy_id=backup_policy_id, policy_enforced=policy_enforced)),
         tags=tags)
     if throughput_mibps is not None:
-        params.throughput_mibps=throughput_mibps
+        params.throughput_mibps = throughput_mibps
     _update_mapper(instance, params, ['service_level', 'usage_threshold', 'tags', 'data_protection'])
     return params
 
@@ -342,4 +342,3 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         yearly_backups_to_keep=yearly_backups,
         enabled=enabled)
     return client.update(resource_group_name, account_name, backup_policy_name, body)
-
