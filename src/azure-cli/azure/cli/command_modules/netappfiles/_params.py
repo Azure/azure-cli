@@ -35,24 +35,24 @@ def load_arguments(self, _):
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
     with self.argument_context('netappfiles account backup-policy') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
+        c.argument('account_name', account_name_type)
         c.argument('backup_policy_name', options_list=['--backup-policy-name', '--name', '-n'], help='The name of the backup policy', id_part='child_name_1')
         c.argument('daily_backups', options_list=['--daily-backups', '-d'], help='Daily backups count to keep', id_part=None)
         c.argument('weekly_backups', options_list=['--weekly-backups', '-w'], help='Weekly backups count to keep', id_part=None)
         c.argument('monthly_backups', options_list=['--monthly-backups', '-m'], help='Monthly backups count to keep', id_part=None)
 
     with self.argument_context('netappfiles account backup-policy list') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('backup_policy_name', options_list=['--backup-policy-name', '--name', '-n'], help='The name of the backup policy', id_part=None)
 
     with self.argument_context('netappfiles account backup') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
-        c.argument('backup-policy-name', options_list=['--name', '--backup-name', '-n'], id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('backup-name', options_list=['--backup-name', '--name', '-n'], id_part=None)
 
     load_poolArguments(self, account_name_type, pool_name_type)
     load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type)
     load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type)
-    load_vaultArguments(self)
+    load_vaultArguments(self, account_name_type)
 
 
 def load_poolArguments(self, account_name_type, pool_name_type):
@@ -61,7 +61,8 @@ def load_poolArguments(self, account_name_type, pool_name_type):
         c.argument('pool_name', pool_name_type, options_list=['--pool-name', '-p', '--name', '-n'])
 
     with self.argument_context('netappfiles pool list') as c:
-        c.argument('account_name', account_name_type, options_list=['--account-name', '-a'], id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
+
 
 def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type):
     with self.argument_context('netappfiles volume') as c:
@@ -114,6 +115,7 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('backup_name', options_list=['--backup-name', '-b'], id_part=None)
 
+
 def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type):
     with self.argument_context('netappfiles snapshot') as c:
         c.argument('account_name', account_name_type)
@@ -127,19 +129,17 @@ def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_
 
     with self.argument_context('netappfiles snapshot policy') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
-        c.argument('snapshot_policy_name', options_list=['--name', '--snapshot-policy-name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
+        c.argument('snapshot_policy_name', options_list=['--snapshot-policy-name', '--name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
         c.argument('hourly_snapshots', options_list=['--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
         c.argument('daily_snapshots', options_list=['--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)
         c.argument('weekly_snapshots', options_list=['--weekly-snapshots', '-w'], help='The amount of weekly snapshots to keep', id_part=None)
         c.argument('monthly_snapshots', options_list=['--monthly-snapshots', '-m'], help='The amount of monthly snapshots to keep', id_part=None)
 
-    with self.argument_context('netappfiles snapshot policy list ') as c:
-        c.argument('account_name', account_name_type)
-        c.argument('pool_name', pool_name_type)
-        c.argument('volume_name', volume_name_type)
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
-        c.argument('snapshot_policy_name', options_list=['--name', '--snapshot-policy-name', '-n'], help='The name of the snapshot policy', id_part=None)
+    with self.argument_context('netappfiles snapshot policy list') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('snapshot_policy_name', options_list=['--snapshot-policy-name', '--name', '-n'], help='The name of the snapshot policy', id_part=None)
 
-def load_vaultArguments(self):
-    with self.argument_context('netappfiles vault list ') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part=None)
+
+def load_vaultArguments(self, account_name_type):
+    with self.argument_context('netappfiles vault list') as c:
+        c.argument('account_name', account_name_type, id_part=None)
