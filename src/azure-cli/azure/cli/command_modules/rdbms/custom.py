@@ -144,10 +144,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         client.create(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(engine_name))
     user = server_result.administrator_login
-    server_id = server_result.id
-    loc = server_result.location
     version = server_result.version
-    sku = server_result.sku.name
     host = server_result.fully_qualified_domain_name
 
     # Adding firewall rule
