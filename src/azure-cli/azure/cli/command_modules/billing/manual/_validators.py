@@ -124,7 +124,7 @@ def billing_policy_update_validator(namespace):
                 "--profile-name / --marketplace-purchases / --reservation-purchases"
             )
 
-    if namespace.profile_name is None or namespace.customer_name is None:
+    if namespace.profile_name is None and namespace.customer_name is None:
         raise RequiredArgumentMissingError(
             "only "
             "--account-name, --profile-name, [--marketplace-purchases, --reservation-purchases, --view-charges] / "

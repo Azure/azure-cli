@@ -436,7 +436,7 @@ def step__policies_put_updatepolicy(test):
 def step__policies_showpolicybycustomer(test):
     test.cmd('az billing policy show '
              '--account-name "{myBillingAccount}" '
-             '--customer-name "{myCustomerName}"',
+             '--customer-name "{myCustomer}"',
              checks=[])
 
 
@@ -782,3 +782,21 @@ class BillingCustomerScenarioTest(ScenarioTest):
 
         step__customers_get_customer(self)
         step__customers_get_customerslistbybillingaccount(self)
+
+
+class BillingPolicyScenarioTest(ScenarioTest):
+
+    def test_billing_policy_show_and_update(self):
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+            "myCustomer": "ba897bfa-7111-465b-8a03-2729e540ef86"
+        })
+
+        step__policies_showpolicybycustomer(self)
+        step__policies_showpolicybyprofile(self)
+
+        step__policies_put_updatepolicy(self)
+
+        step__policies_showpolicybycustomer(self)
+        step__policies_showpolicybyprofile(self)
