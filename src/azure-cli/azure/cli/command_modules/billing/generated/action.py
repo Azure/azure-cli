@@ -20,7 +20,7 @@ class AddSoldTo(argparse.Action):
 
         if hasattr(namespace, 'sold_to'):
             namespace.sold_to = action
-        elif hasattr(namespace, 'bill_to'):
+        if hasattr(namespace, 'bill_to'):
             namespace.bill_to = action
         else:
             raise Exception("Unrecognized arguments")

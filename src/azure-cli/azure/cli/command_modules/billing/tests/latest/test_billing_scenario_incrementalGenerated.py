@@ -738,3 +738,13 @@ class BillingProfileScenarioTest(ScenarioTest):
 
         # show that billing profile
         step__billingprofiles_get_billingprofile(self)
+
+
+class BillingAccountScenarioTest(ScenarioTest):
+    def test_billing_balance_show(self):
+        self.kwargs.update({
+            # This name is give by service team
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB"
+        })
+        step__availablebalances_get(self)
