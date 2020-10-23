@@ -18,7 +18,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import (
-    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item)
+    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item, log_command_handler_call)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -680,6 +680,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
         for _ in range(0, timeout, interval):
             try:
                 progress_indicator.add(message='Waiting')
+                log_command_handler_call(getter, **args)
                 instance = getter(**args)
                 if wait_for_exists:
                     progress_indicator.end()
@@ -751,6 +752,7 @@ def _cli_show_command(context, name, getter_op, custom_command=False, **kwargs):
 
         getter = context_copy.get_op_handler(getter_op, operation_group=kwargs.get('operation_group'))
         try:
+            log_command_handler_call(getter, **args)
             return getter(**args)
         except Exception as ex:  # pylint: disable=broad-except
             show_exception_handler(ex)

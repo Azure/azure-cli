@@ -26,7 +26,8 @@ from azure.cli.core.commands.constants import (
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
-from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.util import (get_command_type_kwarg, read_file_content, get_arg_list, poller_classes,
+                                 log_command_handler_call)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
 
@@ -396,8 +397,10 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
     def _get_operation():
         result = None
         if args:
+            log_command_handler_call(operation, *args)
             result = operation(*args)
         elif kwargs is not None:
+            log_command_handler_call(operation, **kwargs)
             result = operation(**kwargs)
         return result
 
@@ -432,9 +435,11 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
         result = None
         if args:
             extended_args = args + (parameters,)
+            log_command_handler_call(operation, *extended_args)
             result = operation(*extended_args)
         elif kwargs is not None:
             kwargs[setter_arg_name] = parameters
+            log_command_handler_call(operation, **kwargs)
             result = operation(**kwargs)
             del kwargs[setter_arg_name]
         return result

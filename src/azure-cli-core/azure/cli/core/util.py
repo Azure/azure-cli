@@ -1165,3 +1165,8 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def log_command_handler_call(func, description=None, *args, **kwargs):
+    logger.debug("Calling command handler: module=%s, name=%s, args=%s, kwargs=%s",
+                 func.__module__, func.__qualname__, args, kwargs)
