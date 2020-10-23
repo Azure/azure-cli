@@ -164,7 +164,7 @@ short-summary: Get the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-name -b
+  - name: --backup-name
     short-summary: The name of the ANF backup
 examples:
   - name: Get an ANF account backup
@@ -178,7 +178,7 @@ short-summary: Delete the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-name -b
+  - name: --backup-name
     short-summary: The name of the ANF backup
 examples:
   - name: Delete an ANF account backup
@@ -216,7 +216,7 @@ parameters:
 examples:
   - name: Create an ANF backup policy
     text: >
-        az netappfiles account backup-policy create -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups 1 --enabled true
+        az netappfiles account backup-policy create -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname -l westus2 --daily-backups 1 --enabled true
 """
 
 helps['netappfiles account backup-policy delete'] = """
@@ -230,7 +230,7 @@ parameters:
 examples:
   - name: Delete an ANF backup policy
     text: >
-        az netappfiles account backup-policy delete -g mygroup --account-name myaccname --name mybackuppolicyname
+        az netappfiles account backup-policy delete -g mygroup --account-name myaccname --backup-policy-name mybackuppolicyname
 """
 
 helps['netappfiles account backup-policy list'] = """
@@ -256,7 +256,7 @@ parameters:
 examples:
   - name: Get an ANF backup policy
     text: >
-        az netappfiles account backup-policy show -g mygroup --account-name myaccname --name mybackuppolicyname
+        az netappfiles account backup-policy show -g mygroup --account-name myaccname --backup-policy-name mybackuppolicyname
 """
 
 helps['netappfiles account backup-policy update'] = """
@@ -280,7 +280,7 @@ parameters:
 examples:
   - name: Update specific values for an ANF backup policy
     text: >
-        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
+        az netappfiles account backup-policy update -g mygroup --account-name myaccountname --backup-policy-name mybackuppolicyname -l westus2 --daily-backups 1 --enabled false
 """
 
 
@@ -934,7 +934,7 @@ parameters:
 examples:
   - name: Create an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy create -g mygroup --account-name myaccountname --name mysnapshotpolicyname -l westus2 --hourly-snapshots 1 --enabled true
+        az netappfiles snapshot policy create -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --hourly-snapshots 1 --enabled true
 """
 
 helps['netappfiles snapshot policy delete'] = """
@@ -948,7 +948,7 @@ parameters:
 examples:
   - name: Delete an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy delete -g mygroup --account-name myaccname --name mysnapshotpolicyname
+        az netappfiles snapshot policy delete -g mygroup --account-name myaccname --snapshot-policy-name mysnapshotpolicyname
 """
 
 helps['netappfiles snapshot policy list'] = """
@@ -974,7 +974,7 @@ parameters:
 examples:
   - name: Get an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy show -g mygroup --account-name myaccname --name mysnapshotpolicyname
+        az netappfiles snapshot policy show -g mygroup --account-name myaccname --snapshot-policy-name mysnapshotpolicyname
 """
 
 helps['netappfiles snapshot policy volumes'] = """
@@ -988,7 +988,7 @@ parameters:
 examples:
   - name: Get ANF volumes associated with snapshot policy
     text: >
-        az netappfiles snapshot policy volumes -g mygroup --account-name myaccname --name mysnapshotpolicyname
+        az netappfiles snapshot policy volumes -g mygroup --account-name myaccname --snapshot-policy-name mysnapshotpolicyname
 """
 
 helps['netappfiles snapshot policy update'] = """
@@ -1025,12 +1025,12 @@ parameters:
     short-summary: Which hour in UTC timezone the monthly snapshot should be taken
   - name: --monthly-days
     short-summary: Which days of the month the weekly snapshot should be taken, accepts a comma separated list of days
-  - name: --enabled
+  - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
 examples:
   - name: Update specific values for an ANF snapshot policy
     text: >
-        az netappfiles snapshot policy update -g mygroup --account-name myaccountname --name mysnapshotpolicyname -l westus2 --daily-snapshots 1 --enabled false
+        az netappfiles snapshot policy update -g mygroup --account-name myaccountname --snapshot-policy-name mysnapshotpolicyname -l westus2 --daily-snapshots 1 --enabled false
 """
 
 helps['netappfiles vault'] = """
