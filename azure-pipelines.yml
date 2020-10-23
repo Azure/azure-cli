@@ -603,7 +603,7 @@ jobs:
   displayName: Build Yum Package
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -624,7 +624,7 @@ jobs:
   displayName: Test Yum Package
 
   dependsOn: BuildYumPackage
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
