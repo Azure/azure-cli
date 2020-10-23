@@ -43,7 +43,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
                  (account_name, backup_policy_name))
 
         # create backup policy using short parameter names and validate result
-        backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s -n %s "
+        backup_policy = self.cmd("az netappfiles account backup-policy create -g {rg} -a %s -b %s "
                                  "-l %s -d %s -w %s -m %s -e %s --tags %s" %
                                  (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
                                   weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
