@@ -14,7 +14,54 @@ interactions:
       - -g -n -v -l -f
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0''
+        under resource group ''cli_test_template_specs_tenant_deploy000001'' was not
+        found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 19 Oct 2020 04:06:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -32,7 +79,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:07 GMT
+      - Mon, 19 Oct 2020 04:06:44 GMT
       expires:
       - '-1'
       pragma:
@@ -65,7 +112,7 @@ interactions:
       - -g -n -v -l -f
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: PUT
@@ -74,8 +121,8 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"eastus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-08-20T15:57:08.6758354Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-08-20T15:57:08.6758354Z\"\r\n
+        \"2020-10-19T04:06:45.9564058Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-19T04:06:45.9564058Z\"\r\n
         \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-sub-lvl-ts-deploy000002\"\r\n}"
     headers:
@@ -86,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:09 GMT
+      - Mon, 19 Oct 2020 04:06:45 GMT
       expires:
       - '-1'
       pragma:
@@ -106,14 +153,14 @@ interactions:
     body: '{"location": "eastus", "properties": {"artifacts": [], "template": {"$schema":
       "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"storageAccountName": {"type": "string",
-      "defaultValue": "armbuilddemo1801"}, "nestedRGName": {"type": "string", "defaultValue":
-      "cli_test_subscription_level_deployment"}}, "variables": {}, "resources": [{"type":
-      "Microsoft.Authorization/policyDefinitions", "name": "policy2", "apiVersion":
-      "2016-12-01", "properties": {"policyType": "Custom", "parameters": {}, "policyRule":
-      {"if": {"field": "location", "equals": "northeurope"}, "then": {"effect": "deny"}}}},
-      {"type": "Microsoft.Authorization/policyAssignments", "name": "location-lock",
-      "apiVersion": "2016-12-01", "dependsOn": ["policy2"], "properties": {"scope":
-      "[subscription().id]", "policyDefinitionId": "[resourceId(''Microsoft.Authorization/policyDefinitions'',
+      "defaultValue": "[uniqueString(subscription().subscriptionId)]"}, "nestedRGName":
+      {"type": "string", "defaultValue": "cli_test_subscription_level_deployment"}},
+      "variables": {}, "resources": [{"type": "Microsoft.Authorization/policyDefinitions",
+      "name": "policy2", "apiVersion": "2016-12-01", "properties": {"policyType":
+      "Custom", "parameters": {}, "policyRule": {"if": {"field": "location", "equals":
+      "northeurope"}, "then": {"effect": "deny"}}}}, {"type": "Microsoft.Authorization/policyAssignments",
+      "name": "location-lock", "apiVersion": "2016-12-01", "dependsOn": ["policy2"],
+      "properties": {"scope": "[subscription().id]", "policyDefinitionId": "[resourceId(''Microsoft.Authorization/policyDefinitions'',
       ''policy2'')]"}}, {"type": "Microsoft.Resources/resourceGroups", "name": "[parameters(''nestedRGName'')]",
       "apiVersion": "2018-05-01", "location": "WestUS", "properties": {}}, {"type":
       "Microsoft.Resources/deployments", "name": "rg-nested6", "apiVersion": "2017-05-10",
@@ -133,14 +180,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1744'
+      - '1773'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: PUT
@@ -149,12 +196,12 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"eastus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-08-20T15:57:09.7710286Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-08-20T15:57:09.7710286Z\"\r\n
+        \"2020-10-19T04:06:46.9215486Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-19T04:06:46.9215486Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"storageAccountName\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"armbuilddemo1801\"\r\n
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[uniqueString(subscription().subscriptionId)]\"\r\n
         \       },\r\n        \"nestedRGName\": {\r\n          \"type\": \"string\",\r\n
         \         \"defaultValue\": \"cli_test_subscription_level_deployment\"\r\n
         \       }\r\n      },\r\n      \"variables\": {},\r\n      \"resources\":
@@ -194,11 +241,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3460'
+      - '3489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:09 GMT
+      - Mon, 19 Oct 2020 04:06:46 GMT
       expires:
       - '-1'
       pragma:
@@ -226,10 +273,10 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --location --template-spec --parameters
+      - --location --template-spec --parameters --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -292,7 +339,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:10 GMT
+      - Mon, 19 Oct 2020 04:06:47 GMT
       expires:
       - '-1'
       pragma:
@@ -318,10 +365,10 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - --location --template-spec --parameters
+      - --location --template-spec --parameters --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -330,12 +377,12 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"eastus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-08-20T15:57:09.7710286Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-08-20T15:57:09.7710286Z\"\r\n
+        \"2020-10-19T04:06:46.9215486Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-19T04:06:46.9215486Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"storageAccountName\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"armbuilddemo1801\"\r\n
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[uniqueString(subscription().subscriptionId)]\"\r\n
         \       },\r\n        \"nestedRGName\": {\r\n          \"type\": \"string\",\r\n
         \         \"defaultValue\": \"cli_test_subscription_level_deployment\"\r\n
         \       }\r\n      },\r\n      \"variables\": {},\r\n      \"resources\":
@@ -375,11 +422,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3460'
+      - '3489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:10 GMT
+      - Mon, 19 Oct 2020 04:06:47 GMT
       expires:
       - '-1'
       pragma:
@@ -413,8 +460,7 @@ interactions:
       string: "{\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#\",\n
         \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {\n     /** comment1\n
         \       comment2\n        comment3\n      **/\n      // comment\n      /**
-        comment **/\n    \"storageAccountName\": {\n      \"value\": \"armbuilddemo18221\"
-        \ // comment\n    },\n    \"nestedRGName\": {\n      /** comment1\n        comment2\n
+        comment **/\n    \"nestedRGName\": {\n      /** comment1\n        comment2\n
         \       comment3\n      **/\n      // comment\n      /** comment **/\n      \"value\":
         \"cli_test_subscription_level_deployment\" /** comment **/\n      /** comment1\n
         \       comment2\n        comment3\n      **/\n      // comment\n      /**
@@ -430,19 +476,19 @@ interactions:
       connection:
       - close
       content-length:
-      - '743'
+      - '661'
       content-security-policy:
       - default-src 'none'; style-src 'unsafe-inline'; sandbox
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:11 GMT
+      - Mon, 19 Oct 2020 04:06:48 GMT
       etag:
-      - '"79cf9050f422e6c9fef2a7ec4857b9816421227463500c581f531a808d563754"'
+      - '"2cc7b94cb1a1129b25fb74b5079c39ebea46f9ed18b7ed5ab643967ad43be835"'
       expires:
-      - Thu, 20 Aug 2020 16:02:11 GMT
+      - Mon, 19 Oct 2020 04:11:48 GMT
       source-age:
-      - '189'
+      - '0'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -457,15 +503,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 69e1f46e1a734a213ba477ea3e3ab0106c19d267
+      - 77c96dd46729a46b7c6adc06ccc2cc5249daf9d0
       x-frame-options:
       - deny
       x-github-request-id:
-      - 3CCC:2722:1B41FE:1FFA00:5F3E9C99
+      - 144E:2C91:34CB1:4B7F3:5F8D0D8C
       x-served-by:
-      - cache-fty21383-FTY
+      - cache-mia11342-MIA
       x-timer:
-      - S1597939031.494620,VS0,VE1
+      - S1603080408.286422,VS0,VE184
       x-xss-protection:
       - 1; mode=block
     status:
@@ -473,8 +519,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "WestUS", "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0"},
-      "parameters": {"storageAccountName": {"value": "armbuilddemo18221"}, "nestedRGName":
-      {"value": "cli_test_subscription_level_deployment"}}, "mode": "Incremental"}}'
+      "parameters": {"nestedRGName": {"value": "cli_test_subscription_level_deployment"},
+      "storageAccountName": {"value": "armbuilddemo000005"}}, "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -485,30 +531,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '491'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --location --template-spec --parameters
+      - --location --template-spec --parameters --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:12.4804376Z","duration":"PT0S","correlationId":"ba7cb99f-2de8-4aa7-bc5f-8e645df96544","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo000005"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:49.2147416Z","duration":"PT0S","correlationId":"3c76fd68-3b4e-4aaa-b050-92b1b7f5dc8e","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo000005"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2884'
+      - '2890'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:12 GMT
+      - Mon, 19 Oct 2020 04:06:48 GMT
       expires:
       - '-1'
       pragma:
@@ -541,7 +587,7 @@ interactions:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -604,7 +650,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:13 GMT
+      - Mon, 19 Oct 2020 04:06:49 GMT
       expires:
       - '-1'
       pragma:
@@ -633,7 +679,7 @@ interactions:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -642,12 +688,12 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"eastus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-08-20T15:57:09.7710286Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-08-20T15:57:09.7710286Z\"\r\n
+        \"2020-10-19T04:06:46.9215486Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-19T04:06:46.9215486Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"storageAccountName\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"armbuilddemo1801\"\r\n
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[uniqueString(subscription().subscriptionId)]\"\r\n
         \       },\r\n        \"nestedRGName\": {\r\n          \"type\": \"string\",\r\n
         \         \"defaultValue\": \"cli_test_subscription_level_deployment\"\r\n
         \       }\r\n      },\r\n      \"variables\": {},\r\n      \"resources\":
@@ -687,11 +733,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3460'
+      - '3489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:13 GMT
+      - Mon, 19 Oct 2020 04:06:50 GMT
       expires:
       - '-1'
       pragma:
@@ -711,8 +757,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "WestUS", "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0"},
-      "parameters": {"storageAccountName": {"value": "armbuilddemo18221"}, "nestedRGName":
-      {"value": "cli_test_subscription_level_deployment"}}, "mode": "Incremental"}}'
+      "parameters": {"nestedRGName": {"value": "cli_test_subscription_level_deployment"}},
+      "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -723,30 +769,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '434'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:14.7562234Z","duration":"PT0S","correlationId":"b18d2fa1-4619-4378-bcc4-1a6c471ba98c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:51.0699341Z","duration":"PT0S","correlationId":"822a357b-7410-4a68-9832-6f3e9bdd1e3f","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/5w7wnz4ii4bgy"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3002'
+      - '2994'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:14 GMT
+      - Mon, 19 Oct 2020 04:06:50 GMT
       expires:
       - '-1'
       pragma:
@@ -766,8 +812,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "WestUS", "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0"},
-      "parameters": {"storageAccountName": {"value": "armbuilddemo18221"}, "nestedRGName":
-      {"value": "cli_test_subscription_level_deployment"}}, "mode": "Incremental"}}'
+      "parameters": {"nestedRGName": {"value": "cli_test_subscription_level_deployment"}},
+      "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -778,32 +824,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '434'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-08-20T15:57:16.6016358Z","duration":"PT0.9864018S","correlationId":"0503364e-0ba4-4e71-93a5-9664ffbaa142","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-10-19T04:06:52.878794Z","duration":"PT1.0714756S","correlationId":"854d5b26-66cb-469c-b58f-65e1f91e6649","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operationStatuses/08586036678498623890?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operationStatuses/08585985264736703079?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '2278'
+      - '2273'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:57:16 GMT
+      - Mon, 19 Oct 2020 04:06:52 GMT
       expires:
       - '-1'
       pragma:
@@ -832,52 +878,9 @@ interactions:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586036678498623890?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Aug 2020 15:57:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment sub create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --location --template-spec --parameters
-      User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586036678498623890?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585985264736703079?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -889,7 +892,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:17 GMT
+      - Mon, 19 Oct 2020 04:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -918,21 +921,21 @@ interactions:
       - -n --location --template-spec --parameters
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:57.1995992Z","duration":"PT41.5843652S","correlationId":"0503364e-0ba4-4e71-93a5-9664ffbaa142","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:59.4520617Z","duration":"PT7.6447433S","correlationId":"854d5b26-66cb-469c-b58f-65e1f91e6649","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/5w7wnz4ii4bgy"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2831'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:17 GMT
+      - Mon, 19 Oct 2020 04:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -961,23 +964,23 @@ interactions:
       - -n
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:57.1995992Z","duration":"PT41.5843652S","correlationId":"0503364e-0ba4-4e71-93a5-9664ffbaa142","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003","name":"azure-cli-subscription_level_deployment000003","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:59.4520617Z","duration":"PT7.6447433S","correlationId":"854d5b26-66cb-469c-b58f-65e1f91e6649","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/5w7wnz4ii4bgy"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2840'
+      - '2831'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:19 GMT
+      - Mon, 19 Oct 2020 04:07:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1008,25 +1011,25 @@ interactions:
       - -n
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/exportTemplate?api-version=2020-06-01
   response:
     body:
-      string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"storageAccountName":{"defaultValue":"armbuilddemo1801","type":"String"},"nestedRGName":{"defaultValue":"cli_test_subscription_level_deployment","type":"String"}},"variables":{},"resources":[{"type":"Microsoft.Authorization/policyDefinitions","apiVersion":"2016-12-01","name":"policy2","properties":{"policyType":"Custom","parameters":{},"policyRule":{"if":{"field":"location","equals":"northeurope"},"then":{"effect":"deny"}}}},{"type":"Microsoft.Authorization/policyAssignments","apiVersion":"2016-12-01","name":"location-lock","dependsOn":["policy2"],"properties":{"scope":"[subscription().id]","policyDefinitionId":"[resourceId(''Microsoft.Authorization/policyDefinitions'',
+      string: '{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"storageAccountName":{"defaultValue":"[uniqueString(subscription().subscriptionId)]","type":"String"},"nestedRGName":{"defaultValue":"cli_test_subscription_level_deployment","type":"String"}},"variables":{},"resources":[{"type":"Microsoft.Authorization/policyDefinitions","apiVersion":"2016-12-01","name":"policy2","properties":{"policyType":"Custom","parameters":{},"policyRule":{"if":{"field":"location","equals":"northeurope"},"then":{"effect":"deny"}}}},{"type":"Microsoft.Authorization/policyAssignments","apiVersion":"2016-12-01","name":"location-lock","dependsOn":["policy2"],"properties":{"scope":"[subscription().id]","policyDefinitionId":"[resourceId(''Microsoft.Authorization/policyDefinitions'',
         ''policy2'')]"}},{"type":"Microsoft.Resources/resourceGroups","apiVersion":"2018-05-01","name":"[parameters(''nestedRGName'')]","location":"WestUS","properties":{}},{"type":"Microsoft.Resources/deployments","apiVersion":"2017-05-10","name":"rg-nested6","dependsOn":["[parameters(''nestedRGName'')]"],"properties":{"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{},"variables":{},"resources":[{"type":"Microsoft.Storage/storageAccounts","name":"[parameters(''storageAccountName'')]","apiVersion":"2015-06-15","location":"East
         US","properties":{"accountType":"Standard_LRS","supportsHttpsTrafficOnly":true}}]},"mode":"Incremental"},"resourceGroup":"[parameters(''nestedRGName'')]"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1592'
+      - '1621'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:19 GMT
+      - Mon, 19 Oct 2020 04:07:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1059,23 +1062,23 @@ interactions:
       - -n
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operations?api-version=2020-06-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/329EE474E6D6C89B","operationId":"329EE474E6D6C89B","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:55.681714Z","duration":"PT34.6674743S","trackingId":"35c587cf-c59c-488b-94ed-9e51c5358bb4","serviceRequestId":"56cdfcbd-bb1c-4c3c-b74d-c7b32318692b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/AB73B60C58049248","operationId":"AB73B60C58049248","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:20.706402Z","duration":"PT2.3974458S","trackingId":"3eef41be-7595-494c-99cf-26f74241a8b8","serviceRequestId":"f4adb327-ca7f-4546-b73c-e89b968442fe","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/E0AC39399CA5D988","operationId":"E0AC39399CA5D988","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:19.8868294Z","duration":"PT0.3881352S","trackingId":"75b16f45-16cd-46e5-8129-162b35c981ea","serviceRequestId":"eastus:aef12f1c-eda2-4589-a367-03e2b1bbb9ff","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/02C83B583A6FE177","operationId":"02C83B583A6FE177","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:18.9693199Z","duration":"PT0.6603637S","trackingId":"904b7d40-26de-4ccc-ac47-17d08b98204d","serviceRequestId":"eastus:356702c2-b7a2-44d5-9d55-d9f82745edac","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/08586036678498623890","operationId":"08586036678498623890","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2020-08-20T15:57:56.9698113Z","duration":"PT0.820013S","trackingId":"08b510d6-f8ce-4842-bd64-8edf75ae6b4e","statusCode":"OK"}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/15DDD8B59A6FABEE","operationId":"15DDD8B59A6FABEE","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:59.2425847Z","duration":"PT5.6790585S","trackingId":"f5b3a78d-f688-4bac-b6bf-6ca0648c8ee7","serviceRequestId":"westus:c596ad45-4cf3-48ed-98b2-8e827df4566f","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/EB4027A247FF45C1","operationId":"EB4027A247FF45C1","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:57.0930489Z","duration":"PT3.5295227S","trackingId":"d172d32e-0dbc-42ea-8eac-14b727e7a565","serviceRequestId":"westus:4e3efeb4-72fc-4ef1-bf1c-4700787428c6","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/BEF4B24AE24CD498","operationId":"BEF4B24AE24CD498","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:57.9213955Z","duration":"PT4.3578693S","trackingId":"53e17172-61e7-4988-8433-1a1d4e04b262","serviceRequestId":"13f870a0-8da5-43e5-95be-2231473c8b48","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/6AF5956DA28131BA","operationId":"6AF5956DA28131BA","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:54.3904101Z","duration":"PT0.8268839S","trackingId":"eeaf1219-43eb-423c-8de7-336b0366760b","serviceRequestId":"9407603e-7a0e-4b90-91ab-58cd6e54d31b","statusCode":"OK","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000003/operations/08585985264736703079","operationId":"08585985264736703079","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2020-10-19T04:06:59.4364687Z","duration":"PT0.0864182S","trackingId":"c852822c-7fba-4d40-8638-bd89a5977b69","statusCode":"OK"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3474'
+      - '3471'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:19 GMT
+      - Mon, 19 Oct 2020 04:07:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1104,7 +1107,7 @@ interactions:
       - -n --location --template-spec --parameters --no-wait
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -1167,7 +1170,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:21 GMT
+      - Mon, 19 Oct 2020 04:07:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1196,7 +1199,7 @@ interactions:
       - -n --location --template-spec --parameters --no-wait
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
@@ -1205,12 +1208,12 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"eastus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
         \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-08-20T15:57:09.7710286Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-08-20T15:57:09.7710286Z\"\r\n
+        \"2020-10-19T04:06:46.9215486Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-19T04:06:46.9215486Z\"\r\n
         \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
         {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"storageAccountName\":
-        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"armbuilddemo1801\"\r\n
+        {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[uniqueString(subscription().subscriptionId)]\"\r\n
         \       },\r\n        \"nestedRGName\": {\r\n          \"type\": \"string\",\r\n
         \         \"defaultValue\": \"cli_test_subscription_level_deployment\"\r\n
         \       }\r\n      },\r\n      \"variables\": {},\r\n      \"resources\":
@@ -1250,11 +1253,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3460'
+      - '3489'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:21 GMT
+      - Mon, 19 Oct 2020 04:07:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1274,8 +1277,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "WestUS", "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0"},
-      "parameters": {"storageAccountName": {"value": "armbuilddemo18221"}, "nestedRGName":
-      {"value": "cli_test_subscription_level_deployment"}}, "mode": "Incremental"}}'
+      "parameters": {"nestedRGName": {"value": "cli_test_subscription_level_deployment"}},
+      "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -1286,30 +1289,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '434'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n --location --template-spec --parameters --no-wait
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-08-20T15:58:22.4908916Z","duration":"PT0S","correlationId":"3fe55b5b-f51e-4283-901d-596e2df6120f","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/armbuilddemo18221"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-19T04:07:27.7429587Z","duration":"PT0S","correlationId":"0fbab7a4-43bc-4ada-bb72-a87720306cfc","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Storage/storageAccounts/5w7wnz4ii4bgy"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3002'
+      - '2994'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:22 GMT
+      - Mon, 19 Oct 2020 04:07:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1329,8 +1332,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "WestUS", "properties": {"templateLink": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0"},
-      "parameters": {"storageAccountName": {"value": "armbuilddemo18221"}, "nestedRGName":
-      {"value": "cli_test_subscription_level_deployment"}}, "mode": "Incremental"}}'
+      "parameters": {"nestedRGName": {"value": "cli_test_subscription_level_deployment"}},
+      "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -1341,32 +1344,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '488'
+      - '434'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n --location --template-spec --parameters --no-wait
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-08-20T15:58:24.3534761Z","duration":"PT1.0748634S","correlationId":"3382d22e-4cde-40f5-83f4-3185f03f6662","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-10-19T04:07:29.4911542Z","duration":"PT1.2537692S","correlationId":"50e68306-2f38-47d0-8145-d36a30a577fd","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004/operationStatuses/08586036677821990209?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004/operationStatuses/08585985264372402351?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '2278'
+      - '2274'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:23 GMT
+      - Mon, 19 Oct 2020 04:07:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1397,7 +1400,7 @@ interactions:
       - -n
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: POST
@@ -1409,7 +1412,7 @@ interactions:
       cache-control:
       - no-cache
       date:
-      - Thu, 20 Aug 2020 15:58:25 GMT
+      - Mon, 19 Oct 2020 04:07:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1438,23 +1441,23 @@ interactions:
       - -n
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1013067532690748919","parameters":{"storageAccountName":{"type":"String","value":"armbuilddemo18221"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Canceled","timestamp":"2020-08-20T15:58:25.5082862Z","duration":"PT2.2296735S","correlationId":"3382d22e-4cde-40f5-83f4-3185f03f6662","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/azure-cli-subscription_level_deployment000004","name":"azure-cli-subscription_level_deployment000004","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_tenant_deploy000001/providers/Microsoft.Resources/templateSpecs/cli-test-sub-lvl-ts-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"4228755797029926516","parameters":{"storageAccountName":{"type":"String","value":"5w7wnz4ii4bgy"},"nestedRGName":{"type":"String","value":"cli_test_subscription_level_deployment"}},"mode":"Incremental","provisioningState":"Canceled","timestamp":"2020-10-19T04:07:30.3790542Z","duration":"PT2.1416692S","correlationId":"50e68306-2f38-47d0-8145-d36a30a577fd","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]},{"resourceType":"policyAssignments","locations":[null]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"resourceGroups","locations":["westus"]},{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy2","resourceType":"Microsoft.Authorization/policyDefinitions","resourceName":"policy2"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/location-lock","resourceType":"Microsoft.Authorization/policyAssignments","resourceName":"location-lock"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment","resourceType":"Microsoft.Resources/resourceGroups","resourceName":"cli_test_subscription_level_deployment"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_subscription_level_deployment/providers/Microsoft.Resources/deployments/rg-nested6","resourceType":"Microsoft.Resources/deployments","resourceName":"rg-nested6"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2278'
+      - '2274'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Aug 2020 15:58:26 GMT
+      - Mon, 19 Oct 2020 04:07:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1485,7 +1488,7 @@ interactions:
       - --template-spec --yes
       User-Agent:
       - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1 (MSI)
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
       accept-language:
       - en-US
     method: DELETE
@@ -1499,7 +1502,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 20 Aug 2020 15:58:27 GMT
+      - Mon, 19 Oct 2020 04:07:32 GMT
       expires:
       - '-1'
       pragma:

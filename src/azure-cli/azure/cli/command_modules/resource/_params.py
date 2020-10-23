@@ -60,16 +60,16 @@ def load_arguments(self, _):
 
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
-                                                            is_preview=True, min_api='2019-07-01')
+                                                            min_api='2019-07-01')
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
                                                            help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
-                                                           is_preview=True, min_api='2019-07-01')
+                                                           min_api='2019-07-01')
     deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
                                                                    arg_type=get_enum_type(ChangeType),
                                                                    help='Space-separated list of resource change types to be excluded from What-If results.',
-                                                                   is_preview=True, min_api='2019-07-01')
+                                                                   min_api='2019-07-01')
     tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
     tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
     tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
@@ -544,6 +544,7 @@ def load_arguments(self, _):
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
         c.argument('ui_definition_file', arg_type=ts_version_ui_definiton_file_type)
+        c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     with self.argument_context('ts update') as c:
         c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')

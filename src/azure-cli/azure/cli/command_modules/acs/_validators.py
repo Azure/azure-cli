@@ -229,8 +229,8 @@ def validate_load_balancer_outbound_ports(namespace):
 def validate_load_balancer_idle_timeout(namespace):
     """validate load balancer profile idle timeout"""
     if namespace.load_balancer_idle_timeout is not None:
-        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
-            raise CLIError("--load-balancer-idle-timeout must be in the range [4,120]")
+        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
+            raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
 def validate_nodes_count(namespace):
@@ -311,6 +311,15 @@ def validate_vnet_subnet_id(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.vnet_subnet_id):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+
+
+def validate_ppg(namespace):
+    if namespace.ppg is not None:
+        if namespace.ppg == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.ppg):
+            raise CLIError("--ppg is not a valid Azure resource ID.")
 
 
 def validate_nodepool_labels(namespace):

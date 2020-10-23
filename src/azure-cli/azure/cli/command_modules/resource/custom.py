@@ -1650,9 +1650,9 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
                                                                               resource_type,
                                                                               resource_name)]
 
-    return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
-            tags, is_incremental) for id_dict in parsed_ids])
+    return _single_or_collection([LongRunningOperation(cmd.cli_ctx)(
+        _get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
+            tags, is_incremental)) for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
@@ -1751,7 +1751,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, ui_definition_file=None):
+                         description=None, version=None, version_description=None, no_prompt=False, ui_definition_file=None):
     artifacts = None
     input_ui_definition = None
     if location is None:
@@ -1759,18 +1759,31 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         location = rcf.resource_groups.get(resource_group_name).location
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
+        Exists = False
+        if no_prompt is False:
+            try:  # Check if child template spec already exists.
+                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                from knack.prompting import prompt_y_n
+                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                if not confirmation:
+                    return None
+                Exists = True
+            except Exception:  # pylint: disable=broad-except
+                pass
+
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
             packed_template = pack(cmd, template_file)
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        try:  # Check if parent template spec already exists.
-            rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
-        except Exception:  # pylint: disable=broad-except
-            TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-            template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
-            rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
+        if not Exists:
+            try:  # Check if parent template spec already exists.
+                rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+            except Exception:  # pylint: disable=broad-except
+                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
+                rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         if ui_definition_file:
             ui_definition_content = _remove_comments_from_json(read_file_content(ui_definition_file))
