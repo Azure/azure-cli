@@ -61,7 +61,7 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
     # TODO: Fix this because it changes the default location even when I pass in a location param
     # location = _update_location(cmd, resource_group_name)
 
-    return location, resource_group_name, server_name
+    return location, resource_group_name, server_name.lower()
 
 
 def generate_password(administrator_login_password):
