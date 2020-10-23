@@ -351,8 +351,6 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
-
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
                  checks=self.check('tags', {'cli-test': 'test'}))
@@ -375,8 +373,6 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
-
         # Test Microsoft.ContainerInstance/containerGroups
         self.kwargs.update({
             'container_group_name': self.create_random_name('clicontainer', 16),
@@ -388,6 +384,14 @@ class TagScenarioTest(ScenarioTest):
         self.kwargs['container_id'] = container['id']
         self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {container_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource tag --ids {vault_id} {webhook_id} {container_id} --tags {tag}', checks=[
+            self.check('length(@)', 3),
+            self.check('[0].tags', {'cli-test': 'test'})
+        ])
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
