@@ -17,7 +17,11 @@ from knack.util import CLIError
 class AddSoldTo(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        namespace.sold_to = action
+
+        if hasattr(namespace, 'sold_to'):
+            namespace.sold_to = action
+        if hasattr(namespace, 'bill_to'):
+            namespace.bill_to = action
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         try:

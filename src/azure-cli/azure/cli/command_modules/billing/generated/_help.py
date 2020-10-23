@@ -233,7 +233,7 @@ helps['billing customer list'] = """
     short-summary: "Lists the customers that are billed to a billing account. The operation is supported only for \
 billing accounts with agreement type Microsoft Partner Agreement."
     examples:
-      - name: CustomersListByBillingAccount
+      - name: CustomersListByBillingProfile
         text: |-
                az billing customer list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 """

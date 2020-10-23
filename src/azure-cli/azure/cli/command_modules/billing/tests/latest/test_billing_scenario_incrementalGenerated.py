@@ -183,13 +183,13 @@ def step__customers_get_customer(test):
 @try_manual
 def step__customers_get_customerslistbybillingaccount(test):
     test.cmd('az billing customer list '
-             '--account-name "{myBillingAccount}" ',
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
-# EXAMPLE: /Customers/get/CustomersListByBillingAccount
+# EXAMPLE: /Customers/get/CustomersListByBillingProfile
 @try_manual
-def step__customers_get_customerslistbybillingprofile(test):    # manually correct
+def step__customers_get_customerslistbybillingprofile(test):
     test.cmd('az billing customer list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}"',
@@ -742,7 +742,7 @@ class BillingProfileScenarioTest(ScenarioTest):
         })
 
         # create a new billing profile
-        # step__billingprofiles_put_createbillingprofile(self)    # this ccommand is not working
+        # step__billingprofiles_put_createbillingprofile(self)    # this API is not working
 
         # list new appended billing profiles
         step__billingprofiles_get2(self)

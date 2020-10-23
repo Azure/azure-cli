@@ -207,7 +207,6 @@ def billing_subscription_list(client,
     elif account_name is not None and profile_name is not None:
         return client.list_by_billing_profile(billing_account_name=account_name,
                                               billing_profile_name=profile_name)
-
     return client.list_by_billing_account(billing_account_name=account_name)
 
 
