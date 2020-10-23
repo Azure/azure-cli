@@ -1170,5 +1170,6 @@ def handle_version_update():
 def log_command_handler_call(func, *args, **kwargs):
     logger.debug("Calling command handler: module=%s, name=%s, args=%s, kwargs=%s",
                  func.__module__, func.__qualname__, args, kwargs)
+    from knack.util import todict
     if kwargs.get('parameters'):
-        logger.debug("parameters: %s", kwargs['parameters'].as_dict())
+        logger.debug("parameters: %s", todict(kwargs['parameters']))
