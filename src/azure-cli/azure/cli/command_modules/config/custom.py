@@ -8,6 +8,8 @@ from knack.util import CLIError
 
 from azure.cli.core.util import ScopedConfig
 
+import azure.cli.core.telemetry as telemetry
+
 logger = get_logger(__name__)
 
 
@@ -20,6 +22,7 @@ def _normalize_config_value(value):
 def config_set(cmd, key_value=None, local=False):
     if key_value:
         with ScopedConfig(cmd.cli_ctx.config, local):
+            telemetry_contents = []
             for kv in key_value:
                 # core.no_color=true
                 parts = kv.split('=', 1)
@@ -36,6 +39,8 @@ def config_set(cmd, key_value=None, local=False):
                 name = parts[1]
 
                 cmd.cli_ctx.config.set_value(section, name, _normalize_config_value(value))
+                telemetry_contents.append((key, section, value))
+            telemetry.set_debug_info('ConfigSet', telemetry_contents)
 
 
 def config_get(cmd, key=None, local=False):
@@ -86,6 +91,7 @@ def config_unset(cmd, key=None, local=False):
 
         with ScopedConfig(cmd.cli_ctx.config, local):
             cmd.cli_ctx.config.remove_option(section, name)
+    telemetry.set_debug_info('ConfigUnset', ' '.join(key))
 
 
 def turn_param_persist_on(cmd):
