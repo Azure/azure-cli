@@ -164,7 +164,7 @@ short-summary: Get the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-name --name -n
+  - name: --backup-name -b
     short-summary: The name of the ANF backup
 examples:
   - name: Get an ANF account backup
@@ -178,7 +178,7 @@ short-summary: Delete the specific Azure NetApp Files (ANF) Account Backup.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-name --name -n
+  - name: --backup-name -b
     short-summary: The name of the ANF backup
 examples:
   - name: Delete an ANF account backup
@@ -197,19 +197,19 @@ short-summary: Create a new Azure NetApp Files (ANF) backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-policy-name -n --name
+  - name: --backup-policy-name -b
     short-summary: The name of the ANF backup policy
   - name: --location -l
     short-summary: The location of the backup
-  - name: --daily-backups
+  - name: --daily-backups -d
     short-summary: Daily backups count to keep
-  - name: --weekly-backups
+  - name: --weekly-backups -w
     short-summary: Weekly backups count to keep
-  - name: --monthly-backups
+  - name: --monthly-backups -m
     short-summary: Monthly backups count to keep
-  - name: --yearly-backups
+  - name: --yearly-backups -y
     short-summary: Yearly backups count to keep, not in use at the moment
-  - name: --enabled
+  - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
@@ -225,7 +225,7 @@ short-summary: Delete the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-policy-name -n --name
+  - name: --backup-policy-name -b
     short-summary: The name of the ANF backup policy
 examples:
   - name: Delete an ANF backup policy
@@ -251,7 +251,7 @@ short-summary: Get the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --backup-policy-name -n --name
+  - name: --backup-policy-name -b
     short-summary: The name of the ANF backup policy
 examples:
   - name: Get an ANF backup policy
@@ -265,17 +265,17 @@ short-summary: Update the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --pool-name -n --name
+  - name: --backup-policy-name -b
     short-summary: The name of the ANF backup policy
-  - name: --daily-backups
+  - name: --daily-backups -d
     short-summary: Daily backups count to keep
-  - name: --weekly-backups
+  - name: --weekly-backups -w
     short-summary: Weekly backups count to keep
-  - name: --monthly-backups
+  - name: --monthly-backups -m
     short-summary: Monthly backups count to keep
-  - name: --yearly-backups
+  - name: --yearly-backups -y
     short-summary: Yearly backups count to keep, not in use at the moment
-  - name: --enabled
+  - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
 examples:
   - name: Update specific values for an ANF backup policy
@@ -899,15 +899,15 @@ short-summary: Create a new Azure NetApp Files (ANF) snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name
     short-summary: The name of the ANF snapshot policy
-  - name: --hourly-snapshots
+  - name: --hourly-snapshots -u
     short-summary: Hourly snapshots count to keep
-  - name: --daily-snapshots
+  - name: --daily-snapshots -d
     short-summary: Daily snapshots count to keep
-  - name: --weekly-snapshots
+  - name: --weekly-snapshots -w
     short-summary: Weekly snapshots count to keep
-  - name: --monthly-snapshots
+  - name: --monthly-snapshots -m
     short-summary: Monthly snapshots count to keep
   - name: --hourly-minute
     short-summary: Which minute the hourly snapshot should be taken
@@ -927,7 +927,7 @@ parameters:
     short-summary: Which hour in UTC timezone the monthly snapshot should be taken
   - name: --monthly-days
     short-summary: Which days of the month the weekly snapshot should be taken, accepts a comma separated list of days
-  - name: --enabled
+  - name: --enabled -e
     short-summary: The property to decide policy is enabled or not
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
@@ -943,7 +943,7 @@ short-summary: Delete the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Delete an ANF snapshot policy
@@ -969,7 +969,7 @@ short-summary: Get the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Get an ANF snapshot policy
@@ -983,7 +983,7 @@ short-summary: Get the all ANF volumes associated with snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Get ANF volumes associated with snapshot policy
@@ -997,15 +997,15 @@ short-summary: Update the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name
     short-summary: The name of the ANF snapshot policy
-  - name: --hourly-snapshots
+  - name: --hourly-snapshots -u
     short-summary: Hourly snapshots count to keep
-  - name: --daily-snapshots
+  - name: --daily-snapshots -d
     short-summary: Daily snapshots count to keep
-  - name: --weekly-snapshots
+  - name: --weekly-snapshots -w
     short-summary: Weekly snapshots count to keep
-  - name: --monthly-snapshots
+  - name: --monthly-snapshots -m
     short-summary: Monthly snapshots count to keep
   - name: --hourly-minute
     short-summary: Which minute the hourly snapshot should be taken

@@ -116,7 +116,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
         self.create_backup(account_name, pool_name, volume_name, backup_name)
 
         # get backup and validate
-        backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s --backup-name %s" %
+        backup = self.cmd("netappfiles volume backup show -g {rg} -a %s -p %s -v %s -b %s" %
                           (account_name, pool_name, volume_name, backup_name)).get_output_in_json()
         assert backup is not None
         assert backup['name'] == account_name + "/" + pool_name + "/" + volume_name + "/" + backup_name
