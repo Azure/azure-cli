@@ -191,6 +191,7 @@ def billing_invoice_section_update(client,
                        labels=labels)
 
 
+# pylint: disable=no-else-return
 def billing_subscription_list(client,
                               account_name,
                               profile_name=None,
@@ -206,8 +207,8 @@ def billing_subscription_list(client,
     elif account_name is not None and profile_name is not None:
         return client.list_by_billing_profile(billing_account_name=account_name,
                                               billing_profile_name=profile_name)
-    else:
-        return client.list_by_billing_account(billing_account_name=account_name)
+
+    return client.list_by_billing_account(billing_account_name=account_name)
 
 
 def billing_subscription_show(client,
