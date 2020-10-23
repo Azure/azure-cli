@@ -6,7 +6,7 @@ Release History
 0.7.0 (10/23/2020)
 ++++++
 
-* Improve index.html. Move report link inside table.
+* Improve index.html. Move report link inside table. Display number of tests in link name.
 
 0.6.0 (10/19/2020)
 ++++++

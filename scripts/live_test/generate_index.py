@@ -8,6 +8,7 @@ Generate index.html of testing results HTML pages.
 """
 import traceback
 import os
+import re
 import requests
 import xml.etree.ElementTree as ET
 
@@ -120,12 +121,21 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
         for x in data:
             name = x['name']
             url = x['url']
-            if name.startswith(module):
+            if name.startswith(module + '.'):
                 display_name = 'report'
                 if 'parallel' in name:
                     display_name = 'parallel'
                 elif 'sequential' in name:
                     display_name = 'sequential'
+                try:
+                    html = requests.get(url).content.__str__()
+                    pattern = re.compile('\\d+ tests ran in')
+                    match = pattern.search(html)
+                    number = match.group().split()[0]
+                    if number.isdigit():
+                        display_name += '(' + number + ')'
+                except:
+                    traceback.print_exc()
                 reports += '<a href="{}">{}</a> '.format(url, display_name)
         table += """
           <tr>
