@@ -6,6 +6,8 @@
 # pylint: disable=too-many-lines
 # pylint: disable=too-many-statements
 
+from ..action import AddSoldTo
+
 
 def load_arguments(self, _):
 
@@ -50,3 +52,9 @@ def load_arguments(self, _):
             help="The ID that uniquely identifies a billing profile.",
         )
         c.argument("customer_name", help="The ID that uniquely identifies a customer")
+
+    with self.argument_context('billing profile create') as c:
+        c.argument('bill_to', action=AddSoldTo, nargs='*', help='Billing address.')
+
+    with self.argument_context('billing profile update') as c:
+        c.argument('bill_to', action=AddSoldTo, nargs='*', help='Billing address.')
