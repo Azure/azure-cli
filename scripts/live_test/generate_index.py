@@ -152,16 +152,16 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     """
     content += table
 
-    content += """
-    <p><b>Reports</b></p>
-    """
-
-    for item in data:
-        name = item['name']
-        url = item['url']
-        content += """
-        <a href={}>{}</a><br>
-        """.format(url, name)
+    # content += """
+    # <p><b>Reports</b></p>
+    # """
+    #
+    # for item in data:
+    #     name = item['name']
+    #     url = item['url']
+    #     content += """
+    #     <a href={}>{}</a><br>
+    #     """.format(url, name)
 
     content += """
     </body>
