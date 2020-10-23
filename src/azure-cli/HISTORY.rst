@@ -22,7 +22,7 @@ Release History
 **App Service**
 
 * Bugfix: az webapp up fails when user doesn't have write permissions to project's parent directory (#15373)
-* Fix#-13777-Fix to remove escape chars from XML (#15364)
+* Fix #13777: Fix to remove escape chars from XML (#15364)
 * Fixes #15441: az webapp create-remote-connection fails with AttributeError: 'Thread' object has no attribute 'isAlive' (#15446)
 * [BREAKING CHANGE] az webapp up: add optional params (os & runtime) and updated runtimes (#15522)
 
@@ -49,10 +49,6 @@ Release History
 * `az cosmosdb create/update`: Improve error message from incorrect --locations input (#15276)
 * `az cosmosdb sql container create/update`: Add --analytical-storage-ttl parameter (#15276)
 
-**Docker**
-
-* Add bash-completion to Dockerfile (#15228)
-
 **HDInsight**
 
 * [BREAKING CHANGE] az hdinsight create: remove two parameters: --public-network-access-type and  --outbound-public-network-access-type (#15582)
@@ -65,6 +61,10 @@ Release History
 
 * Invalidate `--enable-soft-delete false` while creating or updating vaults (#15504)
 * Make `--bypass` and `--default-action` work together with network acl parameters while creating vaults (#15571)
+
+**Misc.**
+
+* Add bash-completion to Dockerfile (#15228)
 
 **RDBMS**
 
@@ -125,7 +125,6 @@ Release History
 
 **App Config**
 
-* Fix test bug (#15310)
 * Support AAD auth for data operations (#15160)
 
 **App Service**
