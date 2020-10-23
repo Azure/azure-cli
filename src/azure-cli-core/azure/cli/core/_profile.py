@@ -277,8 +277,8 @@ class Profile:
                         # managedByTenants is missing from the response. This is a known service issue:
                         # https://github.com/Azure/azure-rest-api-specs/issues/9567
                         # pylint: disable=line-too-long
-                        from azure.cli.core.azclierror import UserFault
-                        raise UserFault("Invalid profile is used for cloud '{cloud_name}'. "
+                        from azure.cli.core.azclierror import UnknownError
+                        raise UnknownError("Invalid profile is used for cloud '{cloud_name}'. "
                                         "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>(e.g. 2019-03-01-hybrid)`. "
                                         "For more information about using Azure CLI with Azure Stack, see "
                                         "https://docs.microsoft.com/en-us/azure/azure-stack/user/azure-stack-version-profiles-azurecli2#connect-to-azure-stack"
