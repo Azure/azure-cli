@@ -135,7 +135,7 @@ def load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_
         c.argument('volume_name', options_list=['--volume-name', '-v'], help='The name of the ANF volume', id_part=None)
 
     with self.argument_context('netappfiles snapshot policy') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], id_part='name')
+        c.argument('account_name', account_name_type)
         c.argument('snapshot_policy_name', options_list=['--snapshot-policy-name', '--name', '-n'], help='The name of the snapshot policy', id_part='child_name_1')
         c.argument('hourly_snapshots', options_list=['--hourly-snapshots', '-u'], help='The amount of hourly snapshots to keep', id_part=None)
         c.argument('daily_snapshots', options_list=['--daily-snapshots', '-d'], help='The amount of daily snapshots to keep', id_part=None)

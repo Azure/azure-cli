@@ -197,7 +197,7 @@ short-summary: Create a new Azure NetApp Files (ANF) backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --backup-policy-name -n --name
+  - name: --backup-policy-name -n --name
     short-summary: The name of the ANF backup policy
   - name: --location -l
     short-summary: The location of the backup
@@ -225,7 +225,7 @@ short-summary: Delete the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --backup-policy-name -n --name
+  - name: --backup-policy-name -n --name
     short-summary: The name of the ANF backup policy
 examples:
   - name: Delete an ANF backup policy
@@ -251,7 +251,7 @@ short-summary: Get the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --backup-policy-name -n --name
+  - name: --backup-policy-name -n --name
     short-summary: The name of the ANF backup policy
 examples:
   - name: Get an ANF backup policy
@@ -265,7 +265,7 @@ short-summary: Update the specified ANF backup policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --pool-name -n --name
+  - name: --pool-name -n --name
     short-summary: The name of the ANF backup policy
   - name: --daily-backups
     short-summary: Daily backups count to keep
@@ -899,7 +899,7 @@ short-summary: Create a new Azure NetApp Files (ANF) snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name -n --name
     short-summary: The name of the ANF snapshot policy
   - name: --hourly-snapshots
     short-summary: Hourly snapshots count to keep
@@ -943,7 +943,7 @@ short-summary: Delete the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name -n --name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Delete an ANF snapshot policy
@@ -969,7 +969,7 @@ short-summary: Get the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name -n --name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Get an ANF snapshot policy
@@ -983,7 +983,7 @@ short-summary: Get the all ANF volumes associated with snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name -n --name
     short-summary: The name of the ANF snapshot policy
 examples:
   - name: Get ANF volumes associated with snapshot policy
@@ -997,7 +997,7 @@ short-summary: Update the specified ANF snapshot policy.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
-  - name: --name --snapshot-policy-name -n --name
+  - name: --snapshot-policy-name -n --name
     short-summary: The name of the ANF snapshot policy
   - name: --hourly-snapshots
     short-summary: Hourly snapshots count to keep
