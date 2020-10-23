@@ -306,7 +306,6 @@ class Profile:
         # pylint: disable=too-many-statements
 
         import jwt
-        from requests import HTTPError
         from msrestazure.tools import is_valid_resource_id
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -317,12 +316,13 @@ class Profile:
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
+                from azure.cli.core.azclierror import AzureResponseError
                 try:
                     msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                except AzureResponseError as ex:
+                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
                         logger.info('Sniff: not an MSI client id')
                     else:
                         raise
@@ -332,8 +332,8 @@ class Profile:
                         identity_type = MsiAccountTypes.user_assigned_object_id
                         msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
-                    except HTTPError as ex:
-                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                    except AzureResponseError as ex:
+                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
                             logger.info('Sniff: not an MSI object id')
                         else:
                             raise
@@ -1140,7 +1140,7 @@ class ServicePrincipalAuth:
                            'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
             self.certificate_file = certificate_file
             self.public_certificate = None
             try:
@@ -1154,7 +1154,7 @@ class ServicePrincipalAuth:
                         match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
                                           self.cert_file_string, re.I)
                         self.public_certificate = match.group('public').strip()
-            except UnicodeDecodeError:
+            except (UnicodeDecodeError, Error):
                 raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
