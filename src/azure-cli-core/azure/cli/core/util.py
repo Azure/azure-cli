@@ -1170,6 +1170,11 @@ def handle_version_update():
 def log_command_handler_call(func, *args, **kwargs):
     logger.debug("Calling command handler: module=%s, name=%s, args=%s, kwargs=%s",
                  func.__module__, func.__qualname__, args, kwargs)
-    from knack.util import todict
-    if kwargs.get('parameters'):
-        logger.debug("parameters: %s", todict(kwargs['parameters']))
+    parameters = kwargs.get('parameters')
+    if parameters:
+        try:
+            # For SDK Model instances, convert to a dict
+            parameters = parameters.as_dict()
+        except AttributeError:
+            pass
+        logger.debug("parameters: %s", parameters)
