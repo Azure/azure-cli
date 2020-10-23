@@ -5,15 +5,18 @@ Release History
 
 0.7.0 (10/23/2020)
 ++++++
+
 * Improve index.html. Move report link inside table.
 
 0.6.0 (10/19/2020)
 ++++++
+
 * Remove module iotcentral.
 * Support testing Azure CLI extensions.
 
 0.5.0 (10/10/2020)
 ++++++
+
 * Update index.html design.
 * Add module data table.
 * Add retry for CLI commands.
