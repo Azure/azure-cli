@@ -485,7 +485,7 @@ jobs:
   displayName: Build Homebrew Formula
 
   dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
