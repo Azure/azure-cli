@@ -20,6 +20,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     :return:
     """
     print('Enter generate()')
+    # [{'name': name, 'url': url}]
     data = []
     url = container_url + '?restype=container&comp=list'
     content = requests.get(url).content
@@ -100,6 +101,7 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
         <th>Pass</th>
         <th>Fail</th>
         <th>Pass rate</th>
+        <th>Reports</th>
       </tr>
     """
 
@@ -109,18 +111,31 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
         <td>{}</td>
         <td>{}</td>
         <td>{}</td>
+        <td></td>
       </tr>
     """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
     for module, passed, failed, rate in testdata.modules:
+        reports = ''
+        for x in data:
+            name = x['name']
+            url = x['url']
+            if name.startswith(module):
+                display_name = 'report'
+                if 'parallel' in name:
+                    display_name = 'parallel'
+                elif 'sequential' in name:
+                    display_name = 'sequential'
+                reports += '<a href="{}">{}</a> '.format(url, display_name)
         table += """
           <tr>
             <td>{}</td>
             <td>{}</td>
             <td>{}</td>
             <td>{}</td>
+            <td>{}</td>
           </tr>
-        """.format(module, passed, failed, rate)
+        """.format(module, passed, failed, rate, reports)
 
     table += """
     </table>
