@@ -1565,3 +1565,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='The path to a file or directory in the specified file system.', required=True)
             c.argument('permissions', validator=validate_access_control)
             c.ignore('upn')
+
+    for item in ['set-recursive', 'update-recursive', 'remove-recursive']:
+        with self.argument_context('storage fs access {}'.format(item)) as c:
+            c.register_fs_directory_arguments()
+            c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
+                       'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
+                       'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
+                       'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.')
+            c.extra('continuation',
+                    help='Optional continuation token that can be used to resume previously stopped operation.')
+            c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
+                    'be split into multiple requests so that progress can be tracked. Batch size should be between 1 '
+                    'and 2000. The default when unspecified is 2000.')
+            c.extra('max_batches', type=int, help='Optional. Define maximum number of batches that single change '
+                    'Access Control operation can execute. If maximum is reached before all sub-paths are processed, '
+                    'then continuation token can be used to resume operation. Empty value indicates that maximum '
+                    'number of batches in unbound and operation continues till end.')
+            c.extra('continue_on_failure', arg_type=get_three_state_flag(),
+                    help='If set to False, the operation will terminate quickly on encountering user errors (4XX). '
+                         'If True, the operation will ignore user errors and proceed with the operation on other '
+                         'sub-entities of the directory. Continuation token will only be returned when '
+                         '--continue-on-failure is True in case of user errors. If not set the default value is False '
+                         'for this.')
