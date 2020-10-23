@@ -83,7 +83,7 @@ def load_command_table(self, _):
     )
     load_vaults_command_groups(self, netappfiles_vaults_sdk)
 
-    with self.command_group('netappfiles', is_preview=True) as g:
+    with self.command_group('netappfiles', is_preview=True):
         pass
 
 
