@@ -1561,7 +1561,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.register_fs_directory_arguments()
             c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
                        'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
-                       'format "[scope:][type]:[id]:[permissions]".')
+                       'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
+                       'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.')
             c.extra('continuation',
                     help='Optional continuation token that can be used to resume previously stopped operation.')
             c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
