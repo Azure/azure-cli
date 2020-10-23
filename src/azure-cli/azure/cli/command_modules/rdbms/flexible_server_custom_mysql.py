@@ -8,7 +8,6 @@
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from knack.log import get_logger
-import mysql.connector as mysql_connector
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
@@ -398,63 +397,15 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
 
 
 def flexible_server_connection_string(
-        cmd, server_name='{server}', database_name='{database}', administrator_login='{login}',
+        server_name='{server}', database_name='{database}', administrator_login='{login}',
         administrator_login_password='{password}'):
-    mysql_server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
-    host = '{}{}'.format(server_name, mysql_server_endpoint)
+    host = '{}.mysql.database.azure.com'.format(server_name)
     if database_name is None:
         database_name = 'mysql'
     return {
         'connectionStrings': _create_mysql_connection_strings(host, administrator_login, administrator_login_password,
                                                               database_name)
     }
-
-
-def connect_to_flexible_server_mysql(cmd, server_name, administrator_login, administrator_login_password, database_name=None, mysql_query=None):
-    mysql_server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
-    host = '{}{}'.format(server_name, mysql_server_endpoint)
-    cursor = None
-    json_data = None
-    if database_name is None:
-        database_name = DEFAULT_DB_NAME
-        logger.warning("Connecting to %s database by default.", DEFAULT_DB_NAME)
-    # Connect to mysql and get cursor to run sql commands
-    try:
-        connection_kwargs = {
-            'host': host,
-            'database': database_name,
-            'user': administrator_login,
-            'password': administrator_login_password
-        }
-        connection = mysql_connector.connect(**connection_kwargs)
-        logger.warning('Successfully connected to %s.', server_name)
-    except Exception as e:
-        logger.warning('Failed connection to %s. Check error and validate firewall and public access settings.', server_name)
-        raise CLIError("Unable to connect to flexible server: {}".format(e))
-
-    # execute query if passed in
-    if mysql_query is not None:
-        try:
-            cursor = connection.cursor()
-            cursor.execute(mysql_query)
-            logger.warning("Ran Database Query: '%s'", mysql_query)
-            logger.warning("Retrieving first 30 rows of query output.")
-            result = cursor.fetchmany(30)  # limit to 30 rows of output for now
-            row_headers = [x[0] for x in cursor.description]  # this will extract row headers
-            # format the result for a clean display
-            json_data = []
-            for rv in result:
-                json_data.append(dict(zip(row_headers, rv)))
-        except mysql_connector.errors.Error as e:
-            raise CLIError("Unable to execute query '{0}': {1}".format(mysql_query, e))
-        finally:
-            if cursor is not None:
-                try:
-                    cursor.close()
-                    logger.warning("Closed the connection to %s", server_name)
-                except Exception:  # pylint: disable=broad-except
-                    logger.warning('Unable to close connection cursor.')
-    return json_data
 
 
 def _create_mysql_connection_strings(host, user, password, database):

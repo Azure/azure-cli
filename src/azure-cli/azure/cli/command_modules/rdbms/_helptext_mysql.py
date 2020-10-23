@@ -291,13 +291,3 @@ examples:
     text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """
-
-helps['mysql flexible-server connect'] = """
-type: command
-short-summary: Connect to a flexible server.
-example:
-  - name: Connect to a flexible server using administrator username and password. Default database is used if not specified.
-    text: az mysql flexible-server connect -u username -p password -d flexibleserverdb
-  - name: Connect to a flexible server and execute a query with results outputted in a table.
-    text: az mysql flexible-server connect -u username -p password --mysql-query "select host, user from mysql.user;" --output table
-"""
