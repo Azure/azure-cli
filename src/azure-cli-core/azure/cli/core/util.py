@@ -1167,6 +1167,6 @@ def handle_version_update():
         logger.warning(ex)
 
 
-def log_command_handler_call(func, description=None, *args, **kwargs):
+def log_command_handler_call(func, *args, **kwargs):
     logger.debug("Calling command handler: module=%s, name=%s, args=%s, kwargs=%s",
                  func.__module__, func.__qualname__, args, kwargs)

@@ -17,8 +17,8 @@ from azure.cli.core.commands import LongRunningOperation, _is_poller, cached_get
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import (
-    shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg, find_child_item, log_command_handler_call)
+from azure.cli.core.util import (shell_safe_json_parse, augment_no_wait_handler_args, get_command_type_kwarg,
+                                 find_child_item, log_command_handler_call)
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
