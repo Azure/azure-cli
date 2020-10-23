@@ -40,7 +40,7 @@ def load_arguments(self, _):
         c.argument('daily_backups', options_list=['--daily-backups', '-d'], help='Daily backups count to keep', id_part=None)
         c.argument('weekly_backups', options_list=['--weekly-backups', '-w'], help='Weekly backups count to keep', id_part=None)
         c.argument('monthly_backups', options_list=['--monthly-backups', '-m'], help='Monthly backups count to keep', id_part=None)
-        c.argument('yearly_backups', options_list=['--yearly_backups', '-y'], help='Yearly backups count to keep', id_part=None)
+        c.argument('yearly_backups', options_list=['--yearly-backups', '-y'], help='Yearly backups count to keep', id_part=None)
 
     with self.argument_context('netappfiles account backup-policy list') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -48,7 +48,6 @@ def load_arguments(self, _):
 
     with self.argument_context('netappfiles account backup') as c:
         c.argument('account_name', account_name_type, id_part=None)
-        c.argument('backup-name', options_list=['--backup-name', '-b'], id_part=None)
 
     load_poolArguments(self, account_name_type, pool_name_type)
     load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type)
