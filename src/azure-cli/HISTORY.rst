@@ -23,18 +23,18 @@ Release History
 
 * Bugfix: az webapp up fails when user doesn't have write permissions to project's parent directory (#15373)
 * Fix #13777: Fix to remove escape chars from XML (#15364)
-* Fixes #15441: az webapp create-remote-connection fails with AttributeError: 'Thread' object has no attribute 'isAlive' (#15446)
+* Fix #15441: az webapp create-remote-connection fails with AttributeError: 'Thread' object has no attribute 'isAlive' (#15446)
 * [BREAKING CHANGE] az webapp up: add optional params (os & runtime) and updated runtimes (#15522)
 
 **ARM**
 
 * Make template deployment What-If commands GA (#15416)
 * [BREAKING CHANGE] Add user confirmation for az ts create (#15480)
-* Fixed the returned data when tagging multiple resources (#15146)
+* Fix the returned data when tagging multiple resources (#15146)
 
 **Backup**
 
-* `az backup policy create`: Added support for IaaSVM backup policy creation from CLI (#15542)
+* `az backup policy create`: Add support for IaaSVM backup policy creation from CLI (#15542)
 * Increasing VM protection limit from 100 to 1000 (#15563)
 
 **Compute**
@@ -55,7 +55,7 @@ Release History
 
 **IoT Central**
 
-* CLI: Removing preview warning since it is already GAed (#15527)
+* Remove preview warning since it is already GAed (#15527)
 
 **Key Vault**
 
@@ -70,7 +70,7 @@ Release History
 
 * Add List-SKUS Command, Table Transformers, Local Context for Postgres, MySQL, Mariadb Single Server (#15450)
 * [BREAKING CHANGE] Parameter name updates. Improvements to Management Plane for MySQL and PostgreSQL (#15363)
-* : `az postgres|mariadb|mysql server create` : Updated create experience for Postgres, MySQL and MariaDB - new fields in the output , Introduce new values for `--public` parameter in create command (all,<IP>,<IPRange>,0.0.0.0) (#15538)
+* `az postgres|mariadb|mysql server create` : Update create experience for Postgres, MySQL and MariaDB - new fields in the output , Introduce new values for `--public` parameter in create command (all,<IP>,<IPRange>,0.0.0.0) (#15538)
 * Add flexible-server connect command (#15419)
 
 **SignalR**
@@ -87,7 +87,7 @@ Release History
 * `az sql server audit-policy show`: extend to show servers's audit policy including LA and EH data (#15444)
 * `az sql server audit-policy update`: extend to allow LA and EH update along with server's audit policy (#15444)
 * `az sql server audit-policy wait`: place the CLI in a waiting state until a condition of the server's audit policy is met. (#15444)
-* Adding AAD-only Support for SQL Managed Instances and Servers (#15292)
+* Add AAD-only Support for SQL Managed Instances and Servers (#15292)
 * `az sql db replica create`: Add --partner-database argument (#15577)
 
 **Storage**
