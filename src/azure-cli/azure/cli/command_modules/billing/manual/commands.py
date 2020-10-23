@@ -41,6 +41,7 @@ def load_command_table(self, _):
             "download",
             "billing_invoice_download",
             validator=billing_invoice_download_validator,
+            is_preview=True
         )
         g.custom_show_command(
             "show", "billing_invoice_show", validator=billing_invoice_show_validator
