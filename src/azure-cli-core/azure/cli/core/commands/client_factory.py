@@ -95,19 +95,25 @@ def configure_common_settings(cli_ctx, client):
     except KeyError:
         pass
 
+    # Prepare CommandName header
+    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
+    cli_ctx.data['headers']['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # Prepare ParameterSetName header
+    if cli_ctx.data.get('safe_params'):
+        cli_ctx.data['headers']['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
+    # Prepare x-ms-client-request-id header
+    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
+
+    logger.debug("Adding custom headers to the client:")
+
     for header, value in cli_ctx.data['headers'].items():
+        # msrest doesn't print custom headers in debug log, so CLI should do that
+        logger.debug("    '%s': '%s'", header, value)
         # We are working with the autorest team to expose the add_header functionality of the generated client to avoid
         # having to access private members
         client._client.add_header(header, value)  # pylint: disable=protected-access
-
-    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
-    # pylint: disable=protected-access
-    client._client.add_header('CommandName',
-                              "{}{}".format(cli_ctx.data['command'], command_name_suffix))
-    if cli_ctx.data.get('safe_params'):
-        client._client.add_header('ParameterSetName',
-                                  ' '.join(cli_ctx.data['safe_params']))
-    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
 def configure_common_settings_track2(cli_ctx):
