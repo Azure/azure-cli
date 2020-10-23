@@ -17,9 +17,9 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 # Env setup
-@try_manual
-def setup(test):
-    pass
+# @try_manual
+# def setup(test):
+#     pass
 
 
 # EXAMPLE: /BillingAccounts/get/BillingAccounts
@@ -547,9 +547,9 @@ def step__transactions_get_transactionslistbyinvoice(test):
 
 
 # Env cleanup
-@try_manual
-def cleanup(test):
-    pass
+# @try_manual
+# def cleanup(test):
+#     pass
 
 
 # Testcase
