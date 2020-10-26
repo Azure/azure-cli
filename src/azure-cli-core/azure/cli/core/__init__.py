@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.12.0"
+__version__ = "2.14.0"
 
 import os
 import sys
@@ -35,7 +35,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
 
 
 class AzCli(CLI):

@@ -188,6 +188,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
+    @record_only()
     def test_keyvault_hsm_mgmt(self):
         self.kwargs.update({
             'hsm_name': ACTIVE_HSM_NAME,
@@ -409,7 +410,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
-    @pytest.mark.serial()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_hsm_full_backup')
     @AllowLargeResponse()
     def test_keyvault_hsm_full_backup_restore(self):
@@ -462,7 +463,7 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
-    @pytest.mark.serial()
+    @record_only()
     def test_keyvault_hsm_role(self):
         self.kwargs.update({
             'hsm_url': ACTIVE_HSM_URL,
@@ -793,7 +794,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
-    @pytest.mark.serial()
+    @record_only()
     def test_keyvault_hsm_key_using_hsm_name(self):
         self.kwargs.update({
             'hsm_name': ACTIVE_HSM_NAME,
@@ -808,6 +809,20 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
                            checks=self.check('attributes.enabled', True)).get_output_in_json()
         self.kwargs['hsm_kid1'] = hsm_key['key']['kid']
         self.kwargs['hsm_version1'] = self.kwargs['hsm_kid1'].rsplit('/', 1)[1]
+
+        # encrypt/decrypt
+        self.kwargs['plaintext_value'] = 'abcdef'
+        self.kwargs['base64_value'] = 'YWJjZGVm'
+        self.kwargs['encryption_result1'] = \
+            self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a RSA-OAEP --value "{plaintext_value}" '
+                     '--data-type plaintext').get_output_in_json()['result']
+        self.kwargs['encryption_result2'] = \
+            self.cmd('keyvault key encrypt -n {key} --hsm-name {hsm_name} -a RSA-OAEP --value "{base64_value}" '
+                     '--data-type base64').get_output_in_json()['result']
+        self.cmd('keyvault key decrypt -n {key} --hsm-name {hsm_name} -a RSA-OAEP --value "{encryption_result1}" '
+                 '--data-type plaintext', checks=self.check('result', '{plaintext_value}'))
+        self.cmd('keyvault key decrypt -n {key} --hsm-name {hsm_name} -a RSA-OAEP --value "{encryption_result2}" '
+                 '--data-type base64', checks=self.check('result', '{base64_value}'))
 
         # delete/recover
         deleted_key = self.cmd('keyvault key delete --hsm-name {hsm_name} -n {key}',
@@ -919,7 +934,7 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
-    @pytest.mark.serial()
+    @record_only()
     def test_keyvault_hsm_key_using_hsm_url(self):
         self.kwargs.update({
             'hsm_name': ACTIVE_HSM_NAME,
@@ -960,6 +975,20 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
                            checks=self.check('attributes.enabled', True)).get_output_in_json()
         self.kwargs['hsm_kid1'] = hsm_key['key']['kid']
         self.kwargs['hsm_version1'] = self.kwargs['hsm_kid1'].rsplit('/', 1)[1]
+
+        # encrypt/decrypt
+        self.kwargs['plaintext_value'] = 'abcdef'
+        self.kwargs['base64_value'] = 'YWJjZGVm'
+        self.kwargs['encryption_result1'] = \
+            self.cmd('keyvault key encrypt --id {hsm_url}/keys/{key} -a RSA-OAEP --value "{plaintext_value}" '
+                     '--data-type plaintext').get_output_in_json()['result']
+        self.kwargs['encryption_result2'] = \
+            self.cmd('keyvault key encrypt --id {hsm_url}/keys/{key} -a RSA-OAEP --value "{base64_value}" '
+                     '--data-type base64').get_output_in_json()['result']
+        self.cmd('keyvault key decrypt --id {hsm_url}/keys/{key} -a RSA-OAEP --value "{encryption_result1}" '
+                 '--data-type plaintext', checks=self.check('result', '{plaintext_value}'))
+        self.cmd('keyvault key decrypt --id {hsm_url}/keys/{key} -a RSA-OAEP --value "{encryption_result2}" '
+                 '--data-type base64', checks=self.check('result', '{base64_value}'))
 
         # delete/recover
         deleted_key = self.cmd('keyvault key delete --id {hsm_kid1}',
@@ -1142,6 +1171,7 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
+    @record_only()
     def test_keyvault_hsm_key_download(self):
         self.kwargs.update({
             'hsm_url': ACTIVE_HSM_URL,

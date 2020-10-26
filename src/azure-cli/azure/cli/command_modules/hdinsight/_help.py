@@ -77,16 +77,19 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount --encryption-at-host true
-  - name: Create a cluster with private link settings.
+  - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
-        --public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer
-  - name: Create a cluster with the Enterprise Security Package (ESP).
+        --domain "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.AAD/domainServices/MyDomain.onmicrosoft.com" \\
+        --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
+        --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
+        --cluster-users-group-dns MyGroup
+  - name: Create a cluster with the Enterprise Security Package (ESP) and enable HDInsight ID Broker.
     text: |-
-        az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
+        az hdinsight create --esp --idbroker -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\

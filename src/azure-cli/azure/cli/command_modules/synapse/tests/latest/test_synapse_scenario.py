@@ -479,3 +479,316 @@ class SynapseScenarioTests(ScenarioTest):
                 self.check('type', 'Microsoft.Storage/storageAccounts'),
                 self.check('provisioningState', 'Succeeded')
             ])
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_linked_service(self):
+        self.kwargs.update({
+            'name': 'linkedservice'})
+
+        # create a workspace
+        self._create_workspace()
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        # create linked service
+        self.cmd(
+            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get linked service
+        self.cmd(
+            'az synapse linked-service show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list linked service
+        self.cmd(
+            'az synapse linked-service list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/linkedservices')
+            ])
+
+        # delete linked service
+        self.cmd(
+            'az synapse linked-service delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse linked-service show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @record_only()
+    @ResourceGroupPreparer(name_prefix='synapse-cli', random_name_length=16)
+    def test_dataset(self):
+        self.kwargs.update({
+            'name': 'dataset'})
+
+        # create a workspace
+        self._create_workspace()
+        # create firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule create --resource-group {rg} --name allowAll --workspace-name {workspace} '
+            '--start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255', checks=[
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+        import time
+        time.sleep(20)
+
+        self.kwargs['file'] = ('{\\"properties\\":{\\"linkedServiceName\\":{\\"referenceName\\":\\"' + self.kwargs['workspace'] + '-WorkspaceDefaultStorage\\",'
+                               '\\"type\\":\\"LinkedServiceReference\\"},\\"type\\":\\"Orc\\",\\"typeProperties\\":{\\"location\\":{\\"type\\":\\"AzureBlobFSLocation\\"}}}}')
+
+        # create dataset
+        self.cmd(
+            'az synapse dataset create --workspace-name {workspace} --name {name} --file {file}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get dataset
+        self.cmd(
+            'az synapse dataset show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list dataset
+        self.cmd(
+            'az synapse dataset list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/datasets')
+            ])
+
+        # delete dataset
+        self.cmd(
+            'az synapse dataset delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse dataset show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @record_only()
+    def test_pipeline(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'pipeline'})
+
+        # create pipeline
+        self.cmd(
+            'az synapse pipeline create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/pipeline.json',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get pipeline
+        self.cmd(
+            'az synapse pipeline show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list pipeline
+        self.cmd(
+            'az synapse pipeline list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/pipelines')
+            ])
+
+        # create pipeline run
+        pipeline_run = self.cmd(
+            'az synapse pipeline create-run --workspace-name {workspace} --name {name}').get_output_in_json()
+        self.kwargs['runId'] = pipeline_run['runId']
+
+        # cancel pipeline run
+        self.cmd(
+            'az synapse pipeline-run cancel --workspace-name {workspace} --run-id {runId} -y')
+        import time
+        time.sleep(20)
+
+        # get pipeline run by run id
+        self.cmd(
+            'az synapse pipeline-run show --workspace-name {workspace} --run-id {runId}',
+            checks=[
+                self.check('status', 'Cancelled')
+            ])
+
+        # get pipeline run by workspace
+        self.cmd(
+            'az synapse pipeline-run query-by-workspace --workspace-name {workspace} '
+            '--last-updated-after 2020-09-01T00:36:44.3345758Z --last-updated-before 2020-10-16T00:36:44.3345758Z')
+
+        # get acticity run
+        self.cmd(
+            'az synapse activity-run query-by-pipeline-run --workspace-name {workspace} --name {name} --run-id {runId} '
+            '--last-updated-after 2020-09-01T00:36:44.3345758Z --last-updated-before 2020-10-16T00:36:44.3345758Z')
+
+        # delete pipeline
+        self.cmd(
+            'az synapse pipeline delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse pipeline show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @record_only()
+    def test_trigger(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'trigger',
+            'event-trigger': 'EventTrigger',
+            'tumbling-window-trigger': 'TumblingWindowTrigger',
+            'run-id': '08586024051698130326966471413CU40'})
+
+        # create trigger
+        self.cmd(
+            'az synapse trigger create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/trigger.json',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get trigger
+        self.cmd(
+            'az synapse trigger show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list trigger
+        self.cmd(
+            'az synapse trigger list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/triggers')
+            ])
+
+        # delete trigger
+        self.cmd(
+            'az synapse trigger delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse trigger show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+        # subscribe to event
+        self.cmd(
+            'az synapse trigger subscribe-to-event --workspace-name {workspace} --name {event-trigger}',
+            checks=[
+                self.check('status', 'Provisioning')
+            ])
+        import time
+        time.sleep(20)
+
+        # get event subscription status
+        self.cmd(
+            'az synapse trigger get-event-subscription-status --workspace-name {workspace} --name {event-trigger}',
+            checks=[
+                self.check('status', 'Enabled')
+            ])
+
+        # unsubscribe from event
+        self.cmd(
+            'az synapse trigger unsubscribe-from-event --workspace-name {workspace} --name {event-trigger}',
+            checks=[
+                self.check('status', 'Deprovisioning')
+            ])
+
+        # start a trigger
+        self.cmd(
+            'az synapse trigger start --workspace-name {workspace} --name {tumbling-window-trigger}')
+
+        # get trigger run by workspace
+        self.cmd(
+            'az synapse trigger-run query-by-workspace --workspace-name {workspace} '
+            '--last-updated-after 2020-09-01T00:36:44.3345758Z --last-updated-before 2020-10-01T00:36:44.3345758Z')
+
+        # rerun a trigger
+        self.cmd(
+            'az synapse trigger-run rerun --workspace-name {workspace} --name {tumbling-window-trigger} --run-id {run-id}')
+
+        # stop a trigger
+        self.cmd(
+            'az synapse trigger stop --workspace-name {workspace} --name {tumbling-window-trigger}')
+
+    @record_only()
+    def test_data_flow(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'dataflow'})
+
+        # create data flow
+        self.cmd(
+            'az synapse data-flow create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/dataflow.json',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get data flow
+        self.cmd(
+            'az synapse data-flow show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list data flow
+        self.cmd(
+            'az synapse data-flow list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/dataflows')
+            ])
+
+        # delete data flow
+        self.cmd(
+            'az synapse data-flow delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse data-flow show --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+    @record_only()
+    def test_notebook(self):
+        self.kwargs.update({
+            'workspace': 'testsynapseworkspace',
+            'name': 'notebook',
+            'spark-pool': 'testpool'})
+
+        # create notebook
+        self.cmd(
+            'az synapse notebook create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/notebook.ipynb '
+            '--spark-pool-name {spark-pool}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get notebook
+        self.cmd(
+            'az synapse notebook show --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list notebook
+        self.cmd(
+            'az synapse notebook list --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/notebooks')
+            ])
+
+        # export notebook
+        self.kwargs['output-folder'] = os.getcwd()
+        self.cmd(
+            'az synapse notebook export --workspace-name {workspace} --name {name} '
+            '--output-folder "{output-folder}"')
+        file_path = os.path.join(self.kwargs['output-folder'], self.kwargs['name'] + '.ipynb')
+        self.assertTrue(os.path.isfile(file_path))
+        os.remove(file_path)
+
+        # delete notebook
+        self.cmd(
+            'az synapse notebook delete --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse notebook show --workspace-name {workspace} --name {name}',
+            expect_failure=True)

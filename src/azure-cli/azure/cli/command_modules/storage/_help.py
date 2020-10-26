@@ -1005,6 +1005,81 @@ examples:
     crafted: true
 """
 
+helps['storage container-rm'] = """
+type: group
+short-summary: Manage Azure containers using the Microsoft.Storage resource provider.
+"""
+
+helps['storage container-rm create'] = """
+type: command
+short-summary: Create a new container under the specified storage account.
+examples:
+  - name: Create a new container under the specified storage account.
+    text: az storage container-rm create --storage-account myaccount --name mycontainer
+  - name: Create a new container with metadata and public-access as blob under the specified storage account(account id).
+    text: az storage container-rm create --storage-account myaccountid --name mycontainer --public-access blob --metada key1=value1 key2=value2
+"""
+
+helps['storage container-rm delete'] = """
+type: command
+short-summary: Delete the specified container under its account.
+examples:
+  - name: Delete the specified container under its account.
+    text: az storage container-rm delete --storage-account myAccount --name myContainer
+  - name: Delete the specified container under its account(account id).
+    text: az storage container-rm delete --storage-account myaccountid --name mycontainer
+  - name: Delete the specified container by resource id.
+    text: az storage container-rm delete --ids mycontainerid
+"""
+
+helps['storage container-rm exists'] = """
+type: command
+short-summary: Check for the existence of a container.
+examples:
+  - name: Check for the existence of a container under the specified storage account.
+    text: az storage container-rm exists --storage-account myaccount --name mycontainer
+  - name: Check for the existence of a container under the specified storage account(account id).
+    text: az storage container-rm exists --storage-account myaccountid --name mycontainer
+  - name: Check for the existence of a container by resource id.
+    text: az storage container-rm exists --ids mycontainerid
+"""
+
+helps['storage container-rm list'] = """
+type: command
+short-summary: List all containers under the specified storage account.
+examples:
+  - name: List all containers under the specified storage account.
+    text: az storage container-rm list --storage-account myaccount
+  - name: List all containers under the specified storage account(account id).
+    text: az storage container-rm list --storage-account myaccountid
+  - name: List all containers under the specified storage account, including deleted ones.
+    text: az storage container-rm list --storage-account myaccount --include-deleted
+"""
+
+helps['storage container-rm show'] = """
+type: command
+short-summary: Show the properties for a specified container.
+examples:
+  - name: Show the properties for a container under the specified storage account.
+    text: az storage container-rm show --storage-account myaccount --name mycontainer
+  - name: Show the properties for a container under the specified storage account(account id).
+    text: az storage container-rm show --storage-account myaccountid --name mycontainer
+  - name: Show the properties for a container by resource id.
+    text: az storage container-rm show --ids mycontainerid
+"""
+
+helps['storage container-rm update'] = """
+type: command
+short-summary: Update the properties for a container.
+examples:
+  - name: Update the public access level to 'blob' for a container under the specified storage account.
+    text: az storage container-rm update --storage-account myaccount --name mycontainer --public-access blob
+  - name: Update the metadata for a container under the specified storage account(account id).
+    text: az storage container-rm update --storage-account myaccountid --name mycontainer --metadata newkey1=newvalue1 newkey2=newvalue2
+  - name: Update the default encryption scope for a container by resource id.
+    text: az storage container-rm update --ids mycontainerid --default-encryption-scope myencryptionscope
+"""
+
 helps['storage container'] = """
 type: group
 short-summary: Manage blob storage containers.
@@ -1550,6 +1625,19 @@ type: group
 short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs access remove-recursive'] = """
+type: command
+short-summary: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+parameters:
+    - name: --acl
+      short-summary: Remove POSIX access control rights on files and directories. The value is a comma-separated
+        list of access control entries. Each access control entry (ACE) consists of a scope, a type, and a user or
+        group identifier in the format "[scope:][type]:[id]".
+examples:
+    - name: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access remove-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access set'] = """
 type: command
 short-summary: Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
@@ -1596,12 +1684,28 @@ examples:
       text: az storage fs access set --group 68390a19-a897-236b-b453-488abf67b4dc -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
 """
 
+helps['storage fs access set-recursive'] = """
+type: command
+short-summary: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access set-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923:rwx" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access show'] = """
 type: command
 short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
 examples:
     - name: Show the access control properties of a path.
       text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs access update-recursive'] = """
+type: command
+short-summary: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access update-recursive --acl "user::r-x" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage fs create'] = """
@@ -1953,6 +2057,9 @@ short-summary: Manage storage queues.
 helps['storage queue list'] = """
 type: command
 short-summary: List queues in a storage account.
+examples:
+  - name: List queues whose names begin with 'myprefix' under the storage account 'mystorageaccount'(account name)
+    text: az storage queue list --prefix myprefix --account-name mystorageaccount
 """
 
 helps['storage queue metadata'] = """
@@ -2171,13 +2278,4 @@ short-summary: List tables in a storage account.
 helps['storage table policy'] = """
 type: group
 short-summary: Manage shared access policies of a storage table.
-"""
-
-helps['storage queue'] = """
-type: group
-short-summary: Manage shared access policies of a storage table.
-long-summary: >
-    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
-    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
-    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """

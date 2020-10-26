@@ -11,33 +11,35 @@ import math
 import os
 import re
 import struct
+import sys
 import time
 import uuid
 
-from knack.log import get_logger
-from knack.util import CLIError
+from azure.cli.command_modules.keyvault._client_factory import get_client_factory, Clients, is_azure_stack_profile
+from azure.cli.command_modules.keyvault._validators import _construct_vnet, secret_text_encoding_values
+from azure.cli.command_modules.keyvault.security_domain.jwe import JWE
+from azure.cli.command_modules.keyvault.security_domain.security_domain import Datum, SecurityDomainRestoreData
+from azure.cli.command_modules.keyvault.security_domain.shared_secret import SharedSecret
+from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
+from azure.cli.command_modules.keyvault.security_domain.utils import Utils
+from azure.cli.core import telemetry
+from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
+from azure.cli.core.util import sdk_no_wait
+from azure.graphrbac.models import GraphErrorException
 
-from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.x509 import load_pem_x509_certificate
 
-from azure.cli.core import telemetry
-from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
-from azure.cli.core.util import sdk_no_wait
-from azure.graphrbac.models import GraphErrorException
-
 from msrestazure.azure_exceptions import CloudError
 
-from ._client_factory import get_client_factory, Clients, is_azure_stack_profile
-from ._validators import _construct_vnet, secret_text_encoding_values
-from .security_domain.jwe import JWE
-from .security_domain.security_domain import Datum, SecurityDomainRestoreData
-from .security_domain.shared_secret import SharedSecret
-from .security_domain.sp800_108 import KDF
-from .security_domain.utils import Utils
+from knack.log import get_logger
+from knack.util import CLIError
+
+from OpenSSL import crypto
+
 
 logger = get_logger(__name__)
 
@@ -443,7 +445,8 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
                                 no_wait=no_wait)
 
 
-def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
+def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
+                        bypass, default_action):
     if network_acls_json is None:
         network_acls_json = {}
 
@@ -465,7 +468,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    network_acls = _create_network_rule_set(cmd)
+    network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     from msrestazure.tools import is_valid_resource_id
 
@@ -660,9 +663,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we will parse it from parameter `--network-acls`
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        network_acls = _create_network_rule_set(cmd, bypass, default_action) \
-            if bypass or default_action else \
-            _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets)
+        if network_acls or network_acls_ips or network_acls_vnets:
+            network_acls = _parse_network_acls(
+                cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+        else:
+            network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
@@ -723,6 +728,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
 
     if not sku:
         sku = 'standard'
+
+    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+        enable_soft_delete = True
+        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+              'The value will be changed to true.', file=sys.stderr)
 
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku),
@@ -799,6 +809,10 @@ def update_vault(cmd, instance,
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
 
     if enable_soft_delete is not None:
+        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+            enable_soft_delete = True
+            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+                  'The value will be changed to true.', file=sys.stderr)
         instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:

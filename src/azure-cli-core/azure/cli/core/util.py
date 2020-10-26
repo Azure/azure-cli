@@ -17,8 +17,6 @@ import logging
 
 import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from azure.cli.core.azclierror import AzCLIErrorType
-from azure.cli.core.azclierror import AzCLIError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -55,7 +53,7 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-many-statements
+def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
     from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
@@ -63,7 +61,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-man
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
-    from requests.exceptions import SSLError
+    from requests.exceptions import SSLError, HTTPError
+    import azure.cli.core.azclierror as azclierror
     import traceback
 
     logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
@@ -74,76 +73,159 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements, too-man
         error_msg = getattr(ex, 'message', str(ex))
         exit_code = 1
 
-        if isinstance(ex, AzCLIError):
+        if isinstance(ex, azclierror.AzCLIError):
             az_error = ex
 
         elif isinstance(ex, JMESPathTypeError):
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
-            az_error = AzCLIError(AzCLIErrorType.ArgumentParseError, error_msg)
+            az_error = azclierror.InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
 
+        elif isinstance(ex, SSLError):
+            az_error = azclierror.AzureConnectionError(error_msg)
+            az_error.set_recommendation(SSLERROR_TEMPLATE)
+
+        elif isinstance(ex, CloudError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
+
         elif isinstance(ex, ValidationError):
-            az_error = AzCLIError(AzCLIErrorType.ValidationError, error_msg)
+            az_error = azclierror.ValidationError(error_msg)
 
-        # TODO: Fine-grained analysis to decide whether they are ValidationErrors
-        elif isinstance(ex, (CLIError, CloudError, AzureError)):
-            try:
-                error_msg = ex.args[0]
-                for detail in ex.args[0].error.details:
-                    error_msg += ('\n' + detail)
-            except Exception:  # pylint: disable=broad-except
-                pass
-            az_error = AzCLIError(AzCLIErrorType.ValidationError, error_msg)
-            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
+        elif isinstance(ex, CLIError):
+            # TODO: Fine-grained analysis here for Unknown error
+            az_error = azclierror.UnknownError(error_msg)
 
-        # TODO: Fine-grained analysis
+        elif isinstance(ex, AzureError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            AzCLIErrorType = get_error_type_by_azure_error(ex)
+            az_error = AzCLIErrorType(error_msg)
+
         elif isinstance(ex, AzureException):
-            az_error = AzCLIError(AzCLIErrorType.ServiceError, error_msg)
-            exit_code = ex.args[1] if len(ex.args) >= 2 else 1
+            if is_azure_connection_error(error_msg):
+                az_error = azclierror.AzureConnectionError(error_msg)
+            else:
+                # TODO: Fine-grained analysis here for Unknown error
+                az_error = azclierror.UnknownError(error_msg)
 
-        # TODO: Fine-grained analysis
-        elif isinstance(ex, (ClientRequestError, SSLError)):
-            az_error = AzCLIError(AzCLIErrorType.ClientError, error_msg)
-            if 'SSLError' in error_msg:
-                az_error.set_recommendation(SSLERROR_TEMPLATE)
+        elif isinstance(ex, ClientRequestError):
+            if is_azure_connection_error(error_msg):
+                az_error = azclierror.AzureConnectionError(error_msg)
+            else:
+                az_error = azclierror.ClientRequestError(error_msg)
 
-        # TODO: Fine-grained analysis
         elif isinstance(ex, HttpOperationError):
-            try:
-                response = json.loads(ex.response.text)
-                if isinstance(response, str):
-                    error = response
-                else:
-                    error = response['error']
+            message, status_code = extract_http_operation_error(ex)
+            if message:
+                error_msg = message
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
 
-                # ARM should use ODATA v4. So should try this first.
-                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-                if isinstance(error, dict):
-                    code = "{} - ".format(error.get('code', 'Unknown Code'))
-                    message = error.get('message', ex)
-                    error_msg = "code: {}, {}".format(code, message)
-                else:
-                    error_msg = error
-
-            except (ValueError, KeyError):
-                pass
-
-            az_error = AzCLIError(AzCLIErrorType.ServiceError, error_msg)
+        elif isinstance(ex, HTTPError):
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
 
         elif isinstance(ex, KeyboardInterrupt):
             error_msg = 'Keyboard interrupt is captured.'
-            az_error = AzCLIError(AzCLIErrorType.ManualInterrupt, error_msg)
+            az_error = azclierror.ManualInterrupt(error_msg)
 
         else:
             error_msg = "The command failed with an unexpected error. Here is the traceback:"
-            az_error = AzCLIError(AzCLIErrorType.UnexpectedError, error_msg)
-            az_error.set_raw_exception(ex)
+            az_error = azclierror.CLIInternalError(error_msg)
+            az_error.set_exception_trace(ex)
             az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+
+        if isinstance(az_error, azclierror.ResourceNotFoundError):
+            exit_code = 3
 
         az_error.print_error()
         az_error.send_telemetry()
 
         return exit_code
+
+
+def extract_common_error_message(ex):
+    error_msg = None
+    try:
+        error_msg = ex.args[0]
+        for detail in ex.args[0].error.details:
+            error_msg += ('\n' + detail)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return error_msg
+
+
+def extract_http_operation_error(ex):
+    error_msg = None
+    status_code = 'Unknown Code'
+    try:
+        response = json.loads(ex.response.text)
+        if isinstance(response, str):
+            error = response
+        else:
+            error = response['error']
+        # ARM should use ODATA v4. So should try this first.
+        # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+        if isinstance(error, dict):
+            status_code = error.get('code', 'Unknown Code')
+            code_str = "{} - ".format(status_code)
+            message = error.get('message', ex)
+            error_msg = "code: {}, {}".format(code_str, message)
+        else:
+            error_msg = error
+    except (ValueError, KeyError):
+        pass
+    return error_msg, status_code
+
+
+def get_error_type_by_azure_error(ex):
+    import azure.core.exceptions as exceptions
+    import azure.cli.core.azclierror as azclierror
+
+    if isinstance(ex, exceptions.HttpResponseError):
+        status_code = str(ex.status_code)
+        return get_error_type_by_status_code(status_code)
+    if isinstance(ex, exceptions.ResourceNotFoundError):
+        return azclierror.ResourceNotFoundError
+    if isinstance(ex, exceptions.ServiceRequestError):
+        return azclierror.ClientRequestError
+    if isinstance(ex, exceptions.ServiceRequestTimeoutError):
+        return azclierror.AzureConnectionError
+    if isinstance(ex, (exceptions.ServiceResponseError, exceptions.ServiceResponseTimeoutError)):
+        return azclierror.AzureResponseError
+
+    return azclierror.UnknownError
+
+
+def get_error_type_by_status_code(status_code):
+    import azure.cli.core.azclierror as azclierror
+
+    if status_code == '400':
+        return azclierror.BadRequestError
+    if status_code == '401':
+        return azclierror.UnauthorizedError
+    if status_code == '403':
+        return azclierror.ForbiddenError
+    if status_code == '404':
+        return azclierror.ResourceNotFoundError
+    if status_code.startswith('5'):
+        return azclierror.AzureInternalError
+
+    return azclierror.UnknownError
+
+
+def is_azure_connection_error(error_msg):
+    error_msg = error_msg.lower()
+    if 'connection error' in error_msg \
+            or 'connection broken' in error_msg \
+            or 'connection aborted' in error_msg:
+        return True
+    return False
 
 
 # pylint: disable=inconsistent-return-statements
@@ -714,7 +796,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         skip_authorization_header = True
 
     # Handle User-Agent
-    agents = [get_az_user_agent()]
+    agents = [get_az_rest_user_agent()]
 
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
@@ -996,6 +1078,17 @@ def get_az_user_agent():
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
     # if ENV_ADDITIONAL_USER_AGENT in os.environ:
     #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+
+    return ' '.join(agents)
+
+
+def get_az_rest_user_agent():
+    """Get User-Agent for az rest calls"""
+
+    agents = ['python/{}'.format(platform.python_version()),
+              '({})'.format(platform.platform()),
+              get_az_user_agent()
+              ]
 
     return ' '.join(agents)
 

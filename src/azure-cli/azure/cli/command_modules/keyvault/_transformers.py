@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from collections.abc import Iterable
-from ._validators import KeyEncryptionDataType
+from azure.cli.command_modules.keyvault._validators import KeyEncryptionDataType
 
 
 def multi_transformers(*transformers):

@@ -39,7 +39,8 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
               no_wait=False,
               platform=None,
               target=None,
-              auth_mode=None):
+              auth_mode=None,
+              log_template=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, BUILD_NOT_SUPPORTED)
 
@@ -114,7 +115,8 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
         credentials=get_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
-        )
+        ),
+        log_template=log_template
     )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(

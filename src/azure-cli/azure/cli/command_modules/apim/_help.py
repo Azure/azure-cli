@@ -180,7 +180,7 @@ examples:
 
 helps['apim api import'] = """
 type: command
-short-summary: Import an API Management service instance.
+short-summary: Import an API Management API.
 """
 
 helps['apim product api list'] = """
