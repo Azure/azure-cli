@@ -1175,6 +1175,9 @@ def log_command_handler_call(func, *args, **kwargs):
         try:
             # For SDK Model instances, convert to a dict
             parameters = parameters.as_dict()
-        except AttributeError:
+        except Exception:  # pylint: disable=broad-except
+            # Pass if parameters is not an SDK Model, or if there is any error during serialization.
+            # To be specific, in generic update, part of the Model may become a dict, causing as_dict to
+            # raise SerializationError.
             pass
         logger.debug("parameters: %s", parameters)
