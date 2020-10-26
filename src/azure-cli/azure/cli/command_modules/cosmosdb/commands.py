@@ -138,6 +138,22 @@ def load_command_table(self, _):
         g.show_command('show', 'get_sql_user_defined_function')
         g.command('delete', 'delete_sql_user_defined_function', confirmation=True)
 
+    with self.command_group('cosmosdb sql role definition', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_role_definition_create')
+        g.custom_command('update', 'cli_cosmosdb_sql_role_definition_update')
+        g.custom_command('exists', 'cli_cosmosdb_sql_role_definition_exists')
+        g.command('list', 'list_sql_role_definitions')
+        g.show_command('show', 'get_sql_role_definition')
+        g.command('delete', 'delete_sql_role_definition', confirmation=True)
+        
+    with self.command_group('cosmosdb sql role assignment', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_role_assignment_create')
+        g.custom_command('update', 'cli_cosmosdb_sql_role_assignment_update')
+        g.custom_command('exists', 'cli_cosmosdb_sql_role_assignment_exists')
+        g.command('list', 'list_sql_role_assignments')
+        g.show_command('show', 'get_sql_role_assignment')
+        g.command('delete', 'delete_sql_role_assignment', confirmation=True)
+
     # MongoDB api
     with self.command_group('cosmosdb mongodb'):
         pass

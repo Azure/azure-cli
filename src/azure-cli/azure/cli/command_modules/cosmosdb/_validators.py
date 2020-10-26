@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 
 def validate_failover_policies(ns):
@@ -61,3 +62,114 @@ def validate_virtual_network_rules(ns):
         for item in ns.virtual_network_rules:
             virtual_network_rules_list.append(VirtualNetworkRule(id=item))
         ns.virtual_network_rules = virtual_network_rules_list
+
+
+def validate_role_definition_body(cmd, ns):
+    """ Extracts role definition body """
+    from azure.mgmt.cosmosdb.models import Permission
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    import os
+    if ns.role_definition_body is not None:
+        if os.path.exists(ns.role_definition_body):
+            role_definition = get_file_json(ns.role_definition_body)
+        else:
+            role_definition = shell_safe_json_parse(ns.role_definition_body)
+
+        if not isinstance(role_definition, dict):
+            raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
+
+        if 'Id' in role_definition:
+            role_definition['Id'] = _parse_resource_path(role_definition['Id'], False, "sqlRoleDefinitions")
+        else:
+            role_definition['Id'] = _gen_guid()
+
+        if 'DataActions' in role_definition:
+            role_definition['Permissions'] = [Permission(data_actions=role_definition['DataActions'])]
+        else:
+            role_definition['Permissions'] = [Permission(data_actions=p['DataActions']) for p in role_definition['Permissions']]
+
+        if 'Type' in role_definition:
+            role_definition['Type'] = role_definition['Type']
+        else:
+            role_definition['Type'] = "CustomRole"
+
+        role_definition['AssignableScopes'] = [_parse_resource_path(
+            scope,
+            True,
+            None,
+            get_subscription_id(cmd.cli_ctx),
+            ns.resource_group_name, ns.account_name) for scope in role_definition['AssignableScopes']]
+
+        ns.role_definition_body = role_definition
+
+
+def validate_role_definition_id(ns):
+    """ Extracts Guid role definition Id """
+    if ns.role_definition_id is not None:
+        ns.role_definition_id = _parse_resource_path(ns.role_definition_id, False, "sqlRoleDefinitions")
+
+
+def validate_fully_qualified_role_definition_id(cmd, ns):
+    """ Extracts fully qualified role definition Id """
+    if ns.role_definition_id is not None:
+        ns.role_definition_id = _parse_resource_path(ns.role_definition_id,
+                                                     True,
+                                                     "sqlRoleDefinitions",
+                                                     get_subscription_id(cmd.cli_ctx),
+                                                     ns.resource_group_name,
+                                                     ns.account_name)
+
+
+def validate_role_assignment_id(ns):
+    """ Extracts Guid role assignment Id """
+    if ns.role_assignment_id is not None:
+        ns.role_assignment_id = _parse_resource_path(ns.role_assignment_id, False, "sqlRoleAssignments")
+    else:
+        ns.role_assignment_id = _gen_guid()
+
+
+def validate_scope(cmd, ns):
+    """ Extracts fully qualified scope """
+    if ns.scope is not None:
+        ns.scope = _parse_resource_path(ns.scope,
+                                        True,
+                                        None,
+                                        get_subscription_id(cmd.cli_ctx),
+                                        ns.resource_group_name,
+                                        ns.account_name)
+
+
+def _parse_resource_path(resource,
+                         to_fully_qualified,
+                         resource_type=None,
+                         subscription_id=None,
+                         resource_group_name=None,
+                         account_name=None):
+    """Returns a properly formatted role definition or assignment id or scope. If scope, type=None."""
+    import re
+    regex = "/subscriptions/(?P<subscription>.*)/resourceGroups/(?P<resource_group>.*)/providers/Microsoft.DocumentDB/databaseAccounts/(?P<database_account>.*)"
+    formatted = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}"
+
+    if resource_type is not None:
+        regex += "/" + resource_type + "/(?P<resource_id>.*)"
+        formatted += "/" + resource_type + "/"
+
+    formatted += "{3}"
+
+    if to_fully_qualified:
+        result = re.match(regex, resource)
+        if result is not None:
+            return resource
+
+        return formatted.format(subscription_id, resource_group_name, account_name, resource)
+
+    result = re.match(regex, resource)
+    if result is None:
+        return resource
+
+    return result['resource_id']
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()

@@ -14,7 +14,12 @@ from azure.cli.core.util import shell_safe_json_parse
 
 from azure.cli.command_modules.cosmosdb._validators import (
     validate_failover_policies, validate_capabilities,
-    validate_virtual_network_rules, validate_ip_range_filter)
+    validate_virtual_network_rules, validate_ip_range_filter,
+    validate_role_definition_body,
+    validate_role_definition_id,
+    validate_fully_qualified_role_definition_id,
+    validate_role_assignment_id,
+    validate_scope)
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation)
@@ -181,6 +186,20 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type)
         c.argument('user_defined_function_name', options_list=['--name', '-n'], help="UserDefinedFunction name")
         c.argument('user_defined_function_body', options_list=['--body', '-b'], completer=FilesCompleter(), help="UserDefinedFunction body, you can enter it as a string or as a file, e.g., --body @udfbody-file.json")
+
+# SQL role definition
+    with self.argument_context('cosmosdb sql role definition') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('role_definition_id', options_list=['--id', '-i'], validator=validate_role_definition_id, help="Role Definition Id")
+        c.argument('role_definition_body', options_list=['--body', '-b'], validator=validate_role_definition_body, completer=FilesCompleter(), help="Role Definition body, you can enter it as a string or as a file, e.g., --body @rdbody-file.json")
+
+# SQL role assignment
+    with self.argument_context('cosmosdb sql role assignment') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('role_definition_id', options_list=['--role-definition-id', '-d'], validator=validate_fully_qualified_role_definition_id, help="Role Definition Id")
+        c.argument('role_assignment_id', options_list=['--role-assignment-id', '-i'], validator=validate_role_assignment_id, help="Role Assignment Id")
+        c.argument('scope', options_list=['--scope', '-s'], help="Scope")
+        c.argument('principal_id', options_list=['--principal-id', '-p'], help="Principal Id")
 
 # MongoDB
     with self.argument_context('cosmosdb mongodb database') as c:

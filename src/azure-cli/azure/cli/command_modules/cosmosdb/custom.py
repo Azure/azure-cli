@@ -9,11 +9,13 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     DatabaseAccountUpdateParameters,
+    DefaultRequestDatabaseAccountCreateUpdateProperties,
     Location,
     DatabaseAccountKind,
     VirtualNetworkRule,
@@ -22,6 +24,9 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    SqlRoleAssignmentCreateUpdateParameters,
+    SqlRoleDefinitionCreateUpdateParameters,
+    Permission,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
     SqlTriggerResource,
@@ -122,24 +127,28 @@ def cli_cosmosdb_create(cmd, client,
     elif server_version is not None:
         raise CLIError('server-version is a valid argument only when kind is MongoDB.')
 
+    properties = DefaultRequestDatabaseAccountCreateUpdateProperties(locations=locations)
+
+    properties.consistency_policy = consistency_policy
+    properties.ip_rules = ip_range_filter
+    properties.is_virtual_network_filter_enabled = enable_virtual_network
+    properties.enable_automatic_failover = enable_automatic_failover
+    properties.capabilities = capabilities
+    properties.virtual_network_rules = virtual_network_rules
+    properties.enable_multiple_write_locations = enable_multiple_write_locations
+    properties.disable_key_based_metadata_write_access = disable_key_based_metadata_write_access
+    properties.key_vault_key_uri = key_uri
+    properties.public_network_access = public_network_access
+    properties.api_properties = api_properties
+    properties.enable_analytical_storage = enable_analytical_storage
+    properties.enable_free_tier = enable_free_tier
+
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
-        locations=locations,
         tags=tags,
-        kind=kind,
-        consistency_policy=consistency_policy,
-        ip_rules=ip_range_filter,
-        is_virtual_network_filter_enabled=enable_virtual_network,
-        enable_automatic_failover=enable_automatic_failover,
-        capabilities=capabilities,
-        virtual_network_rules=virtual_network_rules,
-        enable_multiple_write_locations=enable_multiple_write_locations,
-        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-        key_vault_key_uri=key_uri,
-        public_network_access=public_network_access,
-        api_properties=api_properties,
-        enable_analytical_storage=enable_analytical_storage,
-        enable_free_tier=enable_free_tier)
+        properties=properties,
+        kind=kind)
+
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -538,6 +547,116 @@ def cli_cosmosdb_sql_trigger_update(client,
                                             container_name,
                                             trigger_name,
                                             sql_trigger_create_update_resource)
+
+
+def cli_cosmosdb_sql_role_definition_create(cmd,
+                                            client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_definition_body):
+    '''Creates an Azure Cosmos DB SQL Role Definition '''
+    role_definition_create_resource = SqlRoleDefinitionCreateUpdateParameters(
+        role_name=role_definition_body['RoleName'],
+        type=role_definition_body['Type'],
+        assignable_scopes=role_definition_body['AssignableScopes'],
+        permissions=role_definition_body['Permissions'])
+
+    return client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
+
+
+def cli_cosmosdb_sql_role_definition_update(cmd,
+                                            client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_definition_body):
+    '''Update an existing Azure Cosmos DB Sql Role Definition'''
+    logger.debug('reading SQL role definition')
+    role_definition = client.get_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name)
+
+    if role_definition_body['RoleName'] is not None:
+        role_definition.role_name = role_definition_body['RoleName']
+
+    if role_definition_body['AssignableScopes'] is not None:
+        role_definition.assignable_scopes = role_definition_body['AssignableScopes']
+
+    if role_definition_body['Permissions'] is not None:
+        role_definition.permissions = role_definition_body['Permissions']
+
+    role_definition_update_resource = SqlRoleDefinitionCreateUpdateParameters(
+        role_name=role_definition.role_name,
+        type=role_definition_body['Type'],
+        assignable_scopes=role_definition.assignable_scopes,
+        permissions=role_definition.permissions)
+
+    return client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_update_resource)
+
+
+def cli_cosmosdb_sql_role_definition_exists(client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_definition_id):
+    """Checks if an Azure Cosmos DB Sql Role Definition exists"""
+    try:
+        client.get_sql_role_definition(role_definition_id, resource_group_name, account_name)
+    except CloudError as ex:
+        return _handle_exists_exception(ex)
+
+    return True
+
+
+def cli_cosmosdb_sql_role_assignment_create(cmd,
+                                            client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_definition_id,
+                                            scope,
+                                            principal_id,
+                                            role_assignment_id=None):
+    """Creates an Azure Cosmos DB Sql Role Assignment"""
+    sql_role_assignment_create_update_parameters = SqlRoleAssignmentCreateUpdateParameters(
+        role_definition_id=role_definition_id,
+        scope=scope,
+        principal_id=principal_id)
+
+    return client.create_update_sql_role_assignment(role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
+
+
+def cli_cosmosdb_sql_role_assignment_update(cmd,
+                                            client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_definition_id,
+                                            role_assignment_id):
+    """Updates an Azure Cosmos DB Sql Role Assignment"""
+    logger.debug('reading Sql Role Assignment')
+    role_assignment = client.get_sql_role_assignment(role_assignment_id, resource_group_name, account_name)
+
+    logger.debug('replacing Sql Role Assignment')
+
+    sql_role_assignment_create_update_parameters = SqlRoleAssignmentCreateUpdateParameters(
+        role_definition_id=role_definition_id,
+        scope=role_assignment.scope,
+        principal_id=role_assignment.principal_id)
+
+    return client.create_update_sql_role_assignment(role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
+
+
+def cli_cosmosdb_sql_role_assignment_exists(client,
+                                            resource_group_name,
+                                            account_name,
+                                            role_assignment_id):
+    """Checks if an Azure Cosmos DB Sql Role Assignment exists"""
+    try:
+        client.get_sql_role_assignment(role_assignment_id, resource_group_name, account_name)
+    except CloudError as ex:
+        return _handle_exists_exception(ex)
+
+    return True
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
 
 
 def cli_cosmosdb_gremlin_database_create(client,
