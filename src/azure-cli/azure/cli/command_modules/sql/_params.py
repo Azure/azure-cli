@@ -1626,7 +1626,8 @@ def load_arguments(self, _):
                 'timezone_id',
                 'tags',
                 'storage_account_type',
-                'yes'
+                'yes',
+                'maintenance_configuration_id'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1669,6 +1670,10 @@ def load_arguments(self, _):
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maintenance-configuration-id', '-m'],
+                   help='Assign maintenance configuration to this managed instance.')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
