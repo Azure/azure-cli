@@ -1185,7 +1185,7 @@ def resource_to_scopes(resource):
 
 def scopes_to_resource(scopes):
     """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
-    For example: ['https://management.core.windows.net/.default'] -> 'https://management.core.windows.net'
+    For example: ['https://management.core.windows.net/.default'] -> 'https://management.core.windows.net/'
 
     :param scopes: The MSAL scopes. It can be a list or tuple of string
     :return: The ADAL resource
