@@ -314,7 +314,7 @@ class TestProfile(unittest.TestCase):
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
         result = finder._arm_client_factory(mock.MagicMock())
-        self.assertEqual(result.config.base_url, 'http://foo_arm')
+        self.assertEqual(result._client._base_url, 'http://foo_arm')
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
