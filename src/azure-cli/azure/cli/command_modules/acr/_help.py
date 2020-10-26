@@ -1229,7 +1229,7 @@ examples:
             --mode mirror --parent Contoso-Edge01-in-Wichita
             --name Contoso-Mirror02-in-Wichita --repositories contoso-app/mycomponent
             --sync-schedule "0 0 12 1/1 * ? *" --sync-window 4H
-            --auto-update disabled
+            --auto-update-enabled false
 """
 
 helps['acr connected-acr delete'] = """
@@ -1292,7 +1292,7 @@ examples:
     text: |
         az acr connecter-acr create --registry mycloudregistry.azurecr.io
             --name Contoso-Mirror02-in-Wichita --repositories contoso-app/mycomponent
-            --sync-schedule "0 0 12 1/1 * ? *" --sync-window 4H --disable_auto_update
+            --sync-schedule "0 0 12 1/1 * ? *" --sync-window 4H --auto-update-enabled false
 """
 # endregion
 

@@ -390,11 +390,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repositories', options_list=['--repositories', '-t'], type=int, help='Specifies the repositories that need to be synched to the Connected ACR. It can include wildcards to select multiple repositories. It can be in the format [REPO01] [REPO02]...', required=True)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], type=int, help='Optional parameter to define the start of the synch schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], type=int, help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
-        c.argument('disable_auto_update', options_list=['--disable-auto-update', '-a'], type=int, help='Use to disable automatically updates during synch schedule.', required=False, arg_type=get_three_state_flag())
+        c.argument('auto_update_enabled', options_list=['--auto-update-enabled', '-a'], type=int, help='Use to disable automatically updates during synch schedule.', required=False, arg_type=get_three_state_flag())
         c.argument('next-update', options_list=['--next-update'], type=int, help='Optional ISO 8601 timestamp parameter used to specify when the next update for the instance will happen.', required=False)
         c.argument('log_level', options_list=['--log-level'], type=int, help='Sets the log level for logging on the instance.', required=False, default="registry")
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], type=int, help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
-        c.argument('disable_sync_audit_logs', options_list=['--disable-sync-audit-logs'], type=int, help='Disables synchronization of audit logs. ', required=False, arg_type=get_three_state_flag())
+        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], type=int, help='Disables synchronization of audit logs. ', required=False, arg_type=get_three_state_flag())
 
 def _get_helm_default_install_location():
     exe_name = 'helm'

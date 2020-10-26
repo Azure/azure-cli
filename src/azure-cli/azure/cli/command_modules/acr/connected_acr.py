@@ -21,19 +21,19 @@ logger = get_logger(__name__)
 
 
 def acr_connected_acr_create(cmd,
-                                  client,
-                                  registry_name,
-                                  connected_acr_name,
-                                  repositories,
-                                  resource_group_name=None,
-                                  mode=DEFAULT_MODE,
-                                  parent=None,
-                                  sync_schedule=None,
-                                  sync_window=None,
-                                  disable_auto_update=False,
-                                  log_level=DEFAULT_LOG_LEVEL,
-                                  sync_message_ttl=DEFAULT_MESSAGE_TTL,
-                                  disable_sync_audit_logs=False):
+                             client,
+                             registry_name,
+                             connected_acr_name,
+                             repositories,
+                             resource_group_name=None,
+                             mode=DEFAULT_MODE,
+                             parent=None,
+                             sync_schedule=None,
+                             sync_window=None,
+                             auto_update_enabled=True,
+                             log_level=DEFAULT_LOG_LEVEL,
+                             sync_message_ttl=DEFAULT_MESSAGE_TTL,
+                             sync_audit_logs_enabled=True):
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
@@ -73,7 +73,7 @@ def acr_connected_acr_create(cmd,
             'ConnectedRegistry', 'LoggingProperties')
     logging_properties = LoggingProperties(
         LogLevel=log_level,
-        AuditLogStatus='Enabled' if disable_sync_audit_logs else 'Disabled'
+        Status='Enabled' if sync_audit_logs_enabled else 'Disabled'
     )
 
     connected_acr_create_parameters = ConnectedRegistry(
@@ -101,19 +101,19 @@ def acr_connected_acr_create(cmd,
 
 
 def acr_connected_acr_update(cmd,
-                                  client,
-                                  registry_name,
-                                  connected_acr_name,
-                                  repositories,
-                                  resource_group_name=None,
-                                  mode=DEFAULT_MODE,
-                                  sync_schedule=None,
-                                  sync_window=None,
-                                  disable_auto_update=False,
-                                  next_update=None,
-                                  log_level=DEFAULT_LOG_LEVEL,
-                                  sync_message_ttl=DEFAULT_MESSAGE_TTL,
-                                  disable_sync_audit_logs=False):
+                             client,
+                             registry_name,
+                             connected_acr_name,
+                             repositories,
+                             resource_group_name=None,
+                             mode=DEFAULT_MODE,
+                             sync_schedule=None,
+                             sync_window=None,
+                             auto_update_enabled=True,
+                             next_update=None,
+                             log_level=DEFAULT_LOG_LEVEL,
+                             sync_message_ttl=DEFAULT_MESSAGE_TTL,
+                             sync_audit_logs_enabled=True):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
@@ -130,7 +130,7 @@ def acr_connected_acr_update(cmd,
 
     logging_properties = LoggingProperties(
         LogLevel=log_level,
-        AuditLogStatus='Enabled' if disable_sync_audit_logs else 'Disabled'
+        Status='Enabled' if sync_audit_logs_enabled else 'Disabled'
     )
 
     connected_acr_update_parameters = ConnectedRegistryUpdateProperties(
@@ -150,11 +150,11 @@ def acr_connected_acr_update(cmd,
 
 
 def acr_connected_acr_delete(cmd,
-                                  client,
-                                  connected_acr_name,
-                                  registry_name,
-                                  yes=False,
-                                  resource_group_name=None):
+                             client,
+                             connected_acr_name,
+                             registry_name,
+                             yes=False,
+                             resource_group_name=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
@@ -169,11 +169,11 @@ def acr_connected_acr_delete(cmd,
 
 
 def acr_connected_acr_list(cmd,
-                                client,
-                                registry_name,
-                                parent=None,
-                                cascading=False,
-                                resource_group_name=None):
+                           client,
+                           registry_name,
+                           parent=None,
+                           cascading=False,
+                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -182,10 +182,10 @@ def acr_connected_acr_list(cmd,
 
 
 def acr_connected_acr_show(cmd,
-                                client,
-                                connected_acr_name,
-                                registry_name,
-                                resource_group_name=None):
+                           client,
+                           connected_acr_name,
+                           registry_name,
+                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
