@@ -1083,7 +1083,10 @@ def page_blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
 
     try:
-        namespace.tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            namespace.tier = getattr(cmd.get_models('_models#PremiumPageBlobTier'), namespace.tier)
+        else:
+            namespace.tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
     except AttributeError:
         from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
         raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
@@ -1098,7 +1101,10 @@ def block_blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
 
     try:
-        namespace.tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            namespace.tier = getattr(cmd.get_models('_models#StandardBlobTier'), namespace.tier)
+        else:
+            namespace.tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
     except AttributeError:
         from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
         raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
@@ -1334,7 +1340,7 @@ def validate_service_type(services, service_type):
 
 
 def validate_logging_version(namespace):
-    if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
+    if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
@@ -1401,9 +1407,6 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     # usage check
-    if not any([url, container, blob, share, file_path]):
-        raise CLIError("incorrect usage: please specify one of url, container&blob, share&file_path information.")
-
     if not container and blob:
         raise CLIError('incorrect usage: please specify container information for your blob resource.')
     if not share and file_path:
@@ -1459,14 +1462,20 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     if namespace.sas_token:
         sas_token = namespace.sas_token.lstrip('?')
     else:
-        sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-    return '{}?{}'.format(url, sas_token)
+        try:
+            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return '{}?{}'.format(url, sas_token)
+    return url
 
 
 def _is_valid_uri(uri):
     if not uri:
         return False
-    if os.path.isdir(os.path.dirname(uri)):
+    if os.path.isdir(os.path.dirname(uri)) or os.path.isdir(uri):
         return uri
     if "?" in uri:  # sas token exists
         logger.debug("Find ? in %s. ", uri)
@@ -1529,3 +1538,18 @@ def validate_text_configuration(cmd, ns):
         ns.in_escape_char, ns.in_has_header
     del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
         ns.out_escape_char, ns.out_has_header
+
+
+def add_acl_progress_hook(namespace):
+    if namespace.progress_hook:
+        return
+
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        print(acl_changes.batch_failures)
+        failed_entries.append(acl_changes.batch_failures)
+
+    namespace.progress_hook = progress_callback

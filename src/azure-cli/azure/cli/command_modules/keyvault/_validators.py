@@ -16,6 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -142,8 +143,9 @@ def process_storage_uri(ns):
             raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
                            '--storage-account-name NAME --blob-container-name NAME]')
     else:
-        raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
-                       'if --storage-resource-uri is specified.')
+        if ns.storage_account_name or ns.blob_container_name:
+            raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
+                           'if --storage-resource-uri is specified.')
 
 
 def process_sas_token_parameter(cmd, ns):
@@ -387,7 +389,11 @@ def _get_base_url_type(cli_ctx, service):
     if service == 'vault':
         suffix = cli_ctx.cloud.suffixes.keyvault_dns
     elif service == 'hsm':
-        suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        from azure.cli.core.cloud import CloudSuffixNotSetException
+        try:
+            suffix = cli_ctx.cloud.suffixes.mhsm_dns
+        except CloudSuffixNotSetException:  # For Azure Stack and Air-Gaped Cloud
+            suffix = ''
 
     def base_url_type(name):
         return 'https://{}{}'.format(name, suffix)
@@ -431,6 +437,13 @@ def validate_subnet(cmd, namespace):
         namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
+
+def validate_role_assignment_args(ns):
+    if not any([ns.role_assignment_name, ns.scope, ns.assignee, ns.assignee_object_id, ns.role, ns.ids]):
+        raise RequiredArgumentMissingError(
+            'Please specify at least one of these parameters: '
+            '--name, --scope, --assignee, --assignee-object-id, --role, --ids')
 
 
 def validate_vault_or_hsm(ns):

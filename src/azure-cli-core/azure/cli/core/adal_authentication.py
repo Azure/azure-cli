@@ -36,7 +36,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             if in_cloud_console():
                 AdalAuthentication._log_hostname()
 
-            err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
+            err = (getattr(err, 'error_response', None) or {}).get('error_description') or str(err)
             if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
                 raise CLIError("Credentials have expired due to inactivity. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
@@ -93,3 +93,27 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
+
+    def set_token(self):
+        import traceback
+        from knack.log import get_logger
+        logger = get_logger(__name__)
+        from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
+        try:
+            super(MSIAuthenticationWrapper, self).set_token()
+        except requests.exceptions.ConnectionError as err:
+            logger.debug('throw requests.exceptions.ConnectionError when doing MSIAuthentication: \n%s',
+                         traceback.format_exc())
+            raise AzureConnectionError('Failed to connect to MSI. Please make sure MSI is configured correctly '
+                                       'and check the network connection.\nError detail: {}'.format(str(err)))
+        except requests.exceptions.HTTPError as err:
+            logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
+                         traceback.format_exc())
+            raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                     'Get Token request returned http error: {}, reason: {}'
+                                     .format(err.response.status, err.response.reason))
+        except TimeoutError as err:
+            logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
+                         traceback.format_exc())
+            raise AzureConnectionError('MSI endpoint is not responding. Please make sure MSI is configured correctly.\n'
+                                       'Error detail: {}'.format(str(err)))

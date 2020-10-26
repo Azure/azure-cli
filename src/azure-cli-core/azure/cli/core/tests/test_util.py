@@ -15,7 +15,7 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
 from azure.cli.core.mock import DummyCli
 
 
@@ -246,7 +246,7 @@ class TestUtils(unittest.TestCase):
         test_body = '{"b1": "v1"}'
 
         expected_header = {
-            'User-Agent': get_az_user_agent(),
+            'User-Agent': get_az_rest_user_agent(),
             'Accept-Encoding': 'gzip, deflate',
             'Accept': '*/*',
             'Connection': 'keep-alive',
@@ -375,7 +375,7 @@ class TestUtils(unittest.TestCase):
 
             get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
             request = send_mock.call_args.args[1]
-            self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
+            self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
 
 class TestBase64ToHex(unittest.TestCase):
@@ -436,7 +436,7 @@ class TestHandleException(unittest.TestCase):
         # test behavior
         self.assertTrue(mock_logger_error.called)
         self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
-        self.assertEqual(ex_result, mock_cloud_error.args[1])
+        self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):

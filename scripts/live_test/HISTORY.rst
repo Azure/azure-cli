@@ -3,10 +3,31 @@
 Release History
 ===============
 
+0.6.0
+++++++
+* Remove module iotcentral.
+* Support testing Azure CLI extensions.
+
+0.5.0
+++++++
+* Update index.html design.
+* Add module data table.
+* Add retry for CLI commands.
+
+0.4.0
+++++++
+
+* Update pipeline run title.
+* Generate index.html of testing results.
+* Design a unique representation of a pipeline run.
+* Make storage account container public.
+
 0.3.0
 ++++++
 
 * Support upgrading API version in pipeline.
+* Fix a tiny DB bug.
+* Fix pipe not close problem.
 
 0.2.0
 ++++++
