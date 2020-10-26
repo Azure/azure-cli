@@ -110,12 +110,16 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
-def configure_common_settings_track2(cli_ctx):
+def _prepare_client_kwargs(cli_ctx):
+    """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
+    # This enables NetworkTraceLoggingPolicy which logs all headers without being redacted except Authorization
     client_kwargs['logging_enable'] = True
+    # TODO: Need a way to disable ARMHttpLoggingPolicy
+    # client_kwargs['http_logging_policy'] = None
     client_kwargs['user_agent'] = get_az_user_agent()
 
     try:
@@ -168,7 +172,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs.update(_prepare_client_kwargs(cli_ctx))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

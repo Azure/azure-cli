@@ -93,3 +93,12 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
+
+
+class BasicTokenCredential:
+    """A Track 2 implementation of msrest.authentication.BasicTokenAuthentication."""
+    def __init__(self, token_entry):
+        self.token_entry = token_entry
+
+    def get_token(self, *scopes, **kwargs):
+        return AccessToken(self.token_entry['accessToken'], int(self.token_entry['expiresIn'] + time.time()))

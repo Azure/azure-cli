@@ -259,7 +259,7 @@ class Profile:
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
-                _STATE: s.state.value,
+                _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
@@ -804,12 +804,12 @@ class SubscriptionFinder:
                 return arm_client_factory(credentials)
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import configure_common_settings
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            client_kwargs = _prepare_client_kwargs(cli_ctx)
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
-            configure_common_settings(cli_ctx, client)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -827,9 +827,9 @@ class SubscriptionFinder:
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:
-            result = self._find_using_common_tenant(token_entry[_ACCESS_TOKEN], resource)
+            result = self._find_using_common_tenant(token_entry, resource)
         else:
-            result = self._find_using_specific_tenant(tenant, token_entry[_ACCESS_TOKEN])
+            result = self._find_using_specific_tenant(tenant, token_entry)
         return result
 
     def find_through_authorization_code_flow(self, tenant, resource, authority_url):
@@ -884,12 +884,12 @@ class SubscriptionFinder:
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
@@ -916,7 +916,7 @@ class SubscriptionFinder:
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
-                temp_credentials[_ACCESS_TOKEN])
+                temp_credentials)
 
             if not subscriptions:
                 empty_tenants.append(t)
@@ -958,9 +958,9 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
