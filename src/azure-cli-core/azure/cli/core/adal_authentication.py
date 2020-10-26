@@ -112,8 +112,6 @@ class MSIAuthenticationWrapper(MSIAuthentication):
 
     def set_token(self):
         import traceback
-        from knack.log import get_logger
-        logger = get_logger(__name__)
         from azure.cli.core.azclierror import AzureConnectionError, AzureResponseError
         try:
             super(MSIAuthenticationWrapper, self).set_token()
