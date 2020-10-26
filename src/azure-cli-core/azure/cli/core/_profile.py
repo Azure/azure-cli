@@ -615,7 +615,7 @@ class Profile:
         if user_type == _USER:
             _, _, token_entry = self._creds_cache.retrieve_token_for_user(
                 username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry.get(_REFRESH_TOKEN), token_entry, str(account[_TENANT_ID])
+            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
 
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
@@ -1023,7 +1023,7 @@ class CredsCache:
 
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
-        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry, token_entry)
+        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
     def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
         """
@@ -1059,7 +1059,7 @@ class CredsCache:
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None),
                                        use_cert_sn_issuer)
         token_entry = sp_auth.acquire_token(context, resource, sp_id)
-        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry, token_entry)
+        return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
     def retrieve_secret_of_service_principal(self, sp_id):
         self.load_adal_token_cache()
