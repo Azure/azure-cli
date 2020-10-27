@@ -198,7 +198,7 @@ def load_arguments(self, _):
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('role_definition_id', options_list=['--role-definition-id', '-d'], validator=validate_fully_qualified_role_definition_id, help="Role Definition Id")
         c.argument('role_assignment_id', options_list=['--role-assignment-id', '-i'], validator=validate_role_assignment_id, help="Role Assignment Id")
-        c.argument('scope', options_list=['--scope', '-s'], help="Scope")
+        c.argument('scope', validator=validate_scope, options_list=['--scope', '-s'], help="Scope")
         c.argument('principal_id', options_list=['--principal-id', '-p'], help="Principal Id")
 
 # MongoDB

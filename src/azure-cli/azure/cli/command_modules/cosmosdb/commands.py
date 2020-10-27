@@ -145,7 +145,7 @@ def load_command_table(self, _):
         g.command('list', 'list_sql_role_definitions')
         g.show_command('show', 'get_sql_role_definition')
         g.command('delete', 'delete_sql_role_definition', confirmation=True)
-        
+
     with self.command_group('cosmosdb sql role assignment', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_role_assignment_create')
         g.custom_command('update', 'cli_cosmosdb_sql_role_assignment_update')

@@ -715,7 +715,6 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
-
         role_definition_create = self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"').get_output_in_json()
         assert role_definition_create['id'] == fully_qualified_role_def_id
         assert role_definition_create['roleName'] == 'roleName'

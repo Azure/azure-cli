@@ -86,7 +86,8 @@ def validate_role_definition_body(cmd, ns):
         if 'DataActions' in role_definition:
             role_definition['Permissions'] = [Permission(data_actions=role_definition['DataActions'])]
         else:
-            role_definition['Permissions'] = [Permission(data_actions=p['DataActions']) for p in role_definition['Permissions']]
+            role_definition['Permissions'] = [Permission(data_actions=p['DataActions'])
+                                              for p in role_definition['Permissions']]
 
         if 'Type' in role_definition:
             role_definition['Type'] = role_definition['Type']
@@ -147,7 +148,8 @@ def _parse_resource_path(resource,
                          account_name=None):
     """Returns a properly formatted role definition or assignment id or scope. If scope, type=None."""
     import re
-    regex = "/subscriptions/(?P<subscription>.*)/resourceGroups/(?P<resource_group>.*)/providers/Microsoft.DocumentDB/databaseAccounts/(?P<database_account>.*)"
+    regex = "/subscriptions/(?P<subscription>.*)/resourceGroups/(?P<resource_group>.*)/providers/" \
+            "Microsoft.DocumentDB/databaseAccounts/(?P<database_account>.*)"
     formatted = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}"
 
     if resource_type is not None:

@@ -9,7 +9,6 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.commands.client_factory import get_subscription_id
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -26,7 +25,6 @@ from azure.mgmt.cosmosdb.models import (
     ContainerPartitionKey,
     SqlRoleAssignmentCreateUpdateParameters,
     SqlRoleDefinitionCreateUpdateParameters,
-    Permission,
     SqlStoredProcedureResource,
     SqlStoredProcedureCreateUpdateParameters,
     SqlTriggerResource,
@@ -549,23 +547,24 @@ def cli_cosmosdb_sql_trigger_update(client,
                                             sql_trigger_create_update_resource)
 
 
-def cli_cosmosdb_sql_role_definition_create(cmd,
-                                            client,
+def cli_cosmosdb_sql_role_definition_create(client,
                                             resource_group_name,
                                             account_name,
                                             role_definition_body):
     '''Creates an Azure Cosmos DB SQL Role Definition '''
+    print(555)
     role_definition_create_resource = SqlRoleDefinitionCreateUpdateParameters(
         role_name=role_definition_body['RoleName'],
         type=role_definition_body['Type'],
         assignable_scopes=role_definition_body['AssignableScopes'],
         permissions=role_definition_body['Permissions'])
+    print(561)
+    returnval = client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
+    print(563)
+    return returnval
 
-    return client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
 
-
-def cli_cosmosdb_sql_role_definition_update(cmd,
-                                            client,
+def cli_cosmosdb_sql_role_definition_update(client,
                                             resource_group_name,
                                             account_name,
                                             role_definition_body):
@@ -604,8 +603,7 @@ def cli_cosmosdb_sql_role_definition_exists(client,
     return True
 
 
-def cli_cosmosdb_sql_role_assignment_create(cmd,
-                                            client,
+def cli_cosmosdb_sql_role_assignment_create(client,
                                             resource_group_name,
                                             account_name,
                                             role_definition_id,
@@ -621,8 +619,7 @@ def cli_cosmosdb_sql_role_assignment_create(cmd,
     return client.create_update_sql_role_assignment(role_assignment_id, resource_group_name, account_name, sql_role_assignment_create_update_parameters)
 
 
-def cli_cosmosdb_sql_role_assignment_update(cmd,
-                                            client,
+def cli_cosmosdb_sql_role_assignment_update(client,
                                             resource_group_name,
                                             account_name,
                                             role_definition_id,
