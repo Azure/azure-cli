@@ -11,6 +11,7 @@ import math
 import os
 import re
 import struct
+import sys
 import time
 import uuid
 
@@ -22,6 +23,7 @@ from azure.cli.command_modules.keyvault.security_domain.shared_secret import Sha
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
 from azure.graphrbac.models import GraphErrorException
@@ -216,7 +218,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
     )
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
+                       no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
             no_wait,
@@ -224,10 +227,7 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             location=location,
             vault_name=vault_name
         )
-
-    assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-    return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
+    return None
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
@@ -235,19 +235,10 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        deleted_resources = []
-        try:
-            deleted_resources.extend(client.list_deleted())
-            deleted_resources.extend(hsm_client.list_deleted())
-        except:  # pylint: disable=bare-except
-            pass
-
-        return deleted_resources
+        return client.list_deleted()
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return hsm_client.list_deleted()
+        raise InvalidArgumentValueError('Operation "list-deleted" has not been supported for HSM.')
 
     if resource_type == 'vault':
         return client.list_deleted()
@@ -444,7 +435,8 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
                                 no_wait=no_wait)
 
 
-def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
+def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
+                        bypass, default_action):
     if network_acls_json is None:
         network_acls_json = {}
 
@@ -466,7 +458,7 @@ def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acl
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
 
-    network_acls = _create_network_rule_set(cmd)
+    network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     from msrestazure.tools import is_valid_resource_id
 
@@ -661,9 +653,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
     # if bypass or default_action was specified create a NetworkRuleSet
     # if neither were specified we will parse it from parameter `--network-acls`
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        network_acls = _create_network_rule_set(cmd, bypass, default_action) \
-            if bypass or default_action else \
-            _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets)
+        if network_acls or network_acls_ips or network_acls_vnets:
+            network_acls = _parse_network_acls(
+                cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets, bypass, default_action)
+        else:
+            network_acls = _create_network_rule_set(cmd, bypass, default_action)
 
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
@@ -724,6 +718,11 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
 
     if not sku:
         sku = 'standard'
+
+    if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+        enable_soft_delete = True
+        print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+              'The value will be changed to true.', file=sys.stderr)
 
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku),
@@ -800,6 +799,10 @@ def update_vault(cmd, instance,
         instance.properties.enable_rbac_authorization = enable_rbac_authorization
 
     if enable_soft_delete is not None:
+        if enable_soft_delete is False:  # ignore '--enable-soft-delete false'
+            enable_soft_delete = True
+            print('"--enable-soft-delete false" has been deprecated, you cannot disable Soft Delete via CLI. '
+                  'The value will be changed to true.', file=sys.stderr)
         instance.properties.enable_soft_delete = enable_soft_delete
 
     if enable_purge_protection is not None:
