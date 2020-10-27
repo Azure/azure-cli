@@ -473,15 +473,6 @@ def step__invoicesections_get(test):
              ])
 
 
-# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
-@try_manual
-def step__billingpermissions_get2(test):
-    test.cmd('az billing permission list '
-             '--account-name "{myBillingAccount}" '
-             '--customer-name "{myCustomer}"',
-             checks=[])
-
-
 # EXAMPLE: /BillingProperty/get/BillingProperty
 @try_manual
 def step__billingproperty_get_billingproperty(test):
@@ -954,3 +945,22 @@ class BillingAgreementScenarioTest(ScenarioTest):
 
         step__agreements_get(self)
         step__agreements_get_agreementbyname(self)
+
+
+class BillingPermissionScenarioTest(ScenarioTest):
+
+    def test_permission_list(self):
+        self.kwargs.update({
+            "myBillingAccount": "db038d21-b0d2-463c-942f-b09127c6f4e4:7c9c4a38-593e-479e-8958-9a338a0d8d02_2019-05-31",
+            "myBillingProfile": "2A3E-KXSS-BG7-TGB",
+            "myInvoiceSection": "CGFY-TOZ5-PJA-TGB"
+        })
+
+        # list by invoice name
+        step__billingpermissions_get(self)
+
+        # list by customer name
+        # step__billingpermissions_get2(self)   # no customer to list and it will raise exception
+
+        # # list by billing account
+        step__billingpermissions_get3(self)
