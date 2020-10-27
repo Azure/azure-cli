@@ -22,6 +22,10 @@ TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
+# Put a config section or key (section.name) in the allowed set to allow recording the config
+# values in the section or for the key with 'az config set'
+ALLOWED_CONFIG_SECTIONS_OR_KEYS = {'auto-upgrade', 'extension', 'core', 'logging.enable_log_file',
+                                   'output.show_survey_link'}
 
 
 class TelemetrySession:  # pylint: disable=too-many-instance-attributes
@@ -136,6 +140,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -343,8 +348,23 @@ def set_user_fault(summary=None):
 
 @decorators.suppress_all_exceptions()
 def set_debug_info(key, info):
+    if key == 'ConfigSet':
+        info = _process_config_set_debug_info(info)
+
     debug_info = '{}: {}'.format(key, info)
     _session.debug_info.append(debug_info)
+
+
+@decorators.suppress_all_exceptions()
+def _process_config_set_debug_info(info):
+    processed_info = []
+    # info is a list of tuples
+    for key, section, value in info:
+        if section in ALLOWED_CONFIG_SECTIONS_OR_KEYS or key in ALLOWED_CONFIG_SECTIONS_OR_KEYS:
+            processed_info.append('{}={}'.format(key, value))
+        else:
+            processed_info.append('{}={}'.format(key, '***' if value else value))
+    return ' '.join(processed_info)
 
 
 @decorators.suppress_all_exceptions()
