@@ -39,7 +39,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             timeout=None,
             resource_group_name=None,
             platform=None,
-            auth_mode=None):
+            auth_mode=None,
+            log_template=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
@@ -75,7 +76,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 cmd=cmd,
                 auth_mode=auth_mode
             ),
-            agent_pool_name=agent_pool_name
+            agent_pool_name=agent_pool_name,
+            log_template=log_template
         )
     else:
         yaml_template = get_yaml_template(cmd_value, timeout, file)
@@ -94,7 +96,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 cmd=cmd,
                 auth_mode=auth_mode
             ),
-            agent_pool_name=agent_pool_name
+            agent_pool_name=agent_pool_name,
+            log_template=log_template
         )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(

@@ -13,24 +13,24 @@ interactions:
       ParameterSetName:
       - -g -n --no-wait
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001","name":"cli_test_ag_frontend_port000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-06-14T13:15:03Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001","name":"cli_test_ag_frontend_port000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-08-20T07:17:16Z","StorageType":"Standard_LRS"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '471'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:15:11 GMT
+      - Thu, 20 Aug 2020 07:17:20 GMT
       expires:
       - '-1'
       pragma:
@@ -58,12 +58,12 @@ interactions:
       ParameterSetName:
       - -g -n --no-wait
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_frontend_port000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_ag_frontend_port000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FvirtualNetworks%27&api-version=2020-06-01
   response:
     body:
       string: '{"value":[]}'
@@ -75,7 +75,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:15:12 GMT
+      - Thu, 20 Aug 2020 07:17:20 GMT
       expires:
       - '-1'
       pragma:
@@ -90,14 +90,14 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {"appGwID": "[resourceId(\''Microsoft.Network/applicationGateways\'',
-      \''ag1\'')]"}, "resources": [{"name": "ag1Vnet", "type": "Microsoft.Network/virtualNetworks",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {"appGwID": "[resourceId(''Microsoft.Network/applicationGateways'',
+      ''ag1'')]"}, "resources": [{"name": "ag1Vnet", "type": "Microsoft.Network/virtualNetworks",
       "location": "westus", "apiVersion": "2015-06-15", "dependsOn": [], "tags": {},
       "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets":
       [{"name": "default", "properties": {"addressPrefix": "10.0.0.0/24"}}]}}, {"type":
       "Microsoft.Network/applicationGateways", "name": "ag1", "location": "westus",
-      "tags": {}, "apiVersion": "2020-05-01", "dependsOn": ["Microsoft.Network/virtualNetworks/ag1Vnet"],
+      "tags": {}, "apiVersion": "2020-06-01", "dependsOn": ["Microsoft.Network/virtualNetworks/ag1Vnet"],
       "properties": {"backendAddressPools": [{"name": "appGatewayBackendPool"}], "backendHttpSettingsCollection":
       [{"name": "appGatewayBackendHttpSettings", "properties": {"Port": 80, "Protocol":
       "Http", "CookieBasedAffinity": "disabled", "connectionDraining": {"enabled":
@@ -108,16 +108,17 @@ interactions:
       80}}], "gatewayIPConfigurations": [{"name": "appGatewayFrontendIP", "properties":
       {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default"}}}],
       "httpListeners": [{"name": "appGatewayHttpListener", "properties": {"FrontendIpConfiguration":
-      {"Id": "[concat(variables(\''appGwID\''), \''/frontendIPConfigurations/appGatewayFrontendIP\'')]"},
-      "FrontendPort": {"Id": "[concat(variables(\''appGwID\''), \''/frontendPorts/appGatewayFrontendPort\'')]"},
+      {"Id": "[concat(variables(''appGwID''), ''/frontendIPConfigurations/appGatewayFrontendIP'')]"},
+      "FrontendPort": {"Id": "[concat(variables(''appGwID''), ''/frontendPorts/appGatewayFrontendPort'')]"},
       "Protocol": "http", "SslCertificate": null}}], "sku": {"name": "Standard_Medium",
       "tier": "Standard", "capacity": 2}, "requestRoutingRules": [{"Name": "rule1",
-      "properties": {"RuleType": "Basic", "httpListener": {"id": "[concat(variables(\''appGwID\''),
-      \''/httpListeners/appGatewayHttpListener\'')]"}, "backendAddressPool": {"id":
-      "[concat(variables(\''appGwID\''), \''/backendAddressPools/appGatewayBackendPool\'')]"},
-      "backendHttpSettings": {"id": "[concat(variables(\''appGwID\''), \''/backendHttpSettingsCollection/appGatewayBackendHttpSettings\'')]"}}}]},
-      "zones": null}], "outputs": {"applicationGateway": {"type": "object", "value":
-      "[reference(\''ag1\'')]"}}}, "parameters": {}, "mode": "Incremental"}}'''
+      "properties": {"RuleType": "Basic", "httpListener": {"id": "[concat(variables(''appGwID''),
+      ''/httpListeners/appGatewayHttpListener'')]"}, "backendAddressPool": {"id":
+      "[concat(variables(''appGwID''), ''/backendAddressPools/appGatewayBackendPool'')]"},
+      "backendHttpSettings": {"id": "[concat(variables(''appGwID''), ''/backendHttpSettingsCollection/appGatewayBackendHttpSettings'')]"}}}],
+      "privateLinkConfigurations": []}, "zones": null}], "outputs": {"applicationGateway":
+      {"type": "object", "value": "[reference(''ag1'')]"}}}, "parameters": {}, "mode":
+      "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -128,24 +129,24 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2799'
+      - '2832'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --no-wait
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/ag_deploy_JMauYJLpIlGAunGrtEt7j6msT1ijVyEC","name":"ag_deploy_JMauYJLpIlGAunGrtEt7j6msT1ijVyEC","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16712531234876365240","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-06-14T13:15:29.3554472Z","duration":"PT2.5356963S","correlationId":"e88f9eeb-c3b0-4fbb-b870-bf857066092e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"ag1Vnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"ag1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/ag_deploy_qr7W4ZulL31gsg6QwdWkcC1OQAO2oGH1","name":"ag_deploy_qr7W4ZulL31gsg6QwdWkcC1OQAO2oGH1","type":"Microsoft.Resources/deployments","properties":{"templateHash":"17168856726794963206","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-08-20T07:17:25.0791311Z","duration":"PT2.4831008S","correlationId":"ecb1e7b6-a8a6-4d9e-b9ea-6f057e322b28","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"applicationGateways","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"ag1Vnet"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1","resourceType":"Microsoft.Network/applicationGateways","resourceName":"ag1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/ag_deploy_JMauYJLpIlGAunGrtEt7j6msT1ijVyEC/operationStatuses/08586094663586578646?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_frontend_port000001/providers/Microsoft.Resources/deployments/ag_deploy_qr7W4ZulL31gsg6QwdWkcC1OQAO2oGH1/operationStatuses/08586036990428815846?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -153,7 +154,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:15:30 GMT
+      - Thu, 20 Aug 2020 07:17:26 GMT
       expires:
       - '-1'
       pragma:
@@ -163,7 +164,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1193'
     status:
       code: 201
       message: Created
@@ -181,12 +182,12 @@ interactions:
       ParameterSetName:
       - -g -n --exists
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/applicationGateways/ag1''
@@ -200,7 +201,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:15:35 GMT
+      - Thu, 20 Aug 2020 07:17:26 GMT
       expires:
       - '-1'
       pragma:
@@ -228,31 +229,31 @@ interactions:
       ParameterSetName:
       - -g -n --exists
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -262,14 +263,14 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -277,7 +278,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -288,7 +289,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -299,7 +300,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -318,9 +319,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:17:46 GMT
+      - Thu, 20 Aug 2020 07:17:57 GMT
       etag:
-      - W/"cb99711f-5ab5-4ed7-bd59-77e3d2435510"
+      - W/"962862b5-b770-4e0b-956b-abae3f044d4d"
       expires:
       - '-1'
       pragma:
@@ -337,7 +338,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 67486bf2-fd53-4009-b0e6-64e46132807c
+      - e9e5b4b3-94ea-4bf2-b7ca-bd830a43e7cb
     status:
       code: 200
       message: OK
@@ -355,31 +356,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n --no-wait --port
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -389,14 +390,14 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -404,7 +405,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -415,7 +416,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -426,7 +427,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"cb99711f-5ab5-4ed7-bd59-77e3d2435510\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"962862b5-b770-4e0b-956b-abae3f044d4d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -445,9 +446,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:17:57 GMT
+      - Thu, 20 Aug 2020 07:17:57 GMT
       etag:
-      - W/"cb99711f-5ab5-4ed7-bd59-77e3d2435510"
+      - W/"962862b5-b770-4e0b-956b-abae3f044d4d"
       expires:
       - '-1'
       pragma:
@@ -464,12 +465,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ec5d4930-46cf-485c-b173-cb4d98f59684
+      - 8c05965e-9463-4951-91b7-9d755cb7fc66
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
       "location": "westus", "tags": {}, "properties": {"sku": {"name": "Standard_Medium",
       "tier": "Standard", "capacity": 2}, "gatewayIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default"}},
@@ -494,7 +495,7 @@ interactions:
       "properties": {"ruleType": "Basic", "backendAddressPool": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool"},
       "backendHttpSettings": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings"},
       "httpListener": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener"}},
-      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'''
+      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'
     headers:
       Accept:
       - application/json
@@ -511,31 +512,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n --no-wait --port
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -545,19 +546,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 111\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -565,7 +566,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -576,7 +577,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -587,7 +588,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"3d10b2b9-7abc-4527-aa76-4b2d77120f23\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"a2e57561-61ad-4a96-b804-35a3e23c4ead\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -600,7 +601,7 @@ interactions:
         \n    \"redirectConfigurations\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d8cb1ea4-63a7-46da-b13f-e39be15227ba?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/505ff2f1-29da-4557-9cc6-cea9cc046ce2?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -608,7 +609,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:17:58 GMT
+      - Thu, 20 Aug 2020 07:17:59 GMT
       expires:
       - '-1'
       pragma:
@@ -625,9 +626,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 21cdd766-fc9c-4d53-b1d8-3e918d1ca14f
+      - 92918da2-eda7-4e0a-8213-dd28f7c1e93c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1184'
+      - '1192'
     status:
       code: 200
       message: OK
@@ -645,31 +646,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -679,19 +680,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 111\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -699,7 +700,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -710,7 +711,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -721,7 +722,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -740,9 +741,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:00 GMT
+      - Thu, 20 Aug 2020 07:17:59 GMT
       etag:
-      - W/"b9918200-707e-44dc-b4b7-a6e70797428f"
+      - W/"5772f254-9b0c-49e3-9f56-67ef3ab4530a"
       expires:
       - '-1'
       pragma:
@@ -759,7 +760,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 86371c01-73da-450a-a031-9b4271849bbd
+      - d556dbb1-fb0f-4b6a-81df-e0e1ac37d532
     status:
       code: 200
       message: OK
@@ -777,31 +778,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n --no-wait --port
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -811,19 +812,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 111\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -831,7 +832,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -842,7 +843,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -853,7 +854,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"b9918200-707e-44dc-b4b7-a6e70797428f\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"5772f254-9b0c-49e3-9f56-67ef3ab4530a\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -872,9 +873,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:01 GMT
+      - Thu, 20 Aug 2020 07:18:00 GMT
       etag:
-      - W/"b9918200-707e-44dc-b4b7-a6e70797428f"
+      - W/"5772f254-9b0c-49e3-9f56-67ef3ab4530a"
       expires:
       - '-1'
       pragma:
@@ -891,12 +892,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 546684a4-4546-4df0-8f42-6ccb39cf966b
+      - 171c5b0f-011e-484f-acba-a84acdb10778
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
       "location": "westus", "tags": {}, "properties": {"sku": {"name": "Standard_Medium",
       "tier": "Standard", "capacity": 2}, "gatewayIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default"}},
@@ -921,7 +922,7 @@ interactions:
       "properties": {"ruleType": "Basic", "backendAddressPool": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool"},
       "backendHttpSettings": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings"},
       "httpListener": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener"}},
-      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'''
+      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'
     headers:
       Accept:
       - application/json
@@ -938,31 +939,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n --no-wait --port
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -972,19 +973,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 112\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -992,7 +993,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1003,7 +1004,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1014,7 +1015,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"e7235b74-2633-49e4-9a8a-78bf08a89450\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eccad0af-2135-4318-93fe-5949cd12a29d\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1027,7 +1028,7 @@ interactions:
         \n    \"redirectConfigurations\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7cc5e421-efbd-4001-8236-effd0671d882?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d4e7c61d-eb4e-4a88-8f87-cea32ce03ce5?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1035,7 +1036,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:04 GMT
+      - Thu, 20 Aug 2020 07:18:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1052,9 +1053,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 327cb9ef-da74-4aa0-aabb-750b240db21d
+      - c2c59fa5-6798-4a7d-9f3f-2aad11ea4b46
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1191'
     status:
       code: 200
       message: OK
@@ -1072,31 +1073,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -1106,19 +1107,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 112\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -1126,7 +1127,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1137,7 +1138,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1148,7 +1149,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1167,9 +1168,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:06 GMT
+      - Thu, 20 Aug 2020 07:18:01 GMT
       etag:
-      - W/"dc86be88-d6df-45cf-bae6-cb4f8254ae83"
+      - W/"9ae52c36-a70e-440d-b14a-3004dc8e90e9"
       expires:
       - '-1'
       pragma:
@@ -1186,7 +1187,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7a32361a-d361-41a6-b7ec-c435eceb1cd2
+      - 84113fd9-0c78-42a1-abd6-e80ef8ec3118
     status:
       code: 200
       message: OK
@@ -1204,31 +1205,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -1238,19 +1239,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 112\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -1258,7 +1259,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1269,7 +1270,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1280,7 +1281,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1299,9 +1300,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:06 GMT
+      - Thu, 20 Aug 2020 07:18:03 GMT
       etag:
-      - W/"dc86be88-d6df-45cf-bae6-cb4f8254ae83"
+      - W/"9ae52c36-a70e-440d-b14a-3004dc8e90e9"
       expires:
       - '-1'
       pragma:
@@ -1318,7 +1319,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 09a14171-79cc-4e83-99f0-56b7fdf0401a
+      - eaba2615-72ac-4033-a188-b7af1359d44c
     status:
       code: 200
       message: OK
@@ -1336,31 +1337,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name --no-wait -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -1370,19 +1371,19 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      },\r\n      {\r\n        \"name\": \"myport\",\r\n        \"id\"\
         : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/myport\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 112\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -1390,7 +1391,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1401,7 +1402,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1412,7 +1413,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"dc86be88-d6df-45cf-bae6-cb4f8254ae83\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"9ae52c36-a70e-440d-b14a-3004dc8e90e9\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1431,9 +1432,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:11 GMT
+      - Thu, 20 Aug 2020 07:18:03 GMT
       etag:
-      - W/"dc86be88-d6df-45cf-bae6-cb4f8254ae83"
+      - W/"9ae52c36-a70e-440d-b14a-3004dc8e90e9"
       expires:
       - '-1'
       pragma:
@@ -1450,12 +1451,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2ec2e292-dd6c-4ea3-a30a-5b874556a532
+      - 8f24f963-f209-4da3-be7d-5629a1da730b
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1",
       "location": "westus", "tags": {}, "properties": {"sku": {"name": "Standard_Medium",
       "tier": "Standard", "capacity": 2}, "gatewayIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default"}},
@@ -1479,7 +1480,7 @@ interactions:
       "properties": {"ruleType": "Basic", "backendAddressPool": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool"},
       "backendHttpSettings": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings"},
       "httpListener": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener"}},
-      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'''
+      "name": "rule1"}], "rewriteRuleSets": [], "redirectConfigurations": []}}'
     headers:
       Accept:
       - application/json
@@ -1496,31 +1497,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name --no-wait -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -1530,14 +1531,14 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -1545,7 +1546,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1556,7 +1557,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1567,7 +1568,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"ef0f98b6-34fc-4f20-aef7-781246578ce9\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"eca751d5-7413-4147-aeaa-1a08edf959cd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1580,7 +1581,7 @@ interactions:
         \n    \"redirectConfigurations\": []\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7ab98b20-1740-4f0b-9f9e-891c66408e20?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/63c1a402-d7bb-43f6-bc3a-b4100d90d37c?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1588,7 +1589,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:12 GMT
+      - Thu, 20 Aug 2020 07:18:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1605,9 +1606,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 46ed3376-b50a-4c6e-a3ef-cf828936b207
+      - 28c874bb-c7ab-45fe-bbf2-6e2ea1930340
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -1625,31 +1626,31 @@ interactions:
       ParameterSetName:
       - -g --gateway-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"ag1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1\"\
-        ,\r\n  \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationGateways\",\r\n  \"location\":\
         \ \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Updating\",\r\n    \"resourceGuid\": \"6ddb2b12-844d-474f-89e3-f1bd4784802d\"\
+        : \"Updating\",\r\n    \"resourceGuid\": \"d2ddb210-b8ca-431c-8605-13d525910a4d\"\
         ,\r\n    \"sku\": {\r\n      \"name\": \"Standard_Medium\",\r\n      \"tier\"\
         : \"Standard\",\r\n      \"capacity\": 2\r\n    },\r\n    \"operationalState\"\
         : \"Stopped\",\r\n    \"gatewayIPConfigurations\": [\r\n      {\r\n      \
         \  \"name\": \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/gatewayIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/virtualNetworks/ag1Vnet/subnets/default\"\
         \r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/gatewayIPConfigurations\"\
         \r\n      }\r\n    ],\r\n    \"sslCertificates\": [],\r\n    \"authenticationCertificates\"\
         : [],\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\"\
         : \"appGatewayFrontendIP\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendIPConfigurations\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
@@ -1659,14 +1660,14 @@ interactions:
         \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
         \ \"frontendPorts\": [\r\n      {\r\n        \"name\": \"appGatewayFrontendPort\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendPorts/appGatewayFrontendPort\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"httpListeners\": [\r\n       \
         \     {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/frontendPorts\"\
         \r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n   \
         \     \"name\": \"appGatewayBackendPool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendAddressPools/appGatewayBackendPool\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"backendAddresses\": [],\r\n          \"requestRoutingRules\"\
         : [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
@@ -1674,7 +1675,7 @@ interactions:
         \r\n      }\r\n    ],\r\n    \"backendHttpSettingsCollection\": [\r\n    \
         \  {\r\n        \"name\": \"appGatewayBackendHttpSettings\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/backendHttpSettingsCollection/appGatewayBackendHttpSettings\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"port\": 80,\r\n          \"protocol\": \"Http\",\r\n    \
         \      \"cookieBasedAffinity\": \"Disabled\",\r\n          \"connectionDraining\"\
@@ -1685,7 +1686,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/backendHttpSettingsCollection\"\
         \r\n      }\r\n    ],\r\n    \"httpListeners\": [\r\n      {\r\n        \"\
         name\": \"appGatewayHttpListener\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"frontendIPConfiguration\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/frontendIPConfigurations/appGatewayFrontendIP\"\
         \r\n          },\r\n          \"frontendPort\": {\r\n            \"id\": \"\
@@ -1696,7 +1697,7 @@ interactions:
         \r\n            }\r\n          ]\r\n        },\r\n        \"type\": \"Microsoft.Network/applicationGateways/httpListeners\"\
         \r\n      }\r\n    ],\r\n    \"urlPathMaps\": [],\r\n    \"requestRoutingRules\"\
         : [\r\n      {\r\n        \"name\": \"rule1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/requestRoutingRules/rule1\"\
-        ,\r\n        \"etag\": \"W/\\\"796bf3dd-1e01-432d-a524-41c4778a7b93\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"406fbac3-77f3-4ab5-a662-0b610fa41915\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"ruleType\": \"Basic\",\r\n          \"httpListener\": {\r\
         \n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_frontend_port000001/providers/Microsoft.Network/applicationGateways/ag1/httpListeners/appGatewayHttpListener\"\
@@ -1715,9 +1716,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 14 Jun 2020 13:18:14 GMT
+      - Thu, 20 Aug 2020 07:18:04 GMT
       etag:
-      - W/"796bf3dd-1e01-432d-a524-41c4778a7b93"
+      - W/"406fbac3-77f3-4ab5-a662-0b610fa41915"
       expires:
       - '-1'
       pragma:
@@ -1734,7 +1735,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 398e4560-f6f2-41c4-974e-534f33672362
+      - 29991c0b-d36f-4505-a70e-74ee07f8b19a
     status:
       code: 200
       message: OK

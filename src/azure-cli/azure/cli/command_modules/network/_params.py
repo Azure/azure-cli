@@ -61,7 +61,7 @@ def load_arguments(self, _):
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
      ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
      ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
-     PreferredIPVersion, HTTPConfigurationMethod, OutputType) = self.get_models(
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType, DestinationPortBehavior, CoverageLevel, EndpointType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -72,7 +72,7 @@ def load_arguments(self, _):
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
          'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType', 'DestinationPortBehavior', 'CoverageLevel', 'EndpointType')
 
     ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
@@ -147,7 +147,11 @@ def load_arguments(self, _):
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
-        c.argument('enable_private_link', action='store_true', help='Enable Private Link feature for this application gateway', default=False)
+        c.argument('enable_private_link',
+                   action='store_true',
+                   help='Enable Private Link feature for this application gateway. '
+                        'If both public IP and private IP are enbaled, taking effect only in public frontend IP',
+                   default=False)
         c.argument('private_link_ip_address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
@@ -246,7 +250,7 @@ def load_arguments(self, _):
         c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
         c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
-        c.argument('host_names', nargs='+', is_preview=True, help='List of host names that allows special wildcard characters as well.', min_api='2019-11-01')
+        c.argument('host_names', nargs='+', is_preview=True, help='Space-separated list of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
     with self.argument_context('network application-gateway http-listener create') as c:
@@ -257,7 +261,7 @@ def load_arguments(self, _):
         c.argument('private_link_name', options_list=['--name', '-n'], help='The name of Private Link.')
         c.argument('private_link_ip_address', options_list='--ip-address', help='The static private IP address of a subnet for Private Link. If omitting, a dynamic one will be created')
         c.argument('private_link_subnet_prefix', options_list='--subnet-prefix', help='The CIDR prefix to use when creating a new subnet')
-        c.argument('private_link_subnet_name', options_list='--subnet', help='The name of a subnet within the same vnet of an application gateway')
+        c.argument('private_link_subnet_name_or_id', options_list='--subnet', help='The name or an existing ID of a subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', options_list='--primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway private-link list', arg_group=None) as c:
@@ -335,6 +339,7 @@ def load_arguments(self, _):
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
         c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
+        c.argument('priority', type=int, help='Priority of the request routing rule. Range from 1 to 2000')
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -447,6 +452,14 @@ def load_arguments(self, _):
          'WebApplicationFirewallEnabledState', 'WebApplicationFirewallMode')
     with self.argument_context('network application-gateway waf-policy', min_api='2018-12-01') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
+        c.argument('rule_set_version',
+                   options_list='--version',
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
 
     with self.argument_context('network application-gateway waf-policy policy-setting', min_api='2019-09-01') as c:
         c.argument('policy_name', options_list='--policy-name', id_part=None,
@@ -508,18 +521,10 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
-                   help='The type of the web application firewall rule set.')
-        c.argument('rule_set_version',
-                   options_list='--version',
-                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
-                   help='The version of the web application firewall rule set type. '
-                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
-        c.argument('rules', nargs='+', help='List of rules that will be disabled.')
+        c.argument('rules', nargs='+', help='List of rules that will be disabled. If provided, --group-name must be provided too')
 
     with self.argument_context('network application-gateway waf-policy managed-rule exclusion',
                                min_api='2019-09-01') as c:
@@ -812,7 +817,9 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'],
+                   help='The ID of the group obtained from the remote resource that this private endpoint should connect to. '
+                        'You can use "az network private-link-resource list" to obtain the supported group ids. You must provide this except for PrivateLinkService')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
@@ -941,7 +948,7 @@ def load_arguments(self, _):
         c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
 
     with self.argument_context('network lb frontend-ip update') as c:
-        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use "" to remove the static address and use a dynamic address instead.')
+        c.argument('private_ip_address', help='Static private IP address to associate with the configuration. Use ""(\'""\' in PowerShell) to remove the static address and use a dynamic address instead.')
 
     with self.argument_context('network lb probe') as c:
         c.argument('interval', help='Probing time interval in seconds.')
@@ -1001,7 +1008,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network nic update') as c:
         c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
+        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use ""(\'""\' in PowerShell) to revert to default Azure servers.', nargs='+', arg_group='DNS')
 
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
@@ -1025,7 +1032,7 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
         c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
         c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
-        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or "" to use a dynamic address.')
+        c.argument('private_ip_address', private_ip_address_type, help='Static IP address to use or ""(\'""\' in PowerShell) to use a dynamic address.')
 
     with self.argument_context('network nic ip-config address-pool') as c:
         c.argument('load_balancer_name', options_list='--lb-name', help='The name of the load balancer containing the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
@@ -1145,20 +1152,32 @@ def load_arguments(self, _):
                                arg_group='V2 Endpoint',
                                min_api='2019-11-01') as c:
         c.argument('endpoint_dest_name',
-                   help='The name of the source of connection monitor endpoint. '
-                        'If you are creating a V2 Connection Monitor, it\'s required')
-        c.argument('endpoint_dest_resource_id',
-                   help='Resource ID of the source of connection monitor endpoint')
-        c.argument('endpoint_dest_address',
-                   help='Address of the source of connection monitor endpoint (IP or domain name)')
-        c.argument('endpoint_source_name',
                    help='The name of the destination of connection monitor endpoint. '
                         'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('endpoint_dest_resource_id',
+                   help='Resource ID of the destination of connection monitor endpoint')
+        c.argument('endpoint_dest_address',
+                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_dest_type',
+                   arg_type=get_enum_type(EndpointType),
+                   help='The endpoint type')
+        c.argument('endpoint_dest_coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
+        c.argument('endpoint_source_name',
+                   help='The name of the source of connection monitor endpoint. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
         c.argument('endpoint_source_resource_id',
-                   help='Resource ID of the destination of connection monitor endpoint. '
+                   help='Resource ID of the source of connection monitor endpoint. '
                         'If endpoint is intended to used as source, this option is required.')
         c.argument('endpoint_source_address',
-                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+                   help='Address of the source of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_source_type',
+                   arg_type=get_enum_type(EndpointType),
+                   help='The endpoint type')
+        c.argument('endpoint_source_coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
 
     # Argument Group for test configuration to create a V2 connection monitor
     with self.argument_context('network watcher connection-monitor',
@@ -1194,6 +1213,10 @@ def load_arguments(self, _):
                    options_list='--tcp-port',
                    help='The port to connect to',
                    type=int)
+        c.argument('test_config_tcp_port_behavior',
+                   options_list='--tcp-port-behavior',
+                   help='Destination port behavior',
+                   arg_type=get_enum_type(DestinationPortBehavior))
         c.argument('test_config_tcp_disable_trace_route',
                    options_list='--tcp-disable-trace-route',
                    help='Value indicating whether path evaluation with trace route should be disabled. '
@@ -1263,12 +1286,27 @@ def load_arguments(self, _):
                    help='Resource ID of the connection monitor endpoint')
         c.argument('address',
                    help='Address of the connection monitor endpoint (IP or domain name)')
+        c.argument('address_include',
+                   nargs='+',
+                   help='List of address of the endpoint item which needs to be included to the endpoint scope')
+        c.argument('address_exclude',
+                   nargs='+',
+                   help='List of address of the endpoint item which needs to be included to the endpoint scope')
+        c.argument('endpoint_type',
+                   options_list=['--type'],
+                   help='The endpoint type',
+                   arg_type=get_enum_type(EndpointType))
+        c.argument('coverage_level',
+                   arg_type=get_enum_type(CoverageLevel),
+                   help='Test coverage for the endpoint')
         c.argument('filter_type',
                    arg_type=get_enum_type(ConnectionMonitorEndpointFilterType),
+                   deprecate_info=c.deprecate(hide=False),
                    help="The behavior of the endpoint filter. Currently only 'Include' is supported.")
         c.argument('filter_items',
                    options_list=['--filter-item'],
                    action=NWConnectionMonitorEndpointFilterItemAction,
+                   deprecate_info=c.deprecate(hide=False),
                    nargs='+',
                    help="List of property=value pairs to define filter items. "
                         "Property currently include: type, address. "
@@ -1327,6 +1365,9 @@ def load_arguments(self, _):
                        help='Value indicating whether path evaluation with trace route should be disabled. '
                             'false is default.',
                        arg_type=get_three_state_flag())
+            c.argument('tcp_port_behavior',
+                       help='Destination port behavior',
+                       arg_type=get_enum_type(DestinationPortBehavior))
         # ICMP protocol configuration
         with self.argument_context('network watcher connection-monitor test-configuration',
                                    min_api='2019-11-01',
@@ -1600,7 +1641,7 @@ def load_arguments(self, _):
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
-        c.argument('monitor_path', help='Path to monitor. Use "" for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
+        c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
         c.argument('monitor_port', help='Port to monitor.', type=int, options_list=['--port', c.deprecate(target='--monitor-port', redirect='--port', hide=True)])
         c.argument('monitor_protocol', monitor_protocol_type, options_list=['--protocol', c.deprecate(target='--monitor-protocol', redirect='--protocol', hide=True)])
         c.argument('timeout', help='The time in seconds allowed for endpoints to respond to a health check.', type=int)
@@ -1698,8 +1739,8 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet subnet update') as c:
-        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
-        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string "" to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
+        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string ""(\'""\' in PowerShell) to detach it.')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string ""(\'""\' in PowerShell) to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
@@ -1792,7 +1833,11 @@ def load_arguments(self, _):
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
-        c.argument('hosted_gateway', help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.', validator=validate_virtul_network_gateway)
+        c.argument('hosted_gateway',
+                   deprecate_info=c.deprecate(redirect='--hosted-subnet', hide=False),
+                   help='Name or ID of the virtual network gateway with ExpressRouter on which VirtualRouter is hosted.',
+                   validator=validate_virtul_network_gateway)
+        c.argument('hosted_subnet', help='The ID of a subnet where VirtualRouter would be deployed')
 
     with self.argument_context('network vrouter peering') as c:
         c.argument('virtual_router_name', options_list=['--vrouter-name'], help='The name of the Virtual Router.')
@@ -1859,9 +1904,9 @@ def load_arguments(self, _):
     register_providers()
     for scope in ['private-link-resource', 'private-endpoint-connection']:
         with self.argument_context('network {} list'.format(scope)) as c:
-            c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
-            c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
-            c.argument('resource_group_name', required=False)
+            c.argument('name', required=False, help='Name of the resource. If provided, --type and --resource-group must be provided too', options_list=['--name', '-n'])
+            c.argument('resource_provider', required=False, help='Type of the resource. If provided, --name and --resource-group must be provided too', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+            c.argument('resource_group_name', required=False, help='Name of resource group. If provided, --name and --type must be provided too')
             c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
     for scope in ['show', 'approve', 'reject', 'delete']:
         with self.argument_context('network private-endpoint-connection {}'.format(scope)) as c:

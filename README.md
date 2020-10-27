@@ -89,17 +89,17 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 
 ### Common scenarios and use Azure CLI effectively
 
-Please check [Tips for using Azure CLI effectively](doc/use_cli_effectively.md). It describes some common scenarios:
+Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively). It describes some common scenarios:
 
-- [Output formatting (json, table, or tsv)](doc/use_cli_effectively.md#output-formatting-json-table-or-tsv)
-- [Pass values from one command to another](doc/use_cli_effectively.md#pass-values-from-one-command-to-another)
-- [Async operations](doc/use_cli_effectively.md#async-operations)
-- [Generic update arguments](doc/use_cli_effectively.md#generic-update-arguments)
-- [Generic resource commands - `az resource`](doc/use_cli_effectively.md#generic-resource-commands---az-resource)
-- [REST API command - `az rest`](doc/use_cli_effectively.md#rest-api-command---az-rest)
-- [Quoting issues](doc/use_cli_effectively.md#quoting-issues)
-- [Work behind a proxy](doc/use_cli_effectively.md#work-behind-a-proxy)
-- [Concurrent builds](doc/use_cli_effectively.md#concurrent-builds)
+- [Output formatting (json, table, or tsv)](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#output-formatting-json-table-or-tsv)
+- [Pass values from one command to another](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#pass-values-from-one-command-to-another)
+- [Async operations](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#async-operations)
+- [Generic update arguments](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-update-arguments)
+- [Generic resource commands - `az resource`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
+- [REST API command - `az rest`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#rest-api-command---az-rest)
+- [Quoting issues](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#quoting-issues)
+- [Work behind a proxy](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy)
+- [Concurrent builds](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#concurrent-builds)
 
 ### More samples and snippets
 
@@ -120,12 +120,6 @@ See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for avai
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
-```
-
-For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
-For example:
-```bash
-$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
 ```
 
 ### Edge builds

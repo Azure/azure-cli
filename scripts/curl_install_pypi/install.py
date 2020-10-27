@@ -149,10 +149,6 @@ def install_cli(install_dir, tmp_dir):
     path_to_pip = os.path.join(install_dir, 'bin', 'pip')
     cmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, 'azure-cli', '--upgrade']
     exec_command(cmd)
-    # Temporary fix to make sure that we have empty __init__.py files for the azure site-packages folder.
-    # (including the pkg_resources/declare namespace significantly impacts startup perf for the CLI)
-    fixupcmd = [path_to_pip, 'install', '--cache-dir', tmp_dir, '--upgrade', '--force-reinstall', 'azure-nspkg', 'azure-mgmt-nspkg']
-    exec_command(fixupcmd)
 
 
 def create_executable(exec_dir, install_dir):

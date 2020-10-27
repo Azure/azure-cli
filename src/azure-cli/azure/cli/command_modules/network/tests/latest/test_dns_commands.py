@@ -391,8 +391,8 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
         self._check_aaaa(zone, 'myaaaa.' + zn, [(3600, '2001:4898:e0:99:6dc4:6329:1c99:4e69')])
         self._check_cname(zone, 'mycname.' + zn, 3600, 'contoso.com.')
-        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname')])
-        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com')])
+        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname.')])
+        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com.')])
         self._check_txt(zone, 'myname2.' + zn, [(3600, 9, 'manualtxt')])
         self._check_txt(zone, 'mytxt2.' + zn, [
             (7200, 7, 'abc def'),

@@ -40,6 +40,8 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
         if workload_type is None:
             raise CLIError("Please provide workload type.")
         return custom_wl.create_policy(client, resource_group_name, vault_name, name, policy, workload_type)
+    if backup_management_type.lower() == "azureiaasvm":
+        return custom.create_policy(client, resource_group_name, vault_name, name, policy)
     return None
 
 

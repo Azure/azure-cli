@@ -58,15 +58,21 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        c.argument('api_permissions', nargs='+', help='space separated list of `<resource-access-id>=<type>`')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2817
+        c.argument('api', help='Specify `RequiredResourceAccess.resourceAppId` - The unique identifier for the resource that the application requires access to. This should be equal to the appId declared on the target resource application.')
+        # https://github.com/Azure/azure-rest-api-specs/blob/32e56f061668a1bf1eeca6209000fad4c09afca8/specification/graphrbac/data-plane/Microsoft.GraphRbac/stable/1.6/graphrbac.json#L2833
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>=<type>`.')
         c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
         c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
-        c.argument('api', help='the target API to access')
         c.argument('consent_type', arg_type=get_enum_type(ConsentType), default=ConsentType.all_principals.value,
                    help="Indicates if consent was provided by the administrator (on behalf of the organization) or by an individual.")
         c.argument('principal_id', help='If --consent-type is "Principal", this argument specifies the object of the user that granted consent and applies only for that user.')
         c.argument('show_resource_name', options_list=['--show-resource-name', '-r'],
                    arg_type=get_three_state_flag(), help="show resource's display name")
+
+    with self.argument_context('ad app permission delete') as c:
+        # `=<type>` is not needed.
+        c.argument('api_permissions', nargs='+', help='Specify `ResourceAccess.id` - The unique identifier for one of the OAuth2Permission or AppRole instances that the resource application exposes. Space-separated list of `<resource-access-id>`.')
 
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
@@ -146,6 +152,7 @@ def load_arguments(self, _):
         c.argument('mail_nickname', help='Mail nickname')
         c.argument('force', arg_type=get_three_state_flag(),
                    help='always create a new group instead of updating the one with same display and mail nickname')
+        c.argument('description', help='Group description')
 
     with self.argument_context('ad group show') as c:
         c.extra('cmd')
@@ -185,6 +192,9 @@ def load_arguments(self, _):
                    "use the object id and not the app id.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
+        c.argument('description', min_api='2020-04-01-preview', help='Description of role assignment.')
+        c.argument('condition', min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
+        c.argument('condition_version', min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
 
     time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:
@@ -196,6 +206,11 @@ def load_arguments(self, _):
         if PrincipalType:
             c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
                        help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
+
+    with self.argument_context('role assignment update') as c:
+        c.argument('role_assignment',
+                   help='Description of an existing role assignment as JSON, or a path to a file containing a '
+                        'JSON description.')
 
     with self.argument_context('role assignment delete') as c:
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Continue to delete all assignments under the subscription')

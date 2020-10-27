@@ -23,6 +23,7 @@ from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
+from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -1262,24 +1263,6 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, se
         t.join()
 
 
-def _get_resource_group_by_name(cli_ctx, resource_group_name):
-    try:
-        resouce_client = resource_client_factory(cli_ctx).resource_groups
-        return resouce_client.get(resource_group_name)
-    except Exception as ex:  # pylint: disable=broad-except
-        error = getattr(ex, 'Azure Error', ex)
-        if error != 'ResourceGroupNotFound':
-            return None
-        raise
-
-
-def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
-    ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
-    client = resource_client_factory(cli_ctx).resource_groups
-    parameters = ResourceGroup(location=location, tags=tags)
-    client.create_or_update(rg_name, parameters)
-
-
 # pylint: disable=inconsistent-return-statements
 def _get_target_instance(reliability_level):
     level = reliability_level.lower()
@@ -1338,7 +1321,7 @@ def _dict_to_fabric_settings(setting_dict):
     return settings
 
 
-def _deploy_arm_template_core(cli_ctx,
+def _deploy_arm_template_core(cmd,
                               resource_group_name,
                               template,
                               parameters,
@@ -1346,18 +1329,30 @@ def _deploy_arm_template_core(cli_ctx,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
-
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
-    client = resource_client_factory(cli_ctx)
-    if validate_only:
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
+    client = resource_client_factory(cmd.cli_ctx)
 
-    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
-                              deployment_name, properties)
-    result = LongRunningOperation(cli_ctx)(deploy_poll)
-    return result
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate_only:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                                      deployment)
+        else:
+            deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
+                                      deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
+
+    if validate_only:
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name,
+                           properties)
+
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name, deployment_name,
+                              properties)
+    return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
 
 def _get_vault_name(resource_group_name, vault_name):

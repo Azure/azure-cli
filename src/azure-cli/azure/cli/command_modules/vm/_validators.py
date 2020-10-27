@@ -16,8 +16,9 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
-from azure.cli.core.util import hash_string
-from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api, get_storage_blob_uri
+from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
+from azure.cli.command_modules.vm._vm_utils import (
+    check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
@@ -337,7 +338,6 @@ def _get_storage_profile_description(profile):
 
 
 def _validate_location(cmd, namespace, zone_info, size_info):
-    from ._vm_utils import list_sku_info
     if not namespace.location:
         get_default_location_from_resource_group(cmd, namespace)
         if zone_info:
@@ -599,43 +599,37 @@ def _validate_vm_create_vmss(cmd, namespace):
 
 
 def _validate_vm_create_dedicated_host(cmd, namespace):
+    """
+    "host": {
+      "$ref": "#/definitions/SubResource",
+      "description": "Specifies information about the dedicated host that the virtual machine resides in.
+      <br><br>Minimum api-version: 2018-10-01."
+    },
+    "hostGroup": {
+      "$ref": "#/definitions/SubResource",
+      "description": "Specifies information about the dedicated host group that the virtual machine resides in.
+      <br><br>Minimum api-version: 2020-06-01. <br><br>NOTE: User cannot specify both host and hostGroup properties."
+    }
+
+    :param cmd:
+    :param namespace:
+    :return:
+    """
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
-    # handle incorrect usage
-    if namespace.dedicated_host_group and namespace.dedicated_host is None:
-        raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
+    if namespace.dedicated_host and namespace.dedicated_host_group:
+        raise CLIError('usage error: User cannot specify both --host and --host-group properties.')
 
-    # if this is a valid dedicated host resource id return
-    if is_valid_resource_id(namespace.dedicated_host):
-        if namespace.dedicated_host_group is not None:
-            logger.warning("Ignoring `--host-group` as `--host` is a valid resource id.")
-        return
+    if namespace.dedicated_host and not is_valid_resource_id(namespace.dedicated_host):
+        raise CLIError('usage error: --host is not a valid resource ID.')
 
-    # otherwise this should just be a dedicated host name. If host group provided, build resource id
-    if namespace.dedicated_host:
-        if namespace.dedicated_host_group is None:
-            raise CLIError("incorrect usage: --host ID | --host-group  NAME --host NAME")
-
-        host_name = namespace.dedicated_host
-        rg = namespace.resource_group_name
-        host_group_name = namespace.dedicated_host_group
-
-        if not check_existence(cmd.cli_ctx, host_name, rg, 'Microsoft.Compute', 'hosts',
-                               parent_name=host_group_name, parent_type='hostGroups'):
-            raise CLIError("The dedicated host '{}' in host group '{}' and resource group '{}' does not exist."
-                           .format(host_name, host_group_name, rg))
-
-        namespace.dedicated_host = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=rg,
-            namespace='Microsoft.Compute',
-            type='hostGroups',
-            name=host_group_name,
-            child_type_1="hosts",
-            child_name_1=host_name)
-
-        logger.info("Built dedicated host ID '%s' from host name and host group.", namespace.dedicated_host)
+    if namespace.dedicated_host_group:
+        if not is_valid_resource_id(namespace.dedicated_host_group):
+            namespace.dedicated_host_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='hostGroups', name=namespace.dedicated_host_group
+            )
 
 
 def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
@@ -712,42 +706,64 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
         size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
         size = size.lower()
 
-        # to refresh the list, run 'az vm create --accelerated-networking --size Standard_DS1_v2' and
-        # get it from the error
-        aval_sizes = ['Standard_D3_v2', 'Standard_D12_v2', 'Standard_D3_v2_Promo', 'Standard_D12_v2_Promo',
-                      'Standard_DS3_v2', 'Standard_DS12_v2', 'Standard_DS13-4_v2', 'Standard_DS14-4_v2',
-                      'Standard_DS3_v2_Promo', 'Standard_DS12_v2_Promo', 'Standard_DS13-4_v2_Promo',
-                      'Standard_DS14-4_v2_Promo', 'Standard_F4', 'Standard_F4s', 'Standard_D8_v3', 'Standard_D8s_v3',
-                      'Standard_D32-8s_v3', 'Standard_E8_v3', 'Standard_E8s_v3', 'Standard_D3_v2_ABC',
-                      'Standard_D12_v2_ABC', 'Standard_F4_ABC', 'Standard_F8s_v2', 'Standard_D4_v2',
-                      'Standard_D13_v2', 'Standard_D4_v2_Promo', 'Standard_D13_v2_Promo', 'Standard_DS4_v2',
-                      'Standard_DS13_v2', 'Standard_DS14-8_v2', 'Standard_DS4_v2_Promo', 'Standard_DS13_v2_Promo',
-                      'Standard_DS14-8_v2_Promo', 'Standard_F8', 'Standard_F8s', 'Standard_M64-16ms',
-                      'Standard_D16_v3', 'Standard_D16s_v3', 'Standard_D32-16s_v3', 'Standard_D64-16s_v3',
-                      'Standard_E16_v3', 'Standard_E16s_v3', 'Standard_E32-16s_v3', 'Standard_D4_v2_ABC',
-                      'Standard_D13_v2_ABC', 'Standard_F8_ABC', 'Standard_F16s_v2', 'Standard_D5_v2',
-                      'Standard_D14_v2', 'Standard_D5_v2_Promo', 'Standard_D14_v2_Promo', 'Standard_DS5_v2',
-                      'Standard_DS14_v2', 'Standard_DS5_v2_Promo', 'Standard_DS14_v2_Promo', 'Standard_F16',
-                      'Standard_F16s', 'Standard_M64-32ms', 'Standard_M128-32ms', 'Standard_D32_v3',
-                      'Standard_D32s_v3', 'Standard_D64-32s_v3', 'Standard_E32_v3', 'Standard_E32s_v3',
-                      'Standard_E32-8s_v3', 'Standard_E32-16_v3', 'Standard_D5_v2_ABC', 'Standard_D14_v2_ABC',
-                      'Standard_F16_ABC', 'Standard_F32s_v2', 'Standard_D15_v2', 'Standard_D15_v2_Promo',
-                      'Standard_D15_v2_Nested', 'Standard_DS15_v2', 'Standard_DS15_v2_Promo',
-                      'Standard_DS15_v2_Nested', 'Standard_D40_v3', 'Standard_D40s_v3', 'Standard_D15_v2_ABC',
-                      'Standard_M64ms', 'Standard_M64s', 'Standard_M128-64ms', 'Standard_D64_v3', 'Standard_D64s_v3',
-                      'Standard_E64_v3', 'Standard_E64s_v3', 'Standard_E64-16s_v3', 'Standard_E64-32s_v3',
-                      'Standard_F64s_v2', 'Standard_F72s_v2', 'Standard_M128s', 'Standard_M128ms', 'Standard_L8s_v2',
-                      'Standard_L16s_v2', 'Standard_L32s_v2', 'Standard_L64s_v2', 'Standard_L96s_v2', 'SQLGL',
-                      'SQLGLCore', 'Standard_D4_v3', 'Standard_D4s_v3', 'Standard_D2_v2', 'Standard_DS2_v2',
-                      'Standard_E4_v3', 'Standard_E4s_v3', 'Standard_F2', 'Standard_F2s', 'Standard_F4s_v2',
-                      'Standard_D11_v2', 'Standard_DS11_v2', 'AZAP_Performance_ComputeV17C',
-                      'AZAP_Performance_ComputeV17C_DDA', 'Standard_PB6s', 'Standard_PB12s', 'Standard_PB24s',
-                      'Standard_L80s_v2', 'Standard_M8ms', 'Standard_M8-4ms', 'Standard_M8-2ms', 'Standard_M16ms',
-                      'Standard_M16-8ms', 'Standard_M16-4ms', 'Standard_M32ms', 'Standard_M32-8ms',
-                      'Standard_M32-16ms', 'Standard_M32ls', 'Standard_M32ts', 'Standard_M64ls', 'Standard_E64i_v3',
-                      'Standard_E64is_v3', 'Standard_E4-2s_v3', 'Standard_E8-4s_v3', 'Standard_E8-2s_v3',
-                      'Standard_E16-4s_v3', 'Standard_E16-8s_v3', 'Standard_E20s_v3', 'Standard_E20_v3']
-        aval_sizes = [x.lower() for x in aval_sizes]
+        # Use the following code to refresh the list
+        # skus = list_sku_info(cli_ctx, namespace.location)
+        # aval_sizes = [x.name.lower() for x in skus if x.resource_type == 'virtualMachines' and
+        #               any(c.name == 'AcceleratedNetworkingEnabled' and c.value == 'True' for c in x.capabilities)]
+
+        aval_sizes = ['standard_b12ms', 'standard_b16ms', 'standard_b20ms', 'standard_ds2_v2', 'standard_ds3_v2',
+                      'standard_ds4_v2', 'standard_ds5_v2', 'standard_ds11-1_v2', 'standard_ds11_v2',
+                      'standard_ds12-1_v2', 'standard_ds12-2_v2', 'standard_ds12_v2', 'standard_ds13-2_v2',
+                      'standard_ds13-4_v2', 'standard_ds13_v2', 'standard_ds14-4_v2', 'standard_ds14-8_v2',
+                      'standard_ds14_v2', 'standard_ds15_v2', 'standard_ds2_v2_promo', 'standard_ds3_v2_promo',
+                      'standard_ds4_v2_promo', 'standard_ds5_v2_promo', 'standard_ds11_v2_promo',
+                      'standard_ds12_v2_promo', 'standard_ds13_v2_promo', 'standard_ds14_v2_promo', 'standard_f2s',
+                      'standard_f4s', 'standard_f8s', 'standard_f16s', 'standard_d4s_v3', 'standard_d8s_v3',
+                      'standard_d16s_v3', 'standard_d32s_v3', 'standard_d2_v2', 'standard_d3_v2', 'standard_d4_v2',
+                      'standard_d5_v2', 'standard_d11_v2', 'standard_d12_v2', 'standard_d13_v2', 'standard_d14_v2',
+                      'standard_d15_v2', 'standard_d2_v2_promo', 'standard_d3_v2_promo', 'standard_d4_v2_promo',
+                      'standard_d5_v2_promo', 'standard_d11_v2_promo', 'standard_d12_v2_promo', 'standard_d13_v2_promo',
+                      'standard_d14_v2_promo', 'standard_f2', 'standard_f4', 'standard_f8', 'standard_f16',
+                      'standard_d4_v3', 'standard_d8_v3', 'standard_d16_v3', 'standard_d32_v3', 'standard_d48_v3',
+                      'standard_d64_v3', 'standard_d48s_v3', 'standard_d64s_v3', 'standard_e4_v3', 'standard_e8_v3',
+                      'standard_e16_v3', 'standard_e20_v3', 'standard_e32_v3', 'standard_e48_v3', 'standard_e64i_v3',
+                      'standard_e64_v3', 'standard_e4-2s_v3', 'standard_e4s_v3', 'standard_e8-2s_v3',
+                      'standard_e8-4s_v3', 'standard_e8s_v3', 'standard_e16-4s_v3', 'standard_e16-8s_v3',
+                      'standard_e16s_v3', 'standard_e20s_v3', 'standard_e32-8s_v3', 'standard_e32-16s_v3',
+                      'standard_e32s_v3', 'standard_e48s_v3', 'standard_e64-16s_v3', 'standard_e64-32s_v3',
+                      'standard_e64is_v3', 'standard_e64s_v3', 'standard_l8s_v2', 'standard_l16s_v2',
+                      'standard_l32s_v2', 'standard_l48s_v2', 'standard_l64s_v2', 'standard_l80s_v2', 'standard_e4_v4',
+                      'standard_e8_v4', 'standard_e16_v4', 'standard_e20_v4', 'standard_e32_v4', 'standard_e48_v4',
+                      'standard_e64_v4', 'standard_e4d_v4', 'standard_e8d_v4', 'standard_e16d_v4', 'standard_e20d_v4',
+                      'standard_e32d_v4', 'standard_e48d_v4', 'standard_e64d_v4', 'standard_e4-2s_v4',
+                      'standard_e4s_v4', 'standard_e8-2s_v4', 'standard_e8-4s_v4', 'standard_e8s_v4',
+                      'standard_e16-4s_v4', 'standard_e16-8s_v4', 'standard_e16s_v4', 'standard_e20s_v4',
+                      'standard_e32-8s_v4', 'standard_e32-16s_v4', 'standard_e32s_v4', 'standard_e48s_v4',
+                      'standard_e64-16s_v4', 'standard_e64-32s_v4', 'standard_e64s_v4', 'standard_e4-2ds_v4',
+                      'standard_e4ds_v4', 'standard_e8-2ds_v4', 'standard_e8-4ds_v4', 'standard_e8ds_v4',
+                      'standard_e16-4ds_v4', 'standard_e16-8ds_v4', 'standard_e16ds_v4', 'standard_e20ds_v4',
+                      'standard_e32-8ds_v4', 'standard_e32-16ds_v4', 'standard_e32ds_v4', 'standard_e48ds_v4',
+                      'standard_e64-16ds_v4', 'standard_e64-32ds_v4', 'standard_e64ds_v4', 'standard_d4d_v4',
+                      'standard_d8d_v4', 'standard_d16d_v4', 'standard_d32d_v4', 'standard_d48d_v4', 'standard_d64d_v4',
+                      'standard_d4_v4', 'standard_d8_v4', 'standard_d16_v4', 'standard_d32_v4', 'standard_d48_v4',
+                      'standard_d64_v4', 'standard_d4ds_v4', 'standard_d8ds_v4', 'standard_d16ds_v4',
+                      'standard_d32ds_v4', 'standard_d48ds_v4', 'standard_d64ds_v4', 'standard_d4s_v4',
+                      'standard_d8s_v4', 'standard_d16s_v4', 'standard_d32s_v4', 'standard_d48s_v4', 'standard_d64s_v4',
+                      'standard_f4s_v2', 'standard_f8s_v2', 'standard_f16s_v2', 'standard_f32s_v2', 'standard_f48s_v2',
+                      'standard_f64s_v2', 'standard_f72s_v2', 'standard_m208ms_v2', 'standard_m208s_v2',
+                      'standard_m416-208s_v2', 'standard_m416s_v2', 'standard_m416-208ms_v2', 'standard_m416ms_v2',
+                      'standard_m64', 'standard_m64m', 'standard_m128', 'standard_m128m', 'standard_m8-2ms',
+                      'standard_m8-4ms', 'standard_m8ms', 'standard_m16-4ms', 'standard_m16-8ms', 'standard_m16ms',
+                      'standard_m32-8ms', 'standard_m32-16ms', 'standard_m32ls', 'standard_m32ms', 'standard_m32ts',
+                      'standard_m64-16ms', 'standard_m64-32ms', 'standard_m64ls', 'standard_m64ms', 'standard_m64s',
+                      'standard_m128-32ms', 'standard_m128-64ms', 'standard_m128ms', 'standard_m128s',
+                      'standard_d4a_v4', 'standard_d8a_v4', 'standard_d16a_v4', 'standard_d32a_v4', 'standard_d48a_v4',
+                      'standard_d64a_v4', 'standard_d96a_v4', 'standard_d4as_v4', 'standard_d8as_v4',
+                      'standard_d16as_v4', 'standard_d32as_v4', 'standard_d48as_v4', 'standard_d64as_v4',
+                      'standard_d96as_v4', 'standard_e4a_v4', 'standard_e8a_v4', 'standard_e16a_v4', 'standard_e20a_v4',
+                      'standard_e32a_v4', 'standard_e48a_v4', 'standard_e64a_v4', 'standard_e96a_v4',
+                      'standard_e4as_v4', 'standard_e8as_v4', 'standard_e16as_v4', 'standard_e20as_v4',
+                      'standard_e32as_v4', 'standard_e48as_v4', 'standard_e64as_v4', 'standard_e96as_v4']
         if size not in aval_sizes:
             return
 
@@ -931,6 +947,8 @@ def _validate_vm_vmss_create_auth(namespace):
                                      StorageProfile.SASpecializedOSDisk]:
         return
 
+    if namespace.admin_username is None:
+        namespace.admin_username = get_default_admin_username()
     namespace.admin_username = _validate_admin_username(namespace.admin_username, namespace.os_type)
 
     if not namespace.os_type:
@@ -1006,13 +1024,7 @@ def _validate_admin_username(username, os_type):
         raise CLIError(linux_err)
     if not is_linux and username.endswith('.'):
         raise CLIError(win_err)
-    disallowed_user_names = [
-        "administrator", "admin", "user", "user1", "test", "user2",
-        "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm",
-        "admin2", "aspnet", "backup", "console", "guest",
-        "owner", "root", "server", "sql", "support", "support_388945a0",
-        "sys", "test2", "test3", "user4", "user5"]
-    if username.lower() in disallowed_user_names:
+    if username.lower() in DISALLOWED_USER_NAMES:
         raise CLIError("This user name '{}' meets the general requirements, but is specifically disallowed for this image. Please try a different value.".format(username))
     return username
 
@@ -1022,18 +1034,19 @@ def _validate_admin_password(password, os_type):
     is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
-    if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The password length must be between {} and {}'.format(min_length,
-                                                                              max_length))
+
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
     contains_special_char = re.findall(r'[ `~!@#$%^&*()=+_\[\]{}\|;:.\/\'\",<>?]+', password)
     count = len([x for x in [contains_lower, contains_upper,
                              contains_digit, contains_special_char] if x])
+
     # pylint: disable=line-too-long
-    if count < 3:
-        raise CLIError('Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character')
+    error_msg = ("The password length must be between {} and {}. Password must have the 3 of the following: "
+                 "1 lower case character, 1 upper case character, 1 number and 1 special character.").format(min_length, max_length)
+    if len(password) not in range(min_length, max_length + 1) or count < 3:
+        raise CLIError(error_msg)
 
 
 def validate_ssh_key(namespace):
@@ -1363,7 +1376,6 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.plan_product,
             namespace.plan_promotion_code,
             namespace.plan_publisher,
-            namespace.proximity_placement_group,
             namespace.priority,
             namespace.public_ip_address,
             namespace.public_ip_address_allocation,
@@ -1372,7 +1384,6 @@ def process_vmss_create_namespace(cmd, namespace):
             # namespace.identity_role,
             namespace.identity_scope,
             namespace.secrets,
-            namespace.single_placement_group,
             namespace.ssh_dest_key_path,
             namespace.ssh_key_value,
             # namespace.storage_container_name,
@@ -1389,8 +1400,8 @@ def process_vmss_create_namespace(cmd, namespace):
             namespace.vnet_name
         ]
         if any(param is not None for param in banned_params):
-            raise CLIError('usage error: in VM mode, only name, resource-group, location, '
-                           'tags, zones, platform-fault-domain-count are allowed')
+            raise CLIError('usage error: In VM mode, only name, resource-group, location, '
+                           'tags, zones, platform-fault-domain-count, single-placement-group and ppg are allowed')
         return
     validate_tags(namespace)
     if namespace.vm_sku is None:
@@ -1415,6 +1426,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
+    _validate_vmss_create_host_group(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1715,3 +1727,14 @@ def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-
     """
     if namespace.automatic_repairs_grace_period is not None:
         namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
+
+
+def _validate_vmss_create_host_group(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.host_group:
+        if not is_valid_resource_id(namespace.host_group):
+            namespace.host_group = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
+            )

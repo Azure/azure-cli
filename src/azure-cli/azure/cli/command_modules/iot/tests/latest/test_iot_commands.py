@@ -35,6 +35,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('resourcegroup', rg),
                          self.check('name', hub),
                          self.check('sku.name', 'F1'),
+                         self.check('properties.minTlsVersion', None),
                          self.check('properties.eventHubEndpoints.events.partitionCount', '2')])
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
@@ -42,10 +43,11 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
                  .format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --mintls 2.5'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20'.format(hub, rg),
+                 ' --fileupload-notification-ttl 20 --min-tls-version 1.2'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -58,7 +60,8 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
                          self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
                          self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
-                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79')])
+                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79'),
+                         self.check('properties.minTlsVersion', '1.2')])
 
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
@@ -403,7 +406,7 @@ class IoTHubTest(ScenarioTest):
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
-        containerName = 'iothubcontainer1'
+        containerName = 'iothubcontainer'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'

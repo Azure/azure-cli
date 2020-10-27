@@ -6,7 +6,7 @@
 from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, user_confirmation
 
 logger = get_logger(__name__)
 
@@ -32,14 +32,18 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    assign_identity=None,
                    minimal_tls_version=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
-                   encryption_algorithm='RSA-OAEP', esp=False, no_validation_timeout=False):
+                   encryption_algorithm='RSA-OAEP', encryption_in_transit=None,
+                   autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
+                   timezone=None, days=None, time=None, autoscale_workernode_count=None,
+                   encryption_at_host=None, esp=False, idbroker=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
         DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
-        KafkaRestProperties, ClientGroupInfo
+        KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
+        Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -112,7 +116,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
-    if not storage_default_container and is_wasb:
+    if not storage_default_container and storage_account and is_wasb:
         storage_default_container = cluster_name.lower()
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
     elif not storage_default_filesystem and not is_wasb:
@@ -136,6 +140,42 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if not _all_or_none(kafka_client_group_id, kafka_client_group_name):
         raise CLIError('Either the kafka client group id and kafka client group name should be specified, '
                        'or none of them should be')
+
+    # Validate and initialize autoscale setting
+    autoscale_configuration = None
+    load_based_type = "Load"
+    schedule_based_type = "Schedule"
+    if autoscale_type and autoscale_type.lower() == load_based_type.lower():
+        if not all([autoscale_min_workernode_count, autoscale_max_workernode_count]):
+            raise CLIError(
+                'When the --autoscale-type is Load, '
+                'both --autoscale-min-workernode-count and --autoscale-max-workernode-count should be specified.')
+
+        autoscale_configuration = Autoscale(
+            capacity=AutoscaleCapacity(
+                min_instance_count=autoscale_min_workernode_count,
+                max_instance_count=autoscale_max_workernode_count
+            )
+        )
+    elif autoscale_type and autoscale_type.lower() == schedule_based_type.lower():
+        if not all([timezone, days, time, autoscale_workernode_count]):
+            raise CLIError(
+                'When the --autoscale-type is Schedule, all of the --timezone, --days, --time, '
+                '--autoscale-workernode-count should be specified.')
+
+        autoscale_configuration = Autoscale(
+            recurrence=AutoscaleRecurrence(
+                time_zone=timezone,
+                schedule=[AutoscaleSchedule(
+                    days=days,
+                    time_and_capacity=AutoscaleTimeAndCapacity(
+                        time=time,
+                        min_instance_count=autoscale_workernode_count,
+                        max_instance_count=autoscale_workernode_count
+                    )
+                )]
+            )
+        )
 
     # Specify virtual network profile only when network arguments are provided
     virtual_network_profile = subnet and build_virtual_network_profile(subnet)
@@ -181,7 +221,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             hardware_profile=HardwareProfile(vm_size=workernode_size),
             os_profile=os_profile,
             virtual_network_profile=virtual_network_profile,
-            data_disks_groups=workernode_data_disk_groups
+            data_disks_groups=workernode_data_disk_groups,
+            autoscale_configuration=autoscale_configuration
         )
     ]
 
@@ -215,6 +256,15 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             )
         )
 
+    if esp and idbroker:
+        roles.append(
+            Role(
+                name="idbrokernode",
+                target_instance_count=2,
+                virtual_network_profile=virtual_network_profile
+            )
+        )
+
     storage_accounts = []
     if storage_account:
         # Specify storage account details only when storage arguments are provided
@@ -224,7 +274,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                 key=storage_account_key,
                 container=storage_default_container,
                 file_system=storage_default_filesystem,
-                resource_id=None if is_wasb else storage_account,
+                resource_id=storage_account,
                 msi_resource_id=storage_account_managed_identity,
                 is_default=True
             )
@@ -274,11 +324,21 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         msi_resource_id=assign_identity
     )
 
+    if encryption_at_host:
+        if disk_encryption_properties:
+            disk_encryption_properties.encryption_at_host = encryption_at_host
+        else:
+            disk_encryption_properties = DiskEncryptionProperties(encryption_at_host=encryption_at_host)
+
     kafka_rest_properties = (kafka_client_group_id and kafka_client_group_name) and KafkaRestProperties(
         client_group_info=ClientGroupInfo(
             group_id=kafka_client_group_id,
             group_name=kafka_client_group_name
         )
+    )
+
+    encryption_in_transit_properties = encryption_in_transit and EncryptionInTransitProperties(
+        is_encryption_in_transit_enabled=encryption_in_transit
     )
 
     create_params = ClusterCreateParametersExtended(
@@ -302,7 +362,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             security_profile=security_profile,
             disk_encryption_properties=disk_encryption_properties,
             kafka_rest_properties=kafka_rest_properties,
-            min_supported_tls_version=minimal_tls_version
+            min_supported_tls_version=minimal_tls_version,
+            encryption_in_transit_properties=encryption_in_transit_properties
         ),
         identity=cluster_identity
     )
@@ -477,3 +538,191 @@ def execute_hdi_script_action(cmd, client, resource_group_name, cluster_name,
     ]
 
     return client.execute_script_actions(resource_group_name, cluster_name, persist_on_success, script_actions_params)
+
+
+# pylint: disable=redefined-builtin
+def create_autoscale(cmd, client, resource_group_name, cluster_name, type, min_workernode_count=None,
+                     max_workernode_count=None, timezone=None, days=None, time=None, workernode_count=None,
+                     no_wait=False, yes=False):
+    from azure.mgmt.hdinsight.models import Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, \
+        AutoscaleTimeAndCapacity
+    load_based_type = "Load"
+    schedule_based_type = "Schedule"
+    autoscale_configuration = None
+
+    if type.lower() == load_based_type.lower():
+        if not all([min_workernode_count, max_workernode_count]):
+            raise CLIError(
+                'When the --type is Load, both --min-workernode-count and --max-workernode-count should be specified.')
+
+        autoscale_configuration = Autoscale(
+            capacity=AutoscaleCapacity(
+                min_instance_count=min_workernode_count,
+                max_instance_count=max_workernode_count
+            )
+        )
+    elif type.lower() == schedule_based_type.lower():
+        if not all([timezone, days, time, workernode_count]):
+            raise CLIError(
+                'When the --type is Schedule, all of the --timezone, --days, --time, '
+                '--workernode-count should be specified.')
+
+        autoscale_configuration = Autoscale(
+            recurrence=AutoscaleRecurrence(
+                time_zone=timezone,
+                schedule=[AutoscaleSchedule(
+                    days=days,
+                    time_and_capacity=AutoscaleTimeAndCapacity(
+                        time=time,
+                        min_instance_count=workernode_count,
+                        max_instance_count=workernode_count
+                    )
+                )]
+            )
+        )
+
+    user_confirmation(
+        "This operation will override previous autoscale configuration. "
+        "Are you sure you want to perform this operation", yes)
+
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def update_autoscale(cmd, client, resource_group_name, cluster_name, min_workernode_count=None,
+                     max_workernode_count=None, timezone=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleCapacity, AutoscaleRecurrence
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+
+    # try to update load-based configuration
+    if autoscale_configuration.capacity:
+        if min_workernode_count:
+            autoscale_configuration.capacity.min_instance_count = min_workernode_count
+        if max_workernode_count:
+            autoscale_configuration.capacity.max_instance_count = max_workernode_count
+
+    if not autoscale_configuration.capacity:
+        if min_workernode_count or max_workernode_count:
+            autoscale_configuration.capacity = AutoscaleCapacity()
+            if min_workernode_count:
+                autoscale_configuration.capacity.min_instance_count = min_workernode_count
+            if max_workernode_count:
+                autoscale_configuration.capacity.max_instance_count = max_workernode_count
+
+    # try to update schedule-based configuration
+    if timezone:
+        if autoscale_configuration.recurrence:
+            autoscale_configuration.recurrence.time_zone = timezone
+        elif not autoscale_configuration.recurrence:
+            autoscale_configuration.recurrence = AutoscaleRecurrence(time_zone=timezone)
+
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def show_autoscale(cmd, client, resource_group_name, cluster_name):
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+    return autoscale_configuration
+
+
+def delete_autoscale(cmd, client, resource_group_name, cluster_name, no_wait=False):
+    cluster = client.get(resource_group_name, cluster_name)
+    _extract_and_validate_autoscale_configuration(cluster)
+    autoscale_configuration = None
+
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def list_timezones(cmd, client):
+    from .util import AUTOSCALE_TIMEZONES
+    return AUTOSCALE_TIMEZONES
+
+
+def create_autoscale_condition(cmd, client, resource_group_name, cluster_name, days, time, workernode_count,
+                               no_wait=False):
+    from azure.mgmt.hdinsight.models import AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+
+    # try to add schedule condition
+    condition = AutoscaleSchedule(
+        days=days,
+        time_and_capacity=AutoscaleTimeAndCapacity(
+            time=time,
+            min_instance_count=workernode_count,
+            max_instance_count=workernode_count)
+    )
+    if autoscale_configuration.recurrence:
+        autoscale_configuration.recurrence.schedule.append(condition)
+    elif not autoscale_configuration.recurrence:
+        autoscale_configuration.recurrence = AutoscaleRecurrence(
+            schedule=[condition]
+        )
+
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def update_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, days=None, time=None,
+                               workernode_count=None, no_wait=False):
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+    _validate_schedule_configuration(autoscale_configuration)
+
+    if index >= len(autoscale_configuration.recurrence.schedule):
+        raise CLIError(
+            'This cluster only has {} condition(s). Please specify a correct index which starts with 0.'.format(
+                len(autoscale_configuration.recurrence.schedule)))
+
+    # try to update schedule condition
+    if days:
+        autoscale_configuration.recurrence.schedule[index].days = days
+    if time:
+        autoscale_configuration.recurrence.schedule[index].time_and_capacity.time = time
+    if workernode_count:
+        autoscale_configuration.recurrence.schedule[index].time_and_capacity.min_instance_count = workernode_count
+        autoscale_configuration.recurrence.schedule[index].time_and_capacity.max_instance_count = workernode_count
+
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def delete_autoscale_condition(cmd, client, resource_group_name, cluster_name, index, no_wait=False):
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+    _validate_schedule_configuration(autoscale_configuration)
+
+    conditions_count = len(autoscale_configuration.recurrence.schedule)
+    if len(index) >= conditions_count:
+        raise CLIError('Deleting all conditions is not allowed.'
+                       'If you want to disable autoscale please use `az hdinsight autoscale delete`.')
+    autoscale_configuration.recurrence.schedule = [autoscale_configuration.recurrence.schedule[i] for i in
+                                                   range(conditions_count) if i not in index]
+    return sdk_no_wait(no_wait, client.update_auto_scale_configuration, resource_group_name, cluster_name,
+                       autoscale_configuration)
+
+
+def list_autoscale_condition(cmd, client, resource_group_name, cluster_name):
+    cluster = client.get(resource_group_name, cluster_name)
+    autoscale_configuration = _extract_and_validate_autoscale_configuration(cluster)
+    _validate_schedule_configuration(autoscale_configuration)
+    return autoscale_configuration.recurrence.schedule
+
+
+def _extract_and_validate_autoscale_configuration(cluster):
+    autoscale_configuration = None
+    for role in cluster.properties.compute_profile.roles:
+        if role.name == "workernode":
+            autoscale_configuration = role.autoscale_configuration
+            break
+    if not autoscale_configuration:
+        raise CLIError('The cluster has not enabled autoscale.')
+    return autoscale_configuration
+
+
+def _validate_schedule_configuration(autoscale_configuration):
+    if not autoscale_configuration.recurrence:
+        raise CLIError('The cluster has not enabled Schedule-based autoscale.')

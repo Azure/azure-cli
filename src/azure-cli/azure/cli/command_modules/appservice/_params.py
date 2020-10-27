@@ -12,6 +12,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
                                                 get_three_state_flag, get_enum_type, tags_type)
 from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
+from azure.cli.command_modules.appservice._appservice_utils import MSI_LOCAL_ID
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
@@ -36,7 +37,7 @@ ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-lines
 
 
 def load_arguments(self, _):
@@ -44,9 +45,9 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(
-            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3',
+            ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
              'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -63,7 +64,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
+    functionapp_runtime_strings, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -104,8 +105,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
-        c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container',
-                   is_preview=True)
+        c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
@@ -125,13 +125,14 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new web app',
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Use `az webapp list-runtimes` for available list")  # TODO ADD completer
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+                                                                     "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one",
@@ -141,6 +142,10 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
+
+    with self.argument_context('webapp list-instances') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
         c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps')
@@ -204,6 +209,10 @@ def load_arguments(self, _):
             c.argument('deployment_source_branch', options_list=['--deployment-source-branch', '-b'],
                        help='the branch to deploy')
             c.argument('tags', arg_type=tags_type)
+            c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                       help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+            c.argument('scope', options_list=['--scope'], help="Scope that the system assigned identity can access")
+            c.argument('role', options_list=['--role'], help="Role name or id the system assigned identity will have")
 
         with self.argument_context(scope + ' config ssl bind') as c:
             c.argument('ssl_type', help='The ssl cert type', arg_type=get_enum_type(['SNI', 'IP']))
@@ -270,6 +279,10 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' identity') as c:
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
+        with self.argument_context(scope + ' identity assign') as c:
+            c.argument('assign_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
+        with self.argument_context(scope + ' identity remove') as c:
+            c.argument('remove_identities', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deployment')
@@ -307,7 +320,7 @@ def load_arguments(self, _):
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|10.14\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
-            c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016", is_preview=True)
+            c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
             c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'],
@@ -364,6 +377,8 @@ def load_arguments(self, _):
                    configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('webapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
@@ -380,8 +395,8 @@ def load_arguments(self, _):
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system',
-                   arg_type=get_three_state_flag(return_label=True))
+        c.argument('application_logging', help='configure application logging',
+                   arg_type=get_enum_type(['filesystem', 'azureblobstorage', 'off']))
         c.argument('detailed_error_messages', help='configure detailed error messages',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('failed_request_tracing', help='configure failed request tracing',
@@ -526,6 +541,8 @@ def load_arguments(self, _):
                    help='Application ID to integrate AAD organization account Sign-in into your web app')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory',
                    help='AAD application secret')
+        c.argument('client_secret_certificate_thumbprint', options_list=['--aad-client-secret-certificate-thumbprint', '--thumbprint'], arg_group='Azure Active Directory',
+                   help='Alternative to AAD Client Secret, thumbprint of a certificate used for signing purposes')
         c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'],
                    arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
@@ -581,12 +598,15 @@ def load_arguments(self, _):
         c.argument('name', arg_type=webapp_name_arg_type,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
-                                                                 scopes=['webapp']))
+                                                                 scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+                                                                     "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -601,11 +621,13 @@ def load_arguments(self, _):
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
         c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
+        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -646,7 +668,7 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
+                   arg_type=get_enum_type(functionapp_runtime_strings))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
                         'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
@@ -738,6 +760,8 @@ def load_arguments(self, _):
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)",
                    required=False)
 
+    with self.argument_context('functionapp deployment list-publishing-profiles') as c:
+        c.argument('xml', options_list=['--xml'], required=False, help='retrieves the publishing profile details in XML format')
     with self.argument_context('functionapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
@@ -755,6 +779,36 @@ def load_arguments(self, _):
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+
+    with self.argument_context('functionapp keys', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+    with self.argument_context('functionapp keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+
+    with self.argument_context('functionapp function', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function keys', id_part=None) as c:
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp function keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key. If not provided, a value will be generated.")
+    with self.argument_context('functionapp function keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
 
     # Access Restriction Commands
     for scope in ['webapp', 'functionapp']:
@@ -840,6 +894,24 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
+    # App Service Domain Commands
+    with self.argument_context('appservice domain create') as c:
+        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
+        c.argument('contact_info', options_list=['--contact-info', '-c'], help='The file path to a JSON object with your contact info for domain registration. '
+                                                                               'Please see the following link for the format of the JSON file expected: '
+                                                                               'https://github.com/AzureAppServiceCLI/appservice_domains_templates/blob/master/contact_info.json')
+        c.argument('privacy', options_list=['--privacy', '-p'], help='Enable privacy protection')
+        c.argument('auto_renew', options_list=['--auto-renew', '-a'], help='Enable auto-renew on the domain')
+        c.argument('accept_terms', options_list=['--accept-terms'], help='By using this flag, you are accepting '
+                                                                         'the conditions shown using the --show-hostname-purchase-terms flag. ')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('dryrun', help='Show summary of the purchase and create operation instead of executing it')
+        c.argument('no_wait', help='Do not wait for the create to complete, and return immediately after queuing the create.')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources')
+
+    with self.argument_context('appservice domain show-terms') as c:
+        c.argument('hostname', options_list=['--hostname', '-n'], help='Name of the custom domain')
+
     with self.argument_context('staticwebapp') as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
@@ -908,6 +980,7 @@ def _get_functionapp_runtime_versions():
                 runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
                 runtime_version_properties = {
                     KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_DEPRECATED: runtime_version_json[KEYS.IS_DEPRECATED],
                     KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
                 }
                 runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
@@ -917,14 +990,14 @@ def _get_functionapp_runtime_versions():
     # taking their properties into account (i.e. isHidden, isPreview)
     runtime_to_version_strings = []
     for runtime, runtime_versions in runtime_to_version.items():
-        # dotnet version is not configurable, so leave out of help menu
-        if runtime == 'dotnet':
+        # dotnet and custom version is not configurable, so leave out of help menu
+        if runtime in ('dotnet', 'custom'):
             continue
         ordered_runtime_versions = list(runtime_versions.keys())
         ordered_runtime_versions.sort(key=float)
         ordered_runtime_versions_strings = []
         for version in ordered_runtime_versions:
-            if runtime_versions[version][KEYS.IS_HIDDEN]:
+            if runtime_versions[version][KEYS.IS_HIDDEN] or runtime_versions[version][KEYS.IS_DEPRECATED]:
                 continue
             if runtime_versions[version][KEYS.IS_PREVIEW]:
                 ordered_runtime_versions_strings.append(version + ' (preview)')
@@ -932,4 +1005,4 @@ def _get_functionapp_runtime_versions():
                 ordered_runtime_versions_strings.append(version)
         runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
 
-    return runtime_to_version, runtime_to_version_strings
+    return runtime_to_version.keys(), runtime_to_version_strings

@@ -154,6 +154,11 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
 
+# volume revert
+def revert_snapshot(cmd, client, account_name, pool_name, volume_name, resource_group_name, snapshot_id):
+    return client.revert(resource_group_name, account_name, pool_name, volume_name, snapshot_id)
+
+
 # volume update
 def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
     params = VolumePatch(
@@ -193,12 +198,27 @@ def list_export_policy_rules(cmd, client, account_name, pool_name, volume_name, 
 
 # delete rule by specific index
 def remove_export_policy_rule(cmd, instance, rule_index):
+    rules = []
+    # Note this commented out way created a patch request that included some mount target properties causing validation issues server side
+    # need to investigate why, leave this for now remove after this has been ivestigated before next release please
     # look for the rule and remove
-    for rule in instance.export_policy.rules:
-        if rule.rule_index == int(rule_index):
-            instance.export_policy.rules.remove(rule)
+    # for rule in instance.export_policy.rules:
+    #    if rule.rule_index == int(rule_index):
+    #        instance.export_policy.rules.remove(rule)
 
-    return instance
+    # return instance
+
+    for rule in instance.export_policy.rules:
+        if rule.rule_index != int(rule_index):
+            rules.append(rule)
+
+    volume_export_policy = VolumePropertiesExportPolicy(rules=rules)
+    params = VolumePatch(
+        export_policy=volume_export_policy,
+        service_level=instance.service_level,
+        usage_threshold=instance.usage_threshold)
+    _update_mapper(instance, params, ['export_policy'])
+    return params
 
 
 # -- volume replication --
@@ -210,6 +230,6 @@ def authorize_replication(cmd, client, resource_group_name, account_name, pool_n
 
 # -- snapshot --
 
-def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location, file_system_id=None):
-    body = Snapshot(location=location, file_system_id=file_system_id)
-    return client.create(body, resource_group_name, account_name, pool_name, volume_name, snapshot_name)
+def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_name, resource_group_name, location):
+    body = Snapshot(location=location)
+    return client.create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body.location)

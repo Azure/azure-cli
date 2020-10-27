@@ -3,6 +3,40 @@
 Release History
 ===============
 
+2.14.0
+++++++
+* Minor fixes
+
+2.13.0
+++++++
+* Minor fixes
+
+2.12.1
+++++++
+* No changes
+
+2.12.0
+++++++
+* Add a new global parameter `--query-examples` (#14765)
+* Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
+* Error message improvement (#14855)
+
+2.11.1
+++++++
+* Minor fixes
+
+2.11.0
+++++++
+* Minor improvement
+
+2.10.1
+++++++
+* Minor fixes
+
+2.10.0
+++++++
+* Minor fixes
+
 2.9.1
 ++++++
 * Minor fixes

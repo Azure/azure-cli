@@ -9,7 +9,7 @@ from azure.mgmt.resource.resources.models import ChangeType, PropertyChangeType
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder
-from ._utils import parse_resource_id
+from ._utils import split_resource_id
 
 _change_type_to_color = {
     ChangeType.create: Color.GREEN,
@@ -48,8 +48,8 @@ _change_type_to_weight = {
     ChangeType.create: 1,
     ChangeType.deploy: 2,
     ChangeType.modify: 3,
-    ChangeType.ignore: 4,
-    ChangeType.no_change: 5,
+    ChangeType.no_change: 4,
+    ChangeType.ignore: 5,
 }
 
 _property_change_type_to_weight = {
@@ -62,16 +62,16 @@ _property_change_type_to_weight = {
 
 def format_what_if_operation_result(what_if_operation_result, enable_color=True):
     builder = ColoredStringBuilder(enable_color)
-    _format_preview_notice(builder)
+    _format_noise_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
     _format_resource_changes(builder, what_if_operation_result.changes)
     _format_resource_changes_stats(builder, what_if_operation_result.changes)
     return builder.build()
 
 
-def _format_preview_notice(builder):
+def _format_noise_notice(builder):
     builder.append_line(
-        """Note: As What-If is currently in preview, the result may contain false positive predictions (noise).
+        """Note: The result may contain false positive predictions (noise).
 You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues."""
     )
     builder.append_line()
@@ -357,12 +357,12 @@ def _get_api_version(resource_change):
 
 
 def _get_scope(resource_change):
-    scope, _ = parse_resource_id(resource_change.resource_id)
+    scope, _ = split_resource_id(resource_change.resource_id)
     return scope
 
 
 def _get_relative_resource_id(resource_change):
-    _, relative_resource_id = parse_resource_id(resource_change.resource_id)
+    _, relative_resource_id = split_resource_id(resource_change.resource_id)
     return relative_resource_id
 
 

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 # CLIENT FACTORIES
 
@@ -31,7 +32,7 @@ def get_mariadb_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return MariaDBManagementClient(
@@ -59,7 +60,35 @@ def get_mysql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
+            credentials = Authentication()
+
+        return MySQLManagementClient(
+            subscription_id=getenv(SUB_ID_OVERRIDE),
+            base_url=rm_uri_override,
+            credentials=credentials)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
+
+
+def get_mysql_flexible_management_client(cli_ctx, **_):
+    from os import getenv
+    from azure.mgmt.rdbms.mysql_flexibleservers import MySQLManagementClient
+
+    # Allow overriding resource manager URI using environment variable
+    # for testing purposes. Subscription id is also determined by environment
+    # variable.
+    rm_uri_override = getenv(RM_URI_OVERRIDE)
+    if rm_uri_override:
+        client_id = getenv(CLIENT_ID)
+        if client_id:
+            from azure.common.credentials import ServicePrincipalCredentials
+            credentials = ServicePrincipalCredentials(
+                client_id=client_id,
+                secret=getenv(CLIENT_SECRET),
+                tenant=getenv(TENANT_ID))
+        else:
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return MySQLManagementClient(
@@ -87,7 +116,34 @@ def get_postgresql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication    # pylint: disable=import-error
+            from msrest.authentication import Authentication  # pylint: disable=import-error
+            credentials = Authentication()
+
+        return PostgreSQLManagementClient(
+            subscription_id=getenv(SUB_ID_OVERRIDE),
+            base_url=rm_uri_override,
+            credentials=credentials)
+    # Normal production scenario.
+    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient)
+
+
+def get_postgresql_flexible_management_client(cli_ctx, **_):
+    from os import getenv
+    from azure.mgmt.rdbms.postgresql_flexibleservers import PostgreSQLManagementClient
+    # Allow overriding resource manager URI using environment variable
+    # for testing purposes. Subscription id is also determined by environment
+    # variable.
+    rm_uri_override = getenv(RM_URI_OVERRIDE)
+    if rm_uri_override:
+        client_id = getenv(CLIENT_ID)
+        if client_id:
+            from azure.common.credentials import ServicePrincipalCredentials
+            credentials = ServicePrincipalCredentials(
+                client_id=client_id,
+                secret=getenv(CLIENT_SECRET),
+                tenant=getenv(TENANT_ID))
+        else:
+            from msrest.authentication import Authentication  # pylint: disable=import-error
             credentials = Authentication()
 
         return PostgreSQLManagementClient(
@@ -220,3 +276,84 @@ def cf_mysql_server_ad_administrators_operations(cli_ctx, _):
 
 def cf_postgres_server_ad_administrators_operations(cli_ctx, _):
     return get_postgresql_management_client(cli_ctx).server_administrators
+
+
+def cf_mariadb_check_resource_availability_sterling(cli_ctx, _):
+    return get_mariadb_management_client(cli_ctx).check_name_availability
+
+
+def cf_mysql_check_resource_availability_sterling(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).check_name_availability
+
+
+def cf_postgres_check_resource_availability_sterling(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).check_name_availability
+
+
+def cf_mysql_location_based_performance_tier_operations(cli_ctx, _):
+    return get_mysql_management_client(cli_ctx).location_based_performance_tier
+
+
+def cf_postgres_location_based_performance_tier_operations(cli_ctx, _):
+    return get_postgresql_management_client(cli_ctx).location_based_performance_tier
+
+
+def cf_mariadb_location_based_performance_tier_operations(cli_ctx, _):
+    return get_mariadb_management_client(cli_ctx).location_based_performance_tier
+
+
+# Meru operations for flexible servers
+def cf_mysql_flexible_servers(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).servers
+
+
+def cf_mysql_flexible_firewall_rules(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).firewall_rules
+
+
+def cf_mysql_flexible_config(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).configurations
+
+
+def cf_mysql_flexible_db(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).databases
+
+
+def cf_mysql_flexible_replica(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).replicas
+
+
+def cf_mysql_flexible_location_capabilities(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).location_based_capabilities
+
+
+def cf_mysql_check_resource_availability(cli_ctx, _):
+    return get_mysql_flexible_management_client(cli_ctx).check_name_availability
+
+
+def cf_postgres_flexible_servers(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).servers
+
+
+def cf_postgres_flexible_firewall_rules(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
+
+
+def cf_postgres_flexible_config(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).configurations
+
+
+def cf_postgres_flexible_location_capabilities(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
+
+
+def cf_postgres_check_resource_availability(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
+
+
+def resource_client_factory(cli_ctx, **_):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+
+
+def network_client_factory(cli_ctx):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)

@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
-
+import os
 import argparse
 
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.cli.command_modules.storage._client_factory import (get_storage_data_service_client,
                                                                blob_data_service_factory,
@@ -128,8 +129,7 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(
-                    resource="https://storage.azure.com", subscription_id=n._subscription)
+                n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -168,15 +168,21 @@ def validate_client_parameters(cmd, namespace):
     if n.sas_token:
         n.sas_token = n.sas_token.lstrip('?')
 
+    # account name with secondary
+    if n.account_name and n.account_name.endswith('-secondary'):
+        n.location_mode = 'secondary'
+        n.account_name = n.account_name[:-10]
+
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There is no credential provided in your command and environment, we will query account key '
-                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
-                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
-                       'For more information about RBAC roles in storage, you can see '
+        logger.warning('There are no credentials provided in your command and environment, we will query for the '
+                       'account key inside your storage account. \nPlease provide --connection-string, '
+                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
+                       'have required RBAC roles in your command. For more information about RBAC roles '
+                       'in storage, visit '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting corresponding environment variable can avoid inputting credential in your command. '
-                       'Please use --help to get more information.')
+                       'Setting the corresponding environment variables can avoid inputting credentials in '
+                       'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
@@ -346,7 +352,6 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     if not source_sas:
         # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
-            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
             source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                                      dir_name, file_name)
@@ -551,7 +556,6 @@ def get_file_path_validator(default_file_param=None):
     Allows another path-type parameter to be named which can supply a default filename. """
 
     def validator(namespace):
-        import os
         if not hasattr(namespace, 'path'):
             return
 
@@ -577,6 +581,43 @@ def validate_included_datasets(cmd, namespace):
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         t_blob_include = cmd.get_models('blob#Include')
         namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
+
+
+def get_include_help_string(include_list):
+    item = []
+    for include in include_list:
+        if include.value == 'uncommittedblobs':
+            continue
+        item.append('(' + include.value[0] + ')' + include[1:])
+    return ', '.join(item)
+
+
+def validate_included_datasets_validator(include_class):
+    allowed_values = [x.lower() for x in dir(include_class) if not x.startswith('__')]
+    allowed_string = ''.join(x[0] for x in allowed_values)
+
+    def validator(namespace):
+        if namespace.include:
+            if set(namespace.include) - set(allowed_string):
+                help_string = get_include_help_string(include_class)
+                raise ValueError(
+                    'valid values are {} or a combination thereof.'.format(help_string))
+            include = []
+            if 's' in namespace.include:
+                include.append(include_class.snapshots)
+            if 'm' in namespace.include:
+                include.append(include_class.metadata)
+            if 'c' in namespace.include:
+                include.append(include_class.copy)
+            if 'd' in namespace.include:
+                include.append(include_class.deleted)
+            if 'v' in namespace.include:
+                include.append(include_class.versions)
+            if 't' in namespace.include:
+                include.append(include_class.tags)
+            namespace.include = include
+
+    return validator
 
 
 def validate_key_name(namespace):
@@ -784,8 +825,6 @@ def process_container_delete_parameters(cmd, namespace):
 
 def process_blob_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage blob download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -799,8 +838,6 @@ def process_blob_download_batch_parameters(cmd, namespace):
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source) or not os.path.isdir(namespace.source):
         raise ValueError('incorrect usage: source must be an existing directory')
@@ -873,8 +910,6 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
 
 def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.source):
         raise ValueError('incorrect usage: source {} does not exist'.format(namespace.source))
@@ -899,8 +934,6 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
 def process_file_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage file batch download command"""
-    import os
-
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
@@ -923,8 +956,6 @@ def process_file_batch_source_parameters(cmd, namespace):
 
 
 def process_file_download_namespace(namespace):
-    import os
-
     get_file_path_validator()(namespace)
 
     dest = namespace.file_path
@@ -997,7 +1028,7 @@ def ipv4_range_type(string):
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{ip_format}-{ip_format}$".format(ip_format=ip_format), string):
-            raise ValueError
+            raise CLIError("Please use the following format to specify ip range: '{ip1}-{ip2}'.")
     return string
 
 
@@ -1051,7 +1082,10 @@ def page_blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
 
     try:
-        namespace.tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            namespace.tier = getattr(cmd.get_models('_models#PremiumPageBlobTier'), namespace.tier)
+        else:
+            namespace.tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
     except AttributeError:
         from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
         raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
@@ -1066,7 +1100,10 @@ def block_blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
 
     try:
-        namespace.tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
+        if is_storagev2(cmd.command_kwargs['resource_type'].value[0]):
+            namespace.tier = getattr(cmd.get_models('_models#StandardBlobTier'), namespace.tier)
+        else:
+            namespace.tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
     except AttributeError:
         from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
         raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
@@ -1138,7 +1175,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
         namespace.target = url
 
     if valid_file:
-        import os
         client = file_data_service_factory(cmd.cli_ctx, {
             'account_name': namespace.account_name,
             'account_key': namespace.account_key})
@@ -1170,31 +1206,46 @@ def as_user_validator(namespace):
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
 
-def validator_delete_retention_days(namespace):
-    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
-        raise ValueError(
-            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
-            "is set to true")
+def validator_delete_retention_days(namespace, enable=None, days=None):
+    enable_param = '--' + enable.replace('_', '-')
+    days_param = '--' + enable.replace('_', '-')
+    enable = getattr(namespace, enable)
+    days = getattr(namespace, days)
 
-    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+    if enable is True and days is None:
         raise ValueError(
-            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+            "incorrect usage: you have to provide value for '{}' when '{}' "
+            "is set to true".format(days_param, enable_param))
 
-    if namespace.enable_delete_retention is None and namespace.delete_retention_days is not None:
+    if enable is False and days is not None:
         raise ValueError(
-            "incorrect usage: please specify '--enable-delete-retention true' if you want to set the value for "
-            "'--delete-retention-days'")
+            "incorrect usage: '{}' is invalid when '{}' is set to false".format(days_param, enable_param))
 
-    if namespace.delete_retention_days or namespace.delete_retention_days == 0:
-        if namespace.delete_retention_days < 1:
+    if enable is None and days is not None:
+        raise ValueError(
+            "incorrect usage: please specify '{} true' if you want to set the value for "
+            "'{}'".format(enable_param, days_param))
+
+    if days or days == 0:
+        if days < 1:
             raise ValueError(
-                "incorrect usage: '--delete-retention-days' must be greater than or equal to 1")
-        if namespace.delete_retention_days > 365:
+                "incorrect usage: '{}' must be greater than or equal to 1".format(days_param))
+        if days > 365:
             raise ValueError(
-                "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+                "incorrect usage: '{}' must be less than or equal to 365".format(days_param))
+
+
+def validate_container_delete_retention_days(namespace):
+    validator_delete_retention_days(namespace, enable='enable_container_delete_retention',
+                                    days='container_delete_retention_days')
 
 
 def validate_delete_retention_days(namespace):
+    validator_delete_retention_days(namespace, enable='enable_delete_retention',
+                                    days='delete_retention_days')
+
+
+def validate_file_delete_retention_days(namespace):
     if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
         raise ValueError(
             "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
@@ -1288,7 +1339,216 @@ def validate_service_type(services, service_type):
 
 
 def validate_logging_version(namespace):
-    if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
+    if validate_service_type(namespace.services, 'table') and namespace.version and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
+
+
+def validate_match_condition(namespace):
+    from .track2_util import _if_match, _if_none_match
+    if namespace.if_match:
+        namespace = _if_match(if_match=namespace.if_match, **namespace)
+        del namespace.if_match
+    if namespace.if_none_match:
+        namespace = _if_none_match(if_none_match=namespace.if_none_match, **namespace)
+        del namespace.if_none_match
+
+
+def validate_or_policy(namespace):
+    error_elements = []
+    if namespace.properties is None:
+        error_msg = "Please provide --policy in JSON format or the following arguments: "
+        if namespace.source_account is None:
+            error_elements.append("--source-account")
+
+        # Apply account name when there is no destination account provided
+        if namespace.destination_account is None:
+            namespace.destination_account = namespace.account_name
+
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " to initialize Object Replication Policy for storage account."
+            raise ValueError(error_msg)
+    else:
+        if os.path.exists(namespace.properties):
+            or_policy = get_file_json(namespace.properties)
+        else:
+            or_policy = shell_safe_json_parse(namespace.properties)
+
+        try:
+            namespace.source_account = or_policy["sourceAccount"]
+        except KeyError:
+            namespace.source_account = or_policy["source_account"]
+        if namespace.source_account is None:
+            error_elements.append("source_account")
+
+        try:
+            namespace.destination_account = or_policy["destinationAccount"]
+        except KeyError:
+            namespace.destination_account = or_policy["destination_account"]
+
+        if "rules" not in or_policy.keys() or not or_policy["rules"]:
+            error_elements.append("rules")
+        error_msg = "Missing input parameters: "
+        if error_elements:
+            error_msg += ", ".join(error_elements)
+            error_msg += " in properties to initialize Object Replication Policy for storage account."
+            raise ValueError(error_msg)
+        namespace.properties = or_policy
+
+        if "policyId" in or_policy.keys() and or_policy["policyId"]:
+            namespace.policy_id = or_policy['policyId']
+
+
+def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
+    import re
+    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
+    # usage check
+    if not container and blob:
+        raise CLIError('incorrect usage: please specify container information for your blob resource.')
+    if not share and file_path:
+        raise CLIError('incorrect usage: please specify share information for your file resource.')
+
+    if url and container:
+        raise CLIError('incorrect usage: you only can specify one between url and container information.')
+    if url and share:
+        raise CLIError('incorrect usage: you only can specify one between url and share information.')
+    if share and container:
+        raise CLIError('incorrect usage: you only can specify one between share and container information.')
+
+    # get url
+    storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
+
+    if url is not None:
+        # validate source is uri or local path
+        storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
+        result = re.findall(storage_pattern, url)
+        if result:  # source is URL
+            storage_info = result[0]
+            namespace.account_name = storage_info[0]
+            if storage_info[1] in ['blob', 'dfs']:
+                service = 'blob'
+            elif storage_info[1] in ['file']:
+                service = 'file'
+            else:
+                raise ValueError('{} is not valid storage endpoint.'.format(url))
+    # validate credential
+    validate_client_parameters(cmd, namespace)
+    kwargs = {'account_name': namespace.account_name,
+              'account_key': namespace.account_key,
+              'connection_string': namespace.connection_string,
+              'sas_token': namespace.sas_token}
+    if container:
+        client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+        if blob is None:
+            blob = ''
+        url = client.make_blob_url(container, blob)
+
+        service = 'blob'
+    elif share:
+        client = file_data_service_factory(cmd.cli_ctx, kwargs)
+        dir_name, file_name = os.path.split(file_path) if file_path else (None, '')
+        dir_name = None if dir_name in ('', '.') else dir_name
+        url = client.make_file_url(share, dir_name, file_name)
+        service = 'file'
+    elif not any([url, container, share]):  # In account level, only blob service is supported
+        service = 'blob'
+        url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
+
+    # Add sas in url
+    if namespace.sas_token:
+        sas_token = namespace.sas_token.lstrip('?')
+    else:
+        try:
+            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return '{}?{}'.format(url, sas_token)
+    return url
+
+
+def _is_valid_uri(uri):
+    if not uri:
+        return False
+    if os.path.isdir(os.path.dirname(uri)) or os.path.isdir(uri):
+        return uri
+    if "?" in uri:  # sas token exists
+        logger.debug("Find ? in %s. ", uri)
+        return uri
+    return False
+
+
+def validate_azcopy_credential(cmd, namespace):
+    # Get destination uri
+    if not _is_valid_uri(namespace.destination):
+        namespace.url = namespace.destination
+        namespace.destination = get_url_with_sas(
+            cmd, namespace, url=namespace.destination,
+            container=namespace.destination_container, blob=namespace.destination_blob,
+            share=namespace.destination_share, file_path=namespace.destination_file_path)
+
+    if not _is_valid_uri(namespace.source):
+        # determine if source account is same with destination
+        if not namespace.source_account_key and not namespace.source_sas and not namespace.source_connection_string:
+            if namespace.source_account_name == namespace.account_name:
+                namespace.source_account_key = namespace.account_key
+                namespace.source_sas = namespace.sas_token
+                namespace.source_connection_string = namespace.connection_string
+        namespace.account_name = namespace.source_account_name
+        namespace.account_key = namespace.source_account_key
+        namespace.sas_token = namespace.source_sas
+        namespace.connection_string = namespace.source_connection_string
+
+        # Get source uri
+        namespace.url = namespace.source
+        namespace.source = get_url_with_sas(
+            cmd, namespace, url=namespace.source,
+            container=namespace.source_container, blob=namespace.source_blob,
+            share=namespace.source_share, file_path=namespace.source_file_path)
+
+
+def validate_text_configuration(cmd, ns):
+    DelimitedTextDialect = cmd.get_models('_models#DelimitedTextDialect', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    DelimitedJSON = cmd.get_models('_models#DelimitedJSON', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if ns.input_format == 'csv':
+        ns.input_config = DelimitedTextDialect(
+            delimiter=ns.in_column_separator,
+            quotechar=ns.in_quote_char,
+            lineterminator=ns.in_record_separator,
+            escapechar=ns.in_escape_char,
+            has_header=ns.in_has_header)
+    if ns.input_format == 'json':
+        ns.input_config = DelimitedJSON(delimiter=ns.in_line_separator)
+
+    if ns.output_format == 'csv':
+        ns.output_config = DelimitedTextDialect(
+            delimiter=ns.out_column_separator,
+            quotechar=ns.out_quote_char,
+            lineterminator=ns.out_record_separator,
+            escapechar=ns.out_escape_char,
+            has_header=ns.out_has_header)
+    if ns.output_format == 'json':
+        ns.output_config = DelimitedJSON(delimiter=ns.out_line_separator)
+    del ns.input_format, ns.in_line_separator, ns.in_column_separator, ns.in_quote_char, ns.in_record_separator, \
+        ns.in_escape_char, ns.in_has_header
+    del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
+        ns.out_escape_char, ns.out_has_header
+
+
+def add_acl_progress_hook(namespace):
+    if namespace.progress_hook:
+        return
+
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        print(acl_changes.batch_failures)
+        failed_entries.append(acl_changes.batch_failures)
+
+    namespace.progress_hook = progress_callback

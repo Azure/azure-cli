@@ -1,0 +1,1258 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --version --type
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_app_gateway_waf_policy_managed_rules_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001","name":"cli_test_app_gateway_waf_policy_managed_rules_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-08-20T07:31:38Z","StorageType":"Standard_LRS"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '457'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"managedRules": {"managedRuleSets":
+      [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '128'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --version --type
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"9c2bbca3-2429-488e-ba91-945cb5a965fe\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : []\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\
+        \n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/92d77304-3c63-46ac-848d-1fabb1f33fb0?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '924'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 44bb93a6-564e-4f51-af02-4120fedad8c6
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1168'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"ea988c3e-f7d7-421f-9924-a4deddfabcb6\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : []\r\n        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\
+        \n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '925'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:44 GMT
+      etag:
+      - W/"ea988c3e-f7d7-421f-9924-a4deddfabcb6"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5ec063a5-db32-4fb8-98e9-1d0fc1177ef7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"policySettings": {"state": "Disabled",
+      "mode": "Detection", "requestBodyCheck": true, "maxRequestBodySizeInKb": 128,
+      "fileUploadLimitInMb": 100}, "customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1", "ruleGroupOverrides":
+      [{"ruleGroupName": "REQUEST-921-PROTOCOL-ATTACK", "rules": [{"ruleId": "921120"},
+      {"ruleId": "921110"}]}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '675'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"b8a10fa8-cdb5-4ef1-a47b-65e534a141db\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n\
+        \      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2083e356-c63b-4c8f-9ccc-06c513db2ac1?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c1450099-3c29-4600-87c0-f07a5c781a05
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1168'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"6ed4523e-1391-43c7-9fb4-7e18ecd6ef55\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n\
+        \      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1306'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:46 GMT
+      etag:
+      - W/"6ed4523e-1391-43c7-9fb4-7e18ecd6ef55"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 72de1523-abb5-42a4-a926-69fb7ae1b68a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"6ed4523e-1391-43c7-9fb4-7e18ecd6ef55\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n\
+        \      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1306'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:47 GMT
+      etag:
+      - W/"6ed4523e-1391-43c7-9fb4-7e18ecd6ef55"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 31aae2c0-f340-4085-8cac-6063a7f59a9a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"policySettings": {"state": "Disabled",
+      "mode": "Detection", "requestBodyCheck": true, "maxRequestBodySizeInKb": 128,
+      "fileUploadLimitInMb": 100}, "customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1", "ruleGroupOverrides":
+      [{"ruleGroupName": "REQUEST-921-PROTOCOL-ATTACK", "rules": [{"ruleId": "921120",
+      "state": "Disabled"}, {"ruleId": "921110", "state": "Disabled"}, {"ruleId":
+      "921150"}]}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '739'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"bdff4006-4b84-4f23-8819-0bc962c3250e\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n\
+        \      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7e90cf38-4a1a-4901-9995-143ad36bd135?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1422'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b455be56-6d27-460e-a699-c979b63715af
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1167'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"b8b32e92-9abf-4762-a281-bf4bef01ffce\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n\
+        \      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:48 GMT
+      etag:
+      - W/"b8b32e92-9abf-4762-a281-bf4bef01ffce"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 01bbcc47-0ee6-4fd9-bdf0-1341da8f6b2f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"b8b32e92-9abf-4762-a281-bf4bef01ffce\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            }\r\n          ]\r\n        }\r\n      ],\r\n\
+        \      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1423'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:49 GMT
+      etag:
+      - W/"b8b32e92-9abf-4762-a281-bf4bef01ffce"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ac2729de-8bbc-4607-9818-f98b4ef1eb9b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"policySettings": {"state": "Disabled",
+      "mode": "Detection", "requestBodyCheck": true, "maxRequestBodySizeInKb": 128,
+      "fileUploadLimitInMb": 100}, "customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1", "ruleGroupOverrides":
+      [{"ruleGroupName": "REQUEST-921-PROTOCOL-ATTACK", "rules": [{"ruleId": "921120",
+      "state": "Disabled"}, {"ruleId": "921110", "state": "Disabled"}, {"ruleId":
+      "921150", "state": "Disabled"}]}, {"ruleGroupName": "REQUEST-913-SCANNER-DETECTION",
+      "rules": [{"ruleId": "913100"}]}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '845'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"f435f31f-f9b2-413d-a978-23027320ba69\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            },\r\n            {\r\n              \"ruleGroupName\"\
+        : \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n   \
+        \             {\r\n                  \"ruleId\": \"913100\",\r\n         \
+        \         \"state\": \"Disabled\"\r\n                }\r\n              ]\r\
+        \n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"exclusions\"\
+        : []\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/659848f6-e056-4732-a847-dc47838dbdc0?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1677'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c2d24ae6-1267-48e7-ad7e-041d621a3aa2
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1172'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"05335f70-6b8a-40a6-a8ef-2505e718f8c9\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            },\r\n            {\r\n              \"ruleGroupName\"\
+        : \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n   \
+        \             {\r\n                  \"ruleId\": \"913100\",\r\n         \
+        \         \"state\": \"Disabled\"\r\n                }\r\n              ]\r\
+        \n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"exclusions\"\
+        : []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:51 GMT
+      etag:
+      - W/"05335f70-6b8a-40a6-a8ef-2505e718f8c9"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 5996d827-36c1-4bd4-96ed-854fcd907988
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"05335f70-6b8a-40a6-a8ef-2505e718f8c9\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921120\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921110\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     },\r\n                {\r\n                  \"ruleId\": \"921150\"\
+        ,\r\n                  \"state\": \"Disabled\"\r\n                }\r\n  \
+        \            ]\r\n            },\r\n            {\r\n              \"ruleGroupName\"\
+        : \"REQUEST-913-SCANNER-DETECTION\",\r\n              \"rules\": [\r\n   \
+        \             {\r\n                  \"ruleId\": \"913100\",\r\n         \
+        \         \"state\": \"Disabled\"\r\n                }\r\n              ]\r\
+        \n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"exclusions\"\
+        : []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:51 GMT
+      etag:
+      - W/"05335f70-6b8a-40a6-a8ef-2505e718f8c9"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0ee0ade9-dc7d-40c4-ab63-c7db3a273484
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"policySettings": {"state": "Disabled",
+      "mode": "Detection", "requestBodyCheck": true, "maxRequestBodySizeInKb": 128,
+      "fileUploadLimitInMb": 100}, "customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1", "ruleGroupOverrides":
+      [{"ruleGroupName": "REQUEST-921-PROTOCOL-ATTACK", "rules": [{"ruleId": "921130"},
+      {"ruleId": "921140"}]}, {"ruleGroupName": "REQUEST-913-SCANNER-DETECTION", "rules":
+      [{"ruleId": "913100", "state": "Disabled"}]}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '781'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name --rules
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"63b1ba28-0f10-4dc4-ade6-3fb8a7f7151e\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921130\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921140\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            },\r\n            {\r\n        \
+        \      \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n         \
+        \     \"rules\": [\r\n                {\r\n                  \"ruleId\": \"\
+        913100\",\r\n                  \"state\": \"Disabled\"\r\n               \
+        \ }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n  \
+        \    ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/616a2758-12d9-47a4-aed6-5f04931cda3c?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1560'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b288b46d-b728-4104-b167-0648c9db8cf4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1168'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"c4b136ff-722e-42e3-aeb8-5f667505312e\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921130\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921140\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            },\r\n            {\r\n        \
+        \      \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n         \
+        \     \"rules\": [\r\n                {\r\n                  \"ruleId\": \"\
+        913100\",\r\n                  \"state\": \"Disabled\"\r\n               \
+        \ }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n  \
+        \    ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1561'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:53 GMT
+      etag:
+      - W/"c4b136ff-722e-42e3-aeb8-5f667505312e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0d99203f-51d6-4238-ae81-f79bbc2296df
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"c4b136ff-722e-42e3-aeb8-5f667505312e\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-921-PROTOCOL-ATTACK\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"921130\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                },\r\n                {\r\n                  \"ruleId\":\
+        \ \"921140\",\r\n                  \"state\": \"Disabled\"\r\n           \
+        \     }\r\n              ]\r\n            },\r\n            {\r\n        \
+        \      \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\",\r\n         \
+        \     \"rules\": [\r\n                {\r\n                  \"ruleId\": \"\
+        913100\",\r\n                  \"state\": \"Disabled\"\r\n               \
+        \ }\r\n              ]\r\n            }\r\n          ]\r\n        }\r\n  \
+        \    ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1561'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:54 GMT
+      etag:
+      - W/"c4b136ff-722e-42e3-aeb8-5f667505312e"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 988699ff-a983-47ce-ab89-c1b6772eaefb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1",
+      "location": "westus", "properties": {"policySettings": {"state": "Disabled",
+      "mode": "Detection", "requestBodyCheck": true, "maxRequestBodySizeInKb": 128,
+      "fileUploadLimitInMb": 100}, "customRules": [], "managedRules": {"exclusions":
+      [], "managedRuleSets": [{"ruleSetType": "OWASP", "ruleSetVersion": "3.1", "ruleGroupOverrides":
+      [{"ruleGroupName": "REQUEST-913-SCANNER-DETECTION", "rules": [{"ruleId": "913100",
+      "state": "Disabled"}]}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '676'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --policy-name --type --version --group-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"f3b22275-c45e-4b65-a33d-459f72ac8163\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Updating\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"913100\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                }\r\n              ]\r\n            }\r\n          ]\r\n\
+        \        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e1f6e587-1364-4e2d-96d5-340a87827371?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1190'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 78ceec0d-397b-4aa1-abd2-a2c2dc9ead49
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1166'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network application-gateway waf-policy managed-rule rule-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --policy-name
+      User-Agent:
+      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
+        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"agp1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_app_gateway_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/agp1\"\
+        ,\r\n  \"etag\": \"W/\\\"eac3a030-d732-4a91-a269-f50a4b120191\\\"\",\r\n \
+        \ \"type\": \"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"customRules\": [],\r\n    \"policySettings\": {\r\
+        \n      \"requestBodyCheck\": true,\r\n      \"maxRequestBodySizeInKb\": 128,\r\
+        \n      \"fileUploadLimitInMb\": 100,\r\n      \"state\": \"Disabled\",\r\n\
+        \      \"mode\": \"Detection\"\r\n    },\r\n    \"managedRules\": {\r\n  \
+        \    \"managedRuleSets\": [\r\n        {\r\n          \"ruleSetType\": \"\
+        OWASP\",\r\n          \"ruleSetVersion\": \"3.1\",\r\n          \"ruleGroupOverrides\"\
+        : [\r\n            {\r\n              \"ruleGroupName\": \"REQUEST-913-SCANNER-DETECTION\"\
+        ,\r\n              \"rules\": [\r\n                {\r\n                 \
+        \ \"ruleId\": \"913100\",\r\n                  \"state\": \"Disabled\"\r\n\
+        \                }\r\n              ]\r\n            }\r\n          ]\r\n\
+        \        }\r\n      ],\r\n      \"exclusions\": []\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1191'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 20 Aug 2020 07:31:56 GMT
+      etag:
+      - W/"eac3a030-d732-4a91-a269-f50a4b120191"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 489ef8bd-f082-45e9-9c84-8ebc83416785
+    status:
+      code: 200
+      message: OK
+version: 1

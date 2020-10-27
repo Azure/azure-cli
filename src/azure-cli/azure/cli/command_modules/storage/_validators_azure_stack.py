@@ -128,8 +128,7 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(
-                    resource="https://storage.azure.com", subscription_id=n._subscription)
+                n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -170,13 +169,14 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('There is no credential provided in your command and environment, we will query account key '
-                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
-                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
-                       'For more information about RBAC roles in storage, you can see '
+        logger.warning('There are no credentials provided in your command and environment, we will query for the '
+                       'account key inside your storage account. \nPlease provide --connection-string, '
+                       '--account-key or --sas-token as credentials, or use `--auth-mode login` if you '
+                       'have required RBAC roles in your command. For more information about RBAC roles '
+                       'in storage, visit '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
-                       'Setting corresponding environment variable can avoid inputting credential in your command. '
-                       'Please use --help to get more information.')
+                       'Setting the corresponding environment variables can avoid inputting credentials in '
+                       'your command. Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 

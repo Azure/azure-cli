@@ -256,6 +256,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -279,12 +281,14 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -297,6 +301,9 @@ examples:
     text: >
         az deployment create --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+  - name: Create a deployment at subscription scope from a template-spec
+    text: >
+        az deployment create --location WestUS --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment export'] = """
@@ -388,6 +395,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -414,12 +423,14 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -448,6 +459,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
@@ -549,6 +562,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -577,6 +592,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -584,7 +601,7 @@ parameters:
   - name: --mode
     short-summary: The deployment mode.
   - name: --what-if-result-format -r
-    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -603,6 +620,9 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+  - name: Create a deployment at subscription scope from a template-spec
+    text: >
+        az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment group what-if'] = """
@@ -618,6 +638,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to execute deployment What-If operation at.
   - name: --name -n
@@ -726,6 +748,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -735,6 +759,41 @@ parameters:
 examples:
   - name: Validate whether a template is valid at management group.
     text: az deployment mg validate --management-group-id testmg --location WestUS --template-file {template-file}
+"""
+
+helps['deployment mg what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at management group scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
+  - name: --management-group-id -m
+    short-summary: The management group id to create deployment at.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --location -l
+    short-summary: The location to store the deployment metadata.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a management group.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a management group with ResourceIdOnly format.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a management group without pretty-printing the result.
+    text: >
+        az deployment mg what-if --management-group-id testmg --location westus --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment mg create'] = """
@@ -750,12 +809,16 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -851,6 +914,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
@@ -858,6 +923,39 @@ parameters:
 examples:
   - name: Validate whether a template is valid at tenant scope.
     text: az deployment tenant validate --location WestUS --template-file {template-file}
+"""
+
+helps['deployment tenant what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at tenant scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
+  - name: --location -l
+    short-summary: The location to store the deployment What-If operation metadata.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at tenant scope.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at tenant scope with ResourceIdOnly format.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at tenant scope without pretty-printing the result.
+    text: >
+        az deployment tenant what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment tenant create'] = """
@@ -873,10 +971,14 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when `--confirm-with-what-if` is set.
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -1706,6 +1808,9 @@ examples:
         az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites \\
             --properties "{ \\"serverFarmId\\":\\"/subscriptions/{SubID}/resourcegroups/ \\
                 {ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}\\" }"
+  - name: Create a resource by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile --latest-include-preview
 """
 
 helps['resource delete'] = """
@@ -1721,6 +1826,9 @@ examples:
   - name: Delete a subnet using a resource identifier.
     text: >
         az resource delete --ids /subscriptions/0b1f6471-1bf0-4dda-aec3-111111111111/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet
+  - name: Delete a virtual machine named 'MyVm' by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource delete -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource invoke-action'] = """
@@ -1911,6 +2019,9 @@ examples:
   - name: Show an application gateway path rule.
     text: >
         az resource show -g MyResourceGroup --namespace Microsoft.Network --parent applicationGateways/ag1/urlPathMaps/map1 --resource-type pathRules -n rule1
+  - name: Show a virtual machine resource named 'MyVm' by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource show -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource tag'] = """
@@ -1926,16 +2037,22 @@ examples:
   - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally. It doesn't empty the existing tags.
     text: >
         az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
+  - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" --latest-include-preview
 """
 
 helps['resource update'] = """
 type: command
 short-summary: Update a resource.
 examples:
-  - name: Update a resource. (autogenerated)
+  - name: Update a webapp. (autogenerated)
     text: |
-        az resource update --ids $id --set properties.connectionType=Proxy
+        az resource update --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --set tags.key=value
     crafted: true
+  - name: Update a webapp by using the latest api-version whether this version is a preview version.
+    text: >
+        az resource update --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --set tags.key=value --latest-include-preview
 """
 
 helps['resource wait'] = """
@@ -1958,7 +2075,7 @@ examples:
 
 helps['tag'] = """
 type: group
-short-summary: Manage resource tags.
+short-summary: Tag Management on a resource.
 """
 
 helps['tag add-value'] = """
@@ -1972,18 +2089,185 @@ examples:
 
 helps['tag create'] = """
 type: command
-short-summary: Create a tag in the subscription.
+short-summary: Create tags on a specific resource.
+long-summary: >
+    The az tag create command with an id creates or updates the entire set of tags on a resource, resource group or subscription.
+    This operation allows adding or replacing the entire set of tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to create.
+  - name: --subscription
+    short-summary: Name or ID of subscription. You can configure the default subscription using az account set -s NAME_OR_ID.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --tags
+    short-summary: The tags to be applied on the resource.
 examples:
   - name: Create a tag in the subscription.
     text: >
         az tag create --name MyTag
+  - name: Create or update the entire set of tags on a subscription.
+    text: >
+        az tag create --resource-id /subscriptions/{subId} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource group.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --tags Dept=Finance Status=Normal
+  - name: Create or update the entire set of tags on a resource.
+    text: >
+        az tag create --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --tags Dept=Finance Status=Normal
 """
 
 helps['tag delete'] = """
 type: command
-short-summary: Delete a tag in the subscription.
+short-summary: Delete tags on a specific resource.
+long-summary:
+    The az tag delete command with an id deletes the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --name -n
+    short-summary: The name of the tag to be deleted.
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
   - name: Delete a tag from the subscription.
     text: >
         az tag delete --name MyTag
+  - name: Delete the entire set of tags on a subscription.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}
+  - name: Delete the entire set of tags on a resource group.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: Delete the entire set of tags on a resource.
+    text: >
+        az tag delete --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag list'] = """
+type: command
+short-summary: List the entire set of tags on a specific resource.
+long-summary: The az tag list command with an id lists the entire set of tags on a resource, resource group or subscription.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+examples:
+  - name: List the entire set of tags on a subscription.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}
+  - name: List the entire set of tags on a resource group.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}
+  - name: List the entire set of tags on a resource.
+    text: >
+        az tag list --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName}
+"""
+
+helps['tag update'] = """
+type: command
+short-summary: Selectively update the set of tags on a specific resource.
+long-summary: >
+    The az tag update command with an id selectively updates the set of tags on a resource, resource group or subscription.
+    This operation allows replacing, merging or selectively deleting tags on the specified resource, resource group or subscription.
+    The specified entity can have a maximum of 50 tags at the end of the operation.
+    The 'replace' option replaces the entire set of existing tags with a new set.
+    The 'merge' option allows adding tags with new names and updating the values of tags with existing names.
+    The 'delete' option allows selectively deleting tags based on given names or name/value pairs.
+parameters:
+  - name: --resource-id
+    short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
+  - name: --operation
+    short-summary: The update operation. Options are Merge, Replace and Delete.
+  - name: --tags
+    short-summary: The tags to be updated on the resource.
+examples:
+  - name: Selectively update the set of tags on a subscription with "merge" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id} --operation merge --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource group with "replace" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg} --operation replace --tags key1=value1 key3=value3
+  - name: Selectively update the set of tags on a resource with "delete" Operation.
+    text: >
+        az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
+"""
+
+helps['ts'] = """
+type: group
+short-summary: Manage template specs at subscription or resource group scope.
+"""
+
+helps['ts create'] = """
+type: command
+short-summary: Create a template spec and or template spec version.
+examples:
+  - name: Create a template spec.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
+  - name: Create a template spec version.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
+"""
+
+helps['ts update'] = """
+type: command
+short-summary: Update a template spec version.
+examples:
+  - name: Update the template content of a template spec or template spec version based on the resource ID.
+    text: az ts update --template-spec resourceID -f updatedFile.json
+  - name: Update the display name of a template spec based on the resource ID.
+    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName"
+  - name: Update the description of a template spec version.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
+  - name: Update all the properties of a template spec version.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+"""
+
+helps['ts show'] = """
+type: command
+short-summary: Get the specified template spec or template spec version.
+examples:
+  - name: Show the specified template spec.
+    text: az ts show -g testrg --name TemplateSpecName
+  - name: Show the specified template spec version.
+    text: az ts show -g testrg --name TemplateSpecName --version VersionName
+  - name: Show the specified template spec or template spec version based on the resource ID.
+    text: az ts show --template-spec resourceID
+"""
+
+helps['ts export'] = """
+type: command
+short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
+examples:
+  - name: Export the specified template spec with all versions.
+    text: az ts export -g testrg --name TemplateSpecName --output-folder C:/path/
+  - name: Export the specified template spec.
+    text: az ts export -s resourceID --output-folder C:/path/
+  - name: Export the specified template spec version.
+    text: az ts export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
+"""
+
+helps['ts delete'] = """
+type: command
+short-summary: Delete a specified template spec or template spec version by name or resource ID..
+examples:
+  - name: Delete the specified template spec and all versions.
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName
+  - name: Delete the specified version from the template spec.
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName --version VersionName
+  - name: Delete the template spec or version based on resource ID.
+    text: az ts delete --template-spec resourceID
+"""
+
+helps['ts list'] = """
+type: command
+short-summary: List template specs or template spec versions.
+examples:
+  - name: List all template specs in current default subscription.
+    text: az ts list
+  - name: List all template specs in specified subscription.
+    text: az ts list --subscription Subscription
+  - name: List all template specs in resource group.
+    text: az ts list -g MyResourceGroup
+  - name: List all versions of parent template spec.
+    text: az ts list -g MyResourceGroup -n TemplateSpecName
 """

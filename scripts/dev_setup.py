@@ -66,7 +66,6 @@ pip_command('install -r requirements.txt')
 pip_command('install -e ./tools')
 
 # command modules have dependency on azure-cli-core so install this first
-pip_command('install -e src/azure-cli-nspkg')
 pip_command('install -e src/azure-cli-telemetry')
 pip_command('install -e src/azure-cli-core')
 py_command('-m automation.setup.install_modules')
@@ -74,11 +73,6 @@ py_command('-m automation.setup.install_modules')
 # azure cli has dependencies on the above packages so install this one last
 pip_command('install -e src/azure-cli')
 pip_command('install -e src/azure-cli-testsdk')
-
-# Ensure that the site package's azure/__init__.py has the old style namespace
-# package declaration by installing the old namespace package
-pip_command('install --force-reinstall azure-nspkg==1.0.0')
-pip_command('install --force-reinstall azure-mgmt-nspkg==1.0.0')
 
 print_support_message()
 print('Finished dev setup.')
