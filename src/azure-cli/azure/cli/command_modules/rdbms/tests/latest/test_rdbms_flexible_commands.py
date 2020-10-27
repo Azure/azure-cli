@@ -61,7 +61,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     def _get_resource_group(self, **kwargs):
         return kwargs.get(self.resource_group_parameter_name)
 
-'''
+
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
@@ -468,15 +468,13 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
-'''
-
 
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
     mysql_location = 'westus2'
-
+    '''
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_investigation(self, resource_group):
@@ -485,108 +483,53 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     '''
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    @live_only()
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_subnetid('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @live_only()
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_subnetid('mysql', resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    @live_only()
     def test_postgres_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vnet('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @live_only()
     def test_mysql_flexible_server_vnet_mgmt_supplied_vnet(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vnet('mysql', resource_group)
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    @live_only()
     def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @live_only()
     def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
         self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_2')
+    @live_only()
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('postgres', resource_group_1, resource_group_2)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_1')
     @ResourceGroupPreparer(location=mysql_location, parameter_name='resource_group_2')
+    @live_only()
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
-    '''
-
-    def helper(self, database_engine, resource_group):
-
-            # flexible-server create
-            if self.cli_ctx.local_context.is_on:
-                self.cmd('local-context off')
-
-            if database_engine == 'postgres':
-                tier = 'GeneralPurpose'
-                sku_name = 'Standard_D2s_v3'
-                version = '12'
-                storage_size = 128
-                location = self.postgres_location
-            elif database_engine == 'mysql':
-                tier = 'Burstable'
-                sku_name = 'Standard_B1ms'
-                storage_size = 10
-                version = '5.7'
-                location = self.mysql_location
-
-            vnet_name = 'clitestvnet'
-            address_prefix = '10.0.0.0/16'
-            subnet_name_1 = 'clitestsubnet'
-            subnet_prefix_1 = '10.0.0.0/24'
-            vnet_name_2 = 'clitestvnet1'
-            subnet_name_2 = 'clitestsubnet1'
-            # flexible-servers
-            servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
-                       self.create_random_name('azuredbcli', SERVER_NAME_MAX_LENGTH)]
-
-            # Case 2 : Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
-            # The subnet name is the default created one, not the one in subnet ID
-            self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                     .format(database_engine, resource_group, servers[1],
-                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                                 self.get_subscription_id(), resource_group, vnet_name_2, subnet_name_2)),
-                     checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
-                             JMESPathCheck('subnetId',
-                                           '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                                               self.get_subscription_id(), resource_group, vnet_name_2,
-                                               'Subnet' + servers[1][6:])),
-                             JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
-
-            # flexible-server show to validate delegation is added to both the created server
-            delegation_service = 'Microsoft.DBforPostgreSQL/flexibleServers'
-            if database_engine == 'mysql':
-                delegation_service = 'Microsoft.DBforMySQL/flexibleServers'
-
-            self.cmd('{} flexible-server show -g {} -n {}'
-                     .format(database_engine, resource_group, servers[1]),
-                     checks=[JMESPathCheck('delegatedSubnetArguments.subnetArmResourceId',
-                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                                 self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1][6:]))])
-            '''
-            show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
-                                     .format(database_engine, resource_group, servers[1])).get_output_in_json()
-
-            self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
-                             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                                 self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1][6:]))
-            '''
-
 
     def _test_flexible_server_vnet_mgmt_supplied_subnetid(self, database_engine, resource_group):
 
@@ -595,16 +538,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
             location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
             location = self.mysql_location
 
         vnet_name = 'clitestvnet'
@@ -641,11 +578,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
 
         # flexible-server show to validate delegation is added to both the created server
-        delegation_service = 'Microsoft.DBforPostgreSQL/flexibleServers'
-        if database_engine == 'mysql':
-            delegation_service = 'Microsoft.DBforMySQL/flexibleServers'
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
-                               .format(database_engine, resource_group, servers[0])).get_output_in_json()
+                                 .format(database_engine, resource_group, servers[0])).get_output_in_json()
         show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, servers[1])).get_output_in_json()
         self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'],
@@ -682,16 +616,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
             location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
             location = self.mysql_location
 
         vnet_name = 'clitestvnet2'
@@ -716,7 +644,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('subnetId', '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.get_subscription_id(), resource_group, vnet_name, 'Subnet' + servers[0][6:])),
                          JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine))])
 
-
         # Case 2 : Provision a server with a supplied Vname that does not exist.
         self.cmd('{} flexible-server create -g {} -n {} --vnet {}'
                  .format(database_engine, resource_group, servers[1], vnet_name_2),
@@ -727,11 +654,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
 
         # flexible-server show to validate delegation is added to both the created server
-        delegation_service = 'Microsoft.DBforPostgreSQL/flexibleServers'
-        if database_engine == 'mysql':
-            delegation_service = 'Microsoft.DBforMySQL/flexibleServers'
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
-                               .format(database_engine, resource_group, servers[0])).get_output_in_json()
+                                 .format(database_engine, resource_group, servers[0])).get_output_in_json()
 
         show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, servers[1])).get_output_in_json()
@@ -773,16 +697,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
             location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
             location = self.mysql_location
 
         vnet_name = 'clitestvnet5'
@@ -818,11 +736,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
 
         # flexible-server show to validate delegation is added to both the created server
-        delegation_service = 'Microsoft.DBforPostgreSQL/flexibleServers'
-        if database_engine == 'mysql':
-            delegation_service = 'Microsoft.DBforMySQL/flexibleServers'
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
-                               .format(database_engine, resource_group, servers[0])).get_output_in_json()
+                                 .format(database_engine, resource_group, servers[0])).get_output_in_json()
 
         show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, servers[1])).get_output_in_json()
@@ -863,16 +778,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
             location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
             location = self.mysql_location
 
         vnet_name = 'clitestvnet7'
@@ -906,7 +815,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Case 2 : Provision a server with supplied subnetid that has a different RG in the ID but does not exist. The vnet and subnet is then created in the RG of the server
         self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
                  .format(database_engine, resource_group_2, servers[1], '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                                           self.get_subscription_id(), resource_group_1, vnet_name_2, subnet_name_2)),
+                         self.get_subscription_id(), resource_group_1, vnet_name_2, subnet_name_2)),
                  checks=[JMESPathCheck('resourceGroup', resource_group_2), JMESPathCheck('skuname', sku_name),
                          JMESPathCheck('subnetId',
                                        '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -915,9 +824,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
 
         # flexible-server show to validate delegation is added to both the created server
-        delegation_service = 'Microsoft.DBforPostgreSQL/flexibleServers'
-        if database_engine == 'mysql':
-            delegation_service = 'Microsoft.DBforMySQL/flexibleServers'
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group_2, servers[0])).get_output_in_json()
 
@@ -978,17 +884,9 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
-            location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
-            location = self.mysql_location
 
         # flexible-servers
         servers = [self.create_random_name('azuredbpaccess', SERVER_NAME_MAX_LENGTH),
