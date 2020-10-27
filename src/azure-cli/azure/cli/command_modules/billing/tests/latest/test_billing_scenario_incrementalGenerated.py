@@ -181,6 +181,14 @@ def step__customers_get_customerslistbybillingprofile(test):
              checks=[])
 
 
+# EXAMPLE: /BillingProperty/patch/UpdateBillingProperty
+@try_manual
+def step__billingproperty_patch_updatebillingproperty(test):
+    test.cmd('az billing property update '
+             '--cost-center "1010"',
+             checks=[])
+
+
 # EXAMPLE: /Customers/get/Customer
 @try_manual
 def step__customers_get_customer(test):
@@ -253,7 +261,7 @@ def step__billingsubscriptions_get_billingsubscription(test):
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByBillingAccount
 @try_manual
-def step__billingsubscriptions_get(test):
+def step__billingsubscriptions_get2(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}"',
              checks=[])
@@ -261,7 +269,7 @@ def step__billingsubscriptions_get(test):
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByBillingProfile
 @try_manual
-def step__billingsubscriptions_get2(test):
+def step__billingsubscriptions_get3(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}"',
@@ -270,7 +278,7 @@ def step__billingsubscriptions_get2(test):
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByCustomer
 @try_manual
-def step__billingsubscriptions_get3(test):
+def step__billingsubscriptions_get(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}" '
              '--customer-name "{myCustomer}"',
@@ -298,7 +306,7 @@ def step__billingsubscriptions_patch(test):
 
 # EXAMPLE: /BillingSubscriptions/post/MoveBillingSubscription
 @try_manual
-def step__billingsubscriptions_post(test):
+def step__billingsubscriptions_post2(test):
     test.cmd('az billing subscription move '
              '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
@@ -308,7 +316,7 @@ def step__billingsubscriptions_post(test):
 
 # EXAMPLE: /BillingSubscriptions/post/SubscriptionMoveValidateFailure
 @try_manual
-def step__billingsubscriptions_post2(test):
+def step__billingsubscriptions_post(test):
     test.cmd('az billing subscription validate-move '
              '--account-name "{myBillingAccount}" '
              '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
@@ -384,6 +392,15 @@ def step__invoices_get_invoiceslistbybillingprofile(test):
              checks=[])
 
 
+# EXAMPLE: /Invoices/get/CreditNote
+@try_manual
+def step__invoices_get_creditnote(test):
+    test.cmd('az billing invoice show '
+             '--account-name "{myBillingAccount}" '
+             '--name "{myInvoice}"',
+             checks=[])
+
+
 # EXAMPLE: /Invoices/get/InvoicesListByBillingProfileWithRebillDetails
 @try_manual
 def step__invoices_get3(test):
@@ -422,6 +439,21 @@ def step__invoicesections_put_putinvoicesection(test):
              '--name "{myInvoiceSection}" '
              '--display-name "invoiceSection1" '
              '--labels costCategory="Support" pcCode="A123456"',
+             checks=[
+                 test.check("name", "{myInvoiceSection}", case_sensitive=False),
+                 test.check("displayName", "invoiceSection1", case_sensitive=False),
+                 test.check("labels.costCategory", "Support", case_sensitive=False),
+                 test.check("labels.pcCode", "A123456", case_sensitive=False),
+             ])
+
+
+# EXAMPLE: /InvoiceSections/get/InvoiceSection
+@try_manual
+def step__invoicesections_get_invoicesection(test):
+    test.cmd('az billing invoice section show '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
+             '--name "{myInvoiceSection}"',
              checks=[
                  test.check("name", "{myInvoiceSection}", case_sensitive=False),
                  test.check("displayName", "invoiceSection1", case_sensitive=False),
@@ -606,6 +638,125 @@ def step__transactions_get_transactionslistbyinvoice(test):
 
 
 # Testcase
+# @try_manual
+# def call_scenario(test):
+#     setup(test)
+#     step__billingaccounts_get_billingaccounts(test)
+#     step__billingaccounts_get_billingaccountslist(test)
+#     step__billingaccounts_get(test)
+#     step__billingaccounts_get2(test)
+#     step__billingaccounts_get_billingaccountwithexpand(test)
+#     step__billingaccounts_patch_updatebillingaccount(test)
+#     step__billingprofiles_put_createbillingprofile(test)
+#     step__billingprofiles_get_billingprofile(test)
+#     step__billingprofiles_get(test)
+#     step__billingprofiles_get2(test)
+#     step__billingprofiles_get_billingprofilewithexpand(test)
+#     step__availablebalances_get(test)
+#     step__billingproperty_get_billingproperty(test)
+#     step__billingproperty_patch_updatebillingproperty(test)
+#     step__customers_get_customer(test)
+#     step__customers_get_customerslistbybillingaccount(test)
+#     step__customers_get_customerslistbybillingaccount(test)
+#     step__customers_get_customerwithexpand(test)
+#     step__billingsubscriptions_get(test)
+#     step__billingsubscriptions_get_billingsubscription(test)
+#     step__billingsubscriptions_get2(test)
+#     step__billingsubscriptions_get3(test, checs=[
+#         self.check()
+#     ])
+#     step__billingsubscriptions_get4(test)
+#     step__billingsubscriptions_patch(test)
+#     step__invoices_get_billingaccountinvoiceslist(test)
+#     step__invoices_get(test)
+#     step__invoices_get2(test)
+#     step__billingsubscriptions_post(test)
+#     step__invoices_get_invoice(test)
+#     step__invoices_get_invoiceslistbybillingprofile(test)
+#     step__invoices_get_creditnote(test)
+#     step__invoices_get3(test)
+#     step__invoices_get_invoicewithrebilldetails(test)
+#     step__invoices_get_voidinvoice(test)
+#     step__invoicesections_put_putinvoicesection(test)
+#     step__invoicesections_get_invoicesection(test)
+#     step__invoicesections_get(test)
+#     step__billingsubscriptions_post2(test)
+#     step__billingsubscriptions_post3(test)
+#     step__policies_put_updatepolicy(test)
+#     step__products_get_product(test)
+#     step__products_get_productslistbybillingaccount(test)
+#     step__products_get_productslistbybillingprofile(test)
+#     step__products_get_productslistbyinvoicesection(test)
+#     step__products_get_productslistbyinvoicesection(test)
+#     step__products_patch_updatebillingproperty(test)
+#     step__products_post_moveproduct(test)
+#     step__products_post(test)
+#     step__products_post2(test)
+#     step__transactions_get_transactionslistbyinvoice(test)
+#     cleanup(test)
+
+
+# @try_manual
+# class BillingManagementClientScenarioTest(ScenarioTest):
+
+#     def test_billing(self):
+
+#         self.kwargs.update({
+#             'myBillingAccount': '{billingAccountName}',
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
+
+#         call_scenario(self)
+#         calc_coverage(__file__)
+#         raise_if()
+# Testcase2
+# @try_manual
+# def call_scenario2 (test):
+#     setup(test)
+#     step__billingprofiles_put_createbillingprofile(test)
+#     step__billingprofiles_get_billingprofile(test)
+#     step__billingprofiles_get(test)
+#     step__billingprofiles_get2(test)
+#     step__billingprofiles_get_billingprofilewithexpand(test)
+#     step__customers_get_customer(test)
+
+# @try_manual
+# class BillingScenarioTest(ScenarioTest):
+
+#     def test_billing(self):
+
+#         self.kwargs.update({
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
+
+#         call_scenario(self)
+#         calc_coverage(__file__)
+#         raise_if()
+
+#     def test_billing2(self):
+
+#         self.kwargs.update({
+#             'myBillingProfile': '{billingProfileName}',
+#             'myCustomer': '{customerName}',
+#             'myInvoiceSection': '{invoiceSectionName}',
+#             'myProduct': '{productName}',
+#             'myInvoice': '{invoiceName}',
+#         })
+
+#         call_scenario2(self)
+#         calc_coverage(__file__)
+#         raise_if()
+
+
+@record_only()
 @try_manual
 class BillingAccountScenarioTest(ScenarioTest):
     def test_billing_account_list_and_show(self):
@@ -639,21 +790,167 @@ class BillingAccountScenarioTest(ScenarioTest):
         # step__billingaccounts_get_billingaccountwithexpand(self)
 
 
+@record_only()
 @try_manual
-class BillingManagementClientScenarioTest(ScenarioTest):
+class BillingProfileScenarioTest(ScenarioTest):
 
-    def test_billing(self):
-
+    def setUp(self):
+        super().setUp()
         self.kwargs.update({
-            'myBillingAccount': '{billingAccountName}',
-            'myBillingProfile': '{billingProfileName}',
-            'myCustomer': '{customerName}',
-            'myInvoiceSection': '{invoiceSectionName}',
-            'myProduct': '{productName}',
-            'myInvoice': '{invoiceName}',
-            'myAgreement': '{agreementName}',
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31"   # This name is give by service team
         })
 
-        call_scenario(self)
-        calc_coverage(__file__)
-        raise_if()
+    def test_biiling_profile_list_and_show(self):
+
+        # list billing profiles under a certain billing account
+        step__billingprofiles_get(self)
+
+        # list billing profiles with expanded arguments
+        step__billingprofiles_get2(self)
+
+        self.kwargs.update({
+            "myBillingProfile": "DN7P-GKOI-BG7-AJ4D-SGB"
+        })
+
+        # show a billing profile with default properties
+        step__billingprofiles_get_billingprofile(self)
+        # show a billing profile with expaned properties
+        step__billingprofiles_get_billingprofilewithexpand(self)
+
+    def test_billing_profile_create_and_update(self):
+
+        # list existing billing profiles
+        step__billingprofiles_get2(self)
+
+        self.kwargs.update({
+            "myBillingProfile": "XXGU-AF7A-BG7-AJ4D-123"
+        })
+
+        # create a new billing profile
+        # step__billingprofiles_put_createbillingprofile(self)    # this API is not working
+
+        # list new appended billing profiles
+        step__billingprofiles_get2(self)
+
+        # show that billing profile
+        step__billingprofiles_get_billingprofile(self)
+
+
+@record_only()
+class BillingAccountScenarioTest(ScenarioTest):
+    def test_billing_balance_show(self):
+        self.kwargs.update({
+            # This name is give by service team
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB"
+        })
+        step__availablebalances_get(self)
+
+
+@record_only()
+class BillingCustomerScenarioTest(ScenarioTest):
+
+    def test_billing_customer_list_and_show(self):
+
+        self.kwargs.update({
+            # This name is give by service team
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+        })
+
+        step__customers_get_customerslistbybillingaccount(self)
+        step__customers_get_customerslistbybillingprofile(self)
+
+        self.kwargs.update({
+            "myCustomer": "ba897bfa-7111-465b-8a03-2729e540ef86"
+        })
+
+        step__customers_get_customer(self)
+        step__customers_get_customerslistbybillingaccount(self)
+
+
+@record_only()
+class BillingPolicyScenarioTest(ScenarioTest):
+
+    def test_billing_policy_show_and_update(self):
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+            "myCustomer": "ba897bfa-7111-465b-8a03-2729e540ef86"
+        })
+
+        step__policies_showpolicybycustomer(self)
+        step__policies_showpolicybyprofile(self)
+
+        step__policies_put_updatepolicy(self)
+
+        step__policies_showpolicybycustomer(self)
+        step__policies_showpolicybyprofile(self)
+
+
+@record_only()
+class BillingPropertyScenarioTest(ScenarioTest):
+
+    def test_billing_property_show(self):
+        # have to set a subscription first
+        # removed sensitive information manually from recording file
+        step__billingproperty_get_billingproperty(self)
+
+
+# All of operations are forbidden
+@record_only()
+class BillingInvoiceScenarioTest(ScenarioTest):
+    def test_billing_invoice_list_and_show(self):
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+        })
+
+        # list by billing account
+        # step__invoices_get_billingaccountinvoiceslist(self)
+        # step__invoices_get2(self)
+        # list by billing account and billing profile
+        # step__invoices_get_invoiceslistbybillingprofile(self)
+
+
+@record_only()
+class BillingInvoiceSectionScenarioTest(ScenarioTest):
+    def setUp(self):
+        super().setUp()
+
+        self.kwargs.update({
+            "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+            "myBillingProfile": "ROHX-DYIN-BG7-AJ4D-SGB",
+            "myInvoiceSection": "7S7S-YONO-PJA-AJ4D-SGB"
+        })
+
+    def test_billing_invoice_section_list_and_show(self):
+        step__invoicesections_get(self)
+        step__invoicesections_get_invoicesection(self)
+
+    def test_billing_section_create(self):
+        self.kwargs.update({
+            "myInvoiceSection": "7S7S-YONO-PJA-AJ4D-123"
+        })
+        step__invoicesections_put_putinvoicesection(self)
+        step__invoicesections_get(self)
+        step__invoicesections_get_invoicesection(self)
+
+
+# class BillingTransactionScenarioTest(ScenarioTest):
+#     def test_billing_transaction_list(self):
+#         self.kwargs.update({
+#             "myBillingAccount": "aff095f4-f26b-5334-db79-29704a77c0e5:8d5301c9-db55-4eb6-8611-9db0417d6cb2_2019-05-31",
+#             "myInvoice": ""
+#         })
+#         step__transactions_get_transactionslistbyinvoice(self)
+
+
+class BillingAgreementScenarioTest(ScenarioTest):
+    def test_agreement_list_and_show(self):
+        self.kwargs.update({
+            "myBillingAccount": "db038d21-b0d2-463c-942f-b09127c6f4e4:7c9c4a38-593e-479e-8958-9a338a0d8d02_2019-05-31",
+            "myAgreement": "NotFountResource"
+        })
+
+        step__agreements_get(self)
+        step__agreements_get_agreementbyname(self)
