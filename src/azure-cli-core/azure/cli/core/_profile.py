@@ -815,10 +815,12 @@ class SubscriptionFinder:
                 return arm_client_factory(credentials)
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import _prepare_client_kwargs
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            client_kwargs = _prepare_client_kwargs(cli_ctx)
+
+            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
                                  base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
@@ -905,6 +907,7 @@ class SubscriptionFinder:
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
@@ -913,6 +916,7 @@ class SubscriptionFinder:
                 t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
+                logger.debug("Acquiring a token with tenant=%s, resource=%s", tenant_id, resource)
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be

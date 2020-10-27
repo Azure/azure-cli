@@ -110,7 +110,7 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
-def _prepare_client_kwargs(cli_ctx):
+def _prepare_client_kwargs_track2(cli_ctx):
     """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
@@ -177,7 +177,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(_prepare_client_kwargs(cli_ctx))
+        client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
         client_kwargs['credential_scopes'] = resource_to_scopes(resource)
 
     if subscription_bound:
