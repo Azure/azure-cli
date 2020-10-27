@@ -114,12 +114,16 @@ def _prepare_client_kwargs(cli_ctx):
     """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
+    # Change SSL verification behavior
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
-    # This enables NetworkTraceLoggingPolicy which logs all headers without being redacted except Authorization
+    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
     client_kwargs['logging_enable'] = True
-    # TODO: Need a way to disable ARMHttpLoggingPolicy
-    # client_kwargs['http_logging_policy'] = None
+
+    # Disable ARMHttpLoggingPolicy which logs only allowed headers
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
     client_kwargs['user_agent'] = get_az_user_agent()
 
     try:
