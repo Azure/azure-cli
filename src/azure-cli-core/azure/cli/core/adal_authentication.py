@@ -138,9 +138,10 @@ class MSIAuthenticationWrapper(MSIAuthentication):
 
 
 class BasicTokenCredential:
+    # pylint:disable=too-few-public-methods
     """A Track 2 implementation of msrest.authentication.BasicTokenAuthentication."""
     def __init__(self, token_entry):
         self.token_entry = token_entry
 
-    def get_token(self, *scopes, **kwargs):
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         return AccessToken(self.token_entry['accessToken'], int(self.token_entry['expiresIn'] + time.time()))
