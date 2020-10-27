@@ -311,6 +311,21 @@ helps['billing invoice section wait'] = """
 "{billingProfileName}" --name "{invoiceSectionName}" --updated
 """
 
+helps['billing permission'] = """
+    type: group
+    short-summary: billing permission
+"""
+
+helps['billing permission list'] = """
+    type: command
+    short-summary: "Lists the billing permissions the caller has on a billing account."
+    examples:
+      - name: InvoiceSectionPermissionsList
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+"""
+
 helps['billing subscription'] = """
     type: group
     short-summary: billing subscription
@@ -547,4 +562,27 @@ operation is supported only for billing accounts with agreement type Microsoft C
       - name: UpdateBillingProperty
         text: |-
                az billing property update --cost-center "1010"
+"""
+
+helps['billing agreement'] = """
+    type: group
+    short-summary: billing agreement
+"""
+
+helps['billing agreement list'] = """
+    type: command
+    short-summary: "Lists the agreements for a billing account."
+    examples:
+      - name: AgreementsListByBillingAccount
+        text: |-
+               az billing agreement list --account-name "{billingAccountName}"
+"""
+
+helps['billing agreement show'] = """
+    type: command
+    short-summary: "Gets an agreement by ID."
+    examples:
+      - name: AgreementByName
+        text: |-
+               az billing agreement show --name "{agreementName}" --account-name "{billingAccountName}"
 """

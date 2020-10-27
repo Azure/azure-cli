@@ -191,7 +191,24 @@ def billing_invoice_section_update(client,
                        labels=labels)
 
 
-# pylint: disable=no-else-return
+def billing_permission_list(client,
+                            account_name,
+                            profile_name=None,
+                            invoice_section_name=None,
+                            customer_name=None):
+    if account_name is not None and profile_name is not None and invoice_section_name is not None:
+        return client.list_by_invoice_sections(billing_account_name=account_name,
+                                               billing_profile_name=profile_name,
+                                               invoice_section_name=invoice_section_name)
+    elif account_name is not None and customer_name is not None:
+        return client.list_by_customer(billing_account_name=account_name,
+                                       customer_name=customer_name)
+    elif account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name)
+    return client.list_by_billing_account(billing_account_name=account_name)
+
+
 def billing_subscription_list(client,
                               account_name,
                               profile_name=None,
@@ -361,3 +378,19 @@ def billing_property_show(client):
 def billing_property_update(client,
                             cost_center=None):
     return client.update(cost_center=cost_center)
+
+
+def billing_agreement_list(client,
+                           account_name,
+                           expand=None):
+    return client.list_by_billing_account(billing_account_name=account_name,
+                                          expand=expand)
+
+
+def billing_agreement_show(client,
+                           account_name,
+                           name,
+                           expand=None):
+    return client.get(billing_account_name=account_name,
+                      agreement_name=name,
+                      expand=expand)

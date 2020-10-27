@@ -12,7 +12,8 @@ from ._validators import (
     billing_invoice_download_validator,
     billing_invoice_show_validator,
     billing_profile_show_validator,
-    billing_policy_update_validator
+    billing_policy_update_validator,
+    billing_permission_list_validator
 )
 
 
@@ -54,3 +55,11 @@ def load_command_table(self, _):
     with self.command_group('billing policy', billing_policy, client_factory=cf_policy, is_preview=True) as g:
         g.custom_show_command('show', 'billing_policy_show', validator=billing_profile_show_validator)
         g.custom_command('update', 'billing_policy_update', validator=billing_policy_update_validator)
+
+    from ..generated._client_factory import cf_permission
+    billing_permission = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#BillingPermissionsOperations.{}',
+        client_factory=cf_permission)
+    with self.command_group('billing permission', billing_permission, client_factory=cf_permission,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_permission_list', validator=billing_permission_list_validator)

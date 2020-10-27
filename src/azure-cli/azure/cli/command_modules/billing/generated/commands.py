@@ -63,6 +63,14 @@ def load_command_table(self, _):
         g.custom_command('update', 'billing_invoice_section_update', supports_no_wait=True)
         g.custom_wait_command('wait', 'billing_invoice_section_show')
 
+    from ..generated._client_factory import cf_permission
+    billing_permission = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#BillingPermissionsOperations.{}',
+        client_factory=cf_permission)
+    with self.command_group('billing permission', billing_permission, client_factory=cf_permission,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_permission_list')
+
     from ..generated._client_factory import cf_subscription
     billing_subscription = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#BillingSubscriptionsOperations.{}',
@@ -117,3 +125,12 @@ def load_command_table(self, _):
     with self.command_group('billing property', billing_property, client_factory=cf_property, is_preview=True) as g:
         g.custom_show_command('show', 'billing_property_show')
         g.custom_command('update', 'billing_property_update')
+
+    from ..generated._client_factory import cf_agreement
+    billing_agreement = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#AgreementsOperations.{}',
+        client_factory=cf_agreement)
+    with self.command_group('billing agreement', billing_agreement, client_factory=cf_agreement,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_agreement_list')
+        g.custom_show_command('show', 'billing_agreement_show')

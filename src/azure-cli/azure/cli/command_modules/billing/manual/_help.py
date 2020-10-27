@@ -261,6 +261,30 @@ helps['billing invoice section wait'] = """
 "{billingProfileName}" --name "{invoiceSectionName}" --updated
 """
 
+helps['billing permission'] = """
+    type: group
+    short-summary: List billing permissions
+"""
+
+helps['billing permission list'] = """
+    type: command
+    short-summary: "List the billing permissions the caller has on a billing account."
+    examples:
+      - name: List permissions by billing account scope
+        text: |-
+               az billing permision list --account-name "{billingAccountName}"
+      - name: List permissions by billing profile scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+      - name: List permission by invoice section scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+      - name: List permissions by customer scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --customer-name "{customerName}"
+"""
+
 helps['billing subscription'] = """
     type: group
     short-summary: billing subscription
@@ -525,4 +549,27 @@ operation is supported only for billing accounts with agreement type Microsoft C
       - name: Update properties of a billing account
         text: |-
                az billing property update --cost-center "1010"
+"""
+
+helps['billing agreement'] = """
+    type: group
+    short-summary: Display billing agreement
+"""
+
+helps['billing agreement list'] = """
+    type: command
+    short-summary: "List the agreements for a billing account."
+    examples:
+      - name: List agreements by billing account
+        text: |-
+               az billing agreement list --account-name "{billingAccountName}"
+"""
+
+helps['billing agreement show'] = """
+    type: command
+    short-summary: "Get an agreement by ID."
+    examples:
+      - name: Show an agreement by billing account and its name
+        text: |-
+               az billing agreement show --name "{agreementName}" --account-name "{billingAccountName}"
 """
