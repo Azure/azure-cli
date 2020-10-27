@@ -16,7 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -295,6 +295,9 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
+
+    if hsm_name:
+        raise InvalidArgumentValueError('Operation "purge" has not been supported for HSM.')
 
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')
