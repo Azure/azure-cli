@@ -58,3 +58,10 @@ def load_arguments(self, _):
 
     with self.argument_context('billing profile update') as c:
         c.argument('bill_to', action=AddSoldTo, nargs='*', help='Billing address.')
+
+    with self.argument_context('billing role-assignment') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a role '
+                   'assignment.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')

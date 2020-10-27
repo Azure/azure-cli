@@ -172,47 +172,13 @@ def step__availablebalances_get(test):
              checks=[])
 
 
-# EXAMPLE: /Customers/get/CustomersListByBillingProfile
+# EXAMPLE: /BillingRoleAssignments/get/InvoiceSectionRoleAssignmentList
 @try_manual
-def step__customers_get_customerslistbybillingprofile(test):
-    test.cmd('az billing customer list '
+def step__billingroleassignments_get(test):
+    test.cmd('az billing role-assignment list '
              '--account-name "{myBillingAccount}" '
-             '--profile-name "{myBillingProfile}"',
-             checks=[])
-
-
-# EXAMPLE: /BillingProperty/patch/UpdateBillingProperty
-@try_manual
-def step__billingproperty_patch_updatebillingproperty(test):
-    test.cmd('az billing property update '
-             '--cost-center "1010"',
-             checks=[])
-
-
-# EXAMPLE: /Customers/get/Customer
-@try_manual
-def step__customers_get_customer(test):
-    test.cmd('az billing customer show '
-             '--account-name "{myBillingAccount}" '
-             '--name "{myCustomer}"',
-             checks=[])
-
-
-# EXAMPLE: /Customers/get/CustomersListByBillingAccount
-@try_manual
-def step__customers_get_customerslistbybillingaccount(test):
-    test.cmd('az billing customer list '
-             '--account-name "{myBillingAccount}"',
-             checks=[])
-
-
-# EXAMPLE: /Customers/get/CustomerWithExpand
-@try_manual
-def step__customers_get_customerwithexpand(test):
-    test.cmd('az billing customer show '
-             '--expand "enabledAzurePlans,resellers" '
-             '--account-name "{myBillingAccount}" '
-             '--name "{myCustomer}"',
+             '--profile-name "{myBillingProfile}" '
+             '--invoice-section-name "{myInvoiceSection}"',
              checks=[])
 
 
@@ -226,20 +192,40 @@ def step__billingpermissions_get(test):
              checks=[])
 
 
-# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
+# EXAMPLE: /BillingRoleAssignments/get/BillingAccountRoleAssignmentList
 @try_manual
-def step__billingpermissions_get2(test):
-    test.cmd('az billing permission list '
-             '--account-name "{myBillingAccount}" '
-             '--customer-name "{myCustomer}"',
+def step__billingroleassignments_get2(test):
+    test.cmd('az billing role-assignment list '
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
-# EXAMPLE: /BillingPermissions/get/BillingAccountPermissionsList
+# EXAMPLE: /BillingRoleAssignments/get/BillingProfileRoleAssignmentList
 @try_manual
-def step__billingpermissions_get3(test):
-    test.cmd('az billing permission list '
-             '--account-name "{myBillingAccount}"',
+def step__billingroleassignments_get3(test):
+    test.cmd('az billing role-assignment list '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingRoleAssignments/delete/BillingAccountRoleAssignmentDelete
+@try_manual
+def step__billingroleassignments_delete(test):
+    test.cmd('az billing role-assignment delete -y '
+             '--account-name "{myBillingAccount}" '
+             '--name "{myBillingRoleAssignment}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingRoleAssignments/delete/InvoiceSectionRoleAssignmentDelete
+@try_manual
+def step__billingroleassignments_delete2(test):
+    test.cmd('az billing role-assignment delete -y '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
+             '--name "{myBillingRoleAssignment}" '
+             '--invoice-section-name "{myInvoiceSection}"',
              checks=[])
 
 
@@ -251,6 +237,33 @@ def step__billingproperty_patch_updatebillingproperty(test):
              checks=[])
 
 
+# EXAMPLE: /Customers/get/CustomersListByBillingAccount
+@try_manual
+def step__customers_get_customerslistbybillingaccount(test):
+    test.cmd('az billing customer list '
+             '--account-name "{myBillingAccount}"',
+             checks=[])
+
+
+# EXAMPLE: /Customers/get/CustomersListByBillingProfile
+@try_manual
+def step__customers_get_customerslistbybillingprofile(test):
+    test.cmd('az billing customer list '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}"',
+             checks=[])
+
+
+# EXAMPLE: /Customers/get/CustomerWithExpand
+@try_manual
+def step__customers_get_customerwithexpand(test):
+    test.cmd('az billing customer show '
+             '--expand "enabledAzurePlans,resellers" '
+             '--account-name "{myBillingAccount}" '
+             '--name "{myCustomer}"',
+             checks=[])
+
+
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscription
 @try_manual
 def step__billingsubscriptions_get_billingsubscription(test):
@@ -259,17 +272,43 @@ def step__billingsubscriptions_get_billingsubscription(test):
              checks=[])
 
 
-# EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByBillingAccount
+# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
 @try_manual
-def step__billingsubscriptions_get2(test):
-    test.cmd('az billing subscription list '
-             '--account-name "{myBillingAccount}"',
+def step__billingpermissions_get2(test):
+    test.cmd('az billing permission list '
+             '--account-name "{myBillingAccount}" '
+             '--customer-name "{myCustomer}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
+@try_manual
+def step__billingpermissions_get2(test):
+    test.cmd('az billing permission list '
+             '--account-name "{myBillingAccount}" '
+             '--customer-name "{myCustomer}"',
+             checks=[])
+
+
+# EXAMPLE: /Customers/get/Customer
+@try_manual
+def step__customers_get_customer(test):
+    test.cmd('az billing customer show '
+             '--account-name "{myBillingAccount}" '
+             '--name "{myCustomer}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingProperty/get/BillingProperty
+@try_manual
+def step__billingproperty_get_billingproperty(test):
+    test.cmd('az billing property show',
              checks=[])
 
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByBillingProfile
 @try_manual
-def step__billingsubscriptions_get3(test):
+def step__billingsubscriptions_get(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}"',
@@ -278,7 +317,7 @@ def step__billingsubscriptions_get3(test):
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByCustomer
 @try_manual
-def step__billingsubscriptions_get(test):
+def step__billingsubscriptions_get2(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}" '
              '--customer-name "{myCustomer}"',
@@ -287,11 +326,19 @@ def step__billingsubscriptions_get(test):
 
 # EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByInvoiceSection
 @try_manual
-def step__billingsubscriptions_get4(test):
+def step__billingsubscriptions_get3(test):
     test.cmd('az billing subscription list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}" '
              '--invoice-section-name "{myInvoiceSection}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingSubscriptions/get/BillingSubscriptionsListByBillingAccount
+@try_manual
+def step__billingsubscriptions_get4(test):
+    test.cmd('az billing subscription list '
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -324,23 +371,11 @@ def step__billingsubscriptions_post(test):
              checks=[])
 
 
-# EXAMPLE: /BillingSubscriptions/post/SubscriptionMoveValidateSuccess
+# EXAMPLE: /BillingPermissions/get/BillingAccountPermissionsList
 @try_manual
-def step__billingsubscriptions_post3(test):
-    test.cmd('az billing subscription validate-move '
-             '--account-name "{myBillingAccount}" '
-             '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
-             'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}"',
-             checks=[])
-
-
-# EXAMPLE: /Invoices/get/BillingAccountInvoicesList
-@try_manual
-def step__invoices_get_billingaccountinvoiceslist(test):
-    test.cmd('az billing invoice list '
-             '--account-name "{myBillingAccount}" '
-             '--period-end-date "2018-06-30" '
-             '--period-start-date "2018-01-01"',
+def step__billingpermissions_get3(test):
+    test.cmd('az billing permission list '
+             '--account-name "{myBillingAccount}"',
              checks=[])
 
 
@@ -354,12 +389,23 @@ def step__invoices_get(test):
              checks=[])
 
 
-# EXAMPLE: /Invoices/get/BillingSubscriptionsListByBillingAccount
+# EXAMPLE: /Invoices/get/BillingAccountInvoicesList
 @try_manual
-def step__invoices_get2(test):
+def step__invoices_get_billingaccountinvoiceslist(test):
     test.cmd('az billing invoice list '
+             '--account-name "{myBillingAccount}" '
              '--period-end-date "2018-06-30" '
              '--period-start-date "2018-01-01"',
+             checks=[])
+
+
+# EXAMPLE: /BillingSubscriptions/post/SubscriptionMoveValidateSuccess
+@try_manual
+def step__billingsubscriptions_post3(test):
+    test.cmd('az billing subscription validate-move '
+             '--account-name "{myBillingAccount}" '
+             '--destination-invoice-section-id "/providers/Microsoft.Billing/billingAccounts/{billingAccountName}/billi'
+             'ngProfiles/{billingProfileName}/invoiceSections/{newInvoiceSectionName}"',
              checks=[])
 
 
@@ -381,6 +427,15 @@ def step__invoices_get_invoice(test):
              checks=[])
 
 
+# EXAMPLE: /Invoices/get/BillingSubscriptionsListByBillingAccount
+@try_manual
+def step__invoices_get2(test):
+    test.cmd('az billing invoice list '
+             '--period-end-date "2018-06-30" '
+             '--period-start-date "2018-01-01"',
+             checks=[])
+
+
 # EXAMPLE: /Invoices/get/InvoicesListByBillingProfile
 @try_manual
 def step__invoices_get_invoiceslistbybillingprofile(test):
@@ -389,15 +444,6 @@ def step__invoices_get_invoiceslistbybillingprofile(test):
              '--profile-name "{myBillingProfile}" '
              '--period-end-date "2018-06-30" '
              '--period-start-date "2018-01-01"',
-             checks=[])
-
-
-# EXAMPLE: /Invoices/get/CreditNote
-@try_manual
-def step__invoices_get_creditnote(test):
-    test.cmd('az billing invoice show '
-             '--account-name "{myBillingAccount}" '
-             '--name "{myInvoice}"',
              checks=[])
 
 
@@ -473,26 +519,14 @@ def step__invoicesections_get(test):
              ])
 
 
-# EXAMPLE: /BillingProperty/get/BillingProperty
+# EXAMPLE: /BillingRoleAssignments/delete/BillingProfileRoleAssignmentDelete
 @try_manual
-def step__billingproperty_get_billingproperty(test):
-    test.cmd('az billing property show',
-             checks=[])
-
-
-# EXAMPLE: /InvoiceSections/get/InvoiceSection
-@try_manual
-def step__invoicesections_get_invoicesection(test):
-    test.cmd('az billing invoice section show '
+def step__billingroleassignments_delete3(test):
+    test.cmd('az billing role-assignment delete -y '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}" '
-             '--name "{myInvoiceSection}"',
-             checks=[
-                 test.check("name", "{myInvoiceSection}", case_sensitive=False),
-                 test.check("displayName", "invoiceSection1", case_sensitive=False),
-                 test.check("labels.costCategory", "Support", case_sensitive=False),
-                 test.check("labels.pcCode", "A123456", case_sensitive=False),
-             ])
+             '--name "{myBillingRoleAssignment}"',
+             checks=[])
 
 
 # EXAMPLE: /Policies/put/UpdatePolicy
@@ -638,41 +672,51 @@ def step__transactions_get_transactionslistbyinvoice(test):
 #     step__billingaccounts_get2(test)
 #     step__billingaccounts_get_billingaccountwithexpand(test)
 #     step__billingaccounts_patch_updatebillingaccount(test)
+#     step__agreements_get_agreementbyname(test)
+#     step__agreements_get(test)
 #     step__billingprofiles_put_createbillingprofile(test)
 #     step__billingprofiles_get_billingprofile(test)
 #     step__billingprofiles_get(test)
 #     step__billingprofiles_get2(test)
 #     step__billingprofiles_get_billingprofilewithexpand(test)
 #     step__availablebalances_get(test)
-#     step__billingproperty_get_billingproperty(test)
+#     step__billingroleassignments_get(test)
+#     step__billingpermissions_get(test)
+#     step__billingroleassignments_get2(test)
+#     step__billingroleassignments_get3(test)
+#     step__billingroleassignments_delete(test)
+#     step__billingroleassignments_delete2(test)
 #     step__billingproperty_patch_updatebillingproperty(test)
-#     step__customers_get_customer(test)
 #     step__customers_get_customerslistbybillingaccount(test)
-#     step__customers_get_customerslistbybillingaccount(test)
+#     step__customers_get_customerslistbybillingprofile(test)
 #     step__customers_get_customerwithexpand(test)
-#     step__billingsubscriptions_get(test)
 #     step__billingsubscriptions_get_billingsubscription(test)
+#     step__billingpermissions_get2(test)
+#     step__billingpermissions_get2(test)
+#     step__customers_get_customer(test)
+#     step__billingproperty_get_billingproperty(test)
+#     step__billingsubscriptions_get(test)
 #     step__billingsubscriptions_get2(test)
-#     step__billingsubscriptions_get3(test, checs=[
-#         self.check()
-#     ])
+#     step__billingsubscriptions_get3(test)
 #     step__billingsubscriptions_get4(test)
 #     step__billingsubscriptions_patch(test)
-#     step__invoices_get_billingaccountinvoiceslist(test)
-#     step__invoices_get(test)
-#     step__invoices_get2(test)
 #     step__billingsubscriptions_post(test)
-#     step__invoices_get_invoice(test)
-#     step__invoices_get_invoiceslistbybillingprofile(test)
+#     step__billingsubscriptions_post2(test)
+#     step__billingpermissions_get3(test)
+#     step__invoices_get(test)
+#     step__invoices_get_billingaccountinvoiceslist(test)
+#     step__billingsubscriptions_post3(test)
 #     step__invoices_get_creditnote(test)
+#     step__invoices_get_invoice(test)
+#     step__invoices_get2(test)
+#     step__invoices_get_invoiceslistbybillingprofile(test)
 #     step__invoices_get3(test)
 #     step__invoices_get_invoicewithrebilldetails(test)
 #     step__invoices_get_voidinvoice(test)
 #     step__invoicesections_put_putinvoicesection(test)
 #     step__invoicesections_get_invoicesection(test)
 #     step__invoicesections_get(test)
-#     step__billingsubscriptions_post2(test)
-#     step__billingsubscriptions_post3(test)
+#     step__billingroleassignments_delete3(test)
 #     step__policies_put_updatepolicy(test)
 #     step__products_get_product(test)
 #     step__products_get_productslistbybillingaccount(test)
@@ -699,50 +743,11 @@ def step__transactions_get_transactionslistbyinvoice(test):
 #             'myInvoiceSection': '{invoiceSectionName}',
 #             'myProduct': '{productName}',
 #             'myInvoice': '{invoiceName}',
+#             'myBillingRoleAssignment': '{billingRoleAssignmentName}',
+#             'myAgreement': '{agreementName}',
 #         })
 
 #         call_scenario(self)
-#         calc_coverage(__file__)
-#         raise_if()
-# Testcase2
-# @try_manual
-# def call_scenario2 (test):
-#     setup(test)
-#     step__billingprofiles_put_createbillingprofile(test)
-#     step__billingprofiles_get_billingprofile(test)
-#     step__billingprofiles_get(test)
-#     step__billingprofiles_get2(test)
-#     step__billingprofiles_get_billingprofilewithexpand(test)
-#     step__customers_get_customer(test)
-
-# @try_manual
-# class BillingScenarioTest(ScenarioTest):
-
-#     def test_billing(self):
-
-#         self.kwargs.update({
-#             'myBillingProfile': '{billingProfileName}',
-#             'myCustomer': '{customerName}',
-#             'myInvoiceSection': '{invoiceSectionName}',
-#             'myProduct': '{productName}',
-#             'myInvoice': '{invoiceName}',
-#         })
-
-#         call_scenario(self)
-#         calc_coverage(__file__)
-#         raise_if()
-
-#     def test_billing2(self):
-
-#         self.kwargs.update({
-#             'myBillingProfile': '{billingProfileName}',
-#             'myCustomer': '{customerName}',
-#             'myInvoiceSection': '{invoiceSectionName}',
-#             'myProduct': '{productName}',
-#             'myInvoice': '{invoiceName}',
-#         })
-
-#         call_scenario2(self)
 #         calc_coverage(__file__)
 #         raise_if()
 
@@ -964,3 +969,25 @@ class BillingPermissionScenarioTest(ScenarioTest):
 
         # # list by billing account
         step__billingpermissions_get3(self)
+
+
+class BillingRoleAssignmentScenarioTest(ScenarioTest):
+
+    def setUp(self):
+        super().setUp()
+
+        self.kwargs.update({
+            "myBillingAccount": "db038d21-b0d2-463c-942f-b09127c6f4e4:7c9c4a38-593e-479e-8958-9a338a0d8d02_2019-05-31",
+            "myBillingProfile": "ZY2R-LX3G-BG7-TGB",
+            "myInvoiceSection": "ES5C-GD7Y-PJA-TGB"
+        })
+
+    def test_role_assignment_list_and_show(self):
+        # list by billing account
+        step__billingroleassignments_get2(self)
+
+        # list by billing profile
+        step__billingroleassignments_get3(self)
+
+        # list by invoice name
+        step__billingroleassignments_get(self)

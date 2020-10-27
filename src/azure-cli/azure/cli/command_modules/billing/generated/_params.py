@@ -255,6 +255,18 @@ def load_arguments(self, _):
     with self.argument_context('billing property update') as c:
         c.argument('cost_center', type=str, help='The cost center applied to the subscription.')
 
+    with self.argument_context('billing role-assignment list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+
+    with self.argument_context('billing role-assignment delete') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a role '
+                   'assignment.')
+
     with self.argument_context('billing agreement list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('expand', type=str, help='May be used to expand the participants.')

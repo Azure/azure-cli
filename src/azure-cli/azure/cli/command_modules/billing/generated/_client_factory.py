@@ -64,5 +64,9 @@ def cf_property(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_property
 
 
+def cf_role_assignment(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).billing_role_assignments
+
+
 def cf_agreement(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).agreements

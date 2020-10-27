@@ -564,6 +564,33 @@ operation is supported only for billing accounts with agreement type Microsoft C
                az billing property update --cost-center "1010"
 """
 
+helps['billing role-assignment'] = """
+    type: group
+    short-summary: billing role-assignment
+"""
+
+helps['billing role-assignment list'] = """
+    type: command
+    short-summary: "Lists the role assignments for the caller on a billing account. The operation is supported for \
+billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSectionRoleAssignmentList
+        text: |-
+               az billing role-assignment list --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing role-assignment delete'] = """
+    type: command
+    short-summary: "Deletes a role assignment for the caller on a billing account. The operation is supported for \
+billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSectionRoleAssignmentDelete
+        text: |-
+               az billing role-assignment delete --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{billingRoleAssignmentName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
 helps['billing agreement'] = """
     type: group
     short-summary: billing agreement

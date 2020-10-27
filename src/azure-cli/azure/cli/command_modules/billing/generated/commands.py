@@ -126,6 +126,15 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'billing_property_show')
         g.custom_command('update', 'billing_property_update')
 
+    from ..generated._client_factory import cf_role_assignment
+    billing_role_assignment = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#BillingRoleAssignmentsOperations.{}',
+        client_factory=cf_role_assignment)
+    with self.command_group('billing role-assignment', billing_role_assignment, client_factory=cf_role_assignment,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_role_assignment_list')
+        g.custom_command('delete', 'billing_role_assignment_delete', confirmation=True)
+
     from ..generated._client_factory import cf_agreement
     billing_agreement = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#AgreementsOperations.{}',
