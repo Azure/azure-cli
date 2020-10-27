@@ -1165,3 +1165,36 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def resource_to_scopes(resource):
+    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
+    For example: 'https://management.core.windows.net/' -> ['https://management.core.windows.net/.default']
+    :param resource: The ADAL resource ID
+    :return: A list of scopes
+    """
+    if 'datalake' in resource or 'batch' in resource or 'database' in resource:
+        # For datalake, batch and database, the slash must be doubled due to service issue, like
+        #   https://datalake.azure.net//.default
+        # TODO: This should be fixed on the service side.
+        scope = resource + '/.default'
+    else:
+        scope = resource.rstrip('/') + '/.default'
+    return [scope]
+
+
+def scopes_to_resource(scopes):
+    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
+    For example: ['https://management.core.windows.net/.default'] -> 'https://management.core.windows.net/'
+
+    :param scopes: The MSAL scopes. It can be a list or tuple of string
+    :return: The ADAL resource
+    :rtype: str
+    """
+    scope = scopes[0]
+    if scope.endswith(".default"):
+        scope = scope[:-len(".default")]
+
+    # Trim extra ending slashes. https://datalake.azure.net// -> https://datalake.azure.net/
+    scope = scope.rstrip('/') + '/'
+    return scope
