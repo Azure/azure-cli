@@ -1228,7 +1228,7 @@ examples:
         az acr connecter-acr create --registry mycloudregistry.azurecr.io
             --mode mirror --parent Contoso-Edge01-in-Wichita
             --name Contoso-Mirror02-in-Wichita --repositories contoso-app/mycomponent
-            --sync-schedule "0 0 12 1/1 * ? *" --sync-window 4H
+            --sync-schedule "0 12 * * *" --sync-window PT4H
             --auto-update-enabled false
 """
 
@@ -1282,17 +1282,17 @@ examples:
   - name: Update a connected registry with DNS name 'edge01.contoso.internal' that has 'mycloudregistry.azurecr.io' as a parent.
     text: |
         az acr connecter-acr update --registry mycloudregistry.azurecr.io 
-            --name Contoso-Edge01-in-Wichita --repositories "contoso-app/* contoso-service/*"
-  - name: Update the next time the connected registry will sync with its parent again.
+            --name Contoso-Edge01-in-Wichita --repositories "contoso-app/hello-world contoso-service/mycomponent"
+  - name: Update the next timestamp in ISO 8601 when the connected registry will sync with its parent again.
     text: |
         az acr connecter-acr create --registry mycloudregistry.azurecr.io
             --name Contoso-Mirror01-in-Wichita --repositories contoso-app/hello-world
-            --next_update "0 0 12 1/1 * ? *"
+            --next-update "2019-09-07T-15:50+00"
   - name: Update the sync and window time, and disable auto update of a connected registry.
     text: |
         az acr connecter-acr create --registry mycloudregistry.azurecr.io
             --name Contoso-Mirror02-in-Wichita --repositories contoso-app/mycomponent
-            --sync-schedule "0 0 12 1/1 * ? *" --sync-window 4H --auto-update-enabled false
+            --sync-schedule "0 12 * * *" --sync-window PT4H --auto-update-enabled false
 """
 # endregion
 
