@@ -62,7 +62,6 @@ from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinux
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
