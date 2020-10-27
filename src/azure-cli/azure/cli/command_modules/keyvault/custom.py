@@ -218,7 +218,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
     )
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
+                       no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
             no_wait,
@@ -226,9 +227,7 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             location=location,
             vault_name=vault_name
         )
-
-    if hsm_name:
-        raise InvalidArgumentValueError('Operation "purge" has not been supported for HSM.')
+    return None
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
