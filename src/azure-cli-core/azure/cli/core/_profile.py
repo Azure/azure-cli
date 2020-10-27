@@ -559,26 +559,35 @@ class Profile:
                     external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
-            def _retrieve_token():
+            def _retrieve_token(sdk_resource=None):
+                # When called by
+                #   - Track 1 SDK, use `resource` specified by CLI
+                #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for resource %r", token_resource)
+
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                    return self._get_token_from_cloud_shell(resource)
+                    return self._get_token_from_cloud_shell(token_resource)
                 if user_type == _USER:
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                     account[_TENANT_ID], resource)
+                                                                     account[_TENANT_ID], token_resource)
                 use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, token_resource,
                                                                               account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
-            def _retrieve_tokens_from_external_tenants():
+            def _retrieve_tokens_from_external_tenants(sdk_resource=None):
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
+
                 external_tokens = []
                 for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, sub_tenant_id, resource))
+                            username_or_sp_id, sub_tenant_id, token_resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, sub_tenant_id, resource))
+                            username_or_sp_id, token_resource, sub_tenant_id, token_resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -621,6 +630,8 @@ class Profile:
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        logger.debug("Profile.get_raw_token invoked with resource=%r, subscription=%r, tenant=%r",
+                     resource, subscription, tenant)
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
