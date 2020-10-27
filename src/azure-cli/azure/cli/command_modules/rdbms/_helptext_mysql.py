@@ -16,6 +16,15 @@ helps['mysql flexible-server create'] = """
 type: command
 short-summary: Create a flexible server.
 examples:
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with VNET enabled by default.
+    text: |
+        az mysql flexible-server create
+  - name: Create a MySQL flexible server with default params (resource group, location, servername, username, password) with all public IPs (0.0.0.0 - 255.255.255.255).
+    text: |
+        az mysql flexible-server create --public-access all
+  - name: Create a MySQL flexible server with default params ( resource group, location, servername, username, password ) with public access without any firewall rules.
+    text: |
+        az mysql flexible-server create --public-access none
   - name: Create a MySQL flexible server with specified SKU and storage, using defaults from local context.
     text: |
         az mysql flexible-server create --name testServer --admin-password password
@@ -72,6 +81,8 @@ short-summary: Delete a flexible server.
 examples:
   - name: Delete a flexible server.
     text: az mysql flexible-server delete --resource-group testGroup --name testServer
+  - name: Delete a flexible server without prompt or confirmation.
+    text: az mysql flexible-server delete --resource-group testGroup --name testServer --yes
 """
 
 helps['mysql flexible-server firewall-rule'] = """
@@ -84,9 +95,9 @@ type: command
 short-summary: Create a new firewall rule for a flexible server.
 examples:
   - name: Create a firewall rule allowing connections from a specific IP address.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
+    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowip --start-ip-address 107.46.14.221 --end-ip-address 107.46.14.221
   - name: Create a firewall rule allowing connections from an IP address range.
-    text: az mysql flexible-server firewall-rule create --resource-group testGroup --server-name testServer --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+    text: az mysql flexible-server firewall-rule create --resource-group testGroup --name testServer --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
 """
 
 helps['mysql flexible-server firewall-rule delete'] = """
@@ -94,7 +105,7 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az mysql flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testServer
+    text: az mysql flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -103,7 +114,7 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az mysql server firewall-rule list --resource-group testGroup --server-name testServer
+    text: az mysql server firewall-rule list --resource-group testGroup --name testServer
     crafted: false
 """
 
@@ -112,7 +123,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az mysql flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testServer
+    text: az mysql flexible-server firewall-rule show --rule-name testRule --resource-group testGroup --name testServer
     crafted: true
 """
 
@@ -121,11 +132,11 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --server-name testServer
-            --name allowiprange --start-ip-address 107.46.14.1
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer
+            --rule-name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az mysql flexible-server firewall-rule update --resource-group testGroup --server-name testServer
-            --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az mysql flexible-server firewall-rule update --resource-group testGroup --name testServer
+            --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['mysql flexible-server list'] = """
@@ -185,7 +196,7 @@ type: command
 short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testReplicaServer' for 'testServer'.
-    text: az mysql flexible-server replica create -n testReplicaServer -g testGroup --source-server testServer
+    text: az mysql flexible-server replica create --replica-name testReplicaServer -g testGroup --source-server testServer
 """
 
 helps['mysql flexible-server replica list'] = """
@@ -193,7 +204,7 @@ type: command
 short-summary: List all read replicas for a given server.
 examples:
   - name: List all read replicas for master server 'testServer'.
-    text: az mysql flexible-server replica list -g testGroup -s primaryservername
+    text: az mysql flexible-server replica list -g testGroup -n primaryservername
 """
 
 helps['mysql flexible-server replica stop-replication'] = """
@@ -201,7 +212,7 @@ type: command
 short-summary: Stop replication to a read replica and make it a read/write server.
 examples:
   - name: Stop replication to 'testReplicaServer' and make it a read/write server.
-    text: az mysql flexible-server replica stop-replication -g testGroup -s testReplicaServer
+    text: az mysql flexible-server replica stop-replication -g testGroup -n testReplicaServer
 """
 
 helps['mysql flexible-server restart'] = """
@@ -218,12 +229,12 @@ type: command
 short-summary: Restore a flexible server from backup.
 examples:
   - name: Restore 'testServer' to a specific point-in-time as a new server 'testServerNew'.
-    text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --time "2017-06-15T13:10:00Z"
+    text: az mysql flexible-server restore --resource-group testGroup --name testServerNew --source-server testServer --restore-time "2017-06-15T13:10:00Z"
   - name: Restore 'testServer2' to 'testServerNew', where 'testServerNew' is in a different resource group from 'testServer2'.
     text: |
         az mysql flexible-server restore --resource-group testGroup --name testServerNew \\
             --source-server "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.DBforMySQL/servers/testServer2" \\
-            --time "2017-06-15T13:10:00Z"
+            --restore-time "2017-06-15T13:10:00Z"
 """
 
 helps['mysql flexible-server show'] = """

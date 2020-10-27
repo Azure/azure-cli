@@ -1191,7 +1191,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
                                                                             mock_msi_auth):
-        from requests import HTTPError
+        from azure.cli.core.azclierror import AzureResponseError
 
         class SubscriptionFinderStub:
             def find_from_raw_token(self, tenant, token):
@@ -1216,9 +1216,8 @@ class TestProfile(unittest.TestCase):
                         'access_token': TestProfile.test_msi_access_token
                     }
                 else:
-                    mock_obj = mock.MagicMock()
-                    mock_obj.status, mock_obj.reason = 400, 'Bad Request'
-                    raise HTTPError(response=mock_obj)
+                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                             'Get Token request returned http error: 400, reason: Bad Request')
 
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
@@ -1800,6 +1799,12 @@ class TestProfile(unittest.TestCase):
             'certificateFile': test_cert_file,
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
+
+    def test_service_principal_auth_client_cert_err(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'err_sp_cert.pem')
+        with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
+            ServicePrincipalAuth(test_cert_file)
 
     def test_detect_adfs_authority_url(self):
         cli = DummyCli()

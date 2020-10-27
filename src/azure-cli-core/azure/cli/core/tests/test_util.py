@@ -15,7 +15,7 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
 from azure.cli.core.mock import DummyCli
 
 
@@ -246,7 +246,7 @@ class TestUtils(unittest.TestCase):
         test_body = '{"b1": "v1"}'
 
         expected_header = {
-            'User-Agent': get_az_user_agent(),
+            'User-Agent': get_az_rest_user_agent(),
             'Accept-Encoding': 'gzip, deflate',
             'Accept': '*/*',
             'Connection': 'keep-alive',
@@ -375,7 +375,30 @@ class TestUtils(unittest.TestCase):
 
             get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
             request = send_mock.call_args.args[1]
-            self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
+            self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
+
+    def test_scopes_to_resource(self):
+        from azure.cli.core.util import scopes_to_resource
+        # scopes as a list
+        self.assertEqual(scopes_to_resource(['https://management.core.windows.net/.default']),
+                         'https://management.core.windows.net/')
+        # scopes as a tuple
+        self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
+                         'https://storage.azure.com/')
+
+        # Double slashes are reduced
+        self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
+                         'https://datalake.azure.net/')
+
+    def test_resource_to_scopes(self):
+        from azure.cli.core.util import resource_to_scopes
+        # resource converted to a scopes list
+        self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
+                         ['https://management.core.windows.net/.default'])
+
+        # Use double slashes for certain services
+        self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
+                         ['https://datalake.azure.net//.default'])
 
 
 class TestBase64ToHex(unittest.TestCase):

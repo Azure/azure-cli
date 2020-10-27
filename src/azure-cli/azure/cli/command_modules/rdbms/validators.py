@@ -161,8 +161,8 @@ def _mysql_sku_name_validator(sku_name, sku_info, tier):
     if sku_name:
         skus = get_mysql_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. The SKU name does not match \
-                         {} tier. Specify --tier if you did not. '.format(tier)
+            error_msg = 'Incorrect value for --sku-name. ' +\
+                        'The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
@@ -207,8 +207,8 @@ def _pg_sku_name_validator(sku_name, sku_info, tier):
     if sku_name:
         skus = get_postgres_skus(sku_info, tier)
         if sku_name not in skus:
-            error_msg = 'Incorrect value for --sku-name. The SKU name does not match \
-                         {} tier. Specify --tier if you did not. '.format(tier)
+            error_msg = 'Incorrect value for --sku-name. ' +\
+                        'The SKU name does not match {} tier. Specify --tier if you did not. '.format(tier)
             raise CLIError(error_msg + 'Allowed values : {}'.format(skus))
 
 
