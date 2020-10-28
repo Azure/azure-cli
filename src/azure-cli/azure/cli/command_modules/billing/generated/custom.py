@@ -380,6 +380,20 @@ def billing_property_update(client,
     return client.update(cost_center=cost_center)
 
 
+def billing_role_definition_list(client,
+                                 account_name,
+                                 profile_name=None,
+                                 invoice_section_name=None):
+    if account_name is not None and profile_name is not None and invoice_section_name is not None:
+        return client.list_by_invoice_section(billing_account_name=account_name,
+                                              billing_profile_name=profile_name,
+                                              invoice_section_name=invoice_section_name)
+    elif account_name is not None and profile_name is not None:
+        return client.list_by_billing_profile(billing_account_name=account_name,
+                                              billing_profile_name=profile_name)
+    return client.list_by_billing_account(billing_account_name=account_name)
+
+
 def billing_role_assignment_list(client,
                                  account_name,
                                  profile_name=None,

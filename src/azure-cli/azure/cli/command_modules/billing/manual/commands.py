@@ -71,3 +71,11 @@ def load_command_table(self, _):
     with self.command_group('billing role-assignment', billing_role_assignment, client_factory=cf_role_assignment,
                             is_preview=True) as g:
         g.custom_show_command('show', 'billing_role_assignment_show')
+
+    from ..generated._client_factory import cf_role_definition
+    billing_role_definition = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#BillingRoleDefinitionsOperations.{}',
+        client_factory=cf_role_definition)
+    with self.command_group('billing role-definition', billing_role_definition, client_factory=cf_role_definition,
+                            is_preview=True) as g:
+        g.custom_show_command('show', 'billing_role_definition_show')

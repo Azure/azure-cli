@@ -551,6 +551,42 @@ operation is supported only for billing accounts with agreement type Microsoft C
                az billing property update --cost-center "1010"
 """
 
+helps['billing role-definition'] = """
+    type: group
+    short-summary: Display billing role-definition
+"""
+
+helps['billing role-definition list'] = """
+    type: command
+    short-summary: "List the role definitions for a billing account. The operation is supported for billing accounts \
+with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: Lists the role definitions for a billing account
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}"
+      - name: List the role definitions for a billing profile.
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+      - name: List the role definitions for an invoice section.
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing role-definition show'] = """
+  type: command
+  short-summary: Show the role definition details
+  examples:
+    - name: Show the definition for a role on a billing account. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+      text: |-
+             az billing role-definition show --account-name "{billingAccountName}" --name "{billingRoleDefinitionName}"
+    - name: Show the definition for a role on a billing profile. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+      text: |-
+             az billing role-definition show --acount-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleDefinitionName}"
+    - name: Show the definition for a role on an invoice section. The operation is supported only for billing accounts with agreement type Microsoft Customer Agreement
+      text: |-
+             az billing role-definition show --account-name "{billingAccountName}" --invoice-section-name "{invoiceSectionName}" --name "{billingRoleDefinitionName}"
+"""
+
 helps['billing role-assignment'] = """
     type: group
     short-summary: billing role-assignment

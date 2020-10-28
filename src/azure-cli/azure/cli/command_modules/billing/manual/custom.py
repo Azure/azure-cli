@@ -106,11 +106,31 @@ def billing_role_assignment_show(client,
         return client.get_by_billing_profile(billing_account_name=account_name,
                                              billing_profile_name=profile_name,
                                              billing_role_assignment_name=name)
-    elif profile_name is not None and invoice_section_name is not None:
+    if profile_name is not None and invoice_section_name is not None:
         return client.get_by_invoice_section(billing_account_name=account_name,
                                              billing_profile_name=profile_name,
                                              invoice_section_name=invoice_section_name,
                                              billing_role_assignment_name=name)
-    else:
-        return client.get_by_billing_account(billing_account_name=account_name,
-                                             billing_role_assignment_name=name)
+
+    return client.get_by_billing_account(billing_account_name=account_name,
+                                         billing_role_assignment_name=name)
+
+
+def billing_role_definition_show(client,
+                                 name,
+                                 account_name,
+                                 profile_name=None,
+                                 invoice_section_name=None):
+    if profile_name is not None and invoice_section_name is None:
+        return client.get_by_billing_profile(billing_account_name=account_name,
+                                             billing_profile_name=profile_name,
+                                             billing_role_definition_name=name)
+
+    if profile_name is not None and invoice_section_name is not None:
+        return client.get_by_invoice_section(billing_account_name=account_name,
+                                             billing_profile_name=profile_name,
+                                             invoice_section_name=invoice_section_name,
+                                             billing_role_definition_name=name)
+
+    return client.get_by_billing_account(billing_account_name=account_name,
+                                         billing_role_definition_name=name)

@@ -126,6 +126,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'billing_property_show')
         g.custom_command('update', 'billing_property_update')
 
+    from ..generated._client_factory import cf_role_definition
+    billing_role_definition = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#BillingRoleDefinitionsOperations.{}',
+        client_factory=cf_role_definition)
+    with self.command_group('billing role-definition', billing_role_definition, client_factory=cf_role_definition,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_role_definition_list')
+
     from ..generated._client_factory import cf_role_assignment
     billing_role_assignment = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#BillingRoleAssignmentsOperations.{}',

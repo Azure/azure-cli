@@ -564,6 +564,22 @@ operation is supported only for billing accounts with agreement type Microsoft C
                az billing property update --cost-center "1010"
 """
 
+helps['billing role-definition'] = """
+    type: group
+    short-summary: billing role-definition
+"""
+
+helps['billing role-definition list'] = """
+    type: command
+    short-summary: "Lists the role definitions for a billing account. The operation is supported for billing accounts \
+with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSectionRoleDefinitionsList
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
 helps['billing role-assignment'] = """
     type: group
     short-summary: billing role-assignment
