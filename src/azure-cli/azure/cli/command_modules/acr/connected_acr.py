@@ -16,6 +16,7 @@ from ._utils import (
 DEFAULT_MODE = 'registry'
 DEFAULT_LOG_LEVEL = 'Info'
 DEFAULT_MESSAGE_TTL = 'P2D'
+MIN_SYNC_WINDOW = 'PT1H'
 
 logger = get_logger(__name__)
 
@@ -29,7 +30,7 @@ def acr_connected_acr_create(cmd,
                              mode=DEFAULT_MODE,
                              parent=None,
                              sync_schedule=None,
-                             sync_window=None,
+                             sync_window=MIN_SYNC_WINDOW,
                              auto_update_enabled=True,
                              log_level=DEFAULT_LOG_LEVEL,
                              sync_message_ttl=DEFAULT_MESSAGE_TTL,
@@ -39,34 +40,16 @@ def acr_connected_acr_create(cmd,
         cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    SyncProperties, ParentProperties = cmd.get_models(
-            'SyncProperties', 'ParentProperties')
+    SyncProperties, ParentProperties = cmd.get_models('SyncProperties', 'ParentProperties')
     sync_properties = SyncProperties(
         TokenId=None, #Create Token? The resource ID of the ACR token used to authenticate the connected registry to its parent during sync. 
         Schedule=sync_schedule,
         MessageTtl=sync_message_ttl,
-        SyncWindow=sync_window,
-        LastSyncTime=None,
-        GatewayEndpoint=None
+        SyncWindow=sync_window
     )
     parent_properties = ParentProperties(
         Id=registry.Id,
         SyncProperties=sync_properties
-    )
-
-    TlsCertificateProperties, TlsProperties, LoginServerProperties = cmd.get_models(
-            'TlsCertificateProperties', 'TlsProperties', 'LoginServerProperties')
-    tls_certificate_properties = TlsCertificateProperties(
-        Type=None,
-        Location=None
-    )
-    tls_properties = TlsProperties(
-        Status=None,
-        Certificate=tls_certificate_properties
-    )
-    login_server_properties = LoginServerProperties(
-        Host=None,
-        Tls=tls_properties
     )
 
     ConnectedRegistry, LoggingProperties = cmd.get_models(
@@ -79,15 +62,9 @@ def acr_connected_acr_create(cmd,
     connected_acr_create_parameters = ConnectedRegistry(
         ProvisioningState=None,
         Mode=mode,
-        Version=None,
-        LastVersionUpdateTime=None,
-        ConnectionState=None,
-        LastActivityTime=None,
         Parent=parent_properties,
         ClientTokenIds=None,
-        LoginServer=login_server_properties,
-        Logging=logging_properties,
-        StatusDetails=None
+        Logging=logging_properties
     )
 
     try:
@@ -108,7 +85,7 @@ def acr_connected_acr_update(cmd,
                              resource_group_name=None,
                              mode=DEFAULT_MODE,
                              sync_schedule=None,
-                             sync_window=None,
+                             sync_window=MIN_SYNC_WINDOW,
                              auto_update_enabled=True,
                              next_update=None,
                              log_level=DEFAULT_LOG_LEVEL,
