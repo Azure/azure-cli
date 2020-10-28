@@ -105,7 +105,7 @@ class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
                          self.check("[0].suppressionIds", None)])
 
     def test_recommendations_resource_group(self):
-        resource_group = 'AzExpertStg'
+        resource_group = 'cli-test-advisor-rg'
         self.kwargs.update({
             'resource_group': resource_group
         })
