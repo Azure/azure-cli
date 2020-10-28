@@ -2573,6 +2573,8 @@ class _StackRuntimeHelper:
         result = []
         if self._linux:
             result = get_file_json(RUNTIME_STACKS)['linux']
+            for r in result:
+                r['setter'] = _StackRuntimeHelper.update_site_config
         else:  # Windows stacks
             result = get_file_json(RUNTIME_STACKS)['windows']
             for r in result:
