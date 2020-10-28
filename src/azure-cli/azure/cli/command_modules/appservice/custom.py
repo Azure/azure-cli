@@ -198,8 +198,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if current_stack:
         app_metadata = client.web_apps.list_metadata(resource_group_name, name)
-        app_metadata.properties["CURRENT_STACK"] = current_stack
-        client.web_apps.update_metadata(resource_group_name, name, kind="app", properties=app_metadata.properties)
+        if app_metadata.properties and 'CURRENT_STACK' in app_metadata.properties and app_metadata.properties["CURRENT_STACK"] != current_stack:
+            app_metadata.properties["CURRENT_STACK"] = current_stack
+            client.web_apps.update_metadata(resource_group_name, name, kind="app", properties=app_metadata.properties)
 
     # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
     _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url,
@@ -3684,12 +3685,6 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
             logger.warning('Updating runtime version from %s to %s',
                            site_config.linux_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
-            logger.warning('Waiting for runtime version to propagate ...')
-            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
-        elif os_name.lower() == 'windows' and site_config.windows_fx_version != runtime_version:
-            logger.warning('Updating runtime version from %s to %s',
-                           site_config.windows_fx_version, runtime_version)
-            update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
             logger.warning('Waiting for runtime version to propagate ...')
             time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
         create_json['runtime_version'] = runtime_version

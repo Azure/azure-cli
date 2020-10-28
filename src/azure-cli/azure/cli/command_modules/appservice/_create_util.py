@@ -378,6 +378,8 @@ def get_plan_to_use(cmd, user, os_name, loc, sku, create_rg, resource_group_name
 # Portal uses the current_stack property in the app metadata to display the correct stack
 # This value should be one of: ['dotnet', 'dotnetcore', 'node', 'php', 'python', 'java']
 def get_current_stack_from_runtime(runtime):
+    if runtime.lower() == "dotnetcore|5.0":  # dotnet 5 should be set to dotnet instead of dotnetcore
+        return 'dotnet'
     language = runtime.split('|')[0].lower()
     if language == 'aspnet':
         return 'dotnet'
