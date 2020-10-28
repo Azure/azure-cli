@@ -660,11 +660,20 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
                                                  src_parse_result['name'])
     if src_plan_info is None:
         raise CLIError('Could not determine the current plan of the functionapp')
-    if not (is_plan_consumption(cmd, src_plan_info) or is_plan_elastic_premium(cmd, src_plan_info)):
+
+    src_is_premium = is_plan_elastic_premium(cmd, src_plan_info)
+    dest_is_consumption = is_plan_consumption(cmd, dest_plan_instance)
+
+    if not (is_plan_consumption(cmd, src_plan_info) or src_is_premium):
         raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
-    if not (is_plan_consumption(cmd, dest_plan_instance) or is_plan_elastic_premium(cmd, dest_plan_instance)):
+    if not (dest_is_consumption or is_plan_elastic_premium(cmd, dest_plan_instance)):
         raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
                        general_switch_msg)
+
+    if src_is_premium and dest_is_consumption:
+        logger.warning("Moving a functionapp from Premium to Consumption might result in loss of functionality. "
+                       "Please ensure the functionapp is compatible with a Consumption plan and is not using any "
+                       "premium features.")
 
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
