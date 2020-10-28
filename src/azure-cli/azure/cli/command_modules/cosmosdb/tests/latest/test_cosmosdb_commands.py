@@ -696,6 +696,7 @@ class CosmosDBTests(ScenarioTest):
         role_definition_create_body2 = ' { \\"RoleName\\": \\"roleName3\\", \\"AssignableScopes\\": [ \\"/\\" ], \\"Permissions\\": [ { \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/create\\" ] }, { \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read\\" ] }, { \\"DataActions\\": [ \\"Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/replace\\" ] } ] } '
         fully_qualified_role_def_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleDefinitions/{3}'.format(subscription, resource_group, acc_name, role_def_id)
         fully_qualified_role_assignment_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/sqlRoleAssignments/{3}'.format(subscription, resource_group, acc_name, role_assignment_id)
+        assignable_scope = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}'.format(subscription, resource_group, acc_name)
         scope = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/dbs/{3}'.format(subscription, resource_group, acc_name, db_name)
         principal_id = 'ed4c2395-a18c-4018-afb3-6e521e7534d2'
 
@@ -715,54 +716,61 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
-        role_definition_create = self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"').get_output_in_json()
-        assert role_definition_create['id'] == fully_qualified_role_def_id
-        assert role_definition_create['roleName'] == 'roleName'
-        assert role_definition_create['sqlRoleDefinitionGetResultsType'] == 'CustomRole'
-        assert len(role_definition_create['assignableScopes']) == 1
-        assert len(role_definition_create['permissions']) == 1
+        self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body}"', checks=[
+            self.check('id', fully_qualified_role_def_id),
+            self.check('roleName', 'roleName'),
+            self.check('sqlRoleDefinitionGetResultsType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 1)
+        ])
 
         assert self.cmd('az cosmosdb sql role definition exists -g {rg} -a {acc} -i {role_def_id}').get_output_in_json()
 
-        role_definition_show = self.cmd('az cosmosdb sql role definition show -g {rg} -a {acc} -i {role_def_id}').get_output_in_json()
-        assert role_definition_show['roleName'] == 'roleName'
+        role_definition_show = self.cmd('az cosmosdb sql role definition show -g {rg} -a {acc} -i {role_def_id}', checks=[
+            self.check('roleName', 'roleName')
+        ])
 
-        role_definition_update = self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"').get_output_in_json()
-        assert role_definition_update['id'] == fully_qualified_role_def_id
-        assert role_definition_update['roleName'] == 'roleName2'
-        assert role_definition_create['sqlRoleDefinitionGetResultsType'] == 'CustomRole'
-        assert len(role_definition_update['assignableScopes']) == 1
-        assert len(role_definition_update['permissions']) == 2
+        role_definition_update = self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
+            self.check('id', fully_qualified_role_def_id),
+            self.check('roleName', 'roleName2'),
+            self.check('sqlRoleDefinitionGetResultsType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 2)
+        ])
 
-        role_definition_create2 = self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body2}"').get_output_in_json()
-        assert role_definition_create2['roleName'] == 'roleName3'
-        assert role_definition_create2['sqlRoleDefinitionGetResultsType'] == 'CustomRole'
-        assert len(role_definition_create2['assignableScopes']) == 1
-        assert len(role_definition_create2['permissions']) == 3
+        role_definition_create2 = self.cmd('az cosmosdb sql role definition create -g {rg} -a {acc} -b "{create_body2}"', checks=[
+            self.check('roleName', 'roleName3'),
+            self.check('sqlRoleDefinitionGetResultsType', 'CustomRole'),
+            self.check('assignableScopes[0]', assignable_scope),
+            self.check('length(permissions)', 3)
+        ]).get_output_in_json()
 
         role_definition_list = self.cmd('az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_definition_list) == 2
 
-        role_assignment_create = self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}').get_output_in_json()
-        assert role_assignment_create['id'] == fully_qualified_role_assignment_id
-        assert role_assignment_create['roleDefinitionId'] == fully_qualified_role_def_id
-        assert role_assignment_create['scope'] == scope
-        assert role_assignment_create['principalId'] == principal_id
+        role_assignment_create = self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id),
+            self.check('roleDefinitionId', fully_qualified_role_def_id),
+            self.check('scope', scope),
+            self.check('principalId', principal_id)
+        ])
 
         assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id}').get_output_in_json()
 
-        role_assignment_show = self.cmd('az cosmosdb sql role assignment show -g {rg} -a {acc} -i {role_assignment_id}').get_output_in_json()
-        assert role_assignment_show['id'] == fully_qualified_role_assignment_id
+        role_assignment_show = self.cmd('az cosmosdb sql role assignment show -g {rg} -a {acc} -i {role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id)
+        ])
 
         self.kwargs.update({
             'fully_qualified_role_def_id2': role_definition_create2['name']
         })
 
-        role_assignment_update = self.cmd('az cosmosdb sql role assignment update -g {rg} -a {acc} -d {fully_qualified_role_def_id2} -i {fully_qualified_role_assignment_id}').get_output_in_json()
-        assert role_assignment_update['id'] == fully_qualified_role_assignment_id
-        assert role_assignment_update['roleDefinitionId'] == role_definition_create2['id']
-        assert role_assignment_update['scope'] == scope
-        assert role_assignment_update['principalId'] == principal_id
+        role_assignment_update = self.cmd('az cosmosdb sql role assignment update -g {rg} -a {acc} -d {fully_qualified_role_def_id2} -i {fully_qualified_role_assignment_id}', checks=[
+            self.check('id', fully_qualified_role_assignment_id),
+            self.check('roleDefinitionId', role_definition_create2['id']),
+            self.check('scope', scope),
+            self.check('principalId', principal_id)
+        ])
 
         role_assignment_list = self.cmd('az cosmosdb sql role assignment list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_assignment_list) == 1

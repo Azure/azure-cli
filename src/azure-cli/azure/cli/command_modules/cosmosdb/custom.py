@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.cosmosdb.models import DefaultErrorResponseException 
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
@@ -146,7 +147,6 @@ def cli_cosmosdb_create(cmd, client,
         tags=tags,
         properties=properties,
         kind=kind)
-
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -552,16 +552,13 @@ def cli_cosmosdb_sql_role_definition_create(client,
                                             account_name,
                                             role_definition_body):
     '''Creates an Azure Cosmos DB SQL Role Definition '''
-    print(555)
     role_definition_create_resource = SqlRoleDefinitionCreateUpdateParameters(
         role_name=role_definition_body['RoleName'],
         type=role_definition_body['Type'],
         assignable_scopes=role_definition_body['AssignableScopes'],
         permissions=role_definition_body['Permissions'])
-    print(561)
-    returnval = client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
-    print(563)
-    return returnval
+
+    return client.create_update_sql_role_definition(role_definition_body['Id'], resource_group_name, account_name, role_definition_create_resource)
 
 
 def cli_cosmosdb_sql_role_definition_update(client,
@@ -597,8 +594,8 @@ def cli_cosmosdb_sql_role_definition_exists(client,
     """Checks if an Azure Cosmos DB Sql Role Definition exists"""
     try:
         client.get_sql_role_definition(role_definition_id, resource_group_name, account_name)
-    except CloudError as ex:
-        return _handle_exists_exception(ex)
+    except DefaultErrorResponseException as ex:
+        return _handle_exists_exception(ex.response)
 
     return True
 
@@ -645,8 +642,8 @@ def cli_cosmosdb_sql_role_assignment_exists(client,
     """Checks if an Azure Cosmos DB Sql Role Assignment exists"""
     try:
         client.get_sql_role_assignment(role_assignment_id, resource_group_name, account_name)
-    except CloudError as ex:
-        return _handle_exists_exception(ex)
+    except DefaultErrorResponseException as ex:
+        return _handle_exists_exception(ex.response)
 
     return True
 
