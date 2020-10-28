@@ -941,6 +941,7 @@ class BillingInvoiceSectionScenarioTest(ScenarioTest):
 #         step__transactions_get_transactionslistbyinvoice(self)
 
 
+@record_only()
 class BillingAgreementScenarioTest(ScenarioTest):
     def test_agreement_list_and_show(self):
         self.kwargs.update({
@@ -952,6 +953,7 @@ class BillingAgreementScenarioTest(ScenarioTest):
         step__agreements_get_agreementbyname(self)
 
 
+@record_only()
 class BillingPermissionScenarioTest(ScenarioTest):
 
     def test_permission_list(self):
@@ -971,6 +973,7 @@ class BillingPermissionScenarioTest(ScenarioTest):
         step__billingpermissions_get3(self)
 
 
+@record_only()
 class BillingRoleAssignmentScenarioTest(ScenarioTest):
 
     def setUp(self):
