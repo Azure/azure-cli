@@ -540,9 +540,9 @@ def _get_max_path_length_from_object(value):
 
 def _is_leaf(value):
     return (
-        isinstance(value, (type(None), bool, int, float, str))
-        or (isinstance(value, list) and not value)
-        or (isinstance(value, dict) and not value)
+        isinstance(value, (type(None), bool, int, float, str)) or
+        (isinstance(value, list) and not value) or
+        (isinstance(value, dict) and not value)
     )
 
 
