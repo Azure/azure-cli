@@ -11,6 +11,7 @@
 |---------|------------|--------|
 |az billing account|BillingAccounts|[commands](#CommandsInBillingAccounts)|
 |az billing balance|AvailableBalances|[commands](#CommandsInAvailableBalances)|
+|az billing instruction|Instructions|[commands](#CommandsInInstructions)|
 |az billing profile|BillingProfiles|[commands](#CommandsInBillingProfiles)|
 |az billing customer|Customers|[commands](#CommandsInCustomers)|
 |az billing invoice section|InvoiceSections|[commands](#CommandsInInvoiceSections)|
@@ -50,6 +51,12 @@
 |[az billing customer list](#CustomersListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersCustomersListByBillingProfile)|[Example](#ExamplesCustomersListByBillingProfile)|
 |[az billing customer list](#CustomersListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersCustomersListByBillingAccount)|[Example](#ExamplesCustomersListByBillingAccount)|
 |[az billing customer show](#CustomersGet)|Get|[Parameters](#ParametersCustomersGet)|[Example](#ExamplesCustomersGet)|
+
+### <a name="CommandsInInstructions">Commands in `az billing instruction` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing instruction list](#InstructionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersInstructionsListByBillingProfile)|[Example](#ExamplesInstructionsListByBillingProfile)|
+|[az billing instruction show](#InstructionsGet)|Get|[Parameters](#ParametersInstructionsGet)|[Example](#ExamplesInstructionsGet)|
 
 ### <a name="CommandsInInvoices">Commands in `az billing invoice` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -278,6 +285,33 @@ az billing customer show --expand "enabledAzurePlans,resellers" --account-name "
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
 |**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
 |**--expand**|string|May be used to expand enabledAzurePlans and resellers|expand|$expand|
+
+### group `az billing instruction`
+#### <a name="InstructionsListByBillingProfile">Command `az billing instruction list`</a>
+
+##### <a name="ExamplesInstructionsListByBillingProfile">Example</a>
+```
+az billing instruction list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersInstructionsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+
+#### <a name="InstructionsGet">Command `az billing instruction show`</a>
+
+##### <a name="ExamplesInstructionsGet">Example</a>
+```
+az billing instruction show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{instructionName}"
+```
+##### <a name="ParametersInstructionsGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--name**|string|Instruction Name.|name|instructionName|
 
 ### group `az billing invoice`
 #### <a name="InvoicesListByBillingProfile">Command `az billing invoice list`</a>

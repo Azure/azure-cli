@@ -409,11 +409,30 @@ def step__billingsubscriptions_post3(test):
              checks=[])
 
 
-# EXAMPLE: /Invoices/get/BillingAccountInvoicesList
+# EXAMPLE: /Instructions/get/Instruction
 @try_manual
-def step__invoices_get_billingaccountinvoiceslist(test):
+def step__instructions_get_instruction(test):
+    test.cmd('az billing instruction show '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
+             '--name "{myInstruction}"',
+             checks=[])
+
+
+# EXAMPLE: /Invoices/get/BillingAccountInvoicesListWithRebillDetails
+@try_manual
+def step__invoices_get(test):
     test.cmd('az billing invoice list '
              '--account-name "{myBillingAccount}" '
+             '--period-end-date "2018-06-30" '
+             '--period-start-date "2018-01-01"',
+             checks=[])
+
+
+# EXAMPLE: /Invoices/get/BillingSubscriptionsListByBillingAccount
+@try_manual
+def step__invoices_get2(test):
+    test.cmd('az billing invoice list '
              '--period-end-date "2018-06-30" '
              '--period-start-date "2018-01-01"',
              checks=[])
@@ -425,6 +444,15 @@ def step__invoices_get_creditnote(test):
     test.cmd('az billing invoice show '
              '--account-name "{myBillingAccount}" '
              '--name "{myInvoice}"',
+             checks=[])
+
+
+# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
+@try_manual
+def step__billingpermissions_get2(test):
+    test.cmd('az billing permission list '
+             '--account-name "{myBillingAccount}" '
+             '--customer-name "{myCustomer}"',
              checks=[])
 
 
@@ -448,21 +476,31 @@ def step__invoices_get_invoiceslistbybillingprofile(test):
              checks=[])
 
 
-# EXAMPLE: /BillingPermissions/get/BillingProfilePermissionsList
+# EXAMPLE: /Instructions/get/InstructionsListByBillingProfile
 @try_manual
-def step__billingpermissions_get2(test):
-    test.cmd('az billing permission list '
+def step__instructions_get(test):
+    test.cmd('az billing instruction list '
              '--account-name "{myBillingAccount}" '
-             '--customer-name "{myCustomer}"',
+             '--profile-name "{myBillingProfile}"',
              checks=[])
 
 
 # EXAMPLE: /Invoices/get/InvoicesListByBillingProfileWithRebillDetails
 @try_manual
-def step__invoices_get(test):
+def step__invoices_get3(test):
     test.cmd('az billing invoice list '
              '--account-name "{myBillingAccount}" '
              '--profile-name "{myBillingProfile}" '
+             '--period-end-date "2018-06-30" '
+             '--period-start-date "2018-01-01"',
+             checks=[])
+
+
+# EXAMPLE: /Invoices/get/BillingAccountInvoicesList
+@try_manual
+def step__invoices_get_billingaccountinvoiceslist(test):
+    test.cmd('az billing invoice list '
+             '--account-name "{myBillingAccount}" '
              '--period-end-date "2018-06-30" '
              '--period-start-date "2018-01-01"',
              checks=[])
@@ -477,31 +515,12 @@ def step__invoices_get_invoicewithrebilldetails(test):
              checks=[])
 
 
-# EXAMPLE: /Invoices/get/BillingAccountInvoicesListWithRebillDetails
-@try_manual
-def step__invoices_get2(test):
-    test.cmd('az billing invoice list '
-             '--account-name "{myBillingAccount}" '
-             '--period-end-date "2018-06-30" '
-             '--period-start-date "2018-01-01"',
-             checks=[])
-
-
 # EXAMPLE: /Invoices/get/VoidInvoice
 @try_manual
 def step__invoices_get_voidinvoice(test):
     test.cmd('az billing invoice show '
              '--account-name "{myBillingAccount}" '
              '--name "{myInvoice}"',
-             checks=[])
-
-
-# EXAMPLE: /Invoices/get/BillingSubscriptionsListByBillingAccount
-@try_manual
-def step__invoices_get3(test):
-    test.cmd('az billing invoice list '
-             '--period-end-date "2018-06-30" '
-             '--period-start-date "2018-01-01"',
              checks=[])
 
 
@@ -1071,3 +1090,20 @@ class BillingRoleDefinitionScenarionTest(ScenarioTest):
                  '--profile-name "{myBillingProfile}" '
                  '--invoice-section-name "{myInvoiceSection}"',
                  checks=[])
+
+
+@record_only()
+class BillingInstructionScenarioTest(ScenarioTest):
+    def setUp(self):
+        super().setUp()
+
+        self.kwargs.update({
+            "myBillingAccount": "db038d21-b0d2-463c-942f-b09127c6f4e4:7c9c4a38-593e-479e-8958-9a338a0d8d02_2019-05-31",
+            "myBillingProfile": "ZY2R-LX3G-BG7-TGB",
+            "myInstruction": "404Instruction",
+        })
+
+    def test_instruction_list_and_show(self):
+        step__instructions_get(self)
+
+        step__instructions_get_instruction(self)

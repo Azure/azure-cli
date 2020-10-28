@@ -84,6 +84,31 @@ Microsoft Customer Agreement."
                az billing balance show --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 """
 
+helps['billing instruction'] = """
+    type: group
+    short-summary: Manage billing instruction
+"""
+
+helps['billing instruction list'] = """
+    type: command
+    short-summary: "List the instructions by billing profile id."
+    examples:
+      - name: List instructions by billing profile
+        text: |-
+               az billing instruction list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+"""
+
+helps['billing instruction show'] = """
+    type: command
+    short-summary: "Show the instruction by name. These are custom billing instructions and are only applicable for \
+certain customers."
+    examples:
+      - name: Instruction
+        text: |-
+               az billing instruction show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--name "{instructionName}"
+"""
+
 helps['billing profile'] = """
     type: group
     short-summary: Manage billing profile of billing account

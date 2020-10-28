@@ -53,6 +53,22 @@ def billing_balance_show(client,
                       billing_profile_name=profile_name)
 
 
+def billing_instruction_list(client,
+                             account_name,
+                             profile_name):
+    return client.list_by_billing_profile(billing_account_name=account_name,
+                                          billing_profile_name=profile_name)
+
+
+def billing_instruction_show(client,
+                             account_name,
+                             profile_name,
+                             name):
+    return client.get(billing_account_name=account_name,
+                      billing_profile_name=profile_name,
+                      instruction_name=name)
+
+
 def billing_profile_list(client,
                          account_name,
                          expand=None):

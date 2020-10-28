@@ -32,6 +32,15 @@ def load_command_table(self, _):
     with self.command_group('billing balance', billing_balance, client_factory=cf_balance, is_preview=True) as g:
         g.custom_show_command('show', 'billing_balance_show')
 
+    from ..generated._client_factory import cf_instruction
+    billing_instruction = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#InstructionsOperations.{}',
+        client_factory=cf_instruction)
+    with self.command_group('billing instruction', billing_instruction, client_factory=cf_instruction,
+                            is_preview=True) as g:
+        g.custom_command('list', 'billing_instruction_list')
+        g.custom_show_command('show', 'billing_instruction_show')
+
     from ..generated._client_factory import cf_profile
     billing_profile = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations#BillingProfilesOperations.{}',

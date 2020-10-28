@@ -19,8 +19,15 @@ from ._validators import (
 
 def load_command_table(self, _):
 
-    from ..generated._client_factory import cf_invoice_section
+    # from ..generated._client_factory import cf_instruction
+    # billing_instruction = CliCommandType(
+    #     operations_tmpl='azure.mgmt.billing.operations#InstructionsOperations.{}',
+    #     client_factory=cf_instruction)
+    # with self.command_group('billing instruction', billing_instruction, client_factory=cf_instruction,
+    #                         is_preview=True) as g:
+    #     g.custom_command('')
 
+    from ..generated._client_factory import cf_invoice_section
     billing_invoice_section = CliCommandType(
         operations_tmpl="azure.mgmt.billing.operations#InvoiceSectionsOperations.{}",
         client_factory=cf_invoice_section,
@@ -32,7 +39,6 @@ def load_command_table(self, _):
         pass  # inherit commands from generated/ and add is_preview=True
 
     from ..generated._client_factory import cf_invoice
-
     billing_invoice = CliCommandType(
         operations_tmpl="azure.mgmt.billing.operations#InvoicesOperations.{}",
         client_factory=cf_invoice,

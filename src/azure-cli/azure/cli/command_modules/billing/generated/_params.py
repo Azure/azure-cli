@@ -57,6 +57,15 @@ def load_arguments(self, _):
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
 
+    with self.argument_context('billing instruction list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+
+    with self.argument_context('billing instruction show') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='Instruction Name.')
+
     with self.argument_context('billing profile list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')

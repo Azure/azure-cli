@@ -24,6 +24,10 @@ def cf_balance(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).available_balances
 
 
+def cf_instruction(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).instructions
+
+
 def cf_profile(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_profiles
 
