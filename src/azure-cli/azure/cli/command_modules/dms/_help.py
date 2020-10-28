@@ -388,6 +388,20 @@ examples:
     crafted: true
 """
 
+helps['dms project task cutover'] = """
+type: command
+short-summary: For an online migration task, complete the migration by performing a cutover.
+long-summary: |
+  To see the result of the request, please use the 'task show' command:
+      az dms project task show ... --expand command
+
+parameters:
+  - name: --object-name
+    type: string
+    short-summary: >
+      The name of the database on the source you wish to cutover.
+"""
+
 helps['dms show'] = """
 type: command
 short-summary: Show the details for an instance of the Data Migration Service.

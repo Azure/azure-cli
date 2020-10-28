@@ -17,7 +17,9 @@ from azure.mgmt.datamigration.models import (DataMigrationService,
                                              MySqlConnectionInfo,
                                              MigrateMySqlAzureDbForMySqlSyncTaskProperties,
                                              PostgreSqlConnectionInfo,
-                                             MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties)
+                                             MigratePostgreSqlAzureDbForPostgreSqlSyncTaskProperties,
+                                             MigrateSyncCompleteCommandInput,
+                                             MigrateSyncCompleteCommandProperties)
 from azure.cli.core.util import sdk_no_wait, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.dms._client_factory import dms_cf_projects
 from azure.cli.command_modules.dms.scenario_inputs import (get_migrate_sql_to_sqldb_offline_input,
@@ -203,10 +205,60 @@ def list_tasks(client, resource_group_name, service_name, project_name, task_typ
                              project_name=project_name,
                              task_type=task_type)
 
+
+def cutover_sync_task(cmd,
+                      client,
+                      resource_group_name,
+                      service_name,
+                      project_name,
+                      task_name,
+                      object_name):
+    # If object name is empty, treat this as cutting over the entire online migration.
+    # Otherwise, for scenarios that support it, just cut over the migration on the specified object.
+    # 'input' is a built in function. Even though we can technically use it, it's not recommended.
+    # https://stackoverflow.com/questions/20670732/is-input-a-keyword-in-python
+
+    source_platform, target_platform = get_project_platforms(cmd,
+                                                             project_name=project_name,
+                                                             service_name=service_name,
+                                                             resource_group_name=resource_group_name)
+    st = get_scenario_type(source_platform, target_platform, "onlinemigration")
+
+    if st in [ScenarioType.mysql_azuremysql_online,
+              ScenarioType.postgres_azurepostgres_online]:
+        command_input = MigrateSyncCompleteCommandInput(database_name=object_name)
+        command_properties_model = MigrateSyncCompleteCommandProperties
+    else:
+        raise CLIError("The supplied project's source and target do not support cutting over the migration.")
+
+    run_command(client,
+                command_input,
+                command_properties_model,
+                resource_group_name,
+                service_name,
+                project_name,
+                task_name)
 # endregion
 
 
 # region Helper Methods
+def run_command(client,
+                command_input,
+                command_properties_model,
+                resource_group_name,
+                service_name,
+                project_name,
+                task_name):
+    command_properties_params = {'input': command_input}
+    command_properties = command_properties_model(**command_properties_params)
+
+    client.command(group_name=resource_group_name,
+                   service_name=service_name,
+                   project_name=project_name,
+                   task_name=task_name,
+                   parameters=command_properties)
+
+
 def get_project_platforms(cmd, project_name, service_name, resource_group_name):
     client = dms_cf_projects(cmd.cli_ctx)
     proj = client.get(group_name=resource_group_name, service_name=service_name, project_name=project_name)

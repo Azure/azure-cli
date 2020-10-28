@@ -73,6 +73,7 @@ def load_command_table(self, _):
 
     with self.command_group('dms project task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
         g.custom_command('create', 'create_task')
+        g.custom_command('cutover', 'cutover_sync_task')
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list')
         g.show_command('show', 'get')
