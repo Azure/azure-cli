@@ -136,11 +136,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.app_command_line = startup_file
 
         if runtime:
-            site_config.linux_fx_version = runtime
             match = helper.resolve(runtime)
             if not match:
                 raise CLIError("Linux Runtime '{}' is not supported."
                                " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            match['setter'](cmd=cmd, stack=match, site_config=site_config)
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
@@ -3684,11 +3684,18 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
         if os_name.lower() == 'linux' and site_config.linux_fx_version != runtime_version:
-            logger.warning('Updating runtime version from %s to %s',
-                           site_config.linux_fx_version, runtime_version)
-            update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
-            logger.warning('Waiting for runtime version to propagate ...')
-            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
+            helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
+            match = helper.resolve(runtime_version)
+            linux_set_fx_version = runtime_version
+            if match:
+                linux_set_fx_version = match['configs']['linux_fx_version']
+            # also check configs.linux_fx_version in case display name is different from linux_fx_version
+            if not match or site_config.linux_fx_version != match['configs']['linux_fx_version']:
+                logger.warning('Updating runtime version from %s to %s',
+                               site_config.linux_fx_version, runtime_version)
+                update_site_configs(cmd, rg_name, name, linux_fx_version=linux_set_fx_version)
+                logger.warning('Waiting for runtime version to propagate ...')
+                time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)

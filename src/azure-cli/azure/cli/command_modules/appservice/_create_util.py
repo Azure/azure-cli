@@ -13,7 +13,8 @@ from azure.mgmt.web.models import SkuDescription
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
                          NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
                          ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT)
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
+                         NODE_VERSION_NEWER)
 
 logger = get_logger(__name__)
 
@@ -274,7 +275,7 @@ def detect_node_version_tocreate(detected_ver):
     if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
     else:
-        node_ver = '12.9'
+        node_ver = NODE_VERSION_NEWER
     return node_ver
 
 
