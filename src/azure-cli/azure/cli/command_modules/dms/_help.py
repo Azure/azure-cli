@@ -122,7 +122,13 @@ parameters:
 examples:
   - name: Create a SQL to SQLDB Project for a DMS instance.
     text: >
-        az dms project create -l westus -n myproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+  - name: Create a MySQL to AzureDbForMySql Project for a DMS instance.
+    text: >
+        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySql --tags tagName1=tagValue1 tagWithNoValue
+  - name: Create a PostgreSql to AzureDbForPostgreSql Project for a DMS instance.
+    text: >
+        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSql --target-platform AzureDbForPostgreSql --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
@@ -180,65 +186,160 @@ parameters:
 helps['dms project task create'] = """
 type: command
 short-summary: Create and start a migration Task.
+long-summary: |
+  The following task configurations are supported:
+    -) source -> target :: task type
+    1) SQL -> SQLDB :: OfflineMigration
+    2) MySQL -> AzureDbForMySql :: OnlineMigration
+    3) PostgreSQL -> AzureDbForPostgreSql :: OnlineMigration
 parameters:
+  - name: --task-type
+    type: string
+    short-summary: >
+        The type of data movement the task will support. The supported types are: OnlineMigration, OfflineMigration.
   - name: --database-options-json
     type: string
     short-summary: >
         Database and table information. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+    long-summary: >
+        For SQL we support per table migrations. To use this, specify the tables names in the 'table_map' as below.
+        You can also set the source as read only.
+            [
+                {
+                    "name": "source database",
+                    "target_database_name": "target database",
+                    "make_source_db_read_only": false|true,
+                    "table_map": {
+                        "schema.SourceTableName1": "schema.TargetTableName1",
+                        "schema.SourceTableName2": "schema.TargetTableName2",
+                        ...n
+                    }
+                },
+                ...n
+            ]
+
+        For MySQL, the format of the database options JSON object.
+            [
+                {
+                    "name": "source database",
+                    "target_database_name": "target database",
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "migrationSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "sourceSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "targetSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Optional parameter to list tables that you want included in the migration.
+                    "tableMap": {
+                        "schema.SourceTableName1": "schema.TargetTableName1",
+                        "schema.SourceTableName2": "schema.TargetTableName2",
+                        ...n
+                    }
+                },
+                ...n
+            ]
+
+        For PostgreSQL, the format of the database options JSON object.
+            [
+                {
+                    "name": "source database",
+                    "target_database_name": "target database",
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "migrationSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "sourceSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Used for manipulating the underlying migration engine.
+                    // Only provide if instructed to do so or if you really know what you are doing.
+                    "targetSetting": {
+                        "setting1": "value1",
+                        ...n
+                    },
+                    // Optional parameter to list tables that you want included in the migration.
+                    "selectedTables": [
+                        "schemaName1.tableName1",
+                        ...n
+                    ]
+                },
+                ...n
+            ]
   - name: --source-connection-json
     type: string
     short-summary: >
-        The connection information to the source server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
-  - name: --target-connection-json
-    type: string
-    short-summary: >
-        The connection information to the target server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
-  - name: --enable-data-integrity-validation
-    type: bool
-    short-summary: >
-        Whether to perform a checksum based data integrity validation between source and target for the selected database and tables.
-  - name: --enable-query-analysis-validation
-    type: bool
-    short-summary: >
-        Whether to perform a quick and intelligent query analysis by retrieving queries from the source database and
-        executing them in the target. The result will have execution statistics for executions in source and target databases
-        for the extracted queries.
-  - name: --enable-schema-validation
-    type: bool
-    short-summary: >
-        Whether to compare the schema information between source and target.
-examples:
-  - name: Create and start a Task which performs no validation checks.
-    text: >
-        az dms project task create --database-options-json "C:\\CLI Files\\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}" --target-connection-json "C:\\CLI Files\\targetConnection.json"
-  - name: Create and start a Task which performs all validation checks.
-    text: >
-        az dms project task create --database-options-json "C:\\CLI Files\\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "C:\\CLI Files\\sourceConnection.json" --target-connection-json "C:\\CLI Files\\targetConnection.json" --enable-data-integrity-validation --enable-query-analysis-validation --enable-schema-validation
-  - name: The format of the database options JSON object.
-    text: >
-        [
-            {
-                "name": "source database",
-                "target_database_name": "target database",
-                "make_source_db_read_only": false|true,
-                "table_map": {
-                    "schema.SourceTableName1": "schema.TargetTableName1",
-                    "schema.SourceTableName2": "schema.TargetTableName2",
-                    ...n
-                }
-            },
-            ...n
-        ]
-  - name: The format of the connection JSON object.
-    text: >
+        The connection information to the source server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See examples below for the format.
+    long-summary: |
+      The format of the connection JSON object for SQL connections.
         {
             "userName": "user name",    // if this is missing or null, you will be prompted
             "password": null,           // if this is missing or null (highly recommended) you will be prompted
             "dataSource": "server name[,port]",
             "authentication": "SqlAuthentication|WindowsAuthentication",
             "encryptConnection": true,      // highly recommended to leave as true
-            "trustServerCertificate": true  // highly recommended to leave as true
+            "trustServerCertificate": false  // highly recommended to leave as false
         }
+
+      The format of the connection JSON object for MySql connections.
+        {
+            "userName": "user name",    // if this is missing or null, you will be prompted
+            "password": null,           // if this is missing or null (highly recommended) you will be prompted
+            "serverName": "server name",
+            "port": 3306                // if this is missing, it will default to 3306
+        }
+
+      The format of the connection JSON object for PostgreSQL connections.
+        {
+            "userName": "user name",    // if this is missing or null, you will be prompted
+            "password": null,           // if this is missing or null (highly recommended) you will be prompted
+            "serverName": "server name",
+            "databaseName": "database name", // if this is missing, it will default to the 'postgres' database
+            "port": 5432,                // if this is missing, it will default to 5432
+            "encryptConnection": true,      // highly recommended to leave as true 
+            "trustServerCertificate": false  // highly recommended to leave as false
+        }
+  - name: --target-connection-json
+    type: string
+    short-summary: >
+        The connection information to the target server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See 'source-connection-json' for examples of connection formats.
+  - name: --enable-data-integrity-validation
+    type: bool
+    short-summary: >
+        For SQL only. Whether to perform a checksum based data integrity validation between source and target for the selected database and tables.
+  - name: --enable-query-analysis-validation
+    type: bool
+    short-summary: >
+        For SQL only. Whether to perform a quick and intelligent query analysis by retrieving queries from the source database and
+        executing them in the target. The result will have execution statistics for executions in source and target databases
+        for the extracted queries.
+  - name: --enable-schema-validation
+    type: bool
+    short-summary: >
+        For SQL only. Whether to compare the schema information between source and target.
+examples:
+  - name: Create and start an offline SQL migration Task. For a SQL migration, this will perform no validation checks.
+    text: >
+        az dms project task create --task-type OfflineMigration --database-options-json "C:\\CLI Files\\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}" --target-connection-json "C:\\CLI Files\\targetConnection.json"
+  - name: Create and start a SQL Task which performs all validation checks.
+    text: >
+        az dms project task create --task-type OfflineMigration --database-options-json "C:\\CLI Files\\databaseOptions.json" -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json "C:\\CLI Files\\sourceConnection.json" --target-connection-json "C:\\CLI Files\\targetConnection.json" --enable-data-integrity-validation --enable-query-analysis-validation --enable-schema-validation
 """
 
 helps['dms project task delete'] = """
