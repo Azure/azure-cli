@@ -107,28 +107,28 @@ long-summary: |
   The following project configurations are supported:
     -) source -> target
     1) SQL -> SQLDB
-    2) MySQL -> AzureDbForMySql
-    3) PostgreSQL -> AzureDbForPostgreSql
+    2) MySQL -> AzureDbForMySQL
+    3) PostgreSQL -> AzureDbForPostgreSQL
 
 parameters:
   - name: --source-platform
     type: string
     short-summary: >
-        The type of server for the source database. The supported types are: SQL, MySQL, PostgreSql.
+        The type of server for the source database. The supported types are: SQL, MySQL, PostgreSQL.
   - name: --target-platform
     type: string
     short-summary: >
-        The type of service for the target database. The supported types are: SQLDB, AzureDbForMySql, AzureDbForPostgreSql.
+        The type of service for the target database. The supported types are: SQLDB, AzureDbForMySQL, AzureDbForPostgreSQL.
 examples:
   - name: Create a SQL to SQLDB Project for a DMS instance.
     text: >
         az dms project create -l westus -n sqlproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a MySQL to AzureDbForMySql Project for a DMS instance.
     text: >
-        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySql --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -l westus -n mysqlproject -g myresourcegroup --service-name mydms --source-platform MySQL --target-platform AzureDbForMySQL --tags tagName1=tagValue1 tagWithNoValue
   - name: Create a PostgreSql to AzureDbForPostgreSql Project for a DMS instance.
     text: >
-        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSql --target-platform AzureDbForPostgreSql --tags tagName1=tagValue1 tagWithNoValue
+        az dms project create -l westus -n pgproject -g myresourcegroup --service-name mydms --source-platform PostgreSQL --target-platform AzureDbForPostgreSQL --tags tagName1=tagValue1 tagWithNoValue
 """
 
 helps['dms project delete'] = """
@@ -312,7 +312,7 @@ parameters:
             "serverName": "server name",
             "databaseName": "database name", // if this is missing, it will default to the 'postgres' database
             "port": 5432,                // if this is missing, it will default to 5432
-            "encryptConnection": true,      // highly recommended to leave as true 
+            "encryptConnection": true,      // highly recommended to leave as true
             "trustServerCertificate": false  // highly recommended to leave as false
         }
   - name: --target-connection-json

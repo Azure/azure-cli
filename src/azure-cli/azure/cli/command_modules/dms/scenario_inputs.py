@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-from knack.prompting import prompt, prompt_pass
 from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateSqlServerSqlDbDatabaseInput,
                                              MigrationValidationOptions,
@@ -14,12 +12,13 @@ from azure.mgmt.datamigration.models import (MigrateSqlServerSqlDbTaskInput,
                                              MigrateMySqlAzureDbForMySqlSyncTaskInput,
                                              MigrateMySqlAzureDbForMySqlSyncDatabaseInput)
 
+
 def get_migrate_sql_to_sqldb_offline_input(database_options_json,
-                                        source_connection_info,
-                                        target_connection_info,
-                                        enable_schema_validation,
-                                        enable_data_integrity_validation,
-                                        enable_query_analysis_validation):
+                                           source_connection_info,
+                                           target_connection_info,
+                                           enable_schema_validation,
+                                           enable_data_integrity_validation,
+                                           enable_query_analysis_validation):
     database_options = []
 
     for d in database_options_json:

@@ -33,8 +33,7 @@ def check_service_name_availability(client, service_name, location):
                                           type='services')
 
 
-def create_service(cmd,
-                   client,
+def create_service(client,
                    service_name,
                    resource_group_name,
                    location,
@@ -93,8 +92,7 @@ def check_project_name_availability(client, resource_group_name, service_name, p
                                                    type='projects')
 
 
-def create_or_update_project(cmd,
-                             client,
+def create_or_update_project(client,
                              project_name,
                              service_name,
                              resource_group_name,
@@ -220,10 +218,9 @@ def core_handles_scenario(
         target_platform,
         task_type=""):
     # Add scenarios here after migrating them to the core from the extension.
-    CoreScenarioTypes = [
-            ScenarioType.sql_sqldb_offline,
-            ScenarioType.mysql_azuremysql_online,
-            ScenarioType.postgres_azurepostgres_online]
+    CoreScenarioTypes = [ScenarioType.sql_sqldb_offline,
+                         ScenarioType.mysql_azuremysql_online,
+                         ScenarioType.postgres_azurepostgres_online]
     return get_scenario_type(source_platform, target_platform, task_type) in CoreScenarioTypes
 
 
@@ -287,11 +284,11 @@ def create_connection(connection_info_json, prompt_prefix, typeOfInfo):
                                         trust_server_certificate=trust_server_certificate)
 
     if "sql" in typeOfInfo:
-        data_source=connection_info_json.get('dataSource', None)
-        authentication=connection_info_json.get('authentication', None)
-        encrypt_connection=connection_info_json.get('encryptConnection', None)
-        trust_server_certificate=connection_info_json.get('trustServerCertificate', None)
-        additional_settings=connection_info_json.get('additionalSettings', None)
+        data_source = connection_info_json.get('dataSource', None)
+        authentication = connection_info_json.get('authentication', None)
+        encrypt_connection = connection_info_json.get('encryptConnection', None)
+        trust_server_certificate = connection_info_json.get('trustServerCertificate', None)
+        additional_settings = connection_info_json.get('additionalSettings', None)
         return SqlConnectionInfo(user_name=user_name,
                                  password=password,
                                  data_source=data_source,
@@ -299,7 +296,6 @@ def create_connection(connection_info_json, prompt_prefix, typeOfInfo):
                                  encrypt_connection=encrypt_connection,
                                  trust_server_certificate=trust_server_certificate,
                                  additional_settings=additional_settings)
-
 
     # If no match, Pass the connection info through
     return connection_info_json
@@ -329,14 +325,14 @@ def get_task_migration_properties(
         raise CLIError("The supplied source, target, and task type is not supported for migration.")
 
     return get_task_properties(st,
-            GetInput,
-            TaskProperties,
-            database_options_json,
-            source_connection_info,
-            target_connection_info,
-            enable_schema_validation,
-            enable_data_integrity_validation,
-            enable_query_analysis_validation)
+                               GetInput,
+                               TaskProperties,
+                               database_options_json,
+                               source_connection_info,
+                               target_connection_info,
+                               enable_schema_validation,
+                               enable_data_integrity_validation,
+                               enable_query_analysis_validation)
 
 
 def get_task_properties(scenario_type,
@@ -371,9 +367,11 @@ def get_task_properties(scenario_type,
 
 def get_scenario_type(source_platform, target_platform, task_type=""):
     if source_platform == "sql" and target_platform == "sqldb":
-        scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else ScenarioType.unknown
+        scenario_type = ScenarioType.sql_sqldb_offline if not task_type or "offline" in task_type else \
+            ScenarioType.unknown
     elif source_platform == "mysql" and target_platform == "azuredbformysql":
-        scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else ScenarioType.unknown
+        scenario_type = ScenarioType.mysql_azuremysql_online if not task_type or "online" in task_type else \
+            ScenarioType.unknown
     elif source_platform == "postgresql" and target_platform == "azuredbforpostgresql":
         scenario_type = ScenarioType.postgres_azurepostgres_online if not task_type or "online" in task_type else \
             ScenarioType.unknown
@@ -385,12 +383,12 @@ def get_scenario_type(source_platform, target_platform, task_type=""):
 
 class ScenarioType(Enum):
 
-        unknown = 0
-        # SQL to SQLDB
-        sql_sqldb_offline = 1
-        # MySQL to Azure for MySQL
-        mysql_azuremysql_online = 21
-        # PostgresSQL to Azure for PostgreSQL
-        postgres_azurepostgres_online = 31
+    unknown = 0
+    # SQL to SQLDB
+    sql_sqldb_offline = 1
+    # MySQL to Azure for MySQL
+    mysql_azuremysql_online = 21
+    # PostgresSQL to Azure for PostgreSQL
+    postgres_azurepostgres_online = 31
 
 # endregion
