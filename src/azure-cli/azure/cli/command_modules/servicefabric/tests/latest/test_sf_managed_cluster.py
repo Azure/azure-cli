@@ -94,7 +94,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'cert_tp2': '123BDACDCDFB2C7B250192C6078E47D1E1DB7777',
-            'loc': 'southcentralus',
+            'loc': 'eastus2',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'extName': 'csetest',
