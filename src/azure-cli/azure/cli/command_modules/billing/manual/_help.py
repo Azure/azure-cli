@@ -121,6 +121,16 @@ for certain customers."
 "2019-12-30T21:26:47.997Z"
 """
 
+helps['billing instruction update'] = """
+    type: command
+    short-summary: "Update an instruction. These are custom billing instructions and are only applicable \
+for certain customers."
+    examples:
+      - name: Create an instruction
+        text: |-
+               az billing instruction update --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{instructionName}" --amount 5000
+"""
+
 helps['billing profile'] = """
     type: group
     short-summary: Manage billing profile of billing account
@@ -309,7 +319,7 @@ helps['billing permission list'] = """
     examples:
       - name: List permissions by billing account scope
         text: |-
-               az billing permision list --account-name "{billingAccountName}"
+               az billing permission list --account-name "{billingAccountName}"
       - name: List permissions by billing profile scope
         text: |-
                az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
@@ -618,7 +628,7 @@ helps['billing role-definition show'] = """
              az billing role-definition show --account-name "{billingAccountName}" --name "{billingRoleDefinitionName}"
     - name: Show the definition for a role on a billing profile. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
       text: |-
-             az billing role-definition show --acount-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleDefinitionName}"
+             az billing role-definition show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleDefinitionName}"
     - name: Show the definition for a role on an invoice section. The operation is supported only for billing accounts with agreement type Microsoft Customer Agreement
       text: |-
              az billing role-definition show --account-name "{billingAccountName}" --invoice-section-name "{invoiceSectionName}" --name "{billingRoleDefinitionName}"

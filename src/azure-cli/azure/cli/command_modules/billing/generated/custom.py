@@ -9,6 +9,7 @@
 # --------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
+# pylint: disable=no-else-return
 
 from azure.cli.core.util import sdk_no_wait
 
