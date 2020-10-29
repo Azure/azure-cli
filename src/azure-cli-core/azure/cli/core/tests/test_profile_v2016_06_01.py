@@ -14,11 +14,17 @@ import re
 from copy import deepcopy
 
 from adal import AdalError
-from azure.mgmt.resource.subscriptions.v2016_06_01.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDEROED_SUBSCRIPTION_SDK)
+
+if _USE_VENDEROED_SUBSCRIPTION_SDK:
+    from azure.cli.core.vendored_sdks.subscriptions.v2016_06_01.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
+else:
+    from azure.mgmt.resource.subscriptions.v2016_06_01.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
+
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError

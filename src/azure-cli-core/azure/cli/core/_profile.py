@@ -78,6 +78,8 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
+_USE_VENDEROED_SUBSCRIPTION_SDK = True
+
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -295,11 +297,18 @@ class Profile:
         return result
 
     def _new_account(self):
-        from azure.cli.core.profiles import ResourceType, get_sdk
-        SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, 'Subscription',
-                                              'SubscriptionState', mod='models')
+        if _USE_VENDEROED_SUBSCRIPTION_SDK:
+            from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
+            from azure.cli.core.vendored_sdks.subscriptions.models import SubscriptionState
+            SubscriptionType = Subscription
+            StateType = SubscriptionState
+        else:
+            from azure.cli.core.profiles import ResourceType, get_sdk
+            SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                                  'Subscription',
+                                                  'SubscriptionState', mod='models')
         s = SubscriptionType()
-        s.state = StateType.enabled
+        s.state = StateType.ENABLED
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
@@ -441,8 +450,7 @@ class Profile:
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
-        from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
     def is_tenant_level_account(self):
@@ -816,7 +824,7 @@ class SubscriptionFinder:
             from azure.cli.core.profiles import ResourceType, get_api_version
             from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
 
-            client_type = self._get_subscription_client_class(use_vendored_sdk=True)
+            client_type = self._get_subscription_client_class()
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
             # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
@@ -987,18 +995,18 @@ class SubscriptionFinder:
         self.tenants.append(tenant)
         return all_subscriptions
 
-    def _get_subscription_client_class(self, use_vendored_sdk=False):  # pylint: disable=no-self-use
+    def _get_subscription_client_class(self):  # pylint: disable=no-self-use
         """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
         on the design of architecture.
         """
-        if use_vendored_sdk:
+        if _USE_VENDEROED_SUBSCRIPTION_SDK:
             # Use vendered subscription SDK to decouple from `resource` command module
             from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
             client_type = SubscriptionClient
         else:
-            from azure.cli.core.profiles._shared import get_client_class
-            from azure.cli.core.profiles import ResourceType
             # Use the public SDK
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.profiles._shared import get_client_class
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
         return client_type
 
