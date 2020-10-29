@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime
 import time
 import requests
 import adal
@@ -76,6 +77,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
             scopes = scopes[1:]
 
         _, token, full_token, _ = self._get_token(scopes_to_resource(scopes))
+        if 'expiresIn' in full_token and 'expiresOn' in full_token:
+            expires_on_timestamp = \
+                int(datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f').timestamp())
+            return AccessToken(token, min(int(full_token['expiresIn'] + time.time()), expires_on_timestamp))
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
         except KeyError:  # needed to deal with differing unserialized MSI token payload
