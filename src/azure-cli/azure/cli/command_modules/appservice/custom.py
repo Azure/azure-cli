@@ -198,7 +198,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     if current_stack:
         app_metadata = client.web_apps.list_metadata(resource_group_name, name)
-        if app_metadata.properties and 'CURRENT_STACK' in app_metadata.properties and app_metadata.properties["CURRENT_STACK"] != current_stack:
+        if 'CURRENT_STACK' not in app_metadata.properties or app_metadata.properties["CURRENT_STACK"] != current_stack:
             app_metadata.properties["CURRENT_STACK"] = current_stack
             client.web_apps.update_metadata(resource_group_name, name, kind="app", properties=app_metadata.properties)
 
@@ -3695,7 +3695,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
                                site_config.linux_fx_version, runtime_version)
                 update_site_configs(cmd, rg_name, name, linux_fx_version=linux_set_fx_version)
                 logger.warning('Waiting for runtime version to propagate ...')
-                time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
+                time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
