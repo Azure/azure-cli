@@ -176,7 +176,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         current_stack = get_current_stack_from_runtime(runtime)
 
     else:  # windows webapp without runtime specified
-        if name_validation.name_available:
+        if name_validation.name_available:  # If creating new webapp
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
 
@@ -2564,7 +2564,15 @@ class _StackRuntimeHelper:
         NameValuePair = cmd.get_models('NameValuePair')
         if site_config.app_settings is None:
             site_config.app_settings = []
-        site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in stack['configs'].items()]
+
+        for k, v in stack['configs'].items():
+            already_in_appsettings = False
+            for app_setting in site_config.app_settings:
+                if app_setting.name == k:
+                    already_in_appsettings = True
+                    app_setting.value = v
+            if not already_in_appsettings:
+                site_config.app_settings.append(NameValuePair(name=k, value=v))
         return site_config
 
     def _load_stacks_hardcoded(self):
