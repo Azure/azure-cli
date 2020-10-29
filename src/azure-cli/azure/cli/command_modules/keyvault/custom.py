@@ -23,6 +23,7 @@ from azure.cli.command_modules.keyvault.security_domain.shared_secret import Sha
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
 from azure.graphrbac.models import GraphErrorException
@@ -217,7 +218,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
     )
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
+                       no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
             no_wait,
@@ -225,10 +227,7 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             location=location,
             vault_name=vault_name
         )
-
-    assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-    return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
+    return None
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
@@ -236,19 +235,10 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        deleted_resources = []
-        try:
-            deleted_resources.extend(client.list_deleted())
-            deleted_resources.extend(hsm_client.list_deleted())
-        except:  # pylint: disable=bare-except
-            pass
-
-        return deleted_resources
+        return client.list_deleted()
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return hsm_client.list_deleted()
+        raise InvalidArgumentValueError('Operation "list-deleted" has not been supported for HSM.')
 
     if resource_type == 'vault':
         return client.list_deleted()
