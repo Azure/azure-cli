@@ -7,7 +7,7 @@
 
 from __future__ import print_function
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 
 VERSION = "2.14.0"
 
@@ -86,12 +86,7 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    packages=[
-        'azure.cli.core',
-        'azure.cli.core.commands',
-        'azure.cli.core.extension',
-        'azure.cli.core.profiles',
-    ],
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     extras_require={
         ":python_version<'3.4'": ['enum34'],
