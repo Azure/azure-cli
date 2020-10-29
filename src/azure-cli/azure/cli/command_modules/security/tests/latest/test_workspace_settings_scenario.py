@@ -20,7 +20,7 @@ class SecurityCenterWorkspaceSettingsTests(ScenarioTest):
             'la_prop_path': os.path.join(TEST_DIR, 'loganalytics.json')
         })
 
-        ws_response = self.cmd('resource create -g {rg} -n {ws} '
+        ws_response = self.cmd('az resource create -g {rg} -n {ws} '
                                '--resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"') \
             .get_output_in_json()
         workspace_id = ws_response['id']
@@ -44,3 +44,5 @@ class SecurityCenterWorkspaceSettingsTests(ScenarioTest):
         workspace_settings = self.cmd('az security workspace-setting list').get_output_in_json()
 
         assert len(workspace_settings) == 0
+
+        self.cmd('az resource delete --ids {workspace_id}')
