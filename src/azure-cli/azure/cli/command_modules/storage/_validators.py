@@ -584,6 +584,8 @@ def validate_included_datasets(cmd, namespace):
 
 
 def get_include_help_string(include_list):
+    if include_list is None:
+        return ''
     item = []
     for include in include_list:
         if include.value == 'uncommittedblobs':
