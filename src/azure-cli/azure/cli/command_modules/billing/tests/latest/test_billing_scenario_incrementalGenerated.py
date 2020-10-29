@@ -1110,7 +1110,7 @@ class BillingRoleDefinitionScenarionTest(ScenarioTest):
                  checks=[])
 
 
-# @record_only()
+@record_only()
 class BillingInstructionScenarioTest(ScenarioTest):
     def setUp(self):
         super().setUp()
