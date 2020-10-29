@@ -485,6 +485,24 @@ def step__instructions_get(test):
              checks=[])
 
 
+# EXAMPLE: /Instructions/put/PutInstruction
+@try_manual
+def step__instructions_put_putinstruction(test):
+    test.cmd('az billing instruction create '
+             '--account-name "{myBillingAccount}" '
+             '--profile-name "{myBillingProfile}" '
+             '--name "{myInstruction}" '
+             '--amount 5000 '
+             '--end-date "2020-12-30T21:26:47.997Z" '
+             '--start-date "2019-12-30T21:26:47.997Z"',
+             checks=[
+                 test.check("name", "{myInstruction}", case_sensitive=False),
+                 test.check("amount", 5000),
+                 test.check("endDate", "2020-12-30T21:26:47.997Z", case_sensitive=False),
+                 test.check("startDate", "2019-12-30T21:26:47.997Z", case_sensitive=False),
+             ])
+
+
 # EXAMPLE: /Invoices/get/InvoicesListByBillingProfileWithRebillDetails
 @try_manual
 def step__invoices_get3(test):
@@ -1092,7 +1110,7 @@ class BillingRoleDefinitionScenarionTest(ScenarioTest):
                  checks=[])
 
 
-@record_only()
+# @record_only()
 class BillingInstructionScenarioTest(ScenarioTest):
     def setUp(self):
         super().setUp()
@@ -1105,5 +1123,21 @@ class BillingInstructionScenarioTest(ScenarioTest):
 
     def test_instruction_list_and_show(self):
         step__instructions_get(self)
+
+        step__instructions_get_instruction(self)
+
+    def test_instruction_create_and_update(self):
+
+        self.kwargs.update({
+            "myInstruction": "inst-1",
+        })
+
+        step__instructions_put_putinstruction(self)
+
+        self.cmd('az billing instruction update '
+                 '--account-name "{myBillingAccount}" '
+                 '--profile-name "{myBillingProfile}" '
+                 '--name "{myInstruction}" '
+                 '--amount 12')
 
         step__instructions_get_instruction(self)

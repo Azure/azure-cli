@@ -19,13 +19,18 @@ from ._validators import (
 
 def load_command_table(self, _):
 
-    # from ..generated._client_factory import cf_instruction
-    # billing_instruction = CliCommandType(
-    #     operations_tmpl='azure.mgmt.billing.operations#InstructionsOperations.{}',
-    #     client_factory=cf_instruction)
-    # with self.command_group('billing instruction', billing_instruction, client_factory=cf_instruction,
-    #                         is_preview=True) as g:
-    #     g.custom_command('')
+    from ..generated._client_factory import cf_instruction
+    billing_instruction = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations#InstructionsOperations.{}',
+        client_factory=cf_instruction)
+    with self.command_group('billing instruction', billing_instruction, client_factory=cf_instruction,
+                            is_preview=True) as g:
+        g.generic_update_command('update',
+                                 operations_tmpl='azure.cli.command_modules.billing.manual.custom#{}',
+                                 getter_type=billing_instruction,
+                                 setter_name='put',
+                                 setter_type=billing_instruction,
+                                 custom_func_name='billing_instruction_update')
 
     from ..generated._client_factory import cf_invoice_section
     billing_invoice_section = CliCommandType(

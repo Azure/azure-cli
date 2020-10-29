@@ -57,6 +57,7 @@
 |---------|------------|--------|-----------|
 |[az billing instruction list](#InstructionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersInstructionsListByBillingProfile)|[Example](#ExamplesInstructionsListByBillingProfile)|
 |[az billing instruction show](#InstructionsGet)|Get|[Parameters](#ParametersInstructionsGet)|[Example](#ExamplesInstructionsGet)|
+|[az billing instruction create](#InstructionsPut)|Put|[Parameters](#ParametersInstructionsPut)|[Example](#ExamplesInstructionsPut)|
 
 ### <a name="CommandsInInvoices">Commands in `az billing invoice` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -312,6 +313,24 @@ az billing instruction show --account-name "{billingAccountName}" --profile-name
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
 |**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
 |**--name**|string|Instruction Name.|name|instructionName|
+
+#### <a name="InstructionsPut">Command `az billing instruction create`</a>
+
+##### <a name="ExamplesInstructionsPut">Example</a>
+```
+az billing instruction create --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{instructionName}" --amount 5000 --end-date "2020-12-30T21:26:47.997Z" --start-date "2019-12-30T21:26:47.997Z"
+```
+##### <a name="ParametersInstructionsPut">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--name**|string|Instruction Name.|name|instructionName|
+|**--amount**|number|The amount budgeted for this billing instruction.|amount|amount|
+|**--start-date**|date-time|The date this billing instruction goes into effect.|start_date|startDate|
+|**--end-date**|date-time|The date this billing instruction is no longer in effect.|end_date|endDate|
+|**--creation-date**|date-time|The date this billing instruction was created.|creation_date|creationDate|
 
 ### group `az billing invoice`
 #### <a name="InvoicesListByBillingProfile">Command `az billing invoice list`</a>

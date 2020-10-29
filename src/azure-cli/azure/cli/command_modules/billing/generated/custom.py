@@ -69,6 +69,25 @@ def billing_instruction_show(client,
                       instruction_name=name)
 
 
+def billing_instruction_create(client,
+                               account_name,
+                               profile_name,
+                               name,
+                               amount=None,
+                               start_date=None,
+                               end_date=None,
+                               creation_date=None):
+    parameters = {}
+    parameters['amount'] = amount
+    parameters['start_date'] = start_date
+    parameters['end_date'] = end_date
+    parameters['creation_date'] = creation_date
+    return client.put(billing_account_name=account_name,
+                      billing_profile_name=profile_name,
+                      instruction_name=name,
+                      parameters=parameters)
+
+
 def billing_profile_list(client,
                          account_name,
                          expand=None):

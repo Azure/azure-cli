@@ -127,6 +127,18 @@ certain customers."
 --name "{instructionName}"
 """
 
+helps['billing instruction create'] = """
+    type: command
+    short-summary: "Creates or updates an instruction. These are custom billing instructions and are only applicable \
+for certain customers."
+    examples:
+      - name: PutInstruction
+        text: |-
+               az billing instruction create --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{instructionName}" --amount 5000 --end-date "2020-12-30T21:26:47.997Z" --start-date \
+"2019-12-30T21:26:47.997Z"
+"""
+
 helps['billing profile'] = """
     type: group
     short-summary: billing profile

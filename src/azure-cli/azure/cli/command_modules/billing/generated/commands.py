@@ -40,6 +40,7 @@ def load_command_table(self, _):
                             is_preview=True) as g:
         g.custom_command('list', 'billing_instruction_list')
         g.custom_show_command('show', 'billing_instruction_show')
+        g.custom_command('create', 'billing_instruction_create')
 
     from ..generated._client_factory import cf_profile
     billing_profile = CliCommandType(

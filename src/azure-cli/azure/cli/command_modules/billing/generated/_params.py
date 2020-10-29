@@ -66,6 +66,15 @@ def load_arguments(self, _):
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('name', options_list=['--name', '-n'], type=str, help='Instruction Name.')
 
+    with self.argument_context('billing instruction create') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='Instruction Name.')
+        c.argument('amount', type=float, help='The amount budgeted for this billing instruction.')
+        c.argument('start_date', help='The date this billing instruction goes into effect.')
+        c.argument('end_date', help='The date this billing instruction is no longer in effect.')
+        c.argument('creation_date', help='The date this billing instruction was created.')
+
     with self.argument_context('billing profile list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')

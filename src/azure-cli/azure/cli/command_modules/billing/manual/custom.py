@@ -134,3 +134,19 @@ def billing_role_definition_show(client,
 
     return client.get_by_billing_account(billing_account_name=account_name,
                                          billing_role_definition_name=name)
+
+
+def billing_instruction_update(cmd,
+                               instance,
+                               amount=None,
+                               start_date=None,
+                               end_date=None,
+                               creation_date=None):
+
+    with cmd.update_context(instance) as c:
+        c.set_param('amount', amount)
+        c.set_param('start_date', start_date)
+        c.set_param('end_date', end_date)
+        c.set_param('creation_date', creation_date)
+
+    return instance
