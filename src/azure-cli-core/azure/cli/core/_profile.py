@@ -259,7 +259,7 @@ class Profile:
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
-                _STATE: s.state.value,
+                _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
@@ -813,14 +813,15 @@ class SubscriptionFinder:
         def create_arm_client_factory(credentials):
             if arm_client_factory:
                 return arm_client_factory(credentials)
-            from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import configure_common_settings
-            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+
+            client_type = self._get_subscription_client_class(use_vendored_sdk=True)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
-            configure_common_settings(cli_ctx, client)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -895,16 +896,17 @@ class SubscriptionFinder:
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
@@ -913,6 +915,7 @@ class SubscriptionFinder:
                 t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
+                logger.debug("Acquiring a token with tenant=%s, resource=%s", tenant_id, resource)
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
@@ -969,9 +972,9 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
@@ -983,6 +986,21 @@ class SubscriptionFinder:
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
+
+    def _get_subscription_client_class(self, use_vendored_sdk=False):  # pylint: disable=no-self-use
+        """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
+        on the design of architecture.
+        """
+        if use_vendored_sdk:
+            # Use vendered subscription SDK to decouple from `resource` command module
+            from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
+            client_type = SubscriptionClient
+        else:
+            from azure.cli.core.profiles._shared import get_client_class
+            from azure.cli.core.profiles import ResourceType
+            # Use the public SDK
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        return client_type
 
 
 class CredsCache:

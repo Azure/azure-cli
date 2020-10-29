@@ -135,3 +135,13 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def signed_session(self, session=None):
         logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
         super().signed_session(session)
+
+
+class BasicTokenCredential:
+    # pylint:disable=too-few-public-methods
+    """A Track 2 implementation of msrest.authentication.BasicTokenAuthentication."""
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        return AccessToken(self.access_token, int(time.time() + 3600))
