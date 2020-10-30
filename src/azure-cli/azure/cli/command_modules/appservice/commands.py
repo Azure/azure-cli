@@ -181,7 +181,7 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('sync', 'sync_kv_cert', exception_handler=ex_handler_factory())
-        
+
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
         g.custom_show_command('show', 'show_backup_configuration')
