@@ -23,8 +23,10 @@ def validate_ip_range_filter(ns):
         ip_rules_list = []
         for item in ns.ip_range_filter:
             for i in item.split(","):
-                ip_rules_list.append(IpAddressOrRange(ip_address_or_range=i))
-                ns.ip_range_filter = ip_rules_list
+                if i:
+                    ip_rules_list.append(IpAddressOrRange(ip_address_or_range=i))
+                    ns.ip_range_filter = ip_rules_list
+        ns.ip_range_filter = ip_rules_list
 
 
 def validate_private_endpoint_connection_id(ns):

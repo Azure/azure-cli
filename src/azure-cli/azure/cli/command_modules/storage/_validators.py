@@ -129,8 +129,7 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(
-                    resource="https://storage.azure.com", subscription_id=n._subscription)
+                n.token_credential, _, _ = profile.get_login_credentials(subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -1475,7 +1474,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
 def _is_valid_uri(uri):
     if not uri:
         return False
-    if os.path.isdir(os.path.dirname(uri)):
+    if os.path.isdir(os.path.dirname(uri)) or os.path.isdir(uri):
         return uri
     if "?" in uri:  # sas token exists
         logger.debug("Find ? in %s. ", uri)
@@ -1538,3 +1537,18 @@ def validate_text_configuration(cmd, ns):
         ns.in_escape_char, ns.in_has_header
     del ns.output_format, ns.out_line_separator, ns.out_column_separator, ns.out_quote_char, ns.out_record_separator, \
         ns.out_escape_char, ns.out_has_header
+
+
+def add_acl_progress_hook(namespace):
+    if namespace.progress_hook:
+        return
+
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        print(acl_changes.batch_failures)
+        failed_entries.append(acl_changes.batch_failures)
+
+    namespace.progress_hook = progress_callback
