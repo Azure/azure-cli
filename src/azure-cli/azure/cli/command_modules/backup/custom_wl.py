@@ -46,6 +46,7 @@ attr_map = {'sqldatabase': 'SQLDatabase',
             'sapasedatabase': 'SAPAseDatabase'}
 
 protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
+                             'HANADataBase': 'SAPHanaDatabase',
                              'SAPHanaDatabase': 'SAPHanaDatabase',
                              'HANAInstance': 'SAPHanaSystem',
                              'SAPHanaSystem': 'SAPHanaSystem',
@@ -633,8 +634,8 @@ def _get_protected_item_instance(item_type):
     return AzureVmWorkloadSQLDatabaseProtectedItem()
 
 
-def _check_map(key, key_value_map):
-    if key_value_map.get(key) is not None:
-        return key_value_map[key]
-    error_text = key + " is an invalid argument. " + str(list(key_value_map.keys())) + " are the allowed values."
+def _check_map(item_type, item_type_map):
+    if item_type_map.get(item_type) is not None:
+        return item_type_map[item_type]
+    error_text = item_type + " is an invalid argument. " + str(list(item_type_map.keys())) + " are the allowed values."
     raise CLIError(error_text)
