@@ -3707,40 +3707,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         elif os_name.lower() == 'windows':
             # may need to update stack runtime settings. For node its site_config.app_settings, otherwise site_config
             if match:
-                update_needed = False
-                if 'node' in runtime_version:
-                    settings = []
-                    for k, v in match['configs'].items():
-                        for app_setting in site_config.app_settings:
-                            if app_setting.name == k and app_setting.value != v:
-                                update_needed = True
-                                settings.append('%s=%s', k, v)
-                    if update_needed:
-                        logger.warning('Updating runtime version to %s', runtime_version)
-                        update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
-                else:
-                    for k, v in match['configs'].items():
-                        if getattr(site_config, k, None) != v:
-                            update_needed = True
-                            setattr(site_config, k, v)
-                    if update_needed:
-                        logger.warning('Updating runtime version to %s', runtime_version)
-                        update_site_configs(cmd,
-                                            rg_name,
-                                            name,
-                                            net_framework_version=site_config.net_framework_version,
-                                            php_version=site_config.php_version,
-                                            python_version=site_config.python_version,
-                                            java_version=site_config.java_version,
-                                            java_container=site_config.java_container,
-                                            java_container_version=site_config.java_container_version)
-
-                current_stack = get_current_stack_from_runtime(runtime_version)
-                _update_webapp_current_stack_property_if_needed(cmd, rg_name, name, current_stack)
-
-                if update_needed:
-                    logger.warning('Waiting for runtime version to propagate ...')
-                    time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
+                _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version)
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
@@ -3766,6 +3733,43 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         cmd.cli_ctx.config.set_value('defaults', 'location', loc)
         cmd.cli_ctx.config.set_value('defaults', 'web', name)
     return create_json
+
+
+def _update_app_settings_for_windows_if_needed(cmd, rg_name, name, match, site_config, runtime_version):
+    update_needed = False
+    if 'node' in runtime_version:
+        settings = []
+        for k, v in match['configs'].items():
+            for app_setting in site_config.app_settings:
+                if app_setting.name == k and app_setting.value != v:
+                    update_needed = True
+                    settings.append('%s=%s', k, v)
+        if update_needed:
+            logger.warning('Updating runtime version to %s', runtime_version)
+            update_app_settings(cmd, rg_name, name, settings=settings, slot=None, slot_settings=None)
+    else:
+        for k, v in match['configs'].items():
+            if getattr(site_config, k, None) != v:
+                update_needed = True
+                setattr(site_config, k, v)
+        if update_needed:
+            logger.warning('Updating runtime version to %s', runtime_version)
+            update_site_configs(cmd,
+                                rg_name,
+                                name,
+                                net_framework_version=site_config.net_framework_version,
+                                php_version=site_config.php_version,
+                                python_version=site_config.python_version,
+                                java_version=site_config.java_version,
+                                java_container=site_config.java_container,
+                                java_container_version=site_config.java_container_version)
+
+    current_stack = get_current_stack_from_runtime(runtime_version)
+    _update_webapp_current_stack_property_if_needed(cmd, rg_name, name, current_stack)
+
+    if update_needed:
+        logger.warning('Waiting for runtime version to propagate ...')
+        time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. No way to poll for this
 
 
 def _update_webapp_current_stack_property_if_needed(cmd, resource_group, name, current_stack):
