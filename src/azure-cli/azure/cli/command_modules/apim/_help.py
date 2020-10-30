@@ -63,6 +63,17 @@ examples:
              --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
 """
 
+helps['apim restore'] = """
+type: command
+short-summary: Restores a backup of an API Management service created using the ApiManagementService_Backup operation on the current service. This is a long running operation and could take several minutes to complete.
+examples:
+  - name: Restores a backup of the API Management service instance
+    text: |-
+        az apim restore --name MyApim -g MyResourceGroup --backup-name myBackup \
+             --storage-account-name mystorageaccount --storage-account-container backups \
+             --storage-account-key Ay2ZbdxLnD4OJPT29F6jLPkB6KynOzx85YCObhrw==
+"""
+
 helps['apim create'] = """
 type: command
 short-summary: Create an API Management service instance.

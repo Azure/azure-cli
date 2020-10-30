@@ -114,6 +114,16 @@ def apim_backup(client, resource_group_name, name, backup_name, storage_account_
 
     return client.api_management_service.backup(resource_group_name, name, parameters)
 
+def apim_restore(client, resource_group_name, name, backup_name, storage_account_name,
+                storage_account_container, storage_account_key):
+    """Restore an API Management service to the configured storage account """
+    parameters = ApiManagementServiceBackupRestoreParameters(
+        storage_account=storage_account_name,
+        access_key=storage_account_key,
+        container_name=storage_account_container,
+        backup_name=backup_name)
+
+    return client.api_management_service.restore(resource_group_name, name, parameters)
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):
     """back up an API Management service to the configured storage account """

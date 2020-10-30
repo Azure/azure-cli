@@ -66,6 +66,12 @@ def load_arguments(self, _):
         c.argument('storage_account_key', arg_group='Storage', help='The access key of the storage account used to place the backup.')
         c.argument('storage_account_container', arg_group='Storage', help='The name of the storage account container used to place the backup.')
 
+    with self.argument_context('apim restore') as c:
+        c.argument('backup_name', help='The name of the backup file to restore.')
+        c.argument('storage_account_name', arg_group='Storage', help='The name of the storage account used to retrieve the backup from.')
+        c.argument('storage_account_key', arg_group='Storage', help='The access key of the storage account used to retrieve the backup from.')
+        c.argument('storage_account_container', arg_group='Storage', help='The name of the storage account container used to retrieve the backup from.')
+
     with self.argument_context('apim api show') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', arg_group='API', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
