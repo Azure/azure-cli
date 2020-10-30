@@ -9,7 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.cosmosdb.models import DefaultErrorResponseException 
+from azure.mgmt.cosmosdb.models import DefaultErrorResponseException
 
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,

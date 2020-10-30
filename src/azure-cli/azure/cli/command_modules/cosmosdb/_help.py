@@ -800,7 +800,7 @@ type: command
 short-summary: Create a SQL role definition under an Azure Cosmos DB account.
 examples:
   - name: Create a SQL role definition under an Azure Cosmos DB account.
-    text: az cosmosdb role definition create -a MyAccount -g MyResourceGroup -b @role-definition.json
+    text: az cosmosdb sql role definition create -a MyAccount -g MyResourceGroup -b @role-definition.json
 """
 
 helps['cosmosdb sql role definition delete'] = """
@@ -808,7 +808,7 @@ type: command
 short-summary: Delete a SQL role definition under an Azure Cosmos DB account.
 examples:
   - name: Create a SQL role definition under an Azure Cosmos DB account.
-    text: az cosmosdb role definition delete -a MyAccount -g MyResourceGroup -i RoleDefinitionId
+    text: az cosmosdb sql role definition delete -a MyAccount -g MyResourceGroup -i RoleDefinitionId
 """
 
 helps['cosmosdb sql role definition exists'] = """
@@ -816,7 +816,7 @@ type: command
 short-summary: Check if an Azure Cosmos DB role definition exists.
 examples:
   - name: Check if an Azure Cosmos DB role definition exists.
-    text: az cosmosdb role definition exists -a MyAccount -g MyResourceGroup -i RoleDefinitionId
+    text: az cosmosdb sql role definition exists -a MyAccount -g MyResourceGroup -i RoleDefinitionId
 """
 
 helps['cosmosdb sql role definition list'] = """
@@ -824,7 +824,7 @@ type: command
 short-summary: List all SQL role definitions under an Azure Cosmos DB account.
 examples:
   - name: List all SQL role definitions under an Azure Cosmos DB account.
-    text: az cosmosdb role definition list -a MyAccount -g MyResourceGroup
+    text: az cosmosdb sql role definition list -a MyAccount -g MyResourceGroup
 """
 
 helps['cosmosdb sql role definition show'] = """
@@ -832,7 +832,7 @@ type: command
 short-summary: Show the properties of a SQL role definition under an Azure Cosmos DB account.
 examples:
   - name: Show the properties of a SQL role definition under an Azure Cosmos DB account.
-    text: az cosmosdb role definition show -a MyAccount -g MyResourceGroup -i RoleDefinitionId
+    text: az cosmosdb sql role definition show -a MyAccount -g MyResourceGroup -i RoleDefinitionId
 """
 
 helps['cosmosdb sql role definition update'] = """
@@ -840,7 +840,7 @@ type: command
 short-summary: Update a SQL role definition under an Azure Cosmos DB account.
 examples:
   - name: Update a SQL role definition under an Azure Cosmos DB account.
-    text: az cosmosdb role definition update -a MyAccount -g MyResourceGroup -b @role-definition.json
+    text: az cosmosdb sql role definition update -a MyAccount -g MyResourceGroup -b @role-definition.json
 """
 
 helps['cosmosdb sql role assignment'] = """
@@ -853,7 +853,7 @@ type: command
 short-summary: Create a SQL role assignment under an Azure Cosmos DB account.
 examples:
   - name: Create a SQL role assignment under an Azure Cosmos DB account.
-    text: az cosmosdb role assignment create -a MyAccount -g MyResourceGroup -s "/" -p MyPrincipalId -d RoleDefinitionId
+    text: az cosmosdb sql role assignment create -a MyAccount -g MyResourceGroup -s "/" -p MyPrincipalId -d RoleDefinitionId
 """
 
 helps['cosmosdb sql role assignment delete'] = """
@@ -861,7 +861,7 @@ type: command
 short-summary: Delete a SQL role assignment under an Azure Cosmos DB account.
 examples:
   - name: Create a SQL role assignment under an Azure Cosmos DB account.
-    text: az cosmosdb role assignment delete -a MyAccount -g MyResourceGroup -i RoleAssignmentId
+    text: az cosmosdb sql role assignment delete -a MyAccount -g MyResourceGroup -i RoleAssignmentId
 """
 
 helps['cosmosdb sql role assignment exists'] = """
@@ -869,7 +869,7 @@ type: command
 short-summary: Check if an Azure Cosmos DB role assignment exists.
 examples:
   - name: Check if an Azure Cosmos DB role assignment exists.
-    text: az cosmosdb role assignment exists -a MyAccount -g MyResourceGroup -i RoleAssignment
+    text: az cosmosdb sql role assignment exists -a MyAccount -g MyResourceGroup -i RoleAssignment
 """
 
 helps['cosmosdb sql role assignment list'] = """
@@ -877,7 +877,7 @@ type: command
 short-summary: List all SQL role assignments under an Azure Cosmos DB account.
 examples:
   - name: List all SQL role assignments under an Azure Cosmos DB account.
-    text: az cosmosdb role assignment list -a MyAccount -g MyResourceGroup
+    text: az cosmosdb sql role assignment list -a MyAccount -g MyResourceGroup
 """
 
 helps['cosmosdb sql role assignment show'] = """
@@ -885,7 +885,7 @@ type: command
 short-summary: Show the properties of a SQL role assignment under an Azure Cosmos DB account.
 examples:
   - name: Show the properties of a SQL role assignment under an Azure Cosmos DB account.
-    text: az cosmosdb role assignment show -a MyAccount -g MyResourceGroup -i RoleAssignmentId
+    text: az cosmosdb sql role assignment show -a MyAccount -g MyResourceGroup -i RoleAssignmentId
 """
 
 helps['cosmosdb sql role assignment update'] = """
@@ -893,7 +893,7 @@ type: command
 short-summary: Update a SQL role assignment under an Azure Cosmos DB account.
 examples:
   - name: Update a SQL role assignment under an Azure Cosmos DB account.
-    text: az cosmosdb role assignment update -a MyAccount -g MyResourceGroup -i RoleAssignmentId -d RoleDefinitionId
+    text: az cosmosdb sql role assignment update -a MyAccount -g MyResourceGroup -i RoleAssignmentId -d RoleDefinitionId
 """
 
 helps['cosmosdb table'] = """
