@@ -80,17 +80,14 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        cli_status_msg = "See https://aka.cli/cli-command-status to learn more about Azure CLI command status " \
-                         "and support."
+        ref_message = "Reference and support levels: https://aka.cli/cli-command-status"
         # Override the experimental message
         import knack.experimental
-        knack.experimental.EXPERIMENTAL_MESSAGE = "This {} is experimental. " + cli_status_msg
-        knack.experimental.IMPLICIT_EXPERIMENTAL_MESSAGE = "Command group '{}' is experimental. " + cli_status_msg
+        knack.experimental.EXPERIMENTAL_MESSAGE = "{} is experimental. " + ref_message
 
         # Override the preview message
         import knack.preview
-        knack.preview.PREVIEW_MESSAGE = "This {} is in preview. " + cli_status_msg
-        knack.preview.IMPLICIT_PREVIEW_MESSAGE = "Command group '{}' is in preview. " + cli_status_msg
+        knack.preview.PREVIEW_MESSAGE = "{} is in preview. " + ref_message
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
