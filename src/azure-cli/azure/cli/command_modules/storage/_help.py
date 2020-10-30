@@ -1098,11 +1098,11 @@ long-summary: >
     You can configure the --public-access using `az storage container set-permission -n CONTAINER_NAME --public-access blob/container/off`.
 examples:
   - name: Create a storage container in a storage account.
-    text: az storage container create -n MyStorageContainer
+    text: az storage container create -n mystoragecontainer
   - name: Create a storage container in a storage account and return an error if the container already exists.
-    text: az storage container create -n MyStorageContainer --fail-on-exist
+    text: az storage container create -n mystoragecontainer --fail-on-exist
   - name: Create a storage container in a storage account and allow public read access for blobs.
-    text: az storage container create -n MyStorageContainer --public-access blob
+    text: az storage container create -n mystoragecontainer --public-access blob
 """
 
 helps['storage container delete'] = """
