@@ -7,6 +7,7 @@ Release History
 ++++++
 
 * Improve index.html. Move report link inside table. Display number of tests in link name.
+* Fix a small problem of job condition.
 
 0.6.0 (10/19/2020)
 ++++++
