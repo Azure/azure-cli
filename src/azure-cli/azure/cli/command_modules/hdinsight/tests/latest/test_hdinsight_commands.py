@@ -48,8 +48,9 @@ class HDInsightClusterTests(ScenarioTest):
         )
 
     # Uses 'rg' kwarg
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
-    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    # _rest_proxy_arguments() will override location to southcentralus, so use this location for rg and sa
+    @ResourceGroupPreparer(name_prefix='hdicli-', location='southcentralus', random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location='southcentralus', parameter_name='storage_account')
     def test_hdinsight_cluster_kafka_with_rest_proxy(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),

@@ -10,7 +10,7 @@ import unittest
 from knack.util import CLIError
 
 from azure.cli.testsdk import (
-    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest, live_only)
+    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, VirtualNetworkPreparer, ScenarioTest, live_only)
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
@@ -194,7 +194,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.httpapplicationrouting.enabled', True)
+            self.check('addonProfiles.httpApplicationRouting.enabled', True)
         ])
 
         # delete
@@ -248,7 +248,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles', None)
+            self.check('addonProfiles.KubeDashboard.enabled', False)
         ])
 
         # scale up
@@ -462,11 +462,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
+    @VirtualNetworkPreparer()
     def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
+        subnet_id = self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name default').get_output_in_json()['id']
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -475,14 +478,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': _process_sp_name(sp_name),
             'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'subnet_id': subnet_id
         })
 
         # create cluster with virtual-node addon
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret} --enable-addons virtual-node ' \
-                     '--aci-subnet-name foo --vnet-subnet-id bar'
+                     '--aci-subnet-name foo --vnet-subnet-id "{subnet_id}"'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
