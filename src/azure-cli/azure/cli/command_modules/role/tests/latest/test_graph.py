@@ -334,8 +334,6 @@ class GraphGroupScenarioTest(ScenarioTest):
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
         domain = username.split('@', 1)[1]
-        if domain == 'microsoft.com' and self.is_live:
-            domain = self.cmd('rest --method get --url https://graph.windows.net/myorganization/domains?api-version=1.6 --query "value[?isVerified==`true`].name|[0]"').get_output_in_json()
         self.kwargs = {
             'user1': self.create_random_name(prefix='deleteme1', length=15),
             'user2': self.create_random_name(prefix='deleteme2', length=15),
