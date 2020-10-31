@@ -297,6 +297,7 @@ def load_arguments(self, _):
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
             c.argument('ppg', type=str, validator=validate_ppg)
+            c.argument('max_surge', type=str, validator=validate_max_surge)
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -308,7 +309,8 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
-
+        c.argument('max_surge', type=str, validator=validate_max_surge)
+        
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')
         c.argument('space_name', options_list=['--space', '-s'])
