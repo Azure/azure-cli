@@ -10,6 +10,8 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from knack.prompting import prompt_y_n, NoTTYException
+from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from ._constants import (
@@ -417,24 +419,6 @@ def get_task_id_from_task_name(cli_ctx, resource_group, registry_name, task_name
     )
 
 
-def parse_actions_from_repositories(allow_or_remove_repository):
-    from .scope_map import ScopeMapActions
-    valid_actions = {action.value for action in ScopeMapActions}
-    REPOSITORIES = 'repositories'
-    actions = []
-    for rule in allow_or_remove_repository:
-        repository = rule[0]
-        if len(rule) < 2:
-            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
-        for action in rule[1:]:
-            action = action.lower()
-            if action not in valid_actions:
-                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
-
-    return actions
-
-
 def prepare_source_location(cmd, source_location, client_registries, registry_name, resource_group_name):
     if not source_location or source_location.lower() == ACR_NULL_CONTEXT:
         source_location = None
@@ -469,3 +453,45 @@ def prepare_source_location(cmd, source_location, client_registries, registry_na
 class ResourceNotFound(CLIError):
     """For exceptions that a resource couldn't be found in user's subscription
     """
+
+
+# Scope & Tolens help functions
+def parse_actions_from_repositories(allow_or_remove_repository):
+    from .scope_map import ScopeMapActions
+    valid_actions = {action.value for action in ScopeMapActions}
+    REPOSITORIES = 'repositories'
+    actions = []
+    for rule in allow_or_remove_repository:
+        repository = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
+        for action in rule[1:]:
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
+
+    return actions
+
+
+def create_default_scope_map(cmd, resource_group_name, registry_name, token_name, repositories, logger):
+    from ._client_factory import cf_acr_scope_maps
+    scope_map_name = '{}-scope-map'.format(token_name)
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    actions = parse_actions_from_repositories(repositories)
+    try:
+        existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
+        # for command idempotency, if the actions are the same, we accept it
+        if sorted(existing_scope_map.actions) == sorted(actions):
+            return existing_scope_map.id
+        raise CLIError('The default scope map was already configured with different repository permissions.'
+                       '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
+                       .format(registry_name, scope_map_name))
+    except CloudError:
+        pass
+    logger.warning('Creating a scope map "%s" for provided repository permissions.', scope_map_name)
+    poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
+                                     actions, "Created by token: {}".format(token_name))
+    scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
+    return scope_map.id
+# endregion

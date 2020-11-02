@@ -3,14 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
+from ._utils import get_resource_group_name_by_registry_name, create_default_scope_map
 
 SCOPE_MAPS = 'scopeMaps'
 TOKENS = 'tokens'
-DEF_SCOPE_MAP_NAME_TEMPLATE = '{}-scope-map'  # append - to minimize incidental collision
 
 
 def acr_token_create(cmd,
@@ -38,7 +36,7 @@ def acr_token_create(cmd,
 
     logger = get_logger(__name__)
     if repository_actions_list:
-        scope_map_id = _create_default_scope_map(cmd, resource_group_name, registry_name,
+        scope_map_id = create_default_scope_map(cmd, resource_group_name, registry_name,
                                                  token_name, repository_actions_list, logger)
     else:
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
@@ -63,28 +61,6 @@ def acr_token_create(cmd,
     _create_default_passwords(cmd, resource_group_name, registry_name, token, logger,
                               expiration_in_days, expiration)
     return token
-
-
-def _create_default_scope_map(cmd, resource_group_name, registry_name, token_name, repositories, logger):
-    from ._client_factory import cf_acr_scope_maps
-    scope_map_name = DEF_SCOPE_MAP_NAME_TEMPLATE.format(token_name)
-    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
-    actions = parse_actions_from_repositories(repositories)
-    try:
-        existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
-        # for command idempotency, if the actions are the same, we accept it
-        if sorted(existing_scope_map.actions) == sorted(actions):
-            return existing_scope_map.id
-        raise CLIError('The default scope map was already configured with different repository permissions.'
-                       '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
-                       .format(registry_name, scope_map_name))
-    except CloudError:
-        pass
-    logger.warning('Creating a scope map "%s" for provided repository permissions.', scope_map_name)
-    poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
-                                     actions, "Created by token: {}".format(token_name))
-    scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
-    return scope_map.id
 
 
 def _create_default_passwords(cmd, resource_group_name, registry_name, token, logger,
