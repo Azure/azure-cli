@@ -19,7 +19,7 @@ curl -Ls -o azure-cli.deb https://mysa.airgapped.cloud.net/packages/azure-cli.de
 
 
 ## Load Cloud Endpoints
-If you are working in an Azure Airgapped Cloud such as `USSec` or `USNat`, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL, then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
+If you are working in an Azure Airgapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL, then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
 
 If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://docs.microsoft.com/cli/azure/manage-clouds-azure-cli?view=azure-cli-latest).
 
