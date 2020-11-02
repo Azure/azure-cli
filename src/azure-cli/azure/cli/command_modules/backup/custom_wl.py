@@ -25,6 +25,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 fabric_name = "Azure"
@@ -637,5 +638,8 @@ def _get_protected_item_instance(item_type):
 def _check_map(item_type, item_type_map):
     if item_type_map.get(item_type) is not None:
         return item_type_map[item_type]
-    error_text = item_type + " is an invalid argument. " + str(list(item_type_map.keys())) + " are the allowed values."
-    raise CLIError(error_text)
+    error_text = "{} is an invalid argument.".format(item_type)
+    recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+    az_error = InvalidArgumentValueError(error_text)
+    az_error.set_recommendation(recommendation_text)
+    raise az_error
