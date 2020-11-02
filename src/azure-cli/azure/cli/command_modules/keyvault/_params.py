@@ -19,6 +19,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
+
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,

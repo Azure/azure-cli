@@ -30,8 +30,7 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, PublicNetworkAccess, \
-        OutboundOnlyPublicNetworkAccessType
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
                                      help='The size of the node. See also: https://docs.microsoft.com/azure/'
@@ -73,6 +72,9 @@ def load_arguments(self, _):
         c.argument('esp', arg_group='Cluster', action='store_true',
                    help='Specify to create cluster with Enterprise Security Package. If omitted, '
                         'creating cluster with Enterprise Security Package will not not allowed.')
+        c.argument('idbroker', arg_group='Cluster', action='store_true',
+                   help='Specify to create ESP cluster with HDInsight ID Broker. If omitted, '
+                        'creating ESP cluster with HDInsight ID Broker will not not allowed.')
         c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
                    arg_group='Cluster', help='The minimal supported TLS version.')
 
@@ -181,15 +183,6 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list_under_subscription(
                        'Microsoft.ManagedIdentity/userAssignedIdentities'),
                    help="The name or ID of user assigned identity.")
-
-        # Private Link Network Settings
-        c.argument('public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(PublicNetworkAccess), help='The public network access type.',
-                   deprecate_info=c.deprecate(expiration='2.14.0'))
-        c.argument('outbound_public_network_access_type', arg_group='Private Link Network Settings',
-                   arg_type=get_enum_type(OutboundOnlyPublicNetworkAccessType),
-                   help='The outbound only public network access type.',
-                   deprecate_info=c.deprecate(expiration='2.14.0'))
 
         # Encryption In Transit
         c.argument('encryption_in_transit', arg_group='Encryption In Transit', arg_type=get_three_state_flag(),

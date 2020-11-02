@@ -69,7 +69,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
         self.kwargs.update({
             'streamingPolicyName': streamingPolicyName,
             'protocols': 'HLS Dash',
-            'urlTemplate': 'xyz.foo.bar',
+            'urlTemplate': 'https://xyz.foo.bar',
             'label': 'label'
         })
 
@@ -125,9 +125,9 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
             'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
             'label': 'label',
-            'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
+            'playReadyUrlTemplate': 'https://playReadyTemplate.foo.bar',
             'playReadyAttributes': 'awesomeAttributes',
-            'widevineUrlTemplate': 'widevineTemplate.foo.bar'
+            'widevineUrlTemplate': 'https://widevineTemplate.foo.bar'
         })
 
         self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cenc-protocols {protocols} --cenc-clear-tracks "{clearTracks}" --cenc-key-to-track-mappings "{keyToTrackMappings}" --cenc-default-key-label {label} --cenc-default-key-policy-name {policyNameFromKeyToTrackMappings1} --cenc-play-ready-template {playReadyUrlTemplate} --cenc-play-ready-attributes {playReadyAttributes} --cenc-widevine-template {widevineUrlTemplate}', checks=[
@@ -184,7 +184,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
             'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
             'label': 'label',
-            'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
+            'playReadyUrlTemplate': 'https://playReadyTemplate.foo.bar',
             'playReadyAttributes': 'awesomeAttributes'
         })
 
@@ -242,7 +242,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'clearTracks': '@' + _get_test_data_file('clearTracks.json'),
             'keyToTrackMappings': '@' + _get_test_data_file('keyToTrackMappings.json'),
             'label': 'label',
-            'playReadyUrlTemplate': 'playReadyTemplate.foo.bar',
+            'playReadyUrlTemplate': 'https://playReadyTemplate.foo.bar',
             'playReadyAttributes': 'awesomeAttributes'
         })
 
@@ -278,7 +278,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'streamingPolicyName': streamingPolicyName,
             'protocols': 'HLS SmoothStreaming Dash',
             'label': 'label',
-            'urlTemplate': 'xyz.foo.bar',
+            'urlTemplate': 'https://xyz.foo.bar',
         })
 
         self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cbcs-protocols {protocols} --cbcs-fair-play-template {urlTemplate} --cbcs-default-key-label {label} --cbcs-fair-play-allow-persistent-license', checks=[
@@ -313,7 +313,7 @@ class AmsStreamingPolicyTests(ScenarioTest):
             'streamingPolicyName': streamingPolicyName,
             'protocols': 'HLS SmoothStreaming Dash',
             'label': 'label',
-            'urlTemplate': 'xyz.foo.bar',
+            'urlTemplate': 'https://xyz.foo.bar',
         })
 
         self.cmd('az ams streaming-policy create -a {amsname} -n {streamingPolicyName} -g {rg} --cbcs-protocols {protocols} --cbcs-default-key-label {label} ', checks=[

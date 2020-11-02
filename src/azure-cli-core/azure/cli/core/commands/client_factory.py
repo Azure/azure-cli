@@ -150,6 +150,7 @@ def _get_mgmt_service_client(cli_ctx,
                              aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
+    from azure.cli.core.util import resource_to_scopes
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
@@ -169,6 +170,7 @@ def _get_mgmt_service_client(cli_ctx,
 
     if is_track2(client_type):
         client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs['credential_scopes'] = resource_to_scopes(resource)
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

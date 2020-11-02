@@ -118,9 +118,11 @@ class CommandRecommender():
                 },
                 headers=headers,
                 timeout=1)
+            telemetry.set_debug_info('AladdinResponseTime', response.elapsed.total_seconds())
+
         except RequestException as ex:
             logger.debug('Recommendation requests.get() exception: %s', ex)
-            telemetry.set_debug_info('AladdinRecommendationService', ex.__class__.__name__)
+            telemetry.set_debug_info('AladdinException', ex.__class__.__name__)
 
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
@@ -174,7 +176,18 @@ class CommandRecommender():
         elif self.aladdin_recommendations:
             recommend_command = self.aladdin_recommendations[0]
 
+        # set the recommened command into Telemetry
+        self._set_recommended_command_to_telemetry(recommend_command)
+
         return recommend_command
+
+    def _set_recommended_command_to_telemetry(self, recommend_command):
+        """Set the recommended command to Telemetry for analysis. """
+
+        if recommend_command in self.aladdin_recommendations:
+            telemetry.set_debug_info('AladdinRecommendCommand', recommend_command)
+        elif recommend_command:
+            telemetry.set_debug_info('ExampleRecommendCommand', recommend_command)
 
     def _disable_aladdin_service(self):
         """Decide whether to disable aladdin request when a command fails.
@@ -238,7 +251,10 @@ class CommandRecommender():
             if parameter_table:
                 for argument in parameter_table.values():
                     options = argument.type.settings['options_list']
-                    options = (option for option in options if not isinstance(option, Deprecated))
+                    options = [option for option in options if not isinstance(option, Deprecated)]
+                    # skip the positional arguments
+                    if not options:
+                        continue
                     try:
                         sorted_options = sorted(options, key=len, reverse=True)
                         standard_form = sorted_options[0]
