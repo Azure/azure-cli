@@ -33,7 +33,7 @@ def process_template(template, preserve_order=True, file_path=None):
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
 
-    # Get rid of extra spaces.
+    # Remove extra spaces, compress multiline string(s)
     result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
 
     try:
