@@ -165,10 +165,11 @@ def _get_sku_object(cmd, sku):
 
 
 def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, access_level):
-    AccessLevel = cmd.get_models('AccessLevel')
+    AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
-    return op.grant_access(resource_group_name, name, access_level or AccessLevel.read, duration_in_seconds)
+    grant_access_data = GrantAccessData(access=access_level or AccessLevel.read, duration_in_seconds=duration_in_seconds)
+    return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
 
 def _is_linux_os(vm):
@@ -379,7 +380,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.tier = tier
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
+    return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds, access_level=None):
@@ -484,10 +485,10 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
         image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
 
     if hyper_v_generation:
-        image.hyper_vgeneration = hyper_v_generation
+        image.hyper_v_generation = hyper_v_generation
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.images.create_or_update(resource_group_name, name, image)
+    return client.images.begin_create_or_update(resource_group_name, name, image)
 
 
 def update_image(instance, tags=None):
@@ -564,7 +565,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         snapshot.disk_access_id = disk_access
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.snapshots.create_or_update, resource_group_name, snapshot_name, snapshot)
+    return sdk_no_wait(no_wait, client.snapshots.begin_create_or_update, resource_group_name, snapshot_name, snapshot)
 
 
 def grant_snapshot_access(cmd, resource_group_name, snapshot_name, duration_in_seconds, access_level=None):
@@ -3180,7 +3181,7 @@ def create_image_gallery(cmd, resource_group_name, gallery_name, description=Non
     gallery = Gallery(description=description, location=location, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.galleries.create_or_update, resource_group_name, gallery_name, gallery)
+    return sdk_no_wait(no_wait, client.galleries.begin_create_or_update, resource_group_name, gallery_name, gallery)
 
 
 def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_name, os_type, publisher, offer, sku,
@@ -3218,6 +3219,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
 
+    print(GalleryImage, GalleryImageIdentifier)
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),

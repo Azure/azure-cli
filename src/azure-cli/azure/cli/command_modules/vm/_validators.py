@@ -6,6 +6,9 @@
 # pylint:disable=too-many-lines
 
 import os
+
+from azure.core.exceptions import ResourceNotFoundError
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -1495,7 +1498,7 @@ def process_image_create_namespace(cmd, namespace):
             compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
             vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
             source_from_vm = True
-    except CloudError:
+    except ResourceNotFoundError:
         pass
 
     if source_from_vm:
@@ -1542,7 +1545,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         try:
             info = compute_client.snapshots.get(resource_group_name, source)
             source_snapshot = info.id
-        except CloudError:
+        except ResourceNotFoundError:
             info = compute_client.disks.get(resource_group_name, source)
             source_disk = info.id
 

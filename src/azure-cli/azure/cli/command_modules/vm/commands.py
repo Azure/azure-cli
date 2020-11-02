@@ -196,12 +196,12 @@ def load_command_table(self, _):
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('grant-access', 'grant_disk_access')
         g.custom_command('list', 'list_managed_disks', table_transformer='[].' + transform_disk_show_table_output)
-        g.command('revoke-access', 'revoke_access')
+        g.command('revoke-access', 'begin_revoke_access')
         g.show_command('show', 'get', table_transformer=transform_disk_show_table_output)
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
@@ -255,7 +255,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_snapshots')
         g.command('revoke-access', 'revoke_access')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('vm', compute_vm_sdk) as g:
