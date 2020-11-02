@@ -3,8 +3,15 @@
 ## Introduction
 While Azure CLI is not fully supported in an airgapped cloud which has no public internet connectivity, most commands can run without issues if the underlying service is supported in that cloud.
 
+Here is a list of known CLI features that are not supported in airgapped clouds:
+* Manage extensions with extension names. For instance, you can not install the `azure-devops` extension with `az extension add --name azure-devops`. You need to provide a local path to a wheel file or a URL for downloading the wheel file that is accessible in the airgapped cloud with `--source` option.
+* `az upgrade` to update to the latest CLI version. You can follow the below install instructions to update CLI.
+* `az find`
+* Commands that install another tool such as `az aks install-cli`, `az acr helm install-cli`, `az storage copy`.
+* External channel operations in `az bot` are not available such as Facebook and Wechat.
+
 ## Install
-We are working on solutions to make Azure CLI more available in airgapped clouds. Before that is ready, you are on your own to download the Azure CLI package with public internet access, copy it to the airgapped cloud environment and then install it locally in the airgapped cloud.
+We are working on solutions to make the installation and upgrade of Azure CLI easier in airgapped clouds. Before that is ready, you need to download the Azure CLI package with public internet access, copy it to the airgapped cloud environment and then install it locally in the airgapped cloud.
 
 Package | Download Address | Install Command
 --- | --- | ---
@@ -19,7 +26,7 @@ curl -Ls -o azure-cli.deb https://mysa.airgapped.cloud.net/packages/azure-cli.de
 
 
 ## Load Cloud Endpoints
-If you are working in an Azure Airgapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL, then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
+If you are working in an Azure AirGapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL, then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
 
 If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://docs.microsoft.com/cli/azure/manage-clouds-azure-cli?view=azure-cli-latest).
 
