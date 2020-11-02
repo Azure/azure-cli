@@ -24,7 +24,7 @@ jobs:
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 20
+    maxParallel: 5
     matrix:
       acr:
         Target: acr
@@ -324,7 +324,7 @@ jobs:
           echo "##vso[task.setvariable variable=Match]0"
         fi
     - task: UsePythonVersion@0
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         versionSpec: '3.8'
         addToPath: true
@@ -399,34 +399,34 @@ jobs:
           git push origin $(USER_BRANCH)
         fi
 
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
     - task: PublishTestResults@2
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
         ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
         ArtifactName: '$(Target).report.parallel.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'

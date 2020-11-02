@@ -18,7 +18,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
     def test_basic_cluster(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
-            'loc': 'southcentralus',
+            'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9)
         })
@@ -47,7 +47,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
     def test_node_type_operation(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
-            'loc': 'southcentralus',
+            'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9)
         })
@@ -94,7 +94,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'cert_tp2': '123BDACDCDFB2C7B250192C6078E47D1E1DB7777',
-            'loc': 'eastus2',
+            'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
             'extName': 'csetest',
