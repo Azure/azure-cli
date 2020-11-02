@@ -482,11 +482,6 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  "--public-ip-address {ip}")
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
-        print('-' * 100)
-        from pprint import pprint
-        pprint(show_data)
-        print('-' * 100)
-
         self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
 
         # Those assertions are not stable, because the order in array frontendIpConfigurations is not fixed
