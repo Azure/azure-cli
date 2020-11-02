@@ -1167,6 +1167,39 @@ def handle_version_update():
         logger.warning(ex)
 
 
+def resource_to_scopes(resource):
+    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
+    For example:
+       'https://management.core.windows.net/' -> ['https://management.core.windows.net//.default']
+       'https://managedhsm.azure.com' -> ['https://managedhsm.azure.com/.default']
+
+    :param resource: The ADAL resource ID
+    :return: A list of scopes
+    """
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # We should not trim the trailing slash, like in https://management.azure.com/
+    # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
+    scope = resource + '/.default'
+    return [scope]
+
+
+def scopes_to_resource(scopes):
+    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
+    For example:
+       ['https://management.core.windows.net//.default'] -> 'https://management.core.windows.net/'
+       ['https://managedhsm.azure.com/.default'] -> 'https://managedhsm.azure.com'
+
+    :param scopes: The MSAL scopes. It can be a list or tuple of string
+    :return: The ADAL resource
+    :rtype: str
+    """
+    scope = scopes[0]
+    if scope.endswith("/.default"):
+        scope = scope[:-len("/.default")]
+
+    return scope
+
+
 def log_command_handler_call(func, *args, **kwargs):
     logger.debug("Calling command handler: module=%s, name=%s, args=%s, kwargs=%s",
                  func.__module__, func.__qualname__, args, kwargs)

@@ -377,6 +377,41 @@ class TestUtils(unittest.TestCase):
             request = send_mock.call_args.args[1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
+    def test_scopes_to_resource(self):
+        from azure.cli.core.util import scopes_to_resource
+        # scopes as a list
+        self.assertEqual(scopes_to_resource(['https://management.core.windows.net//.default']),
+                         'https://management.core.windows.net/')
+        # scopes as a tuple
+        self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
+                         'https://storage.azure.com')
+
+        # resource with trailing slash
+        self.assertEqual(scopes_to_resource(('https://management.azure.com//.default',)),
+                         'https://management.azure.com/')
+        self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
+                         'https://datalake.azure.net/')
+
+        # resource without trailing slash
+        self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
+                         'https://managedhsm.azure.com')
+
+    def test_resource_to_scopes(self):
+        from azure.cli.core.util import resource_to_scopes
+        # resource converted to a scopes list
+        self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
+                         ['https://management.core.windows.net//.default'])
+
+        # resource with trailing slash
+        self.assertEqual(resource_to_scopes('https://management.azure.com/'),
+                         ['https://management.azure.com//.default'])
+        self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
+                         ['https://datalake.azure.net//.default'])
+
+        # resource without trailing slash
+        self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
+                         ['https://managedhsm.azure.com/.default'])
+
 
 class TestBase64ToHex(unittest.TestCase):
 

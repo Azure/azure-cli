@@ -486,18 +486,15 @@ def load_command_table(self, _):
 
     with self.command_group('mysql server',
                             mysql_location_based_performance_tier_sdk,
-                            client_factory=cf_mysql_location_based_performance_tier_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
 
     with self.command_group('postgres server',
                             postgres_location_based_performance_tier_sdk,
-                            client_factory=cf_postgres_location_based_performance_tier_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
 
     with self.command_group('mariadb server',
                             mariadb_location_based_performance_tier_sdk,
-                            client_factory=cf_mariadb_location_based_performance_tier_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_mariadb_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
