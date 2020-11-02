@@ -610,7 +610,9 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
             content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
         from ..url_quote_util import encode_url_path
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token))
+        from urllib.parse import quote
+        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
+                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
     return sas_token
 
 
