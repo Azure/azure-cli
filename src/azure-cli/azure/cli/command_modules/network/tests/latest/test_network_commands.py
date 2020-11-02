@@ -482,13 +482,18 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
                  "--public-ip-address {ip}")
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
-        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
-        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
-        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
-        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+        print('-' * 100)
+        from pprint import pprint
+        pprint(show_data)
+        print('-' * 100)
 
-        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
-        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+        self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][0]["privateIpAddress"], "10.0.0.17")
+
+        self.assertEqual(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
 
         self.cmd("network application-gateway delete -g {rg} -n {appgw}")
 

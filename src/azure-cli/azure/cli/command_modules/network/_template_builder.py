@@ -121,7 +121,15 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     frontend_ip_configs = []
 
-    if private_ip_address is not None or public_ip_id is None:
+    if public_ip_id:
+        frontend_public_ip = _build_frontend_ip_config(cmd, frontend_public_ip_name,
+                                                       public_ip_id=public_ip_id,
+                                                       enable_private_link=enable_private_link,
+                                                       private_link_configuration_id=private_link_configuration_id)
+        frontend_ip_configs.append(frontend_public_ip)
+
+        frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_public_ip_name)
+    if private_ip_address != '' or public_ip_id is None:
         enable_private_link = False if public_ip_id else enable_private_link
         frontend_private_ip = _build_frontend_ip_config(cmd, frontend_private_ip_name,
                                                         subnet_id=subnet_id,
@@ -132,14 +140,6 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         frontend_ip_configs.append(frontend_private_ip)
 
         frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_private_ip_name)
-    if public_ip_id:
-        frontend_public_ip = _build_frontend_ip_config(cmd, frontend_public_ip_name,
-                                                       public_ip_id=public_ip_id,
-                                                       enable_private_link=enable_private_link,
-                                                       private_link_configuration_id=private_link_configuration_id)
-        frontend_ip_configs.append(frontend_public_ip)
-
-        frontend_ip_config_id = _ag_subresource_id('frontendIPConfigurations', frontend_public_ip_name)
 
     http_listener = {
         'name': http_listener_name,
