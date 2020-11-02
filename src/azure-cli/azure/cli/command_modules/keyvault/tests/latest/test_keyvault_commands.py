@@ -787,7 +787,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
 
 class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
-    #@record_only()
+    @record_only()
     def test_keyvault_hsm_key_using_hsm_name(self):
         self.kwargs.update({
             'hsm_name': ACTIVE_HSM_NAME,
