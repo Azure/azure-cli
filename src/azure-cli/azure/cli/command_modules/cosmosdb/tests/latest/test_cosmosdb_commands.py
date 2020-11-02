@@ -726,11 +726,11 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb sql role definition exists -g {rg} -a {acc} -i {role_def_id}').get_output_in_json()
 
-        role_definition_show = self.cmd('az cosmosdb sql role definition show -g {rg} -a {acc} -i {role_def_id}', checks=[
+        self.cmd('az cosmosdb sql role definition show -g {rg} -a {acc} -i {role_def_id}', checks=[
             self.check('roleName', 'roleName')
         ])
 
-        role_definition_update = self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
+        self.cmd('az cosmosdb sql role definition update -g {rg} -a {acc} -b "{update_body}"', checks=[
             self.check('id', fully_qualified_role_def_id),
             self.check('roleName', 'roleName2'),
             self.check('sqlRoleDefinitionGetResultsType', 'CustomRole'),
@@ -748,7 +748,7 @@ class CosmosDBTests(ScenarioTest):
         role_definition_list = self.cmd('az cosmosdb sql role definition list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_definition_list) == 2
 
-        role_assignment_create = self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}', checks=[
+        self.cmd('az cosmosdb sql role assignment create -g {rg} -a {acc} -s {scope} -p {principal_id} -d {fully_qualified_role_def_id} -i {role_assignment_id}', checks=[
             self.check('id', fully_qualified_role_assignment_id),
             self.check('roleDefinitionId', fully_qualified_role_def_id),
             self.check('scope', scope),
@@ -757,7 +757,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb sql role assignment exists -g {rg} -a {acc} -i {role_assignment_id}').get_output_in_json()
 
-        role_assignment_show = self.cmd('az cosmosdb sql role assignment show -g {rg} -a {acc} -i {role_assignment_id}', checks=[
+        self.cmd('az cosmosdb sql role assignment show -g {rg} -a {acc} -i {role_assignment_id}', checks=[
             self.check('id', fully_qualified_role_assignment_id)
         ])
 
@@ -765,7 +765,7 @@ class CosmosDBTests(ScenarioTest):
             'fully_qualified_role_def_id2': role_definition_create2['name']
         })
 
-        role_assignment_update = self.cmd('az cosmosdb sql role assignment update -g {rg} -a {acc} -d {fully_qualified_role_def_id2} -i {fully_qualified_role_assignment_id}', checks=[
+        self.cmd('az cosmosdb sql role assignment update -g {rg} -a {acc} -d {fully_qualified_role_def_id2} -i {fully_qualified_role_assignment_id}', checks=[
             self.check('id', fully_qualified_role_assignment_id),
             self.check('roleDefinitionId', role_definition_create2['id']),
             self.check('scope', scope),
