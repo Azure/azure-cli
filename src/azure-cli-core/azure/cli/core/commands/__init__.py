@@ -86,7 +86,7 @@ def _expand_file_prefixed_files(args):
                 raise FileNotFoundError('File "{}" does not exist.'.format(path))
             if not os.path.isfile(path):
                 raise FileNotFoundError('"{}" is not a file.')
-            content = read_file_content(os.path.expanduser(path), allow_binary=True)
+            content = read_file_content(path, allow_binary=True)
 
         return content.rstrip(os.linesep)
 
