@@ -336,6 +336,7 @@ def _build_sp_result(subscription_id, location, resource_group_name, account_nam
     result = {
         'SubscriptionId': subscription_id,
         'ServicePrincipalName': sp_name,
+        'Region': location,
         'Location': location,
         'ResourceGroup': resource_group_name,
         'Role': role,
