@@ -162,6 +162,11 @@ def process_hsm_name(ns):
         ns.hsm_name = ns.identifier
 
 
+def process_release_policy(ns):
+    if ns.release_policy and not ns.exportable:
+        ns.exportable = ns.key_attributes.exportable = True
+
+
 def validate_vault_name_and_hsm_name(ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)

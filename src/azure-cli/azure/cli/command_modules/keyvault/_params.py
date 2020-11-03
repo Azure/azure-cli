@@ -28,7 +28,7 @@ from azure.cli.command_modules.keyvault._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_name_and_hsm_name, set_vault_base_url,
+    validate_vault_name_and_hsm_name, set_vault_base_url, process_release_policy,
     process_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
@@ -352,7 +352,8 @@ def load_arguments(self, _):
             c.argument('release_policy', options_list=['--policy'],
                        help='The policy rules under which the key can be exported encoded with JSON. '
                             'Use @{file} to load from a file(e.g. @my_policy.json).',
-                       type=get_json_object, is_preview=True)
+                       type=get_json_object, is_preview=True,
+                       validator=process_release_policy)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
