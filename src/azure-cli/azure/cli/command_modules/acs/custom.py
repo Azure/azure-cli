@@ -24,6 +24,7 @@ import threading
 import time
 import uuid
 import webbrowser
+from math import isnan
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
@@ -61,7 +62,6 @@ from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinux
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
@@ -95,6 +95,8 @@ from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _s
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
+
+from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
 
 logger = get_logger(__name__)
 
@@ -1590,6 +1592,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_ahub=False,
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
+               node_osdisk_type=None,
                node_osdisk_size=0,
                node_osdisk_diskencryptionset_id=None,
                node_count=3,
@@ -1621,6 +1624,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
+               ppg=None,
                max_pods=0,
                min_count=None,
                max_count=None,
@@ -1662,8 +1666,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
-        storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
+        proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
         max_pods=int(max_pods) if max_pods else None,
@@ -1672,6 +1676,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
+
+    if node_osdisk_type:
+        agent_pool_profile.os_disk_type = node_osdisk_type
 
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool_profile)
 
@@ -2426,8 +2433,12 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon == 'aciConnector':
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # addon name is case insensitive
-        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
+
+        # honor addon names defined in Azure CLI
+        for key in list(addon_profiles):
+            if key.lower() == addon.lower() and key != addon:
+                addon_profiles[addon] = addon_profiles.pop(key)
+
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
@@ -2737,8 +2748,9 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
-    if 'loganalyticsworkspaceresourceid' in addon.config:
-        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+    for key in list(addon.config):
+        if key.lower() == 'loganalyticsworkspaceresourceid' and key != 'logAnalyticsWorkspaceResourceID':
+            addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop(key)
 
     workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
 
@@ -2894,15 +2906,20 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       zones=None,
                       enable_node_public_ip=False,
                       node_vm_size=None,
+                      node_osdisk_type=None,
                       node_osdisk_size=0,
                       node_count=3,
                       vnet_subnet_id=None,
+                      ppg=None,
                       max_pods=0,
                       os_type="Linux",
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+                      eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
+                      spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
                       mode="User",
@@ -2936,21 +2953,31 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
-        storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
+        proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
+        scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         mode=mode
     )
 
+    if priority == CONST_SCALE_SET_PRIORITY_SPOT:
+        agent_pool.scale_set_eviction_policy = eviction_policy
+        if isnan(spot_max_price):
+            spot_max_price = -1
+        agent_pool.spot_max_price = spot_max_price
+
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
 
     if node_osdisk_size:
         agent_pool.os_disk_size_gb = int(node_osdisk_size)
+
+    if node_osdisk_type:
+        agent_pool.os_disk_type = node_osdisk_type
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool)
 

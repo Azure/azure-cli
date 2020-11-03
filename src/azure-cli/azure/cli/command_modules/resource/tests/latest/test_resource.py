@@ -351,8 +351,6 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
-
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
                  checks=self.check('tags', {'cli-test': 'test'}))
@@ -375,8 +373,6 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
-
         # Test Microsoft.ContainerInstance/containerGroups
         self.kwargs.update({
             'container_group_name': self.create_random_name('clicontainer', 16),
@@ -388,6 +384,14 @@ class TagScenarioTest(ScenarioTest):
         self.kwargs['container_id'] = container['id']
         self.cmd('resource tag --ids {container_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {container_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource tag --ids {vault_id} {webhook_id} {container_id} --tags {tag}', checks=[
+            self.check('length(@)', 3),
+            self.check('[0].tags', {'cli-test': 'test'})
+        ])
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -731,6 +735,11 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
             self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
         ]).get_output_in_json()
+
+        self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
+            self.check('description', None),
+            self.check('display_name', None),
+        ])
 
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
@@ -1715,6 +1724,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
             'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"',
@@ -1722,7 +1732,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
 
         self.kwargs['template_spec_version_id'] = result['id']
 
-        self.cmd('deployment sub validate --location WestUS --template-spec {template_spec_version_id} --parameters "{params_uri}"', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-spec {template_spec_version_id} --parameters "{params_uri}"  --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 

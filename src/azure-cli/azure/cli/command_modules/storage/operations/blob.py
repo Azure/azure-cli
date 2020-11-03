@@ -29,9 +29,7 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                         default_encryption_scope=None, deny_encryption_scope_override=None):
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
-        from azure.cli.core.azclierror import AzCLIErrorType
-        from azure.cli.core.azclierror import AzCLIError
-        raise AzCLIError(AzCLIErrorType.ValidationError, 'The specified container already exists.')
+        raise CLIError('The specified container already exists.')
 
     if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
         BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)

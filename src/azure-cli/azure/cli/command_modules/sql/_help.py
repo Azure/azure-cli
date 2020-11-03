@@ -22,29 +22,59 @@ type: group
 short-summary: Manage a database's auditing policy.
 """
 
+helps['sql db audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the database's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that database's audit policy exists
+    text: az sql db audit-policy wait -g mygroup -s myserver -n mydb --exists
+"""
+
 helps['sql db audit-policy update'] = """
 type: command
 short-summary: Update a database's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled --storage-account mystorage
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
-  - name: Add an audit action.
-    text: |
-        az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --event-hub-target-state Disabled
 """
 
 helps['sql db copy'] = """
@@ -56,6 +86,9 @@ examples:
     text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --service-objective S0
   - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a copy of an existing GeneralPurpose database.
     text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb -f Gen4 -c 1
+  - name: Create a database with local backup storage redundancy as a copy of an existing database
+    text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --backup-storage-redundancy Local
+
 """
 
 helps['sql db create'] = """
@@ -75,7 +108,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --auto-pause-delay 120
   - name: Create a Hyperscale Gen5 2 vcore database with 2 read replicas
     text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
-
+  - name: Create a GeneralPurpose database with locally redundant backup storage
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
 """
 
 helps['sql db delete'] = """
@@ -267,6 +301,8 @@ examples:
     text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --service-objective S0
   - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a secondary replica of an existing GeneralPurpose database
     text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb -f Gen4 -c 1
+  - name: Create a database with with zone redundant backup storage as a secondary replica of an existing database.
+    text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --backup-storage-redundancy Zone
 """
 
 helps['sql db replica delete-link'] = """
@@ -300,6 +336,9 @@ examples:
     text: |
         az sql db restore --dest-name MyDest --edition GeneralPurpose --name MyAzureSQLDatabase --resource-group MyResourceGroup --server myserver --subscription MySubscription --time "2018-05-20T05:34:22"
     crafted: true
+  - name: Create a new database with geo-redundant backup storage by restoring from a backup. (autogenerated)
+    text: |
+        az sql db restore --dest-name MyDest --edition GeneralPurpose --name MyAzureSQLDatabase --resource-group MyResourceGroup --server myserver --subscription MySubscription --time "2018-05-20T05:34:22" --backup-storage-redundancy Geo
 """
 
 helps['sql db show'] = """
@@ -383,6 +422,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb -z false
   - name: Update database to serverless compute model
     text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
+  - name: Update database with locally redundant backup storage
+    text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
 
 """
 
@@ -628,6 +669,35 @@ short-summary: Returns a list of managed instance Active Directory Administrator
 helps['sql mi ad-admin update'] = """
 type: command
 short-summary: Updates an existing managed instance Active Directory administrator.
+"""
+
+helps['sql mi ad-only-auth'] = """
+type: group
+short-summary: Manage a Managed Instance's Azure Active Directly only settings.
+"""
+
+helps['sql mi ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Enable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth enable --resource-group mygroup --name myMI
+"""
+
+helps['sql mi ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Disable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth disable --resource-group mygroup --name myMI
+"""
+
+helps['sql mi ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a managed instance
+    text: az sql mi ad-only-auth get --resource-group mygroup --name myMI
 """
 
 helps['sql mi create'] = """
@@ -964,9 +1034,46 @@ type: command
 short-summary: Update an existing server Active Directory administrator.
 """
 
+helps['sql server ad-only-auth'] = """
+type: group
+short-summary: Manage Azure Active Directly only Authentication settings for this Server.
+"""
+
+helps['sql server ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Server.
+examples:
+  - name: Enable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth enable --resource-group mygroup --name myServer
+"""
+
+helps['sql server ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Server.
+examples:
+  - name: Disable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth disable --resource-group mygroup --name myServer
+"""
+
+helps['sql server ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a sql server
+    text: az sql server ad-only-auth get --resource-group mygroup --name myServer
+"""
+
 helps['sql server audit-policy'] = """
 type: group
 short-summary: Manage a server's auditing policy.
+"""
+
+helps['sql server audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the server's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that server's audit policy exists
+    text: az sql server audit-policy wait -g mygroup -n myserver --exists
 """
 
 helps['sql server audit-policy update'] = """
@@ -975,23 +1082,45 @@ short-summary: Update a server's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql server audit-policy update -g mygroup -n myserver --state Enabled --storage-account mystorage
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql server audit-policy update -g mygroup -n myserver \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
-  - name: Add an audit action.
-    text: |
-        az sql server audit-policy update -g mygroup -n myserver \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql server audit-policy update -g mygroup -n myserver --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql server audit-policy update -g mygroup -n myserver --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --event-hub-target-state Disabled
 """
 
 helps['sql server conn-policy'] = """

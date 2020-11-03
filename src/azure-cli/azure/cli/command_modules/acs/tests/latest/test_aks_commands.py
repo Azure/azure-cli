@@ -10,7 +10,7 @@ import unittest
 from knack.util import CLIError
 
 from azure.cli.testsdk import (
-    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest, live_only)
+    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, VirtualNetworkPreparer, ScenarioTest, live_only)
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import (StringContainCheck, StringContainCheckIgnoreCase)
 from azure.cli.command_modules.acs._format import version_to_tuple
@@ -194,7 +194,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles.httpapplicationrouting.enabled', True)
+            self.check('addonProfiles.httpApplicationRouting.enabled', True)
         ])
 
         # delete
@@ -248,7 +248,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].name', '{nodepool_name}'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
-            self.check('addonProfiles', None)
+            self.check('addonProfiles.KubeDashboard.enabled', False)
         ])
 
         # scale up
@@ -462,11 +462,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
+    @VirtualNetworkPreparer()
     def test_aks_create_default_service_with_virtual_node_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
+        subnet_id = self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name default').get_output_in_json()['id']
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -475,14 +478,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': _process_sp_name(sp_name),
             'client_secret': sp_password,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'subnet_id': subnet_id
         })
 
         # create cluster with virtual-node addon
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
                      '--service-principal={service_principal} --client-secret={client_secret} --enable-addons virtual-node ' \
-                     '--aci-subnet-name foo --vnet-subnet-id bar'
+                     '--aci-subnet-name foo --vnet-subnet-id "{subnet_id}"'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -1983,6 +1987,128 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'UpgradingNodeImageVersion')
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_spot_node_pool(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        spot_node_pool_name = self.create_random_name('s', 6)
+        spot_max_price = 88.88888  # Good number with large value.
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'spot_node_pool_name': spot_node_pool_name,
+            'spot_max_price': spot_max_price,
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\')
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value} ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_spot_node_pool_cmd = 'aks nodepool add ' \
+                                    '--resource-group={resource_group} ' \
+                                    '--cluster-name={name} ' \
+                                    '-n {spot_node_pool_name} ' \
+                                    '--priority Spot ' \
+                                    '--spot-max-price {spot_max_price} ' \
+                                    '-c 1'
+        self.cmd(create_spot_node_pool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', spot_node_pool_name),
+            self.check('scaleSetEvictionPolicy', 'Delete'),
+            self.check('nodeTaints[0]', 'kubernetes.azure.com/scalesetpriority=spot:NoSchedule'),
+            self.check('spotMaxPrice', spot_max_price)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_ppg(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('p', 10)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'service_principal': _process_sp_name(sp_name),
+            'client_secret': sp_password,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ppg': self.generate_ppg_id(resource_group, resource_group_location)
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+            '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+            '--service-principal={service_principal} --client-secret={client_secret} --ppg={ppg} '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].proximityPlacementGroupId', '{ppg}')
+        ])
+
+        # add node pool
+        create_ppg_node_pool_cmd = 'aks nodepool add ' \
+            '--resource-group={resource_group} ' \
+            '--cluster-name={name} ' \
+            '-n {node_pool_name} ' \
+            '--ppg={ppg} '
+        self.cmd(create_ppg_node_pool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', node_pool_name),
+            self.check('proximityPlacementGroupId', '{ppg}')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_managed_disk(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--generate-ssh-keys ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--node-osdisk-type=Managed'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].osDiskType', 'Managed'),
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_ephemeral_disk(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--generate-ssh-keys ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--node-osdisk-type=Ephemeral --node-osdisk-size 60'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('agentPoolProfiles[0].osDiskType', 'Ephemeral'),
+        ])
+    
     @classmethod
     def generate_ssh_keys(cls):
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
@@ -1999,6 +2125,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
                                .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
         return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
+
+    def generate_ppg_id(self, resource_group, location):
+        ppg_name = self.create_random_name('clippg', 16)
+        ppg = self.cmd('az ppg create -n {} -g {} --location {}'
+                       .format(ppg_name, resource_group, location)).get_output_in_json()
+        return ppg.get("id")
 
     def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""

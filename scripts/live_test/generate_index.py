@@ -8,6 +8,7 @@ Generate index.html of testing results HTML pages.
 """
 import traceback
 import os
+import re
 import requests
 import xml.etree.ElementTree as ET
 
@@ -19,6 +20,8 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     :param container_url:
     :return:
     """
+    print('Enter generate()')
+    # [{'name': name, 'url': url}]
     data = []
     url = container_url + '?restype=container&comp=list'
     content = requests.get(url).content
@@ -38,7 +41,7 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
                 data.append({'name': name, 'url': url})
         break
     print(data)
-    html = render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+    html = render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
     with open('index.html', 'w') as f:
         f.write(html)
 
@@ -46,9 +49,11 @@ def generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_
     cmd = 'az storage blob upload -f index.html -c {} -n index.html --account-name clitestresultstac'.format(container)
     print('Running: ' + cmd)
     os.system(cmd)
+    print('Exit generate()')
 
 
-def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE):
+    print('Enter render()')
     content = """
     <!DOCTYPE html>
     <html>
@@ -65,6 +70,7 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     """
 
     live = 'True' if USER_LIVE == '--live' else 'False'
+    date = container.split('-')[0]
 
     content += """
     <p>
@@ -72,15 +78,19 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     Branch: {}<br>
     Commit: {}<br>
     Live: {}<br>
+    Date: {}
     </p>
-    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live)
+    """.format(USER_REPO, USER_BRANCH, COMMIT_ID, live, date)
 
     content += """
     <p>
-    <b>User Manual of Live Test Pipeline</b>
+    <b>Pass: {}, Fail: {}, Pass rate: {}</b>
     </p>
+    """.format(testdata.total[1], testdata.total[2], testdata.total[3])
+
+    content += """
     <p>
-    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>Word</a> 
+    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>User Manual of Live Test Pipeline</a> 
     </p>
     """
 
@@ -89,21 +99,12 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
     <table>
       <tr>
         <th>Module</th>
-        <th>Passed</th>
-        <th>Failed</th>
+        <th>Pass</th>
+        <th>Fail</th>
         <th>Pass rate</th>
+        <th>Reports</th>
       </tr>
     """
-
-    for module, passed, failed, rate in testdata.modules:
-        table += """
-          <tr>
-            <td>{}</td>
-            <td>{}</td>
-            <td>{}</td>
-            <td>{}</td>
-          </tr>
-        """.format(module, passed, failed, rate)
 
     table += """
       <tr>
@@ -111,27 +112,64 @@ def render(data, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USE
         <td>{}</td>
         <td>{}</td>
         <td>{}</td>
+        <td></td>
       </tr>
-    </table>
     """.format(testdata.total[1], testdata.total[2], testdata.total[3])
 
+    for module, passed, failed, rate in testdata.modules:
+        reports = ''
+        for x in data:
+            name = x['name']
+            url = x['url']
+            if name.startswith(module + '.'):
+                display_name = 'report'
+                if 'parallel' in name:
+                    display_name = 'parallel'
+                elif 'sequential' in name:
+                    display_name = 'sequential'
+                try:
+                    html = requests.get(url).content.__str__()
+                    pattern = re.compile('\\d+ tests ran in')
+                    match = pattern.search(html)
+                    number = match.group().split()[0]
+                    if number.isdigit():
+                        display_name += '(' + number + ')'
+                except:
+                    traceback.print_exc()
+                reports += '<a href="{}">{}</a> '.format(url, display_name)
+        table += """
+          <tr>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+          </tr>
+        """.format(module, passed, failed, rate, reports)
+
+    table += """
+    </table>
+    """
     content += table
 
-    content += """
-    <p><b>Reports</b></p>
-    """
-
-    for item in data:
-        name = item['name']
-        url = item['url']
-        content += """
-        <a href={}>{}</a><br>
-        """.format(url, name)
+    # content += """
+    # <p><b>Reports</b></p>
+    # """
+    #
+    # for item in data:
+    #     name = item['name']
+    #     url = item['url']
+    #     content += """
+    #     <a href={}>{}</a><br>
+    #     """.format(url, name)
 
     content += """
     </body>
     </html>
     """
+
+    print(content)
+    print('Exit render()')
     return content
 
 
