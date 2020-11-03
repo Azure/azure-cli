@@ -422,7 +422,7 @@ Virtual Network Rule Arguments
 
 ## Error Handling
 
-Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_hanlding_guidelines.md) to select a proper error type and write an actionable error message.
+Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md) to select a proper error type and write an actionable error message.
 
 ## Coding Practices
 
