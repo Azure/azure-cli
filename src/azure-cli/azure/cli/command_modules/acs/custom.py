@@ -97,6 +97,14 @@ from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_prov
                             update_load_balancer_profile, create_load_balancer_profile)
 
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
+from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+from ._consts import CONST_MONITORING_ADDON_NAME
+from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
+from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
+from ._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
+from ._consts import CONST_AZURE_POLICY_ADDON_NAME
+from ._consts import ADDONS
 
 logger = get_logger(__name__)
 
@@ -1450,7 +1458,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     instance = client.get(resource_group_name, name)
     addon_profiles = instance.addon_profiles or {}
     # addon name is case insensitive
-    addon_profile = next((addon_profiles[k] for k in addon_profiles if k.lower() == 'kubeDashboard'.lower()),
+    addon_profile = next((addon_profiles[k] for k in addon_profiles
+                          if k.lower() == CONST_KUBE_DASHBOARD_ADDON_NAME.lower()),
                          ManagedClusterAddonProfile(enabled=False))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
@@ -1564,12 +1573,12 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         is_service_principal = True
     elif (
             (hasattr(result, 'addon_profiles')) and
-            ('omsagent' in result.addon_profiles) and
-            (hasattr(result.addon_profiles['omsagent'], 'identity')) and
-            (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
+            (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
+            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], 'identity')) and
+            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity, 'object_id'))
     ):
         logger.info('omsagent MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
+        service_principal_msi_id = result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity.object_id
         is_service_principal = False
 
     if service_principal_msi_id is not None:
@@ -1812,9 +1821,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         vnet_subnet_id
     )
     monitoring = False
-    if 'omsagent' in addon_profiles:
+    if CONST_MONITORING_ADDON_NAME in addon_profiles:
         monitoring = True
-        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
 
     aad_profile = None
     if enable_aad:
@@ -1969,8 +1978,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
-    if 'omsagent' in instance.addon_profiles and instance.addon_profiles['omsagent'].enabled:
-        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+    if (CONST_MONITORING_ADDON_NAME in instance.addon_profiles and
+            instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled):
+        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, name, instance))
         cloud_name = cmd.cli_ctx.cloud.name
@@ -2011,15 +2021,6 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name)
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
-
-
-ADDONS = {
-    'http_application_routing': 'httpApplicationRouting',
-    'monitoring': 'omsagent',
-    'virtual-node': 'aciConnector',
-    'kube-dashboard': 'kubeDashboard',
-    'azure-policy': 'azurepolicy'
-}
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -2430,7 +2431,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon_arg not in ADDONS:
             raise CLIError("Invalid addon name: {}.".format(addon_arg))
         addon = ADDONS[addon_arg]
-        if addon == 'aciConnector':
+        if addon == CONST_VIRTUAL_NODE_ADDON_NAME:
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
 
@@ -2443,7 +2444,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
             # special config handling for certain addons
-            if addon == 'omsagent':
+            if addon == CONST_MONITORING_ADDON_NAME:
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
                                    'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
@@ -2458,8 +2459,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
-                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
-            elif addon.lower() == ('aciConnector' + os_type).lower():
+                addon_profile.config = {CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
+            elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
                                    'To change virtual-node configuration, run '
@@ -2467,11 +2468,11 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                                    'before enabling it again.')
                 if not subnet_name:
                     raise CLIError('The aci-connector addon requires setting a subnet name.')
-                addon_profile.config = {'SubnetName': subnet_name}
+                addon_profile.config = {CONST_VIRTUAL_NODE_SUBNET_NAME: subnet_name}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
-                if addon == 'kubeDashboard':
+                if addon == CONST_KUBE_DASHBOARD_ADDON_NAME:
                     addon_profiles[addon] = ManagedClusterAddonProfile(enabled=False)
                 else:
                     raise CLIError("The addon {} is not installed.".format(addon))
@@ -2506,10 +2507,10 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
-        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('http_application_routing')
     if 'kube-dashboard' in addons:
-        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('kube-dashboard')
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
@@ -2523,22 +2524,22 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             workspace_resource_id = '/' + workspace_resource_id
         if workspace_resource_id.endswith('/'):
             workspace_resource_id = workspace_resource_id.rstrip('/')
-        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
-            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
+            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
         addons.remove('monitoring')
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
     if 'azure-policy' in addons:
-        addon_profiles['azurepolicy'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('azure-policy')
     if 'virtual-node' in addons:
         if not aci_subnet_name or not vnet_subnet_id:
             raise CLIError('"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         # TODO: how about aciConnectorwindows, what is its addon name?
-        addon_profiles['aciConnectorLinux'] = ManagedClusterAddonProfile(
+        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True,
-            config={'SubnetName': aci_subnet_name}
+            config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
         )
         addons.remove('virtual-node')
     # error out if any (unrecognized) addons remain
@@ -2749,10 +2750,11 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
     for key in list(addon.config):
-        if key.lower() == 'loganalyticsworkspaceresourceid' and key != 'logAnalyticsWorkspaceResourceID':
-            addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop(key)
+        if (key.lower() == CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID.lower() and
+                key != CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID):
+            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID] = addon.config.pop(key)
 
-    workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+    workspace_resource_id = addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
 
     workspace_resource_id = workspace_resource_id.strip()
 
