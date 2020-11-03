@@ -177,11 +177,17 @@ def validate_vault_name_and_hsm_name(ns):
 def get_attribute_validator(name, attribute_class, create=False):
     def validator(ns):
         ns_dict = ns.__dict__
+        exportable = ns_dict.get('exportable', None)
+        kwargs = {}
+        if exportable:
+            kwargs = {'exportable': True}
+
         enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled=enabled,
             not_before=ns_dict.pop('not_before', None),
-            expires=ns_dict.pop('expires', None))
+            expires=ns_dict.pop('expires', None),
+            **kwargs)
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
