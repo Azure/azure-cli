@@ -762,7 +762,7 @@ parameters:
 
 helps['aks remove-dev-spaces'] = """
 type: command
-short-summary: (Deprecated) Remove Azure Dev Spaces from a managed Kubernetes cluster.
+short-summary: (DEPRECATED) Remove Azure Dev Spaces from a managed Kubernetes cluster.
 examples:
   - name: Remove Azure Dev Spaces from a managed Kubernetes cluster.
     text: |-
@@ -854,7 +854,7 @@ examples:
 
 helps['aks use-dev-spaces'] = """
 type: command
-short-summary: (Deprecated) Use Azure Dev Spaces with a managed Kubernetes cluster.
+short-summary: (DEPRECATED) Use Azure Dev Spaces with a managed Kubernetes cluster.
 parameters:
   - name: --update
     type: bool
