@@ -727,7 +727,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
 
-        cipher_suite = 'TLS_RSA_WITH_AES_128_CBC_SHA256'
+        cipher_suite = 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'
         self.kwargs['cipher'] = cipher_suite
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {cipher} --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
