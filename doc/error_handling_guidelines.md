@@ -4,7 +4,7 @@ This document aims to provide the guidelines for command group authors to onboar
 
 Previously in Azure CLI, `CLIError` is widely used to wrap the error messages after the different kinds of error types being caught. Now, `CLIError` is deprecated and it is replaced by a set of new designed error types, which will provide more clear structures for error categorizing and also more actionable error outputs for user experience.
 
-For the new commands authoring, here are what need to be done to onboard. __Any PRs not following rules here will be rejected.__ For the existing `CLIError` in command groups, command group owners should schedule to replace them with the new error types.
+For the new commands authoring, here are what need to be done to get on board. __Any PRs not following rules here will be rejected.__ For the existing `CLIError` in command groups, command group owners should schedule to replace them with the new error types.
 1. [__Mandatory__] Use the new designed error types instead of CLIError, detail section [here](#Error-Type)
 2. [__Mandatory__] Follow the error message authoring guidelines, detail section [here](#Error-Message)
 3. [__Recommendation__] Provide recommendations for users to take action, detail section [here](#Error-Recommendation)
