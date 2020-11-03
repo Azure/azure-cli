@@ -71,7 +71,7 @@ __init__(self, error_msg, recommendation=None):
 - `error_msg`: _string_, _required_. A clear message shown to users what the error is.
 - `recommendation`: _string_ or _list_, _optional_. Recommendations telling users what action to take.
 
-### Add A New Error Type
+### Add a New Error Type
 
 If there is not a proper error type for your case and the error is general enough, consider defining a new error type in [azure/cli/core/azclierror.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/azclierror.py). The defined error type should be inherited from one of the errors define in the second layer (`UserFault`, `ClientError`, `ServiceError`).
 
