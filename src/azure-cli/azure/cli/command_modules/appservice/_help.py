@@ -139,7 +139,7 @@ examples:
   - name: Add Access Restriction opening (Allow) named remote_agents in vNet 'corp01' in rg 'vnets' with subnet 'agents'
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
-    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -989,7 +989,7 @@ examples:
   - name: Add Access Restriction opening (Allow) named remote_agents in vNet 'corp01' in rg 'vnets' with subnet 'agents'
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
   - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
-    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --priority 800 --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
 """
 
 helps['webapp config access-restriction remove'] = """
