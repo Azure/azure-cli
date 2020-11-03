@@ -136,6 +136,10 @@ examples:
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
   - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
     text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+  - name: Add Access Restriction opening (Allow) named remote_agents in vNet 'corp01' in rg 'vnets' with subnet 'agents'
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
+  - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
+    text: az functionapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
 """
 
 helps['functionapp config access-restriction remove'] = """
@@ -982,6 +986,10 @@ examples:
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name app_gateway --action Allow --vnet-name core_weu --subnet app_gateway --priority 300
   - name: Add Access Restriction opening (Allow) named internal_agents for Subnet build_agents in vNet corp01 with priority 500 to scm site; and ignore service endpoint registration on the Subnet.
     text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name internal_agents --action Allow --vnet-name corp01 --subnet build_agents --priority 500 --scm-site true --ignore-missing-endpoint true
+  - name: Add Access Restriction opening (Allow) named remote_agents in vNet 'corp01' in rg 'vnets' with subnet 'agents'
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --vnet-name corp01 --subnet agents --priority 500 --vnet-resource-group vnets
+  - name: Add Access Restriction opening (Allow) named agents in vNet 'corp01' in rg 'vnets' with subnet 'agents' (using subnet resource id)
+    text: az webapp config access-restriction add -g ResourceGroup -n AppName --rule-name remote_agents --action Allow --subnet '/subscriptions/<subscription-id>/resourceGroups/vnets/providers/Microsoft.Network/virtualNetworks/corp01/subnets/agents'
 """
 
 helps['webapp config access-restriction remove'] = """

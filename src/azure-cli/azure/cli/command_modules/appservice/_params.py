@@ -834,6 +834,7 @@ def load_arguments(self, _):
                        default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
+            c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
