@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import shell_safe_json_parse
 from azure.mgmt.web.models import IpSecurityRestriction
 from azure.mgmt.network.models import ServiceEndpointPropertiesFormat
 from azure.cli.command_modules.appservice.custom import get_site_configs
@@ -15,7 +16,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 logger = get_logger(__name__)
 
 NETWORK_API_VERSION = '2019-02-01'
-
+ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdid', 'x-fd-healthprobe']
 
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     import json
@@ -34,11 +35,11 @@ def add_webapp_access_restriction(
         cmd, resource_group_name, name, priority, rule_name=None,
         action='Allow', ip_address=None, subnet=None,
         vnet_name=None, description=None, scm_site=False,
-        ignore_missing_vnet_service_endpoint=False, slot=None, vnet_resource_group=None):
+        ignore_missing_vnet_service_endpoint=False, slot=None, vnet_resource_group=None,
+        service_tag=None, http_headers=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-
-    if (ip_address and subnet) or (not ip_address and not subnet):
-        raise CLIError('Usage error: --subnet | --ip-address')
+    if int(service_tag is not None) + int(ip_address is not None) + int(subnet is not None) != 1:
+        raise CLIError('Usage error: --subnet | --ip-address | --service-tag')
 
     # get rules list
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
@@ -62,6 +63,17 @@ def add_webapp_access_restriction(
             name=rule_name, ip_address=ip_address,
             priority=priority, action=action, tag='Default', description=description)
         access_rules.append(rule_instance)
+
+    elif service_tag:
+        logger.info(service_tag)
+        # rule_instance = IpSecurityRestriction(
+        #    name=rule_name, ip_address=service_tag,
+        #    priority=priority, action=action, tag='ServiceTag', description=description)
+        # access_rules.append(rule_instance)
+
+    if http_headers:
+        logger.info(http_headers)
+        #rule_instance.headers = _parse_http_headers(cmd.cli_ctx, http_headers=http_headers)
 
     result = _generic_site_operation(
         cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
@@ -162,3 +174,25 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
             subnet_name, subnet_parameters=subnet_obj)
         # Ensure subnet is updated to avoid update conflict
         LongRunningOperation(cli_ctx)(poller)
+
+def _parse_http_headers(cli_ctx, http_headers):
+    logger.info(http_headers)
+    header_dict = {}
+    for header_str in http_headers:
+        header = header_str.split('=')
+        if len(header) != 2:
+            raise CLIError('Http headers must have a format of `<name>=<value>`: "{}"'.format(header_str))
+        header_name = header[0].strip().lower()
+        header_value = header[1].strip()
+
+        if header_name not in ALLOWED_HTTP_HEADER_NAMES:
+            raise CLIError('Invalid http-header name: "{}"'.format(header_name))
+
+        if header_value:
+            if header_name in header_dict:
+                if len(header_dict[header_name]) > 7:
+                    raise CLIError('Only 8 values are allowed for each http-header: "{}"'.format(header_name))
+                header_dict[header_name].append(header_value)
+            else:
+                header_dict[header_name] = [header_value]
+    return header_dict
