@@ -81,12 +81,7 @@ def _expand_file_prefixed_files(args):
         if path == '-':
             content = sys.stdin.read()
         else:
-            path = os.path.expanduser(path)
-            if not os.path.exists(path):
-                raise FileNotFoundError('File "{}" does not exist.'.format(path))
-            if not os.path.isfile(path):
-                raise FileNotFoundError('"{}" is not a file.')
-            content = read_file_content(path, allow_binary=True)
+            content = read_file_content(os.path.expanduser(path), allow_binary=True)
 
         return content.rstrip(os.linesep)
 
@@ -103,6 +98,10 @@ def _expand_file_prefixed_files(args):
                 return _load_file(poss_file)
             except IOError:
                 logger.debug("Failed to load '%s', assume not a file", arg)
+                if not os.path.exists(poss_file):
+                    raise FileNotFoundError('File "{}" does not exist.'.format(poss_file))
+                if not os.path.isfile(poss_file):
+                    raise FileNotFoundError('"{}" is not a file.')
                 return arg
 
         # if @ not at the start it can't be a file
