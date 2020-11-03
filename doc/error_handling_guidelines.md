@@ -100,9 +100,9 @@ __DOs__
 
 __DON'Ts__
 - Do not control the style of an error message. (e.g, the unnecessary `'\n'` and the colorization.)
-- Do not include the error type info in an error message. (e.g, _usage error: --ids | --name [--resource-group]_)
-- Do not use a formula-like or a programming expression in the error message. (e.g, _Parameter 'resource_group_name' must conform to the following pattern: '^[-\\w\\._\\(\\)]+$'_)
-- Do not use ambiguous expressions which mean nothing to users. (e.g, _Something unexpected happens._)
+- Do not include the error type info in an error message. (e.g, `usage error: --ids | --name [--resource-group]`)
+- Do not use a formula-like or a programming expression in the error message. (e.g, `Parameter 'resource_group_name' must conform to the following pattern: '^[-\\w\\._\\(\\)]+$'`)
+- Do not use ambiguous expressions which mean nothing to users. (e.g, `Something unexpected happens.`)
 
 
 ## Error Recommendation
