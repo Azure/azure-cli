@@ -194,7 +194,13 @@ class ManualInterrupt(UserFault):
     pass
 
 
-# Unknow error type
+# File not found error type
+class FileNotFoundError(UserFault):
+    """ File not found. """
+    pass
+
+
+# Unknown error type
 class UnknownError(UserFault):
     """ Reserved for the errors which can not be categorized into the error types above.
     Usually for the very general error type like CLIError, AzureError.
