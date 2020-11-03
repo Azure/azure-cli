@@ -394,19 +394,19 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
             self.check("storageProfile.osDisk.managedDisk", None),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
         # Create image from vm id
         self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
             self.check("storageProfile.osDisk.managedDisk", None),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
         # Create image from disk id
         self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux --hyper-v-generation "V1"', checks=[
             self.check("sourceVirtualMachine", None),
             self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}'),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
 
 

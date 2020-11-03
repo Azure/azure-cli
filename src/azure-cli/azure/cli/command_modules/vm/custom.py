@@ -173,7 +173,7 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
 
 
 def _is_linux_os(vm):
-    os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+    os_type = vm.storage_profile.os_disk.os_type if vm.storage_profile.os_disk.os_type else None
     if os_type:
         return os_type.lower() == 'linux'
     # the os_type could be None for VM scaleset, let us check out os configurations
@@ -673,7 +673,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
                                                 destination_container_name=storage_container,
                                                 overwrite_vhds=overwrite)
-    poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
+    poller = client.virtual_machines.begin_capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
     output = getattr(result, 'output', None) or result.resources[0]
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
@@ -1208,15 +1208,15 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if force:
-        return sdk_no_wait(no_wait, client.virtual_machines.redeploy, resource_group_name, vm_name)
-    return sdk_no_wait(no_wait, client.virtual_machines.restart, resource_group_name, vm_name)
+        return sdk_no_wait(no_wait, client.virtual_machines.begin_redeploy, resource_group_name, vm_name)
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_restart, resource_group_name, vm_name)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(cmd.cli_ctx)
     parsed_id = _parse_rg_name(instance.id)
-    poller = sdk_no_wait(no_wait, client.virtual_machines.create_or_update,
+    poller = sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update,
                          resource_group_name=parsed_id[0],
                          vm_name=parsed_id[1],
                          parameters=instance)
@@ -1299,14 +1299,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                                vm=vm,
                                                vm_name=vm_name,
                                                workspace_name=workspace_name)
-        os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+        os_type = vm.storage_profile.os_disk.os_type if vm.storage_profile.os_disk.os_type else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     aux_subscriptions = None
     if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
         aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-    return sdk_no_wait(no_wait, client.virtual_machines.create_or_update, resource_group_name, vm_name, **kwargs)
+    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
 
 
@@ -1631,14 +1631,14 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
     ext = VirtualMachineExtension(location=vm.location,
                                   publisher=publisher,
-                                  virtual_machine_extension_type=vm_extension_name,
+                                  type_properties_type=vm_extension_name,
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings=settings,
                                   auto_upgrade_minor_version=(not no_auto_upgrade))
     if force_update:
         ext.force_update_tag = str(_gen_guid())
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
                        resource_group_name, vm_name, instance_name, ext)
 # endregion
 
@@ -1976,7 +1976,7 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
                                                                 RunCommandInput(command_id=command_id, script=scripts,
                                                                                 parameters=run_command_input_parameters))  # pylint: disable=line-too-long
     # otherwise this is a regular vm instance
-    return client.virtual_machines.run_command(resource_group_name, vm_vmss_name,
+    return client.virtual_machines.begin_run_command(resource_group_name, vm_vmss_name,
                                                RunCommandInput(command_id=command_id, script=scripts,
                                                                parameters=run_command_input_parameters))
 
@@ -2153,12 +2153,12 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
 
     ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
-                                  virtual_machine_extension_type=_LINUX_ACCESS_EXT,
+                                  type_properties_type=_LINUX_ACCESS_EXT,
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
                        resource_group_name, vm_instance.name, instance_name, ext)
 
 

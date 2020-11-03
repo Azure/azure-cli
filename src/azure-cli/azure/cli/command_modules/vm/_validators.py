@@ -465,7 +465,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
-            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            namespace.os_type = image_info.storage_profile.os_disk.os_type
             image_data_disks = image_info.storage_profile.data_disks or []
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
@@ -1503,7 +1503,7 @@ def process_image_create_namespace(cmd, namespace):
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+        namespace.os_type = vm_info.storage_profile.os_disk.os_type
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
