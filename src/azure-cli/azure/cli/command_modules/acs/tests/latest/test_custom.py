@@ -801,6 +801,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+
 class mockUrlretrieveUrlValidator(object):
     def __init__(self, url, version):
         self.url = url
@@ -808,6 +809,7 @@ class mockUrlretrieveUrlValidator(object):
 
     def __eq__(self, other):
         return other.startswith(self.url) and self.version in other
+
 
 def create_kubelogin_zip(file_url, download_path):
     import zipfile

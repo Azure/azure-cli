@@ -323,11 +323,11 @@ def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(cmd, client_version='latest', install_location=None, base_download_source_url=None,
+def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
-                    kubelogin_base_download_source_url=None):
-    k8s_install_kubectl(cmd, client_version, install_location, base_download_source_url)
-    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location, kubelogin_base_download_source_url)
+                    kubelogin_base_src_url=None):
+    k8s_install_kubectl(cmd, client_version, install_location, base_src_url)
+    k8s_install_kubelogin(cmd, kubelogin_version, kubelogin_install_location, kubelogin_base_src_url)
 
 
 def k8s_install_kubectl(cmd, client_version='latest', install_location=None, source_url=None):
