@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 
-import sys
 import difflib
 
 import argparse
@@ -188,11 +187,6 @@ class AzCliCommandParser(CLICommandParser):
             az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
         az_error.print_error()
         az_error.send_telemetry()
-
-        # For ai-did-you-mean-this
-        failure_recovery_recommendations = self._get_failure_recovery_recommendations()
-        self._suggestion_msg.extend(failure_recovery_recommendations)
-        self._print_suggestion_msg(sys.stderr)
         self.exit(2)
 
     def format_help(self):
@@ -289,24 +283,11 @@ class AzCliCommandParser(CLICommandParser):
 
         return command, parameters, extension
 
-    def _get_failure_recovery_recommendations(self, action=None, **kwargs):
-        # Gets failure recovery recommendations
-        from azure.cli.core import __version__ as core_version
-        failure_recovery_arguments = self._get_failure_recovery_arguments(action)
-        recommendations = AzCliCommandParser.recommendation_provider(core_version,
-                                                                     *failure_recovery_arguments,
-                                                                     **kwargs)
-        return recommendations
-
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
         if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
             self.specified_arguments.append(action.dest)
         return value
-
-    def _print_suggestion_msg(self, file=None):
-        if self._suggestion_msg:
-            print('\n'.join(self._suggestion_msg), file=file)
 
     def parse_known_args(self, args=None, namespace=None):
         # retrieve the raw argument list in case parsing known arguments fails.
@@ -399,7 +380,6 @@ class AzCliCommandParser(CLICommandParser):
             # use cli_ctx from cli_help which is not lost.
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
-            caused_by_extension_not_installed = False
             command_name_inferred = self.prog
             error_msg = None
             if not self.command_source:
@@ -418,7 +398,6 @@ class AzCliCommandParser(CLICommandParser):
                     command_str = roughly_parse_command(cmd_list[1:])
                     ext_name = self._search_in_extension_commands(command_str)
                     if ext_name:
-                        caused_by_extension_not_installed = True
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)
@@ -482,7 +461,7 @@ class AzCliCommandParser(CLICommandParser):
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
-            # recommand a command for user
+            # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommended_command = recommender.recommend_a_command()
@@ -500,8 +479,4 @@ class AzCliCommandParser(CLICommandParser):
             az_error.print_error()
             az_error.send_telemetry()
 
-            if not caused_by_extension_not_installed:
-                failure_recovery_recommendations = self._get_failure_recovery_recommendations(action)
-                self._suggestion_msg.extend(failure_recovery_recommendations)
-                self._print_suggestion_msg(sys.stderr)
             self.exit(2)
