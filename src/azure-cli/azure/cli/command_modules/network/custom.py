@@ -228,11 +228,6 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id)
 
-    from pprint import pprint
-    print('-' * 100)
-    pprint(app_gateway_resource)
-    print('-' * 100)
-
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
