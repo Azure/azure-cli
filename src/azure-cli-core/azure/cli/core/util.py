@@ -61,7 +61,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
-    from requests.exceptions import SSLError
+    from requests.exceptions import SSLError, HTTPError
     import azure.cli.core.azclierror as azclierror
     import traceback
 
@@ -122,6 +122,11 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             message, status_code = extract_http_operation_error(ex)
             if message:
                 error_msg = message
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
+
+        elif isinstance(ex, HTTPError):
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
@@ -211,7 +216,7 @@ def get_error_type_by_status_code(status_code):
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 
-    return azclierror.AzureResponseError
+    return azclierror.UnknownError
 
 
 def is_azure_connection_error(error_msg):
@@ -791,7 +796,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         skip_authorization_header = True
 
     # Handle User-Agent
-    agents = [get_az_user_agent()]
+    agents = [get_az_rest_user_agent()]
 
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
@@ -1077,6 +1082,17 @@ def get_az_user_agent():
     return ' '.join(agents)
 
 
+def get_az_rest_user_agent():
+    """Get User-Agent for az rest calls"""
+
+    agents = ['python/{}'.format(platform.python_version()),
+              '({})'.format(platform.platform()),
+              get_az_user_agent()
+              ]
+
+    return ' '.join(agents)
+
+
 def user_confirmation(message, yes=False):
     if yes:
         return
@@ -1149,3 +1165,36 @@ def handle_version_update():
             refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def resource_to_scopes(resource):
+    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
+    For example:
+       'https://management.core.windows.net/' -> ['https://management.core.windows.net//.default']
+       'https://managedhsm.azure.com' -> ['https://managedhsm.azure.com/.default']
+
+    :param resource: The ADAL resource ID
+    :return: A list of scopes
+    """
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # We should not trim the trailing slash, like in https://management.azure.com/
+    # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
+    scope = resource + '/.default'
+    return [scope]
+
+
+def scopes_to_resource(scopes):
+    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
+    For example:
+       ['https://management.core.windows.net//.default'] -> 'https://management.core.windows.net/'
+       ['https://managedhsm.azure.com/.default'] -> 'https://managedhsm.azure.com'
+
+    :param scopes: The MSAL scopes. It can be a list or tuple of string
+    :return: The ADAL resource
+    :rtype: str
+    """
+    scope = scopes[0]
+    if scope.endswith("/.default"):
+        scope = scope[:-len("/.default")]
+
+    return scope

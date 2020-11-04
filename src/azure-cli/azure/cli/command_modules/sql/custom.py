@@ -43,6 +43,11 @@ from azure.mgmt.sql.models import (
     ServerPublicNetworkAccess
 )
 
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.command_modules.monitor._client_factory import cf_monitor
+from azure.cli.command_modules.monitor.operations.diagnostics_settings import create_diagnostics_settings
+
 from knack.log import get_logger
 from knack.prompting import prompt_y_n
 
@@ -953,8 +958,8 @@ def db_create_replica(
         database_name,
         server_name,
         resource_group_name,
-        # Replica must have the same database name as the source db
         partner_server_name,
+        partner_database_name=None,
         partner_resource_group_name=None,
         no_wait=False,
         **kwargs):
@@ -966,6 +971,7 @@ def db_create_replica(
 
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
+    partner_database_name = partner_database_name or database_name
 
     # Set create mode
     kwargs['create_mode'] = CreateMode.secondary.value
@@ -995,7 +1001,7 @@ def db_create_replica(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
         no_wait,
         **kwargs)
 
@@ -1450,8 +1456,6 @@ def _find_storage_account_resource_group(cli_ctx, name):
     resource group just to update some unrelated property, which is annoying and makes no sense to
     the customer.
     '''
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
@@ -1496,7 +1500,6 @@ def _get_storage_endpoint(
     Gets storage account endpoint by querying storage ARM API.
     '''
     from azure.mgmt.storage import StorageManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage account
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1523,7 +1526,6 @@ def _get_storage_key(
     Gets storage account key by querying storage ARM API.
     '''
     from azure.mgmt.storage import StorageManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # Get storage keys
     client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
@@ -1583,98 +1585,817 @@ def _db_security_policy_update(
             use_secondary_key)
 
 
-def db_audit_policy_update(
+def _check_audit_policy_state(
+        state,
+        value):
+    return state is not None and state.lower() == value.lower()
+
+
+def _is_audit_policy_state_enabled(state):
+    return _check_audit_policy_state(state, BlobAuditingPolicyState.enabled.value)
+
+
+def _is_audit_policy_state_disabled(state):
+    return _check_audit_policy_state(state, BlobAuditingPolicyState.disabled.value)
+
+
+def _is_audit_policy_state_none_or_disabled(state):
+    return state is None or _check_audit_policy_state(state, BlobAuditingPolicyState.disabled.value)
+
+
+def _get_diagnostic_settings_url(
+        cmd,
+        resource_group_name,
+        server_name,
+        database_name=None):
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name, server_name,
+        database_name if database_name is not None else "master")
+
+
+def _get_diagnostic_settings(
+        cmd,
+        resource_group_name,
+        server_name,
+        database_name=None):
+    '''
+    Common code to get server or database diagnostic settings
+    '''
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(
+        cmd=cmd, resource_group_name=resource_group_name,
+        server_name=server_name, database_name=database_name)
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
+
+    return azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url)
+
+
+def _fetch_first_audit_diagnostic_setting(diagnostic_settings):
+    return next((ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
+                 next((log for log in ds.logs if log.enabled and
+                       log.category == 'SQLSecurityAuditEvents'), None) is not None), None)
+
+
+def _fetch_all_audit_diagnostic_settings(diagnostic_settings):
+    return [ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
+            next((log for log in ds.logs if log.enabled and
+                  log.category == 'SQLSecurityAuditEvents'), None) is not None]
+
+
+def _audit_policy_show(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        database_name=None):
+    '''
+    Common code to get server or database audit policy including diagnostic settings
+    '''
+
+    # Request audit policy
+    if database_name is None:
+        audit_policy = client.get(
+            resource_group_name=resource_group_name,
+            server_name=server_name)
+    else:
+        audit_policy = client.get(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name)
+
+    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+    audit_policy.event_hub_target_state = BlobAuditingPolicyState.disabled
+    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.disabled
+
+    # If audit policy's state is disabled there is nothing to do
+    if _is_audit_policy_state_disabled(audit_policy.state):
+        return audit_policy
+
+    if not audit_policy.storage_endpoint:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.disabled
+    else:
+        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.enabled
+
+    # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
+    if not audit_policy.is_azure_monitor_target_enabled:
+        return audit_policy
+
+    # Request diagnostic settings
+    diagnostic_settings = _get_diagnostic_settings(
+        cmd=cmd, resource_group_name=resource_group_name,
+        server_name=server_name, database_name=database_name)
+
+    # Sort received diagnostic settings by name and get first element to ensure consistency between command executions
+    diagnostic_settings.value.sort(key=lambda d: d.name)
+    audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+
+    # Initialize azure monitor properties
+    if audit_diagnostic_setting is not None:
+        if audit_diagnostic_setting.workspace_id is not None:
+            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.enabled
+            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+
+        if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
+            audit_policy.event_hub_target_state = BlobAuditingPolicyState.enabled
+            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+            audit_policy.event_hub_name = audit_diagnostic_setting.event_hub_name
+
+    return audit_policy
+
+
+def server_audit_policy_show(
+        cmd,
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Show server audit policy
+    '''
+
+    return _audit_policy_show(
+        cmd=cmd,
+        client=client,
+        resource_group_name=resource_group_name,
+        server_name=server_name)
+
+
+def db_audit_policy_show(
+        cmd,
+        client,
+        server_name,
+        resource_group_name,
+        database_name):
+    '''
+    Show database audit policy
+    '''
+
+    return _audit_policy_show(
+        cmd=cmd,
+        client=client,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+
+def _audit_policy_validate_arguments(
+        state=None,
+        blob_storage_target_state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        retention_days=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub_name=None):
+    '''
+    Validate input agruments
+    '''
+
+    blob_storage_arguments_provided = blob_storage_target_state is not None or\
+        storage_account is not None or storage_endpoint is not None or\
+        storage_account_access_key is not None or\
+        retention_days is not None
+
+    log_analytics_arguments_provided = log_analytics_target_state is not None or\
+        log_analytics_workspace_resource_id is not None
+
+    event_hub_arguments_provided = event_hub_target_state is not None or\
+        event_hub_authorization_rule_id is not None or\
+        event_hub_name is not None
+
+    if not state and not blob_storage_arguments_provided and\
+            not log_analytics_arguments_provided and not event_hub_arguments_provided:
+        raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
+
+    if _is_audit_policy_state_enabled(state) and\
+            blob_storage_target_state is None and log_analytics_target_state is None and event_hub_target_state is None:
+        raise CLIError('One of the following arguments must be enabled:'
+                       ' blob-storage-target-state, log-analytics-target-state, event-hub-target-state')
+
+    if _is_audit_policy_state_disabled(state) and\
+            (blob_storage_arguments_provided or
+             log_analytics_arguments_provided or
+             event_hub_name):
+        raise CLIError('No additional arguments should be provided once state is disabled')
+
+    if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
+            (storage_account is not None or storage_endpoint is not None or
+             storage_account_access_key is not None or retention_days is not None):
+        raise CLIError('Blob storage account arguments cannot be specified'
+                       ' if blob-storage-target-state is not provided or disabled')
+
+    if _is_audit_policy_state_enabled(blob_storage_target_state):
+        if storage_account is not None and storage_endpoint is not None:
+            raise CLIError('storage-account and storage-endpoint cannot be provided at the same time')
+
+        if storage_account is None and storage_endpoint is None and retention_days is None:
+            raise CLIError('Either storage-account or storage-endpoint or retention-days must be provided')
+
+    # Server upper limit
+    max_retention_days = 3285
+
+    if retention_days is not None and\
+            (not retention_days.isdigit() or int(retention_days) <= 0 or int(retention_days) >= max_retention_days):
+        raise CLIError('retention-days must be a positive number greater than zero and lower than {}'
+                       .format(max_retention_days))
+
+    if _is_audit_policy_state_none_or_disabled(log_analytics_target_state) and\
+            log_analytics_workspace_resource_id is not None:
+        raise CLIError('Log analytics workspace resource id cannot be specified'
+                       ' if log-analytics-target-state is not provided or disabled')
+
+    if _is_audit_policy_state_enabled(log_analytics_target_state) and\
+            log_analytics_workspace_resource_id is None:
+        raise CLIError('Log analytics workspace resource id must be specified'
+                       ' if log-analytics-target-state is enabled')
+
+    if _is_audit_policy_state_none_or_disabled(event_hub_target_state) and\
+            (event_hub_authorization_rule_id is not None or event_hub_name is not None):
+        raise CLIError('Event hub arguments cannot be specified if event-hub-target-state is not provided or disabled')
+
+    if _is_audit_policy_state_enabled(event_hub_target_state) and event_hub_authorization_rule_id is None:
+        raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
+
+
+def _audit_policy_create_diagnostic_setting(
+        cmd,
+        resource_group_name,
+        server_name,
+        database_name=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub_name=None):
+    '''
+    Create audit diagnostic setting, i.e. containing single category - "SQLSecurityAuditEvents"
+    '''
+
+    # Generate diagnostic settings name to be created
+    name = "SQLSecurityAuditEvents"
+
+    import inspect
+    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
+                      e.function == "test_sql_server_security_mgmt"), None) is not None
+
+    # For test environment the name should be constant, i.e. match the name written in recorded yaml file
+    if test_mode:
+        name += '_LogAnalytics' if log_analytics_target_state is not None else ''
+        name += '_EventHub' if event_hub_target_state is not None else ''
+    else:
+        import uuid
+        name += '_' + str(uuid.uuid4())
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
+
+    LogSettings = cmd.get_models(
+        'LogSettings',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    RetentionPolicy = cmd.get_models(
+        'RetentionPolicy',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    return create_diagnostics_settings(
+        client=azure_monitor_client.diagnostic_settings,
+        name=name,
+        resource_uri=diagnostic_settings_url,
+        logs=[LogSettings(category="SQLSecurityAuditEvents", enabled=True,
+                          retention_policy=RetentionPolicy(enabled=False, days=0))],
+        metrics=None,
+        event_hub=event_hub_name,
+        event_hub_rule=event_hub_authorization_rule_id,
+        storage_account=None,
+        workspace=log_analytics_workspace_resource_id)
+
+
+def _audit_policy_update_diagnostic_settings(
+        cmd,
+        server_name,
+        resource_group_name,
+        database_name=None,
+        diagnostic_settings=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub_name=None):
+    '''
+    Update audit policy's diagnostic settings
+    '''
+
+    # Fetch all audit diagnostic settings
+    audit_diagnostic_settings = _fetch_all_audit_diagnostic_settings(diagnostic_settings.value)
+    num_of_audit_diagnostic_settings = len(audit_diagnostic_settings)
+
+    # If more than 1 audit diagnostic settings found then throw error
+    if num_of_audit_diagnostic_settings > 1:
+        raise CLIError('Multiple audit diagnostics settings are already enabled')
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
+
+    # If no audit diagnostic settings found then create one if azure monitor is enabled
+    if num_of_audit_diagnostic_settings == 0:
+        if _is_audit_policy_state_enabled(log_analytics_target_state) or\
+                _is_audit_policy_state_enabled(event_hub_target_state):
+            created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                database_name=database_name,
+                log_analytics_target_state=log_analytics_target_state,
+                log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+                event_hub_target_state=event_hub_target_state,
+                event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+                event_hub_name=event_hub_name)
+
+            # Return rollback data tuple
+            return [("delete", created_diagnostic_setting)]
+
+        # azure monitor is disabled - there is nothing to do
+        return None
+
+    # This leaves us with case when num_of_audit_diagnostic_settings is 1
+    audit_diagnostic_setting = audit_diagnostic_settings[0]
+
+    # Initialize actually updated azure monitor fields
+    if log_analytics_target_state is None:
+        log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+    elif _is_audit_policy_state_disabled(log_analytics_target_state):
+        log_analytics_workspace_resource_id = None
+
+    if event_hub_target_state is None:
+        event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+        event_hub_name = audit_diagnostic_setting.event_hub_name
+    elif _is_audit_policy_state_disabled(event_hub_target_state):
+        event_hub_authorization_rule_id = None
+        event_hub_name = None
+
+    is_azure_monitor_target_enabled = log_analytics_workspace_resource_id is not None or\
+        event_hub_authorization_rule_id is not None
+
+    has_other_categories = next((log for log in audit_diagnostic_setting.logs
+                                 if log.enabled and log.category != 'SQLSecurityAuditEvents'), None) is not None
+
+    # If there is no other categories except SQLSecurityAuditEvents update or delete
+    # the existing single diagnostic settings
+    if not has_other_categories:
+        # If azure monitor is enabled then update existing single audit diagnostic setting
+        if is_azure_monitor_target_enabled:
+            create_diagnostics_settings(
+                client=azure_monitor_client.diagnostic_settings,
+                name=audit_diagnostic_setting.name,
+                resource_uri=diagnostic_settings_url,
+                logs=audit_diagnostic_setting.logs,
+                metrics=audit_diagnostic_setting.metrics,
+                event_hub=event_hub_name,
+                event_hub_rule=event_hub_authorization_rule_id,
+                storage_account=audit_diagnostic_setting.storage_account_id,
+                workspace=log_analytics_workspace_resource_id)
+
+            # Return rollback data tuple
+            return [("update", audit_diagnostic_setting)]
+
+        # Azure monitor is disabled, delete existing single audit diagnostic setting
+        azure_monitor_client.diagnostic_settings.delete(diagnostic_settings_url, audit_diagnostic_setting.name)
+
+        # Return rollback data tuple
+        return [("create", audit_diagnostic_setting)]
+
+    # In case there are other categories in the existing single audit diagnostic setting a "split" must be performed:
+    #   1. Disable SQLSecurityAuditEvents category in found audit diagnostic setting
+    #   2. Create new diagnostic setting with SQLSecurityAuditEvents category, i.e. audit diagnostic setting
+
+    # Build updated logs list with disabled 'SQLSecurityAuditEvents' category
+    updated_logs = []
+
+    LogSettings = cmd.get_models(
+        'LogSettings',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    RetentionPolicy = cmd.get_models(
+        'RetentionPolicy',
+        resource_type=ResourceType.MGMT_MONITOR,
+        operation_group='diagnostic_settings')
+
+    for log in audit_diagnostic_setting.logs:
+        if log.category == "SQLSecurityAuditEvents":
+            updated_logs.append(LogSettings(category=log.category, enabled=False,
+                                            retention_policy=RetentionPolicy(enabled=False, days=0)))
+        else:
+            updated_logs.append(log)
+
+    # Update existing diagnostic settings
+    create_diagnostics_settings(
+        client=azure_monitor_client.diagnostic_settings,
+        name=audit_diagnostic_setting.name,
+        resource_uri=diagnostic_settings_url,
+        logs=updated_logs,
+        metrics=audit_diagnostic_setting.metrics,
+        event_hub=audit_diagnostic_setting.event_hub_name,
+        event_hub_rule=audit_diagnostic_setting.event_hub_authorization_rule_id,
+        storage_account=audit_diagnostic_setting.storage_account_id,
+        workspace=audit_diagnostic_setting.workspace_id)
+
+    # Add original 'audit_diagnostic_settings' to rollback_data list
+    rollback_data = [("update", audit_diagnostic_setting)]
+
+    # Create new diagnostic settings with enabled 'SQLSecurityAuditEvents' category only if azure monitor is enabled
+    if is_azure_monitor_target_enabled:
+        created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            log_analytics_target_state=log_analytics_target_state,
+            log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+            event_hub_target_state=event_hub_target_state,
+            event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+            event_hub_name=event_hub_name)
+
+        # Add 'created_diagnostic_settings' to rollback_data list in reverse order
+        rollback_data.insert(0, ("delete", created_diagnostic_setting))
+
+    return rollback_data
+
+
+def _audit_policy_update_apply_blob_storage_details(
         cmd,
         instance,
+        blob_storage_target_state,
+        storage_account,
+        storage_endpoint,
+        storage_account_access_key,
+        retention_days):
+    '''
+    Apply blob storage details on policy update
+    '''
+
+    if blob_storage_target_state is None:
+        # Original audit policy has no storage_endpoint
+        if not instance.storage_endpoint:
+            instance.storage_endpoint = None
+            instance.storage_account_access_key = None
+        else:
+            # Resolve storage_account_access_key based on original storage_endpoint
+            storage_account = _get_storage_account_name(instance.storage_endpoint)
+            storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+
+            instance.storage_account_access_key = _get_storage_key(
+                cli_ctx=cmd.cli_ctx,
+                storage_account=storage_account,
+                resource_group_name=storage_resource_group,
+                use_secondary_key=instance.is_storage_secondary_key_in_use)
+    elif _is_audit_policy_state_enabled(blob_storage_target_state):
+        # Resolve storage_endpoint using provided storage_account
+        if storage_account is not None:
+            storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+            storage_endpoint = _get_storage_endpoint(cmd.cli_ctx, storage_account, storage_resource_group)
+
+        if storage_endpoint is not None:
+            instance.storage_endpoint = storage_endpoint
+
+        if storage_account_access_key is not None:
+            instance.storage_account_access_key = storage_account_access_key
+        elif storage_endpoint is not None:
+            # Resolve storage_account if not provided
+            if storage_account is None:
+                storage_account = _get_storage_account_name(storage_endpoint)
+                storage_resource_group = _find_storage_account_resource_group(cmd.cli_ctx, storage_account)
+
+            # Resolve storage_account_access_key based on storage_account
+            instance.storage_account_access_key = _get_storage_key(
+                cli_ctx=cmd.cli_ctx,
+                storage_account=storage_account,
+                resource_group_name=storage_resource_group,
+                use_secondary_key=instance.is_storage_secondary_key_in_use)
+
+        # Apply retenation days
+        if retention_days is not None:
+            instance.retention_days = retention_days
+    else:
+        instance.storage_endpoint = None
+        instance.storage_account_access_key = None
+
+
+def _audit_policy_update_apply_azure_monitor_target_enabled(
+        instance,
+        diagnostic_settings,
+        log_analytics_target_state,
+        event_hub_target_state):
+    '''
+    Apply value of is_azure_monitor_target_enabled on policy update
+    '''
+
+    # If log_analytics_target_state and event_hub_target_state are None there is nothing to do
+    if log_analytics_target_state is None and event_hub_target_state is None:
+        return
+
+    if _is_audit_policy_state_enabled(log_analytics_target_state) or\
+            _is_audit_policy_state_enabled(event_hub_target_state):
+        instance.is_azure_monitor_target_enabled = True
+    else:
+        # Sort received diagnostic settings by name and get first element to ensure consistency
+        # between command executions
+        diagnostic_settings.value.sort(key=lambda d: d.name)
+        audit_diagnostic_setting = _fetch_first_audit_diagnostic_setting(diagnostic_settings.value)
+
+        # Determine value of is_azure_monitor_target_enabled
+        if audit_diagnostic_setting is None:
+            updated_log_analytics_workspace_id = None
+            updated_event_hub_authorization_rule_id = None
+        else:
+            updated_log_analytics_workspace_id = audit_diagnostic_setting.workspace_id
+            updated_event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
+
+        if _is_audit_policy_state_disabled(log_analytics_target_state):
+            updated_log_analytics_workspace_id = None
+
+        if _is_audit_policy_state_disabled(event_hub_target_state):
+            updated_event_hub_authorization_rule_id = None
+
+        instance.is_azure_monitor_target_enabled = updated_log_analytics_workspace_id is not None or\
+            updated_event_hub_authorization_rule_id is not None
+
+
+def _audit_policy_update_global_settings(
+        cmd,
+        instance,
+        diagnostic_settings=None,
         state=None,
+        blob_storage_target_state=None,
         storage_account=None,
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
-        retention_days=None):
+        retention_days=None,
+        log_analytics_target_state=None,
+        event_hub_target_state=None):
     '''
-    Updates an audit policy. Custom update function to apply parameters to instance.
+    Update audit policy's global settings
     '''
 
     # Apply state
-    if state:
+    if state is not None:
         instance.state = BlobAuditingPolicyState[state.lower()]
 
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
+    # Apply additional command line arguments only if policy's state is enabled
+    if _is_audit_policy_state_enabled(instance.state):
+        # Apply blob_storage_target_state and all storage account details
+        _audit_policy_update_apply_blob_storage_details(
+            cmd=cmd,
+            instance=instance,
+            blob_storage_target_state=blob_storage_target_state,
+            storage_account=storage_account,
+            storage_endpoint=storage_endpoint,
+            storage_account_access_key=storage_account_access_key,
+            retention_days=retention_days)
 
-    # Set storage-related properties
-    _db_security_policy_update(
-        cmd.cli_ctx,
+        # Apply audit_actions_and_groups
+        if audit_actions_and_groups is not None:
+            instance.audit_actions_and_groups = audit_actions_and_groups
+
+        if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
+            instance.audit_actions_and_groups = [
+                "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+                "FAILED_DATABASE_AUTHENTICATION_GROUP",
+                "BATCH_COMPLETED_GROUP"]
+
+        # Apply is_azure_monitor_target_enabled
+        _audit_policy_update_apply_azure_monitor_target_enabled(
+            instance=instance,
+            diagnostic_settings=diagnostic_settings,
+            log_analytics_target_state=log_analytics_target_state,
+            event_hub_target_state=event_hub_target_state)
+
+
+def _audit_policy_update_rollback(
+        cmd,
+        server_name,
+        resource_group_name,
+        database_name,
+        rollback_data):
+    '''
+    Rollback diagnostic settings change
+    '''
+
+    diagnostic_settings_url = _get_diagnostic_settings_url(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name)
+
+    azure_monitor_client = cf_monitor(cmd.cli_ctx)
+
+    for rd in rollback_data:
+        rollback_diagnostic_setting = rd[1]
+
+        if rd[0] == "create" or rd[0] == "update":
+            create_diagnostics_settings(
+                client=azure_monitor_client.diagnostic_settings,
+                name=rollback_diagnostic_setting.name,
+                resource_uri=diagnostic_settings_url,
+                logs=rollback_diagnostic_setting.logs,
+                metrics=rollback_diagnostic_setting.metrics,
+                event_hub=rollback_diagnostic_setting.event_hub_name,
+                event_hub_rule=rollback_diagnostic_setting.event_hub_authorization_rule_id,
+                storage_account=rollback_diagnostic_setting.storage_account_id,
+                workspace=rollback_diagnostic_setting.workspace_id)
+        else:  # delete
+            azure_monitor_client.diagnostic_settings.delete(diagnostic_settings_url, rollback_diagnostic_setting.name)
+
+
+def _audit_policy_update(
+        cmd,
         instance,
-        enabled,
-        storage_account,
-        storage_endpoint,
-        storage_account_access_key,
-        instance.is_storage_secondary_key_in_use)
+        server_name,
+        resource_group_name,
+        database_name=None,
+        state=None,
+        blob_storage_target_state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        retention_days=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub_name=None):
 
-    # Set other properties
-    if audit_actions_and_groups:
-        instance.audit_actions_and_groups = audit_actions_and_groups
+    # Arguments validation
+    _audit_policy_validate_arguments(
+        state=state,
+        blob_storage_target_state=blob_storage_target_state,
+        storage_account=storage_account,
+        storage_endpoint=storage_endpoint,
+        storage_account_access_key=storage_account_access_key,
+        retention_days=retention_days,
+        log_analytics_target_state=log_analytics_target_state,
+        log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+        event_hub_target_state=event_hub_target_state,
+        event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+        event_hub_name=event_hub_name)
 
-    # If auditing is enabled, make sure that the actions and groups are set to default
-    # value in case they were removed previously (When disabling auditing)
-    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
-        instance.audit_actions_and_groups = [
-            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-            "FAILED_DATABASE_AUTHENTICATION_GROUP",
-            "BATCH_COMPLETED_GROUP"]
+    # Get diagnostic settings only if log_analytics_target_state or event_hub_target_state is provided
+    if log_analytics_target_state is not None or event_hub_target_state is not None:
+        diagnostic_settings = _get_diagnostic_settings(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name)
 
-    if retention_days:
-        instance.retention_days = retention_days
+        # Update diagnostic settings
+        rollback_data = _audit_policy_update_diagnostic_settings(
+            cmd=cmd,
+            server_name=server_name,
+            resource_group_name=resource_group_name,
+            database_name=database_name,
+            diagnostic_settings=diagnostic_settings,
+            log_analytics_target_state=log_analytics_target_state,
+            log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+            event_hub_target_state=event_hub_target_state,
+            event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+            event_hub_name=event_hub_name)
+    else:
+        diagnostic_settings = None
+        rollback_data = None
 
-    return instance
+    # Update auditing global settings
+    try:
+        _audit_policy_update_global_settings(
+            cmd=cmd,
+            instance=instance,
+            diagnostic_settings=diagnostic_settings,
+            state=state,
+            blob_storage_target_state=blob_storage_target_state,
+            storage_account=storage_account,
+            storage_endpoint=storage_endpoint,
+            storage_account_access_key=storage_account_access_key,
+            audit_actions_and_groups=audit_actions_and_groups,
+            retention_days=retention_days,
+            log_analytics_target_state=log_analytics_target_state,
+            event_hub_target_state=event_hub_target_state)
+
+        return instance
+    except Exception as err:
+        logger.debug(err)
+
+        if rollback_data is not None:
+            _audit_policy_update_rollback(
+                cmd=cmd,
+                server_name=server_name,
+                resource_group_name=resource_group_name,
+                database_name=database_name,
+                rollback_data=rollback_data)
+
+        # Reraise the original exception
+        raise err
 
 
 def server_audit_policy_update(
         cmd,
         instance,
+        server_name,
+        resource_group_name,
         state=None,
+        blob_storage_target_state=None,
         storage_account=None,
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
-        retention_days=None):
+        retention_days=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub=None):
     '''
-    Updates an audit policy. Custom update function to apply parameters to instance.
+    Update server audit policy
     '''
 
-    # Apply state
-    if state:
-        instance.state = BlobAuditingPolicyState[state.lower()]
+    return _audit_policy_update(
+        cmd=cmd,
+        instance=instance,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=None,
+        state=state,
+        blob_storage_target_state=blob_storage_target_state,
+        storage_account=storage_account,
+        storage_endpoint=storage_endpoint,
+        storage_account_access_key=storage_account_access_key,
+        audit_actions_and_groups=audit_actions_and_groups,
+        retention_days=retention_days,
+        log_analytics_target_state=log_analytics_target_state,
+        log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+        event_hub_target_state=event_hub_target_state,
+        event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+        event_hub_name=event_hub)
 
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
-    # Set storage-related properties
-    _db_security_policy_update(
-        cmd.cli_ctx,
+def db_audit_policy_update(
+        cmd,
         instance,
-        enabled,
-        storage_account,
-        storage_endpoint,
-        storage_account_access_key,
-        instance.is_storage_secondary_key_in_use)
+        server_name,
+        resource_group_name,
+        database_name,
+        state=None,
+        blob_storage_target_state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        audit_actions_and_groups=None,
+        retention_days=None,
+        log_analytics_target_state=None,
+        log_analytics_workspace_resource_id=None,
+        event_hub_target_state=None,
+        event_hub_authorization_rule_id=None,
+        event_hub=None):
+    '''
+    Update database audit policy
+    '''
 
-    # Set other properties
-    if audit_actions_and_groups:
-        instance.audit_actions_and_groups = audit_actions_and_groups
-
-    # If auditing is enabled, make sure that the actions and groups are set to default
-    # value in case they were removed previously (When disabling auditing)
-    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
-        instance.audit_actions_and_groups = [
-            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-            "FAILED_DATABASE_AUTHENTICATION_GROUP",
-            "BATCH_COMPLETED_GROUP"]
-
-    if retention_days:
-        instance.retention_days = retention_days
-
-    return instance
+    return _audit_policy_update(
+        cmd=cmd,
+        instance=instance,
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        database_name=database_name,
+        state=state,
+        blob_storage_target_state=blob_storage_target_state,
+        storage_account=storage_account,
+        storage_endpoint=storage_endpoint,
+        storage_account_access_key=storage_account_access_key,
+        audit_actions_and_groups=audit_actions_and_groups,
+        retention_days=retention_days,
+        log_analytics_target_state=log_analytics_target_state,
+        log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
+        event_hub_target_state=event_hub_target_state,
+        event_hub_authorization_rule_id=event_hub_authorization_rule_id,
+        event_hub_name=event_hub)
 
 
 def update_long_term_retention(
@@ -1964,7 +2685,6 @@ def db_sensitivity_label_update(
     '''
 
     # Get the information protection policy
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.security import SecurityCenter
     from msrestazure.azure_exceptions import CloudError
 
@@ -2722,6 +3442,41 @@ def encryption_protector_update(
         server_key_name=key_name
     )
 
+#####
+#           sql server aad-only
+#####
+
+
+def server_aad_only_disable(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Disables a servers aad-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        azure_ad_only_authentication=False
+    )
+
+
+def server_aad_only_enable(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Enables a servers aad-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        azure_ad_only_authentication=True
+    )
+
+
 ###############################################
 #                sql managed instance         #
 ###############################################
@@ -2998,10 +3753,47 @@ def mi_ad_admin_delete(
     '''
     Deletes a managed instance active directory administrator.
     '''
+
     return client.delete(
         resource_group_name=resource_group_name,
         managed_instance_name=managed_instance_name
     )
+
+
+#####
+#           sql managed instance aad-only
+#####
+
+
+def mi_aad_only_disable(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Disables the managed instance AAD-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=False
+    )
+
+
+def mi_aad_only_enable(
+        client,
+        resource_group_name,
+        managed_instance_name):
+    '''
+    Enables the AAD-only setting
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        managed_instance_name=managed_instance_name,
+        azure_ad_only_authentication=True
+    )
+
 
 ###############################################
 #                sql managed db               #

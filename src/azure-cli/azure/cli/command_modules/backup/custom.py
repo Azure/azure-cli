@@ -178,6 +178,13 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
+def create_policy(client, resource_group_name, vault_name, name, policy):
+    policy_object = _get_policy_from_json(client, policy)
+    policy_object.name = name
+    policy_object.properties.backup_management_type = "AzureIaasVM"
+    return client.create_or_update(vault_name, resource_group_name, name, policy_object)
+
+
 def delete_policy(client, resource_group_name, vault_name, name):
     client.delete(vault_name, resource_group_name, name)
 
@@ -206,6 +213,10 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+
+    # throw error if policy has more than 1000 protected VMs.
+    if policy.properties.protected_items_count >= 1000:
+        raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
     if vm.location.lower() != vault.location.lower():
         raise CLIError(
@@ -344,9 +355,9 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
             Use the relevant get-default policy command and use it to update the policy for the workload.
             """)
 
-    # throw error if policy has more than 100 protected VMs.
-    if policy.properties.protected_items_count >= 100:
-        raise CLIError("Cannot configure backup for more than 100 VMs per policy")
+    # throw error if policy has more than 1000 protected VMs.
+    if policy.properties.protected_items_count >= 1000:
+        raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
