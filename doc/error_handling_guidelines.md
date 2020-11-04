@@ -5,9 +5,9 @@ This document aims to provide the guidelines for command group authors to onboar
 Previously in Azure CLI, `CLIError` was widely used to wrap error messages after different kinds of error types are being caught. Now, `CLIError` is deprecated and replaced by a set of newly designed error types, which will provide clearer structures for error categorizing and also more actionable error outputs for better user experience.
 
 For the new commands authoring, here are what need to be done to get onboard. __Any PRs not following these rules here will be rejected.__ For the existing `CLIError` in command groups, command group owners should schedule to replace them with the new error types.
-1. [__Mandatory__] Use the new designed error types instead of CLIError, detail section [here](#Error-Type)
-2. [__Mandatory__] Follow the error message authoring guidelines, detail section [here](#Error-Message)
-3. [__Recommended__] Provide recommendations for users to take action, detail section [here](#Error-Recommendation)
+1. [__Mandatory__] Use the newly designed error types instead of `CLIError`. See section [Error Type](#Error-Type)
+2. [__Mandatory__] Follow the error message authoring guidelines. See section [Error Message](#Error-Message)
+3. [__Recommended__] Provide recommendations for users to take action. See section [Error Recommendation](#Error-Recommendation)
 
 
 ## Error Type
@@ -51,13 +51,13 @@ To summarize, here is a list of rules for command group authors to select a prop
 Applying the new error types is just as easy as using `CLIError`. Wherever an `CLIError` could appear, you can use the new error types to replace it.
 
 For example, previously, you may raise `CLIError` in this way.
-```
+```Python
 err_msg = 'the specified resource group ... not exist'
 raise CLIError(err_msg)
 ```
 
 Now, you could use the new error type in this way.
-```
+```Python
 from azure.cli.core.azclierror import ResourceNotFoundError
 
 err_msg = 'the specified resource group ... not exist'
@@ -65,7 +65,7 @@ raise ResourceNotFoundError(err_msg)
 ```
 
 The new error types all have the same signature for `__init__` function shown below. When an error is raised, you are highly recommended to provide some recommendations for users to take action if the error message is not clear enough for users to know what to do next.
-```
+```Python
 __init__(self, error_msg, recommendation=None):
 ```
 - `error_msg`: _string_, _required_. A clear message shown to users what the error is.
@@ -76,7 +76,7 @@ __init__(self, error_msg, recommendation=None):
 If there is not a proper error type for your case and the error is general enough, consider defining a new error type in [azure/cli/core/azclierror.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/azclierror.py). The defined error type should inherit from one of the errors defined in the second layer (`UserFault`, `ClientError`, `ServiceError`).
 
 For example, a new error type can be defined in this way.
-```
+```Python
 class NewErrorTypeName(UserFault):
     """ A description of new error type. """
     pass
@@ -107,10 +107,10 @@ __DON'Ts__
 
 ## Error Recommendation
 
-When necessary, it is highly suggested for command group authors to provide recommendations for users to resolve the errors they encountered. It is also suggested that we split the error message itself from the recommendations, which can be done either by specifying the `recommendation` parameter when initiating an error type or using the `set_recommendation` function after an error is initiated. The recommendations you provide will be printed right below the error message, one recommendation in a new line.
+When necessary, it is highly suggested for command group authors to provide recommendations for users to resolve the errors they encountered. It is also suggested that we split the error message itself from the recommendations, which can be done either by specifying the `recommendation` parameter when initiating an error type or using the `set_recommendation` function after an error is initiated. In both cases, you can either provide a single recommendation with a string or multiple recommendations with a string list. The recommendations you provide will be printed right below the error message, one recommendation in a new line.
 
 
-```
+```Python
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
@@ -118,7 +118,7 @@ recommendation = 'Try to use --urn publisher:offer:sku:version only'
 raise MutuallyExclusiveArgumentError(err_msg, recommendation)
 ```
 
-```
+```Python
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 error_msg = 'Please specify all of (--publisher, --offer, --sku, --version), or --urn'
