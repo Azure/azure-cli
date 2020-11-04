@@ -23,7 +23,7 @@ from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_pr
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
-    process_storage_uri, validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
+    validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
@@ -383,6 +383,20 @@ def load_arguments(self, _):
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local key backup from which to restore key.')
 
+    with self.argument_context('keyvault key restore', arg_group='Storage Id') as c:
+        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'],
+                   help='Azure Blob storage container Uri. If specified all '
+                        'other \'Storage Id\' arguments should be omitted')
+        c.argument('storage_account_name', help='Name of Azure Storage Account.')
+        c.argument('blob_container_name', help='Name of Blob Container.')
+
+    with self.argument_context('keyvault key restore', arg_group='Restoring keys from storage account') as c:
+        c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
+                   help='The SAS token pointing to an Azure Blob storage container')
+        c.argument('backup_folder', help='Name of the blob container which contains the backup')
+        c.argument('key_name', options_list=['--name', '-n'],
+                   help='Name of the key. (Only for restoring from storage account)')
+
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
 
@@ -490,7 +504,7 @@ def load_arguments(self, _):
                 c.ignore('cls')
 
     with self.argument_context('keyvault backup start', arg_group='Storage Id') as c:
-        c.argument('storage_resource_uri', required=False, validator=process_storage_uri,
+        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'], required=False,
                    help='Azure Blob storage container Uri. If specified all other \'Storage Id\' arguments '
                         'should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')
@@ -506,7 +520,7 @@ def load_arguments(self, _):
                    help='Name of the blob container which contains the backup')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
-        c.extra('storage_resource_uri', required=False, validator=process_storage_uri,
+        c.extra('storage_resource_uri', options_list=['--storage-resource-uri', '-u'], required=False,
                 help='Azure Blob storage container Uri. If specified all other \'Storage Id\' '
                      'arguments should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')

@@ -24,7 +24,8 @@ from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
 
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
+    MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
 from azure.graphrbac.models import GraphErrorException
@@ -1096,13 +1097,50 @@ def backup_key(client, file_path, vault_base_url=None,
         output.write(backup)
 
 
-def restore_key(client, file_path, vault_base_url=None, hsm_name=None,
-                identifier=None):  # pylint: disable=unused-argument
-    with open(file_path, 'rb') as file_in:
-        data = file_in.read()
-    if hsm_name is None:  # TODO: use a more graceful way to implement.
-        hsm_name = vault_base_url
-    return client.restore_key(hsm_name, data)
+def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
+                identifier=None, storage_resource_uri=None,  # pylint: disable=unused-argument
+                storage_account_name=None, blob_container_name=None,
+                token=None, backup_folder=None, key_name=None, no_wait=False):
+    if file_path:
+        if any([storage_account_name, blob_container_name, token, backup_folder]):
+            raise MutuallyExclusiveArgumentError('Do not use --file/-f with any of --storage-account-name/'
+                                                 '--blob-container-name/--storage-container-SAS-token/--backup-folder')
+        if key_name:
+            raise MutuallyExclusiveArgumentError('Please do not specify --name/-n when using --file/-f')
+
+        if no_wait:
+            raise MutuallyExclusiveArgumentError('Please do not specify --no-wait when using --file/-f')
+
+    if not file_path and not any([storage_account_name, blob_container_name, token, backup_folder]):
+        raise RequiredArgumentMissingError('Please specify --file/-f or --storage-account-name & '
+                                           '--blob-container-name & ----storage-container-SAS-token & --backup-folder')
+
+    if file_path:
+        with open(file_path, 'rb') as file_in:
+            data = file_in.read()
+        if hsm_name is None:  # TODO: use a more graceful way to implement.
+            hsm_name = vault_base_url
+        return client.restore_key(hsm_name, data)
+
+    if not token:
+        raise RequiredArgumentMissingError('Please specify --storage-container-SAS-token/-t')
+    if not backup_folder:
+        raise RequiredArgumentMissingError('Please specify --backup-folder')
+
+    storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
+    if not storage_resource_uri:
+        storage_resource_uri = construct_storage_uri(
+            cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
+
+    backup_client = get_client_factory(
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)(cmd.cli_ctx, {'hsm_name': hsm_name})
+    return sdk_no_wait(
+        no_wait, backup_client.begin_selective_restore,
+        blob_storage_uri=storage_resource_uri,
+        sas_token=token,
+        folder_name=backup_folder,
+        key_name=key_name
+    )
 
 
 def _int_to_bytes(i):
@@ -1999,11 +2037,40 @@ def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable
 
 
 # region full backup/restore
-def full_backup(client, storage_resource_uri, token, hsm_name=None):  # pylint: disable=unused-argument
+def construct_storage_uri(endpoint, storage_account_name, blob_container_name):
+    return 'https://{}.blob.{}/{}'.format(storage_account_name, endpoint, blob_container_name)
+
+
+def storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name):
+    if storage_resource_uri and any([storage_account_name, blob_container_name]):
+        raise MutuallyExclusiveArgumentError('Please do not specify --storage-account-name or --blob-container-name '
+                                             'if --storage-resource-uri is specified.')
+    if not storage_resource_uri:
+        if not storage_account_name:
+            raise RequiredArgumentMissingError('Please specify --storage-account-name')
+        if not blob_container_name:
+            raise RequiredArgumentMissingError('Please specify --blob-container-name')
+
+    if not storage_resource_uri and not any([storage_account_name, blob_container_name]):
+        raise RequiredArgumentMissingError('Please specify --storage-resource-uri or '
+                                           '--storage-account-name & --blob-container-name')
+
+
+def full_backup(cmd, client, token, storage_resource_uri=None, storage_account_name=None, blob_container_name=None,
+                hsm_name=None):  # pylint: disable=unused-argument
+    storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
+    if not storage_resource_uri:
+        storage_resource_uri = construct_storage_uri(
+            cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     return client.begin_full_backup(storage_resource_uri, token)
 
 
-def full_restore(client, storage_resource_uri, token, folder_to_restore, hsm_name=None):  # pylint: disable=unused-argument
+def full_restore(cmd, client, token, folder_to_restore, storage_resource_uri=None, storage_account_name=None,
+                 blob_container_name=None, hsm_name=None):  # pylint: disable=unused-argument
+    storage_account_parameters_check(storage_resource_uri, storage_account_name, blob_container_name)
+    if not storage_resource_uri:
+        storage_resource_uri = construct_storage_uri(
+            cmd.cli_ctx.cloud.suffixes.storage_endpoint, storage_account_name, blob_container_name)
     return client.begin_full_restore(storage_resource_uri, token, folder_to_restore)
 # endregion
 
