@@ -1982,8 +1982,9 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         assert expected_export == actual_export
 
 
-class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
+class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='AadTest', length=15)
@@ -2044,7 +2045,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
         })
 
         # Before assigning data reader role, read operation should fail with AAD auth
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Unauthorized'"):
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Assign data reader role to current user
@@ -2069,7 +2070,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'value': updated_value
         })
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
             self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
