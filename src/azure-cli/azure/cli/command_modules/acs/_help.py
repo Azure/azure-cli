@@ -205,6 +205,9 @@ parameters:
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
@@ -407,6 +410,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
   - name: Create a kubernetes cluster with server side encryption using your owned key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
+  - name: Create a kubernetes cluster with ephemeral OS enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks update'] = """
@@ -621,6 +626,9 @@ parameters:
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
@@ -667,6 +675,9 @@ parameters:
   - name: --spot-max-price
     type: float
     short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
+examples:
+  - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks nodepool delete'] = """
