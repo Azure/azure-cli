@@ -7,6 +7,7 @@ Release History
 ++++++
 
 * Optimize index.html CSS style.
+* Support a permanent link of latest testing results.
 
 0.7.0 (10/23/2020)
 ++++++
