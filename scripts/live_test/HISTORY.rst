@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.8.0 (11/4/2020)
+++++++
+
+* Optimize index.html CSS style.
+
 0.7.0 (10/23/2020)
 ++++++
 
