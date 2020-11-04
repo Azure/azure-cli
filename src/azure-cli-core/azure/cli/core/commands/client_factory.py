@@ -114,7 +114,7 @@ def _prepare_client_kwargs_track2(cli_ctx):
     """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
-    # Change SSL verification behavior
+    # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
     # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
@@ -124,6 +124,7 @@ def _prepare_client_kwargs_track2(cli_ctx):
     from azure.core.pipeline.policies import SansIOHTTPPolicy
     client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
 
+    # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()
 
     try:
@@ -133,13 +134,20 @@ def _prepare_client_kwargs_track2(cli_ctx):
     except KeyError:
         pass
 
+    # Prepare custom headers, used by HeadersPolicy
     headers = dict(cli_ctx.data['headers'])
+
+    # - Prepare CommandName header
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
     headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # - Prepare ParameterSetName header
     if cli_ctx.data.get('safe_params'):
         headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
     client_kwargs['headers'] = headers
 
+    # Prepare x-ms-client-request-id header, used by RequestIdPolicy
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
 
