@@ -75,7 +75,7 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         if len(scopes) > 1:
             scopes = scopes[1:]
 
-        _, token, full_token, _ = self._get_token(scopes_to_resource(scopes))
+        _, token, full_token, _ = self._get_token(_try_scopes_to_resource(scopes))
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
         except KeyError:  # needed to deal with differing unserialized MSI token payload
@@ -106,7 +106,9 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     # This method is exposed for Azure Core. Add *scopes, **kwargs to fit azure.core requirement
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
-        self.resource = scopes_to_resource(scopes)
+        resource = _try_scopes_to_resource(scopes)
+        if resource:
+            self.resource = resource
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
@@ -135,3 +137,25 @@ class MSIAuthenticationWrapper(MSIAuthentication):
     def signed_session(self, session=None):
         logger.debug("MSIAuthenticationWrapper.signed_session invoked by Track 1 SDK")
         super().signed_session(session)
+
+
+def _try_scopes_to_resource(scopes):
+    """Wrap scopes_to_resource to workaround some SDK issues."""
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
+    # credential_scopes and call `get_token` with empty scopes.
+    # As a workaround, return None so that the CLI-managed resource is used.
+    if not scopes:
+        logger.debug("No scope is provided by the SDK, use the CLI-managed resource.")
+        return None
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/745 extend default
+    # credential_scopes with custom credential_scopes. Instead, credential_scopes should be replaced by
+    # custom credential_scopes. https://github.com/Azure/azure-sdk-for-python/issues/12947
+    # As a workaround, remove the first one if there are multiple scopes provided.
+    if len(scopes) > 1:
+        logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s.", scopes[0])
+        return scopes_to_resource(scopes[1:])
+
+    # Exactly only one scope is provided
+    return scopes_to_resource(scopes)
