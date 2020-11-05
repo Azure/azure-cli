@@ -71,8 +71,8 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
       border: 1px solid black;
       border-collapse: collapse;
     }
-    </head>
     </style>
+    </head>
     <body>
     <h2>Testing results of Azure CLI</h2>
     """
