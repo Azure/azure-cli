@@ -1454,9 +1454,11 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     # open portal view if addon is not enabled or k8s version >= 1.19.0
     if StrictVersion(instance.kubernetes_version) >= StrictVersion('1.19.0') or (not addon_profile.enabled):
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        dashboardURL = (('https://portal.azure.com/#resource/subscriptions/{0}/resourceGroups/{1}/providers/'
-                         'Microsoft.ContainerService/managedClusters/{2}/workloads')
-                        .format(subscription_id, resource_group_name, name))
+        dashboardURL = (
+            cmd.cli_ctx.cloud.endpoints.portal +  # Azure Portal URL (https://portal.azure.com for public cloud)
+            ('/#resource/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService'
+             '/managedClusters/{2}/workloads').format(subscription_id, resource_group_name, name)
+        )
 
         if in_cloud_console():
             logger.warning('To view the Kubernetes resources view, please open %s in a new tab', dashboardURL)
