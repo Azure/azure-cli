@@ -13,13 +13,13 @@ class CognitiveServicesByoxTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_cognitiveservices_user_owned_storage(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
-
+        subscription_id = 'f9b96b36-1f5e-4021-8959-51527e26e6d3' if self.is_live else '00000000-0000-0000-0000-000000000000'
         self.kwargs.update({
             'sname': sname,
             'kind': 'SpeechServices',
             'sku': 'S0',
             'location': 'centraluseuap',
-            'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/f9b96b36-1f5e-4021-8959-51527e26e6d3/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest\\\"}]'
+            'storageIds': '[{\\\"resourceId\\\":\\\"/subscriptions/' + subscription_id + '/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest\\\"}]'
         })
 
         # test to create cognitive services account
@@ -34,7 +34,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertEqual(len(account['properties']['userOwnedStorage']), 1)
-        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest')
+        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest'.format(subscription_id))
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
@@ -52,7 +52,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
 
         self.assertEqual(account['identity']['type'], 'SystemAssigned')
         self.assertEqual(len(account['properties']['userOwnedStorage']), 1)
-        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest')
+        self.assertEqual(account['properties']['userOwnedStorage'][0]['resourceId'], '/subscriptions/{}/resourceGroups/felixwa-01/providers/Microsoft.Storage/storageAccounts/felixwatest'.format(subscription_id))
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
@@ -79,7 +79,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                          self.check('properties.provisioningState', 'Creating')])
 
         for i in range(10):
-            time.sleep(0.1)  # when generating recording, use a large value such as 15
+            time.sleep(15)
             account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
             if 'Creating' != account['properties']['provisioningState']:
                 break

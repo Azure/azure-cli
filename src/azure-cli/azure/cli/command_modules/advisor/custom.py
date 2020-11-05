@@ -55,12 +55,15 @@ def enable_recommendations(client, ids=None, resource_group_name=None, recommend
 
     for rec in recs:
         for sup in all_sups:
-            if sup.suppression_id in rec.suppression_ids:
-                result = _parse_recommendation_uri(rec.id)
-                client.suppressions.delete(
-                    resource_uri=result['resource_uri'],
-                    recommendation_id=result['recommendation_id'],
-                    name=sup.name)
+            try:
+                if sup.suppression_id in rec.suppression_ids:
+                    result = _parse_recommendation_uri(rec.id)
+                    client.suppressions.delete(
+                        resource_uri=result['resource_uri'],
+                        recommendation_id=result['recommendation_id'],
+                        name=sup.name)
+            except TypeError:  # when rec.id is already suppressed, rec.suppression_ids is None
+                pass
         rec.suppression_ids = None
 
     return recs

@@ -11,7 +11,6 @@ import re
 # TODO: revert when #9406 is addressed
 class SecurityCenterAlertsTests(LiveScenarioTest):
 
-    @AllowLargeResponse()
     def test_security_alerts(self):
 
         alerts = self.cmd('az security alert list').get_output_in_json()
