@@ -68,12 +68,6 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
 class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
-    @staticmethod
-    def recommendation_provider(version, command, parameters, extension):  # pylint: disable=unused-argument
-        logger.debug("recommendation_provider: version: %s, command: %s, parameters: %s, extension: %s",
-                     version, command, parameters, extension)
-        return []
-
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
         self._raw_arguments = None
