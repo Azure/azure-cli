@@ -1464,7 +1464,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
             logger.warning('Kubernetes resources view on %s', dashboardURL)
 
         if not disable_browser:
-            wait_then_open_async(dashboardURL)
+            webbrowser.open_new_tab(dashboardURL)
         return
 
     # otherwise open the kube-dashboard addon
