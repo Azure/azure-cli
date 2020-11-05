@@ -477,7 +477,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
     mysql_location = 'westus2'
-    '''
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     @VirtualNetworkPreparer()
@@ -488,7 +488,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location=mysql_location)
     def test_investigation2(self, resource_group):
         self.helper2('mysql', resource_group)
-    '''
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     def test_investigation3(self, resource_group):
@@ -660,7 +660,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         vnet_name_2 = 'clitestvnet1'
         subnet_name_2 = 'clitestsubnet1'
         # flexible-servers
-        servers = ['sampleserver1','sampleserver2']
+        servers = ['sampleserver1', 'sampleserver2']
 
         # Case 2 : Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
         # The subnet name is the default created one, not the one in subnet ID
