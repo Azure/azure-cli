@@ -21,6 +21,7 @@ from azure.cli.testsdk import (
     ScenarioTest,
     StringContainCheck,
     LocalContextScenarioTest,
+    VirtualNetworkPreparer,
     live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -30,7 +31,7 @@ from azure.cli.testsdk.preparers import (
 SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 
-
+'''
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
     def __init__(self, engine_type, location, engine_parameter_name='database_engine',
@@ -469,16 +470,22 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
-
+'''
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
     mysql_location = 'westus2'
-    '''
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @VirtualNetworkPreparer()
     def test_investigation(self, resource_group):
         self.helper('mysql', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_investigation2(self, resource_group):
+        self.helper2('mysql', resource_group)
 
     '''
     @AllowLargeResponse()
@@ -530,6 +537,133 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     @live_only()
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg('mysql', resource_group_1, resource_group_2)
+    '''
+
+    def helper(self, database_engine, resource_group):
+
+        # flexible-server create
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
+        if database_engine == 'postgres':
+            tier = 'GeneralPurpose'
+            sku_name = 'Standard_D2s_v3'
+            version = '12'
+            storage_size = 128
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            tier = 'Burstable'
+            sku_name = 'Standard_B1ms'
+            storage_size = 10
+            version = '5.7'
+            location = self.mysql_location
+
+        vnet_name = 'clitestvnet'
+        address_prefix = '10.0.0.0/16'
+        subnet_name_1 = 'clitestsubnet'
+        subnet_prefix_1 = '10.0.0.0/24'
+        vnet_name_2 = 'clitestvnet1'
+        subnet_name_2 = 'clitestsubnet1'
+        # flexible-servers
+        servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcli', SERVER_NAME_MAX_LENGTH)]
+
+        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()[
+            'id']
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
+                 .format(database_engine, resource_group, servers[0], subnet_id),
+                 checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
+                         JMESPathCheck('subnetId', subnet_id),
+                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine))])
+
+        # flexible-server show to validate delegation is added to both the created server
+        show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
+                                 .format(database_engine, resource_group, servers[0])).get_output_in_json()
+        self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'],
+                         subnet_id)
+
+        # delete all servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
+                 checks=NoneCheck())
+
+        time.sleep(15 * 60)
+        '''
+        # remove delegations from all vnets
+        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
+                                                                                                         subnet_name_1,
+                                                                                                         vnet_name))
+        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
+                                                                                                         'Subnet' +
+                                                                                                         servers[1][6:],
+                                                                                                         vnet_name_2))
+
+        # remove all vnets
+        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name))
+        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
+        '''
+
+    def helper2(self, database_engine, resource_group):
+
+        # flexible-server create
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
+        if database_engine == 'postgres':
+            tier = 'GeneralPurpose'
+            sku_name = 'Standard_D2s_v3'
+            version = '12'
+            storage_size = 128
+            location = self.postgres_location
+        elif database_engine == 'mysql':
+            tier = 'Burstable'
+            sku_name = 'Standard_B1ms'
+            storage_size = 10
+            version = '5.7'
+            location = self.mysql_location
+
+        vnet_name = 'clitestvnet'
+        address_prefix = '10.0.0.0/16'
+        subnet_name_1 = 'clitestsubnet'
+        subnet_prefix_1 = '10.0.0.0/24'
+        vnet_name_2 = 'clitestvnet1'
+        subnet_name_2 = 'clitestsubnet1'
+        # flexible-servers
+        servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcli', SERVER_NAME_MAX_LENGTH)]
+
+        # Case 2 : Provision a server with supplied Subnet ID whose vnet exists, but subnet does not exist and the vnet does not contain any other subnet
+        # The subnet name is the default created one, not the one in subnet ID
+        self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
+                 .format(database_engine, resource_group, servers[1],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, vnet_name_2, subnet_name_2)),
+                 checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
+                         JMESPathCheck('subnetId',
+                                       '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                                           self.get_subscription_id(), resource_group, vnet_name_2,
+                                           'Subnet' + servers[1][6:])),
+                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
+
+        # flexible-server show to validate delegation is added to both the created server
+        show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
+                                 .format(database_engine, resource_group, servers[1])).get_output_in_json()
+        self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
+                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
+                             self.get_subscription_id(), resource_group, vnet_name_2, 'Subnet' + servers[1][6:]))
+
+        # delete all servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
+                 checks=NoneCheck())
+        time.sleep(15 * 60)
+
+        # remove delegations from all vnets
+        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
+                                                                                                         'Subnet' +
+                                                                                                         servers[1][6:],
+                                                                                                         vnet_name_2))
+
+        # remove all vnets
+        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
 
     def _test_flexible_server_vnet_mgmt_supplied_subnetid(self, database_engine, resource_group):
 
