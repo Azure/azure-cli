@@ -78,7 +78,7 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
-_USE_VENDEROED_SUBSCRIPTION_SDK = True
+_USE_VENDORED_SUBSCRIPTION_SDK = True
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -297,7 +297,7 @@ class Profile:
         return result
 
     def _new_account(self):
-        if _USE_VENDEROED_SUBSCRIPTION_SDK:
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
             from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
             from azure.cli.core.vendored_sdks.subscriptions.models import SubscriptionState
             SubscriptionType = Subscription
@@ -999,7 +999,7 @@ class SubscriptionFinder:
         """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
         on the design of architecture.
         """
-        if _USE_VENDEROED_SUBSCRIPTION_SDK:
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
             # Use vendered subscription SDK to decouple from `resource` command module
             from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
             client_type = SubscriptionClient

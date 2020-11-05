@@ -16,8 +16,8 @@ from copy import deepcopy
 from adal import AdalError
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDEROED_SUBSCRIPTION_SDK)
-if _USE_VENDEROED_SUBSCRIPTION_SDK:
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
         (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 else:
