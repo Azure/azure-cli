@@ -179,6 +179,29 @@ class ClientRequestError(UserFault):
     pass
 
 
+# OS error types
+class AzFileNotFoundError(UserFault):
+    """ File doesn't exist. """
+    pass
+
+
+class AzPermissionError(UserFault):
+    """ Operate without adequate access rights. """
+    pass
+
+
+class AzIsADirectoryError(UserFault):
+    """ Request a file operation on a directory. """
+    pass
+
+
+class AzOSError(UserFault):
+    """ Fallback of the os errors.
+    Avoid using this class unless the error can not be classified
+    into the above os error types. """
+    pass
+
+
 # Validation related error types
 class ValidationError(UserFault):
     """ Fallback of the errors in validation functions.
