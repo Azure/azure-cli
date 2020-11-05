@@ -471,6 +471,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
 '''
+
+
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus'
@@ -546,24 +548,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
-            location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
-            location = self.mysql_location
 
-        vnet_name = 'clitestvnet'
-        address_prefix = '10.0.0.0/16'
-        subnet_name_1 = 'clitestsubnet'
-        subnet_prefix_1 = '10.0.0.0/24'
-        vnet_name_2 = 'clitestvnet1'
-        subnet_name_2 = 'clitestsubnet1'
         # flexible-servers
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcli', SERVER_NAME_MAX_LENGTH)]
@@ -586,7 +574,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        # time.sleep(15 * 60)
         '''
         # remove delegations from all vnets
         self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
@@ -609,22 +597,10 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
             self.cmd('local-context off')
 
         if database_engine == 'postgres':
-            tier = 'GeneralPurpose'
             sku_name = 'Standard_D2s_v3'
-            version = '12'
-            storage_size = 128
-            location = self.postgres_location
         elif database_engine == 'mysql':
-            tier = 'Burstable'
             sku_name = 'Standard_B1ms'
-            storage_size = 10
-            version = '5.7'
-            location = self.mysql_location
 
-        vnet_name = 'clitestvnet'
-        address_prefix = '10.0.0.0/16'
-        subnet_name_1 = 'clitestsubnet'
-        subnet_prefix_1 = '10.0.0.0/24'
         vnet_name_2 = 'clitestvnet1'
         subnet_name_2 = 'clitestsubnet1'
         # flexible-servers
