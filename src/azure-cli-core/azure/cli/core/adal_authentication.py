@@ -101,6 +101,7 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         logger.debug("MSIAuthenticationWrapper.get_token invoked by Track 2 SDK with scopes=%s", scopes)
         resource = _try_scopes_to_resource(scopes)
         if resource:
+            # If available, use resource provided by SDK
             self.resource = resource
         self.set_token()
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
