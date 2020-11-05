@@ -16,7 +16,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_adls_file_system, cf_adls_directory,
                                                                cf_adls_file, cf_adls_service,
                                                                cf_blob_client, cf_blob_lease_client,
-                                                               cf_or_policy, cf_container_client)
+                                                               cf_or_policy, cf_container_client,
+                                                               cf_queue_service)
 
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.core.commands import CliCommandType
@@ -350,10 +351,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')
 
-    with self.command_group('storage blob',
-                            custom_command_type=get_custom_sdk('blob', cf_blob_client)) as g:
-        g.storage_custom_command_oauth('set-tier', 'set_blob_tier_v2')
-
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
@@ -609,8 +606,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._format import transform_boolean_for_table
         from ._transformers import create_boolean_result_output_transformer
 
-        g.storage_command_oauth('list', 'list_queues',
-                                transform=transform_storage_list_output)
         g.storage_command_oauth('create', 'create_queue', transform=create_boolean_result_output_transformer('created'),
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('delete', 'delete_queue', transform=create_boolean_result_output_transformer('deleted'),
@@ -649,6 +644,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('clear', 'clear_messages')
         g.storage_command_oauth('update', 'update_message')
+
+    queue_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.queue._queue_service_client#QueueServiceClient.{}',
+        client_factory=cf_queue_service, resource_type=ResourceType.DATA_STORAGE_QUEUE)
+
+    with self.command_group('storage queue', queue_service_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_QUEUE, min_api='2018-03-28',
+                            custom_command_type=get_custom_sdk('queue', client_factory=cf_queue_service,
+                                                               resource_type=ResourceType.DATA_STORAGE_QUEUE)) as g:
+        g.storage_custom_command_oauth('list', 'list_queues', transform=transform_storage_list_output)
 
     if cosmosdb_table_exists(self.cli_ctx):
         table_sdk = CliCommandType(operations_tmpl='azure.multiapi.cosmosdb.table.tableservice#TableService.{}',
@@ -722,6 +727,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_adls_directory,
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
+    custom_adls_directory_sdk = get_custom_sdk(custom_module='fs_directory',
+                                               client_factory=cf_adls_directory,
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
     adls_file_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_file_client#DataLakeFileClient.{}',
         client_factory=cf_adls_file,
@@ -777,8 +785,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
 
-    with self.command_group('storage fs access', adls_directory_sdk,
+    with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_directory_sdk,
                             resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
         from ._transformers import transform_fs_access_output
         g.storage_command_oauth('set', 'set_access_control')
         g.storage_command_oauth('show', 'get_access_control', transform=transform_fs_access_output)
+        g.storage_custom_command_oauth('set-recursive', 'set_access_control_recursive', min_api='2020-02-10')
+        g.storage_custom_command_oauth('update-recursive', 'update_access_control_recursive', min_api='2020-02-10')
+        g.storage_custom_command_oauth('remove-recursive', 'remove_access_control_recursive', min_api='2020-02-10')

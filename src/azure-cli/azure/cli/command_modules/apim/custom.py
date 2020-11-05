@@ -40,7 +40,7 @@ def create_apim(client, resource_group_name, name, publisher_email, sku_name=Sku
         resource['identity'] = ApiManagementServiceIdentity(type="SystemAssigned")
 
     if resource.sku.name == SkuType.consumption.value:
-        resource.sku.capacity = None
+        resource.sku.capacity = 0
 
     cms = client.api_management_service
 

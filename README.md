@@ -122,12 +122,6 @@ See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for avai
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
 ```
 
-For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
-For example:
-```bash
-$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
-```
-
 ### Edge builds
 
 If you want to get the latest build from the `dev` branch, you can use our "edge" builds.
