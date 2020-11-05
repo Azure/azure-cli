@@ -1626,9 +1626,10 @@ class DeploymentScriptsTest(ScenarioTest):
     def test_list_all_deployment_scripts(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
-            'deployment_script_name': self.create_random_name('script', 20),
-            'deployment_name': self.create_random_name('ds', 20),
+            'deployment_script_name': self.create_random_name('script2019', 20),
+            'deployment_name': self.create_random_name('ds2019', 20),
             'resource_group': resource_group,
+            'api_version': '2019-10-01-preview',
             'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
         })
 
@@ -1636,7 +1637,25 @@ class DeploymentScriptsTest(ScenarioTest):
         self.cmd('deployment-scripts list',
                  checks=self.check("length([?name=='{deployment_script_name}'])", count))
 
-        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name} --parameters apiVersion="{api_version}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+
+        count += 1
+
+        self.kwargs.update({
+            'deployment_script_name': self.create_random_name('script2020', 20),
+            'deployment_name': self.create_random_name('ds2020', 20),
+            'resource_group': resource_group,
+            'api_version': '2020-10-01',
+            'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
+
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName="{deployment_script_name}" --parameters apiVersion="{api_version}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{resource_group}'),
         ])

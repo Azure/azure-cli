@@ -8,6 +8,13 @@
                 "description": "Deployment script name"
             }
         },
+        "apiVersion": {
+            "type": "string",
+            "allowedValues": [
+                "2019-10-01-preview",
+                "2020-10-01"
+            ]
+        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
@@ -16,7 +23,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "2019-10-01-preview",
+            "apiVersion": "[parameters('apiVersion')]",
             "name": "[parameters('scriptName')]",
             "location": "[resourceGroup().location]",
             "identity": {
