@@ -23,6 +23,7 @@ from azure.cli.command_modules.keyvault.security_domain.shared_secret import Sha
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
 from azure.cli.core.util import sdk_no_wait
 from azure.graphrbac.models import GraphErrorException
@@ -217,7 +218,8 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
     )
 
 
-def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None, no_wait=False):
+def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=None,  # pylint: disable=unused-argument
+                       no_wait=False):
     if is_azure_stack_profile(cmd) or vault_name:
         return sdk_no_wait(
             no_wait,
@@ -225,10 +227,7 @@ def purge_vault_or_hsm(cmd, client, location=None, vault_name=None, hsm_name=Non
             location=location,
             vault_name=vault_name
         )
-
-    assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-    return hsm_client.purge_deleted(rlocation=location, name=hsm_name)
+    return None
 
 
 def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
@@ -236,19 +235,10 @@ def list_deleted_vault_or_hsm(cmd, client, resource_type=None):
         return client.list_deleted()
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        deleted_resources = []
-        try:
-            deleted_resources.extend(client.list_deleted())
-            deleted_resources.extend(hsm_client.list_deleted())
-        except:  # pylint: disable=bare-except
-            pass
-
-        return deleted_resources
+        return client.list_deleted()
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-        return hsm_client.list_deleted()
+        raise InvalidArgumentValueError('Operation "list-deleted" has not been supported for HSM.')
 
     if resource_type == 'vault':
         return client.list_deleted()
@@ -406,7 +396,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
     parameters = ManagedHsm(location=location,
-                            sku=ManagedHsmSku(name='Standard_B1'),
+                            sku=ManagedHsmSku(name='Standard_B1', family='B'),
                             properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
 
     return sdk_no_wait(
@@ -433,7 +423,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
 
     params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
-                                                       'sku': Sku(name=SkuName.standard.value),
+                                                       'sku': Sku(name=SkuName.standard.value, family='A'),
                                                        'create_mode': CreateMode.recover.value})
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
@@ -606,7 +596,7 @@ def create_hsm(cmd, client,
                                       network_acls=_create_network_rule_set(cmd, bypass, default_action))
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku),
+                            sku=ManagedHsmSku(name=sku, family='B'),
                             properties=properties)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
@@ -735,7 +725,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
               'The value will be changed to true.', file=sys.stderr)
 
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=Sku(name=sku),
+                                 sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,

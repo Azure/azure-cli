@@ -238,7 +238,7 @@ def create_application_package(cmd, client,
 @transfer_doc(CertificateAddParameter)
 def create_certificate(client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
-    certificate_format = 'pfx' if password else 'cer'
+    certificate_format = 'pfx' if password or certificate_file.endswith('.pfx') else 'cer'
     with open(certificate_file, "rb") as f:
         data_bytes = f.read()
     data = base64.b64encode(data_bytes).decode('utf-8')

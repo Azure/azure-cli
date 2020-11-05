@@ -733,9 +733,10 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert collection_create["name"] == col_name
 
+        indexes_size = len(collection_create["resource"]["indexes"])
         collection_update = self.cmd(
             'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes} --analytical-storage-ttl {new_ttl}').get_output_in_json()
-        assert len(collection_update["resource"]["indexes"]) == 1
+        assert len(collection_update["resource"]["indexes"]) == indexes_size + 1
 
         collection_show = self.cmd(
             'az cosmosdb mongodb collection show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
