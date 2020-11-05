@@ -24,6 +24,7 @@ import threading
 import time
 import uuid
 import webbrowser
+from math import isnan
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
@@ -61,7 +62,6 @@ from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceLinux
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2020_09_01.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterAddonProfile
@@ -95,6 +95,16 @@ from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _s
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
+
+from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
+from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
+from ._consts import CONST_MONITORING_ADDON_NAME
+from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
+from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
+from ._consts import CONST_KUBE_DASHBOARD_ADDON_NAME
+from ._consts import CONST_AZURE_POLICY_ADDON_NAME
+from ._consts import ADDONS
 
 logger = get_logger(__name__)
 
@@ -1448,12 +1458,16 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     instance = client.get(resource_group_name, name)
     addon_profiles = instance.addon_profiles or {}
     # addon name is case insensitive
-    addon_profile = next((addon_profiles[k] for k in addon_profiles if k.lower() == 'kubeDashboard'.lower()),
-                         ManagedClusterAddonProfile(enabled=True))
+    addon_profile = next((addon_profiles[k] for k in addon_profiles
+                          if k.lower() == CONST_KUBE_DASHBOARD_ADDON_NAME.lower()),
+                         ManagedClusterAddonProfile(enabled=False))
     if not addon_profile.enabled:
         raise CLIError('The kube-dashboard addon was disabled for this managed cluster.\n'
-                       'To use "az aks browse" first enable the add-on\n'
-                       'by running "az aks enable-addons --addons kube-dashboard".')
+                       'To use "az aks browse" first enable the add-on '
+                       'by running "az aks enable-addons --addons kube-dashboard".\n'
+                       'Starting with Kubernetes 1.19, AKS no longer support installation of '
+                       'the managed kube-dashboard addon.\n'
+                       'Please use the Kubernetes resources view in the Azure portal (preview) instead.')
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
@@ -1559,12 +1573,12 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
         is_service_principal = True
     elif (
             (hasattr(result, 'addon_profiles')) and
-            ('omsagent' in result.addon_profiles) and
-            (hasattr(result.addon_profiles['omsagent'], 'identity')) and
-            (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
+            (CONST_MONITORING_ADDON_NAME in result.addon_profiles) and
+            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME], 'identity')) and
+            (hasattr(result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity, 'object_id'))
     ):
         logger.info('omsagent MSI exists, using it')
-        service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
+        service_principal_msi_id = result.addon_profiles[CONST_MONITORING_ADDON_NAME].identity.object_id
         is_service_principal = False
 
     if service_principal_msi_id is not None:
@@ -1584,8 +1598,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                admin_username="azureuser",
                windows_admin_username=None,
                windows_admin_password=None,
+               enable_ahub=False,
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
+               node_osdisk_type=None,
                node_osdisk_size=0,
                node_osdisk_diskencryptionset_id=None,
                node_count=3,
@@ -1617,6 +1633,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
+               ppg=None,
                max_pods=0,
                min_count=None,
                max_count=None,
@@ -1658,8 +1675,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
-        storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
+        proximity_placement_group_id=ppg,
         availability_zones=zones,
         enable_node_public_ip=enable_node_public_ip,
         max_pods=int(max_pods) if max_pods else None,
@@ -1668,6 +1685,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
+
+    if node_osdisk_type:
+        agent_pool_profile.os_disk_type = node_osdisk_type
 
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool_profile)
 
@@ -1698,9 +1718,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 raise CLIError(
                     'Please specify both username and password in non-interactive mode.')
 
+        windows_license_type = None
+        if enable_ahub:
+            windows_license_type = 'Windows_Server'
+
         windows_profile = ManagedClusterWindowsProfile(
             admin_username=windows_admin_username,
-            admin_password=windows_admin_password)
+            admin_password=windows_admin_password,
+            license_type=windows_license_type)
 
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
@@ -1796,9 +1821,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         vnet_subnet_id
     )
     monitoring = False
-    if 'omsagent' in addon_profiles:
+    if CONST_MONITORING_ADDON_NAME in addon_profiles:
         monitoring = True
-        _ensure_container_insights_for_monitoring(cmd, addon_profiles['omsagent'])
+        _ensure_container_insights_for_monitoring(cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
 
     aad_profile = None
     if enable_aad:
@@ -1953,8 +1978,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
-    if 'omsagent' in instance.addon_profiles and instance.addon_profiles['omsagent'].enabled:
-        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+    if (CONST_MONITORING_ADDON_NAME in instance.addon_profiles and
+            instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled):
+        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, name, instance))
         cloud_name = cmd.cli_ctx.cloud.name
@@ -1995,15 +2021,6 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
         _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name)
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
-
-
-ADDONS = {
-    'http_application_routing': 'httpApplicationRouting',
-    'monitoring': 'omsagent',
-    'virtual-node': 'aciConnector',
-    'kube-dashboard': 'kubeDashboard',
-    'azure-policy': 'azurepolicy'
-}
 
 
 def aks_list(cmd, client, resource_group_name=None):
@@ -2092,6 +2109,8 @@ def aks_update(cmd, client, resource_group_name, name,
                enable_aad=False,
                aad_tenant_id=None,
                aad_admin_group_object_ids=None,
+               enable_ahub=False,
+               disable_ahub=False,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
@@ -2108,7 +2127,9 @@ def aks_update(cmd, client, resource_group_name, name,
             not uptime_sla and
             api_server_authorized_ip_ranges is None and
             not enable_aad and
-            not update_aad_profile):
+            not update_aad_profile and
+            not enable_ahub and
+            not disable_ahub):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2123,7 +2144,9 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--api-server-authorized-ip-ranges" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
-                       '"--aad-admin-group-object-ids"')
+                       '"--aad-admin-group-object-ids" or '
+                       '"--enable-ahub" or '
+                       '"--disable-ahub"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2232,6 +2255,14 @@ def aks_update(cmd, client, resource_group_name, name,
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
             instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(aad_admin_group_object_ids)
+
+    if enable_ahub and disable_ahub:
+        raise CLIError('Cannot specify "--enable-ahub" and "--disable-ahub" at the same time')
+
+    if enable_ahub:
+        instance.windows_profile.license_type = 'Windows_Server'
+    if disable_ahub:
+        instance.windows_profile.license_type = 'None'
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2400,16 +2431,20 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
         if addon_arg not in ADDONS:
             raise CLIError("Invalid addon name: {}.".format(addon_arg))
         addon = ADDONS[addon_arg]
-        if addon == 'aciConnector':
+        if addon == CONST_VIRTUAL_NODE_ADDON_NAME:
             # only linux is supported for now, in the future this will be a user flag
             addon += os_type
-        # addon name is case insensitive
-        addon = next((x for x in addon_profiles.keys() if x.lower() == addon.lower()), addon)
+
+        # honor addon names defined in Azure CLI
+        for key in list(addon_profiles):
+            if key.lower() == addon.lower() and key != addon:
+                addon_profiles[addon] = addon_profiles.pop(key)
+
         if enable:
             # add new addons or update existing ones and enable them
             addon_profile = addon_profiles.get(addon, ManagedClusterAddonProfile(enabled=False))
             # special config handling for certain addons
-            if addon == 'omsagent':
+            if addon == CONST_MONITORING_ADDON_NAME:
                 if addon_profile.enabled:
                     raise CLIError('The monitoring addon is already enabled for this managed cluster.\n'
                                    'To change monitoring configuration, run "az aks disable-addons -a monitoring"'
@@ -2424,8 +2459,8 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                     workspace_resource_id = '/' + workspace_resource_id
                 if workspace_resource_id.endswith('/'):
                     workspace_resource_id = workspace_resource_id.rstrip('/')
-                addon_profile.config = {'logAnalyticsWorkspaceResourceID': workspace_resource_id}
-            elif addon.lower() == ('aciConnector' + os_type).lower():
+                addon_profile.config = {CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
+            elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
                                    'To change virtual-node configuration, run '
@@ -2433,11 +2468,11 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, 
                                    'before enabling it again.')
                 if not subnet_name:
                     raise CLIError('The aci-connector addon requires setting a subnet name.')
-                addon_profile.config = {'SubnetName': subnet_name}
+                addon_profile.config = {CONST_VIRTUAL_NODE_SUBNET_NAME: subnet_name}
             addon_profiles[addon] = addon_profile
         else:
             if addon not in addon_profiles:
-                if addon == 'kubeDashboard':
+                if addon == CONST_KUBE_DASHBOARD_ADDON_NAME:
                     addon_profiles[addon] = ManagedClusterAddonProfile(enabled=False)
                 else:
                     raise CLIError("The addon {} is not installed.".format(addon))
@@ -2472,10 +2507,10 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
     if 'http_application_routing' in addons:
-        addon_profiles['httpApplicationRouting'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('http_application_routing')
     if 'kube-dashboard' in addons:
-        addon_profiles['kubeDashboard'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('kube-dashboard')
     # TODO: can we help the user find a workspace resource ID?
     if 'monitoring' in addons:
@@ -2489,22 +2524,22 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
             workspace_resource_id = '/' + workspace_resource_id
         if workspace_resource_id.endswith('/'):
             workspace_resource_id = workspace_resource_id.rstrip('/')
-        addon_profiles['omsagent'] = ManagedClusterAddonProfile(
-            enabled=True, config={'logAnalyticsWorkspaceResourceID': workspace_resource_id})
+        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(
+            enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
         addons.remove('monitoring')
     # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError('"--workspace-resource-id" requires "--enable-addons monitoring".')
     if 'azure-policy' in addons:
-        addon_profiles['azurepolicy'] = ManagedClusterAddonProfile(enabled=True)
+        addon_profiles[CONST_AZURE_POLICY_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True)
         addons.remove('azure-policy')
     if 'virtual-node' in addons:
         if not aci_subnet_name or not vnet_subnet_id:
             raise CLIError('"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         # TODO: how about aciConnectorwindows, what is its addon name?
-        addon_profiles['aciConnectorLinux'] = ManagedClusterAddonProfile(
+        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME] = ManagedClusterAddonProfile(
             enabled=True,
-            config={'SubnetName': aci_subnet_name}
+            config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
         )
         addons.remove('virtual-node')
     # error out if any (unrecognized) addons remain
@@ -2714,10 +2749,12 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
 def _ensure_container_insights_for_monitoring(cmd, addon):
     # Workaround for this addon key which has been seen lowercased in the wild.
-    if 'loganalyticsworkspaceresourceid' in addon.config:
-        addon.config['logAnalyticsWorkspaceResourceID'] = addon.config.pop('loganalyticsworkspaceresourceid')
+    for key in list(addon.config):
+        if (key.lower() == CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID.lower() and
+                key != CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID):
+            addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID] = addon.config.pop(key)
 
-    workspace_resource_id = addon.config['logAnalyticsWorkspaceResourceID']
+    workspace_resource_id = addon.config[CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID]
 
     workspace_resource_id = workspace_resource_id.strip()
 
@@ -2871,15 +2908,20 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       zones=None,
                       enable_node_public_ip=False,
                       node_vm_size=None,
+                      node_osdisk_type=None,
                       node_osdisk_size=0,
                       node_count=3,
                       vnet_subnet_id=None,
+                      ppg=None,
                       max_pods=0,
                       os_type="Linux",
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+                      eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
+                      spot_max_price=float('nan'),
                       tags=None,
                       labels=None,
                       mode="User",
@@ -2913,21 +2955,31 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
-        storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
+        proximity_placement_group_id=ppg,
         agent_pool_type="VirtualMachineScaleSets",
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
+        scale_set_priority=priority,
         enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         mode=mode
     )
 
+    if priority == CONST_SCALE_SET_PRIORITY_SPOT:
+        agent_pool.scale_set_eviction_policy = eviction_policy
+        if isnan(spot_max_price):
+            spot_max_price = -1
+        agent_pool.spot_max_price = spot_max_price
+
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
 
     if node_osdisk_size:
         agent_pool.os_disk_size_gb = int(node_osdisk_size)
+
+    if node_osdisk_type:
+        agent_pool.os_disk_type = node_osdisk_type
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool)
 

@@ -706,8 +706,7 @@ class AzCliCommandInvoker(CommandInvoker):
             return event_data['result']
         except Exception as ex:  # pylint: disable=broad-except
             if cmd_copy.exception_handler:
-                cmd_copy.exception_handler(ex)
-                return CommandResultItem(None, exit_code=1, error=ex)
+                return cmd_copy.exception_handler(ex)
             six.reraise(*sys.exc_info())
 
     def _run_jobs_serially(self, jobs, ids):
@@ -845,7 +844,6 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
-        from azure.cli.core.azclierror import AzCLIErrorType
         from azure.cli.core.azclierror import AzCLIError
         for validator in getattr(ns, '_argument_validators', []):
             try:

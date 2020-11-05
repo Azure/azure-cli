@@ -942,7 +942,7 @@ examples:
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-quick-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli.'
 parameters:
   - name: --image
     type: string
@@ -1163,7 +1163,7 @@ long-summary: >4
 
 helps['vm disk attach'] = """
 type: command
-short-summary: Attach a managed persistent disk to a VM.
+short-summary: Attach a managed persistent disk to a VM. Please note that --ids only supports one disk.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
 examples:
   - name: Attach a new default sized (1023 GB) managed data disk to a VM.
@@ -2426,6 +2426,14 @@ examples:
     text: |
         az vmss extension show --name MyExtension --resource-group MyResourceGroup --vmss-name MyVmss
     crafted: true
+"""
+
+helps['vmss extension upgrade'] = """
+type: command
+short-summary: Upgrade all extensions for all VMSS instances to the latest version.
+examples:
+  - name: Upgrade all extensions to the latest version.
+    text: az vmss extension upgrade -g MyResourceGroup -n MyVmss
 """
 
 helps['vmss get-instance-view'] = """

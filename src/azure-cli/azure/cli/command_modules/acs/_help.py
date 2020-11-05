@@ -205,6 +205,9 @@ parameters:
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --kubernetes-version -k
     type: string
     short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
@@ -222,6 +225,9 @@ parameters:
   - name: --windows-admin-password
     type: string
     short-summary: Password to create on Windows node VMs.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
   - name: --enable-aad
     type: bool
     short-summary: Enable managed AAD feature for cluster.
@@ -271,7 +277,7 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -339,6 +345,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
   - name: --enable-node-public-ip
     type: bool
     short-summary: Enable VMSS node public IP.
@@ -395,10 +404,14 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
   - name: Create a kubernetes cluster with supporting Windows agent pools.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
+  - name: Create a kubernetes cluster with supporting Windows agent pools with AHUB enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-ahub
   - name: Create a kubernetes cluster with managed AAD enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
   - name: Create a kubernetes cluster with server side encryption using your owned key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
+  - name: Create a kubernetes cluster with ephemeral OS enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks update'] = """
@@ -442,7 +455,7 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -461,6 +474,12 @@ parameters:
   - name: --aad-tenant-id
     type: string
     short-summary: The ID of an Azure Active Directory tenant.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --disable-ahub
+    type: bool
+    short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -482,6 +501,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
   - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Enable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
+  - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
 """
 
 helps['aks delete'] = """
@@ -603,6 +626,9 @@ parameters:
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
@@ -616,6 +642,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.
@@ -637,6 +666,18 @@ parameters:
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --priority
+    type: string
+    short-summary: The priority of the node pool.
+  - name: --eviction-policy
+    type: string
+    short-summary: The eviction policy of the Spot node pool. It can only be set when --priority is Spot.
+  - name: --spot-max-price
+    type: float
+    short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
+examples:
+  - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks nodepool delete'] = """

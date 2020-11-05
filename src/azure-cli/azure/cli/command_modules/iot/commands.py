@@ -156,8 +156,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             min_api="2019-07-01-preview") as g:
         g.custom_show_command('show', 'iot_hub_devicestream_show')
 
-    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
-                            is_preview=True) as g:
+    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:
         g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)
         g.custom_command('list', 'iot_central_app_list')
         g.custom_show_command('show', 'iot_central_app_get')

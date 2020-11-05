@@ -12,9 +12,6 @@ from ..storage_test_util import StorageScenarioMixin
 
 @api_version_constraint(ResourceType.DATA_STORAGE, min_api='2017-11-09')
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    def oauth_cmd(self, cmd, *args, **kwargs):
-        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer()
@@ -59,9 +56,6 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                        checks=[JMESPathCheck('created', True)])
         self.oauth_cmd('storage queue exists -n {queue} --account-name {account}', checks=[
             JMESPathCheck('exists', True)])
-
-        res = self.oauth_cmd('storage queue list --account-name {account}').get_output_in_json()
-        self.assertIn(self.kwargs.get('queue'), [x['name'] for x in res], 'The newly created queue is not listed.')
 
         self.oauth_cmd('storage queue metadata show -n {queue} --account-name {account}', checks=[
             JMESPathCheck('a', 'b'),

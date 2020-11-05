@@ -9,7 +9,7 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import is_valid_connection_string, resolve_resource_group, get_store_name_from_connection_string
+from ._utils import is_valid_connection_string, resolve_store_metadata, get_store_name_from_connection_string
 from ._models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
@@ -31,6 +31,15 @@ def validate_connection_string(namespace):
         if not is_valid_connection_string(connection_string):
             raise CLIError('''The connection string is invalid. \
 Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xxxx ''')
+
+
+def validate_auth_mode(namespace):
+    auth_mode = namespace.auth_mode
+    if auth_mode == "login":
+        if not namespace.name and not namespace.endpoint:
+            raise CLIError("App Configuration name or endpoint should be provided if auth mode is 'login'.")
+        if namespace.connection_string:
+            raise CLIError("Auth mode should be 'key' when connection string is provided.")
 
 
 def validate_import_depth(namespace):
@@ -85,18 +94,22 @@ def validate_appservice_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
-            config_store_name = namespace.name
-            if not config_store_name:
+            config_store_name = ""
+            if namespace.name:
+                config_store_name = namespace.name
+            elif namespace.connection_string:
                 config_store_name = get_store_name_from_connection_string(namespace.connection_string)
-            resource_group, _ = resolve_resource_group(cmd, config_store_name)
+            else:
+                raise CLIError("Please provide App Configuration name or connection string for fetching the AppService account details. Alternatively, you can provide a valid ARM ID for the Appservice account.")
+
+            resource_group, _ = resolve_store_metadata(cmd, config_store_name)
             namespace.appservice_account = {
                 "subscription": get_subscription_id(cmd.cli_ctx),
                 "resource_group": resource_group,
                 "name": namespace.appservice_account
             }
         else:
-            namespace.appservice_account = parse_resource_id(
-                namespace.appservice_account)
+            namespace.appservice_account = parse_resource_id(namespace.appservice_account)
 
 
 def validate_query_fields(namespace):
