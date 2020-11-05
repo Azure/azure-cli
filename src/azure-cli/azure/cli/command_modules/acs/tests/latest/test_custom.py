@@ -778,6 +778,43 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubectl_with_custom_source_url(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl')
+            test_ver = '1.2.5'
+            test_source_url = 'http://url1'
+            k8s_install_kubectl(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
+            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_with_custom_source_url(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+            test_ver = '1.2.6'
+            test_source_url = 'http://url2'
+            k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
+            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+        finally:
+            shutil.rmtree(temp_dir)
+
+
+class mockUrlretrieveUrlValidator(object):
+    def __init__(self, url, version):
+        self.url = url
+        self.version = version
+
+    def __eq__(self, other):
+        return other.startswith(self.url) and self.version in other
+
 
 def create_kubelogin_zip(file_url, download_path):
     import zipfile
