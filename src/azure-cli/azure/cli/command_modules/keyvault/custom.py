@@ -396,7 +396,7 @@ def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=Fa
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
     parameters = ManagedHsm(location=location,
-                            sku=ManagedHsmSku(name='Standard_B1'),
+                            sku=ManagedHsmSku(name='Standard_B1', family='B'),
                             properties={'tenant_id': tenant_id, 'create_mode': CreateMode.recover.value})
 
     return sdk_no_wait(
@@ -423,7 +423,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
 
     params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
-                                                       'sku': Sku(name=SkuName.standard.value),
+                                                       'sku': Sku(name=SkuName.standard.value, family='A'),
                                                        'create_mode': CreateMode.recover.value})
 
     return _azure_stack_wrapper(cmd, client, 'create_or_update',
@@ -596,7 +596,7 @@ def create_hsm(cmd, client,
                                       network_acls=_create_network_rule_set(cmd, bypass, default_action))
     parameters = ManagedHsm(location=location,
                             tags=tags,
-                            sku=ManagedHsmSku(name=sku),
+                            sku=ManagedHsmSku(name=sku, family='B'),
                             properties=properties)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
@@ -725,7 +725,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals
               'The value will be changed to true.', file=sys.stderr)
 
     properties = VaultProperties(tenant_id=tenant_id,
-                                 sku=Sku(name=sku),
+                                 sku=Sku(name=sku, family='A'),
                                  access_policies=access_policies,
                                  vault_uri=None,
                                  enabled_for_deployment=enabled_for_deployment,

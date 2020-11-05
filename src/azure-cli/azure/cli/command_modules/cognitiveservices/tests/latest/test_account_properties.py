@@ -55,6 +55,13 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
         print(account)
         self.assertEqual(account['properties']['publicNetworkAccess'], 'Enabled')
 
+        import time
+        for i in range(10):
+            time.sleep(15)
+            account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+            if 'Creating' != account['properties']['provisioningState']:
+                break
+
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)

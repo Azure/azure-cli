@@ -149,9 +149,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
-        # Due to this bug in get_login_credentials: https://github.com/Azure/azure-cli/issues/15179,
-        # we need to manage the AAD scope by passing appconfig endpoint as resource
-        cred, _, _ = profile.get_login_credentials(resource=endpoint)
+        cred, _, _ = profile.get_login_credentials()
         try:
             azconfig_client = AzureAppConfigurationClient(credential=cred,
                                                           base_url=endpoint,

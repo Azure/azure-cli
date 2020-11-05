@@ -9,13 +9,18 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 class SecurityCenterAdaptiveadaptiveApplicationControlsTests(ScenarioTest):
 
+    # This test makes use of existing resources
     @AllowLargeResponse()
     def test_adaptive_application_controls(self):
 
         adaptive_application_controls = self.cmd('az security adaptive-application-controls list').get_output_in_json()
 
         assert len(adaptive_application_controls) >= 0
+        group_name = adaptive_application_controls['value'][0]['name']
+        self.kwargs.update({
+            'group_name': group_name
+        })
 
-        adaptive_application_controls = self.cmd('az security adaptive-application-controls show --group-name GROUP1').get_output_in_json()
+        adaptive_application_controls = self.cmd('az security adaptive-application-controls show --group-name {group_name}').get_output_in_json()
 
         assert len(adaptive_application_controls) >= 0
