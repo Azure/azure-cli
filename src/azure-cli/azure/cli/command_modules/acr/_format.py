@@ -254,21 +254,21 @@ def _agentpool_format_group(item):
 def _connected_acr_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('STATUS', _get_value(item, 'status')),
-        ('PARENT', _get_value(item, 'parent')),
+        ('STATUS', _get_value(item, 'statusDetails')),
+        ('PARENT', _get_value(item, 'parent', 'id')),
         ('LOGIN NAME', _get_value(item, 'loginServer', 'host')),
-        ('LAST UPDATED', _get_value(item, 'lastUpdated')),
-        ('NEXT UPDATE', _get_value(item, 'nextUpdate')),
-        ('SYNC SCHEDULE', _get_value(item, 'syncSchedule')),
-        ('SYNC WINDOW', _get_value(item, 'syncWindow'))
+        ('LAST UPDATED', _get_value(item, 'lastActivityTime')),
+        #('NEXT UPDATE', _get_value(item, 'nextUpdate')),.split('/connectedRegistries/')[1]
+        ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
+        ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow'))
     ])
 
 
 def _connected_acr_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('STATUS', _get_value(item, 'status')),
-        ('PARENT', _get_value(item, 'parent')),
+        ('STATUS', _get_value(item, 'statusDetails')),
+        ('PARENT', _get_value(item, 'parent', 'id')),
         ('LOGIN NAME', _get_value(item, 'loginServer', 'host'))
     ])
 
