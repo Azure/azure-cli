@@ -456,12 +456,28 @@ class ResourceNotFound(CLIError):
 
 
 # Scope & Tolens help functions
-def parse_actions_from_repositories(allow_or_remove_repository):
-    from .scope_map import ScopeMapActions
-    valid_actions = {action.value for action in ScopeMapActions}
-    REPOSITORIES = 'repositories'
+def parse_repositories_from_actions(actions):
+    if not actions:
+        return []
+    from .scope_map import RepoScopeMapActions
+    valid_actions = {action.value for action in RepoScopeMapActions}
+    repositories = []
+    REPOSITORY = 'repositories/'
+    for action in actions:
+        if action.startswith(REPOSITORY):
+            for rule in valid_actions:
+                if action.endswith(rule):
+                    repo = action[len(REPOSITORY):-len(rule)-1]
+                    repositories.append(repo)
+    return list(set(repositories))
+
+def parse_actions_from_repositories(repository_actions_list):
+    if not repository_actions_list:
+        return []
+    from .scope_map import RepoScopeMapActions
+    valid_actions = {action.value for action in RepoScopeMapActions}
     actions = []
-    for rule in allow_or_remove_repository:
+    for rule in repository_actions_list:
         repository = rule[0]
         if len(rule) < 2:
             raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
@@ -469,16 +485,41 @@ def parse_actions_from_repositories(allow_or_remove_repository):
             action = action.lower()
             if action not in valid_actions:
                 raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
-            actions.append('{}/{}/{}'.format(REPOSITORIES, repository, action))
+            actions.append('{}/{}/{}'.format('repositories', repository, action))
 
     return actions
 
 
-def create_default_scope_map(cmd, resource_group_name, registry_name, token_name, repositories, logger):
+def parse_actions_from_gateways(gateway_actions_list):
+    if not gateway_actions_list:
+        return []
+    from .scope_map import GatewayScopeMapActions
+    valid_actions = {action.value for action in GatewayScopeMapActions}
+    actions = []
+    for rule in gateway_actions_list:
+        gateway = rule[0]
+        if len(rule) < 2:
+            raise CLIError('At least one action must be specified with the gateway {}.'.format(gateway))
+        for action in rule[1:]:
+            action = action.lower()
+            if action not in valid_actions:
+                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
+            actions.append('{}/{}/{}'.format('gateway', gateway, action))
+
+    return actions
+
+
+def create_default_scope_map(cmd,
+                             resource_group_name,
+                             registry_name,
+                             scope_map_name,
+                             repositories,
+                             gateways,
+                             scope_map_description=""):
     from ._client_factory import cf_acr_scope_maps
-    scope_map_name = '{}-scope-map'.format(token_name)
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
     actions = parse_actions_from_repositories(repositories)
+    actions.extend(parse_actions_from_gateways(gateways))
     try:
         existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
         # for command idempotency, if the actions are the same, we accept it
@@ -491,7 +532,37 @@ def create_default_scope_map(cmd, resource_group_name, registry_name, token_name
         pass
     logger.warning('Creating a scope map "%s" for provided repository permissions.', scope_map_name)
     poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
-                                     actions, "Created by token: {}".format(token_name))
+                                     actions, scope_map_description)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map.id
+
+
+def get_token_from_id(cmd, token_id):
+    from ._client_factory import cf_acr_tokens
+    from .token import acr_token_show
+    token_client = cf_acr_tokens(cmd.cli_ctx)
+    # SCOPE MAP ID example
+    #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/tokens/<9>'
+    token_info = token_id.lstrip('/').split('/')
+    if len(token_info) is not 10:
+        raise CLIError("Not valid scope map id: {}".format(token_id))
+    resource_group_name = token_info[3]
+    registry_name = token_info[7]
+    token_name = token_info[9]
+    return acr_token_show(cmd, token_client, registry_name, token_name, resource_group_name)
+
+
+def get_scope_map_from_id(cmd, scope_map_id):
+    from ._client_factory import cf_acr_scope_maps
+    from .scope_map import acr_scope_map_show
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    # SCOPE MAP ID example
+    #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/scopeMaps/<9>'
+    scope_info = scope_map_id.lstrip('/').split('/')
+    if len(scope_info) is not 10:
+        raise CLIError("Not valid scope map id: {}".format(scope_map_id))
+    resource_group_name = scope_info[3]
+    registry_name = scope_info[7]
+    scope_map_name = scope_info[9]
+    return acr_scope_map_show(cmd, scope_map_client, registry_name, scope_map_name, resource_group_name)
 # endregion

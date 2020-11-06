@@ -9,7 +9,7 @@ from ._utils import get_resource_group_name_by_registry_name, create_default_sco
 
 SCOPE_MAPS = 'scopeMaps'
 TOKENS = 'tokens'
-
+DEFAULT_SCOPE_MAP_NAME = '{}-scope-map'
 
 def acr_token_create(cmd,
                      client,
@@ -17,6 +17,7 @@ def acr_token_create(cmd,
                      token_name,
                      scope_map_name=None,
                      repository_actions_list=None,
+                     gateway_actions_list=None,
                      status=None,
                      resource_group_name=None,
                      no_passwords=None,
@@ -25,8 +26,8 @@ def acr_token_create(cmd,
     from knack.log import get_logger
     from ._utils import get_resource_id_by_registry_name
 
-    if bool(repository_actions_list) == bool(scope_map_name):
-        raise CLIError("usage error: --repository | --scope-map")
+    if (bool(repository_actions_list) or bool(gateway_actions_list)) == bool(scope_map_name):
+        raise CLIError("usage error: can't use --scope-map and --repository | --gateway")
     if no_passwords and (expiration_in_days is not None or expiration is not None):
         raise CLIError("usage error: --no-passwords and expiration arguments are mutually exclusive.")
     if expiration_in_days is not None and expiration is not None:
@@ -35,9 +36,11 @@ def acr_token_create(cmd,
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     logger = get_logger(__name__)
-    if repository_actions_list:
+    if repository_actions_list or gateway_actions_list:
         scope_map_id = create_default_scope_map(cmd, resource_group_name, registry_name,
-                                                 token_name, repository_actions_list, logger)
+                                                DEFAULT_SCOPE_MAP_NAME.format(token_name),
+                                                repository_actions_list, gateway_actions_list,
+                                                "Created by token: {}".format(token_name))
     else:
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
         scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)

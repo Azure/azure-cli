@@ -5,10 +5,13 @@
 
 from enum import Enum
 from azure.cli.core.util import CLIError
-from ._utils import get_resource_group_name_by_registry_name, parse_actions_from_repositories
+from ._utils import (
+    get_resource_group_name_by_registry_name,
+    parse_actions_from_repositories,
+    parse_actions_from_gateways
+)
 
-
-class ScopeMapActions(Enum):
+class RepoScopeMapActions(Enum):
     CONTENT_DELETE = 'content/delete'
     CONTENT_READ = 'content/read'
     CONTENT_WRITE = 'content/write'
@@ -16,17 +19,26 @@ class ScopeMapActions(Enum):
     METADATA_WRITE = 'metadata/write'
 
 
+class GatewayScopeMapActions(Enum):
+    CONFIG_READ = 'config/read'
+    CONFIG_WRITE = 'config/write'
+    MESSAGES_READ = 'messages/read'
+    MESSAGES_WRITE = 'messages/write'
+
+
 def acr_scope_map_create(cmd,
                          client,
                          registry_name,
                          scope_map_name,
-                         repository_actions_list,
+                         repository_actions_list=None,
+                         gateway_actions_list=None,
                          resource_group_name=None,
                          description=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     actions = parse_actions_from_repositories(repository_actions_list)
+    actions.extend(parse_actions_from_gateways(gateway_actions_list))
 
     return client.create(
         resource_group_name,
@@ -62,6 +74,8 @@ def acr_scope_map_update(cmd,
                          scope_map_name,
                          add_repository=None,
                          remove_repository=None,
+                         add_gateway=None,
+                         remove_gateway=None,
                          resource_group_name=None,
                          description=None):
 
@@ -73,9 +87,11 @@ def acr_scope_map_update(cmd,
     current_scope_map = acr_scope_map_show(cmd, client, registry_name, scope_map_name, resource_group_name)
     current_actions = current_scope_map.actions
 
-    if add_repository or remove_repository:
-        add_actions_set = set(parse_actions_from_repositories(add_repository)) if add_repository else set()
-        remove_actions_set = set(parse_actions_from_repositories(remove_repository)) if remove_repository else set()
+    if add_repository or remove_repository or add_gateway or remove_gateway:
+        add_actions_set = set(parse_actions_from_repositories(add_repository) +
+                              parse_actions_from_gateways(add_gateway))
+        remove_actions_set = set(parse_actions_from_repositories(remove_repository) +
+                                 parse_actions_from_gateways(remove_gateway))
 
         # Duplicate actions can lead to inconsistency based on order of operations (set subtraction isn't associative).
         # Eg: ({A, B} - {B}) U {B, C} = {A, B, C},  ({A, B} U {B, C}) - {B}  = {A, C}

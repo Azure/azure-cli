@@ -257,12 +257,12 @@ def _connected_acr_format_group(item):
         ('STATUS', _get_value(item, 'status')),
         ('PARENT', _get_value(item, 'parent')),
         ('LOGIN NAME', _get_value(item, 'loginServer', 'host')),
-        #('AUTO UPDATE', _get_value(item, 'autoUpdate')),
         ('LAST UPDATED', _get_value(item, 'lastUpdated')),
         ('NEXT UPDATE', _get_value(item, 'nextUpdate')),
         ('SYNC SCHEDULE', _get_value(item, 'syncSchedule')),
         ('SYNC WINDOW', _get_value(item, 'syncWindow'))
     ])
+
 
 def _connected_acr_list_format_group(item):
     return OrderedDict([
@@ -270,7 +270,6 @@ def _connected_acr_list_format_group(item):
         ('STATUS', _get_value(item, 'status')),
         ('PARENT', _get_value(item, 'parent')),
         ('LOGIN NAME', _get_value(item, 'loginServer', 'host'))
-        #('AUTO UPDATE', _get_value(item, 'autoUpdate'))
     ])
 
 

@@ -38,7 +38,7 @@ from ._validators import (
     validate_registry_name,
     validate_expiration_time
 )
-from .scope_map import ScopeMapActions
+from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
 
 image_by_tag_or_digest_type = CLIArgumentType(
     options_list=['--image', '-t'],
@@ -310,16 +310,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('description', options_list=['--description'], help='Description for the scope map. Maximum 256 characters are allowed.', required=False)
         c.argument('scope_map_name', options_list=['--name', '-n'], help='The name of the scope map.', required=True)
 
-    valid_actions = "Valid actions are {}".format({action.value for action in ScopeMapActions})
+    repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
+    gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
     with self.argument_context('acr scope-map update') as c:
-        c.argument('add_repository', options_list=['--add'], nargs='+', action='append', required=False,
-                   help='repository permissions to be added. Use the format "--add REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
-        c.argument('remove_repository', options_list=['--remove'], nargs='+', action='append', required=False,
-                   help='respsitory permissions to be removed. Use the format "--remove REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('add_repository', options_list=['--add-repository'], nargs='+', action='append', required=False,
+                   help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('remove_repository', options_list=['--remove-repository'], nargs='+', action='append', required=False,
+                   help='respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('add_gateway', options_list=['--add-gateway'], nargs='+', action='append', required=False,
+                   help='gateway permissions to be added. Use the format "--add-gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
+        c.argument('remove_gateway', options_list=['--remove-gateway'], nargs='+', action='append', required=False,
+                   help='gateway permissions to be removed. Use the format "--remove-gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
 
     with self.argument_context('acr scope-map create') as c:
-        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append', required=True,
-                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+        c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append', required=False,
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('gateway_actions_list', options_list=['--gateway'], nargs='+', action='append', required=False,
+                   help='gateway permissions. Use the format "--gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
 
     with self.argument_context('acr token') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -330,9 +337,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr token create') as c:
         c.argument('scope_map_name', options_list=['--scope-map'],
-                   help='The name of the scope map with pre-configured repository permissions. Use "--repository" if you would like CLI to configure one for you')
+                   help='The name of the scope map with pre-configured repository permissions. Use "--repository" and/or "--gateway" if you would like CLI to configure one for you')
         c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
-                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
+                   help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('gateway_actions_list', options_list=['--gateway'], nargs='+', action='append',
+                   help='gateway permissions. Use the format "--gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
         c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
         c.argument('expiration_in_days', help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
@@ -382,19 +391,32 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
 
     with self.argument_context('acr connected-acr') as c:
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='The name of the resource group where the Connected ACR registry will be created. Must be the same as the resource group for the --registry.', required=False)
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_acr_name', options_list=['--name', '-n'], help='Name for the Connected ACR. Name must start with a letter and contain only alphanumeric characters (including ‘_’) optionally separated by a ‘-’. 5 to 40 chars long. Name must be unique under the Cloud ACR hierarchy.', required=True)
-        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='The name of the resource group where the Connected ACR registry will be created. Must be the same as the resource group for the --registry.', required=False)
         c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent ACR. If omitted, the cloud ACR will be assumed (the value from --registry).', required=False)
-        c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be synched to the Connected ACR. It can include wildcards to select multiple repositories. It can be in the format [REPO01] [REPO02]...', required=True)
-        c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
-        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=True)
-        c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="PT2D")
-        #c.argument('auto_update_enabled', options_list=['--auto-update-enabled', '-a'], help='Use to disable automatically updates during synch schedule.', required=False, arg_type=get_three_state_flag())
-        #c.argument('next_update', options_list=['--next-update'], help='Optional ISO 8601 timestamp parameter used to specify when the next update for the instance will happen.', required=False)
         c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None. ', required=False, default="Information")
         c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It\'s enabled by default.', required=False, arg_type=get_three_state_flag())
+
+    with self.argument_context('acr connected-acr create') as c:
+        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
+        c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be synched to the Connected ACR. It can include wildcards to select multiple repositories. It can be in the format [REPO01] [REPO02]...', required=True)
+        c.argument('client_token_ids', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_ID01] [TOKEN_ID02]...', required=True)
+        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=True)
+        c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
+        c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+
+    with self.argument_context('acr connected-acr update') as c:
+        c.argument('add_repository', options_list=['--add-repository'], nargs='*', required=False,
+                   help='Repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('remove_repository', options_list=['--remove-repository'], nargs='*', required=False,
+                   help='Respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        c.argument('add_client_token_ids', options_list=['--add-client-token'], nargs='*', required=False,
+                   help='Client tokens to be added. Use the format "--add-client-token [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
+        c.argument('remove_client_token_ids', options_list=['--remove-client-token'], nargs='*', required=False,
+                   help='Client tokens to be removed. Use the format "--remove-client-token [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
+        c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
+        c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False)
 
 def _get_helm_default_install_location():
     exe_name = 'helm'
