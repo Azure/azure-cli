@@ -87,6 +87,8 @@ def transform_sku_for_table_output(skus):
             reasons = []
             for x in k['restrictions']:
                 reason = x['reasonCode']
+                if x['type']:
+                    reason += ', type: ' + x['type']
                 if x['restrictionInfo']['locations']:
                     reason += ', locations: ' + ','.join(x['restrictionInfo']['locations'])
                 if x['restrictionInfo']['zones']:
