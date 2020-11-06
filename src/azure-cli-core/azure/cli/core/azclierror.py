@@ -21,9 +21,9 @@ logger = get_logger(__name__)
 
 # region: Base Layer
 # Base class for all the AzureCLI defined error classes.
-# DO NOT raise the error class here directly in your codes.
 class AzCLIError(CLIError):
-    """ Base class for all the AzureCLI defined error classes. """
+    """ Base class for all the AzureCLI defined error classes.
+    DO NOT raise this error class in your codes. """
 
     def __init__(self, error_msg, recommendation=None):
         # error message
@@ -32,17 +32,17 @@ class AzCLIError(CLIError):
         # set recommendations to fix the error if the message is not actionable,
         # they will be printed to users after the error message, one recommendation per line
         self.recommendations = []
-        if isinstance(recommendation, str):
-            self.recommendations = [recommendation]
-        elif isinstance(recommendation, list):
-            self.recommendations = recommendation
+        self.set_recommendation(recommendation)
 
         # exception trace for the error
         self.exception_trace = None
         super().__init__(error_msg)
 
     def set_recommendation(self, recommendation):
-        self.recommendations.append(recommendation)
+        if isinstance(recommendation, str):
+            self.recommendations.append(recommendation)
+        elif isinstance(recommendation, list):
+            self.recommendations.extend(recommendation)
 
     def set_exception_trace(self, exception_trace):
         self.exception_trace = exception_trace
@@ -68,23 +68,25 @@ class AzCLIError(CLIError):
 
 # region: Second Layer
 # Main categories of the AzureCLI error types, used for Telemetry analysis
-# DO NOT raise the error classes here directly in your codes.
 class UserFault(AzCLIError):
-    """ Users should be responsible for the errors. """
+    """ Users should be responsible for the errors.
+    DO NOT raise this error class in your codes. """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_user_fault(self.error_msg)
 
 
 class ServiceError(AzCLIError):
-    """ Azure Services should be responsible for the errors.  """
+    """ Azure Services should be responsible for the errors.
+    DO NOT raise this error class in your codes. """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
 
 
 class ClientError(AzCLIError):
-    """ AzureCLI should be responsible for the errors. """
+    """ AzureCLI should be responsible for the errors.
+    DO NOT raise this error class in your codes. """
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
@@ -94,9 +96,8 @@ class ClientError(AzCLIError):
 
 
 # region: Third Layer
-# Sub-categories of the AzureCLI error types, shown to users
-# Raise the error classes here in your codes
-# Avoid using fallback error classes unless you can not find a proper one
+# Specific categories of the AzureCLI error types
+# Raise the error classes here in your codes. Avoid using fallback error classes unless you can not find a proper one.
 # Command related error types
 class CommandNotFoundError(UserFault):
     """ Command is misspelled or not recognized by AzureCLI. """
@@ -139,10 +140,12 @@ class BadRequestError(UserFault):
 
 class UnauthorizedError(UserFault):
     """ Unauthorized request: 401 error """
+    pass
 
 
 class ForbiddenError(UserFault):
     """ Service refuse to response: 403 error """
+    pass
 
 
 class ResourceNotFoundError(UserFault):
@@ -159,6 +162,7 @@ class AzureResponseError(UserFault):
     """ Fallback of the response related errors.
     Avoid using this class unless the error can not be classified
     into the above Response related error types. """
+    pass
 
 
 # Request related error types
@@ -172,6 +176,7 @@ class ClientRequestError(UserFault):
     to make a request to the service. No request is sent.
     Avoid using this class unless the error can not be classified
     into the above Request related errors types. """
+    pass
 
 
 # Validation related error types
@@ -196,9 +201,8 @@ class ManualInterrupt(UserFault):
 
 # Unknow error type
 class UnknownError(UserFault):
-    """ Reserved for the errors which can not be categorized into the error types above.
-    Usually for the very general error type like CLIError, AzureError.
-    Error type info will not printed to users for this class. """
+    """ Reserved in core for the errors which can not be categorized into the error types above.
+    DO NOT raise this error class in your codes. """
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         with CommandLoggerContext(logger):

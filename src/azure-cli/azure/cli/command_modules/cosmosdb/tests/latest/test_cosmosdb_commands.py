@@ -530,6 +530,32 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container')
+    def test_cosmosdb_sql_container_analytical_ttl(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        ttl = 3000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'ttl': ttl
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-analytical-storage true')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --analytical-storage-ttl {ttl}').get_output_in_json()
+
+        assert container_create["resource"]["analyticalStorageTtl"] == ttl
+
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
+        container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
+        assert len(container_list) == 0
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_stored_procedure')
     def test_cosmosdb_sql_stored_procedure(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -707,9 +733,10 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert collection_create["name"] == col_name
 
+        indexes_size = len(collection_create["resource"]["indexes"])
         collection_update = self.cmd(
             'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes} --analytical-storage-ttl {new_ttl}').get_output_in_json()
-        assert len(collection_update["resource"]["indexes"]) == 1
+        assert len(collection_update["resource"]["indexes"]) == indexes_size + 1
 
         collection_show = self.cmd(
             'az cosmosdb mongodb collection show -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()

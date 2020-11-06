@@ -1236,6 +1236,14 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
+def get_vm_for_generic_update(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    vm = client.virtual_machines.get(resource_group_name, vm_name)
+    # To avoid unnecessary permission check of image
+    vm.storage_profile.image_reference = None
+    return vm
+
+
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
@@ -1294,8 +1302,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     aux_subscriptions = None
-    if vm and vm.storage_profile and vm.storage_profile.image_reference and vm.storage_profile.image_reference.id:
-        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference.id)
+    if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
+        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     return sdk_no_wait(no_wait, client.virtual_machines.create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -2695,7 +2703,10 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None):
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        return client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+        vms = client.virtual_machine_scale_set_vms.get(resource_group_name, name, instance_id)
+        # To avoid unnecessary permission check of image
+        vms.storage_profile.image_reference = None
+        return vms
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
     # To avoid unnecessary permission check of image
     vmss.virtual_machine_profile.storage_profile.image_reference = None
@@ -3177,10 +3188,10 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          release_note_uri=None, eula=None, description=None, location=None,
                          minimum_cpu_core=None, maximum_cpu_core=None, minimum_memory=None, maximum_memory=None,
                          disallowed_disk_types=None, plan_name=None, plan_publisher=None, plan_product=None, tags=None,
-                         hyper_v_generation='V1'):
+                         hyper_v_generation='V1', features=None):
     # pylint: disable=line-too-long
-    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan = cmd.get_models(
-        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan')
+    GalleryImage, GalleryImageIdentifier, RecommendedMachineConfiguration, ResourceRange, Disallowed, ImagePurchasePlan, GalleryImageFeature = cmd.get_models(
+        'GalleryImage', 'GalleryImageIdentifier', 'RecommendedMachineConfiguration', 'ResourceRange', 'Disallowed', 'ImagePurchasePlan', 'GalleryImageFeature')
     client = _compute_client_factory(cmd.cli_ctx)
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
@@ -3197,11 +3208,21 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     if any([plan_name, plan_publisher, plan_product]):
         purchase_plan = ImagePurchasePlan(name=plan_name, publisher=plan_publisher, product=plan_product)
 
+    feature_list = None
+    if features:
+        feature_list = []
+        for item in features.split():
+            try:
+                key, value = item.split('=', 1)
+                feature_list.append(GalleryImageFeature(name=key, value=value))
+            except ValueError:
+                raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
+
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_vgeneration=hyper_v_generation)
+                         hyper_vgeneration=hyper_v_generation, features=feature_list)
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
@@ -3284,6 +3305,15 @@ def fix_gallery_image_date_info(date_info):
     return date_info
 
 
+# pylint: disable=line-too-long
+def get_image_version_for_generic_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
+    # To avoid unnecessary permission check of image
+    version.storage_profile.source = None
+    return version
+
+
 def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name,
                          target_regions=None, replica_count=None, no_wait=False, **kwargs):
     image_version = kwargs['gallery_image_version']
@@ -3297,8 +3327,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
     aux_subscriptions = None
     if image_version.storage_profile and image_version.storage_profile.source and \
-            image_version.storage_profile.source.id:
-        aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source.id)
+            'id' in image_version.storage_profile.source:
+        aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source['id'])
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,

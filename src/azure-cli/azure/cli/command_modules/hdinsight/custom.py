@@ -32,8 +32,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    assign_identity=None,
                    minimal_tls_version=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
-                   encryption_algorithm='RSA-OAEP', public_network_access_type=None,
-                   outbound_public_network_access_type=None, encryption_in_transit=None,
+                   encryption_algorithm='RSA-OAEP', encryption_in_transit=None,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False, no_validation_timeout=False):
@@ -43,7 +42,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
         DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
-        KafkaRestProperties, ClientGroupInfo, NetworkSettings, EncryptionInTransitProperties, \
+        KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
         Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
@@ -117,7 +116,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         storage_account_key = key
 
     # Attempt to provide a default container for WASB storage accounts
-    if not storage_default_container and is_wasb:
+    if not storage_default_container and storage_account and is_wasb:
         storage_default_container = cluster_name.lower()
         logger.warning('Default WASB container not specified, using "%s".', storage_default_container)
     elif not storage_default_filesystem and not is_wasb:
@@ -275,7 +274,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                 key=storage_account_key,
                 container=storage_default_container,
                 file_system=storage_default_filesystem,
-                resource_id=None if is_wasb else storage_account,
+                resource_id=storage_account,
                 msi_resource_id=storage_account_managed_identity,
                 is_default=True
             )
@@ -338,11 +337,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         )
     )
 
-    network_settings = (public_network_access_type or outbound_public_network_access_type) and NetworkSettings(
-        public_network_access=public_network_access_type,
-        outbound_only_public_network_access_type=outbound_public_network_access_type
-    )
-
     encryption_in_transit_properties = encryption_in_transit and EncryptionInTransitProperties(
         is_encryption_in_transit_enabled=encryption_in_transit
     )
@@ -369,7 +363,6 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             disk_encryption_properties=disk_encryption_properties,
             kafka_rest_properties=kafka_rest_properties,
             min_supported_tls_version=minimal_tls_version,
-            network_settings=network_settings,
             encryption_in_transit_properties=encryption_in_transit_properties
         ),
         identity=cluster_identity

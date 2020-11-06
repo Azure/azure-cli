@@ -10,6 +10,7 @@ EXECUTOR_SIZE = {'Small': {'Cores': 4, 'Memory': '28g'}, 'Medium': {'Cores': 8, 
                  'Large': {'Cores': 16, 'Memory': '112g'}}
 SPARK_DOTNET_ASSEMBLY_SEARCH_PATHS_KEY = 'spark.yarn.appMasterEnv.DOTNET_ASSEMBLY_SEARCH_PATHS'
 SPARK_DOTNET_UDFS_FOLDER_NAME = 'udfs'
+SPARK_SERVICE_ENDPOINT_API_VERSION = '2019-11-01-priview'
 
 
 class SynapseSqlCreateMode(str, Enum):
