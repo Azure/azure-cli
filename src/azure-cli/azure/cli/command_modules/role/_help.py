@@ -371,7 +371,7 @@ examples:
 helps['ad sp create-for-rbac'] = """
 type: command
 short-summary: Create a service principal and configure its access to Azure resources.
-long-summary: When you create a service principal using the `az ad sp create-for-rbac` command, the output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. As an alternative, consider using `managed identities` (https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) to avoid the need to use credentials.
+long-summary: When you create a service principal using the `az ad sp create-for-rbac` command, the output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. As an alternative, consider using `managed identities` (https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) to avoid the need to use credentials.  By default, `az ad sp create-for-rbac` assigns the `Contributor` role to the service principal at the subscription scope. To reduce your risk of a compromised service principal, assign a more specific role and narrow the scope to a resource or resource group.  See https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-steps for more information.
 parameters:
   - name: --name -n
     short-summary: A URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
