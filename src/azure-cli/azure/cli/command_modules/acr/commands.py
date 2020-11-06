@@ -164,12 +164,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_connected_acr
     )
 
-    acr_connected_acr_list_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.acr.connected_acr#{}',
-        table_transformer=connected_acr_list_output_format,
-        client_factory=cf_acr_connected_acr
-    )
-
     acr_private_endpoint_connection_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.private_endpoint_connection#{}',
         client_factory=cf_acr_private_endpoint_connections
@@ -364,6 +358,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_connected_acr_delete')
         g.show_command('show', 'acr_connected_acr_show')
         g.command('update', 'acr_connected_acr_update')
-
-    with self.command_group('acr connected-acr', acr_connected_acr_list_util, is_preview=True) as g:
-        g.command('list', 'acr_connected_acr_list')
+        g.command('list', 'acr_connected_acr_list', table_transformer=connected_acr_list_output_format)

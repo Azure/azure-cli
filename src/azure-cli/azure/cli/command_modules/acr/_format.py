@@ -98,7 +98,46 @@ def connected_acr_output_format(result):
 
 
 def connected_acr_list_output_format(result):
-    return _output_format(result, _connected_acr_list_format_group)
+    from .connected_acr import ConnectedRegistryModes
+    family_tree = {}
+    for reg in result:
+        parent_id = _get_value(reg, 'parent', 'id')
+        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
+        name = '(E) ' if _get_value(reg, 'mode').lower() == ConnectedRegistryModes.REGISTRY.value else '(M) '
+        name += _get_value(reg, 'name')
+        family_tree[_get_value(reg, 'id')] = {
+            "name": name,
+            "id": _get_value(reg, 'id'),
+            "status": _get_value(reg, 'statusDetails'),
+            "parent": parent_name,
+            "loginName": _get_value(reg, 'loginServer', 'host'),
+            "childs": []
+        }
+
+    parents = []
+    for reg in result:
+        parent_id = _get_value(reg, 'parent', 'id')
+        if parent_id.isspace():
+            parents.append(_get_value(reg, 'id'))
+        else:
+            family_tree[parent_id]["childs"].append(_get_value(reg, 'id'))
+
+    result_list_format = []
+    for parent_id in parents:
+        _recursive_format_list_acr_childs(family_tree, parent_id, result_list_format)
+
+    return _output_format(result_list_format, _connected_acr_list_format_group)
+
+
+def _recursive_format_list_acr_childs(family_tree, parent_id, output_list, level=""):
+    connected_registry = family_tree[parent_id]
+    childs = connected_registry['childs']
+    if connected_registry['parent']:
+        level += "-"
+        connected_registry['name'] = level + connected_registry['name']
+    output_list.append(connected_registry)
+    for child_id in childs:
+        _recursive_format_list_acr_childs(family_tree, child_id, output_list, level)
 
 
 def helm_list_output_format(result):
@@ -252,10 +291,12 @@ def _agentpool_format_group(item):
 
 
 def _connected_acr_format_group(item):
+    parent_id = _get_value(item, 'parent', 'id')
+    parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('STATUS', _get_value(item, 'statusDetails')),
-        ('PARENT', _get_value(item, 'parent', 'id')),
+        ('PARENT', parent_name),
         ('LOGIN NAME', _get_value(item, 'loginServer', 'host')),
         ('LAST UPDATED', _get_value(item, 'lastActivityTime')),
         #('NEXT UPDATE', _get_value(item, 'nextUpdate')),.split('/connectedRegistries/')[1]
@@ -267,9 +308,9 @@ def _connected_acr_format_group(item):
 def _connected_acr_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('STATUS', _get_value(item, 'statusDetails')),
-        ('PARENT', _get_value(item, 'parent', 'id')),
-        ('LOGIN NAME', _get_value(item, 'loginServer', 'host'))
+        ('STATUS', _get_value(item, 'status')),
+        ('PARENT', _get_value(item, 'parent')),
+        ('LOGIN NAME', _get_value(item, 'loginName'))
     ])
 
 

@@ -530,7 +530,7 @@ def create_default_scope_map(cmd,
                        .format(registry_name, scope_map_name))
     except CloudError:
         pass
-    logger.warning('Creating a scope map "%s" for provided repository permissions.', scope_map_name)
+    logger.warning('Creating a scope map "%s" for provided permissions.', scope_map_name)
     poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
                                      actions, scope_map_description)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)

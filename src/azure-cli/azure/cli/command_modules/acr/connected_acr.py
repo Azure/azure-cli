@@ -60,10 +60,12 @@ def acr_connected_acr_create(cmd,
 
     parent_id = None
     if parent:
-        parent_registry, parent_resource_group_name = get_registry_by_name(
-            cmd.cli_ctx, registry_name, resource_group_name)
-        parent_id = parent_registry.id
-        sync_token_id = _create_sync_token(cmd, parent_resource_group_name, parent_registry,
+        #TODO parent sync token
+        #parent_registry, parent_resource_group_name = get_registry_by_name(
+        #    cmd.cli_ctx, parent, resource_group_name)
+        parent_id = "{}/connectedRegistries/{}".format(registry.id, parent)
+        #sync_token_id = _create_sync_token(cmd, parent_resource_group_name, parent_registry,
+        sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
                                            connected_acr_name, repositories, mode)
     else:
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
