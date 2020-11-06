@@ -6,13 +6,19 @@
 from .MetricAlertConditionListener import MetricAlertConditionListener
 
 
-op_conversion = {
+static_op_conversion = {
     '=': 'Equals',
     '!=': 'NotEquals',
     '>': 'GreaterThan',
     '>=': 'GreaterThanOrEqual',
     '<': 'LessThan',
     '<=': 'LessThanOrEqual'
+}
+
+dynamic_op_conversion = {
+    '>': 'GreaterThan',
+    '<': 'LessThan',
+    '><': 'GreaterOrLessThan'
 }
 
 agg_conversion = {
@@ -23,10 +29,17 @@ agg_conversion = {
     'count': 'Count'
 }
 
+sens_conversion = {
+    'low': 'Low',
+    'medium': 'Medium',
+    'high': 'High',
+}
+
 dim_op_conversion = {
     'includes': 'Include',
     'excludes': 'Exclude'
 }
+
 
 # This class defines a complete listener for a parse tree produced by MetricAlertConditionParser.
 class MetricAlertConditionValidator(MetricAlertConditionListener):
@@ -51,12 +64,39 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
 
     # Exit a parse tree produced by MetricAlertConditionParser#operator.
     def exitOperator(self, ctx):
-        operator = op_conversion[ctx.getText().strip()]
-        self.parameters['operator'] = operator
+        self.parameters['operator'] = ctx.getText().strip()
 
     # Exit a parse tree produced by MetricAlertConditionParser#threshold.
     def exitThreshold(self, ctx):
         self.parameters['threshold'] = ctx.getText().strip()
+
+    def exitDynamic(self, ctx):
+        self.parameters['failing_periods'] = {}
+
+    def exitDyn_sensitivity(self, ctx):
+        sensitivity = sens_conversion[ctx.getText().strip().lower()]
+        self.parameters['alert_sensitivity'] = sensitivity
+
+    def exitDyn_violations(self, ctx):
+        self.parameters['failing_periods']['min_failing_periods_to_alert'] = float(ctx.getText().strip())
+
+    def exitDyn_windows(self, ctx):
+        number_of_evaluation_periods = float(ctx.getText().strip())
+        min_failing_periods_to_alert = self.parameters['failing_periods']['min_failing_periods_to_alert']
+        if  min_failing_periods_to_alert > number_of_evaluation_periods:
+            message = "Violations {} should be smaller or equal to windows {}."
+            raise ValueError(message.format(min_failing_periods_to_alert, number_of_evaluation_periods))
+        self.parameters['failing_periods']['number_of_evaluation_periods'] = number_of_evaluation_periods
+
+    def exitDyn_datetime(self, ctx):
+        from msrest.serialization import Deserializer
+        from msrest.exceptions import DeserializationError
+        datetime_str = ctx.getText().strip()
+        try:
+            self.parameters['ignore_data_before'] = Deserializer.deserialize_iso(datetime_str)
+        except DeserializationError:
+            message = "Datetime {} is not a valid ISO-8601 format"
+            raise ValueError(message.format(datetime_str))
 
     # Enter a parse tree produced by MetricAlertConditionParser#dimensions.
     def enterDimensions(self, ctx):
@@ -85,11 +125,22 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         self.parameters['dimensions'][self._dimension_index]['values'] = [x for x in dvalues if x not in ['', 'or']]
 
     def result(self):
-        from azure.mgmt.monitor.models import MetricCriteria, MetricDimension
+        from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, DynamicThresholdFailingPeriods
         dim_params = self.parameters.get('dimensions', [])
         dimensions = []
         for dim in dim_params:
             dimensions.append(MetricDimension(**dim))
         self.parameters['dimensions'] = dimensions
         self.parameters['name'] = ''  # will be auto-populated later
-        return MetricCriteria(**self.parameters)
+
+        if 'failing_periods' in self.parameters:
+            # dynamic metric criteria
+            self.parameters['operator'] = dynamic_op_conversion[self.parameters['operator']]
+            failing_periods = DynamicThresholdFailingPeriods(**self.parameters['failing_periods'])
+            self.parameters['failing_periods'] = failing_periods
+            return DynamicMetricCriteria(**self.parameters)
+        else:
+            # static metric criteria
+            self.parameters['operator'] = static_op_conversion[self.parameters['operator']]
+            return MetricCriteria(**self.parameters)
+

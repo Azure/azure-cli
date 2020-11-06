@@ -4,7 +4,7 @@ grammar MetricAlertCondition ;
 
 /* Main Rules */
 
-expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator threshold (WHITESPACE dimensions)* NEWLINE* ;
+expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) (statics | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
 
 aggregation         : WORD WHITESPACE ;
 
@@ -14,7 +14,29 @@ metric              : (WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%' | 
 
 operator            : OPERATOR WHITESPACE ;
 
+/* Statics */
+
+statics             : operator threshold;
+
 threshold           : NUMBER ;
+
+/* Dynamics */
+
+dynamic             : DYNAMIC WHITESPACE ;
+
+dynamics            : operator dynamic dyn_sensitivity dyn_violations dyn_of_separator dyn_windows (WHITESPACE dyn_since_seperator dyn_datetime)* ;
+
+dyn_sensitivity     : WORD WHITESPACE ;
+
+dyn_violations      : NUMBER WHITESPACE ;
+
+dyn_of_separator    : OF WHITESPACE ;
+
+dyn_windows         : NUMBER ;
+
+dyn_since_seperator : SINCE WHITESPACE ;
+
+dyn_datetime        : DATETIME ;
 
 /* Dimensions */
 
@@ -42,9 +64,11 @@ fragment A          : ('a'|'A') ;
 fragment C          : ('c'|'C') ;
 fragment D          : ('d'|'D') ;
 fragment E          : ('e'|'E') ;
+fragment F          : ('f'|'F') ;
 fragment H          : ('h'|'H') ;
 fragment I          : ('i'|'I') ;
 fragment L          : ('l'|'L') ;
+fragment M          : ('m'|'M') ;
 fragment N          : ('n'|'N') ;
 fragment O          : ('o'|'O') ;
 fragment R          : ('r'|'R') ;
@@ -52,6 +76,7 @@ fragment S          : ('s'|'S') ;
 fragment U          : ('u'|'U') ;
 fragment W          : ('w'|'W') ;
 fragment X          : ('x'|'X') ;
+fragment Y          : ('y'|'Y') ;
 
 fragment DIGIT      : [0-9] ;
 fragment LOWERCASE  : [a-z] ;
@@ -59,14 +84,18 @@ fragment UPPERCASE  : [A-Z] ;
 
 WHERE               : W H E R E ;
 AND                 : A N D ;
-INCLUDES             : I N C L U D E S ;
+INCLUDES            : I N C L U D E S ;
 EXCLUDES            : E X C L U D E S ;
 OR                  : O R ;
+DYNAMIC             : D Y N A M I C ;
+OF                  : O F ;
+SINCE               : S I N C E ;
 
-OPERATOR            : ('<' | '<=' | '=' | '>=' | '>' | '!=') ;
+OPERATOR            : ('<' | '<=' | '=' | '>=' | '>' | '!=' | '><') ;
 NUMBER              : DIGIT+ ([.,] DIGIT+)? ;
 QUOTE               : ('\'' | '"') ;
 WHITESPACE          : (' ' | '\t')+ ;
 NEWLINE             : ('\r'? '\n' | '\r')+ ;
 WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_')+ ;
+DATETIME            : (LOWERCASE | UPPERCASE | DIGIT | '-' | ':')+ ;
 

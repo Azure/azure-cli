@@ -96,8 +96,11 @@ class MetricAlertConditionAction(argparse._AppendAction):
 
         from azure.cli.command_modules.monitor.grammar.metric_alert import (
             MetricAlertConditionLexer, MetricAlertConditionParser, MetricAlertConditionValidator)
+        from azure.mgmt.monitor.models import MetricCriteria, DynamicMetricCriteria
 
-        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC {=,!=,>,>=,<,<=} THRESHOLD\n' \
+        usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
+                '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
+                '                         [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
                 '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
 
@@ -113,9 +116,18 @@ class MetricAlertConditionAction(argparse._AppendAction):
             walker = antlr4.ParseTreeWalker()
             walker.walk(validator, tree)
             metric_condition = validator.result()
-            for item in ['time_aggregation', 'metric_name', 'threshold', 'operator']:
-                if not getattr(metric_condition, item, None):
-                    raise InvalidArgumentValueError(usage)
+            if isinstance(metric_condition, MetricCriteria):
+                # static metric criteria
+                for item in ['time_aggregation', 'metric_name', 'operator', 'threshold']:
+                    if not getattr(metric_condition, item, None):
+                        raise InvalidArgumentValueError(usage)
+            elif isinstance(metric_condition, DynamicMetricCriteria):
+                # dynamic metric criteria
+                for item in ['time_aggregation', 'metric_name', 'operator', 'alert_sensitivity', 'failing_periods']:
+                    if not getattr(metric_condition, item, None):
+                        raise InvalidArgumentValueError(usage)
+            else:
+                raise NotImplementedError()
         except (AttributeError, TypeError, KeyError):
             raise InvalidArgumentValueError(usage)
         super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)

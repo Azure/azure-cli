@@ -265,6 +265,76 @@ class MonitorTests(ScenarioTest):
             self.check('length(scopes)', 2),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert_v2')
+    @VMPreparer(parameter_name='vm1')
+    @VMPreparer(parameter_name='vm2')
+    def test_dynamic_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines'),
+            'vm_id_2': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm2,
+                namespace='Microsoft.Compute',
+                type='virtualMachines')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor action-group create -g {rg} -n {ag2}')
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --condition "avg Percentage CPU > dynamic low 2 of 4 since 2020-11-01T16:00:00.000Z" --description "High CPU"',
+            checks=[
+                self.check('description', 'High CPU'),
+                self.check('severity', 2),
+                self.check('autoMitigate', None),
+                self.check('windowSize', '0:05:00'),
+                self.check('evaluationFrequency', '0:01:00'),
+                self.check('length(scopes)', 2),
+                self.check('criteria.allOf[0].alertSensitivity', 'Low'),
+                self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
+                self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
+                self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
+                self.check('criteria.allOf[0].operator', 'GreaterThan'),
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+            ])
+
+        self.cmd(
+            'monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "High Or Low CPU" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate --add-condition "avg Percentage CPU >< dynamic medium 1 of 6 since 2020-10-01T10:23:00.000Z"',
+            checks=[
+                self.check('description', 'High Or Low CPU'),
+                self.check('severity', 3),
+                self.check('autoMitigate', True),
+                self.check('windowSize', '0:15:00'),
+                self.check('evaluationFrequency', '0:05:00'),
+                self.check('length(criteria.allOf)', 1),
+                self.check('length(scopes)', 2),
+                self.check('criteria.allOf[0].alertSensitivity', 'Medium'),
+                self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
+                self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 1.0),
+                self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 6.0),
+                self.check('criteria.allOf[0].operator', 'GreaterOrLessThan'),
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-10-01T10:23:00+00:00')
+            ])
+
+        self.cmd('monitor metrics alert list -g {rg}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('monitor metrics alert show -g {rg} -n {alert}')
+        self.cmd('monitor metrics alert delete -g {rg} -n {alert}')
+        self.cmd('monitor metrics alert list -g {rg}',
+                 checks=self.check('length(@)', 0))
+
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group_2')
     @VMPreparer(parameter_name='vm1')
