@@ -374,6 +374,7 @@ class AzCliCommandParser(CLICommandParser):
             # use cli_ctx from cli_help which is not lost.
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
+            caused_by_extension_not_installed = False
             command_name_inferred = self.prog
             error_msg = None
             if not self.command_source:
@@ -392,6 +393,7 @@ class AzCliCommandParser(CLICommandParser):
                     command_str = roughly_parse_command(cmd_list[1:])
                     ext_name = self._search_in_extension_commands(command_str)
                     if ext_name:
+                        caused_by_extension_not_installed = True
                         telemetry.set_command_details(command_str,
                                                       parameters=AzCliCommandInvoker._extract_parameter_names(cmd_list),  # pylint: disable=protected-access
                                                       extension_name=ext_name)
@@ -470,7 +472,8 @@ class AzCliCommandParser(CLICommandParser):
 
             az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
 
-            az_error.print_error()
-            az_error.send_telemetry()
+            if not caused_by_extension_not_installed:
+                az_error.print_error()
+                az_error.send_telemetry()
 
             self.exit(2)
