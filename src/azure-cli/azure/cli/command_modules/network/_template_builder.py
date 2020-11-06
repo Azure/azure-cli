@@ -121,7 +121,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     frontend_ip_configs = []
 
-    if private_ip_address != '' or public_ip_id is None:
+    if private_ip_address is not None or public_ip_id is None:
         enable_private_link = False if public_ip_id else enable_private_link
         frontend_private_ip = _build_frontend_ip_config(cmd, frontend_private_ip_name,
                                                         subnet_id=subnet_id,
