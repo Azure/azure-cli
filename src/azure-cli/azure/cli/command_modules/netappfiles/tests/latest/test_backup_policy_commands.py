@@ -139,9 +139,10 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         weekly_backups_to_keep = 5
         monthly_backups_to_keep = 6
         enabled = False
+        tags = "Tag1=Value2"
         self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -l %s -d %s -w %s "
-                 "-m %s -e %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
-                                  weekly_backups_to_keep, monthly_backups_to_keep, enabled)).get_output_in_json()
+                 "-m %s -e %s --tags %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
+                                  weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 
         # get updated backup policy and validate update
         backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
@@ -150,4 +151,4 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         assert backup_policy['weeklyBackupsToKeep'] == weekly_backups_to_keep
         assert backup_policy['monthlyBackupsToKeep'] == monthly_backups_to_keep
         assert backup_policy['enabled'] == enabled
-        assert backup_policy['tags']['Tag1'] == 'Value1'
+        assert backup_policy['tags']['Tag1'] == 'Value2'
