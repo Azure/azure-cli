@@ -16,6 +16,13 @@ def get_acr_service_client(cli_ctx, api_version=None):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version)
 
 
+def get_acr_service_client_from_local_sdk(cli_ctx):
+    """Returns the client for managing container registries. """
+    #from azure.mgmt.containerregistry.v2020_11_01_preview import ContainerRegistryManagementClient
+    from .azure.mgmt.containerregistry.v2020_11_01_preview import ContainerRegistryManagementClient
+    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient)
+
+
 def cf_acr_registries(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).registries
 
@@ -64,4 +71,5 @@ def cf_acr_agentpool(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).agent_pools
 
 def cf_acr_connected_acr(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2020_11_01_PREVIEW).connected_registries
+    #return get_acr_service_client(cli_ctx, VERSION_2020_11_01_PREVIEW).connected_registries
+    return get_acr_service_client_from_local_sdk(cli_ctx).connected_registries

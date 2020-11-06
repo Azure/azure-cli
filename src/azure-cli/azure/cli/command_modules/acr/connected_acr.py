@@ -71,7 +71,8 @@ def acr_connected_acr_create(cmd,
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
                                            connected_acr_name, repositories, mode)
 
-    SyncProperties, ParentProperties = cmd.get_models('SyncProperties', 'ParentProperties')
+    from .azure.mgmt.containerregistry.v2020_11_01_preview.models import ParentProperties, SyncProperties
+#    SyncProperties, ParentProperties = cmd.get_models('SyncProperties', 'ParentProperties')
     parent_properties = ParentProperties(
         id=parent_id,
         sync_properties=SyncProperties(
@@ -82,7 +83,8 @@ def acr_connected_acr_create(cmd,
         )
     )
 
-    ConnectedRegistry, LoggingProperties = cmd.get_models('ConnectedRegistry', 'LoggingProperties')
+    from .azure.mgmt.containerregistry.v2020_11_01_preview.models import ConnectedRegistry, LoggingProperties
+#    ConnectedRegistry, LoggingProperties = cmd.get_models('ConnectedRegistry', 'LoggingProperties')
     connected_acr_create_parameters = ConnectedRegistry(
         provisioning_state=None,
         mode=mode,
@@ -145,8 +147,9 @@ def acr_connected_acr_update(cmd,
             '--add-client-token-ids and --remove-client-token-ids arguments.\n{}'.format(errors))
     client_token_ids = list(set(client_token_ids).union(add_client_token_set).difference(remove_client_token_set))
 
-    ConnectedRegistryUpdateParameters, SyncProperties, LoggingProperties = cmd.get_models(
-                'ConnectedRegistryUpdateParameters', 'SyncProperties', 'LoggingProperties')
+    from .azure.mgmt.containerregistry.v2020_11_01_preview.models import ConnectedRegistryUpdateParameters, SyncProperties, LoggingProperties
+#    ConnectedRegistryUpdateParameters, SyncProperties, LoggingProperties = cmd.get_models(
+#                'ConnectedRegistryUpdateParameters', 'SyncProperties', 'LoggingProperties')
     sync_properties = SyncProperties(
         token_id=sync_token_id,
         schedule=sync_schedule,
