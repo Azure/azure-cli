@@ -1622,7 +1622,7 @@ class DeploymentWhatIfTestWithTemplateSpecs(ScenarioTest):
 
 
 class DeploymentScriptsTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts', location='brazilsouth')
     def test_list_all_deployment_scripts(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -1643,6 +1643,8 @@ class DeploymentScriptsTest(ScenarioTest):
         ])
 
         count += 1
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
 
         self.kwargs.update({
             'deployment_script_name': self.create_random_name('script2020', 20),
@@ -1652,20 +1654,17 @@ class DeploymentScriptsTest(ScenarioTest):
             'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
         })
 
-        self.cmd('deployment-scripts list',
-                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
-
+        count = 0
         self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName="{deployment_script_name}" --parameters apiVersion="{api_version}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{resource_group}'),
         ])
 
         count += 1
-
         self.cmd('deployment-scripts list',
                  checks=self.check("length([?name=='{deployment_script_name}'])", count))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts', location='brazilsouth')
     def test_show_deployment_script(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -1683,7 +1682,7 @@ class DeploymentScriptsTest(ScenarioTest):
         self.cmd("deployment-scripts show --resource-group {resource_group} --name {deployment_script_name}",
                  checks=self.check('name', '{deployment_script_name}'))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts', location='brazilsouth')
     def test_show_deployment_script_logs(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -1702,7 +1701,7 @@ class DeploymentScriptsTest(ScenarioTest):
 
         self.assertTrue(deployment_script_logs['value'] is not None)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts', location='brazilsouth')
     def test_delete_deployment_script(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
