@@ -467,7 +467,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -1984,6 +1984,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='AadTest', length=15)
@@ -2044,7 +2045,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
         })
 
         # Before assigning data reader role, read operation should fail with AAD auth
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Unauthorized'"):
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Assign data reader role to current user
