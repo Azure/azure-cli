@@ -256,10 +256,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.')
                 c.argument('version', default='5.7', options_list=['--version'],
                            help='Server major version.')
-                c.argument('zone', options_list=['--zone, -z'], help='Availability zone into which to provision the resource.')
-                c.argument('iops', type=int, options_list=['--iops'], help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
-                                                                           'on compute and storage provisioned. The default value for IOPS is free IOPS. '
-                                                                           'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
+                c.argument('zone', options_list=['--zone, -z'],
+                           help='Availability zone into which to provision the resource.')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='Name of an existing virtual network or name of a new one to create. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
@@ -326,10 +324,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Name or ID of the subnet that allows access to an Azure Flexible Server MySQL Server. ')
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
-                c.argument('iops', type=int, options_list=['--iops'],
-                           help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
-                                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
-                                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
             elif command_group == 'postgres':
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')

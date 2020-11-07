@@ -152,7 +152,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         firewall_id = create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip, engine_name)
 
     logger.warning('Make a note of your password. If you forget, you would have to '
-                   'reset your password with \'az %s server update -n %s -g %s -p <new-password>\'.',
+                   'reset your password with \'az %s flexible-server update -n %s -g %s -p <new-password>\'.',
                    engine_name, server_name, resource_group_name)
 
     update_local_contexts(cmd, server_name, resource_group_name, location, user)
