@@ -1984,7 +1984,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
 
-    # Due to a bug in LiveScenarioTest, self.assertRaisesRegex() will not detect the exception. 
+    # Due to a bug in LiveScenarioTest, self.assertRaisesRegex() will not detect the exception.
     # To run this testcase in local with --live, temporarily change to ScenarioTest and add AllowLargeResponse annotation.
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
@@ -2045,7 +2045,7 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'endpoint': endpoint
         })
 
-        # Before assigning data reader role, read operation should fail with AAD auth. 
+        # Before assigning data reader role, read operation should fail with AAD auth.
         # The exception really depends on the which identity is used to run this testcase.
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
