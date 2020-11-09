@@ -1228,6 +1228,14 @@ examples:
     text: az postgres server show-connection-string -s testServer -u username -p password -d databasename
 """
 
+helps['mariadb server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MariaDB server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mariadb server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
 helps['postgres server list-skus'] = """
 type: command
 short-summary: List available sku's in the given region.

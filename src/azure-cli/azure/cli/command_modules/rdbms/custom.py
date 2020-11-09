@@ -813,6 +813,31 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
         for k, v in result.items():
             result[k] = v.format(**connection_kwargs)
 
+    if provider == 'MariaDB':
+        host = '{}.mariadb.database.azure.com'.format(server_name)
+        result = {
+            'ado.net': "Server={host}; Port=3306; Database={database}; Uid={user}@{server}; Pwd={password}",
+            'jdbc': "jdbc:mariadb://{host}:3306/{database}?user={user}@{server}&password={password}",
+            'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
+                       "password: {password}, database: {database}, port: 3306}});",
+            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
+                      "port=3306, database='{database}')",
+            'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "
+                    "database: '{database}', host: '{host}', port: 3306)"
+        }
+
+        connection_kwargs = {
+            'host': host,
+            'user': administrator_login,
+            'password': administrator_login_password if administrator_login_password is not None else '{password}',
+            'database': database_name,
+            'server': server_name
+        }
+
+        for k, v in result.items():
+            result[k] = v.format(**connection_kwargs)
+
     return {
         'connectionStrings': result
     }

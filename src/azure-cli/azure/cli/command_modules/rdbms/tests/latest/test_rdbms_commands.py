@@ -288,15 +288,14 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list'.format(database_engine),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
-        if database_engine != 'mariadb':
-            connection_string = self.cmd('{} server show-connection-string -s {}'
-                                         .format(database_engine, servers[0])).get_output_in_json()
+        connection_string = self.cmd('{} server show-connection-string -s {}'
+                                     .format(database_engine, servers[0])).get_output_in_json()
 
-            self.assertIn('jdbc', connection_string['connectionStrings'])
-            self.assertIn('node.js', connection_string['connectionStrings'])
-            self.assertIn('php', connection_string['connectionStrings'])
-            self.assertIn('python', connection_string['connectionStrings'])
-            self.assertIn('ruby', connection_string['connectionStrings'])
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ruby', connection_string['connectionStrings'])
 
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
