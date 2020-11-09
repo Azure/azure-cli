@@ -5,10 +5,12 @@ While Azure CLI is not fully supported in an airgapped cloud which has no public
 
 Here is a list of known CLI features that are not supported in airgapped clouds:
 * Manage extensions with extension names. For instance, you can not install the `azure-devops` extension with `az extension add --name azure-devops`. You need to provide a local path to a wheel file or a URL for downloading the wheel file that is accessible in the airgapped cloud with `--source` option.
-* `az upgrade` to update to the latest CLI version. You can follow the below install instructions to update CLI.
-* `az find`
+* `az upgrade` to upgrade Azure CLI to the latest version. Instead, you can follow the below [Install](#Install) instructions to upgrade CLI.
+* `az find` to find command examples.
+* Command recommendations based on Aladdin service when the command cannot be parsed correctly.
 * Commands that install another tool such as `az aks install-cli`, `az acr helm install-cli`, `az storage copy`.
 * External channel operations in `az bot` are not available such as Facebook and Wechat.
+* Some links in help messages or error messages cannnot be accessible.
 
 ## Install
 We are working on solutions to make the installation and upgrade of Azure CLI easier in airgapped clouds. Before that is ready, you need to download the Azure CLI package with public internet access, copy it to the airgapped cloud environment and then install it locally in the airgapped cloud.
