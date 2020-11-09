@@ -33,8 +33,10 @@ The newly designed error types are provided in [azure/cli/core/azclierror.py](ht
 |    |    | -- AzureConnectionError
 |    |    | -- ClientRequestError               # fallback of request related errors
 |    |    | -- ValidationError                  # fallback of validation related errors
+|    |    | -- FileOperationError
 |    |    | -- ManualInterrupt
 |    |    | -- ... More ...
+|    |    | -- UnknownError                     # fallback of UserFault related errors
 |    | -- ClientError
 |    |    | -- CLIInternalError
 |    | -- ServiceError
