@@ -3454,6 +3454,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      no_wait=False,
                      workspace_id=None,
                      customer_admin_group_id=None):
+    logger.warning('Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
 
     if location is None:
         location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -3560,11 +3561,15 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
 
 def openshift_show(cmd, client, resource_group_name, name):
+    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+
     mc = client.get(resource_group_name, name)
     return _remove_osa_nulls([mc])[0]
 
 
 def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wait=False):
+    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     idx = 0
@@ -3583,6 +3588,8 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
 
 
 def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
+    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+
     instance = client.get(resource_group_name, name)
     workspace_id = _format_workspace_id(workspace_id)
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
@@ -3592,6 +3599,8 @@ def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_i
 
 
 def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
+    logger.warning('Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.')  # pylint: disable=line-too-long
+
     instance = client.get(resource_group_name, name)
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
