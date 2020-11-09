@@ -39,6 +39,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                                                       local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.GET], scopes=server_name_scope))
         server_name_arg_type = CLIArgumentType(metavar='NAME', help=server_name_help, id_part='name',
                                                local_context_attribute=LocalContextAttribute(name='server_name', actions=[LocalContextAction.SET, LocalContextAction.GET], scopes=server_name_scope))
+        administrator_login_arg_type = CLIArgumentType(metavar='NAME',
+                                                       local_context_attribute=LocalContextAttribute(name='administrator_login', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=server_name_scope))
+
         overriding_none_arg_type = CLIArgumentType(local_context_attribute=LocalContextAttribute(name='context_name', actions=[LocalContextAction.GET]))
 
         with self.argument_context(command_group) as c:
@@ -179,6 +182,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         with self.argument_context('{} server list-skus'.format(command_group)) as c:
             c.argument('location_name', options_list=['--location', '-l'])
+
+        with self.argument_context('{} server show-connection-string'.format(command_group)) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type, help='Name of the server.')
+            c.argument('administrator_login', options_list=['--admin-user', '-u'], arg_type=administrator_login_arg_type,
+                       help='The login username of the administrator.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'],
+                       help='The login password of the administrator.')
+            c.argument('database_name', options_list=['--database-name', '-d'], help='The name of a database.')
 
         if command_group != 'mariadb':
             with self.argument_context('{} server key'.format(command_group)) as c:

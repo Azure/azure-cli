@@ -1212,14 +1212,20 @@ examples:
     text: az postgres server ad-admin wait --server-name testsvr -g testgroup --created
 """
 
-helps['mysql flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a MySQL flexible-server database.
+helps['mysql server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql server show-connection-string -s testServer -u username -p password -d databasename
 """
 
-helps['postgres flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a PostgreSQL flexible-server database.
+helps['postgres server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a PostgreSQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az postgres server show-connection-string -s testServer -u username -p password -d databasename
 """
 
 helps['postgres server list-skus'] = """

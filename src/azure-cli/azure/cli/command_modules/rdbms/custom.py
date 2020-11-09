@@ -13,6 +13,8 @@ from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
+from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
+from azure.mgmt.rdbms.mariadb.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as MariaDBLocationOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, cf_mysql_db, cf_mariadb_db, \
     get_postgresql_management_client, cf_postgres_check_resource_availability_sterling, \
     cf_mysql_check_resource_availability_sterling, cf_mariadb_check_resource_availability_sterling
@@ -155,7 +157,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
                    'reset your password with \'az %s flexible-server update -n %s -g %s -p <new-password>\'.',
                    engine_name, server_name, resource_group_name)
 
-    update_local_contexts(cmd, server_name, resource_group_name, location, user)
+    update_local_contexts(cmd, provider, server_name, resource_group_name, location, user)
 
     if engine_name == 'postgres':
         return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
@@ -735,14 +737,82 @@ def check_server_name_availability(check_name_client, server_name, service_name)
     return True
 
 
-def update_local_contexts(cmd, server_name, resource_group_name, location, user):
+def update_local_contexts(cmd, provider, server_name, resource_group_name, location, user):
+    engine = 'postgres'
+    if provider == 'Microsoft.DBforMySQL':
+        engine = 'mysql'
+    elif provider == 'Microsoft.DBforMariaDB':
+        engine = 'mariadb'
+
     if cmd.cli_ctx.local_context.is_on:
-        cmd.cli_ctx.local_context.set(['postgres server'], 'server_name',
+        cmd.cli_ctx.local_context.set([engine], 'server_name',
                                       server_name)  # Setting the server name in the local context
-        cmd.cli_ctx.local_context.set(['postgres server'], 'administrator_login',
+        cmd.cli_ctx.local_context.set([engine], 'administrator_login',
                                       user)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)
 
-# end region
+
+def get_connection_string(cmd, client, server_name='{server}', database_name='{database}', administrator_login='{username}', administrator_login_password='{password}'):
+    provider = 'MySQL'
+    if isinstance(client, PostgreSQLLocationOperations):
+        provider = 'PostgreSQL'
+    elif isinstance(client, MariaDBLocationOperations):
+        provider = 'MariaDB'
+
+    if provider == 'MySQL':
+        host = '{}.mysql.database.azure.com'.format(server_name)
+        result = {
+            'mysql_cmd': "mysql {database} --host {host} --user {user}@{server} --password={password}",
+            'ado.net': "Server={host}; Port=3306; Database={database}; Uid={user}@{server}; Pwd={password}",
+            'jdbc': "jdbc:mysql://{host}:3306/{database}?user={user}@{server}&password={password}",
+            'node.js': "var conn = mysql.createConnection({{host: '{host}', user: '{user}@{server}',"
+                       "password: {password}, database: {database}, port: 3306}});",
+            'php': "host={host} port=3306 dbname={database} user={user}@{server} password={password}",
+            'python': "cnx = mysql.connector.connect(user='{user}@{server}', password='{password}', host='{host}', "
+                      "port=3306, database='{database}')",
+            'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "
+                    "database: '{database}', host: '{host}', port: 3306)"
+        }
+
+        connection_kwargs = {
+            'host': host,
+            'user': administrator_login,
+            'password': administrator_login_password if administrator_login_password is not None else '{password}',
+            'database': database_name,
+            'server': server_name
+        }
+
+        for k, v in result.items():
+            result[k] = v.format(**connection_kwargs)
+
+    if provider == 'PostgreSQL':
+        host = '{}.postgres.database.azure.com'.format(server_name)
+        result = {
+            'psql_cmd': "postgresql://{user}:{password}@{host}/postgres?sslmode=require",
+            'C++ (libpq)': "host={host} port=5432 dbname={database} user={user}@{server} password={password} sslmode=require",
+            'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user}@{server};Password={password};",
+            'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}@{server}&password={password}",
+            'node.js': "var client = new pg.Client('postgres://{user}@{server}:{password}@{host}:5432/{database}');",
+            'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+            'python': "cnx = psycopg2.connect(database='{database}', user='{user}@{server}', host='{host}', password='{password}', "
+                      "port='5432')",
+            'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
+                    ":port => '5432', :password => '{password}')"
+        }
+
+        connection_kwargs = {
+            'host': host,
+            'user': administrator_login,
+            'password': administrator_login_password if administrator_login_password is not None else '{password}',
+            'database': database_name,
+            'server': server_name
+        }
+
+        for k, v in result.items():
+            result[k] = v.format(**connection_kwargs)
+
+    return {
+        'connectionStrings': result
+    }
