@@ -8,14 +8,14 @@ import argparse
 from azure.cli.command_modules.monitor.util import (
     get_aggregation_map, get_operator_map, get_autoscale_scale_direction_map)
 
-from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 def timezone_name_type(value):
     from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
     zone = next((x['name'] for x in AUTOSCALE_TIMEZONES if x['name'].lower() == value.lower()), None)
     if not zone:
-        raise CLIError(
+        raise InvalidArgumentValueError(
             "Invalid time zone: '{}'. Run 'az monitor autoscale profile list-timezones' for values.".format(value))
     return zone
 
@@ -31,7 +31,7 @@ def timezone_offset_type(value):
     hour = int(hour)
 
     if hour > 14 or hour < -12:
-        raise CLIError('Offset out of range: -12 to +14')
+        raise InvalidArgumentValueError('Offset out of range: -12 to +14')
 
     if 0 <= hour < 10:
         value = '+0{}'.format(hour)
@@ -61,7 +61,7 @@ def get_period_type(as_timedelta=False):
         match = re.match(regex, value.lower())
         match_len = match.span(0)
         if match_len != tuple([0, len(value)]):
-            raise ValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
+            raise InvalidArgumentValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
         # simply return value if a valid ISO8601 string is supplied
         if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
             return value
@@ -115,9 +115,9 @@ class MetricAlertConditionAction(argparse._AppendAction):
             metric_condition = validator.result()
             for item in ['time_aggregation', 'metric_name', 'threshold', 'operator']:
                 if not getattr(metric_condition, item, None):
-                    raise CLIError(usage)
+                    raise InvalidArgumentValueError(usage)
         except (AttributeError, TypeError, KeyError):
-            raise CLIError(usage)
+            raise InvalidArgumentValueError(usage)
         super(MetricAlertConditionAction, self).__call__(parser, namespace, metric_condition, option_string)
 
 
@@ -147,7 +147,7 @@ class ConditionAction(argparse.Action):
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) < 5:
-            raise CLIError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
+            raise InvalidArgumentValueError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
         operator = get_operator_map()[values[-4]]
         threshold = int(values[-3])
@@ -177,9 +177,9 @@ class AlertAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
             return RuleWebhookAction(service_uri=uri, properties=properties)
-        raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+        raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AlertRemoveAction(argparse._AppendAction):
@@ -192,7 +192,7 @@ class AlertRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
@@ -213,9 +213,9 @@ class AutoscaleAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
             return WebhookNotification(service_uri=uri, properties=properties)
-        raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+        raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AutoscaleRemoveAction(argparse._AppendAction):
@@ -228,7 +228,7 @@ class AutoscaleRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
@@ -260,9 +260,9 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             autoscale_condition = validator.result()
             for item in ['time_aggregation', 'metric_name', 'threshold', 'operator', 'time_window']:
                 if not getattr(autoscale_condition, item, None):
-                    raise CLIError(usage)
+                    raise InvalidArgumentValueError(usage)
         except (AttributeError, TypeError, KeyError):
-            raise CLIError(usage)
+            raise InvalidArgumentValueError(usage)
 
         namespace.condition = autoscale_condition
 
@@ -275,7 +275,7 @@ class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) != 2:
-            raise CLIError('usage error: --scale {in,out,to} VALUE[%]')
+            raise InvalidArgumentValueError('usage error: --scale {in,out,to} VALUE[%]')
         dir_val = values[0]
         amt_val = values[1]
         scale_type = None
@@ -307,12 +307,12 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
                                                                 self.deserialize_object(type_name, type_properties),
                                                                 option_string)
         except KeyError:
-            raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+            raise InvalidArgumentValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
         except TypeError:
-            raise ValueError(
+            raise InvalidArgumentValueError(
                 'usage error: Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
         except ValueError as ex:
-            raise ValueError(
+            raise InvalidArgumentValueError(
                 'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
                     ' '.join(values), type_name, str(ex)))
 
@@ -393,8 +393,8 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                                                  http_trigger_url=type_properties[3],
                                                  use_common_alert_schema=useCommonAlertSchema)
             else:
-                raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+                raise ValueError('The type "{}" is not recognizable.'.format(type_name))
 
         except IndexError:
-            raise CLIError('usage error: --action {}'.format(syntax[type_name]))
+            raise InvalidArgumentValueError('usage error: --action {}'.format(syntax[type_name]))
         return receiver
