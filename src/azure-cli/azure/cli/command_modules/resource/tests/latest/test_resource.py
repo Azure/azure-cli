@@ -641,6 +641,17 @@ class ProviderRegistrationTest(ScenarioTest):
             self.cmd('provider register -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
+class ProviderMGRegistrationTest(ScenarioTest):
+
+    def test_provider_registration(self):
+
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            self.cmd('provider register-mg -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
 
 class ProviderOperationTest(ScenarioTest):
