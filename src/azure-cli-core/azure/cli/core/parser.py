@@ -287,7 +287,7 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return command, parameters, extension
+        return command, self._raw_arguments, extension
 
     def _get_failure_recovery_recommendations(self, action=None, **kwargs):
         # Gets failure recovery recommendations
