@@ -32,28 +32,56 @@ def transform_web_list_output(webs):
 
 
 def ex_handler_factory(creating_plan=False):
-    def _polish_bad_errors(ex):
-        import json
-        from knack.util import CLIError
-        try:
-            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-                detail = ex.response.text
-            else:
-                detail = json.loads(ex.response.text)['Message']
-                if creating_plan:
-                    if 'Requested features are not supported in region' in detail:
-                        detail = ("Plan with linux worker is not supported in current region. For " +
-                                  "supported regions, please refer to https://docs.microsoft.com/"
-                                  "azure/app-service-web/app-service-linux-intro")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
-            ex = CLIError(detail)
-        except Exception:  # pylint: disable=broad-except
-            pass
+    def _ex_handler(ex):
+        ex = _polish_bad_errors(ex, creating_plan)
         raise ex
-    return _polish_bad_errors
+    return _ex_handler
+
+
+def update_function_ex_handler_factory():
+    from knack.util import CLIError
+    def _ex_handler(ex):
+        http_error_response = False
+        if hasattr(ex, 'response'):
+            http_error_response = True
+        ex = _polish_bad_errors(ex, False)
+        # only include if an update was attempted and failed on the backend
+        if http_error_response:
+            try:
+                detail = ('If using \'--plan\', a consumption plan may be unable to migrate '
+                        'to a given premium plan. Please confirm that the premium plan '
+                        'exists in the same resource group and region. Note: Not all '
+                        'functionapp plans support premium instances. If you have verified '
+                        'your resource group and region and are still unable to migrate, '
+                        'please redeploy on a premium functionapp plan.')
+                ex = CLIError(ex.args[0] + '\n\n' + detail)
+            except Exception: # pylint: disable=broad-except
+                pass
+        raise ex
+    return _ex_handler
+
+
+def _polish_bad_errors(ex, creating_plan):
+    import json
+    from knack.util import CLIError
+    try:
+        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+            detail = ex.response.text
+        else:
+            detail = json.loads(ex.response.text)['Message']
+            if creating_plan:
+                if 'Requested features are not supported in region' in detail:
+                    detail = ("Plan with linux worker is not supported in current region. For " +
+                              "supported regions, please refer to https://docs.microsoft.com/"
+                              "azure/app-service-web/app-service-linux-intro")
+                elif 'Not enough available reserved instance servers to satisfy' in detail:
+                    detail = ("Plan with Linux worker can only be created in a group " +
+                              "which has never contained a Windows worker, and vice versa. " +
+                              "Please use a new resource group. Original error:" + detail)
+        ex = CLIError(detail)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return ex
 
 
 # pylint: disable=too-many-statements
@@ -275,7 +303,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=ex_handler_factory(),
+        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:

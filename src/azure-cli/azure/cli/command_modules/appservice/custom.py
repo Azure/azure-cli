@@ -637,7 +637,7 @@ def update_webapp(instance, client_affinity_enabled=None, https_only=None):
     return instance
 
 
-def update_functionapp(cmd, instance, plan=None):
+def update_functionapp(cmd, instance, plan=None, force=False):
     client = web_client_factory(cmd.cli_ctx)
     if plan is not None:
         if is_valid_resource_id(plan):
@@ -648,18 +648,24 @@ def update_functionapp(cmd, instance, plan=None):
             dest_plan_info = client.app_service_plans.get(instance.resource_group, plan)
         if dest_plan_info is None:
             raise CLIError("The plan '{}' doesn't exist".format(plan))
-        validate_plan_switch_compatibility(cmd, client, instance, dest_plan_info)
+        validate_plan_switch_compatibility(cmd, client, instance, dest_plan_info, force)
         instance.server_farm_id = dest_plan_info.id
     return instance
 
 
-def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, dest_plan_instance):
+def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, dest_plan_instance, force):
     general_switch_msg = 'Currently the switch is only allowed between a Consumption or an Elastic Premium plan.'
     src_parse_result = parse_resource_id(src_functionapp_instance.server_farm_id)
     src_plan_info = client.app_service_plans.get(src_parse_result['resource_group'],
                                                  src_parse_result['name'])
+
     if src_plan_info is None:
         raise CLIError('Could not determine the current plan of the functionapp')
+
+    # Ensure all plans involved are windows. Reserved = true indicates Linux.
+    if src_plan_info.reserved or dest_plan_instance.reserved:
+        raise CLIError('This feature currently supports windows to windows plan migrations. For other '
+                       'migrations, please redeploy.')
 
     src_is_premium = is_plan_elastic_premium(cmd, src_plan_info)
     dest_is_consumption = is_plan_consumption(cmd, dest_plan_instance)
@@ -671,9 +677,12 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
                        general_switch_msg)
 
     if src_is_premium and dest_is_consumption:
-        logger.warning("Moving a functionapp from Premium to Consumption might result in loss of functionality. "
-                       "Please ensure the functionapp is compatible with a Consumption plan and is not using any "
-                       "premium features.")
+        logger.warning('WARNING: Moving a functionapp from Premium to Consumption might result in loss of '
+                       'functionality and cause the app to break. Please ensure the functionapp is compatible '
+                       'with a Consumption plan and is not using any features only available in Premium.')
+        if not force:
+            raise CLIError('If you want to migrate a functionapp from a Premium to Consumption plan, please '
+                           're-run this command with the \'--force\' flag.')
 
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
