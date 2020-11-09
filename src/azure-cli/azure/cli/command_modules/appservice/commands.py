@@ -40,6 +40,7 @@ def ex_handler_factory(creating_plan=False):
 
 def update_function_ex_handler_factory():
     from knack.util import CLIError
+
     def _ex_handler(ex):
         http_error_response = False
         if hasattr(ex, 'response'):
@@ -49,13 +50,13 @@ def update_function_ex_handler_factory():
         if http_error_response:
             try:
                 detail = ('If using \'--plan\', a consumption plan may be unable to migrate '
-                        'to a given premium plan. Please confirm that the premium plan '
-                        'exists in the same resource group and region. Note: Not all '
-                        'functionapp plans support premium instances. If you have verified '
-                        'your resource group and region and are still unable to migrate, '
-                        'please redeploy on a premium functionapp plan.')
+                          'to a given premium plan. Please confirm that the premium plan '
+                          'exists in the same resource group and region. Note: Not all '
+                          'functionapp plans support premium instances. If you have verified '
+                          'your resource group and region and are still unable to migrate, '
+                          'please redeploy on a premium functionapp plan.')
                 ex = CLIError(ex.args[0] + '\n\n' + detail)
-            except Exception: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 pass
         raise ex
     return _ex_handler
