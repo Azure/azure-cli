@@ -20,6 +20,7 @@ from importlib import import_module
 import six
 
 # pylint: disable=unused-import
+from azure.cli.core.azclierror import FileNotFoundError
 from azure.cli.core.commands.constants import (
     BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
@@ -97,6 +98,10 @@ def _expand_file_prefixed_files(args):
                 return _load_file(poss_file)
             except IOError:
                 logger.debug("Failed to load '%s', assume not a file", arg)
+                if not os.path.exists(poss_file):
+                    raise FileNotFoundError('File "{}" does not exist.'.format(poss_file))
+                if not os.path.isfile(poss_file):
+                    raise FileNotFoundError('"{}" is not a file.')
                 return arg
 
         # if @ not at the start it can't be a file

@@ -199,7 +199,13 @@ class ManualInterrupt(UserFault):
     pass
 
 
-# Unknow error type
+# File not found error type
+class FileNotFoundError(UserFault):
+    """ File not found. """
+    pass
+
+
+# Unknown error type
 class UnknownError(UserFault):
     """ Reserved in core for the errors which can not be categorized into the error types above.
     DO NOT raise this error class in your codes. """
