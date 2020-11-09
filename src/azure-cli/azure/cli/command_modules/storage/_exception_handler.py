@@ -4,15 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 def file_related_exception_handler(ex):
-    from azure.cli.core.azclierror import (AzFileNotFoundError, AzPermissionError, AzIsADirectoryError, AzOSError)
-    if isinstance(ex, FileNotFoundError):
-        raise AzFileNotFoundError(ex)
-    if isinstance(ex, PermissionError):
-        raise AzPermissionError(ex)
-    if isinstance(ex, IsADirectoryError):
-        raise AzIsADirectoryError(ex)
-    if isinstance(ex, OSError):
-        raise AzOSError(ex)
+    from azure.cli.core.azclierror import FileOperationError
+    if isinstance(ex, (FileNotFoundError, PermissionError, IsADirectoryError)):
+        raise FileOperationError(ex)
     import sys
     from six import reraise
     reraise(*sys.exc_info())
