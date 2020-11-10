@@ -169,8 +169,8 @@ long-summary: >-
     to get available permissions for Graph API:
       - Azure Active Directory Graph: `az ad sp show --id 00000002-0000-0000-c000-000000000000`
       - Microsoft Graph: `az ad sp show --id 00000003-0000-0000-c000-000000000000`
-    Permissions under the `appRoles` property correspond to `Role` in --api-permissions.
-    Permissions under the `oauth2Permissions` property correspond to `Scope` in --api-permissions.
+    Application permissions under the `appRoles` property correspond to `Role` in --api-permissions.
+    Delegated permissions under the `oauth2Permissions` property correspond to `Scope` in --api-permissions.
 examples:
   - name: Add Azure Active Directory Graph delegated permission User.Read (Sign in and read user profile).
     text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
