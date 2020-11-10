@@ -75,7 +75,7 @@ __init__(self, error_msg, recommendation=None):
 
 ### Add a New Error Type
 
-If there is not a proper error type for your case and the error is general enough, consider defining a new error type in [azure/cli/core/azclierror.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/azclierror.py). The defined error type should inherit from one of the errors defined in the second layer (`UserFault`, `ClientError`, `ServiceError`). Please reach out to [AzureCLITeam](AzCLIDev@microsoft.com) for more details before adding a new error type.
+If there is not a proper error type for your case and the error is general enough, consider defining a new error type in [azure/cli/core/azclierror.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/azclierror.py). The defined error type should inherit from one of the errors defined in the second layer (`UserFault`, `ClientError`, `ServiceError`). Please reach out to AzCLIDev@microsoft.com for more details before adding a new error type.
 
 For example, a new error type can be defined in this way.
 ```Python
