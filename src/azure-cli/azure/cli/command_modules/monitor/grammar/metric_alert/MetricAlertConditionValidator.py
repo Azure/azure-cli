@@ -125,7 +125,8 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         self.parameters['dimensions'][self._dimension_index]['values'] = [x for x in dvalues if x not in ['', 'or']]
 
     def result(self):
-        from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, DynamicThresholdFailingPeriods
+        from azure.mgmt.monitor.models import MetricCriteria, MetricDimension, DynamicMetricCriteria, \
+            DynamicThresholdFailingPeriods
         dim_params = self.parameters.get('dimensions', [])
         dimensions = []
         for dim in dim_params:
@@ -139,8 +140,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
             failing_periods = DynamicThresholdFailingPeriods(**self.parameters['failing_periods'])
             self.parameters['failing_periods'] = failing_periods
             return DynamicMetricCriteria(**self.parameters)
-        else:
-            # static metric criteria
-            self.parameters['operator'] = static_op_conversion[self.parameters['operator']]
-            return MetricCriteria(**self.parameters)
 
+        # static metric criteria
+        self.parameters['operator'] = static_op_conversion[self.parameters['operator']]
+        return MetricCriteria(**self.parameters)

@@ -1413,20 +1413,20 @@ parameters:
   - name: --condition
     short-summary: The condition which triggers the rule.
     long-summary: |
-        Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC 
-                           [{=,!=,>,>=,<,<=} THRESHOLD] 
+        Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC
+                           [{=,!=,>,>=,<,<=} THRESHOLD]
                            [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
-        
+
         Violations can be the number of violations to trigger an alert. It should be smaller or equal to windows.
-        
+
         Windows can be the number of aggregated lookback windows.
-        
+
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
-        
+
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
@@ -1462,7 +1462,7 @@ examples:
   - name: Create a dynamic CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
-            --condition "avg Percentage CPU > dynamic medium 2 of 4 since 2020-10-01T10:23:00.000Z" 
+            --condition "avg Percentage CPU > dynamic medium 2 of 4 since 2020-10-01T10:23:00.000Z"
             --description "Dynamic CPU"
             --window-size 5m
 
@@ -1505,20 +1505,20 @@ parameters:
   - name: --add-condition
     short-summary: Add a condition which triggers the rule.
     long-summary: |
-        Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC 
-                           [{=,!=,>,>=,<,<=} THRESHOLD] 
+        Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC
+                           [{=,!=,>,>=,<,<=} THRESHOLD]
                            [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
-        
+
         Violations can be the number of violations to trigger an alert. It should be smaller or equal to windows.
-        
+
         Windows can be the number of aggregated lookback windows.
-        
+
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
-        
+
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
