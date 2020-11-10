@@ -251,6 +251,7 @@ class LabelsNamespace:
     def __init__(self, labels):
         self.labels = labels
 
+
 class AssignIdentityNamespace:
     def __init__(self, assign_identity):
         self.assign_identity = assign_identity
