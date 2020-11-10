@@ -365,13 +365,13 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     if disk_iops_read_write is not None:
         disk.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
-        disk.disk_mbps_read_write = disk_mbps_read_write
+        disk.disk_m_bps_read_write = disk_mbps_read_write
     if max_shares is not None:
         disk.max_shares = max_shares
     if disk_iops_read_only is not None:
         disk.disk_iops_read_only = disk_iops_read_only
     if disk_mbps_read_only is not None:
-        disk.disk_mbps_read_only = disk_mbps_read_only
+        disk.disk_m_bps_read_only = disk_mbps_read_only
     if network_access_policy is not None:
         disk.network_access_policy = network_access_policy
     if disk_access is not None:
@@ -409,11 +409,11 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
     if disk_iops_read_write is not None:
         instance.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
-        instance.disk_mbps_read_write = disk_mbps_read_write
+        instance.disk_m_bps_read_write = disk_mbps_read_write
     if disk_iops_read_only is not None:
         instance.disk_iops_read_only = disk_iops_read_only
     if disk_mbps_read_only is not None:
-        instance.disk_mbps_read_only = disk_mbps_read_only
+        instance.disk_m_bps_read_only = disk_mbps_read_only
     if max_shares is not None:
         instance.max_shares = max_shares
     if disk_encryption_set is not None:
@@ -2680,7 +2680,7 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
         return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.deallocate,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
                        resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
 
 
@@ -2836,7 +2836,7 @@ def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
@@ -2871,7 +2871,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if protect_from_scale_set_actions is not None:
             vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
 
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.update,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
                            resource_group_name, name, instance_id, **kwargs)
 
     # else handle vmss update
@@ -2924,7 +2924,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if proximity_placement_group is not None:
         vmss.proximity_placement_group = {'id': proximity_placement_group}
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
 
 # endregion
@@ -3000,13 +3000,13 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         vmss.virtual_machine_profile.storage_profile.image_reference = None
         # pylint: disable=no-member
         _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
-        return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
 
     vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
     # Avoid unnecessary permission error
     vmss_vm.storage_profile.image_reference = None
     _init_data_disk(vmss_vm.storage_profile, lun, disk)
-    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
 
 
 def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
@@ -3032,9 +3032,9 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
     if instance_id is None:
         vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-        return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
     vmss_vm.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
 # endregion
 
 
@@ -3055,7 +3055,7 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
     vmss.virtual_machine_profile.extension_profile.extensions = keep_list
 
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -3098,7 +3098,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extensions = extension_profile.extensions
         if extensions:
             extension_profile.extensions = [x for x in extensions if
-                                            x.type1.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
+                                            x.type_properties_type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
@@ -3115,7 +3115,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, vmss_name, vmss)
 
 
@@ -3219,13 +3219,12 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
             except ValueError:
                 raise CLIError('usage error: --features KEY=VALUE [KEY=VALUE ...]')
 
-    print(GalleryImage, GalleryImageIdentifier)
     image = GalleryImage(identifier=GalleryImageIdentifier(publisher=publisher, offer=offer, sku=sku),
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
                          hyper_vgeneration=hyper_v_generation, features=feature_list)
-    return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
+    return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
@@ -3235,6 +3234,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_region_encryption=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
@@ -3245,10 +3245,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
-        managed_image = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+        managed_image = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                     namespace='Microsoft.Compute', type='images', name=managed_image)
     if os_snapshot and not is_valid_resource_id(os_snapshot):
-        os_snapshot = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+        os_snapshot = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='snapshots', name=os_snapshot)
     if data_snapshots:
         for i, s in enumerate(data_snapshots):
@@ -3293,11 +3293,11 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             raise CLIError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
-    return client.gallery_image_versions.create_or_update(resource_group_name=resource_group_name,
-                                                          gallery_name=gallery_name,
-                                                          gallery_image_name=gallery_image_name,
-                                                          gallery_image_version_name=gallery_image_version,
-                                                          gallery_image_version=image_version)
+    return client.gallery_image_versions.begin_create_or_update(resource_group_name=resource_group_name,
+                                                                gallery_name=gallery_name,
+                                                                gallery_image_name=gallery_image_name,
+                                                                gallery_image_version_name=gallery_image_version,
+                                                                gallery_image_version=image_version)
 
 
 def fix_gallery_image_date_info(date_info):

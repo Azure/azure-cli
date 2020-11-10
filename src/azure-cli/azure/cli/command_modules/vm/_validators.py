@@ -473,7 +473,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
                                                            gallery_image_name=res['child_name_1'])
-            namespace.os_type = image_info.os_type.value
+            namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
