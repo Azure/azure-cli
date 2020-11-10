@@ -1946,6 +1946,7 @@ def register_provider(cmd, resource_provider_namespace, wait=False):
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
 
+
 def register_management_group(cmd, resource_provider_namespace, management_group_id, wait=False):
     import time
     rcf = _resource_client_factory(cmd.cli_ctx)
@@ -1963,6 +1964,7 @@ def register_management_group(cmd, resource_provider_namespace, management_group
         action = 'Registering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
         logger.warning(msg_template, action, resource_provider_namespace)
+
 
 def list_provider_operations(cmd):
     auth_client = _authorization_management_client(cmd.cli_ctx)
