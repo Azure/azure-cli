@@ -3365,7 +3365,7 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 
 
 # region dedicated host
-def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
+def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
                                 automatic_placement=None, location=None, zones=None, tags=None):
     DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)

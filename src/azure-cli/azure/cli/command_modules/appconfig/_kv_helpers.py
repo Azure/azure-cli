@@ -296,7 +296,11 @@ def __read_kv_from_config_store(azconfig_client,
     elif top is None:
         top = 100
 
-    keyvault_client = __get_keyvault_client(cli_ctx) if cli_ctx else None
+    if cli_ctx:
+        from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
+        keyvault_client = keyvault_data_plane_factory(cli_ctx, None)
+    else:
+        keyvault_client = None
 
     for setting in configsetting_iterable:
         kv = convert_configurationsetting_to_keyvalue(setting)
@@ -957,18 +961,6 @@ def __compact_key_values(key_values):
             else:
                 compacted.update({key: value})
     return compacted
-
-
-def __get_keyvault_client(cli_ctx):
-    from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
-
-    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
-
-    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
 
 def __resolve_secret(keyvault_client, keyvault_reference):
