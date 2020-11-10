@@ -393,6 +393,7 @@ def validate_label(label):
 
     return {kv[0]: kv[1]}
 
+
 def validate_assign_identity(namespace):
     if namespace.assign_identity is not None:
         if namespace.assign_identity == '':

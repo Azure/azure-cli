@@ -757,6 +757,7 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
         properties["windowsProfile"] = windows_profile
     return properties
 
+
 def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
     msi_client = get_msi_client(cli_ctx)
     pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
@@ -774,6 +775,7 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
             raise CLIError(ex.message)
         return identity.client_id
     raise CLIError("Cannot parse identity name from provided resource id {}.".format(resource_id))
+
 
 # pylint: disable=too-many-locals
 def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_value, dns_name_prefix=None,
@@ -1768,7 +1770,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
         # if service_principal_profile is None, then this cluster is an MSI cluster,
-        # and the service principal does not exist. Two cases: 
+        # and the service principal does not exist. Two cases:
         # 1. For system assigned identity, we just tell user to grant the
         # permission after the cluster is created to keep consistent with portal experience.
         # 2. For user assigned identity, we can grant needed permission to
