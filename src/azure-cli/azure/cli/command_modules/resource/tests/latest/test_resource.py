@@ -643,13 +643,14 @@ class ProviderRegistrationTest(ScenarioTest):
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 class ProviderMGRegistrationTest(ScenarioTest):
 
-    def test_provider_registration(self):
+    def test_provider_mg_registration(self):
 
-        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate', 'mg': self.create_random_name('azure-cli-management', 30),})
+       
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
-            self.cmd('provider register-mg -n {prov}')
+            self.cmd('provider register-mg --namespace {prov} --management-group-id {mg}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
