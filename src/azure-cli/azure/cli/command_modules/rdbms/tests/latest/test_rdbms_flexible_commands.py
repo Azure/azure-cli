@@ -20,6 +20,7 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StringContainCheck,
+    VirtualNetworkPreparer,
     LocalContextScenarioTest,
     live_only)
 from azure.cli.testsdk.preparers import (
@@ -477,6 +478,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
+    @VirtualNetworkPreparer()
     def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('mysql', resource_group)
@@ -485,6 +487,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
+    @VirtualNetworkPreparer()
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
         # Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
         self._test_flexible_server_vnet_mgmt_existing_supplied_subnetid('postgres', resource_group)
@@ -503,13 +506,15 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group)
+    @VirtualNetworkPreparer(parameter_name='virtual_network')
+    def test_postgres_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('postgres', resource_group, virtual_network)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group)
+    @VirtualNetworkPreparer(parameter_name='virtual_network')
+    def test_mysql_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, resource_group, virtual_network):
+        self._test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname('mysql', resource_group, virtual_network)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='resource_group_1')
@@ -529,45 +534,23 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
-        if database_engine == 'postgres':
-            location = self.postgres_location
-        elif database_engine == 'mysql':
-            location = self.mysql_location
-
-        vnet_name = 'clitestvnet'
-        address_prefix = '10.0.0.0/16'
-        subnet_name_1 = 'clitestsubnet'
-        subnet_prefix_1 = '10.0.0.0/24'
         server = 'testvnetserver1' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
 
-        # create vnet and subnet
-        vnet_result = self.cmd('network vnet create -n {} -g {} -l {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
-                               .format(vnet_name, resource_group, location, address_prefix, subnet_name_1, subnet_prefix_1)).get_output_in_json()
+        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
 
         # create server - Delegation should be added.
         self.cmd('{} flexible-server create -g {} -n {} --subnet {}'
-                 .format(database_engine, resource_group, server, vnet_result['newVNet']['subnets'][0]['id']))
+                 .format(database_engine, resource_group, server, subnet_id))
 
         # flexible-server show to validate delegation is added to both the created server
         show_result_1 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'],
-                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name, subnet_name_1))
+        self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'], subnet_id)
         # delete server
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server),
                  checks=NoneCheck())
-
-        time.sleep(15 * 60)
-
-        # remove delegations from vnet
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         subnet_name_1,
-                                                                                                         vnet_name))
-        # remove vnet
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name))
 
     def _test_flexible_server_vnet_mgmt_non_existing_supplied_subnetid(self, database_engine, resource_group):
 
@@ -672,21 +655,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name))
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
 
-    def _test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, database_engine, resource_group):
+    def _test_flexible_server_vnet_mgmt_supplied_vname_and_subnetname(self, database_engine, resource_group, virtual_network):
 
         # flexible-server create
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
 
-        if database_engine == 'postgres':
-            location = self.postgres_location
-        elif database_engine == 'mysql':
-            location = self.mysql_location
-
-        vnet_name = 'clitestvnet5'
-        subnet_name = 'clitestsubnet5'
-        address_prefix = '10.0.0.0/16'
-        subnet_prefix_1 = '10.0.0.0/24'
         vnet_name_2 = 'clitestvnet6'
 
         # flexible-servers
@@ -695,12 +669,11 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
 
         # create vnet and subnet. When vnet name is supplied, the subnet created will be given the default name.
-        vnet_result = self.cmd('network vnet create -n {} -g {} -l {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
-                               .format(vnet_name, resource_group, location, address_prefix, subnet_name, subnet_prefix_1)).get_output_in_json()
-
+        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()[
+            'id']
         # create server - Delegation should be added.
-        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {}'
-                 .format(database_engine, resource_group, servers[0], vnet_result['newVNet']['name'], vnet_result['newVNet']['subnets'][0]['name']))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet default'
+                 .format(database_engine, resource_group, servers[0], virtual_network))
 
         # Case 2 : Provision a server with a supplied Vname and subnet name that does not exist.
         self.cmd('{} flexible-server create -g {} -n {} --vnet {}'
@@ -713,9 +686,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         show_result_2 = self.cmd('{} flexible-server show -g {} -n {}'
                                  .format(database_engine, resource_group, servers[1])).get_output_in_json()
 
-        self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'],
-                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
-                             self.get_subscription_id(), resource_group, vnet_name, subnet_name))
+        self.assertEqual(show_result_1['delegatedSubnetArguments']['subnetArmResourceId'], subnet_id)
 
         self.assertEqual(show_result_2['delegatedSubnetArguments']['subnetArmResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -730,17 +701,11 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         time.sleep(15 * 60)
 
-        # remove delegations from all vnets
-        self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
-                                                                                                         subnet_name,
-                                                                                                         vnet_name))
-
         self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group,
                                                                                                          'Subnet' + servers[1][6:],
                                                                                                          vnet_name_2))
 
         # remove all vnets
-        self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name))
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group, vnet_name_2))
 
     def _test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, database_engine, resource_group_1, resource_group_2):

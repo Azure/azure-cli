@@ -1,176 +1,43 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
-      "10.0.0.0/24"}, "name": "clitestsubnet5"}]}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network vnet create
+      - network vnet subnet show
       Connection:
       - keep-alive
-      Content-Length:
-      - '212'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g -l --address-prefix --subnet-name --subnet-prefix
+      - -g -n --vnet-name
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"9368b7b3-0a92-4ede-b12b-390abb5ca476\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"ad59b308-ecf0-4670-bcc8-81ebcad9166b\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet5\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"9368b7b3-0a92-4ede-b12b-390abb5ca476\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/e0f2263c-0e92-438a-95c0-04ed695812f4?api-version=2020-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '1472'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:43:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 136b0cba-9e29-40ab-8b48-9d189de2cfc0
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --address-prefix --subnet-name --subnet-prefix
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/e0f2263c-0e92-438a-95c0-04ed695812f4?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"7c65cbe1-edc2-49f1-af39-34ab920f1482\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '605'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 3cdcbc41-cf57-43af-b8d6-c3e9761d3c89
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --address-prefix --subnet-name --subnet-prefix
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestvnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5\",\r\n
-        \ \"etag\": \"W/\\\"6cbbdf8f-da00-4af0-9c3c-fd7fca6632fa\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"ad59b308-ecf0-4670-bcc8-81ebcad9166b\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"clitestsubnet5\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \       \"etag\": \"W/\\\"6cbbdf8f-da00-4af0-9c3c-fd7fca6632fa\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1474'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:43:07 GMT
+      - Tue, 10 Nov 2020 04:15:20 GMT
       etag:
-      - W/"6cbbdf8f-da00-4af0-9c3c-fd7fca6632fa"
+      - W/"7c65cbe1-edc2-49f1-af39-34ab920f1482"
       expires:
       - '-1'
       pragma:
@@ -187,7 +54,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1af5e861-4075-436a-8556-963a8056f14f
+      - 7171cff0-d2bb-4bbe-b24c-e7eaf135e2a1
     status:
       code: 200
       message: OK
@@ -222,7 +89,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:07 GMT
+      - Tue, 10 Nov 2020 04:15:20 GMT
       expires:
       - '-1'
       pragma:
@@ -275,7 +142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:09 GMT
+      - Tue, 10 Nov 2020 04:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -291,7 +158,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -324,7 +191,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 06:43:10 GMT
+      - Tue, 10 Nov 2020 04:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -355,11 +222,11 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"6cbbdf8f-da00-4af0-9c3c-fd7fca6632fa\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"7c65cbe1-edc2-49f1-af39-34ab920f1482\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -368,13 +235,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '607'
+      - '605'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:10 GMT
+      - Tue, 10 Nov 2020 04:15:23 GMT
       etag:
-      - W/"6cbbdf8f-da00-4af0-9c3c-fd7fca6632fa"
+      - W/"7c65cbe1-edc2-49f1-af39-34ab920f1482"
       expires:
       - '-1'
       pragma:
@@ -391,16 +258,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e89e7880-fdb7-4ab3-af22-e7c7ce42042e
+      - 8e00b9ff-1d59-4932-a04f-866b52276b17
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default",
       "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [{"properties":
       {"serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"}, "name": "Microsoft.DBforPostgreSQL/flexibleServers"}],
       "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}, "name": "clitestsubnet5"}'
+      "Enabled"}, "name": "default"}'
     headers:
       Accept:
       - application/json
@@ -411,7 +278,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '547'
+      - '545'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -422,15 +289,15 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"ef17c099-1d42-4d14-89f3-1a644a43fb00\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"692ee9de-0391-41ad-9364-8229d30917eb\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"ef17c099-1d42-4d14-89f3-1a644a43fb00\\\"\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"692ee9de-0391-41ad-9364-8229d30917eb\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -440,15 +307,15 @@ interactions:
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9561c486-038a-4071-a3a2-736646c7071e?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/96b319e8-2a2b-456b-8563-0b575d117edf?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '1382'
+      - '1385'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:11 GMT
+      - Tue, 10 Nov 2020 04:15:23 GMT
       expires:
       - '-1'
       pragma:
@@ -465,7 +332,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9da0b77e-1529-4ab7-84d6-7d27b0630f88
+      - 319449db-2d97-45c8-aba4-32ceb6f9139d
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -488,7 +355,7 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9561c486-038a-4071-a3a2-736646c7071e?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/96b319e8-2a2b-456b-8563-0b575d117edf?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -500,7 +367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:14 GMT
+      - Tue, 10 Nov 2020 04:15:27 GMT
       expires:
       - '-1'
       pragma:
@@ -517,7 +384,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 68c8cbba-0560-46f5-a42b-9a88d8396a55
+      - 1ae5c914-2270-4d09-886f-320b350dd3ee
     status:
       code: 200
       message: OK
@@ -538,15 +405,15 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"ec6bea65-fae6-4a2a-94e0-52c91744bbe1\\\"\",\r\n  \"properties\":
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"df199d78-7af4-4ac8-b194-522898f64c2d\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"ec6bea65-fae6-4a2a-94e0-52c91744bbe1\\\"\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"df199d78-7af4-4ac8-b194-522898f64c2d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -558,13 +425,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1383'
+      - '1386'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:15 GMT
+      - Tue, 10 Nov 2020 04:15:28 GMT
       etag:
-      - W/"ec6bea65-fae6-4a2a-94e0-52c91744bbe1"
+      - W/"df199d78-7af4-4ac8-b194-522898f64c2d"
       expires:
       - '-1'
       pragma:
@@ -581,16 +448,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - d9a0a86b-81df-44a7-a477-8a68dde35c64
+      - bcd8966e-db1d-4f5b-a1dc-d63ed3a96fb2
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "eastus", "sku": {"name": "Standard_D2s_v3", "tier": "GeneralPurpose"},
-      "properties": {"administratorLogin": "curiousRoedeer2", "administratorLoginPassword":
-      "oJXN7WaEqP01LktBthISbQ", "version": "12", "storageProfile": {"backupRetentionDays":
+      "properties": {"administratorLogin": "yawningRaccoon3", "administratorLoginPassword":
+      "Ic373f99P0oO19auMhdtTg", "version": "12", "storageProfile": {"backupRetentionDays":
       7, "storageMB": 131072}, "haEnabled": "Disabled", "delegatedSubnetArguments":
-      {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5"},
+      {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},
       "createMode": "Default"}}'
     headers:
       Accept:
@@ -602,7 +469,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '610'
+      - '615'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -616,10 +483,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
       cache-control:
       - no-cache
       content-length:
@@ -627,11 +494,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:43:17 GMT
+      - Tue, 10 Nov 2020 04:15:32 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -662,10 +529,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a6acb68c-623a-4ca2-8d9b-00f41b7b5e82","status":"InProgress","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"name":"c5e536bf-8806-41aa-9a14-c40a2de520f4","status":"InProgress","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       cache-control:
       - no-cache
@@ -674,7 +541,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:44:18 GMT
+      - Tue, 10 Nov 2020 04:16:33 GMT
       expires:
       - '-1'
       pragma:
@@ -709,10 +576,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a6acb68c-623a-4ca2-8d9b-00f41b7b5e82","status":"InProgress","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"name":"c5e536bf-8806-41aa-9a14-c40a2de520f4","status":"InProgress","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       cache-control:
       - no-cache
@@ -721,7 +588,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:45:19 GMT
+      - Tue, 10 Nov 2020 04:17:33 GMT
       expires:
       - '-1'
       pragma:
@@ -756,10 +623,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a6acb68c-623a-4ca2-8d9b-00f41b7b5e82","status":"InProgress","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"name":"c5e536bf-8806-41aa-9a14-c40a2de520f4","status":"InProgress","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       cache-control:
       - no-cache
@@ -768,7 +635,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:46:19 GMT
+      - Tue, 10 Nov 2020 04:18:33 GMT
       expires:
       - '-1'
       pragma:
@@ -803,10 +670,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a6acb68c-623a-4ca2-8d9b-00f41b7b5e82","status":"InProgress","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"name":"c5e536bf-8806-41aa-9a14-c40a2de520f4","status":"InProgress","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       cache-control:
       - no-cache
@@ -815,7 +682,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:47:20 GMT
+      - Tue, 10 Nov 2020 04:19:34 GMT
       expires:
       - '-1'
       pragma:
@@ -850,10 +717,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/a6acb68c-623a-4ca2-8d9b-00f41b7b5e82?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c5e536bf-8806-41aa-9a14-c40a2de520f4?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a6acb68c-623a-4ca2-8d9b-00f41b7b5e82","status":"Succeeded","startTime":"2020-11-06T06:43:18.697Z"}'
+      string: '{"name":"c5e536bf-8806-41aa-9a14-c40a2de520f4","status":"Succeeded","startTime":"2020-11-10T04:15:31.667Z"}'
     headers:
       cache-control:
       - no-cache
@@ -862,7 +729,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:20 GMT
+      - Tue, 10 Nov 2020 04:20:36 GMT
       expires:
       - '-1'
       pragma:
@@ -900,17 +767,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"curiousRoedeer2","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-06T06:48:21.1348136+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"yawningRaccoon3","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-10T04:20:37.4005031+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
         US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver5postgres","name":"testvnetserver5postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1241'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:20 GMT
+      - Tue, 10 Nov 2020 04:20:36 GMT
       expires:
       - '-1'
       pragma:
@@ -959,7 +826,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:22 GMT
+      - Tue, 10 Nov 2020 04:20:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1012,7 +879,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:24 GMT
+      - Tue, 10 Nov 2020 04:20:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1061,7 +928,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 06:48:23 GMT
+      - Tue, 10 Nov 2020 04:20:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1106,7 +973,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:24 GMT
+      - Tue, 10 Nov 2020 04:20:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1148,10 +1015,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"clitestvnet6\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6\",\r\n
-        \ \"etag\": \"W/\\\"30ac26e7-cc6b-4336-b20c-9772ff4d8a5a\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"e841ef21-2c39-4d1f-a52f-202911035c5d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"2cb22823-fb53-4ab7-b696-2885a5a7ff58\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        \"bd911827-c11c-41cd-9552-486ea0cc9a12\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
         [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
         \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false,\r\n
         \   \"enableVmProtection\": false\r\n  }\r\n}"
@@ -1159,7 +1026,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/0344e4cc-4260-4773-8df9-3737cef8b8f4?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/48ce113d-7986-4372-bd95-a35c9ac3dad9?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1167,7 +1034,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:26 GMT
+      - Tue, 10 Nov 2020 04:20:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1180,7 +1047,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7d26e527-c7e9-4da9-8acd-93395f67d055
+      - 97e41398-d376-44ca-861e-c66957af61d5
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -1215,11 +1082,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
-        \ \"etag\": \"W/\\\"13622a71-91b8-46dc-a59f-f40f43e22d2b\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"8e27f710-6cc8-4182-87be-e02adbb3dff0\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"13622a71-91b8-46dc-a59f-f40f43e22d2b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"8e27f710-6cc8-4182-87be-e02adbb3dff0\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -1229,7 +1096,7 @@ interactions:
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/4b30f479-329a-4eb4-81a8-d21e7ffa1811?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/17b85be1-4ef6-45bc-964f-4af6f17e6506?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1237,7 +1104,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:27 GMT
+      - Tue, 10 Nov 2020 04:20:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1250,7 +1117,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 94ada446-5c8f-4dc8-a1ff-f4591d05d25c
+      - 7ac258c7-ccb4-4c4c-8995-632c9f1ff06e
       x-ms-ratelimit-remaining-subscription-writes:
       - '1198'
     status:
@@ -1273,26 +1140,19 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/0344e4cc-4260-4773-8df9-3737cef8b8f4?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/48ce113d-7986-4372-bd95-a35c9ac3dad9?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Canceled\",\r\n  \"error\": {\r\n    \"code\":
-        \"Canceled\",\r\n    \"message\": \"Operation was canceled.\",\r\n    \"details\":
-        [\r\n      {\r\n        \"code\": \"CanceledAndSupersededDueToAnotherOperation\",\r\n
-        \       \"message\": \"Operation PutVirtualNetworkOperation (0344e4cc-4260-4773-8df9-3737cef8b8f4)
-        was canceled and superseded by operation PutSubnetOperation (4b30f479-329a-4eb4-81a8-d21e7ffa1811).\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
-      canceled-by-azure-asyncoperation:
-      - https://management.azure.com/subscriptions/9d3faf91-9fbe-450d-b5dd-37bea9595299/providers/Microsoft.Network/locations/eastus/operations/4b30f479-329a-4eb4-81a8-d21e7ffa1811?api-version=2020-06-01
       content-length:
-      - '420'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:30 GMT
+      - Tue, 10 Nov 2020 04:20:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1309,7 +1169,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - af27e4fb-af59-465e-8227-1cc1c3f9f252
+      - fd019ca9-c450-4315-af18-4a6922dd26ec
     status:
       code: 200
       message: OK
@@ -1330,19 +1190,43 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/4b30f479-329a-4eb4-81a8-d21e7ffa1811?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"name\": \"clitestvnet6\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6\",\r\n
+        \ \"etag\": \"W/\\\"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"bd911827-c11c-41cd-9552-486ea0cc9a12\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [\r\n
+        \     {\r\n        \"name\": \"Subnetetserver6postgres\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \       \"etag\": \"W/\\\"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [\r\n            {\r\n              \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \             \"etag\": \"W/\\\"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3\\\"\",\r\n
+        \             \"properties\": {\r\n                \"provisioningState\":
+        \"Succeeded\",\r\n                \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \               \"actions\": [\r\n                  \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \               ]\r\n              },\r\n              \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \           }\r\n          ],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '2292'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:31 GMT
+      - Tue, 10 Nov 2020 04:20:48 GMT
+      etag:
+      - W/"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3"
       expires:
       - '-1'
       pragma:
@@ -1359,7 +1243,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 262cc268-0456-4078-9d15-3bdd7bb1a720
+      - b6e1fd18-b00f-4f40-a412-e3e07df6b36c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/17b85be1-4ef6-45bc-964f-4af6f17e6506?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Nov 2020 04:20:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 64ba485c-7724-4ca3-89dc-d917a682ffd3
     status:
       code: 200
       message: OK
@@ -1384,11 +1318,11 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
-        \ \"etag\": \"W/\\\"2feed034-82ce-402a-9af7-9542684eb0dd\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"2feed034-82ce-402a-9af7-9542684eb0dd\\\"\",\r\n
+        \       \"etag\": \"W/\\\"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -1404,9 +1338,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:31 GMT
+      - Tue, 10 Nov 2020 04:20:49 GMT
       etag:
-      - W/"2feed034-82ce-402a-9af7-9542684eb0dd"
+      - W/"4812c47b-68ae-449c-9bc2-e0a3bdfa50b3"
       expires:
       - '-1'
       pragma:
@@ -1423,7 +1357,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - df358ccb-1672-4180-b174-449fea050f2a
+      - 5a5306c8-33fc-4503-87ea-29a7be76f532
     status:
       code: 200
       message: OK
@@ -1449,7 +1383,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-06T06:43:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-10T04:15:10Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1458,7 +1392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:31 GMT
+      - Tue, 10 Nov 2020 04:20:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1474,8 +1408,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "eastus", "sku": {"name": "Standard_D2s_v3", "tier": "GeneralPurpose"},
-      "properties": {"administratorLogin": "remoteLard4", "administratorLoginPassword":
-      "zHTno6oqPVP4ueP1UAqPKg", "version": "12", "storageProfile": {"backupRetentionDays":
+      "properties": {"administratorLogin": "moralDunnock1", "administratorLoginPassword":
+      "eqcKrXCw6n2zNx_L1p42ww", "version": "12", "storageProfile": {"backupRetentionDays":
       7, "storageMB": 131072}, "haEnabled": "Disabled", "delegatedSubnetArguments":
       {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},
       "createMode": "Default"}}'
@@ -1489,7 +1423,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '615'
+      - '617'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
@@ -1503,22 +1437,22 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-11-06T06:48:35.123Z"}'
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-11-10T04:20:52.68Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
       cache-control:
       - no-cache
       content-length:
-      - '88'
+      - '87'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:48:34 GMT
+      - Tue, 10 Nov 2020 04:20:51 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -1528,7 +1462,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 202
       message: Accepted
@@ -1549,245 +1483,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"InProgress","startTime":"2020-11-06T06:48:35.123Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:49:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
-  response:
-    body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"InProgress","startTime":"2020-11-06T06:48:35.123Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:50:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
-  response:
-    body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"InProgress","startTime":"2020-11-06T06:48:35.123Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:51:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
-  response:
-    body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"InProgress","startTime":"2020-11-06T06:48:35.123Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:52:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
-  response:
-    body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"InProgress","startTime":"2020-11-06T06:48:35.123Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 06:53:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - postgres flexible-server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd?api-version=2020-02-14-preview
-  response:
-    body:
-      string: '{"name":"d2dcb9a2-2a19-486f-a9e0-5d3b7eb5efdd","status":"Succeeded","startTime":"2020-11-06T06:48:35.123Z"}'
+      string: '{"name":"c90ac025-165b-4422-ae80-93d5528d5c79","status":"InProgress","startTime":"2020-11-10T04:20:52.68Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1796,7 +1495,195 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:37 GMT
+      - Tue, 10 Nov 2020 04:21:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"c90ac025-165b-4422-ae80-93d5528d5c79","status":"InProgress","startTime":"2020-11-10T04:20:52.68Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Nov 2020 04:22:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"c90ac025-165b-4422-ae80-93d5528d5c79","status":"InProgress","startTime":"2020-11-10T04:20:52.68Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Nov 2020 04:23:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"c90ac025-165b-4422-ae80-93d5528d5c79","status":"InProgress","startTime":"2020-11-10T04:20:52.68Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Nov 2020 04:24:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/c90ac025-165b-4422-ae80-93d5528d5c79?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"c90ac025-165b-4422-ae80-93d5528d5c79","status":"Succeeded","startTime":"2020-11-10T04:20:52.68Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 10 Nov 2020 04:25:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1834,17 +1721,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"remoteLard4","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"3","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-06T06:54:38.0670715+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"moralDunnock1","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"3","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-10T04:25:55.2916616+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
         US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver6postgres","name":"testvnetserver6postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1246'
+      - '1248'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:37 GMT
+      - Tue, 10 Nov 2020 04:25:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1884,17 +1771,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"curiousRoedeer2","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-06T06:54:38.7725448+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"yawningRaccoon3","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-10T04:25:56.7983658+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
         US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver5postgres","name":"testvnetserver5postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1241'
+      - '1246'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:37 GMT
+      - Tue, 10 Nov 2020 04:25:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1934,17 +1821,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"remoteLard4","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"3","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-06T06:54:39.4600608+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"moralDunnock1","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"3","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-11-10T04:25:57.4638707+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
         US","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver6postgres","name":"testvnetserver6postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1246'
+      - '1248'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:38 GMT
+      - Tue, 10 Nov 2020 04:25:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1986,10 +1873,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"operation":"DropServerManagementOperation","startTime":"2020-11-06T06:54:40.133Z"}'
+      string: '{"operation":"DropServerManagementOperation","startTime":"2020-11-10T04:25:58.613Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/0619182e-59bf-4f48-9921-0e1b2213f867?api-version=2020-02-14-preview
       cache-control:
       - no-cache
       content-length:
@@ -1997,11 +1884,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:39 GMT
+      - Tue, 10 Nov 2020 04:25:57 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/0619182e-59bf-4f48-9921-0e1b2213f867?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -2032,10 +1919,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/0619182e-59bf-4f48-9921-0e1b2213f867?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e","status":"InProgress","startTime":"2020-11-06T06:54:40.133Z"}'
+      string: '{"name":"0619182e-59bf-4f48-9921-0e1b2213f867","status":"InProgress","startTime":"2020-11-10T04:25:58.613Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2044,7 +1931,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:54:55 GMT
+      - Tue, 10 Nov 2020 04:26:13 GMT
       expires:
       - '-1'
       pragma:
@@ -2079,10 +1966,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/0619182e-59bf-4f48-9921-0e1b2213f867?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e","status":"InProgress","startTime":"2020-11-06T06:54:40.133Z"}'
+      string: '{"name":"0619182e-59bf-4f48-9921-0e1b2213f867","status":"InProgress","startTime":"2020-11-10T04:25:58.613Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2091,7 +1978,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:55:10 GMT
+      - Tue, 10 Nov 2020 04:26:28 GMT
       expires:
       - '-1'
       pragma:
@@ -2126,10 +2013,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/0619182e-59bf-4f48-9921-0e1b2213f867?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"a1fe13a1-1ec1-4179-9fa4-d318dc15ad5e","status":"Succeeded","startTime":"2020-11-06T06:54:40.133Z"}'
+      string: '{"name":"0619182e-59bf-4f48-9921-0e1b2213f867","status":"Succeeded","startTime":"2020-11-10T04:25:58.613Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2138,7 +2025,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:55:25 GMT
+      - Tue, 10 Nov 2020 04:26:43 GMT
       expires:
       - '-1'
       pragma:
@@ -2180,10 +2067,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"operation":"DropServerManagementOperation","startTime":"2020-11-06T06:55:27.387Z"}'
+      string: '{"operation":"DropServerManagementOperation","startTime":"2020-11-10T04:26:45.877Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/1bb17151-ece2-472d-9252-c0d24ef88570?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/4c9b92b4-8255-4906-b820-10af9e3984de?api-version=2020-02-14-preview
       cache-control:
       - no-cache
       content-length:
@@ -2191,11 +2078,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:55:26 GMT
+      - Tue, 10 Nov 2020 04:26:45 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/1bb17151-ece2-472d-9252-c0d24ef88570?api-version=2020-02-14-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/operationResults/4c9b92b4-8255-4906-b820-10af9e3984de?api-version=2020-02-14-preview
       pragma:
       - no-cache
       server:
@@ -2226,10 +2113,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/1bb17151-ece2-472d-9252-c0d24ef88570?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/4c9b92b4-8255-4906-b820-10af9e3984de?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"1bb17151-ece2-472d-9252-c0d24ef88570","status":"InProgress","startTime":"2020-11-06T06:55:27.387Z"}'
+      string: '{"name":"4c9b92b4-8255-4906-b820-10af9e3984de","status":"InProgress","startTime":"2020-11-10T04:26:45.877Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2238,7 +2125,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:55:42 GMT
+      - Tue, 10 Nov 2020 04:27:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2273,10 +2160,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/1bb17151-ece2-472d-9252-c0d24ef88570?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/4c9b92b4-8255-4906-b820-10af9e3984de?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"1bb17151-ece2-472d-9252-c0d24ef88570","status":"InProgress","startTime":"2020-11-06T06:55:27.387Z"}'
+      string: '{"name":"4c9b92b4-8255-4906-b820-10af9e3984de","status":"InProgress","startTime":"2020-11-10T04:26:45.877Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2285,7 +2172,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:55:57 GMT
+      - Tue, 10 Nov 2020 04:27:15 GMT
       expires:
       - '-1'
       pragma:
@@ -2320,10 +2207,10 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/1bb17151-ece2-472d-9252-c0d24ef88570?api-version=2020-02-14-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US/azureAsyncOperation/4c9b92b4-8255-4906-b820-10af9e3984de?api-version=2020-02-14-preview
   response:
     body:
-      string: '{"name":"1bb17151-ece2-472d-9252-c0d24ef88570","status":"Succeeded","startTime":"2020-11-06T06:55:27.387Z"}'
+      string: '{"name":"4c9b92b4-8255-4906-b820-10af9e3984de","status":"Succeeded","startTime":"2020-11-10T04:26:45.877Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2332,7 +2219,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 06:56:12 GMT
+      - Tue, 10 Nov 2020 04:27:30 GMT
       expires:
       - '-1'
       pragma:
@@ -2347,251 +2234,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --name --vnet-name --remove
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"a17d17ca-5369-4976-8de7-6b2791c0bda6\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet5-clitestsubnet5-NRMS\"\r\n
-        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"a17d17ca-5369-4976-8de7-6b2791c0bda6\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
-        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
-        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
-        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1663'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 07:11:13 GMT
-      etag:
-      - W/"a17d17ca-5369-4976-8de7-6b2791c0bda6"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 7bbe82c5-9a1a-4a04-bc19-f44540e13d2c
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5",
-      "properties": {"addressPrefix": "10.0.0.0/24", "networkSecurityGroup": {"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet5-clitestsubnet5-NRMS"},
-      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
-      "Enabled"}, "name": "clitestsubnet5"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '679'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --name --vnet-name --remove
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"0d43c93c-18ef-4bb0-b1af-8c0843868ca6\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet5-clitestsubnet5-NRMS\"\r\n
-        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/189c6913-8750-48e9-bbda-f2f14316d4af?api-version=2020-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '886'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 07:11:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - f0f5515a-c716-42a2-b226-9657bca76053
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --name --vnet-name --remove
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/189c6913-8750-48e9-bbda-f2f14316d4af?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 07:11:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - e104823b-1e61-4280-b9ed-307e49b847e6
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet subnet update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --name --vnet-name --remove
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"clitestsubnet5\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5/subnets/clitestsubnet5\",\r\n
-        \ \"etag\": \"W/\\\"cc920d77-7b36-4afd-b823-7b12983b57e8\\\"\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
-        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet5-clitestsubnet5-NRMS\"\r\n
-        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
-        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
-        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '887'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 07:11:17 GMT
-      etag:
-      - W/"cc920d77-7b36-4afd-b823-7b12983b57e8"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - aa0f893a-695e-4d5c-b2b7-cddf91087a8f
     status:
       code: 200
       message: OK
@@ -2618,12 +2260,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
-        \ \"etag\": \"W/\\\"ee85d220-bb4b-4a4f-b1b5-08ed0f0e9fa5\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"c075df08-f785-4ce1-b50a-b136fc969dc7\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
         \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
-        \       \"etag\": \"W/\\\"ee85d220-bb4b-4a4f-b1b5-08ed0f0e9fa5\\\"\",\r\n
+        \       \"etag\": \"W/\\\"c075df08-f785-4ce1-b50a-b136fc969dc7\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
         \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
@@ -2639,9 +2281,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 07:11:18 GMT
+      - Tue, 10 Nov 2020 04:42:32 GMT
       etag:
-      - W/"ee85d220-bb4b-4a4f-b1b5-08ed0f0e9fa5"
+      - W/"c075df08-f785-4ce1-b50a-b136fc969dc7"
       expires:
       - '-1'
       pragma:
@@ -2658,7 +2300,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 35848ab4-1c77-4658-88f4-66001de3a41c
+      - 016d4786-e20f-411b-ada3-f6be97ee6b81
     status:
       code: 200
       message: OK
@@ -2693,7 +2335,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
-        \ \"etag\": \"W/\\\"01a33f47-0e91-45d7-b82d-644391d72444\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0ee22559-3ecc-428d-8d3b-e3b17d563faf\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
@@ -2701,7 +2343,7 @@ interactions:
         \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/0afb6c1e-1f28-426d-baa1-76acd00f3833?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/cb5e249f-302b-4276-a9f3-3e3a3829440d?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2709,7 +2351,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 07:11:18 GMT
+      - Tue, 10 Nov 2020 04:42:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2726,7 +2368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4987b31f-4212-4406-afbb-343c2b1c7dd8
+      - 31edfc5b-08cf-4972-83d8-6096baf94517
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -2749,7 +2391,7 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/0afb6c1e-1f28-426d-baa1-76acd00f3833?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/cb5e249f-302b-4276-a9f3-3e3a3829440d?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2761,7 +2403,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 07:11:22 GMT
+      - Tue, 10 Nov 2020 04:42:36 GMT
       expires:
       - '-1'
       pragma:
@@ -2778,7 +2420,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3fa58fb3-7b26-4eac-811d-6f223972dbbb
+      - bdc8ccc6-a4d5-4dd8-ba50-8a1448c4225d
     status:
       code: 200
       message: OK
@@ -2803,7 +2445,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
-        \ \"etag\": \"W/\\\"30bb6c86-fcd8-440e-856e-357d2459897c\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"db0b7499-0da8-4d4d-8913-7da40c59665b\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
         \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
@@ -2817,9 +2459,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 07:11:22 GMT
+      - Tue, 10 Nov 2020 04:42:36 GMT
       etag:
-      - W/"30bb6c86-fcd8-440e-856e-357d2459897c"
+      - W/"db0b7499-0da8-4d4d-8913-7da40c59665b"
       expires:
       - '-1'
       pragma:
@@ -2836,113 +2478,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f3287f73-ff4d-4d7f-b769-65011cdf9d74
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet5?api-version=2020-06-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/e6b16edf-c6af-4b58-b7f1-ebed9f19724e?api-version=2020-06-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Fri, 06 Nov 2020 07:11:23 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/e6b16edf-c6af-4b58-b7f1-ebed9f19724e?api-version=2020-06-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - f1be8971-c4fe-447b-8bae-4bdc3dbd1abe
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/e6b16edf-c6af-4b58-b7f1-ebed9f19724e?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 06 Nov 2020 07:11:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 7ad69cda-37be-4cbf-8694-e73114e3a2f8
+      - b642c991-662f-42ac-bb90-9f1c5dc7da4c
     status:
       code: 200
       message: OK
@@ -2975,17 +2511,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9086a03c-ca7b-46d7-a568-f44805a9a5e6?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/260376a3-bd37-4481-bb4a-698cf27a9a29?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 06 Nov 2020 07:11:35 GMT
+      - Tue, 10 Nov 2020 04:42:37 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/9086a03c-ca7b-46d7-a568-f44805a9a5e6?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operationResults/260376a3-bd37-4481-bb4a-698cf27a9a29?api-version=2020-06-01
       pragma:
       - no-cache
       server:
@@ -2996,9 +2532,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b2e0fcf7-a1ac-4348-976b-a6e724592584
+      - 88018a99-ebfb-46be-8bb2-08057802ec28
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -3019,7 +2555,7 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9086a03c-ca7b-46d7-a568-f44805a9a5e6?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/260376a3-bd37-4481-bb4a-698cf27a9a29?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3031,7 +2567,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 06 Nov 2020 07:11:45 GMT
+      - Tue, 10 Nov 2020 04:42:48 GMT
       expires:
       - '-1'
       pragma:
@@ -3048,7 +2584,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 84d2c418-9844-489b-bb73-e3d57dc90b4b
+      - fb2d0ff3-def7-41b1-915b-137260940e62
     status:
       code: 200
       message: OK
