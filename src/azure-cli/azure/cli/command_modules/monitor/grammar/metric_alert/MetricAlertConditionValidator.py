@@ -6,18 +6,13 @@
 from .MetricAlertConditionListener import MetricAlertConditionListener
 
 
-static_op_conversion = {
+op_conversion = {
     '=': 'Equals',
     '!=': 'NotEquals',
     '>': 'GreaterThan',
     '>=': 'GreaterThanOrEqual',
     '<': 'LessThan',
-    '<=': 'LessThanOrEqual'
-}
-
-dynamic_op_conversion = {
-    '>': 'GreaterThan',
-    '<': 'LessThan',
+    '<=': 'LessThanOrEqual',
     '><': 'GreaterOrLessThan'
 }
 
@@ -64,7 +59,7 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
 
     # Exit a parse tree produced by MetricAlertConditionParser#operator.
     def exitOperator(self, ctx):
-        self.parameters['operator'] = ctx.getText().strip()
+        self.parameters['operator'] = op_conversion[ctx.getText().strip()]
 
     # Exit a parse tree produced by MetricAlertConditionParser#threshold.
     def exitThreshold(self, ctx):
@@ -78,12 +73,19 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
         self.parameters['alert_sensitivity'] = sensitivity
 
     def exitDyn_violations(self, ctx):
-        self.parameters['failing_periods']['min_failing_periods_to_alert'] = float(ctx.getText().strip())
+        min_failing_periods_to_alert = float(ctx.getText().strip())
+        if min_failing_periods_to_alert < 1 or min_failing_periods_to_alert > 6:
+            message = "Violations {} should be 1-6."
+            raise ValueError(message.format(min_failing_periods_to_alert))
+        self.parameters['failing_periods']['min_failing_periods_to_alert'] = min_failing_periods_to_alert
 
     def exitDyn_windows(self, ctx):
         number_of_evaluation_periods = float(ctx.getText().strip())
         min_failing_periods_to_alert = self.parameters['failing_periods']['min_failing_periods_to_alert']
-        if  min_failing_periods_to_alert > number_of_evaluation_periods:
+        if number_of_evaluation_periods < 1 or number_of_evaluation_periods > 6:
+            message = "Windows {} should be 1-6."
+            raise ValueError(message.format(number_of_evaluation_periods))
+        if min_failing_periods_to_alert > number_of_evaluation_periods:
             message = "Violations {} should be smaller or equal to windows {}."
             raise ValueError(message.format(min_failing_periods_to_alert, number_of_evaluation_periods))
         self.parameters['failing_periods']['number_of_evaluation_periods'] = number_of_evaluation_periods
@@ -136,11 +138,9 @@ class MetricAlertConditionValidator(MetricAlertConditionListener):
 
         if 'failing_periods' in self.parameters:
             # dynamic metric criteria
-            self.parameters['operator'] = dynamic_op_conversion[self.parameters['operator']]
             failing_periods = DynamicThresholdFailingPeriods(**self.parameters['failing_periods'])
             self.parameters['failing_periods'] = failing_periods
             return DynamicMetricCriteria(**self.parameters)
 
         # static metric criteria
-        self.parameters['operator'] = static_op_conversion[self.parameters['operator']]
         return MetricCriteria(**self.parameters)

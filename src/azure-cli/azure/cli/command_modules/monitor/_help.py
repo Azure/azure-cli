@@ -1468,6 +1468,38 @@ examples:
 
 """
 
+helps['monitor metrics alert dimension'] = """
+type: group
+short-summary: Manage near-realtime metric alert rule dimensions.
+"""
+
+helps['monitor metrics alert dimension create'] = """
+type: command
+short-summary: Build a metric alert rule dimension.
+examples:
+  - name: Build a metric alert rule dimension.
+    text: |
+         $dim = az monitor metrics alert dimension create -n dimName --operator Include --value GetBlob PutBlob
+"""
+
+helps['monitor metrics alert condition'] = """
+type: group
+short-summary: Manage near-realtime metric alert rule conditions.
+"""
+
+helps['monitor metrics alert condition create'] = """
+type: command
+short-summary: Build a metric alert rule condition.
+examples:
+  - name: Build a static condition.
+    text: |
+        $condition = az monitor metrics alert condition create -t static --aggregation Count --metric Percentage CPU -op GreaterThan  --threshold 95
+  - name: Build a dynamic condition.
+    text: |
+        $condition = az monitor metrics alert condition create -t dynamic --aggregation Average
+"""
+
+
 helps['monitor metrics alert delete'] = """
 type: command
 short-summary: Delete a metrics-based alert rule.

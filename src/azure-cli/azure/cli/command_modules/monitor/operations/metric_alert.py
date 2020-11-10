@@ -8,6 +8,8 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+_metric_alert_dimension_prefix = '_where_or_and_'
+
 
 def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
                         tags=None, actions=None, severity=2, window_size='5m', evaluation_frequency='1m',
@@ -107,6 +109,37 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
             instance.criteria.all_of.append(condition)
 
     return instance
+
+
+def create_metric_alert_dimension(dimension_name, operator, value_list):
+    values = ' or '.join(value_list)
+    return '{} {} {} {} '.format(_metric_alert_dimension_prefix, dimension_name, operator, values)
+
+
+def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
+                                  dimension_list=None, threshold=None, alert_sensitivity=None,
+                                  number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
+                                  ignore_data_before=None):
+    if metric_namespace:
+        metric_namespace += '.'
+    condition = '{} {}"{}" {} '.format(aggregation, metric_namespace, metric_name, operator)
+    if condition_type == 'static':
+        condition += '{} '.format(threshold)
+    elif condition_type == 'dynamic':
+        dynamics = 'dynamic {} {} of {} '.format(
+            alert_sensitivity, min_failing_periods_to_alert, number_of_evaluation_periods)
+        if ignore_data_before:
+            dynamics += 'since {} '.format(ignore_data_before)
+        condition += dynamics
+    else:
+        raise NotImplementedError()
+
+    if dimension_list:
+        dimension_list = dimension_list.split(_metric_alert_dimension_prefix)
+        dimensions = 'where' + 'and'.join(dimension_list)
+        condition += dimensions
+
+    return condition
 
 
 def list_metric_alerts(client, resource_group_name=None):
