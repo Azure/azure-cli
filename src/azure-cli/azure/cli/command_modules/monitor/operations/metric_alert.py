@@ -135,7 +135,7 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
         raise NotImplementedError()
 
     if dimension_list:
-        dimensions = ' '.join(dimension_list)
+        dimensions = ' '.join([t for t in dimension_list if t.strip()])
         if dimensions.startswith(_metric_alert_dimension_prefix):
             dimensions = [t for t in dimensions.split(_metric_alert_dimension_prefix) if t]
             dimensions = 'where' + 'and'.join(dimensions)

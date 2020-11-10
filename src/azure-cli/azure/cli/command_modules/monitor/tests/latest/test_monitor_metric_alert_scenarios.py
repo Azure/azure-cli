@@ -310,6 +310,7 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
             ])
 
+
         self.cmd(
             'monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "High Or Low CPU" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate --add-condition "avg Percentage CPU >< dynamic medium 1 of 6 since 2020-10-01T10:23:00.000Z"',
             checks=[
@@ -334,6 +335,26 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert delete -g {rg} -n {alert}')
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
+
+    def test_metric_alert_condition_create(self):
+        cond1 = "total \'transactions\' > 5.0 where ResponseType includes Success and ApiName includes GetBlob"
+        dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType -op include -v Success').output
+        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName -op include -v GetBlob').output
+        self.cmd(
+            'monitor metrics alert condition create -t static --aggregation total --metric transactions --dimension "{}" "{}" -op GreaterThan --threshold 5'.format(
+                dim1, dim2
+            ),
+            checks=[
+                self.check('@', cond1)
+            ]
+        )
+        cond2 = "avg 'Percentage Cpu' >< dynamic low 3 of 5 since 2020-11-02T12:11:11+00:00 "
+        self.cmd(
+            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" -op GreaterOrLessThan --window 5 --violation 3 --since 2020-11-02T12:11:11Z --sensitivity low',
+            checks=[
+                self.check('@', cond2)
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group_2')
