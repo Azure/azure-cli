@@ -4,7 +4,7 @@ grammar MetricAlertCondition ;
 
 /* Main Rules */
 
-expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) (statics | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
+expression          : aggregation (namespace '.')* (QUOTE metric QUOTE WHITESPACE | metric) operator (threshold | dynamics) (WHITESPACE dimensions)* NEWLINE* ;
 
 aggregation         : WORD WHITESPACE ;
 
@@ -16,15 +16,13 @@ operator            : OPERATOR WHITESPACE ;
 
 /* Statics */
 
-statics             : operator threshold;
-
 threshold           : NUMBER ;
 
 /* Dynamics */
 
 dynamic             : DYNAMIC WHITESPACE ;
 
-dynamics            : operator dynamic dyn_sensitivity dyn_violations dyn_of_separator dyn_windows (WHITESPACE dyn_since_seperator dyn_datetime)* ;
+dynamics            : dynamic dyn_sensitivity dyn_violations dyn_of_separator dyn_windows (WHITESPACE dyn_since_seperator dyn_datetime)* ;
 
 dyn_sensitivity     : WORD WHITESPACE ;
 
@@ -36,7 +34,7 @@ dyn_windows         : NUMBER ;
 
 dyn_since_seperator : SINCE WHITESPACE ;
 
-dyn_datetime        : DATETIME ;
+dyn_datetime        : (NUMBER | WORD | '.' | '-' | ':' | '+')+;
 
 /* Dimensions */
 
@@ -96,6 +94,4 @@ NUMBER              : DIGIT+ ([.,] DIGIT+)? ;
 QUOTE               : ('\'' | '"') ;
 WHITESPACE          : (' ' | '\t')+ ;
 NEWLINE             : ('\r'? '\n' | '\r')+ ;
-WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_')+ ;
-DATETIME            : (LOWERCASE | UPPERCASE | DIGIT | '-' | ':')+ ;
-
+WORD                : (LOWERCASE | UPPERCASE | DIGIT | '_' )+ ;

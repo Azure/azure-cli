@@ -14,71 +14,72 @@ import sys
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
-        buf.write(u"\34\u00b7\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7")
+        buf.write(u"\34\u00b5\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7")
         buf.write(u"\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\4\r\t")
         buf.write(u"\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22")
         buf.write(u"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4")
-        buf.write(u"\30\t\30\4\31\t\31\3\2\3\2\3\2\3\2\7\2\67\n\2\f\2\16")
-        buf.write(u"\2:\13\2\3\2\3\2\3\2\3\2\3\2\3\2\5\2B\n\2\3\2\3\2\5\2")
-        buf.write(u"F\n\2\3\2\3\2\7\2J\n\2\f\2\16\2M\13\2\3\2\7\2P\n\2\f")
-        buf.write(u"\2\16\2S\13\2\3\3\3\3\3\3\3\4\6\4Y\n\4\r\4\16\4Z\3\5")
-        buf.write(u"\6\5^\n\5\r\5\16\5_\3\6\3\6\3\6\3\7\3\7\3\7\3\b\3\b\3")
-        buf.write(u"\t\3\t\3\t\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\3\n\7")
-        buf.write(u"\nw\n\n\f\n\16\nz\13\n\3\13\3\13\3\13\3\f\3\f\3\f\3\r")
-        buf.write(u"\3\r\3\r\3\16\3\16\3\17\3\17\3\17\3\20\3\20\3\21\3\21")
-        buf.write(u"\3\21\3\22\3\22\3\22\3\22\3\22\7\22\u0094\n\22\f\22\16")
-        buf.write(u"\22\u0097\13\22\3\23\3\23\3\23\3\23\3\24\3\24\3\24\3")
-        buf.write(u"\25\3\25\3\25\3\26\3\26\3\26\3\27\3\27\3\27\3\30\3\30")
-        buf.write(u"\3\30\3\30\7\30\u00ad\n\30\f\30\16\30\u00b0\13\30\3\31")
-        buf.write(u"\6\31\u00b3\n\31\r\31\16\31\u00b4\3\31\2\2\32\2\4\6\b")
-        buf.write(u"\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\2\b\4\2\3")
-        buf.write(u"\4\33\33\5\2\3\13\31\31\33\33\4\2\n\n\17\17\3\2\20\21")
-        buf.write(u"\4\2\n\n\22\22\b\2\3\3\5\5\7\r\27\27\31\31\33\33\2\u00a9")
-        buf.write(u"\2\62\3\2\2\2\4T\3\2\2\2\6X\3\2\2\2\b]\3\2\2\2\na\3\2")
-        buf.write(u"\2\2\fd\3\2\2\2\16g\3\2\2\2\20i\3\2\2\2\22l\3\2\2\2\24")
-        buf.write(u"{\3\2\2\2\26~\3\2\2\2\30\u0081\3\2\2\2\32\u0084\3\2\2")
-        buf.write(u"\2\34\u0086\3\2\2\2\36\u0089\3\2\2\2 \u008b\3\2\2\2\"")
-        buf.write(u"\u008e\3\2\2\2$\u0098\3\2\2\2&\u009c\3\2\2\2(\u009f\3")
-        buf.write(u"\2\2\2*\u00a2\3\2\2\2,\u00a5\3\2\2\2.\u00a8\3\2\2\2\60")
-        buf.write(u"\u00b2\3\2\2\2\628\5\4\3\2\63\64\5\6\4\2\64\65\7\3\2")
-        buf.write(u"\2\65\67\3\2\2\2\66\63\3\2\2\2\67:\3\2\2\28\66\3\2\2")
-        buf.write(u"\289\3\2\2\29A\3\2\2\2:8\3\2\2\2;<\7\30\2\2<=\5\b\5\2")
-        buf.write(u"=>\7\30\2\2>?\7\31\2\2?B\3\2\2\2@B\5\b\5\2A;\3\2\2\2")
-        buf.write(u"A@\3\2\2\2BE\3\2\2\2CF\5\f\7\2DF\5\22\n\2EC\3\2\2\2E")
-        buf.write(u"D\3\2\2\2FK\3\2\2\2GH\7\31\2\2HJ\5\"\22\2IG\3\2\2\2J")
-        buf.write(u"M\3\2\2\2KI\3\2\2\2KL\3\2\2\2LQ\3\2\2\2MK\3\2\2\2NP\7")
-        buf.write(u"\32\2\2ON\3\2\2\2PS\3\2\2\2QO\3\2\2\2QR\3\2\2\2R\3\3")
-        buf.write(u"\2\2\2SQ\3\2\2\2TU\7\33\2\2UV\7\31\2\2V\5\3\2\2\2WY\t")
-        buf.write(u"\2\2\2XW\3\2\2\2YZ\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[\7\3\2")
-        buf.write(u"\2\2\\^\t\3\2\2]\\\3\2\2\2^_\3\2\2\2_]\3\2\2\2_`\3\2")
-        buf.write(u"\2\2`\t\3\2\2\2ab\7\26\2\2bc\7\31\2\2c\13\3\2\2\2de\5")
-        buf.write(u"\n\6\2ef\5\16\b\2f\r\3\2\2\2gh\7\27\2\2h\17\3\2\2\2i")
-        buf.write(u"j\7\23\2\2jk\7\31\2\2k\21\3\2\2\2lm\5\n\6\2mn\5\20\t")
-        buf.write(u"\2no\5\24\13\2op\5\26\f\2pq\5\30\r\2qx\5\32\16\2rs\7")
-        buf.write(u"\31\2\2st\5\34\17\2tu\5\36\20\2uw\3\2\2\2vr\3\2\2\2w")
-        buf.write(u"z\3\2\2\2xv\3\2\2\2xy\3\2\2\2y\23\3\2\2\2zx\3\2\2\2{")
-        buf.write(u"|\7\33\2\2|}\7\31\2\2}\25\3\2\2\2~\177\7\27\2\2\177\u0080")
-        buf.write(u"\7\31\2\2\u0080\27\3\2\2\2\u0081\u0082\7\24\2\2\u0082")
-        buf.write(u"\u0083\7\31\2\2\u0083\31\3\2\2\2\u0084\u0085\7\27\2\2")
-        buf.write(u"\u0085\33\3\2\2\2\u0086\u0087\7\25\2\2\u0087\u0088\7")
-        buf.write(u"\31\2\2\u0088\35\3\2\2\2\u0089\u008a\7\34\2\2\u008a\37")
-        buf.write(u"\3\2\2\2\u008b\u008c\7\16\2\2\u008c\u008d\7\31\2\2\u008d")
-        buf.write(u"!\3\2\2\2\u008e\u008f\5 \21\2\u008f\u0095\5$\23\2\u0090")
-        buf.write(u"\u0091\5&\24\2\u0091\u0092\5$\23\2\u0092\u0094\3\2\2")
-        buf.write(u"\2\u0093\u0090\3\2\2\2\u0094\u0097\3\2\2\2\u0095\u0093")
-        buf.write(u"\3\2\2\2\u0095\u0096\3\2\2\2\u0096#\3\2\2\2\u0097\u0095")
-        buf.write(u"\3\2\2\2\u0098\u0099\5,\27\2\u0099\u009a\5(\25\2\u009a")
-        buf.write(u"\u009b\5.\30\2\u009b%\3\2\2\2\u009c\u009d\t\4\2\2\u009d")
-        buf.write(u"\u009e\7\31\2\2\u009e\'\3\2\2\2\u009f\u00a0\t\5\2\2\u00a0")
-        buf.write(u"\u00a1\7\31\2\2\u00a1)\3\2\2\2\u00a2\u00a3\t\6\2\2\u00a3")
-        buf.write(u"\u00a4\7\31\2\2\u00a4+\3\2\2\2\u00a5\u00a6\7\33\2\2\u00a6")
-        buf.write(u"\u00a7\7\31\2\2\u00a7-\3\2\2\2\u00a8\u00ae\5\60\31\2")
-        buf.write(u"\u00a9\u00aa\5*\26\2\u00aa\u00ab\5\60\31\2\u00ab\u00ad")
-        buf.write(u"\3\2\2\2\u00ac\u00a9\3\2\2\2\u00ad\u00b0\3\2\2\2\u00ae")
-        buf.write(u"\u00ac\3\2\2\2\u00ae\u00af\3\2\2\2\u00af/\3\2\2\2\u00b0")
-        buf.write(u"\u00ae\3\2\2\2\u00b1\u00b3\t\7\2\2\u00b2\u00b1\3\2\2")
-        buf.write(u"\2\u00b3\u00b4\3\2\2\2\u00b4\u00b2\3\2\2\2\u00b4\u00b5")
-        buf.write(u"\3\2\2\2\u00b5\61\3\2\2\2\r8AEKQZ_x\u0095\u00ae\u00b4")
+        buf.write(u"\30\t\30\3\2\3\2\3\2\3\2\7\2\65\n\2\f\2\16\28\13\2\3")
+        buf.write(u"\2\3\2\3\2\3\2\3\2\3\2\5\2@\n\2\3\2\3\2\3\2\5\2E\n\2")
+        buf.write(u"\3\2\3\2\7\2I\n\2\f\2\16\2L\13\2\3\2\7\2O\n\2\f\2\16")
+        buf.write(u"\2R\13\2\3\3\3\3\3\3\3\4\6\4X\n\4\r\4\16\4Y\3\5\6\5]")
+        buf.write(u"\n\5\r\5\16\5^\3\6\3\6\3\6\3\7\3\7\3\b\3\b\3\b\3\t\3")
+        buf.write(u"\t\3\t\3\t\3\t\3\t\3\t\3\t\3\t\7\tr\n\t\f\t\16\tu\13")
+        buf.write(u"\t\3\n\3\n\3\n\3\13\3\13\3\13\3\f\3\f\3\f\3\r\3\r\3\16")
+        buf.write(u"\3\16\3\16\3\17\6\17\u0086\n\17\r\17\16\17\u0087\3\20")
+        buf.write(u"\3\20\3\20\3\21\3\21\3\21\3\21\3\21\7\21\u0092\n\21\f")
+        buf.write(u"\21\16\21\u0095\13\21\3\22\3\22\3\22\3\22\3\23\3\23\3")
+        buf.write(u"\23\3\24\3\24\3\24\3\25\3\25\3\25\3\26\3\26\3\26\3\27")
+        buf.write(u"\3\27\3\27\3\27\7\27\u00ab\n\27\f\27\16\27\u00ae\13\27")
+        buf.write(u"\3\30\6\30\u00b1\n\30\r\30\16\30\u00b2\3\30\2\2\31\2")
+        buf.write(u"\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\2\t\4")
+        buf.write(u"\2\3\4\34\34\5\2\3\13\32\32\34\34\b\2\3\3\7\7\t\t\f\f")
+        buf.write(u"\30\30\34\34\4\2\n\n\20\20\3\2\21\22\4\2\n\n\23\23\t")
+        buf.write(u"\2\3\3\5\5\7\13\r\16\30\30\32\32\34\34\2\u00a9\2\60\3")
+        buf.write(u"\2\2\2\4S\3\2\2\2\6W\3\2\2\2\b\\\3\2\2\2\n`\3\2\2\2\f")
+        buf.write(u"c\3\2\2\2\16e\3\2\2\2\20h\3\2\2\2\22v\3\2\2\2\24y\3\2")
+        buf.write(u"\2\2\26|\3\2\2\2\30\177\3\2\2\2\32\u0081\3\2\2\2\34\u0085")
+        buf.write(u"\3\2\2\2\36\u0089\3\2\2\2 \u008c\3\2\2\2\"\u0096\3\2")
+        buf.write(u"\2\2$\u009a\3\2\2\2&\u009d\3\2\2\2(\u00a0\3\2\2\2*\u00a3")
+        buf.write(u"\3\2\2\2,\u00a6\3\2\2\2.\u00b0\3\2\2\2\60\66\5\4\3\2")
+        buf.write(u"\61\62\5\6\4\2\62\63\7\3\2\2\63\65\3\2\2\2\64\61\3\2")
+        buf.write(u"\2\2\658\3\2\2\2\66\64\3\2\2\2\66\67\3\2\2\2\67?\3\2")
+        buf.write(u"\2\28\66\3\2\2\29:\7\31\2\2:;\5\b\5\2;<\7\31\2\2<=\7")
+        buf.write(u"\32\2\2=@\3\2\2\2>@\5\b\5\2?9\3\2\2\2?>\3\2\2\2@A\3\2")
+        buf.write(u"\2\2AD\5\n\6\2BE\5\f\7\2CE\5\20\t\2DB\3\2\2\2DC\3\2\2")
+        buf.write(u"\2EJ\3\2\2\2FG\7\32\2\2GI\5 \21\2HF\3\2\2\2IL\3\2\2\2")
+        buf.write(u"JH\3\2\2\2JK\3\2\2\2KP\3\2\2\2LJ\3\2\2\2MO\7\33\2\2N")
+        buf.write(u"M\3\2\2\2OR\3\2\2\2PN\3\2\2\2PQ\3\2\2\2Q\3\3\2\2\2RP")
+        buf.write(u"\3\2\2\2ST\7\34\2\2TU\7\32\2\2U\5\3\2\2\2VX\t\2\2\2W")
+        buf.write(u"V\3\2\2\2XY\3\2\2\2YW\3\2\2\2YZ\3\2\2\2Z\7\3\2\2\2[]")
+        buf.write(u"\t\3\2\2\\[\3\2\2\2]^\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_\t")
+        buf.write(u"\3\2\2\2`a\7\27\2\2ab\7\32\2\2b\13\3\2\2\2cd\7\30\2\2")
+        buf.write(u"d\r\3\2\2\2ef\7\24\2\2fg\7\32\2\2g\17\3\2\2\2hi\5\16")
+        buf.write(u"\b\2ij\5\22\n\2jk\5\24\13\2kl\5\26\f\2ls\5\30\r\2mn\7")
+        buf.write(u"\32\2\2no\5\32\16\2op\5\34\17\2pr\3\2\2\2qm\3\2\2\2r")
+        buf.write(u"u\3\2\2\2sq\3\2\2\2st\3\2\2\2t\21\3\2\2\2us\3\2\2\2v")
+        buf.write(u"w\7\34\2\2wx\7\32\2\2x\23\3\2\2\2yz\7\30\2\2z{\7\32\2")
+        buf.write(u"\2{\25\3\2\2\2|}\7\25\2\2}~\7\32\2\2~\27\3\2\2\2\177")
+        buf.write(u"\u0080\7\30\2\2\u0080\31\3\2\2\2\u0081\u0082\7\26\2\2")
+        buf.write(u"\u0082\u0083\7\32\2\2\u0083\33\3\2\2\2\u0084\u0086\t")
+        buf.write(u"\4\2\2\u0085\u0084\3\2\2\2\u0086\u0087\3\2\2\2\u0087")
+        buf.write(u"\u0085\3\2\2\2\u0087\u0088\3\2\2\2\u0088\35\3\2\2\2\u0089")
+        buf.write(u"\u008a\7\17\2\2\u008a\u008b\7\32\2\2\u008b\37\3\2\2\2")
+        buf.write(u"\u008c\u008d\5\36\20\2\u008d\u0093\5\"\22\2\u008e\u008f")
+        buf.write(u"\5$\23\2\u008f\u0090\5\"\22\2\u0090\u0092\3\2\2\2\u0091")
+        buf.write(u"\u008e\3\2\2\2\u0092\u0095\3\2\2\2\u0093\u0091\3\2\2")
+        buf.write(u"\2\u0093\u0094\3\2\2\2\u0094!\3\2\2\2\u0095\u0093\3\2")
+        buf.write(u"\2\2\u0096\u0097\5*\26\2\u0097\u0098\5&\24\2\u0098\u0099")
+        buf.write(u"\5,\27\2\u0099#\3\2\2\2\u009a\u009b\t\5\2\2\u009b\u009c")
+        buf.write(u"\7\32\2\2\u009c%\3\2\2\2\u009d\u009e\t\6\2\2\u009e\u009f")
+        buf.write(u"\7\32\2\2\u009f\'\3\2\2\2\u00a0\u00a1\t\7\2\2\u00a1\u00a2")
+        buf.write(u"\7\32\2\2\u00a2)\3\2\2\2\u00a3\u00a4\7\34\2\2\u00a4\u00a5")
+        buf.write(u"\7\32\2\2\u00a5+\3\2\2\2\u00a6\u00ac\5.\30\2\u00a7\u00a8")
+        buf.write(u"\5(\25\2\u00a8\u00a9\5.\30\2\u00a9\u00ab\3\2\2\2\u00aa")
+        buf.write(u"\u00a7\3\2\2\2\u00ab\u00ae\3\2\2\2\u00ac\u00aa\3\2\2")
+        buf.write(u"\2\u00ac\u00ad\3\2\2\2\u00ad-\3\2\2\2\u00ae\u00ac\3\2")
+        buf.write(u"\2\2\u00af\u00b1\t\b\2\2\u00b0\u00af\3\2\2\2\u00b1\u00b2")
+        buf.write(u"\3\2\2\2\u00b2\u00b0\3\2\2\2\u00b2\u00b3\3\2\2\2\u00b3")
+        buf.write(u"/\3\2\2\2\16\66?DJPY^s\u0087\u0093\u00ac\u00b2")
         return buf.getvalue()
 
 
@@ -93,47 +94,45 @@ class MetricAlertConditionParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ u"<INVALID>", u"'.'", u"'/'", u"'_'", u"'\\'", u"':'", 
-                     u"'%'", u"'-'", u"','", u"'|'", u"'*'", u"'~'" ]
+                     u"'%'", u"'-'", u"','", u"'|'", u"'+'", u"'*'", u"'~'" ]
 
     symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
                       u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
                       u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"WHERE", u"AND", u"INCLUDES", u"EXCLUDES", u"OR", 
-                      u"DYNAMIC", u"OF", u"SINCE", u"OPERATOR", u"NUMBER", 
-                      u"QUOTE", u"WHITESPACE", u"NEWLINE", u"WORD", u"DATETIME" ]
+                      u"<INVALID>", u"WHERE", u"AND", u"INCLUDES", u"EXCLUDES", 
+                      u"OR", u"DYNAMIC", u"OF", u"SINCE", u"OPERATOR", u"NUMBER", 
+                      u"QUOTE", u"WHITESPACE", u"NEWLINE", u"WORD" ]
 
     RULE_expression = 0
     RULE_aggregation = 1
     RULE_namespace = 2
     RULE_metric = 3
     RULE_operator = 4
-    RULE_statics = 5
-    RULE_threshold = 6
-    RULE_dynamic = 7
-    RULE_dynamics = 8
-    RULE_dyn_sensitivity = 9
-    RULE_dyn_violations = 10
-    RULE_dyn_of_separator = 11
-    RULE_dyn_windows = 12
-    RULE_dyn_since_seperator = 13
-    RULE_dyn_datetime = 14
-    RULE_where = 15
-    RULE_dimensions = 16
-    RULE_dimension = 17
-    RULE_dim_separator = 18
-    RULE_dim_operator = 19
-    RULE_dim_val_separator = 20
-    RULE_dim_name = 21
-    RULE_dim_values = 22
-    RULE_dim_value = 23
+    RULE_threshold = 5
+    RULE_dynamic = 6
+    RULE_dynamics = 7
+    RULE_dyn_sensitivity = 8
+    RULE_dyn_violations = 9
+    RULE_dyn_of_separator = 10
+    RULE_dyn_windows = 11
+    RULE_dyn_since_seperator = 12
+    RULE_dyn_datetime = 13
+    RULE_where = 14
+    RULE_dimensions = 15
+    RULE_dimension = 16
+    RULE_dim_separator = 17
+    RULE_dim_operator = 18
+    RULE_dim_val_separator = 19
+    RULE_dim_name = 20
+    RULE_dim_values = 21
+    RULE_dim_value = 22
 
     ruleNames =  [ u"expression", u"aggregation", u"namespace", u"metric", 
-                   u"operator", u"statics", u"threshold", u"dynamic", u"dynamics", 
-                   u"dyn_sensitivity", u"dyn_violations", u"dyn_of_separator", 
-                   u"dyn_windows", u"dyn_since_seperator", u"dyn_datetime", 
-                   u"where", u"dimensions", u"dimension", u"dim_separator", 
-                   u"dim_operator", u"dim_val_separator", u"dim_name", u"dim_values", 
-                   u"dim_value" ]
+                   u"operator", u"threshold", u"dynamic", u"dynamics", u"dyn_sensitivity", 
+                   u"dyn_violations", u"dyn_of_separator", u"dyn_windows", 
+                   u"dyn_since_seperator", u"dyn_datetime", u"where", u"dimensions", 
+                   u"dimension", u"dim_separator", u"dim_operator", u"dim_val_separator", 
+                   u"dim_name", u"dim_values", u"dim_value" ]
 
     EOF = Token.EOF
     T__0=1
@@ -147,21 +146,21 @@ class MetricAlertConditionParser ( Parser ):
     T__8=9
     T__9=10
     T__10=11
-    WHERE=12
-    AND=13
-    INCLUDES=14
-    EXCLUDES=15
-    OR=16
-    DYNAMIC=17
-    OF=18
-    SINCE=19
-    OPERATOR=20
-    NUMBER=21
-    QUOTE=22
-    WHITESPACE=23
-    NEWLINE=24
-    WORD=25
-    DATETIME=26
+    T__11=12
+    WHERE=13
+    AND=14
+    INCLUDES=15
+    EXCLUDES=16
+    OR=17
+    DYNAMIC=18
+    OF=19
+    SINCE=20
+    OPERATOR=21
+    NUMBER=22
+    QUOTE=23
+    WHITESPACE=24
+    NEWLINE=25
+    WORD=26
 
     def __init__(self, input, output=sys.stdout):
         super(MetricAlertConditionParser, self).__init__(input, output=output)
@@ -182,6 +181,10 @@ class MetricAlertConditionParser ( Parser ):
             return self.getTypedRuleContext(MetricAlertConditionParser.AggregationContext,0)
 
 
+        def operator(self):
+            return self.getTypedRuleContext(MetricAlertConditionParser.OperatorContext,0)
+
+
         def QUOTE(self, i=None):
             if i is None:
                 return self.getTokens(MetricAlertConditionParser.QUOTE)
@@ -198,8 +201,8 @@ class MetricAlertConditionParser ( Parser ):
             else:
                 return self.getToken(MetricAlertConditionParser.WHITESPACE, i)
 
-        def statics(self):
-            return self.getTypedRuleContext(MetricAlertConditionParser.StaticsContext,0)
+        def threshold(self):
+            return self.getTypedRuleContext(MetricAlertConditionParser.ThresholdContext,0)
 
 
         def dynamics(self):
@@ -247,74 +250,76 @@ class MetricAlertConditionParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 48
+            self.state = 46
             self.aggregation()
-            self.state = 54
+            self.state = 52
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,0,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 49
+                    self.state = 47
                     self.namespace()
-                    self.state = 50
+                    self.state = 48
                     self.match(MetricAlertConditionParser.T__0) 
-                self.state = 56
+                self.state = 54
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,0,self._ctx)
 
-            self.state = 63
+            self.state = 61
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [MetricAlertConditionParser.QUOTE]:
+                self.state = 55
+                self.match(MetricAlertConditionParser.QUOTE)
+                self.state = 56
+                self.metric()
                 self.state = 57
                 self.match(MetricAlertConditionParser.QUOTE)
                 self.state = 58
-                self.metric()
-                self.state = 59
-                self.match(MetricAlertConditionParser.QUOTE)
-                self.state = 60
                 self.match(MetricAlertConditionParser.WHITESPACE)
                 pass
             elif token in [MetricAlertConditionParser.T__0, MetricAlertConditionParser.T__1, MetricAlertConditionParser.T__2, MetricAlertConditionParser.T__3, MetricAlertConditionParser.T__4, MetricAlertConditionParser.T__5, MetricAlertConditionParser.T__6, MetricAlertConditionParser.T__7, MetricAlertConditionParser.T__8, MetricAlertConditionParser.WHITESPACE, MetricAlertConditionParser.WORD]:
-                self.state = 62
+                self.state = 60
                 self.metric()
                 pass
             else:
                 raise NoViableAltException(self)
 
-            self.state = 67
+            self.state = 63
+            self.operator()
+            self.state = 66
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,2,self._ctx)
-            if la_ == 1:
-                self.state = 65
-                self.statics()
+            token = self._input.LA(1)
+            if token in [MetricAlertConditionParser.NUMBER]:
+                self.state = 64
+                self.threshold()
                 pass
-
-            elif la_ == 2:
-                self.state = 66
+            elif token in [MetricAlertConditionParser.DYNAMIC]:
+                self.state = 65
                 self.dynamics()
                 pass
+            else:
+                raise NoViableAltException(self)
 
-
-            self.state = 73
+            self.state = 72
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==MetricAlertConditionParser.WHITESPACE:
-                self.state = 69
+                self.state = 68
                 self.match(MetricAlertConditionParser.WHITESPACE)
-                self.state = 70
+                self.state = 69
                 self.dimensions()
-                self.state = 75
+                self.state = 74
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
-            self.state = 79
+            self.state = 78
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==MetricAlertConditionParser.NEWLINE:
-                self.state = 76
+                self.state = 75
                 self.match(MetricAlertConditionParser.NEWLINE)
-                self.state = 81
+                self.state = 80
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -359,9 +364,9 @@ class MetricAlertConditionParser ( Parser ):
         self.enterRule(localctx, 2, self.RULE_aggregation)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 82
+            self.state = 81
             self.match(MetricAlertConditionParser.WORD)
-            self.state = 83
+            self.state = 82
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -405,12 +410,12 @@ class MetricAlertConditionParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 86 
+            self.state = 85 
             self._errHandler.sync(self)
             _alt = 1
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt == 1:
-                    self.state = 85
+                    self.state = 84
                     _la = self._input.LA(1)
                     if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
@@ -420,7 +425,7 @@ class MetricAlertConditionParser ( Parser ):
 
                 else:
                     raise NoViableAltException(self)
-                self.state = 88 
+                self.state = 87 
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,5,self._ctx)
 
@@ -472,18 +477,18 @@ class MetricAlertConditionParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 91 
+            self.state = 90 
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while True:
-                self.state = 90
+                self.state = 89
                 _la = self._input.LA(1)
                 if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 93 
+                self.state = 92 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
                 if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__1) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__3) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
@@ -530,57 +535,10 @@ class MetricAlertConditionParser ( Parser ):
         self.enterRule(localctx, 8, self.RULE_operator)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 95
+            self.state = 94
             self.match(MetricAlertConditionParser.OPERATOR)
-            self.state = 96
+            self.state = 95
             self.match(MetricAlertConditionParser.WHITESPACE)
-        except RecognitionException as re:
-            localctx.exception = re
-            self._errHandler.reportError(self, re)
-            self._errHandler.recover(self, re)
-        finally:
-            self.exitRule()
-        return localctx
-
-
-    class StaticsContext(ParserRuleContext):
-
-        def __init__(self, parser, parent=None, invokingState=-1):
-            super(MetricAlertConditionParser.StaticsContext, self).__init__(parent, invokingState)
-            self.parser = parser
-
-        def operator(self):
-            return self.getTypedRuleContext(MetricAlertConditionParser.OperatorContext,0)
-
-
-        def threshold(self):
-            return self.getTypedRuleContext(MetricAlertConditionParser.ThresholdContext,0)
-
-
-        def getRuleIndex(self):
-            return MetricAlertConditionParser.RULE_statics
-
-        def enterRule(self, listener):
-            if hasattr(listener, "enterStatics"):
-                listener.enterStatics(self)
-
-        def exitRule(self, listener):
-            if hasattr(listener, "exitStatics"):
-                listener.exitStatics(self)
-
-
-
-
-    def statics(self):
-
-        localctx = MetricAlertConditionParser.StaticsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 10, self.RULE_statics)
-        try:
-            self.enterOuterAlt(localctx, 1)
-            self.state = 98
-            self.operator()
-            self.state = 99
-            self.threshold()
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -616,10 +574,10 @@ class MetricAlertConditionParser ( Parser ):
     def threshold(self):
 
         localctx = MetricAlertConditionParser.ThresholdContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 12, self.RULE_threshold)
+        self.enterRule(localctx, 10, self.RULE_threshold)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 101
+            self.state = 97
             self.match(MetricAlertConditionParser.NUMBER)
         except RecognitionException as re:
             localctx.exception = re
@@ -659,12 +617,12 @@ class MetricAlertConditionParser ( Parser ):
     def dynamic(self):
 
         localctx = MetricAlertConditionParser.DynamicContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 14, self.RULE_dynamic)
+        self.enterRule(localctx, 12, self.RULE_dynamic)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 103
+            self.state = 99
             self.match(MetricAlertConditionParser.DYNAMIC)
-            self.state = 104
+            self.state = 100
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -680,10 +638,6 @@ class MetricAlertConditionParser ( Parser ):
         def __init__(self, parser, parent=None, invokingState=-1):
             super(MetricAlertConditionParser.DynamicsContext, self).__init__(parent, invokingState)
             self.parser = parser
-
-        def operator(self):
-            return self.getTypedRuleContext(MetricAlertConditionParser.OperatorContext,0)
-
 
         def dynamic(self):
             return self.getTypedRuleContext(MetricAlertConditionParser.DynamicContext,0)
@@ -742,33 +696,31 @@ class MetricAlertConditionParser ( Parser ):
     def dynamics(self):
 
         localctx = MetricAlertConditionParser.DynamicsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 16, self.RULE_dynamics)
+        self.enterRule(localctx, 14, self.RULE_dynamics)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 106
-            self.operator()
-            self.state = 107
+            self.state = 102
             self.dynamic()
-            self.state = 108
+            self.state = 103
             self.dyn_sensitivity()
-            self.state = 109
+            self.state = 104
             self.dyn_violations()
-            self.state = 110
+            self.state = 105
             self.dyn_of_separator()
-            self.state = 111
+            self.state = 106
             self.dyn_windows()
-            self.state = 118
+            self.state = 113
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 112
+                    self.state = 107
                     self.match(MetricAlertConditionParser.WHITESPACE)
-                    self.state = 113
+                    self.state = 108
                     self.dyn_since_seperator()
-                    self.state = 114
+                    self.state = 109
                     self.dyn_datetime() 
-                self.state = 120
+                self.state = 115
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,7,self._ctx)
 
@@ -810,12 +762,12 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_sensitivity(self):
 
         localctx = MetricAlertConditionParser.Dyn_sensitivityContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 18, self.RULE_dyn_sensitivity)
+        self.enterRule(localctx, 16, self.RULE_dyn_sensitivity)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 121
+            self.state = 116
             self.match(MetricAlertConditionParser.WORD)
-            self.state = 122
+            self.state = 117
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -855,12 +807,12 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_violations(self):
 
         localctx = MetricAlertConditionParser.Dyn_violationsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 20, self.RULE_dyn_violations)
+        self.enterRule(localctx, 18, self.RULE_dyn_violations)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 124
+            self.state = 119
             self.match(MetricAlertConditionParser.NUMBER)
-            self.state = 125
+            self.state = 120
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -900,12 +852,12 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_of_separator(self):
 
         localctx = MetricAlertConditionParser.Dyn_of_separatorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 22, self.RULE_dyn_of_separator)
+        self.enterRule(localctx, 20, self.RULE_dyn_of_separator)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 127
+            self.state = 122
             self.match(MetricAlertConditionParser.OF)
-            self.state = 128
+            self.state = 123
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -942,10 +894,10 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_windows(self):
 
         localctx = MetricAlertConditionParser.Dyn_windowsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 24, self.RULE_dyn_windows)
+        self.enterRule(localctx, 22, self.RULE_dyn_windows)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 130
+            self.state = 125
             self.match(MetricAlertConditionParser.NUMBER)
         except RecognitionException as re:
             localctx.exception = re
@@ -985,12 +937,12 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_since_seperator(self):
 
         localctx = MetricAlertConditionParser.Dyn_since_seperatorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 26, self.RULE_dyn_since_seperator)
+        self.enterRule(localctx, 24, self.RULE_dyn_since_seperator)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 132
+            self.state = 127
             self.match(MetricAlertConditionParser.SINCE)
-            self.state = 133
+            self.state = 128
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1007,8 +959,17 @@ class MetricAlertConditionParser ( Parser ):
             super(MetricAlertConditionParser.Dyn_datetimeContext, self).__init__(parent, invokingState)
             self.parser = parser
 
-        def DATETIME(self):
-            return self.getToken(MetricAlertConditionParser.DATETIME, 0)
+        def NUMBER(self, i=None):
+            if i is None:
+                return self.getTokens(MetricAlertConditionParser.NUMBER)
+            else:
+                return self.getToken(MetricAlertConditionParser.NUMBER, i)
+
+        def WORD(self, i=None):
+            if i is None:
+                return self.getTokens(MetricAlertConditionParser.WORD)
+            else:
+                return self.getToken(MetricAlertConditionParser.WORD, i)
 
         def getRuleIndex(self):
             return MetricAlertConditionParser.RULE_dyn_datetime
@@ -1027,11 +988,27 @@ class MetricAlertConditionParser ( Parser ):
     def dyn_datetime(self):
 
         localctx = MetricAlertConditionParser.Dyn_datetimeContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 28, self.RULE_dyn_datetime)
+        self.enterRule(localctx, 26, self.RULE_dyn_datetime)
+        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 135
-            self.match(MetricAlertConditionParser.DATETIME)
+            self.state = 131 
+            self._errHandler.sync(self)
+            _la = self._input.LA(1)
+            while True:
+                self.state = 130
+                _la = self._input.LA(1)
+                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    self._errHandler.recoverInline(self)
+                else:
+                    self._errHandler.reportMatch(self)
+                    self.consume()
+                self.state = 133 
+                self._errHandler.sync(self)
+                _la = self._input.LA(1)
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    break
+
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1070,12 +1047,12 @@ class MetricAlertConditionParser ( Parser ):
     def where(self):
 
         localctx = MetricAlertConditionParser.WhereContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 30, self.RULE_where)
+        self.enterRule(localctx, 28, self.RULE_where)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 137
+            self.state = 135
             self.match(MetricAlertConditionParser.WHERE)
-            self.state = 138
+            self.state = 136
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1127,23 +1104,23 @@ class MetricAlertConditionParser ( Parser ):
     def dimensions(self):
 
         localctx = MetricAlertConditionParser.DimensionsContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 32, self.RULE_dimensions)
+        self.enterRule(localctx, 30, self.RULE_dimensions)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 140
+            self.state = 138
             self.where()
-            self.state = 141
+            self.state = 139
             self.dimension()
-            self.state = 147
+            self.state = 145
             self._errHandler.sync(self)
             _la = self._input.LA(1)
             while _la==MetricAlertConditionParser.T__7 or _la==MetricAlertConditionParser.AND:
-                self.state = 142
+                self.state = 140
                 self.dim_separator()
-                self.state = 143
+                self.state = 141
                 self.dimension()
-                self.state = 149
+                self.state = 147
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
 
@@ -1191,14 +1168,14 @@ class MetricAlertConditionParser ( Parser ):
     def dimension(self):
 
         localctx = MetricAlertConditionParser.DimensionContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 34, self.RULE_dimension)
+        self.enterRule(localctx, 32, self.RULE_dimension)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 150
+            self.state = 148
             self.dim_name()
-            self.state = 151
+            self.state = 149
             self.dim_operator()
-            self.state = 152
+            self.state = 150
             self.dim_values()
         except RecognitionException as re:
             localctx.exception = re
@@ -1238,18 +1215,18 @@ class MetricAlertConditionParser ( Parser ):
     def dim_separator(self):
 
         localctx = MetricAlertConditionParser.Dim_separatorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 36, self.RULE_dim_separator)
+        self.enterRule(localctx, 34, self.RULE_dim_separator)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 154
+            self.state = 152
             _la = self._input.LA(1)
             if not(_la==MetricAlertConditionParser.T__7 or _la==MetricAlertConditionParser.AND):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 155
+            self.state = 153
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1292,18 +1269,18 @@ class MetricAlertConditionParser ( Parser ):
     def dim_operator(self):
 
         localctx = MetricAlertConditionParser.Dim_operatorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 38, self.RULE_dim_operator)
+        self.enterRule(localctx, 36, self.RULE_dim_operator)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 157
+            self.state = 155
             _la = self._input.LA(1)
             if not(_la==MetricAlertConditionParser.INCLUDES or _la==MetricAlertConditionParser.EXCLUDES):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 158
+            self.state = 156
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1343,18 +1320,18 @@ class MetricAlertConditionParser ( Parser ):
     def dim_val_separator(self):
 
         localctx = MetricAlertConditionParser.Dim_val_separatorContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 40, self.RULE_dim_val_separator)
+        self.enterRule(localctx, 38, self.RULE_dim_val_separator)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 160
+            self.state = 158
             _la = self._input.LA(1)
             if not(_la==MetricAlertConditionParser.T__7 or _la==MetricAlertConditionParser.OR):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
                 self.consume()
-            self.state = 161
+            self.state = 159
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1394,12 +1371,12 @@ class MetricAlertConditionParser ( Parser ):
     def dim_name(self):
 
         localctx = MetricAlertConditionParser.Dim_nameContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 42, self.RULE_dim_name)
+        self.enterRule(localctx, 40, self.RULE_dim_name)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 163
+            self.state = 161
             self.match(MetricAlertConditionParser.WORD)
-            self.state = 164
+            self.state = 162
             self.match(MetricAlertConditionParser.WHITESPACE)
         except RecognitionException as re:
             localctx.exception = re
@@ -1447,23 +1424,23 @@ class MetricAlertConditionParser ( Parser ):
     def dim_values(self):
 
         localctx = MetricAlertConditionParser.Dim_valuesContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 44, self.RULE_dim_values)
+        self.enterRule(localctx, 42, self.RULE_dim_values)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 166
+            self.state = 164
             self.dim_value()
-            self.state = 172
+            self.state = 170
             self._errHandler.sync(self)
-            _alt = self._interp.adaptivePredict(self._input,9,self._ctx)
+            _alt = self._interp.adaptivePredict(self._input,10,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt==1:
-                    self.state = 167
+                    self.state = 165
                     self.dim_val_separator()
-                    self.state = 168
+                    self.state = 166
                     self.dim_value() 
-                self.state = 174
+                self.state = 172
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,9,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,10,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
@@ -1515,18 +1492,18 @@ class MetricAlertConditionParser ( Parser ):
     def dim_value(self):
 
         localctx = MetricAlertConditionParser.Dim_valueContext(self, self._ctx, self.state)
-        self.enterRule(localctx, 46, self.RULE_dim_value)
+        self.enterRule(localctx, 44, self.RULE_dim_value)
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 176 
+            self.state = 174 
             self._errHandler.sync(self)
             _alt = 1
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
                 if _alt == 1:
-                    self.state = 175
+                    self.state = 173
                     _la = self._input.LA(1)
-                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__9) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
+                    if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << MetricAlertConditionParser.T__0) | (1 << MetricAlertConditionParser.T__2) | (1 << MetricAlertConditionParser.T__4) | (1 << MetricAlertConditionParser.T__5) | (1 << MetricAlertConditionParser.T__6) | (1 << MetricAlertConditionParser.T__7) | (1 << MetricAlertConditionParser.T__8) | (1 << MetricAlertConditionParser.T__10) | (1 << MetricAlertConditionParser.T__11) | (1 << MetricAlertConditionParser.NUMBER) | (1 << MetricAlertConditionParser.WHITESPACE) | (1 << MetricAlertConditionParser.WORD))) != 0)):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -1534,9 +1511,9 @@ class MetricAlertConditionParser ( Parser ):
 
                 else:
                     raise NoViableAltException(self)
-                self.state = 178 
+                self.state = 176 
                 self._errHandler.sync(self)
-                _alt = self._interp.adaptivePredict(self._input,10,self._ctx)
+                _alt = self._interp.adaptivePredict(self._input,11,self._ctx)
 
         except RecognitionException as re:
             localctx.exception = re
