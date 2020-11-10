@@ -974,16 +974,18 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller().begin()
+        self.cli_ctx.get_progress_controller(det=True).begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
         telemetry.poll_start()
         poll_flag = False
+        num = 0
+        total = 20
         while not poller.done():
             poll_flag = True
-            self.cli_ctx.get_progress_controller().add(message='Running')
+
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -1001,7 +1003,9 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
+                self.cli_ctx.get_progress_controller(det=True).add(message='In Progress', value=num, total_val=total)
                 self._delay()
+                num += 1
             except KeyboardInterrupt:
                 self.cli_ctx.get_progress_controller().stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
@@ -1014,9 +1018,11 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             self.cli_ctx.get_progress_controller().stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller().end()
+        self.cli_ctx.get_progress_controller(det=True).add(message='Done', value=total, total_val=total)
+        self.cli_ctx.get_progress_controller(det=True).end()
         if poll_flag:
             telemetry.poll_end()
+
         return result
 
 
