@@ -122,7 +122,7 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
                                   ignore_data_before=None):
     if metric_namespace:
         metric_namespace += '.'
-    condition = '{} {}"{}" {} '.format(aggregation, metric_namespace, metric_name, operator)
+    condition = "{} {}'{}' {} ".format(aggregation, metric_namespace, metric_name, operator)
     if condition_type == 'static':
         condition += '{} '.format(threshold)
     elif condition_type == 'dynamic':
@@ -135,8 +135,10 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
         raise NotImplementedError()
 
     if dimension_list:
-        dimension_list = dimension_list.split(_metric_alert_dimension_prefix)
-        dimensions = 'where' + 'and'.join(dimension_list)
+        dimensions = ' '.join(dimension_list)
+        if dimensions.startswith(_metric_alert_dimension_prefix):
+            dimensions = [t for t in dimensions.split(_metric_alert_dimension_prefix) if t]
+            dimensions = 'where' + 'and'.join(dimensions)
         condition += dimensions
 
     return condition

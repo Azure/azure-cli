@@ -146,7 +146,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
         c.argument('dimension_name', type=str, options_list=['--name', '-n'],
                    help='Name of the dimension.')
-        c.argument('operator', arg_type=get_enum_type(dim_op_conversion.values()))
+        c.argument('operator', options_list=['--operator', '-op'], arg_type=get_enum_type(dim_op_conversion.values()))
         c.argument('value_list', type=str, options_list=['--value', '-v'], nargs='+',
                    help='The values to apply on the operation.')
 
@@ -157,7 +157,7 @@ def load_arguments(self, _):
                    help='Name of metric.')
         c.argument('metric_namespace', options_list=['--namespace'],
                    help='Namespace of metric.')
-        c.argument('dimension_list', options_list=['--dimension'], type=str,
+        c.argument('dimension_list', options_list=['--dimension'], type=str, nargs='+',
                    help='Dimension created by \'az monitor metrics alert dimension create\'.')
         c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()))
         c.argument('operator', options_list=['--operator', '-op'], arg_type=get_enum_type(op_conversion.values()),
@@ -166,14 +166,14 @@ def load_arguments(self, _):
         c.argument('threshold', type=float,
                    help='Static threshold value.')
         c.argument('alert_sensitivity', options_list=['--sensitivity'],
-                   arg_type=get_enum_type(sens_conversion.values()),
+                   arg_type=get_enum_type(sens_conversion.values(), default='Medium'),
                    help="Alert sensitivity for dynamic threshold.")
         c.argument('number_of_evaluation_periods', options_list=['--window'], type=int,
                    help='Window can be the number of aggregated lookback windows for dynamic threshold. '
                         'Range: 1-6.')
         c.argument('min_failing_periods_to_alert', options_list=['--violation'], type=int,
                    help='Violation can be the number of violations to trigger an alert. '
-                        'Range: 1-6. It should be smaller or equal to window.')
+                        'Range: 1-6. It should be less than or equal to window.')
         c.argument('ignore_data_before', options_list=['--since'], arg_type=get_datetime_type(
                     help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
 

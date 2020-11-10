@@ -1479,7 +1479,7 @@ short-summary: Build a metric alert rule dimension.
 examples:
   - name: Build a metric alert rule dimension.
     text: |
-         $dim = az monitor metrics alert dimension create -n dimName --operator Include --value GetBlob PutBlob
+         $dim = az monitor metrics alert dimension create -n dimName -op Include -v GetBlob PutBlob
 """
 
 helps['monitor metrics alert condition'] = """
@@ -1493,10 +1493,23 @@ short-summary: Build a metric alert rule condition.
 examples:
   - name: Build a static condition.
     text: |
-        $condition = az monitor metrics alert condition create -t static --aggregation Count --metric Percentage CPU -op GreaterThan  --threshold 95
+        $dim1 = az monitor metrics alert dimension create -n dimName -op Include -v GetBlob PutBlob
+        $dim2 = az monitor metrics alert dimension create -n Instance -op Exclude -v Get Put
+        $condition = az monitor metrics alert condition create -t static \n
+        --aggregation Count \n
+        --metric "Percentage CPU" \n
+        -op GreaterThan  \n
+        --threshold 95 \n
+        --dimension "$dim1" "$dim2"
   - name: Build a dynamic condition.
     text: |
-        $condition = az monitor metrics alert condition create -t dynamic --aggregation Average
+        $condition = az monitor metrics alert condition create -t dynamic \n
+        --aggregation Average \n
+        --metric "Percentage Cpu" \n
+        -op GreaterOrLessThan \n
+        --violation 4 \n
+        --window 4 \n
+        --since 2020-11-02T12:11
 """
 
 
