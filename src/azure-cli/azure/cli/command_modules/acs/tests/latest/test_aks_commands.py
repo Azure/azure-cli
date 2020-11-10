@@ -2123,7 +2123,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
             'location': resource_group_location,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'identity_resource_id': generate_user_assigned_identity_resource_id(resource_group),
+            'identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
             'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
         })
 
@@ -2240,5 +2240,5 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def generate_user_assigned_identity_resource_id(self, resource_group):
         identity_name = self.create_random_name('cli', 16)
-        identity = self.cmd('az identity create -g {} -n {}', resource_group, identity_name).get_output_in_json()
+        identity = self.cmd('az identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
         return identity.get("id")
