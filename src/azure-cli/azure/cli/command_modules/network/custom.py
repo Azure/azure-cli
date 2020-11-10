@@ -142,7 +142,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
                                sku=None,
-                               private_ip_address='', public_ip_address=None,
+                               private_ip_address=None, public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
