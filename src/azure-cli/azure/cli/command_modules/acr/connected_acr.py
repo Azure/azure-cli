@@ -44,7 +44,7 @@ def acr_connected_acr_create(cmd,
                              registry_name,
                              connected_acr_name,
                              repositories,
-                             client_token_ids,
+                             client_token_ids=None,
                              resource_group_name=None,
                              mode=None,
                              parent=None,
@@ -187,13 +187,27 @@ def acr_connected_acr_delete(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
-    #TODO disable tokens
+    #TODO disable tokens?
     user_confirmation("Are you sure you want to delete the Connected Registry '{}' from '{}'?".format(
         connected_acr_name, registry_name), yes)
     try:
         return client.delete(resource_group_name, registry_name, connected_acr_name)
     except ValidationError as e:
         raise CLIError(e)
+
+
+def acr_connected_acr_deactivate(cmd,
+                                 client,
+                                 connected_acr_name,
+                                 registry_name,
+                                 resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return client.deactivate(subscription_id=subscription_id,
+                             resource_group_name=resource_group_name,
+                             registry_name=registry_name,
+                             connected_registry_name=connected_acr_name)
 
 
 def acr_connected_acr_list(cmd,
@@ -204,8 +218,38 @@ def acr_connected_acr_list(cmd,
                            resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    #TODO Cascading logic and different formattings.
-    return client.list(resource_group_name, registry_name)
+    connected_acr_list = client.list(resource_group_name, registry_name)
+
+    if not cascading:
+        if parent:
+            result = [registry for registry in connected_acr_list if registry.parent.id.endswith(parent)]
+        else:
+            result = [registry for registry in connected_acr_list if not registry.parent.id]
+    elif parent:
+        family_tree = {}
+        for registry in connected_acr_list:
+            family_tree[registry.id] = {
+                "registry": registry,
+                "childs": []
+            }
+            if registry.name == parent:
+                parent_id = registry.id
+        for registry in connected_acr_list:
+            parent_id = registry.parent.id
+            if not parent_id.isspace():
+                family_tree[parent_id]["childs"].append(registry.id)
+
+        result = _get_descendancy(family_tree, parent_id)
+    return result
+
+
+def _get_descendancy(family_tree, parent_id):
+    connected_registry = family_tree[parent_id]["registry"]
+    childs = connected_registry[parent_id]['childs']
+    result = [connected_registry]
+    for child_id in childs:
+        result.extend(_get_descendancy(family_tree, child_id))
+    return result
 
 
 def acr_connected_acr_show(cmd,
@@ -216,6 +260,21 @@ def acr_connected_acr_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     return client.get(resource_group_name, registry_name, connected_acr_name)
+
+
+def acr_connected_acr_list_client_tokens(cmd,
+                                         client,
+                                         connected_acr_name,
+                                         registry_name,
+                                         resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    current_connected_acr = acr_connected_acr_show(cmd, client, connected_acr_name, registry_name, resource_group_name)
+    result = []
+    for token_id in current_connected_acr.client_token_ids:
+        token = get_token_from_id(cmd, token_id)
+        result.append(token)
+    return result
 
 
 def _create_sync_token(cmd,
@@ -233,10 +292,11 @@ def _create_sync_token(cmd,
     gateway_actions_list = [[connected_acr_name] + DEFAULT_GATEWAY_SCOPE]
 
     try:
+        message = "Created by connected registry sync token: {}"
         scope_map_id = create_default_scope_map(cmd, resource_group_name, registry_name,
                                                 SYNC_SCOPE_MAP_NAME.format(connected_acr_name),
                                                 repository_actions_list, gateway_actions_list,
-                                                "Created by connected registry: {}".format(connected_acr_name))
+                                                message.format(connected_acr_name))
 
         Token = cmd.get_models('Token')
         poller = token_client.create(

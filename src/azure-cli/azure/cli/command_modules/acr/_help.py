@@ -1257,6 +1257,15 @@ examples:
         az acr connected-acr list --registry mycloudregistry --parent Contoso-Edge01-in-Wichita --output table
 """
 
+helps['acr connected-acr list-client-tokens'] = """
+type: command
+short-summary: Lists all the connected registries under the current parent registry.
+examples:
+  - name: Lists all client tokens of 'Contoso-Mirror02-in-Witchita'.
+    text: >
+        az acr connected-acr list-client-tokens --registry mycloudregistry --name Contoso-Mirror02-in-Witchita
+"""
+
 helps['acr connected-acr show'] = """
 type: command
 short-summary: Show connected registry details.

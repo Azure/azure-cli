@@ -359,3 +359,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_connected_acr_show')
         g.command('update', 'acr_connected_acr_update')
         g.command('list', 'acr_connected_acr_list', table_transformer=connected_acr_list_output_format)
+        g.command('list-client-tokens', 'acr_connected_acr_list_client_tokens', table_transformer=token_output_format)
