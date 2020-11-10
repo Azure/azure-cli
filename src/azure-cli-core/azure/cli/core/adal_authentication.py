@@ -119,9 +119,13 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         except requests.exceptions.HTTPError as err:
             logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
-            raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                     'Get Token request returned http error: {}, reason: {}'
-                                     .format(err.response.status, err.response.reason))
+            try:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned http error: {}, reason: {}'
+                                         .format(err.response.status, err.response.reason))
+            except AttributeError:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned: {}'.format(err.response))
         except TimeoutError as err:
             logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
