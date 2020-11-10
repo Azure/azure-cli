@@ -124,3 +124,18 @@ def billing_policy_update_validator(namespace):
             "--account-name, --customer-name, [--view-charges] "
             "is valid"
         )
+
+
+def billing_permission_list_validator(namespace):
+    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+
+    if namespace.customer_name is not None:
+        if namespace.invoice_section_name is not None:
+            raise MutuallyExclusiveArgumentError(
+                "--customer-name can't be used with --invoice-section-name"
+            )
+
+        if namespace.profile_name is not None:
+            raise MutuallyExclusiveArgumentError(
+                "--customer-name can't be used with --profile-name"
+            )
