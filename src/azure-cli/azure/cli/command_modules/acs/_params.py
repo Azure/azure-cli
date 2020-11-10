@@ -255,8 +255,10 @@ def load_arguments(self, _):
         with self.argument_context('{} install-cli'.format(scope)) as c:
             c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+            c.argument('base_src_url', help='Base download source URL for kubectl releases.')
             c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
             c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
+            c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')

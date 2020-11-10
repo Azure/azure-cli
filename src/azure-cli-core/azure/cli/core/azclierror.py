@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 # Error types in AzureCLI are from different sources, and there are many general error types like CLIError, AzureError.
 # Besides, many error types with different names are actually showing the same kind of error.
-# For example, CloudError, CLIError and ValidtionError all could be a resource-not-found error.
+# For example, CloudError, CLIError and ValidationError all could be a resource-not-found error.
 # Therefore, here we define the new error classes to map and categorize all of the error types from different sources.
 
 
@@ -116,7 +116,7 @@ class RequiredArgumentMissingError(UserFault):
 
 
 class MutuallyExclusiveArgumentError(UserFault):
-    """ Arguments can not be specfied together. """
+    """ Arguments can not be specified together. """
     pass
 
 
@@ -128,7 +128,7 @@ class InvalidArgumentValueError(UserFault):
 class ArgumentParseError(UserFault):
     """ Fallback of the argument parsing related errors.
     Avoid using this class unless the error can not be classified
-    into the above Argument related error types. """
+    into the Argument related specific error types. """
     pass
 
 
@@ -161,7 +161,7 @@ class AzureInternalError(ServiceError):
 class AzureResponseError(UserFault):
     """ Fallback of the response related errors.
     Avoid using this class unless the error can not be classified
-    into the above Response related error types. """
+    into the Response related specific error types. """
     pass
 
 
@@ -175,27 +175,13 @@ class ClientRequestError(UserFault):
     """ Fallback of the request related errors. Error occurs while attempting
     to make a request to the service. No request is sent.
     Avoid using this class unless the error can not be classified
-    into the above Request related errors types. """
+    into the Request related specific errors types. """
     pass
 
 
-# Validation related error types
-class ValidationError(UserFault):
-    """ Fallback of the errors in validation functions.
-    Avoid using this class unless the error can not be classified into
-    the Argument, Request and Response related error types above. """
-    pass
-
-
+# File operation related error types
 class FileOperationError(UserFault):
-    """ File related errors which users should be responsible for.
-    For example, FileNotFoundError, PermissionError... """
-    pass
-
-
-# CLI internal error type
-class CLIInternalError(ClientError):
-    """ AzureCLI internal error """
+    """ For file or directory operation related errors. """
     pass
 
 
@@ -205,10 +191,19 @@ class ManualInterrupt(UserFault):
     pass
 
 
-# Unknow error type
+# Validation related error types
+class ValidationError(UserFault):
+    """ Fallback of the errors in validation functions.
+    Avoid using this class unless the error can not be classified into
+    the Argument, Request and Response related specific error types. """
+    pass
+
+
 class UnknownError(UserFault):
-    """ Reserved in core for the errors which can not be categorized into the error types above.
-    DO NOT raise this error class in your codes. """
+    """ Fallback of the UserFault related error types.
+    Avoid using this class unless the error can not be classified into
+    the UserFault related specific error types.
+    """
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         with CommandLoggerContext(logger):
@@ -218,5 +213,11 @@ class UnknownError(UserFault):
             if self.recommendations:
                 for recommendation in self.recommendations:
                     print(recommendation, file=sys.stderr)
+
+
+# CLI internal error type
+class CLIInternalError(ClientError):
+    """ AzureCLI internal error """
+    pass
 
 # endregion

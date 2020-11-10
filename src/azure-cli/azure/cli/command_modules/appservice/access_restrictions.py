@@ -34,7 +34,7 @@ def add_webapp_access_restriction(
         cmd, resource_group_name, name, priority, rule_name=None,
         action='Allow', ip_address=None, subnet=None,
         vnet_name=None, description=None, scm_site=False,
-        ignore_missing_vnet_service_endpoint=False, slot=None):
+        ignore_missing_vnet_service_endpoint=False, slot=None, vnet_resource_group=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
 
     if (ip_address and subnet) or (not ip_address and not subnet):
@@ -46,8 +46,9 @@ def add_webapp_access_restriction(
     access_rules = access_rules or []
 
     rule_instance = None
-    if subnet or vnet_name:
-        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+    if subnet:
+        vnet_rg = vnet_resource_group if vnet_resource_group else resource_group_name
+        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, vnet_rg)
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
 
@@ -94,7 +95,8 @@ def remove_webapp_access_restriction(cmd, resource_group_name, name, rule_name=N
                 break
 
     if rule_instance is None:
-        raise CLIError('No rule found with the specified criteria')
+        raise CLIError('No rule found with the specified criteria. '
+                       'If you are trying to remove a Deny rule, you must explicitly specify --action Deny')
 
     access_rules.remove(rule_instance)
 
@@ -133,7 +135,7 @@ def _validate_subnet(cli_ctx, subnet, vnet_name, resource_group_name):
             name=vnet_name,
             child_type_1='subnets',
             child_name_1=subnet)
-    raise CLIError('Usage error: --subnet ID | --subnet NAME --vnet-name NAME')
+    raise CLIError('Usage error: --subnet ID | --subnet NAME --vnet-name NAME [--vnet-resource-group]')
 
 
 def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
