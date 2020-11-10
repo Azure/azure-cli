@@ -25,7 +25,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 
 fabric_name = "Azure"
@@ -257,6 +257,9 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
 
 def show_protectable_instance(items, server_name, protectable_item_type):
+    if server_name is None:
+        raise RequiredArgumentMissingError("Server name missing. Please provide a valid server name.")
+
     protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Server Name filter
     filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
@@ -636,6 +639,14 @@ def _get_protected_item_instance(item_type):
 
 
 def _check_map(item_type, item_type_map):
+    if item_type is None:
+        if item_type_map == workload_type_map:
+            raise RequiredArgumentMissingError("Workload type missing. Please enter a valid workload type.")
+        if item_type_map == protectable_item_type_map:
+            raise RequiredArgumentMissingError("""
+            Protectable item type missing. Please enter a valid protectable item type.
+            """)
+        raise RequiredArgumentMissingError("Item type missing. Enter a valid item type.")
     if item_type_map.get(item_type) is not None:
         return item_type_map[item_type]
     error_text = "{} is an invalid argument.".format(item_type)

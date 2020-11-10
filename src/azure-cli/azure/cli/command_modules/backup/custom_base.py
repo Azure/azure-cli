@@ -197,6 +197,8 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
             container = show_container(cmd, container_client, container_name, resource_group_name, vault_name,
                                        "AzureWorkload")
             custom_help.validate_container(container)
+            if isinstance(container, list):
+                raise CLIError("Multiple containers with same Friendly Name found. Please give native names instead.")
             container_uri = container.name
     return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri)
 
@@ -274,7 +276,11 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
+    custom_help.validate_protectable_item(protectable_item)
+
     policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    custom_help.validate_policy(policy_object)
+
     return custom_wl.enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object,
                                                     protectable_item)
 
@@ -282,9 +288,13 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
 def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_name,
                              protectable_item_type, server_name, workload_type):
     policy_object = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
+    custom_help.validate_policy(policy_object)
+
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
+    custom_help.validate_protectable_item(protectable_item)
+
     return custom_wl.auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_object,
                                               protectable_item)
 
