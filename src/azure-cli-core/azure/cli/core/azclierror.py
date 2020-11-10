@@ -50,9 +50,8 @@ class AzCLIError(CLIError):
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         with CommandLoggerContext(logger):
-            # print error type and error message
-            message = '{}: {}'.format(self.__class__.__name__, self.error_msg)
-            logger.error(message)
+            # print the error message
+            logger.error(self.error_msg)
             # print exception trace if there is
             if self.exception_trace:
                 logger.exception(self.exception_trace)
