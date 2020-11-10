@@ -84,6 +84,53 @@ Microsoft Customer Agreement."
                az billing balance show --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
 """
 
+helps['billing instruction'] = """
+    type: group
+    short-summary: Manage billing instruction
+"""
+
+helps['billing instruction list'] = """
+    type: command
+    short-summary: "List the instructions by billing profile id."
+    examples:
+      - name: List instructions by billing profile
+        text: |-
+               az billing instruction list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+"""
+
+helps['billing instruction show'] = """
+    type: command
+    short-summary: "Show the instruction by name. These are custom billing instructions and are only applicable for \
+certain customers."
+    examples:
+      - name: Instruction
+        text: |-
+               az billing instruction show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--name "{instructionName}"
+"""
+
+helps['billing instruction create'] = """
+    type: command
+    short-summary: "Create an instruction. These are custom billing instructions and are only applicable \
+for certain customers."
+    examples:
+      - name: Create an instruction
+        text: |-
+               az billing instruction create --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{instructionName}" --amount 5000 --end-date "2020-12-30T21:26:47.997Z" --start-date \
+"2019-12-30T21:26:47.997Z"
+"""
+
+helps['billing instruction update'] = """
+    type: command
+    short-summary: "Update an instruction. These are custom billing instructions and are only applicable \
+for certain customers."
+    examples:
+      - name: Create an instruction
+        text: |-
+               az billing instruction update --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{instructionName}" --amount 5000
+"""
+
 helps['billing profile'] = """
     type: group
     short-summary: Manage billing profile of billing account
@@ -259,6 +306,30 @@ helps['billing invoice section wait'] = """
         text: |-
                az billing invoice section wait --account-name "{billingAccountName}" --profile-name \
 "{billingProfileName}" --name "{invoiceSectionName}" --updated
+"""
+
+helps['billing permission'] = """
+    type: group
+    short-summary: List billing permissions
+"""
+
+helps['billing permission list'] = """
+    type: command
+    short-summary: "List the billing permissions the caller has on a billing account."
+    examples:
+      - name: List permissions by billing account scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}"
+      - name: List permissions by billing profile scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+      - name: List permission by invoice section scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+      - name: List permissions by customer scope
+        text: |-
+               az billing permission list --account-name "{billingAccountName}" --customer-name "{customerName}"
 """
 
 helps['billing subscription'] = """
@@ -525,4 +596,111 @@ operation is supported only for billing accounts with agreement type Microsoft C
       - name: Update properties of a billing account
         text: |-
                az billing property update --cost-center "1010"
+"""
+
+helps['billing role-definition'] = """
+    type: group
+    short-summary: Display billing role-definition
+"""
+
+helps['billing role-definition list'] = """
+    type: command
+    short-summary: "List the role definitions for a billing account. The operation is supported for billing accounts \
+with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: Lists the role definitions for a billing account
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}"
+      - name: List the role definitions for a billing profile.
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+      - name: List the role definitions for an invoice section.
+        text: |-
+               az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing role-definition show'] = """
+  type: command
+  short-summary: Show the role definition details
+  examples:
+    - name: Show the definition for a role on a billing account. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+      text: |-
+             az billing role-definition show --account-name "{billingAccountName}" --name "{billingRoleDefinitionName}"
+    - name: Show the definition for a role on a billing profile. The operation is supported for billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+      text: |-
+             az billing role-definition show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleDefinitionName}"
+    - name: Show the definition for a role on an invoice section. The operation is supported only for billing accounts with agreement type Microsoft Customer Agreement
+      text: |-
+             az billing role-definition show --account-name "{billingAccountName}" --invoice-section-name "{invoiceSectionName}" --name "{billingRoleDefinitionName}"
+"""
+
+helps['billing role-assignment'] = """
+    type: group
+    short-summary: billing role-assignment
+"""
+
+helps['billing role-assignment list'] = """
+    type: command
+    short-summary: "List the role assignments for the caller on a billing account. The operation is supported for \
+billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: List role assignements by billing account scope
+        text: |-
+               az billing role-assignment list --account-name "{billingAccountName}"
+      - name: List role assignments by billing profile scope
+        text: |-
+               az billing role-assignment list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+      - name: List role assignments by invoice section scope
+        text: |-
+               az billing role-assignment list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing role-assignment show'] = """
+  type: command
+  short-summary: Show the role assignment detail for the caller within different scopes. The operation is supported for \
+billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement.
+  examples:
+    - name: Show a role assignment for the caller on a billing account
+      text: |-
+             az billing role-assignment show --account-name "{billingAccountName}" --name "{billingRoleAssignmentName}"
+    - name: Show a role assignment for the caller on a billing profile
+      text: |-
+             az billing role-assignment show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleAssignmentName}"
+    - name: Show a role assignment for the caller on an invoice section
+      text: |-
+             az billing role-assignment show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name "{billingRoleAssignmentName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing role-assignment delete'] = """
+    type: command
+    short-summary: "Delete a role assignment for the caller on a billing account. The operation is supported for \
+billing accounts with agreement type Microsoft Partner Agreement or Microsoft Customer Agreement."
+    examples:
+      - name: InvoiceSectionRoleAssignmentDelete
+        text: |-
+               az billing role-assignment delete --account-name "{billingAccountName}" --profile-name \
+"{billingProfileName}" --name "{billingRoleAssignmentName}" --invoice-section-name "{invoiceSectionName}"
+"""
+
+helps['billing agreement'] = """
+    type: group
+    short-summary: Display billing agreement
+"""
+
+helps['billing agreement list'] = """
+    type: command
+    short-summary: "List the agreements for a billing account."
+    examples:
+      - name: List agreements by billing account
+        text: |-
+               az billing agreement list --account-name "{billingAccountName}"
+"""
+
+helps['billing agreement show'] = """
+    type: command
+    short-summary: "Get an agreement by ID."
+    examples:
+      - name: Show an agreement by billing account and its name
+        text: |-
+               az billing agreement show --name "{agreementName}" --account-name "{billingAccountName}"
 """

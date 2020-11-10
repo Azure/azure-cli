@@ -467,7 +467,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -641,7 +641,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
@@ -1985,7 +1984,8 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 
 class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
+    # Due to a bug in LiveScenarioTest, self.assertRaisesRegex() will not detect the exception.
+    # To run this testcase in local with --live, temporarily change to ScenarioTest and add AllowLargeResponse annotation.
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='AadTest', length=15)
@@ -2045,8 +2045,9 @@ class AppConfigAadAuthLiveScenarioTest(LiveScenarioTest):
             'endpoint': endpoint
         })
 
-        # Before assigning data reader role, read operation should fail with AAD auth
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
+        # Before assigning data reader role, read operation should fail with AAD auth.
+        # The exception really depends on the which identity is used to run this testcase.
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Assign data reader role to current user

@@ -37,10 +37,10 @@ examples:
         }
         or
         {
-          "endpoint":{
+          "endpoints":{
             "activeDirectory": "https://login.microsoftonline.us"
           },
-          "suffix":{
+          "suffixes":{
             "acrLoginServerEndpoint": ".azurecr.us"
           }
         }
