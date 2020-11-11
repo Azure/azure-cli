@@ -2392,9 +2392,6 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     location = webapp.location
 
     if key_vault_certificate_name:
-        deprecated_msg = 'Option \'--key-vault-certificate-name\' has been deprecated, and will be removed' \
-                         'in version \'2.15.0\'. Use \'--certificate-name\' instead'
-        logger.warning(deprecated_msg)
         return
 
     if certificate_name:
