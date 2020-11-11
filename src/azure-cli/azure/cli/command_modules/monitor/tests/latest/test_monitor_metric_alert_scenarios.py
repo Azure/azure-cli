@@ -337,10 +337,10 @@ class MonitorTests(ScenarioTest):
 
     def test_metric_alert_condition_create(self):
         cond1 = "total \'transactions\' > 5.0 where ResponseType includes Success and ApiName includes GetBlob"
-        dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType -op include -v Success').output
-        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName -op include -v GetBlob').output
+        dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType --op include -v Success').output
+        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName --op include -v GetBlob').output
         self.cmd(
-            'monitor metrics alert condition create -t static --aggregation total --metric transactions --dimension "{}" "{}" -op GreaterThan --threshold 5'.format(
+            'monitor metrics alert condition create -t static --aggregation total --metric transactions --dimension "{}" "{}" --op GreaterThan --threshold 5'.format(
                 dim1, dim2
             ),
             checks=[
@@ -349,7 +349,7 @@ class MonitorTests(ScenarioTest):
         )
         cond2 = "avg 'Percentage Cpu' >< dynamic low 3 of 5 since 2020-11-02T12:11:11+00:00 "
         self.cmd(
-            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" -op GreaterOrLessThan --window 5 --violation 3 --since 2020-11-02T12:11:11Z --sensitivity low',
+            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" --op GreaterOrLessThan --window 5 --violation 3 --since 2020-11-02T12:11:11Z --sensitivity low',
             checks=[
                 self.check('@', cond2)
             ]

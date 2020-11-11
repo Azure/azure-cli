@@ -146,7 +146,8 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
         c.argument('dimension_name', type=str, options_list=['--name', '-n'],
                    help='Name of the dimension.')
-        c.argument('operator', options_list=['--operator', '-op'], arg_type=get_enum_type(dim_op_conversion.values()))
+        c.argument('operator', options_list=['--operator', '--op'], arg_type=get_enum_type(dim_op_conversion.values()),
+                   help="Dimension operator.")
         c.argument('value_list', type=str, options_list=['--value', '-v'], nargs='+',
                    help='The values to apply on the operation.')
 
@@ -159,8 +160,9 @@ def load_arguments(self, _):
                    help='Namespace of metric.')
         c.argument('dimension_list', options_list=['--dimension'], type=str, nargs='+',
                    help='Dimension created by \'az monitor metrics alert dimension create\'.')
-        c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()))
-        c.argument('operator', options_list=['--operator', '-op'], arg_type=get_enum_type(op_conversion.values()),
+        c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()),
+                   help='Time aggregation.')
+        c.argument('operator', options_list=['--operator', '--op'], arg_type=get_enum_type(op_conversion.values()),
                    help="Operator for static threshold can be 'Equals', 'NotEquals', 'GreaterThan', 'GreaterThanOrEqual', 'LessThan' or 'LessThanOrEqual'. "
                    "Operator for dynamic threshold can be 'GreaterThan', 'LessThan', 'GreaterOrLessThan'.")
         c.argument('threshold', type=float,

@@ -365,7 +365,7 @@ def load_command_table(self, _):
                          validator=validate_metrics_alert_condition)
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
-        g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
+        g.custom_command('create', 'create_log_analytics_workspace')
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
