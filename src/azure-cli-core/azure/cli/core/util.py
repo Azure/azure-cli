@@ -482,6 +482,9 @@ def read_file_content(file_path, allow_binary=False):
                 return f.read()
         except (UnicodeError, UnicodeDecodeError):
             pass
+        except FileNotFoundError as e:
+            from azure.cli.core.azclierror import FileOperationError
+            raise FileOperationError(e)
 
     if allow_binary:
         try:

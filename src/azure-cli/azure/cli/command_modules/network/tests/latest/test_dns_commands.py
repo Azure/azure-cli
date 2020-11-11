@@ -59,6 +59,13 @@ class DnsZoneImportTest(ScenarioTest):
         # verify that each record in the original import is unchanged after export/re-import
         self._check_records(records1, records2)
 
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
+    def test_dns_import_file_not_found(self, resource_group):
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaises(FileOperationError) as e:
+            self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
     def test_dns_zone1_import(self, resource_group):
         self._test_zone('zone1.com', 'zone1.txt')
