@@ -2391,26 +2391,18 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     server_farm_id = webapp.server_farm_id
     location = webapp.location
 
-    if not key_vault_certificate_name and not certificate_name:
-        name_needed_msg = 'You must provide a certificate name, use either: ' \
-                          'certificate-name or key-vault-certificate-name.'
-        logger.warning(name_needed_msg)
+    if key_vault_certificate_name:
+        deprecated_msg = 'Option \'--key-vault-certificate-name\' has been deprecated, and will be removed' \
+                         'in version \'2.15.0\'. Use \'--certificate-name\' instead'
+        logger.warning(deprecated_msg)
         return
 
-    if key_vault_certificate_name:
-        if certificate_name:
-            diff_name_msg = 'Only one certificate name can be provided,' \
-                            'use certificate-name or key-vault-certificate-name.'
-            logger.warning(diff_name_msg)
-            return
-        if not key_vault:
-            no_key_vault_msg = 'if you are trying to import a keyvault certificate,' \
-                               ' you must provide a Key Vault, use --key-vault.'
-            logger.warning(no_key_vault_msg)
-            return
-        cert = key_vault_certificate_name
     if certificate_name:
         cert = certificate_name
+    else:
+        no_cert_msg = 'You must provide a certificate name, use \'--certificate-name\'.'
+        logger.warning(no_cert_msg)
+        return
 
     (kv_id, kv_secret_name, error) = get_import_kv_details(cmd, client, cert, key_vault)
 
