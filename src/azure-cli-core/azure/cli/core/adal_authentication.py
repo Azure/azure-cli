@@ -21,6 +21,12 @@ logger = get_logger(__name__)
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
     def __init__(self, token_retriever, external_tenant_token_retriever=None):
+        # DO NOT call _token_retriever from outside azure-cli-core. It is only available for user or
+        # Service Principal credential (AdalAuthentication), but not for Managed Identity credential
+        # (MSIAuthenticationWrapper).
+        # To retrieve a raw token, either call
+        #   - Profile.get_raw_token, which is more direct
+        #   - AdalAuthentication.get_token, which is designed for Track 2 SDKs
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
