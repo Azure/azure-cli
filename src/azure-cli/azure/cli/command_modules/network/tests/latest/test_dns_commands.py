@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 from azure.cli.command_modules.network.zone_file import parse_zone_file
 
@@ -59,6 +59,7 @@ class DnsZoneImportTest(ScenarioTest):
         # verify that each record in the original import is unchanged after export/re-import
         self._check_records(records1, records2)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
     def test_dns_import_file_not_found(self, resource_group):
         from azure.cli.core.azclierror import FileOperationError
