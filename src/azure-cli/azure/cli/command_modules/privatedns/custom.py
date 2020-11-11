@@ -33,11 +33,17 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     import sys
     from azure.mgmt.privatedns.models import RecordSet
 
-    from azure.cli.core.azclierror import FileOperationError
+    from azure.cli.core.azclierror import FileOperationError, UnknownError
     try:
         file_text = read_file_content(file_name)
-    except FileNotFoundError as e:
-        raise FileOperationError(e)
+    except FileNotFoundError:
+        raise FileOperationError("No such file: " + str(file_name))
+    except IsADirectoryError:
+        raise FileOperationError("Is a directory: " + str(file_name))
+    except PermissionError:
+        raise FileOperationError("Permission denied: " + str(file_name))
+    except OSError as e:
+        raise UnknownError(e)
 
     zone_obj = parse_zone_file(file_text, private_zone_name)
     origin = private_zone_name

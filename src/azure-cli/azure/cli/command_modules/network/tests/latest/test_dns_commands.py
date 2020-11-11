@@ -61,10 +61,22 @@ class DnsZoneImportTest(ScenarioTest):
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
-    def test_dns_import_file_not_found(self, resource_group):
+    def test_dns_import_file_operation_error(self, resource_group):
+        import sys
+        if sys.platform != 'linux':
+            self.skip('This test should run on Linux platform')
+
         from azure.cli.core.azclierror import FileOperationError
-        with self.assertRaises(FileOperationError) as e:
+        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
             self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+            self._test_zone('404zone.com', '')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+            self._test_zone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
