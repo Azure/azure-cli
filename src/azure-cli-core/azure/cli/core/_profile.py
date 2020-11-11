@@ -61,6 +61,8 @@ _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
 
+_USE_VENDORED_SUBSCRIPTION_SDK = True
+
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
@@ -366,7 +368,7 @@ class Profile:
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
-                _STATE: s.state.value,
+                _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
@@ -427,11 +429,18 @@ class Profile:
         return result
 
     def _new_account(self):
-        from azure.cli.core.profiles import ResourceType, get_sdk
-        SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, 'Subscription',
-                                              'SubscriptionState', mod='models')
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
+            from azure.cli.core.vendored_sdks.subscriptions.models import SubscriptionState
+            SubscriptionType = Subscription
+            StateType = SubscriptionState
+        else:
+            from azure.cli.core.profiles import ResourceType, get_sdk
+            SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                                  'Subscription',
+                                                  'SubscriptionState', mod='models')
         s = SubscriptionType()
-        s.state = StateType.enabled
+        s.state = StateType.ENABLED
         return s
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -876,14 +885,15 @@ class SubscriptionFinder:
         def create_arm_client_factory(credentials):
             if arm_client_factory:
                 return arm_client_factory(credentials)
-            from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import configure_common_settings
-            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+
+            client_type = self._get_subscription_client_class()
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
-            configure_common_settings(cli_ctx, client)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -904,8 +914,8 @@ class SubscriptionFinder:
         mfa_tenants = []
 
         from azure.cli.core.credential import CredentialAdaptor
-        track1_credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
-        client = self._arm_client_factory(track1_credential)
+        credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
+        client = self._arm_client_factory(credential)
         tenants = client.tenants.list()
 
         for t in tenants:
@@ -996,3 +1006,18 @@ class SubscriptionFinder:
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
+
+    def _get_subscription_client_class(self):  # pylint: disable=no-self-use
+        """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
+        on the design of architecture.
+        """
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            # Use vendored subscription SDK to decouple from `resource` command module
+            from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
+            client_type = SubscriptionClient
+        else:
+            # Use the public SDK
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.profiles._shared import get_client_class
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        return client_type
