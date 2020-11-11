@@ -168,6 +168,7 @@ def _get_mgmt_service_client(cli_ctx,
     :return:
     """
     from azure.cli.core._profile import Profile
+    from azure.cli.core.util import resource_to_scopes
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
 
     # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to

@@ -57,10 +57,10 @@ from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src)
+                           detect_os_form_src, get_current_stack_from_runtime)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
 
 logger = get_logger(__name__)
 
@@ -92,7 +92,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist in the resource group '{}".format(plan, resource_group_name))
     is_linux = plan_info.reserved
-    node_default_version = NODE_VERSION_DEFAULT
+    node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = client.check_name_availability(name, 'Site')
@@ -123,7 +123,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=using_webapp_up)
     helper = _StackRuntimeHelper(cmd, client, linux=is_linux)
+    if runtime:
+        runtime = helper.remove_delimiters(runtime)
 
+    current_stack = None
     if is_linux:
         if not validate_container_app_create_options(runtime, deployment_container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file):
@@ -165,14 +168,13 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                            "only appliable on linux webapp")
         match = helper.resolve(runtime)
         if not match:
-            raise CLIError("Runtime '{}' is not supported. Please invoke 'az webapp list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
+            raise CLIError("Windows runtime '{}' is not supported. "
+                           "Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
 
-        # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
-        if not match['displayName'].startswith('node'):
-            if name_validation.name_available:
-                site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                              value=node_default_version))
+        # portal uses the current_stack propety in metadata to display stack for windows apps
+        current_stack = get_current_stack_from_runtime(runtime)
+
     else:  # windows webapp without runtime specified
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
@@ -193,6 +195,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+
+    if current_stack:
+        app_metadata = client.web_apps.list_metadata(resource_group_name, name)
+        app_metadata.properties["CURRENT_STACK"] = current_stack
+        client.web_apps.update_metadata(resource_group_name, name, kind="app", properties=app_metadata.properties)
 
     # Ensure SCC operations follow right after the 'create', no precedent appsetting update commands
     _set_remote_or_local_git(cmd, webapp, resource_group_name, name, deployment_source_url,
@@ -1662,17 +1669,17 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     if app_service_environment:
         if hyper_v:
             raise CLIError('Windows containers is not yet supported in app service environment')
-        ase_id = _validate_app_service_environment_id(cmd.cli_ctx, app_service_environment, resource_group_name)
-        ase_def = HostingEnvironmentProfile(id=ase_id)
         ase_list = client.app_service_environments.list()
         ase_found = False
+        ase = None
         for ase in ase_list:
-            if ase.id.lower() == ase_id.lower():
+            if ase.name.lower() == app_service_environment.lower():
+                ase_def = HostingEnvironmentProfile(id=ase.id)
                 location = ase.location
                 ase_found = True
                 break
         if not ase_found:
-            raise CLIError("App service environment '{}' not found in subscription.".format(ase_id))
+            raise CLIError("App service environment '{}' not found in subscription.".format(ase.id))
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2529,6 +2536,12 @@ class _StackRuntimeHelper:
         self._linux = linux
         self._stacks = []
 
+    @staticmethod
+    def remove_delimiters(runtime):
+        import re
+        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        return '|'.join(filter(None, runtime))
+
     def resolve(self, display_name):
         self._load_stacks_hardcoded()
         return next((s for s in self._stacks if s['displayName'].lower() == display_name.lower()),
@@ -3119,8 +3132,8 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
-                           -n {} -g {}""".format(res_dict, name, rg_name))
+            raise CLIError("Zip deployment failed. {}. Please run the command az webapp log deployment show "
+                           "-n {} -g {}".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break
         if 'progress' in res_dict:
@@ -3535,8 +3548,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None, dryrun=False, logs=False,  # pylint: disable=too-many-statements,
-              launch_browser=False, html=False):
+def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
+              os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
@@ -3546,17 +3559,38 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     _create_new_rg = False
     _site_availability = get_site_availability(cmd, name)
     _create_new_app = _site_availability.name_available
-    os_name = detect_os_form_src(src_dir, html)
-    lang_details = get_lang_from_content(src_dir, html)
-    language = lang_details.get('language')
+    os_name = os_type if os_type else detect_os_form_src(src_dir, html)
+    _is_linux = os_name.lower() == 'linux'
 
-    # detect the version
-    data = get_runtime_version_details(lang_details.get('file_loc'), language)
-    version_used_create = data.get('to_create')
-    detected_version = data.get('detected')
+    if runtime and html:
+        raise CLIError('Conflicting parameters: cannot have both --runtime and --html specified.')
+
+    if runtime:
+        helper = _StackRuntimeHelper(cmd, client, linux=_is_linux)
+        runtime = helper.remove_delimiters(runtime)
+        match = helper.resolve(runtime)
+        if not match:
+            if _is_linux:
+                raise CLIError("Linux runtime '{}' is not supported."
+                               " Please invoke 'az webapp list-runtimes --linux' to cross check".format(runtime))
+            raise CLIError("Windows runtime '{}' is not supported."
+                           " Please invoke 'az webapp list-runtimes' to cross check".format(runtime))
+
+        language = runtime.split('|')[0]
+        version_used_create = '|'.join(runtime.split('|')[1:])
+        detected_version = '-'
+    else:
+        # detect the version
+        _lang_details = get_lang_from_content(src_dir, html)
+        language = _lang_details.get('language')
+        _data = get_runtime_version_details(_lang_details.get('file_loc'), language)
+        version_used_create = _data.get('to_create')
+        detected_version = _data.get('detected')
+
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
     site_config = None
+
     if not _create_new_app:  # App exists, or App name unavailable
         if _site_availability.reason == 'Invalid':
             raise CLIError(_site_availability.message)
@@ -3589,7 +3623,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         # Raise error if current OS of the app is different from the current one
         if current_os.lower() != os_name.lower():
             raise CLIError("The webapp '{}' is a {} app. The code detected at '{}' will default to "
-                           "'{}'. Please create a new app"
+                           "'{}'. Please create a new app "
                            "to continue this operation.".format(name, current_os, src_dir, os_name))
         _is_linux = plan_info.reserved
         # for an existing app check if the runtime version needs to be updated
@@ -3597,10 +3631,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         site_config = client.web_apps.get_configuration(rg_name, name)
     else:  # need to create new app, check if we need to use default RG or use user entered values
         logger.warning("The webapp '%s' doesn't exist", name)
-        sku = get_sku_to_use(src_dir, html, sku)
+        sku = get_sku_to_use(src_dir, html, sku, runtime)
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(cmd, user, loc, os_name, resource_group_name)
-        _is_linux = os_name.lower() == 'linux'
         _create_new_rg = should_create_new_rg(cmd, rg_name, _is_linux)
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
@@ -3643,7 +3676,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
-        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None,
+        create_webapp(cmd, rg_name, name, plan, runtime_version if not html else None,
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
@@ -3651,10 +3684,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
             logger.warning('Updating runtime version from %s to %s',
                            site_config.linux_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, linux_fx_version=runtime_version)
+            logger.warning('Waiting for runtime version to propagate ...')
+            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
         elif os_name.lower() == 'windows' and site_config.windows_fx_version != runtime_version:
             logger.warning('Updating runtime version from %s to %s',
                            site_config.windows_fx_version, runtime_version)
             update_site_configs(cmd, rg_name, name, windows_fx_version=runtime_version)
+            logger.warning('Waiting for runtime version to propagate ...')
+            time.sleep(30)  # wait for kudu to get updated runtime before zipdeploy. Currently no way to poll for this
         create_json['runtime_version'] = runtime_version
     # Zip contents & Deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)

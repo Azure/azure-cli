@@ -1822,7 +1822,12 @@ class TestProfile(unittest.TestCase):
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
 
-    @unittest.skip("todo: wait for identity support")
+    def test_service_principal_auth_client_cert_err(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'err_sp_cert.pem')
+        with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
+            ServicePrincipalAuth(test_cert_file)
+
     def test_detect_adfs_authority_url(self):
         # todo: msal
         cli = DummyCli()

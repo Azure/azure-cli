@@ -12,7 +12,7 @@ import time
 from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, VirtualNetworkPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 from knack.util import CLIError
@@ -305,12 +305,14 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
 class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_adls_mgmt')
+    @VirtualNetworkPreparer()
     @AllowLargeResponse()
     def test_dls_account_mgmt(self, resource_group):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
+            'updated_subnet': 'updatedSubnet'
         })
 
         # test create keyvault with default access policy set
@@ -384,28 +386,32 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
         ])
 
         # test virtual network rule crud
+        subnet_id = self.cmd('network vnet subnet show -g {rg} -n default --vnet-name {vnet}').get_output_in_json()['id']
+        updated_subnet_id = self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {updated_subnet} --address-prefixes 10.0.1.0/24').get_output_in_json()['id']
+
         self.kwargs.update({
-            'vnet': 'lewuVNET',
-            'subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/default',
-            'subnet': 'default',
-            'updated_subnet_id': '/subscriptions/9e1f0ab2-2f85-49de-9677-9da6f829b914/resourceGroups/lewu-rg/providers/Microsoft.Network/virtualNetworks/lewuVNET/subnets/updatedSubnetId',
-            'updated_subnet': 'updatedSubnetId'
+            'subnet_id': subnet_id,
+            'updated_subnet_id': updated_subnet_id,
+            'network_rule': 'dlsVnetRule'
         })
-        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {vnet} --subnet {subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {vnet}', checks=[
-            self.check('name', '{vnet}'),
+        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{subnet_id}"')
+        self.cmd('network vnet subnet update --service-endpoints Microsoft.AzureActiveDirectory --ids "{updated_subnet_id}"')
+
+        self.cmd('dls account network-rule create -g {rg} --account-name {dls} --name {network_rule} --subnet {subnet_id}')
+        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
+            self.check('name', '{network_rule}'),
         ])
 
-        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {vnet} --subnet {updated_subnet_id}')
-        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {vnet}', checks=[
-            self.check('name', '{vnet}'),
+        self.cmd('dls account network-rule update -g {rg} --account-name {dls} --name {network_rule} --subnet {updated_subnet_id}')
+        self.cmd('dls account network-rule show -g {rg} --account-name {dls} --name {network_rule}', checks=[
+            self.check('name', '{network_rule}'),
         ])
 
         self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
         ])
-        self.cmd('dls account network-rule delete -g {rg} --account-name {dls} --name {vnet}')
+        self.cmd('dls account network-rule delete -g {rg} --account-name {dls} --name {network_rule}')
         self.cmd('dls account network-rule list -g {rg} --account-name {dls}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 0),

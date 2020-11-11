@@ -3,6 +3,111 @@
 Release History
 ===============
 
+2.14.1
+++++++
+
+**ARM**
+
+* Hotfix: Add TS multiline string support for template inputs
+
+2.14.0
+++++++
+
+**AKS**
+
+* Add PPG support (#15445)
+* Update max standard load balancer timeout to 100 minutes (#15562)
+
+**APIM**
+
+* Fix issue with creating consumption tier instance (#15337)
+
+**App Config**
+
+* Fix querying key-values by comma separated labels (#15449)
+
+**App Service**
+
+* Bugfix: az webapp up fails when user doesn't have write permissions to project's parent directory (#15373)
+* Fix #13777: Fix to remove escape chars from XML (#15364)
+* Fix #15441: az webapp create-remote-connection fails with AttributeError: 'Thread' object has no attribute 'isAlive' (#15446)
+* [BREAKING CHANGE] az webapp up: add optional params (os & runtime) and updated runtimes (#15522)
+
+**ARM**
+
+* Make template deployment What-If commands GA (#15416)
+* [BREAKING CHANGE] Add user confirmation for az ts create (#15480)
+* Fix the returned data when tagging multiple resources (#15146)
+
+**Backup**
+
+* `az backup policy create`: Add support for IaaSVM backup policy creation from CLI (#15542)
+* Increasing VM protection limit from 100 to 1000 (#15563)
+
+**Compute**
+
+* sig image-definition create: add --features (#15549)
+* New API version of gallery_images 2020-09-30 (#15549)
+* `az vm update / az sig image-version update`: Support update vm/image-version even it uses a cross tenant image (#15575)
+* Remove validation of vm host SKUs (#15611)
+
+**Cosmos DB**
+
+* `az cosmosdb create/update`: Improve error message from incorrect --locations input (#15276)
+* `az cosmosdb sql container create/update`: Add --analytical-storage-ttl parameter (#15276)
+
+**HDInsight**
+
+* [BREAKING CHANGE] az hdinsight create: remove two parameters: --public-network-access-type and  --outbound-public-network-access-type (#15582)
+
+**IoT Central**
+
+* Remove preview warning since it is already GAed (#15527)
+
+**Key Vault**
+
+* Invalidate `--enable-soft-delete false` while creating or updating vaults (#15504)
+* Make `--bypass` and `--default-action` work together with network acl parameters while creating vaults (#15571)
+
+**Misc.**
+
+* Add bash-completion to Dockerfile (#15228)
+
+**RDBMS**
+
+* Add List-SKUS Command, Table Transformers, Local Context for Postgres, MySQL, Mariadb Single Server (#15450)
+* [BREAKING CHANGE] Parameter name updates. Improvements to Management Plane for MySQL and PostgreSQL (#15363)
+* `az postgres|mariadb|mysql server create` : Update create experience for Postgres, MySQL and MariaDB - new fields in the output , Introduce new values for `--public` parameter in create command (all,<IP>,<IPRange>,0.0.0.0) (#15538)
+
+**SignalR**
+
+* `az signalr create`: Add new option `--enable-messaging-logs` for controling service generate messaging logs or not (#15327)
+* `az signalr update`: Add new option `--enable-messaging-logs` for controling service generate messaging logs or not (#15327)
+
+**SQL**
+
+* [BREAKING CHANGE] Fix response for backup storage redundancy param name and value for MI (#15367)
+* `az sql db audit-policy show`: extend to show database's audit policy including LA and EH data (#15444)
+* `az sql db audit-policy update`: extend to allow LA and EH update along with database's audit policy (#15444)
+* `az sql db audit-policy wait`: place the CLI in a waiting state until a condition of the database's audit policy is met. (#15444)
+* `az sql server audit-policy show`: extend to show servers's audit policy including LA and EH data (#15444)
+* `az sql server audit-policy update`: extend to allow LA and EH update along with server's audit policy (#15444)
+* `az sql server audit-policy wait`: place the CLI in a waiting state until a condition of the server's audit policy is met. (#15444)
+* Add AAD-only Support for SQL Managed Instances and Servers (#15292)
+* `az sql db replica create`: Add --partner-database argument (#15577)
+
+**Storage**
+
+* Fix #15111: `az storage logging update` fails without optional argument (#15474)
+* Fix bug when using set-tier command with service principal login (#15471)
+* Upgrade version for file datalake to 2020-02-10 (#15572)
+* `az storage queue list`: Track2 supported (#15494)
+* `az storage fs access`: Support managing ACLs recursively (#15221)
+
+**Synapse**
+
+* Add pipeline, linked service, trigger, notebook, data flow and dataset related cmdlets (#15296)
+
 2.13.0
 ++++++
 
@@ -26,7 +131,6 @@ Release History
 
 **App Config**
 
-* Fix test bug (#15310)
 * Support AAD auth for data operations (#15160)
 
 **App Service**

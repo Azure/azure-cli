@@ -35,7 +35,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 # for other HSM operations live/playback
-ACTIVE_HSM_NAME = 'clitest0914b'
+ACTIVE_HSM_NAME = 'clitest-1028'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
 
 # For security domain playback
@@ -53,16 +53,14 @@ def _create_keyvault(test, kwargs, additional_args=None):
     if '--enable-soft-delete' not in additional_args:
         additional_args += ' --enable-soft-delete false'
     kwargs['add'] = additional_args
-    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
+    return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium --retention-days 7 {add}')
 
 
 def _clear_hsm_role_assignments(test, hsm_url, assignees):
     for assignee in assignees:
         test.cmd('keyvault role assignment delete --id {hsm_url} --assignee {assignee}'
                  .format(hsm_url=hsm_url, assignee=assignee))
-
-    if test.is_live:
-        time.sleep(10)
+    time.sleep(10)
 
 
 def _clear_hsm(test, hsm_url):
@@ -71,17 +69,13 @@ def _clear_hsm(test, hsm_url):
     for key_id in all_keys:
         test.cmd('keyvault key delete --id {key_id}'.format(key_id=key_id))
 
-    if test.is_live:
-        time.sleep(10)
-
+    time.sleep(10)
     all_keys = test.cmd('keyvault key list-deleted --id {hsm_url} --query "[].kid"'
                         .format(hsm_url=hsm_url)).get_output_in_json()
     for key_id in all_keys:
         test.cmd('keyvault key purge --id {key_id}'.format(key_id=key_id)
                  .replace('/keys/', '/deletedkeys/'))
-
-    if test.is_live:
-        time.sleep(10)
+    time.sleep(10)
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -194,7 +188,7 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             'hsm_name': ACTIVE_HSM_NAME,
             'hsm_url': ACTIVE_HSM_URL,
             'rg': 'bim-rg',
-            'loc': 'eastus2euap',
+            'loc': 'eastus2',
             'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa'
         })
 
@@ -254,14 +248,14 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # test create keyvault with default access policy set
-        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-soft-delete false', checks=[
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc}', checks=[
             self.check('name', '{kv}'),
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 1),
             self.check('properties.sku.name', 'standard'),
-            self.check('properties.enableSoftDelete', False),
+            self.check('properties.enableSoftDelete', True),
             self.check('properties.enablePurgeProtection', None),
             self.check('properties.softDeleteRetentionInDays', 90)
         ]).get_output_in_json()
@@ -354,11 +348,10 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
             'hsm_name': SD_ACTIVE_HSM_NAME,
             'next_hsm_url': SD_NEXT_ACTIVE_HSM_URL,
             'next_hsm_name': SD_NEXT_ACTIVE_HSM_NAME,
-            'loc': 'eastus2euap',
+            'loc': 'eastus2',
             'init_admin': '9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa',
             'key_name': self.create_random_name('key', 10),
             'rg': 'bim-rg',
-            'rg_lock': 'bim-lock',
             'sdtest_dir': sdtest_dir
         })
         self.kwargs.update({
@@ -380,9 +373,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"')
 
         # delete the HSM
-        self.cmd('az group lock delete -g {rg} -n {rg_lock}')
         self.cmd('az keyvault delete --hsm-name {hsm_name}')
-        self.cmd('az group lock create -g {rg} -n {rg_lock} -t CanNotDelete')
 
         # create a new HSM
         self.cmd('az keyvault create --hsm-name {next_hsm_name} -l {loc} -g {rg} --administrators {init_admin} '
@@ -563,8 +554,7 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('scope', '/')
                  ]).get_output_in_json()
 
-        if self.is_live:
-            time.sleep(10)
+        time.sleep(10)
 
         # list all (including this one: assignee=bim,role=Administrator, scope=/)
         self.cmd('keyvault role assignment list --id {hsm_url}', checks=self.check('length(@)', 7))
@@ -633,14 +623,14 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
     def test_keyvault_key(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-key-', 24),
-            'loc': 'westus',
-            'key': 'key1',
-            'key2': 'key2'
+            'loc': 'eastus2',
+            'key': self.create_random_name('key1-', 24),
+            'key2': self.create_random_name('key2-', 24)
         })
         keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
-        key_perms.extend(['encrypt', 'decrypt'])
+        key_perms.extend(['encrypt', 'decrypt', 'purge'])
         self.kwargs['key_perms'] = ' '.join(key_perms)
 
         # create a key
@@ -719,6 +709,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.kwargs['key_file'] = os.path.join(tempfile.mkdtemp(), 'backup.key')
         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file "{key_file}"')
         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+        time.sleep(10)
+        self.cmd('keyvault key purge --vault-name {kv} -n {key}')
+        time.sleep(10)
         self.cmd('keyvault key delete --vault-name {kv} -n {key2}')
         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
         self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
@@ -780,7 +773,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-key-', 24),
-            'loc': 'eastus2euap'
+            'loc': 'eastus2'
         })
         _create_keyvault(self, self.kwargs)
 
@@ -1283,7 +1276,12 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
             'sec': 'secret1',
             'sec2': 'secret2'
         })
-        _create_keyvault(self, self.kwargs)
+        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        secret_perms = keyvault['properties']['accessPolicies'][0]['permissions']['secrets']
+        secret_perms.append('purge')
+        self.kwargs['secret_perms'] = ' '.join(secret_perms)
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --secret-permissions {secret_perms}')
 
         # create a secret
         secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
@@ -1349,6 +1347,9 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.kwargs['bak_file'] = os.path.join(tempfile.mkdtemp(), 'backup.secret')
         self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file "{bak_file}"')
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
+        time.sleep(10)
+        self.cmd('keyvault secret purge --vault-name {kv} -n {sec}')
+        time.sleep(10)
         self.cmd('keyvault secret delete --vault-name {kv} -n {sec2}', checks=self.check('name', '{sec2}'))
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
@@ -1678,12 +1679,15 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
 
         # backup and then delete certificate
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} '
-                 '--certificate-permissions backup delete get restore list')
+                 '--certificate-permissions backup delete get restore list purge')
 
         bak_file = 'backup.cert'
         self.kwargs['bak_file'] = bak_file
         self.cmd('keyvault certificate backup --vault-name {kv} -n cert1 --file {bak_file}')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
+        time.sleep(10)
+        self.cmd('keyvault certificate purge --vault-name {kv} -n cert1')
+        time.sleep(10)
 
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.is_empty())

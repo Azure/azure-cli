@@ -6,14 +6,16 @@
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, get_resource_name_completion_list
-from azure.cli.core.util import get_json_object
+from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
 from .constant import SparkBatchLanguage, SparkStatementLanguage
+from .action import AddFilters, AddOrderBy
 
 workspace_name_arg_type = CLIArgumentType(help='The workspace name.', completer=get_resource_name_completion_list('Microsoft.Synapse/workspaces'))
 assignee_arg_type = CLIArgumentType(help='Represent a user, group, or service principal. Supported format: object id, user sign-in name, or service principal name.')
 role_arg_type = CLIArgumentType(help='The role name/id that is assigned to the principal.', completer=get_role_definition_name_completion_list)
+definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=FilesCompleter(), type=shell_safe_json_parse, help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
 
 
 def load_arguments(self, _):
@@ -226,3 +228,194 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse role definition list') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    # synapse artifacts linked-service
+    for scope in ['create', 'set']:
+        with self.argument_context('synapse linked-service ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse linked-service list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse linked-service show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
+
+    with self.argument_context('synapse linked-service delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('linked_service_name', arg_type=name_type, help='The linked service name.')
+
+    # synapse artifacts dataset
+    for scope in ['create', 'set']:
+        with self.argument_context('synapse dataset ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse dataset list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse dataset show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
+
+    with self.argument_context('synapse dataset delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('dataset_name', arg_type=name_type, help='The dataset name.')
+
+    # synapse artifacts pipeline
+    for scope in ['create', 'set']:
+        with self.argument_context('synapse pipeline ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse pipeline list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse pipeline show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
+
+    with self.argument_context('synapse pipeline delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
+
+    with self.argument_context('synapse pipeline create-run') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
+        c.argument('reference_pipeline_run_id', options_list=['--reference-pipeline-run-id', '--run-id'],
+                   help='The pipeline run ID for rerun. If run ID is specified, the parameters of the specified run will be used to create a new run.')
+        c.argument('is_recovery', arg_type=get_three_state_flag(),
+                   help='Recovery mode flag. If recovery mode is set to true, the specified referenced pipeline run and the new run will be grouped under the same groupId.')
+        c.argument('start_activity_name', help='In recovery mode, the rerun will start from this activity. If not specified, all activities will run.')
+        c.argument('parameters', completer=FilesCompleter(), type=shell_safe_json_parse,
+                   help='Parameters for pipeline run. Can be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
+
+    # synapse artifacts pipeline run
+    with self.argument_context('synapse pipeline-run query-by-workspace') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('continuation_token', help='The continuation token for getting the next page of results. Null for first page.')
+        c.argument('last_updated_after', help='The time at or after which the run event was updated in \'ISO 8601\' format.')
+        c.argument('last_updated_before', help='The time at or before which the run event was updated in \'ISO 8601\' format.')
+        c.argument('filters', action=AddFilters, nargs='*', help='List of filters.')
+        c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
+
+    with self.argument_context('synapse pipeline-run show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('run_id', help='The pipeline run identifier.')
+
+    with self.argument_context('synapse pipeline-run cancel') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('run_id', help='The pipeline run identifier.')
+        c.argument('is_recursive', arg_type=get_three_state_flag(),
+                   help='If true, cancel all the Child pipelines that are triggered by the current pipeline.')
+
+    with self.argument_context('synapse activity-run query-by-pipeline-run') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('pipeline_name', arg_type=name_type, help='The pipeline name.')
+        c.argument('run_id', help='The pipeline run identifier.')
+        c.argument('continuation_token', help='The continuation token for getting the next page of results. Null for first page.')
+        c.argument('last_updated_after', help='The time at or after which the run event was updated in \'ISO 8601\' format.')
+        c.argument('last_updated_before', help='The time at or before which the run event was updated in \'ISO 8601\' format.')
+        c.argument('filters', action=AddFilters, nargs='*', help='List of filters.')
+        c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
+
+    # synapse artifacts trigger
+    for scope in ['create', 'set']:
+        with self.argument_context('synapse trigger ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse trigger list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse trigger show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger subscribe-to-event') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger get-event-subscription-status') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger unsubscribe-from-event') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger start') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    with self.argument_context('synapse trigger stop') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+
+    # synapse artifacts trigger run
+    with self.argument_context('synapse trigger-run rerun') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('trigger_name', arg_type=name_type, help='The trigger name.')
+        c.argument('run_id', help='The trigger run identifier.')
+
+    with self.argument_context('synapse trigger-run query-by-workspace') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('continuation_token', help='The continuation token for getting the next page of results. Null for first page.')
+        c.argument('last_updated_after', help='The time at or after which the run event was updated in \'ISO 8601\' format.')
+        c.argument('last_updated_before', help='The time at or before which the run event was updated in \'ISO 8601\' format.')
+        c.argument('filters', action=AddFilters, nargs='*', help='List of filters.')
+        c.argument('order_by', action=AddOrderBy, nargs='*', help='List of OrderBy option.')
+
+    # synapse artifacts data flow
+    for scope in ['create', 'set']:
+        with self.argument_context('synapse data-flow ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('data_flow_name', arg_type=name_type, help='The data flow name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+
+    with self.argument_context('synapse data-flow list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse data-flow show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('data_flow_name', arg_type=name_type, help='The data flow name.')
+
+    with self.argument_context('synapse data-flow delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('data_flow_name', arg_type=name_type, help='The data flow name.')
+
+    # synapse artifacts notebook
+    for scope in ['create', 'set', 'import']:
+        with self.argument_context('synapse notebook ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type)
+            c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+            c.argument('definition_file', arg_type=definition_file_arg_type)
+            c.argument('spark_pool_name', help='The name of the Spark pool.')
+            c.argument('executor_size', arg_type=get_enum_type(['Small', 'Medium', 'Large']),
+                       help='Number of core and memory to be used for executors allocated in the specified Spark pool for the job.')
+            c.argument('executor_count', help='Number of executors to be allocated in the specified Spark pool for the job.')
+
+    with self.argument_context('synapse notebook list') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+
+    with self.argument_context('synapse notebook show') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+
+    with self.argument_context('synapse notebook export') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('output_folder', help='The folder where the notebook should be placed.')
+        c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+
+    with self.argument_context('synapse notebook delete') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+        c.argument('notebook_name', arg_type=name_type, help='The notebook name.')

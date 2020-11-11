@@ -659,7 +659,7 @@ parameters:
   - name: --pattern
     type: string
     short-summary: The pattern used for globbing files or blobs in the source. The supported patterns are '*', '?', '[seq]', and '[!seq]'. For more information, please refer to https://docs.python.org/3.7/library/fnmatch.html.
-    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az stroage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
+    long-summary: When you use '*' in --pattern, it will match any character including the the directory separator '/'. You can also try "az storage remove" command with --include and --exclude with azure cli >= 2.0.70 to match multiple patterns.
   - name: --dryrun
     type: bool
     short-summary: Show the summary of the operations to be taken instead of actually deleting the file(s).
@@ -1098,11 +1098,11 @@ long-summary: >
     You can configure the --public-access using `az storage container set-permission -n CONTAINER_NAME --public-access blob/container/off`.
 examples:
   - name: Create a storage container in a storage account.
-    text: az storage container create -n MyStorageContainer
+    text: az storage container create -n mystoragecontainer
   - name: Create a storage container in a storage account and return an error if the container already exists.
-    text: az storage container create -n MyStorageContainer --fail-on-exist
+    text: az storage container create -n mystoragecontainer --fail-on-exist
   - name: Create a storage container in a storage account and allow public read access for blobs.
-    text: az storage container create -n MyStorageContainer --public-access blob
+    text: az storage container create -n mystoragecontainer --public-access blob
 """
 
 helps['storage container delete'] = """
@@ -1625,6 +1625,19 @@ type: group
 short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs access remove-recursive'] = """
+type: command
+short-summary: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+parameters:
+    - name: --acl
+      short-summary: Remove POSIX access control rights on files and directories. The value is a comma-separated
+        list of access control entries. Each access control entry (ACE) consists of a scope, a type, and a user or
+        group identifier in the format "[scope:][type]:[id]".
+examples:
+    - name: Remove the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access remove-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access set'] = """
 type: command
 short-summary: Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
@@ -1671,12 +1684,28 @@ examples:
       text: az storage fs access set --group 68390a19-a897-236b-b453-488abf67b4dc -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
 """
 
+helps['storage fs access set-recursive'] = """
+type: command
+short-summary: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Set the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access set-recursive --acl "default:user:21cd756e-e290-4a26-9547-93e8cc1a8923:rwx" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs access show'] = """
 type: command
 short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
 examples:
     - name: Show the access control properties of a path.
       text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs access update-recursive'] = """
+type: command
+short-summary: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Modify the Access Control on a path and sub-paths in Azure Data Lake Storage Gen2 account.
+      text: az storage fs access update-recursive --acl "user::r-x" -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage fs create'] = """
@@ -2028,6 +2057,9 @@ short-summary: Manage storage queues.
 helps['storage queue list'] = """
 type: command
 short-summary: List queues in a storage account.
+examples:
+  - name: List queues whose names begin with 'myprefix' under the storage account 'mystorageaccount'(account name)
+    text: az storage queue list --prefix myprefix --account-name mystorageaccount
 """
 
 helps['storage queue metadata'] = """
@@ -2246,13 +2278,4 @@ short-summary: List tables in a storage account.
 helps['storage table policy'] = """
 type: group
 short-summary: Manage shared access policies of a storage table.
-"""
-
-helps['storage queue'] = """
-type: group
-short-summary: Manage shared access policies of a storage table.
-long-summary: >
-    Please specify one of the following authentication parameters for your commands: --auth-mode, --account-key,
-    --connection-string, --sas-token. You also can use corresponding environment variables to store your authentication
-    credentials, e.g. AZURE_STORAGE_KEY, AZURE_STORAGE_CONNECTION_STRING and AZURE_STORAGE_SAS_TOKEN.
 """
