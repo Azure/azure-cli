@@ -879,7 +879,7 @@ class WebappACRScenarioTest(ScenarioTest):
 
 
 class FunctionappACRScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     @AllowLargeResponse()
     def test_acr_integration_function_app(self, resource_group, storage_account):
