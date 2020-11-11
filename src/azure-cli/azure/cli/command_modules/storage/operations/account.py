@@ -459,7 +459,7 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, account
     )
 
 
-def create_management_policy(cmd, client, resource_group_name, account_name, policy):
+def create_management_policies(cmd, client, resource_group_name, account_name, policy):
     if os.path.exists(policy):
         policy = get_file_json(policy)
     else:

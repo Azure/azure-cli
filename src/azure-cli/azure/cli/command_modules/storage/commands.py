@@ -182,7 +182,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
                             custom_command_type=management_policy_custom_type) as g:
         g.custom_show_command('show', 'get_management_policy')
-        g.custom_command('create', 'create_management_policy')
+        g.custom_command('create', 'create_management_policies')
         g.generic_update_command('update', getter_name='get_management_policy',
                                  getter_type=management_policy_custom_type,
                                  setter_name='update_management_policy',
