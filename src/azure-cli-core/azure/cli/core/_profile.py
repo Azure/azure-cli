@@ -845,7 +845,7 @@ class SubscriptionFinder:
                 token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
             else:  # when refresh account, we will leverage local cached tokens
                 token_entry = context.acquire_token(resource, username, _CLIENT_ID)
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             _login_exception_handler(err)
 
         if not token_entry:
@@ -870,7 +870,7 @@ class SubscriptionFinder:
         try:
             token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                         resource, _CLIENT_ID, None)
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             _login_exception_handler(err)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
@@ -884,7 +884,7 @@ class SubscriptionFinder:
         context = self._create_auth_context(tenant)
         try:
             code = context.acquire_user_code(resource, _CLIENT_ID)
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-except
             _login_exception_handler(err)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
