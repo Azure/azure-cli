@@ -974,7 +974,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
-                self.cli_ctx.get_progress_controller(det=True).add(message='In Progress', value=num, total_val=total)
+                if num < total:
+                    self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
+                                                                       total_val=total)
+                else:  # add buffer when exceeding estimated time
+                    self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
+                                                                       total_val=num + 0.1)
+
                 self._delay()
                 num += 1
             except KeyboardInterrupt:
