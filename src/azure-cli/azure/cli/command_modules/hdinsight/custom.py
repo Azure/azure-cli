@@ -36,7 +36,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False,
-                   resource_provider_connection=None, private_link=None,
+                   resource_provider_connection=None, enable_private_link=None,
                    no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
         get_storage_account_endpoint, validate_esp_cluster_create_params
@@ -46,7 +46,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         DirectoryType, DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
         KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
         Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
-        NetworkProperties
+        NetworkProperties, PrivateLink
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -345,9 +345,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     )
 
     # relay outbound and private link
-    network_properties = (resource_provider_connection or private_link) and NetworkProperties(
+    network_properties = (resource_provider_connection or enable_private_link) and NetworkProperties(
         resource_provider_connection=resource_provider_connection,
-        private_link=private_link
+        private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
     )
 
     create_params = ClusterCreateParametersExtended(

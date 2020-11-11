@@ -149,7 +149,7 @@ examples:
         az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
-        --resource-provider-connection Outbound --private-link Enabled
+        --resource-provider-connection Outbound --enable-private-link
 """
 
 helps['hdinsight list'] = """

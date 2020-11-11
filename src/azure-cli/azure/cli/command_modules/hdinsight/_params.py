@@ -30,8 +30,7 @@ def load_arguments(self, _):
     from ._completers import subnet_completion_list, cluster_admin_account_completion_list, \
         cluster_user_group_completion_list, get_resource_name_completion_list_under_subscription
     from knack.arguments import CLIArgumentType
-    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, \
-        ResourceProviderConnection, PrivateLink
+    from azure.mgmt.hdinsight.models import Tier, JsonWebKeyEncryptionAlgorithm, ResourceProviderConnection
     from argcomplete.completers import FilesCompleter
     node_size_type = CLIArgumentType(arg_group='Node',
                                      help='The size of the node. See also: https://docs.microsoft.com/azure/'
@@ -220,10 +219,10 @@ def load_arguments(self, _):
 
         # relay outbound and private link
         c.argument('resource_provider_connection', options_list=['--resource-provider-connection', '--rp-connection'],
-                   arg_group='Relay Outbound And PrivateLink',
+                   arg_group='Resource provider connection',
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
-        c.argument('private_link', arg_group='Relay Outbound And PrivateLink',
-                   arg_type=get_enum_type(PrivateLink), help='The private link type')
+        c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
+                   help='Indicates whether enable the private link or not.')
 
         # resize
         with self.argument_context('hdinsight resize') as c:

@@ -586,4 +586,4 @@ class HDInsightClusterTests(ScenarioTest):
         return '--version 3.6 -l southcentralus ' \
                '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers' \
                '/Microsoft.Network/virtualNetworks/fakevnet/subnets/default ' \
-               '--resource-provider-connection Outbound --private-link Enabled'
+               '--resource-provider-connection Outbound --enable-private-link'
