@@ -39,7 +39,7 @@ def ex_handler_factory(creating_plan=False):
 
 
 def update_function_ex_handler_factory():
-    from knack.util import CLIError
+    from azure.cli.core.azclierror import ClientRequestError
 
     def _ex_handler(ex):
         http_error_response = False
@@ -55,7 +55,7 @@ def update_function_ex_handler_factory():
                           'functionapp plans support premium instances. If you have verified '
                           'your resource group and region and are still unable to migrate, '
                           'please redeploy on a premium functionapp plan.')
-                ex = CLIError(ex.args[0] + '\n\n' + detail)
+                ex = ClientRequestError(ex.args[0] + '\n\n' + detail)
             except Exception:  # pylint: disable=broad-except
                 pass
         raise ex

@@ -46,6 +46,7 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent
 from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
 
 from .tunnel import TunnelServer
 
@@ -647,7 +648,7 @@ def update_functionapp(cmd, instance, plan=None, force=False):
         else:
             dest_plan_info = client.app_service_plans.get(instance.resource_group, plan)
         if dest_plan_info is None:
-            raise CLIError("The plan '{}' doesn't exist".format(plan))
+            raise ResourceNotFoundError("The plan '{}' doesn't exist".format(plan))
         validate_plan_switch_compatibility(cmd, client, instance, dest_plan_info, force)
         instance.server_farm_id = dest_plan_info.id
     return instance
@@ -660,35 +661,37 @@ def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, de
                                                  src_parse_result['name'])
 
     if src_plan_info is None:
-        raise CLIError('Could not determine the current plan of the functionapp')
+        raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
 
     # Ensure all plans involved are windows. Reserved = true indicates Linux.
     if src_plan_info.reserved or dest_plan_instance.reserved:
-        raise CLIError('This feature currently supports windows to windows plan migrations. For other '
-                       'migrations, please redeploy.')
+        raise ValidationError('This feature currently supports windows to windows plan migrations. For other '
+                              'migrations, please redeploy.')
 
     src_is_premium = is_plan_elastic_premium(cmd, src_plan_info)
     dest_is_consumption = is_plan_consumption(cmd, dest_plan_instance)
 
     if not (is_plan_consumption(cmd, src_plan_info) or src_is_premium):
-        raise CLIError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' + general_switch_msg)
+        raise ValidationError('Your functionapp is not using a Consumption or an Elastic Premium plan. ' +
+                              general_switch_msg)
     if not (dest_is_consumption or is_plan_elastic_premium(cmd, dest_plan_instance)):
-        raise CLIError('You are trying to move to a plan that is not a Consumption or an Elastic Premium plan. ' +
-                       general_switch_msg)
+        raise ValidationError('You are trying to move to a plan that is not a Consumption or an '
+                              'Elastic Premium plan. ' +
+                              general_switch_msg)
 
     if src_is_premium and dest_is_consumption:
         logger.warning('WARNING: Moving a functionapp from Premium to Consumption might result in loss of '
                        'functionality and cause the app to break. Please ensure the functionapp is compatible '
                        'with a Consumption plan and is not using any features only available in Premium.')
         if not force:
-            raise CLIError('If you want to migrate a functionapp from a Premium to Consumption plan, please '
-                           're-run this command with the \'--force\' flag.')
+            raise RequiredArgumentMissingError('If you want to migrate a functionapp from a Premium to Consumption '
+                                               'plan, please re-run this command with the \'--force\' flag.')
 
 
 def set_functionapp(cmd, resource_group_name, name, **kwargs):
     instance = kwargs['parameters']
     if 'function' not in instance.kind:
-        raise CLIError('Not a function app to update')
+        raise ValidationError('Not a function app to update')
     client = web_client_factory(cmd.cli_ctx)
     return client.web_apps.create_or_update(resource_group_name, name, site_envelope=instance)
 
