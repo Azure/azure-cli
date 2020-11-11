@@ -15,7 +15,8 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
+     read_file_content)
 from azure.cli.core.mock import DummyCli
 
 
@@ -557,6 +558,15 @@ class TestHandleException(unittest.TestCase):
         mock_http_error.response = mock_response
 
         return mock_http_error
+
+
+class TestReadFileContent(unittest.TestCase):
+
+    def test_file_not_found(self):
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaises(FileOperationError) as e:
+            read_file_content("non_existing_file.txt")
+            self.assertEqual(e.errno, 1)
 
 
 if __name__ == '__main__':
