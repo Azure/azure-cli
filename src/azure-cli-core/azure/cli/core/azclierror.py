@@ -92,6 +92,14 @@ class ClientError(AzCLIError):
         telemetry.set_failure(self.error_msg)
         if self.exception_trace:
             telemetry.set_exception(self.exception_trace, '')
+
+
+class UnknownError(AzCLIError):
+    """ Unclear errors, could not know who should be responsible for the errors.
+    DO NOT raise this error class in your codes. """
+    def send_telemetry(self):
+        super().send_telemetry()
+        telemetry.set_failure(self.error_msg)
 # endregion
 
 
@@ -199,7 +207,7 @@ class ValidationError(UserFault):
     pass
 
 
-class UnknownError(UserFault):
+class UnclassifiedUserFault(UserFault):
     """ Fallback of the UserFault related error types.
     Avoid using this class unless the error can not be classified into
     the UserFault related specific error types.
