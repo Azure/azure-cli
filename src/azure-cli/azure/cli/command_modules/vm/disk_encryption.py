@@ -44,7 +44,7 @@ def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
     else:
         exts = vm.resources or []
         r = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                      e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+                                      e.type_properties_type.lower() == ade_ext_info['name'].lower())), None)
     return r
 
 
@@ -156,7 +156,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         settings=public_config,
         auto_upgrade_minor_version=True)
 
-    poller = compute_client.virtual_machine_extensions.create_or_update(
+    poller = compute_client.virtual_machine_extensions.begin_create_or_update(
         resource_group_name, vm_name, extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)
     poller.result()

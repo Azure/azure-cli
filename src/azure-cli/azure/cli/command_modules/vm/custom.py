@@ -625,8 +625,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
                                                                                         'ResourceIdentityType',
                                                                                         'VirtualMachineUpdate')
-    VirtualMachineIdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'VirtualMachineIdentityUserAssignedIdentitiesValue')
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -652,7 +651,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         if external_identities:
             vm.identity.user_assigned_identities = {}
             for identity in external_identities:
-                vm.identity.user_assigned_identities[identity] = VirtualMachineIdentityUserAssignedIdentitiesValue()
+                vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
 
         vm_patch = VirtualMachineUpdate()
         vm_patch.identity = vm.identity
@@ -1228,7 +1227,7 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
 
 def patch_vm(cmd, resource_group_name, vm_name, vm):
     client = _compute_client_factory(cmd.cli_ctx)
-    poller = client.virtual_machines.update(resource_group_name, vm_name, vm)
+    poller = client.virtual_machines.begin_update(resource_group_name, vm_name, vm)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
@@ -1539,7 +1538,7 @@ def set_diagnostics_extension(
                  not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = client.virtual_machine_extensions.delete(resource_group_name, vm_name,
+            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name,
                                                               vm_extension_name)
             LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -1696,7 +1695,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
         client = _compute_client_factory(cmd.cli_ctx)
         VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
         vm_update = VirtualMachineUpdate(identity=vm.identity)
-        return client.virtual_machines.update(resource_group_name, vm_name, vm_update)
+        return client.virtual_machines.begin_update(resource_group_name, vm_name, vm_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
@@ -1972,13 +1971,13 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
 
     # if instance_id, this is a vmss instance
     if instance_id:
-        return client.virtual_machine_scale_set_vms.run_command(resource_group_name, vm_vmss_name, instance_id,
-                                                                RunCommandInput(command_id=command_id, script=scripts,
-                                                                                parameters=run_command_input_parameters))  # pylint: disable=line-too-long
+        return client.virtual_machine_scale_set_vms.begin_run_command(
+            resource_group_name, vm_vmss_name, instance_id,
+            RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
     # otherwise this is a regular vm instance
-    return client.virtual_machines.begin_run_command(resource_group_name, vm_vmss_name,
-                                               RunCommandInput(command_id=command_id, script=scripts,
-                                                               parameters=run_command_input_parameters))
+    return client.virtual_machines.begin_run_command(
+        resource_group_name, vm_vmss_name,
+        RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))
 
 
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
@@ -2281,7 +2280,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                 vmss.identity.user_assigned_identities[identity] = IdentityUserAssignedIdentitiesValue()
         vmss_patch = VirtualMachineScaleSetUpdate()
         vmss_patch.identity = vmss.identity
-        poller = client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_patch)
+        poller = client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_patch)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
@@ -2677,17 +2676,17 @@ def _build_identities_info(identities):
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.deallocate,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.delete,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_delete,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.delete_instances,
@@ -2793,9 +2792,9 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.restart,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_restart,
                            resource_group_name, vm_scale_set_name, instance_ids[0])
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.restart, resource_group_name, vm_scale_set_name,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
                        instance_ids=instance_ids)
 
 
@@ -2816,26 +2815,28 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
 
 def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_ids and len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.start,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
-
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.start,
-                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
+    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    if instance_ids is None:
+        instance_ids = ['*']
+    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_start,
+                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_ids and len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.power_off, resource_group_name,
-                           vm_scale_set_name, instance_id=instance_ids[0], skip_shutdown=skip_shutdown)
-
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.power_off, resource_group_name, vm_scale_set_name,
-                       instance_ids=instance_ids, skip_shutdown=skip_shutdown)
+    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    if instance_ids is None:
+        instance_ids = ['*']
+    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
+                       vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
+    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
 
@@ -3102,7 +3103,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
-                                          type1=extension_name,
+                                          type_properties_type=extension_name,
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,
@@ -3152,7 +3153,7 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
         VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
                                                       operation_group='virtual_machine_scale_sets')
         vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
-        return client.virtual_machine_scale_sets.update(resource_group_name, vmss_name, vmss_update)
+        return client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_update)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
