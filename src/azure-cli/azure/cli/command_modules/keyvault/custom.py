@@ -1104,7 +1104,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
 
     if not file_path and not any([storage_account_name, blob_container_name, token, backup_folder]):
         raise RequiredArgumentMissingError('Please specify --file/-f or --storage-account-name & '
-                                           '--blob-container-name & ----storage-container-SAS-token & --backup-folder')
+                                           '--blob-container-name & --storage-container-SAS-token & --backup-folder')
 
     if file_path:
         with open(file_path, 'rb') as file_in:
