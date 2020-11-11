@@ -70,8 +70,11 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # However, MSAL defaults verify to True, thus overriding ConnectionConfiguration
         # Still not work yet
         from azure.cli.core._debug import change_ssl_cert_verification_track2
-        self.credential_kwargs = {}
-        self.credential_kwargs.update(change_ssl_cert_verification_track2())
+        self._credential_kwargs = {}
+        self._credential_kwargs.update(change_ssl_cert_verification_track2())
+        # Disable ARMHttpLoggingPolicy which logs only allowed headers
+        from azure.core.pipeline.policies import SansIOHTTPPolicy
+        self._credential_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
 
     def _load_msal_cache(self):
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
@@ -85,7 +88,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from msal import PublicClientApplication
         msal_app = PublicClientApplication(authority=authority, client_id=self.client_id,
                                            token_cache=self._load_msal_cache(),
-                                           verify=self.credential_kwargs.get('connection_verify', True))
+                                           verify=self._credential_kwargs.get('connection_verify', True))
         return msal_app
 
     @property
@@ -107,7 +110,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                                   client_id=self.client_id,
                                                   enable_persistent_cache=True,
                                                   allow_unencrypted_cache=self.allow_unencrypted,
-                                                  **self.credential_kwargs)
+                                                  **self._credential_kwargs)
         auth_record = credential.authenticate(scopes=scopes)
         # todo: remove after ADAL token deprecation
         if self._cred_cache:
@@ -127,7 +130,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                               enable_persistent_cache=True,
                                               prompt_callback=prompt_callback,
                                               allow_unencrypted_cache=self.allow_unencrypted,
-                                              **self.credential_kwargs)
+                                              **self._credential_kwargs)
 
             auth_record = credential.authenticate(scopes=scopes)
             # todo: remove after ADAL token deprecation
@@ -150,7 +153,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                                 password=password,
                                                 enable_persistent_cache=True,
                                                 allow_unencrypted_cache=self.allow_unencrypted,
-                                                **self.credential_kwargs)
+                                                **self._credential_kwargs)
         auth_record = credential.authenticate(scopes=scopes)
 
         # todo: remove after ADAL token deprecation
@@ -329,7 +332,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
                                             enable_persistent_cache=True,
                                             allow_unencrypted_cache=self.allow_unencrypted,
-                                            **self.credential_kwargs)
+                                            **self._credential_kwargs)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = \
@@ -350,7 +353,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             logger.info("set AZURE_CLIENT_ID=%s", AZURE_CLI_CLIENT_ID)
             os.environ['AZURE_CLIENT_ID'] = AZURE_CLI_CLIENT_ID
 
-        return EnvironmentCredential(**self.credential_kwargs)
+        return EnvironmentCredential(**self._credential_kwargs)
 
     @staticmethod
     def get_managed_identity_credential(client_id=None):
