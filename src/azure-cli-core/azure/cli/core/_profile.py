@@ -840,14 +840,13 @@ class SubscriptionFinder:
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        from requests.exceptions import InvalidURL
         try:
             if password:
                 token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
             else:  # when refresh account, we will leverage local cached tokens
                 token_entry = context.acquire_token(resource, username, _CLIENT_ID)
-        except InvalidURL as err:
-            _handle_invalid_url(err)
+        except Exception as err:
+            _login_exception_handler(err)
 
         if not token_entry:
             return []
@@ -868,12 +867,11 @@ class SubscriptionFinder:
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
-        from requests.exceptions import InvalidURL
         try:
             token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
                                                                         resource, _CLIENT_ID, None)
-        except InvalidURL as err:
-            _handle_invalid_url(err)
+        except Exception as err:
+            _login_exception_handler(err)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
@@ -884,11 +882,10 @@ class SubscriptionFinder:
 
     def find_through_interactive_flow(self, tenant, resource):
         context = self._create_auth_context(tenant)
-        from requests.exceptions import InvalidURL
         try:
             code = context.acquire_user_code(resource, _CLIENT_ID)
-        except InvalidURL as err:
-            _handle_invalid_url(err)
+        except Exception as err:
+            _login_exception_handler(err)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
@@ -1348,7 +1345,7 @@ def _get_authorization_code(resource, authority_url):
     return results
 
 
-def _handle_invalid_url(ex):
+def _login_exception_handler(ex):
     from requests.exceptions import InvalidURL
     if isinstance(ex, InvalidURL):
         import traceback
