@@ -473,11 +473,6 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
 
 
 def read_file_content(file_path, allow_binary=False):
-    import os
-    if os.path.exists(file_path) is False:
-        from azure.cli.core.azclierror import FileOperationError
-        raise FileOperationError("No such file or directory: " + str(file_path))
-
     from codecs import open as codecs_open
     # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
