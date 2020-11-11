@@ -65,11 +65,6 @@ type: command
 short-summary: Update the throughput of the Cassandra keyspace under an Azure Cosmos DB account.
 """
 
-helps['cosmosdb cassandra keyspace throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the Cassandra keyspace between autoscale and manually provisioned.
-"""
-
 helps['cosmosdb cassandra table'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Cassandra tables.
@@ -125,11 +120,6 @@ examples:
     text: |
         az cosmosdb cassandra table throughput update --account-name MyAccount --keyspace-name MyKeyspace --name MyTable --resource-group MyResourceGroup --throughput "500"
     crafted: true
-"""
-
-helps['cosmosdb cassandra table throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the Cassandra table between autoscale and manually provisioned.
 """
 
 helps['cosmosdb cassandra table update'] = """
@@ -289,11 +279,6 @@ type: command
 short-summary: Update the throughput of the Gremlin database under an Azure Cosmos DB account.
 """
 
-helps['cosmosdb gremlin database throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the Gremlin database between autoscale and manually provisioned.
-"""
-
 helps['cosmosdb gremlin graph'] = """
 type: group
 short-summary: Manage Azure Cosmos DB Gremlin graphs.
@@ -336,11 +321,6 @@ short-summary: Get the throughput of the Gremlin graph under an Azure Cosmos DB 
 helps['cosmosdb gremlin graph throughput update'] = """
 type: command
 short-summary: Update the throughput of the Gremlin graph under an Azure Cosmos DB Gremlin database.
-"""
-
-helps['cosmosdb gremlin graph throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the Gremlin Graph between autoscale and manually provisioned.
 """
 
 helps['cosmosdb gremlin graph update'] = """
@@ -443,11 +423,6 @@ type: command
 short-summary: Update the throughput of the MongoDB collection under an Azure Cosmos DB MongoDB database.
 """
 
-helps['cosmosdb mongodb collection throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the MongoDB collection between autoscale and manually provisioned.
-"""
-
 helps['cosmosdb mongodb collection update'] = """
 type: command
 short-summary: Update an MongoDB collection under an Azure Cosmos DB MongoDB database.
@@ -504,11 +479,6 @@ examples:
     text: |
         az cosmosdb mongodb database throughput update --account-name MyAccount --name MyDatabase --resource-group MyResourceGroup --throughput "500"
     crafted: true
-"""
-
-helps['cosmosdb mongodb database throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the MongoDB database between autoscale and manually provisioned.
 """
 
 helps['cosmosdb network-rule'] = """
@@ -726,11 +696,6 @@ type: command
 short-summary: Update the throughput of the SQL container under an Azure Cosmos DB SQL database.
 """
 
-helps['cosmosdb sql container throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the SQL container between autoscale and manually provisioned.
-"""
-
 helps['cosmosdb sql container update'] = """
 type: command
 short-summary: Update an SQL container under an Azure Cosmos DB SQL database.
@@ -778,11 +743,6 @@ short-summary: Get the throughput of the SQL database under an Azure Cosmos DB a
 helps['cosmosdb sql database throughput update'] = """
 type: command
 short-summary: Update the throughput of the SQL database under an Azure Cosmos DB account.
-"""
-
-helps['cosmosdb sql database throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the SQL database between autoscale and manually provisioned.
 """
 
 helps['cosmosdb sql role'] = """
@@ -934,11 +894,6 @@ short-summary: Get the throughput of the Table under an Azure Cosmos DB account.
 helps['cosmosdb table throughput update'] = """
 type: command
 short-summary: Update the throughput of the Table under an Azure Cosmos DB account.
-"""
-
-helps['cosmosdb table throughput migrate'] = """
-type: command
-short-summary: Migrate the throughput of the Table between autoscale and manually provisioned.
 """
 
 helps['cosmosdb update'] = """
