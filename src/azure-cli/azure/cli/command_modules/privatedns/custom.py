@@ -33,7 +33,12 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     import sys
     from azure.mgmt.privatedns.models import RecordSet
 
-    file_text = read_file_content(file_name)
+    from azure.cli.core.azclierror import FileOperationError
+    try:
+        file_text = read_file_content(file_name)
+    except FileNotFoundError as e:
+        raise FileOperationError(e)
+
     zone_obj = parse_zone_file(file_text, private_zone_name)
     origin = private_zone_name
     record_sets = {}
