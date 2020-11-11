@@ -185,7 +185,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_management_policies')
         g.generic_update_command('update', getter_name='get_management_policy',
                                  getter_type=management_policy_custom_type,
-                                 setter_name='update_management_policy',
+                                 setter_name='update_management_policies',
                                  setter_type=management_policy_custom_type)
         g.custom_command('delete', 'delete_management_policy')
 

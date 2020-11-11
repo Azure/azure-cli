@@ -480,7 +480,7 @@ def delete_management_policy(cmd, client, resource_group_name, account_name):
     return client.delete(resource_group_name, account_name, ManagementPolicyName.DEFAULT)
 
 
-def update_management_policy(cmd, client, resource_group_name, account_name, parameters=None):
+def update_management_policies(cmd, client, resource_group_name, account_name, parameters=None):
     ManagementPolicyName = cmd.get_models('ManagementPolicyName')
     return client.create_or_update(resource_group_name, account_name,
                                    ManagementPolicyName.DEFAULT, properties=parameters)
