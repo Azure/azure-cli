@@ -144,7 +144,7 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
         --time 09:00 --autoscale-workernode-count 5
-  - name: Create a cluster which Relay Outbound and Private Link feature.
+  - name: Create a cluster with Relay Outbound and Private Link feature.
     text: |-
         az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
