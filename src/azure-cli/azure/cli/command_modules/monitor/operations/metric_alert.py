@@ -111,12 +111,12 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
     return instance
 
 
-def create_metric_alert_dimension(dimension_name, operator, value_list):
+def create_metric_alert_dimension(client, dimension_name, operator, value_list):
     values = ' or '.join(value_list)
-    return '{} {} {} {} '.format(_metric_alert_dimension_prefix, dimension_name, operator, values)
+    return '{} {} {} {}'.format(_metric_alert_dimension_prefix, dimension_name, operator, values)
 
 
-def create_metric_alert_condition(condition_type, aggregation, metric_name, operator, metric_namespace='',
+def create_metric_alert_condition(client, condition_type, aggregation, metric_name, operator, metric_namespace='',
                                   dimension_list=None, threshold=None, alert_sensitivity=None,
                                   number_of_evaluation_periods=None, min_failing_periods_to_alert=None,
                                   ignore_data_before=None):
@@ -141,7 +141,7 @@ def create_metric_alert_condition(condition_type, aggregation, metric_name, oper
             dimensions = 'where' + 'and'.join(dimensions)
         condition += dimensions
 
-    return condition
+    return condition.strip()
 
 
 def list_metric_alerts(client, resource_group_name=None):

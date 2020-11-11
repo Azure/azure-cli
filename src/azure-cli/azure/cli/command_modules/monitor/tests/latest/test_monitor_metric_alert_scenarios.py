@@ -269,7 +269,7 @@ class MonitorTests(ScenarioTest):
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     def test_dynamic_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'plan': 'plan1',
@@ -335,10 +335,37 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
-    def test_metric_alert_condition_create(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_condition_create')
+    @VMPreparer(parameter_name='vm1')
+    @VMPreparer(parameter_name='vm2')
+    def test_metric_alert_condition_create(self, resource_group, vm1, vm2):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines'),
+            'vm_id_2': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm2,
+                namespace='Microsoft.Compute',
+                type='virtualMachines')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+
         cond1 = "total \'transactions\' > 5.0 where ResponseType includes Success and ApiName includes GetBlob"
-        dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType --op include -v Success').output
-        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName --op include -v GetBlob').output
+        dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType --op include -v Success').output.strip()
+        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName --op include -v GetBlob').output.strip()
         self.cmd(
             'monitor metrics alert condition create -t static --aggregation total --metric transactions --dimension "{}" "{}" --op GreaterThan --threshold 5'.format(
                 dim1, dim2
@@ -347,13 +374,31 @@ class MonitorTests(ScenarioTest):
                 self.check('@', cond1)
             ]
         )
-        cond2 = "avg 'Percentage Cpu' >< dynamic low 3 of 5 since 2020-11-02T12:11:11+00:00 "
-        self.cmd(
-            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" --op GreaterOrLessThan --window 5 --violation 3 --since 2020-11-02T12:11:11Z --sensitivity low',
+
+        cond2 = "avg 'Percentage Cpu' >< dynamic medium 1 of 6 since 2020-11-02T12:11:11+00:00"
+        condition = self.cmd(
+            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" --op GreaterOrLessThan --window 6 --violation 1 --since 2020-11-02T12:11:11Z --sensitivity medium',
             checks=[
                 self.check('@', cond2)
             ]
-        )
+        ).output.strip()
+
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --description "High CPU" --condition ' + condition,
+            checks=[
+                self.check('description', 'High CPU'),
+                self.check('severity', 2),
+                self.check('autoMitigate', None),
+                self.check('windowSize', '0:05:00'),
+                self.check('evaluationFrequency', '0:01:00'),
+                self.check('length(scopes)', 2),
+                self.check('criteria.allOf[0].alertSensitivity', 'Medium'),
+                self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
+                self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 1.0),
+                self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 6.0),
+                self.check('criteria.allOf[0].operator', 'GreaterOrLessThan'),
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-02T12:11:11+00:00')
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group')
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', parameter_name='resource_group_2')
