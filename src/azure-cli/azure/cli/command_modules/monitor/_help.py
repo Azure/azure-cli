@@ -1411,7 +1411,7 @@ parameters:
   - name: --disabled
     short-summary: Create the rule in a disabled state.
   - name: --condition
-    short-summary: The condition which triggers the rule. 
+    short-summary: The condition which triggers the rule.
                    It can be created by 'az monitor metrics alert condition create' command.
     long-summary: |
         Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC

@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
-from knack.util import CLIError
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+
+from knack.util import CLIError
 
 
 def process_autoscale_create_namespace(cmd, namespace):
@@ -147,7 +148,8 @@ def validate_metrics_alert_dimension(namespace):
 
 
 def validate_metrics_alert_condition(namespace):
-    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import op_conversion, agg_conversion, sens_conversion
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import op_conversion, \
+        agg_conversion, sens_conversion
     for keyword, value in agg_conversion.items():
         if namespace.aggregation == value:
             namespace.aggregation = keyword
@@ -193,11 +195,9 @@ def validate_metrics_alert_condition(namespace):
             ))
 
         if namespace.min_failing_periods_to_alert > namespace.number_of_evaluation_periods:
-            raise InvalidArgumentValueError('Parameter --violation {} should be less than or equal to parameter --window {}.'.format(
-                namespace.min_failing_periods_to_alert,
-                namespace.number_of_evaluation_periods
-            ))
-
+            raise InvalidArgumentValueError(
+                'Parameter --violation {} should be less than or equal to parameter --window {}.'.format(
+                    namespace.min_failing_periods_to_alert, namespace.number_of_evaluation_periods))
     else:
         raise NotImplementedError()
 

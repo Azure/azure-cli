@@ -174,8 +174,9 @@ def load_arguments(self, _):
         c.argument('min_failing_periods_to_alert', options_list=['--violation'], type=int,
                    help='Violation can be the number of violations to trigger an alert. '
                         'Range: 1-6. It should be less than or equal to window.')
-        c.argument('ignore_data_before', options_list=['--since'], arg_type=get_datetime_type(
-                    help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+        c.argument('ignore_data_before', options_list=['--since'],
+                   arg_type=get_datetime_type(
+                       help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
 
     # endregion
 

@@ -310,7 +310,6 @@ class MonitorTests(ScenarioTest):
                 self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
             ])
 
-
         self.cmd(
             'monitor metrics alert update -g {rg} -n {alert} --severity 3 --description "High Or Low CPU" --add-action ag2 test=best --remove-action ag1 --remove-conditions cond0 --evaluation-frequency 5m --window-size 15m --tags foo=boo --auto-mitigate --add-condition "avg Percentage CPU >< dynamic medium 1 of 6 since 2020-10-01T10:23:00.000Z"',
             checks=[
