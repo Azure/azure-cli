@@ -41,6 +41,7 @@ from azure.mgmt.web.models import KeyInfo, DefaultErrorResponseException
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
+from azure.cli.core.azclierror import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
@@ -2387,7 +2388,7 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        err_msg = "'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        err_msg = "'{}' app doesn't exist in resource group {}".format(name, resource_group_name)
         raise ResourceNotFoundError(err_msg)
     server_farm_id = webapp.server_farm_id
     location = webapp.location
