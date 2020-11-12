@@ -79,7 +79,7 @@ def acr_scope_map_update(cmd,
                          resource_group_name=None,
                          description=None):
 
-    if not (add_repository or remove_repository or description):
+    if not (add_repository or remove_repository or add_gateway or remove_gateway or description):
         raise CLIError('No scope map properties to update.')
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)

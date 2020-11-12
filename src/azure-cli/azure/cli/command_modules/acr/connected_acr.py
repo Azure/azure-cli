@@ -8,6 +8,7 @@ from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from ._client_factory import cf_acr_registries, cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
@@ -22,12 +23,12 @@ from ._utils import (
 )
 
 class ConnectedRegistryModes(Enum):
-    mirror = 'mirror'
+    MIRROR = 'mirror'
     REGISTRY = 'registry'
 
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'messages/read', 'messages/write']
 REPO_SCOPES_BY_MODE = {
-    ConnectedRegistryModes.mirror.value: ['content/read', 'metadata/read'],
+    ConnectedRegistryModes.MIRROR.value: ['content/read', 'metadata/read'],
     ConnectedRegistryModes.REGISTRY.value: ['content/read', 'content/write', 'content/delete',
                                             'metadata/read', 'metadata/write']
 }
@@ -58,35 +59,38 @@ def acr_connected_acr_create(cmd,
         cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    parent_id = None
     if parent:
-        #TODO parent sync token
-        #parent_registry, parent_resource_group_name = get_registry_by_name(
-        #    cmd.cli_ctx, parent, resource_group_name)
-        parent_id = "{}/connectedRegistries/{}".format(registry.id, parent)
-        #sync_token_id = _create_sync_token(cmd, parent_resource_group_name, parent_registry,
+        try:
+            parent = acr_connected_acr_show(cmd, client, parent, registry_name, resource_group_name)
+        except ResourceNotFoundError as e:
+            raise CLIError("The parent connected registry '{}' could not be found.".format(parent))
+        if parent.mode.lower() != ConnectedRegistryModes.REGISTRY.value and parent.mode.lower() != mode.lower():
+            raise CLIError("Cannot create the connected registry '{}' with mode '{}'".format(connected_acr_name, mode) +
+                           "when the connected registry parent '{}' has mode '{}'.".format(registry_name, parent.mode) +
+                           "For more information on connected registries, please visit https://aka.ms/acr/onprem.")
+
+        _update_parent_sync_token(cmd, resource_group_name, registry_name,
+                                  connected_acr_name, parent.parent.sync_properties.token_id)
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
                                            connected_acr_name, repositories, mode)
     else:
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
                                            connected_acr_name, repositories, mode)
 
-    SyncProperties, ParentProperties = cmd.get_models('SyncProperties', 'ParentProperties')
-    parent_properties = ParentProperties(
-        id=parent_id,
-        sync_properties=SyncProperties(
-            token_id=sync_token_id,
-            schedule=sync_schedule,
-            message_ttl=sync_message_ttl,
-            sync_window=sync_window
-        )
-    )
-
-    ConnectedRegistry, LoggingProperties = cmd.get_models('ConnectedRegistry', 'LoggingProperties')
+    ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
+        'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties')
     connected_acr_create_parameters = ConnectedRegistry(
         provisioning_state=None,
         mode=mode,
-        parent=parent_properties,
+        parent=ParentProperties(
+            id=parent.id if parent else None,
+            sync_properties=SyncProperties(
+                token_id=sync_token_id,
+                schedule=sync_schedule,
+                message_ttl=sync_message_ttl,
+                sync_window=sync_window
+            )
+        ),
         client_token_ids=client_token_ids,
         logging=LoggingProperties(
             log_level=log_level,
@@ -94,17 +98,20 @@ def acr_connected_acr_create(cmd,
         )
     )
 
-    try:
-        if not registry.data_endpoint_enabled:
-            from .custom import acr_update_custom
-            acr_update_custom(cmd, cf_acr_registries(cmd.cli_ctx), data_endpoint_enabled=True)
+    if not registry.data_endpoint_enabled:
+        from .custom import acr_update_custom
+        acr_update_custom(cmd, cf_acr_registries(cmd.cli_ctx), data_endpoint_enabled=True)
 
+    try:
         return client.create(subscription_id=subscription_id,
                              resource_group_name=resource_group_name,
                              registry_name=registry_name,
                              connected_registry_name=connected_acr_name,
                              connected_registry_create_parameters=connected_acr_create_parameters)
-    except ValidationError as e:
+    except Exception as e:
+        # Delete the previously created sync scope map. TODO Should I remove the scopeMap from the parent?
+        scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+        scope_map_client.delete(resource_group_name, registry_name, SYNC_SCOPE_MAP_NAME.format(connected_acr_name))
         raise CLIError(e)
 
 
@@ -117,7 +124,6 @@ def acr_connected_acr_update(cmd,
                              add_repository=None,
                              remove_repository=None,
                              resource_group_name=None,
-                             mode=None,
                              sync_schedule=None,
                              sync_window=None,
                              log_level=None,
@@ -128,11 +134,6 @@ def acr_connected_acr_update(cmd,
         cmd, registry_name, resource_group_name)
 
     current_connected_acr = acr_connected_acr_show(cmd, client, connected_acr_name, registry_name, resource_group_name)
-    current_mode = current_connected_acr.mode
-    client_token_ids = current_connected_acr.client_token_ids
-    sync_token_id = current_connected_acr.parent.sync_properties.token_id
-    sync_audit_logs_enabled = sync_audit_logs_enabled if sync_audit_logs_enabled is not None else \
-                              current_connected_acr.logging.audit_log_status
 
     # Add or remove from the current client token id list
     add_client_token_set = set(add_client_token_ids) if add_client_token_ids else set()
@@ -143,31 +144,33 @@ def acr_connected_acr_update(cmd,
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-token-ids and --remove-client-token-ids arguments.\n{}'.format(errors))
-    client_token_ids = list(set(client_token_ids).union(add_client_token_set).difference(remove_client_token_set))
 
     ConnectedRegistryUpdateParameters, SyncProperties, LoggingProperties = cmd.get_models(
                 'ConnectedRegistryUpdateParameters', 'SyncProperties', 'LoggingProperties')
-    sync_properties = SyncProperties(
-        token_id=sync_token_id,
-        schedule=sync_schedule,
-        message_ttl=sync_message_ttl,
-        sync_window=sync_window
-    )
-    logging_properties = LoggingProperties(
-        log_level=log_level,
-        audit_log_status=sync_audit_logs_enabled
-    )
     connected_acr_update_parameters = ConnectedRegistryUpdateParameters(
-        sync_properties=sync_properties,
-        logging=logging_properties,
-        client_token_ids=client_token_ids
+        sync_properties=SyncProperties(
+            token_id=current_connected_acr.parent.sync_properties.token_id,
+            schedule=sync_schedule,
+            message_ttl=sync_message_ttl,
+            sync_window=sync_window
+        ),
+        logging=LoggingProperties(
+            log_level=log_level,
+            audit_log_status=sync_audit_logs_enabled if sync_audit_logs_enabled is not None else \
+                            current_connected_acr.logging.audit_log_status
+        ),
+        client_token_ids=list(
+            set(current_connected_acr.client_token_ids).
+            union(add_client_token_set).
+            difference(remove_client_token_set)
+        )
     )
 
     # Add or remove the repo permissions from the sync token scope map id
-    if add_repository or remove_repository or mode:
-        mode = mode if mode else current_mode
+    if add_repository or remove_repository:
         _ = _update_sync_token_scope_map(cmd, resource_group_name, registry_name, connected_acr_name,
-                                         sync_token_id, add_repository, remove_repository, mode)
+                                         current_connected_acr.parent.sync_properties.token_id,
+                                         current_connected_acr.mode, add_repository, remove_repository)
     try:
         return client.update(resource_group_name=resource_group_name,
                              registry_name=registry_name,
@@ -218,11 +221,12 @@ def acr_connected_acr_list(cmd,
                            resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-    connected_acr_list = client.list(resource_group_name, registry_name)
-
+    connected_acr_list = list(client.list(resource_group_name, registry_name))
+    result = []
     if not cascading:
         if parent:
-            result = [registry for registry in connected_acr_list if registry.parent.id.endswith(parent)]
+            result = [registry for registry in connected_acr_list \
+                if registry.parent.id is not None and registry.parent.id.endswith(parent)]
         else:
             result = [registry for registry in connected_acr_list if not registry.parent.id]
     elif parent:
@@ -233,22 +237,14 @@ def acr_connected_acr_list(cmd,
                 "childs": []
             }
             if registry.name == parent:
-                parent_id = registry.id
+                root_parent_id = registry.id
         for registry in connected_acr_list:
             parent_id = registry.parent.id
-            if not parent_id.isspace():
+            if parent_id and not parent_id.isspace():
                 family_tree[parent_id]["childs"].append(registry.id)
-
-        result = _get_descendancy(family_tree, parent_id)
-    return result
-
-
-def _get_descendancy(family_tree, parent_id):
-    connected_registry = family_tree[parent_id]["registry"]
-    childs = connected_registry[parent_id]['childs']
-    result = [connected_registry]
-    for child_id in childs:
-        result.extend(_get_descendancy(family_tree, child_id))
+        result = _get_descendancy(family_tree, root_parent_id)
+    else:
+        result = connected_acr_list
     return result
 
 
@@ -290,7 +286,6 @@ def _create_sync_token(cmd,
         raise CLIError("usage error: --mode supports only 'registry' and 'mirror' values.")
     repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
     gateway_actions_list = [[connected_acr_name] + DEFAULT_GATEWAY_SCOPE]
-
     try:
         message = "Created by connected registry sync token: {}"
         scope_map_id = create_default_scope_map(cmd, resource_group_name, registry_name,
@@ -315,14 +310,43 @@ def _create_sync_token(cmd,
         raise CLIError(e)
 
 
+def _get_descendancy(family_tree, parent_id):
+    childs = family_tree[parent_id]['childs']
+    result = []
+    for child_id in childs:
+        result = [family_tree[child_id]["registry"]]
+        descendancy = _get_descendancy(family_tree, child_id)
+        if descendancy:
+            result.extend(descendancy)
+    return result
+
+
+def _update_parent_sync_token(cmd,
+                              resource_group_name,
+                              registry_name,
+                              connected_acr_name,
+                              parent_sync_token_id):
+    from .scope_map import acr_scope_map_update
+    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+    sync_token = get_token_from_id(cmd, parent_sync_token_id)
+    scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
+    gateway_actions_list = [[connected_acr_name] + DEFAULT_GATEWAY_SCOPE]
+
+    acr_scope_map_update(cmd, scope_map_client,
+                         registry_name,
+                         scope_map_name,
+                         resource_group_name=resource_group_name,
+                         add_gateway=gateway_actions_list)
+
+
 def _update_sync_token_scope_map(cmd,
                                  resource_group_name,
                                  registry_name,
                                  connected_acr_name,
                                  sync_token_id,
+                                 mode,
                                  add_repository=None,
-                                 remove_repository=None,
-                                 mode=None):
+                                 remove_repository=None):
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
     sync_token = get_token_from_id(cmd, sync_token_id)
     current_scope_map = get_scope_map_from_id(cmd, sync_token.scope_map_id)

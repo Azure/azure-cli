@@ -525,7 +525,7 @@ def create_default_scope_map(cmd,
         # for command idempotency, if the actions are the same, we accept it
         if sorted(existing_scope_map.actions) == sorted(actions):
             return existing_scope_map.id
-        raise CLIError('The default scope map was already configured with different repository permissions.'
+        raise CLIError('The default scope map was already configured with different repository permissions.' +
                        '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
                        .format(registry_name, scope_map_name))
     except CloudError:

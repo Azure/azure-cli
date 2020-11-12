@@ -109,7 +109,8 @@ def connected_acr_list_output_format(result):
             "name": name,
             "id": _get_value(reg, 'id'),
             "status": _get_value(reg, 'statusDetails'),
-            "parent": parent_name,
+            "parent_name": parent_name,
+            "parent_id": parent_id,
             "loginName": _get_value(reg, 'loginServer', 'host'),
             "childs": []
         }
@@ -117,27 +118,28 @@ def connected_acr_list_output_format(result):
     parents = []
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
-        if parent_id.isspace():
+        if parent_id.isspace() or parent_id not in family_tree:
             parents.append(_get_value(reg, 'id'))
         else:
             family_tree[parent_id]["childs"].append(_get_value(reg, 'id'))
 
     result_list_format = []
     for parent_id in parents:
-        _recursive_format_list_acr_childs(family_tree, parent_id, result_list_format)
+        result_list_format.extend(_recursive_format_list_acr_childs(family_tree, parent_id))
 
     return _output_format(result_list_format, _connected_acr_list_format_group)
 
 
-def _recursive_format_list_acr_childs(family_tree, parent_id, output_list, level=""):
+def _recursive_format_list_acr_childs(family_tree, parent_id, level=""):
     connected_registry = family_tree[parent_id]
     childs = connected_registry['childs']
-    if connected_registry['parent']:
+    if connected_registry['parent_id'] in family_tree:
         level += "-"
         connected_registry['name'] = level + connected_registry['name']
-    output_list.append(connected_registry)
+    result = [connected_registry]
     for child_id in childs:
-        _recursive_format_list_acr_childs(family_tree, child_id, output_list, level)
+        result.extend(_recursive_format_list_acr_childs(family_tree, child_id, level))
+    return result
 
 
 def helm_list_output_format(result):
@@ -309,7 +311,7 @@ def _connected_acr_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('STATUS', _get_value(item, 'status')),
-        ('PARENT', _get_value(item, 'parent')),
+        ('PARENT', _get_value(item, 'parent_name')),
         ('LOGIN NAME', _get_value(item, 'loginName'))
     ])
 
