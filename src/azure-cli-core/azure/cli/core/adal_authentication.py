@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import datetime
 import time
 import requests
 import adal
@@ -75,6 +76,13 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)
 
         _, token, full_token, _ = self._get_token(_try_scopes_to_resource(scopes))
+
+        try:
+            expires_on = full_token.get('expiresOn', full_token['expires_on'])
+            return AccessToken(token, int(datetime.datetime.strptime(expires_on, '%Y-%m-%d %H:%M:%S.%f').timestamp()))
+        except:  # pylint: disable=bare-except
+            pass  # To avoid crashes due to some unexpected token formats
+
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
         except KeyError:  # needed to deal with differing unserialized MSI token payload
