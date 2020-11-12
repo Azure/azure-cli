@@ -283,8 +283,7 @@ def _populate_sql_container_definition(sql_container_resource,
                                        indexing_policy,
                                        unique_key_policy,
                                        partition_key_version,
-                                       conflict_resolution_policy,
-                                       analytical_storage_ttl):
+                                       conflict_resolution_policy):
     if all(arg is None for arg in
            [partition_key_path, partition_key_version, default_ttl, indexing_policy, unique_key_policy, conflict_resolution_policy]):
         return False
@@ -309,9 +308,6 @@ def _populate_sql_container_definition(sql_container_resource,
     if conflict_resolution_policy is not None:
         sql_container_resource.conflict_resolution_policy = conflict_resolution_policy
 
-    if analytical_storage_ttl is not None:
-        sql_container_resource.analytical_storage_ttl = analytical_storage_ttl
-
     return True
 
 
@@ -327,8 +323,7 @@ def cli_cosmosdb_sql_container_create(client,
                                       throughput=None,
                                       max_throughput=None,
                                       unique_key_policy=None,
-                                      conflict_resolution_policy=None,
-                                      analytical_storage_ttl=None):
+                                      conflict_resolution_policy=None):
     """Creates an Azure Cosmos DB SQL container """
     sql_container_resource = SqlContainerResource(id=container_name)
 
@@ -338,8 +333,7 @@ def cli_cosmosdb_sql_container_create(client,
                                        indexing_policy,
                                        unique_key_policy,
                                        partition_key_version,
-                                       conflict_resolution_policy,
-                                       analytical_storage_ttl)
+                                       conflict_resolution_policy)
 
     options = _get_options(throughput, max_throughput)
 
@@ -360,8 +354,7 @@ def cli_cosmosdb_sql_container_update(client,
                                       database_name,
                                       container_name,
                                       default_ttl=None,
-                                      indexing_policy=None,
-                                      analytical_storage_ttl=None):
+                                      indexing_policy=None):
     """Updates an Azure Cosmos DB SQL container """
     logger.debug('reading SQL container')
     sql_container = client.get_sql_container(resource_group_name, account_name, database_name, container_name)
@@ -379,8 +372,7 @@ def cli_cosmosdb_sql_container_update(client,
                                           indexing_policy,
                                           None,
                                           None,
-                                          None,
-                                          analytical_storage_ttl):
+                                          None):
         logger.debug('replacing SQL container')
 
     sql_container_create_update_resource = SqlContainerCreateUpdateParameters(

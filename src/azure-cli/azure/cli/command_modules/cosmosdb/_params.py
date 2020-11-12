@@ -152,7 +152,6 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400. Omit this parameter if the database has shared throughput unless the container should have dedicated throughput.')
-        c.argument('analytical_storage_ttl', options_list=['--analytical-storage-ttl', '-t'], type=int, help='Analytical TTL, when analytical storage is enabled.')
 
 # SQL stored procedure
     with self.argument_context('cosmosdb sql stored-procedure') as c:
@@ -184,15 +183,15 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb sql role definition') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('role_definition_id', options_list=['--id', '-i'], validator=validate_role_definition_id, help="Role Definition Id")
-        c.argument('role_definition_body', options_list=['--body', '-b'], validator=validate_role_definition_body, completer=FilesCompleter(), help="Role Definition body, you can enter it as a string or as a file, e.g., --body @rdbody-file.json")
+        c.argument('role_definition_body', options_list=['--body', '-b'], validator=validate_role_definition_body, completer=FilesCompleter(), help="Role Definition body with Id (Optional for create), DataActions or Permissions, Type (Default is CustomRole), and AssignableScopes.  You can enter it as a string or as a file, e.g., --body @rdbody-file.json")
 
 # SQL role assignment
     with self.argument_context('cosmosdb sql role assignment') as c:
         c.argument('account_name', account_name_type, id_part=None)
-        c.argument('role_definition_id', options_list=['--role-definition-id', '-d'], validator=validate_fully_qualified_role_definition_id, help="Role Definition Id")
+        c.argument('role_definition_id', options_list=['--role-definition-id', '-d'], validator=validate_fully_qualified_role_definition_id, help="Role Definition Id assigned in the Role Assignment")
         c.argument('role_assignment_id', options_list=['--role-assignment-id', '-i'], validator=validate_role_assignment_id, help="Role Assignment Id")
-        c.argument('scope', validator=validate_scope, options_list=['--scope', '-s'], help="Scope")
-        c.argument('principal_id', options_list=['--principal-id', '-p'], help="Principal Id")
+        c.argument('scope', validator=validate_scope, options_list=['--scope', '-s'], help="Scope assigned in the Role Assignment")
+        c.argument('principal_id', options_list=['--principal-id', '-p'], help="Principal Id assigned in the Role Assignment")
 
 # MongoDB
     with self.argument_context('cosmosdb mongodb database') as c:
