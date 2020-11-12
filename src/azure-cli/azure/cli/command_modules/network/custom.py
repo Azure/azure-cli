@@ -2046,11 +2046,17 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
-    from azure.cli.core.azclierror import FileOperationError
+    from azure.cli.core.azclierror import FileOperationError, UnknownError
     try:
         file_text = read_file_content(file_name)
-    except FileNotFoundError as e:
-        raise FileOperationError(e)
+    except FileNotFoundError:
+        raise FileOperationError("No such file: " + str(file_name))
+    except IsADirectoryError:
+        raise FileOperationError("Is a directory: " + str(file_name))
+    except PermissionError:
+        raise FileOperationError("Permission denied: " + str(file_name))
+    except OSError as e:
+        raise UnknownError(e)
 
     zone_obj = parse_zone_file(file_text, zone_name)
 
