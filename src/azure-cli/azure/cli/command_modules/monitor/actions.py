@@ -61,7 +61,7 @@ def get_period_type(as_timedelta=False):
         match = re.match(regex, value.lower())
         match_len = match.span(0)
         if match_len != tuple([0, len(value)]):
-            raise InvalidArgumentValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
+            raise ValueError('PERIOD should be of the form "##h##m##s" or ISO8601')
         # simply return value if a valid ISO8601 string is supplied
         if match.span(1) != tuple([-1, -1]) and match.span(5) != tuple([-1, -1]):
             return value
