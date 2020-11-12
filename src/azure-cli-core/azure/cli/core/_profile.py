@@ -1352,4 +1352,4 @@ def _login_exception_handler(ex):
         from azure.cli.core.azclierror import UnclassifiedUserFault
         logger.debug('Invalid url when acquiring token\n%s', traceback.format_exc())
         raise UnclassifiedUserFault(error_msg='Invalid url when acquiring token',
-                           recommendation='Please make sure the cloud is registered with valid url')
+                                    recommendation='Please make sure the cloud is registered with valid url')
