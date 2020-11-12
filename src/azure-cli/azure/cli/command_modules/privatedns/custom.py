@@ -27,7 +27,7 @@ def list_privatedns_zones(cmd, resource_group_name=None):
     return client.list()
 
 
-# pylint: disable=too-many-statements, too-many-locals
+# pylint: disable=too-many-statements, too-many-locals, too-many-branches
 def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
