@@ -42,7 +42,10 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import (ResourceNotFoundError,
+                                       ArgumentUsageError,
+                                       ClientRequestError,
+                                       InvalidArgumentValueError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -773,9 +776,9 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
         except CloudError as ex:
             if 'was not found' in ex.message:
                 raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
-            raise CLIError(ex.message)
+            raise ClientRequestError(ex.message)
         return identity.client_id
-    raise CLIError("Cannot parse identity name from provided resource id {}.".format(resource_id))
+    raise InvalidArgumentValueError("Cannot parse identity name from provided resource id {}.".format(resource_id))
 
 
 # pylint: disable=too-many-locals
@@ -1898,7 +1901,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     identity = None
     if not enable_managed_identity and assign_identity:
-        raise CLIError('--assign-identity can only be specified when --enable-managed-identity is specified')
+        raise ArgumentUsageError('--assign-identity can only be specified when --enable-managed-identity is specified')
     if enable_managed_identity and not assign_identity:
         identity = ManagedClusterIdentity(
             type="SystemAssigned"
