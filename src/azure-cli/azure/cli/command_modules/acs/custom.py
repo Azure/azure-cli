@@ -42,6 +42,7 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
+from azure.cli.core.azclierror import ResourceNotFoundError
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -771,7 +772,7 @@ def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
                                                                resource_name=identity_name)
         except CloudError as ex:
             if 'was not found' in ex.message:
-                raise CLIError("Identity {} not found.".format(resource_id))
+                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
             raise CLIError(ex.message)
         return identity.client_id
     raise CLIError("Cannot parse identity name from provided resource id {}.".format(resource_id))

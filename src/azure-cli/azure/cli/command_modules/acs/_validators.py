@@ -15,6 +15,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 import azure.cli.core.keys as keys
 
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterPropertiesAutoScalerProfile
@@ -400,4 +401,4 @@ def validate_assign_identity(namespace):
             return
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_identity):
-            raise CLIError("--assign-identity is not a valid Azure resource ID.")
+            raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")
