@@ -150,7 +150,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     ext = VirtualMachineExtension(
         location=vm.location,  # pylint: disable=no-member
         publisher=extension['publisher'],
-        virtual_machine_extension_type=extension['name'],
+        type_properties_type=extension['name'],
         protected_settings=None if use_new_ade else ade_legacy_private_config,
         type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
         settings=public_config,
@@ -253,7 +253,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         settings=public_config,
         auto_upgrade_minor_version=True)
 
-    poller = compute_client.virtual_machine_extensions.create_or_update(resource_group_name,
+    poller = compute_client.virtual_machine_extensions.begin_create_or_update(resource_group_name,
                                                                         vm_name,
                                                                         extension['name'], ext)
     LongRunningOperation(cmd.cli_ctx)(poller)

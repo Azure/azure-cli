@@ -2685,11 +2685,9 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_delete,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
-
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.delete_instances,
+    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_delete_instances,
                        resource_group_name, vm_scale_set_name, instance_ids)
 
 
@@ -2791,11 +2789,12 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    if instance_ids and len(instance_ids) == 1:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_restart,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
+    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    if instance_ids is None:
+        instance_ids = ['*']
+    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
-                       instance_ids=instance_ids)
+                       vm_instance_i_ds=instance_ids)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -2809,7 +2808,7 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
 
     vmss.sku.capacity = new_capacity
     vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
@@ -3255,7 +3254,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         for i, s in enumerate(data_snapshots):
             if not is_valid_resource_id(data_snapshots[i]):
                 data_snapshots[i] = resource_id(
-                    subscription=client.config.subscription_id, resource_group=resource_group_name,
+                    subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                     namespace='Microsoft.Compute', type='snapshots', name=s)
     source = GalleryArtifactSource(managed_image=ManagedArtifact(id=managed_image))
     profile = ImageVersionPublishingProfile(exclude_from_latest=exclude_from_latest, end_of_life_date=end_of_life_date,
@@ -3334,7 +3333,7 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source['id'])
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
-    return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,
+    return sdk_no_wait(no_wait, client.gallery_image_versions.begin_create_or_update, resource_group_name, gallery_name,
                        gallery_image_name, gallery_image_version_name, **kwargs)
 # endregion
 
@@ -3401,7 +3400,7 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
                                     auto_replace_on_failure=auto_replace_on_failure, license_type=license_type,
                                     sku=sku, tags=tags)
 
-    return client.create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
+    return client.begin_create_or_update(resource_group_name, host_group_name, host_name, parameters=host_params)
 
 
 def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
@@ -3524,17 +3523,18 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
 def create_disk_encryption_set(cmd, client, resource_group_name, disk_encryption_set_name,
                                key_url, source_vault, encryption_type=None, location=None, tags=None, no_wait=False):
     from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     DiskEncryptionSet, EncryptionSetIdentity, KeyVaultAndKeyReference, SourceVault = cmd.get_models(
         'DiskEncryptionSet', 'EncryptionSetIdentity', 'KeyVaultAndKeyReference', 'SourceVault')
     encryption_set_identity = EncryptionSetIdentity(type='SystemAssigned')
     if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                    namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     source_vault = SourceVault(id=source_vault)
     keyVault_and_key_reference = KeyVaultAndKeyReference(source_vault=source_vault, key_url=key_url)
     disk_encryption_set = DiskEncryptionSet(location=location, tags=tags, identity=encryption_set_identity,
                                             active_key=keyVault_and_key_reference, encryption_type=encryption_type)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, disk_encryption_set_name,
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, disk_encryption_set_name,
                        disk_encryption_set)
 
 
@@ -3560,8 +3560,10 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
 
 # region Disk Access
 def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
-    return sdk_no_wait(no_wait, client.create_or_update,
-                       resource_group_name, disk_access_name,
+    DiskAccess = cmd.get_models('DiskAccess')
+    disk_access = DiskAccess(location=location)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name, disk_access_name, disk_access,
                        location=location, tags=tags)
 
 
