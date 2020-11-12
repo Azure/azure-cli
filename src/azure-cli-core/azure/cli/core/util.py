@@ -96,8 +96,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = azclierror.ValidationError(error_msg)
 
         elif isinstance(ex, CLIError):
-            # TODO: Fine-grained analysis here for Unknown error
-            az_error = azclierror.UnknownError(error_msg)
+            # TODO: Fine-grained analysis here
+            az_error = azclierror.UnclassifiedUserFault(error_msg)
 
         elif isinstance(ex, AzureError):
             if extract_common_error_message(ex):

@@ -321,8 +321,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
                                   process_blob_upload_batch_parameters)
+        from ._exception_handler import file_related_exception_handler
         g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output)
+            'download', 'get_blob_to_path', table_transformer=transform_blob_output,
+            exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
@@ -336,7 +338,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
         g.storage_custom_command_oauth('upload', 'upload_blob',
-                                       doc_string_source='blob#BlockBlobService.create_blob_from_path')
+                                       doc_string_source='blob#BlockBlobService.create_blob_from_path',
+                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
@@ -561,6 +564,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
         from ._format import transform_file_directory_result, transform_boolean_for_table, transform_file_output
         from ._transformers import transform_url
+        from ._exception_handler import file_related_exception_handler
         g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output,
                                  doc_string_source='file#FileService.list_directories_and_files')
@@ -576,8 +580,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('update', 'set_file_properties')
         g.storage_command(
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command('download', 'get_file_to_path')
-        g.storage_command('upload', 'create_file_from_path')
+        g.storage_command('download', 'get_file_to_path', exception_handler=file_related_exception_handler)
+        g.storage_command('upload', 'create_file_from_path', exception_handler=file_related_exception_handler)
         g.storage_command('metadata show', 'get_file_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_file_metadata')
