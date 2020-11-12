@@ -35,7 +35,8 @@ header = copyright_header + b"""from msrest.serialization import Model
 from msrest.exceptions import HttpOperationError
 """
 
-track2_header = copyright_header + b"""import msrest.serialization
+track2_header = copyright_header + b"""import datetime
+import msrest.serialization
 from typing import Dict, List, Optional, Union
 from msrest.exceptions import HttpOperationError
 """
