@@ -230,7 +230,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     track2_packages = [
-        'azure.mgmt.keyvault'
+        'azure.mgmt.keyvault',
+        'azure.mgmt.storage'
     ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):
