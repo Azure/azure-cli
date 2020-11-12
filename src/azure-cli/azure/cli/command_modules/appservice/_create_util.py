@@ -11,9 +11,11 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.web.models import SkuDescription
 
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
-                         NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, DOTNET_RUNTIME_NAME,
-                         DOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT)
+                         NODE_VERSIONS, NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME,
+                         ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
+                         PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
+                         NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT,
+                         DOTNET_TARGET_FRAMEWORK_STRING)
 
 logger = get_logger(__name__)
 
@@ -73,11 +75,14 @@ def zip_contents_from_dir(dirPath, lang):
 def get_runtime_version_details(file_path, lang_name):
     version_detected = None
     version_to_create = None
-    if lang_name.lower() == NETCORE_RUNTIME_NAME:
+    if lang_name.lower() == DOTNET_RUNTIME_NAME:
+        version_detected = DOTNET_VERSION_DEFAULT
+        version_to_create = DOTNET_VERSION_DEFAULT
+    elif lang_name.lower() == NETCORE_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_netcore_version(file_path)[0]
         version_to_create = detect_netcore_version_tocreate(version_detected)
-    elif lang_name.lower() == DOTNET_RUNTIME_NAME:
+    elif lang_name.lower() == ASPDOTNET_RUNTIME_NAME:
         # method returns list in DESC, pick the first
         version_detected = parse_dotnet_version(file_path)
         version_to_create = detect_dotnet_version_tocreate(version_detected)
@@ -187,11 +192,17 @@ def detect_dotnet_lang(csproj_path):
     parsed_file = ET.parse(csproj_path)
     root = parsed_file.getroot()
     version_lang = ''
+    version_full = ''
     for target_ver in root.iter('TargetFramework'):
+        version_full = target_ver.text
+        version_full = ''.join(version_full.split()).lower()
         version_lang = re.sub(r'([^a-zA-Z\s]+?)', '', target_ver.text)
+
+    if version_full and version_full.startswith(DOTNET_TARGET_FRAMEWORK_STRING):
+        return DOTNET_RUNTIME_NAME
     if 'netcore' in version_lang.lower():
         return NETCORE_RUNTIME_NAME
-    return DOTNET_RUNTIME_NAME
+    return ASPDOTNET_RUNTIME_NAME
 
 
 def parse_dotnet_version(file_path):
@@ -261,7 +272,7 @@ def detect_dotnet_version_tocreate(detected_ver):
         return detected_ver
     if detected_ver < min_ver:
         return min_ver
-    return DOTNET_VERSION_DEFAULT
+    return ASPDOTNET_VERSION_DEFAULT
 
 
 def detect_node_version_tocreate(detected_ver):
@@ -274,7 +285,7 @@ def detect_node_version_tocreate(detected_ver):
     if major_ver <= 11:
         node_ver = NODE_VERSION_DEFAULT
     else:
-        node_ver = '12.9'
+        node_ver = NODE_VERSION_NEWER
     return node_ver
 
 
