@@ -21,6 +21,12 @@ logger = get_logger(__name__)
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
     def __init__(self, token_retriever, external_tenant_token_retriever=None):
+        # DO NOT call _token_retriever from outside azure-cli-core. It is only available for user or
+        # Service Principal credential (AdalAuthentication), but not for Managed Identity credential
+        # (MSIAuthenticationWrapper).
+        # To retrieve a raw token, either call
+        #   - Profile.get_raw_token, which is more direct
+        #   - AdalAuthentication.get_token, which is designed for Track 2 SDKs
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
@@ -119,9 +125,13 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         except requests.exceptions.HTTPError as err:
             logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
-            raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                     'Get Token request returned http error: {}, reason: {}'
-                                     .format(err.response.status, err.response.reason))
+            try:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned http error: {}, reason: {}'
+                                         .format(err.response.status, err.response.reason))
+            except AttributeError:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned: {}'.format(err.response))
         except TimeoutError as err:
             logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
