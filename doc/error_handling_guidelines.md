@@ -17,14 +17,14 @@ For the new commands authoring, here are what need to be done to get onboard. __
 The newly designed error types are provided in [azure/cli/core/azclierror.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/azclierror.py), where the error types are defined in three layers with their structures shown below. `AzCLIError` is the base layer for all the newly defined error types. The second layer includes the main categories (`UserFault`, `ClientError`, `ServiceError`), which can be shown to users and also can be used for Telemetry analysis. __The third layer includes the specific error types, which are the ones command group authors can use when raising errors.__
 
 ```
-| -- AzCLIError                                 # [Base Layer]: DO NOT use it in command groups
-|    | -- UserFault                             # [Second Layer]: DO NOT use it in command groups
-|    |    | -- CommandNotFoundError             # [Third Layer]: Can be used in command groups
+| -- AzCLIError                             # [Base Layer]: DO NOT use it in command groups
+|    | -- UserFault                         # [Second Layer]: DO NOT use it in command groups
+|    |    | -- CommandNotFoundError         # [Third Layer]: Can be used in command groups
 |    |    | -- UnrecognizedArgumentError
 |    |    | -- RequiredArgumentMissingError
 |    |    | -- MutuallyExclusiveArgumentError
 |    |    | -- InvalidArgumentValueError
-|    |    | -- ArgumentParseError               # fallback of argument related errors
+|    |    | -- ArgumentUsageError               # fallback of argument related errors
 |    |    | -- BadRequestError
 |    |    | -- UnauthorizedError
 |    |    | -- ForbiddenError
@@ -35,8 +35,7 @@ The newly designed error types are provided in [azure/cli/core/azclierror.py](ht
 |    |    | -- ValidationError                  # fallback of validation related errors
 |    |    | -- FileOperationError
 |    |    | -- ManualInterrupt
-|    |    | -- ... More ...
-|    |    | -- UnknownError                     # fallback of UserFault related errors
+|    |    | -- UnclassifiedUserFault            # fallback of UserFault related errors
 |    | -- ClientError
 |    |    | -- CLIInternalError
 |    | -- ServiceError
@@ -45,8 +44,8 @@ The newly designed error types are provided in [azure/cli/core/azclierror.py](ht
 
 To summarize, here is a list of rules for command group authors to select a proper error type.
 - __DO NOT__ use the error types defined in the base layer and the second layer
+- Avoid using the fallback error types unless you can not find a specific one for your case
 - Consider defining a new error type if you can not find a proper one when it is a general error
-- Avoid using the fallback error types unless you can not find a proper one and the error is not general enough for a new error type
 
 ### Apply the Error Type
 
@@ -99,6 +98,7 @@ Below are the specific DOs and DON'Ts when writing the error messages. PRs viola
 
 __DOs__
 - Use the capital letter ahead of an error message.
+- Provide actionable message with argument suggestion. (e.g, Instead of using `resource group is missing, please provide a resource group name`, use `resource group is missing, please provide a resource group name by --resource-group`)
 
 __DON'Ts__
 - Do not control the style of an error message. (e.g, the unnecessary `'\n'` and the colorization.)

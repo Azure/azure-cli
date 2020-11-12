@@ -1050,7 +1050,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
     def test_find_subscriptions_with_invalid_authority_url(self, _get_authorization_code_mock, mock_auth_context):
         from requests.exceptions import InvalidURL
-        from azure.cli.core.azclierror import UnknownError
+        from azure.cli.core.azclierror import UnclassifiedUserFault
 
         def mock_acquire(*args, **kwargs):
             raise InvalidURL(request='http://some.unknown.endpoints')
@@ -1065,11 +1065,11 @@ class TestProfile(unittest.TestCase):
         }
 
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: None)
-        with self.assertRaisesRegexp(UnknownError, 'Invalid url when acquiring token'):
+        with self.assertRaisesRegexp(UnclassifiedUserFault, 'Invalid url when acquiring token'):
             finder.find_from_user_account(self.user1, 'bar', None, 'http://goo-resource')
-        with self.assertRaisesRegexp(UnknownError, 'Invalid url when acquiring token'):
+        with self.assertRaisesRegexp(UnclassifiedUserFault, 'Invalid url when acquiring token'):
             finder.find_through_authorization_code_flow(None, 'https://management.core.windows.net/', 'https:/some_aad_point/common')
-        with self.assertRaisesRegexp(UnknownError, 'Invalid url when acquiring token'):
+        with self.assertRaisesRegexp(UnclassifiedUserFault, 'Invalid url when acquiring token'):
             finder.find_through_interactive_flow(None, 'https://management.core.windows.net/')
 
     @mock.patch('azure.cli.core.adal_authentication.MSIAuthenticationWrapper', autospec=True)
