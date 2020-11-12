@@ -345,9 +345,9 @@ examples:
 
 helps['functionapp config ssl sync'] = """
 type: command
-short-summary: Sync a KV imported certificate on a function app with its object in KV.
+short-summary: Sync an imported certificate on a function app with its object in KV.
 examples:
-  - name: Sync a certificate with the its KV object.
+  - name: Sync a certificate with its KV object.
     text: az functionapp config ssl sync --resource-group MyResourceGroup --name MyFunctionApp --certificate-name MyCertificateName --key-vault MyKeyVault
 """
 
@@ -1324,9 +1324,9 @@ examples:
 
 helps['webapp config ssl sync'] = """
 type: command
-short-summary: Sync a KV imported certificate on a webapp with its object in KV.
+short-summary: Sync an imported certificate on a webapp with its object in KV.
 examples:
-  - name: Sync a certificate with the its KV object.
+  - name: Sync a certificate with the KV object.
     text: az webapp config ssl sync --resource-group MyResourceGroup --name MyWebapp --certificate-name MyCertificateName --key-vault MyKeyVault
 """
 
