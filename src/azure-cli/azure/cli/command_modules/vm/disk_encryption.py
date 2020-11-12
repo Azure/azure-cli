@@ -432,7 +432,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type1=extension['name'],
+                                          type_properties_type=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
@@ -449,7 +449,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
 
-    poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)
 
@@ -472,7 +472,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type1=extension['name'],
+                                          type_properties_type=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
@@ -484,7 +484,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
         extensions = vmss.virtual_machine_profile.extension_profile.extensions
 
     ade_extension = [x for x in extensions if
-                     x.type1.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
+                     x.type_properties_type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
     if not ade_extension:
         from knack.util import CLIError
         raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
@@ -495,7 +495,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
     # Avoid unnecessary permission error
     vmss.virtual_machine_profile.storage_profile.image_reference = None
 
-    poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)
 

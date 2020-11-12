@@ -207,7 +207,7 @@ def load_command_table(self, _):
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
         g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
+        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
         g.command('list-associated-resources', 'list_associated_resources', min_api='2020-06-30')
@@ -218,7 +218,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_accesses')
         g.wait_command('wait')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
@@ -250,7 +250,7 @@ def load_command_table(self, _):
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
         g.custom_command('list', 'list_snapshots')
         g.command('revoke-access', 'revoke_access')
@@ -289,7 +289,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_for_generic_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        g.command('assess-patches', 'assess_patches', min_api='2020-06-01')
+        g.command('assess-patches', 'begin_assess_patches', min_api='2020-06-01')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')

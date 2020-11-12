@@ -3124,8 +3124,10 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
     client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.set_orchestration_service_state,
-                       resource_group_name, vm_scale_set_name, action)
+    OrchestrationServiceStateInput = cmd.get_models('OrchestrationServiceStateInput')
+    state_input = OrchestrationServiceStateInput(service_name=service_name, action=action)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_set_orchestration_service_state,
+                       resource_group_name, vm_scale_set_name, state_input)
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
@@ -3544,10 +3546,11 @@ def list_disk_encryption_sets(cmd, client, resource_group_name=None):
     return client.list()
 
 
-def update_disk_encryption_set(instance, client, resource_group_name, key_url=None, source_vault=None):
+def update_disk_encryption_set(cmd, instance, client, resource_group_name, key_url=None, source_vault=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     if not is_valid_resource_id(source_vault):
-        source_vault = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+        source_vault = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                    namespace='Microsoft.KeyVault', type='vaults', name=source_vault)
     if key_url:
         instance.active_key.key_url = key_url
@@ -3561,10 +3564,9 @@ def update_disk_encryption_set(instance, client, resource_group_name, key_url=No
 # region Disk Access
 def create_disk_access(cmd, client, resource_group_name, disk_access_name, location=None, tags=None, no_wait=False):
     DiskAccess = cmd.get_models('DiskAccess')
-    disk_access = DiskAccess(location=location)
+    disk_access = DiskAccess(location=location, tags=tags)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name, disk_access_name, disk_access,
-                       location=location, tags=tags)
+                       resource_group_name, disk_access_name, disk_access)
 
 
 def list_disk_accesses(cmd, client, resource_group_name=None):
@@ -3575,8 +3577,9 @@ def list_disk_accesses(cmd, client, resource_group_name=None):
 
 def set_disk_access(cmd, client, parameters, resource_group_name, disk_access_name, tags=None, no_wait=False):
     location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-    return sdk_no_wait(no_wait, client.create_or_update,
-                       resource_group_name, disk_access_name,
-                       location=location, tags=tags)
+    DiskAccess = cmd.get_models('DiskAccess')
+    disk_access = DiskAccess(location=location, tags=tags)
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name, disk_access_name, disk_access)
 
 # endregion
