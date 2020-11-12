@@ -29,16 +29,14 @@ def monitor_exception_handler(ex):
         # work around for issue: https://github.com/Azure/azure-sdk-for-python/issues/1556
         try:
             error_payload = ex.response.json()
-        except ValueError:
-            raise CLIError(ex)
-        error_payload = {k.lower(): v for k, v in error_payload.items()}
-        if 'error' in error_payload:
-            error_payload = error_payload['error']
-        if 'code' in error_payload and 'message' in error_payload:
+            error_payload = {k.lower(): v for k, v in error_payload.items()}
+            if 'error' in error_payload:
+                error_payload = error_payload['error']
             message = '{}.'.format(error_payload['message']) if error_payload['message'] else 'Operation failed.'
             code = '[Code: "{}"]'.format(error_payload['code']) if error_payload['code'] else ''
             raise CLIError('{} {}'.format(message, code))
-        raise CLIError(ex)
+        except (ValueError, KeyError, TypeError, IndexError):
+            raise CLIError(ex)
     import sys
     from six import reraise
     reraise(*sys.exc_info())
