@@ -22,7 +22,7 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg, validate_assign_identity)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
     CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
@@ -208,6 +208,7 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
+        c.argument('assign_identity', type=str, validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])

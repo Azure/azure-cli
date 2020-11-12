@@ -369,6 +369,9 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
   - name: --node-osdisk-diskencryptionset-id -d
     type: string
     short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.

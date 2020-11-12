@@ -43,6 +43,10 @@ import requests
 from azure.cli.command_modules.acs import acs_client, proxy
 from azure.cli.command_modules.acs._params import regions_in_preview, regions_in_prod
 from azure.cli.core.api import get_config_dir
+from azure.cli.core.azclierror import (ResourceNotFoundError,
+                                       ArgumentUsageError,
+                                       ClientRequestError,
+                                       InvalidArgumentValueError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -71,6 +75,7 @@ from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentit
 from azure.mgmt.containerservice.v2020_09_01.models import AgentPool
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterSKU
 from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterWindowsProfile
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterIdentityUserAssignedIdentitiesValue
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -90,6 +95,7 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 from ._client_factory import cf_managed_clusters
+from ._client_factory import get_msi_client
 
 from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
                        _parse_comma_separated_list)
@@ -755,6 +761,25 @@ def _generate_properties(api_version, orchestrator_type, orchestrator_version, m
     if windows_profile is not None:
         properties["windowsProfile"] = windows_profile
     return properties
+
+
+def _get_user_assigned_identity_client_id(cli_ctx, resource_id):
+    msi_client = get_msi_client(cli_ctx)
+    pattern = '/subscriptions/.*?/resourcegroups/(.*?)/providers/microsoft.managedidentity/userassignedidentities/(.*)'
+    resource_id = resource_id.lower()
+    match = re.search(pattern, resource_id)
+    if match:
+        resource_group_name = match.group(1)
+        identity_name = match.group(2)
+        try:
+            identity = msi_client.user_assigned_identities.get(resource_group_name=resource_group_name,
+                                                               resource_name=identity_name)
+        except CloudError as ex:
+            if 'was not found' in ex.message:
+                raise ResourceNotFoundError("Identity {} not found.".format(resource_id))
+            raise ClientRequestError(ex.message)
+        return identity.client_id
+    raise InvalidArgumentValueError("Cannot parse identity name from provided resource id {}.".format(resource_id))
 
 
 # pylint: disable=too-many-locals
@@ -1665,6 +1690,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
                enable_managed_identity=False,
+               assign_identity=None,
                attach_acr=None,
                enable_aad=False,
                aad_admin_group_object_ids=None,
@@ -1761,17 +1787,25 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
         # if service_principal_profile is None, then this cluster is an MSI cluster,
-        # and the service principal does not exist. For now, We just tell user to grant the
+        # and the service principal does not exist. Two cases:
+        # 1. For system assigned identity, we just tell user to grant the
         # permission after the cluster is created to keep consistent with portal experience.
-        if service_principal_profile is None:
-            logger.warning('The cluster is an MSI cluster, please manually grant '
-                           'Network Contributor role to the system assigned identity '
-                           'after the cluster is created, see '
+        # 2. For user assigned identity, we can grant needed permission to
+        # user provided user assigned identity before creating managed cluster.
+        if service_principal_profile is None and not assign_identity:
+            logger.warning('The cluster is an MSI cluster using system assigned identity, '
+                           'please manually grant Network Contributor role to the '
+                           'system assigned identity after the cluster is created, see '
                            'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
         else:
             scope = vnet_subnet_id
+            identity_client_id = ""
+            if assign_identity:
+                identity_client_id = _get_user_assigned_identity_client_id(cmd.cli_ctx, assign_identity)
+            else:
+                identity_client_id = service_principal_profile.client_id
             if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                        service_principal_profile.client_id, scope=scope):
+                                        identity_client_id, scope=scope):
                 logger.warning('Could not create a role assignment for subnet. '
                                'Are you an Owner on this subscription?')
 
@@ -1879,10 +1913,21 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
     identity = None
-    if enable_managed_identity:
+    if not enable_managed_identity and assign_identity:
+        raise ArgumentUsageError('--assign-identity can only be specified when --enable-managed-identity is specified')
+    if enable_managed_identity and not assign_identity:
         identity = ManagedClusterIdentity(
             type="SystemAssigned"
         )
+    elif enable_managed_identity and assign_identity:
+        user_assigned_identity = {
+            assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+        }
+        identity = ManagedClusterIdentity(
+            type="UserAssigned",
+            user_assigned_identities=user_assigned_identity
+        )
+
     mc = ManagedCluster(
         location=location,
         tags=tags,
