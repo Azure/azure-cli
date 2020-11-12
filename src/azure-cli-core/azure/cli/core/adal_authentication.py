@@ -77,12 +77,11 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
         _, token, full_token, _ = self._get_token(_try_scopes_to_resource(scopes))
 
-        if 'expiresOn' in full_token:
-            try:
-                return AccessToken(token, int(
-                    datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f').timestamp()))
-            except:  # pylint: disable=bare-except
-                pass  # To avoid crashes due to some unexpected token formats
+        try:
+            return AccessToken(token, int(
+                datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f').timestamp()))
+        except:  # pylint: disable=bare-except
+            pass  # To avoid crashes due to some unexpected token formats
 
         try:
             return AccessToken(token, int(full_token['expiresIn'] + time.time()))
