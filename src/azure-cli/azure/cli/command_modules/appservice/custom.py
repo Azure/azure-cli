@@ -2387,7 +2387,8 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        err_msg = "'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
+        raise ResourceNotFoundError(err_msg)
     server_farm_id = webapp.server_farm_id
     location = webapp.location
 
