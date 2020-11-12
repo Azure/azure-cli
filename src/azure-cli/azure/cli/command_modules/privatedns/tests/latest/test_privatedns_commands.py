@@ -974,6 +974,22 @@ class PrivateDnsZoneImportTest(ScenarioTest):
             self._test_PrivateDnsZone('404zone.com', '/root/')
             self.assertEqual(e.errno, 1)
 
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_operation_error_windows')
+    def test_Private_Dns_import_file_operation_error_windows(self, resource_group):
+        import sys
+        if sys.platform != 'win32':
+            self.skip('This test should run on Windows platform')
+
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+            self._test_PrivateDnsZone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        # Difference with Linux platform while reading a directory
+        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+            self._test_PrivateDnsZone('404zone.com', '.')
+            self.assertEqual(e.errno, 1)
+
     @ResourceGroupPreparer(name_prefix='cli_private_dns_zone1_import')
     def test_Private_Dns_Zone1_Import(self, resource_group):
         self._test_PrivateDnsZone('zone1.com', 'zone1.txt')
