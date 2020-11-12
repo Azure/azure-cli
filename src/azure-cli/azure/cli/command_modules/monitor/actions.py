@@ -147,7 +147,8 @@ class ConditionAction(argparse.Action):
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) < 5:
-            raise InvalidArgumentValueError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
+            raise InvalidArgumentValueError(
+                '--condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
         operator = get_operator_map()[values[-4]]
         threshold = int(values[-3])
@@ -177,7 +178,7 @@ class AlertAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise InvalidArgumentValueError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
             return RuleWebhookAction(service_uri=uri, properties=properties)
         raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
@@ -192,7 +193,7 @@ class AlertRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise InvalidArgumentValueError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('{} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
@@ -213,9 +214,9 @@ class AutoscaleAddAction(argparse._AppendAction):
             try:
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
-                raise InvalidArgumentValueError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
+                raise InvalidArgumentValueError('{} webhook URI [KEY=VALUE ...]'.format(option_string))
             return WebhookNotification(service_uri=uri, properties=properties)
-        raise InvalidArgumentValueError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
+        raise InvalidArgumentValueError('{} TYPE KEY [ARGS]'.format(option_string))
 
 
 class AutoscaleRemoveAction(argparse._AppendAction):
@@ -228,7 +229,7 @@ class AutoscaleRemoveAction(argparse._AppendAction):
         # but it could be enhanced to do additional validation in the future.
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
-            raise InvalidArgumentValueError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))
+            raise InvalidArgumentValueError('{} TYPE KEY [KEY ...]'.format(option_string))
         return values[1:]
 
 
@@ -242,9 +243,9 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             AutoscaleConditionLexer, AutoscaleConditionParser, AutoscaleConditionValidator)
 
         # pylint: disable=line-too-long
-        usage = 'usage error: --condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
-                '                         [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
-                '                         [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
+        usage = '--condition ["NAMESPACE"] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD\n' \
+                '            [where DIMENSION {==,!=} VALUE [or VALUE ...]\n' \
+                '            [and   DIMENSION {==,!=} VALUE [or VALUE ...] ...]]'
 
         string_val = ' '.join(values)
 
@@ -275,7 +276,7 @@ class AutoscaleScaleAction(argparse.Action):  # pylint: disable=protected-access
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) != 2:
-            raise InvalidArgumentValueError('usage error: --scale {in,out,to} VALUE[%]')
+            raise InvalidArgumentValueError('--scale {in,out,to} VALUE[%]')
         dir_val = values[0]
         amt_val = values[1]
         scale_type = None
@@ -307,13 +308,13 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
                                                                 self.deserialize_object(type_name, type_properties),
                                                                 option_string)
         except KeyError:
-            raise InvalidArgumentValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
+            raise InvalidArgumentValueError('the type "{}" is not recognizable.'.format(type_name))
         except TypeError:
             raise InvalidArgumentValueError(
-                'usage error: Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
+                'Failed to parse "{}" as object of type "{}".'.format(' '.join(values), type_name))
         except ValueError as ex:
             raise InvalidArgumentValueError(
-                'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
+                'Failed to parse "{}" as object of type "{}". {}'.format(
                     ' '.join(values), type_name, str(ex)))
 
     def deserialize_object(self, type_name, type_properties):
@@ -393,8 +394,8 @@ class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
                                                  http_trigger_url=type_properties[3],
                                                  use_common_alert_schema=useCommonAlertSchema)
             else:
-                raise ValueError('The type "{}" is not recognizable.'.format(type_name))
+                raise InvalidArgumentValueError('The type "{}" is not recognizable.'.format(type_name))
 
         except IndexError:
-            raise InvalidArgumentValueError('usage error: --action {}'.format(syntax[type_name]))
+            raise InvalidArgumentValueError('--action {}'.format(syntax[type_name]))
         return receiver
