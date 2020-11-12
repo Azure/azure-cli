@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer)
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
@@ -53,7 +53,7 @@ class StorageImmutabilityPolicy(ScenarioTest):
                 JMESPathCheck('immutabilityPeriodSinceCreationInDays', 1)]).get_output_in_json().get('etag')
 
         # cannot delete locked policy
-        with self.assertRaises(CloudError):
+        with self.assertRaises(HttpResponseError):
             self.cmd('az storage container immutability-policy delete --account-name {} -c {} -g {} '
                      '--if-match {}'.format(storage_account, container_name, resource_group, repr(policy_etag)))
 

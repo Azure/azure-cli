@@ -17,6 +17,11 @@ type: group
 short-summary: Manage storage accounts.
 """
 
+helps['storage account check-name'] = """
+type: command
+short-summary: Check that the storage account name is valid and is not already in use.
+"""
+
 helps['storage account blob-service-properties'] = """
 type: group
 short-summary: Manage the properties of a storage account's blob service.
@@ -256,12 +261,22 @@ short-summary: Manage storage account management policies.
 
 helps['storage account management-policy create'] = """
 type: command
-short-summary: Creates the data policy rules associated with the specified storage account.
+short-summary: Create the data policy rules associated with the specified storage account.
 """
 
 helps['storage account management-policy update'] = """
 type: command
-short-summary: Updates the data policy rules associated with the specified storage account.
+short-summary: Update the data policy rules associated with the specified storage account.
+"""
+
+helps['storage account management-policy show'] = """
+type: command
+short-summary: Get the data policy rules associated with the specified storage account.
+"""
+
+helps['storage account management-policy delete'] = """
+type: command
+short-summary: Delete the data policy rules associated with the specified storage account.
 """
 
 helps['storage account network-rule'] = """
@@ -1151,6 +1166,16 @@ type: group
 short-summary: Manage container immutability policies.
 """
 
+helps['storage container immutability-policy create'] = """
+type: command
+short-summary: Create or update an unlocked immutability policy.
+"""
+
+helps['storage container immutability-policy extend'] = """
+type: command
+short-summary: Extend the immutabilityPeriodSinceCreationInDays of a locked immutabilityPolicy.
+"""
+
 helps['storage container lease'] = """
 type: group
 short-summary: Manage blob storage container leases.
@@ -1159,6 +1184,16 @@ short-summary: Manage blob storage container leases.
 helps['storage container legal-hold'] = """
 type: group
 short-summary: Manage container legal holds.
+"""
+
+helps['storage container legal-hold clear'] = """
+type: command
+short-summary: Clear legal hold tags.
+"""
+
+helps['storage container legal-hold set'] = """
+type: command
+short-summary: Set legal hold tags
 """
 
 helps['storage container legal-hold show'] = """
