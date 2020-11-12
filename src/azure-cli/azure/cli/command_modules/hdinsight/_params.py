@@ -222,7 +222,7 @@ def load_arguments(self, _):
                    arg_group='Resource provider connection',
                    arg_type=get_enum_type(ResourceProviderConnection), help='The resource provider connection type')
         c.argument('enable_private_link', arg_group='Private Link', arg_type=get_three_state_flag(),
-                   help='Indicates whether enable the private link or not.')
+                   help='Indicate whether enable the private link or not.')
 
         # resize
         with self.argument_context('hdinsight resize') as c:
