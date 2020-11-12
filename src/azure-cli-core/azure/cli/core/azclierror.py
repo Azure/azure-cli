@@ -133,8 +133,8 @@ class InvalidArgumentValueError(UserFault):
     pass
 
 
-class ArgumentParseError(UserFault):
-    """ Fallback of the argument parsing related errors.
+class ArgumentUsageError(UserFault):
+    """ Fallback of the argument usage related errors.
     Avoid using this class unless the error can not be classified
     into the Argument related specific error types. """
     pass
