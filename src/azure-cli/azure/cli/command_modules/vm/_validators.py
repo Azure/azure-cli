@@ -7,8 +7,6 @@
 
 import os
 
-from azure.core.exceptions import ResourceNotFoundError
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -24,6 +22,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -1486,7 +1485,6 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
 
 def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
     source_from_vm = False
     try:
@@ -1529,7 +1527,6 @@ def process_image_create_namespace(cmd, namespace):
 
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
-    from msrestazure.azure_exceptions import CloudError
     source_blob_uri = None
     source_disk = None
     source_snapshot = None

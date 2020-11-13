@@ -168,7 +168,8 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
     AccessLevel, GrantAccessData = cmd.get_models('AccessLevel', 'GrantAccessData')
     client = _compute_client_factory(cmd.cli_ctx)
     op = client.disks if is_disk else client.snapshots
-    grant_access_data = GrantAccessData(access=access_level or AccessLevel.read, duration_in_seconds=duration_in_seconds)
+    grant_access_data = GrantAccessData(
+        access=access_level or AccessLevel.read, duration_in_seconds=duration_in_seconds)
     return op.begin_grant_access(resource_group_name, name, grant_access_data)
 
 
@@ -1538,8 +1539,7 @@ def set_diagnostics_extension(
                  not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name,
-                                                              vm_extension_name)
+            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
             LongRunningOperation(cmd.cli_ctx)(poller)
 
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
@@ -2828,8 +2828,8 @@ def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no
     if instance_ids is None:
         instance_ids = ['*']
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
-                       vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
+                       vm_scale_set_name, vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
