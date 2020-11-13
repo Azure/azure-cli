@@ -2046,7 +2046,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
         # Before assigning data reader role, read operation should fail with AAD auth.
         # The exception really depends on the which identity is used to run this testcase.
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Assign data reader role to current user
@@ -2071,7 +2071,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         self.kwargs.update({
             'value': updated_value
         })
-        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
             self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
 
         # Export from appconfig to file should succeed
