@@ -13,14 +13,11 @@ Release History
 **AKS**
 
 * Add ephemeral os functionality (#15673)
-* Engineering improvement: replace addon strings with constants (#15786)
+* Engineering improvement: Replace addon strings with constants (#15786)
 * `az aks install-cli`: Support customize download url (#15794)
-* `az aks browse`: point to Azure Portal Kubernetes resources view if k8s >=1.19 or kube-dashboard not enabled (#15803)
+* `az aks browse`: Point to Azure Portal Kubernetes resources view if k8s >=1.19 or kube-dashboard not enabled (#15803)
 * Support BYO control plane identity (#15862)
-
-**aks submodule**
-
-* : Deprecate dev-spaces commands (#15785)
+[AKS] az aks use-dev-spaces: Indicate that dev-spaces commands are deprecated
 
 **AMS**
 
@@ -32,13 +29,13 @@ Release History
 
 **App Service**
 
-* : fix #13646 - Unable to create App Service Plan in a different resource group to App Service Environment (#15497)
+Fix #13646: Unable to create App Service Plan in a different resource group to App Service Environment (#15497)
 * Fix #11698 #15198 #14862 #15409: az webapp/functionapp config access-restriction add (#15784)
-* `az functionapp create`: Added Node 14 preview support. (#15840)
-* `az functionapp create`: Removed preview flag from custom handlers. (#15840)
-* [BREAKING CHANGE] az functionapp update: Migrating a functionapp from Premium to Consumption plans now requires the '--force' flag. (#15695)
-* `az functionapp update`: Added error message if functionapp migration involves any plans on Linux. (#15695)
-* `az functionapp update`: Added more descriptive error message if functionapp migration fails. (#15695)
+* `az functionapp create`: Add Node 14 preview support. (#15840)
+* `az functionapp create`: Remove preview flag from custom handlers. (#15840)
+* [BREAKING CHANGE] az functionapp update: Migrate a functionapp from Premium to Consumption plans now requires the '--force' flag. (#15695)
+* `az functionapp update`: Add error message if functionapp migration involves any plans on Linux. (#15695)
+* `az functionapp update`: Add more descriptive error message if functionapp migration fails. (#15695)
 
 **ARM**
 
@@ -76,7 +73,7 @@ Release History
 
 * Fix update permission check issue (#15606)
 * Enhancement of vm list-skus table format (#15573)
-* vm host group create: make --platform-fault-domain-count required and update help (#15751)
+* vm host group create: Make --platform-fault-domain-count required and update help (#15751)
 * Support update vm/image version when they use cross tenant images (#15883)
 
 **DPS**
@@ -85,7 +82,7 @@ Release History
 
 **HDInsight**
 
-* : az hdinsight create: Add two parameters `--resource-provider-connection` and `--enable-private-link` to support relay outbound and private link feature. (#15837)
+* az hdinsight create: Add two parameters `--resource-provider-connection` and `--enable-private-link` to support relay outbound and private link feature. (#15837)
 
 **Key Vault**
 
@@ -94,20 +91,20 @@ Release History
 
 **NetAppFiles**
 
-* [BREAKING CHANGE] az netappfiles pool update: Removed service-level from parameters. (#15602)
-* `az netappfiles pool update`: Added optional parameter qos-type. (#15602)
-* `az netappfiles pool create`: Added optional parameter qos-type. (#15602)
-* `az netappfiles volume replication suspend`: Added force-break-replication as optional parameter. (#15602)
-* Add az netappfiles volume replication re-initialize: New command added to re-initialise replication. (#15602)
+* [BREAKING CHANGE] az netappfiles pool update: Remove service-level from parameters. (#15602)
+* `az netappfiles pool update`: Add optional parameter qos-type. (#15602)
+* `az netappfiles pool create`: Add optional parameter qos-type. (#15602)
+* `az netappfiles volume replication suspend`: Add force-break-replication as optional parameter. (#15602)
+* Add az netappfiles volume replication re-initialize: New command is added to re-initialise replication. (#15602)
 * Add az netappfiles volume pool-change: New command to change the pool of a volume. (#15602)
 * Add az netappfiles snapshot policy: New command group with list, delete, update, show, create and volumes commands. (#15602)
 * Add az netappfiles account backup: New command group with show, list and delete commands (#15602)
 * Add az netappfiles volume backups: New command group with show, list, delete, update and create commands. (#15602)
 * Add az netappfiles account backup-policy: New command group with show, list, delete, update and delete commands. (#15602)
-* Add az netappfiles vault list: New command added. (#15602)
-* `az netappfiles account ad add`: Added optional parameters kdc-ip, ad-name, server-root-ca-certificate and backup-operators (#15602)
-* `az netappfiles volumes create`: Added optional parameters snapshot-policy-id, backup-policy-id, backup-enabled, backup-id, policy-enforced, vault-id, kerberos-enabled, throughput-mibps, snapshot-directory-visible, security-style, kerberos5-read-only, kerberos5-read-write, kerberos5i-read-only, kerberos5i-read-write, kerberos5p-read-only, kerberos5p-read-write and has-root-access. (#15602)
-* `az netappfiles volume update`: Added optional parameters vault-id, backup-enabled, backup-policy-id, policy-enforced and throughput-mibps (#15602)
+* Add az netappfiles vault list: New command is added. (#15602)
+* `az netappfiles account ad add`: Add optional parameters kdc-ip, ad-name, server-root-ca-certificate and backup-operators (#15602)
+* `az netappfiles volumes create`: Add optional parameters snapshot-policy-id, backup-policy-id, backup-enabled, backup-id, policy-enforced, vault-id, kerberos-enabled, throughput-mibps, snapshot-directory-visible, security-style, kerberos5-read-only, kerberos5-read-write, kerberos5i-read-only, kerberos5i-read-write, kerberos5p-read-only, kerberos5p-read-write and has-root-access. (#15602)
+* `az netappfiles volume update`: Add optional parameters vault-id, backup-enabled, backup-policy-id, policy-enforced and throughput-mibps (#15602)
 
 **Network**
 
@@ -125,7 +122,7 @@ Release History
 
 **Role**
 
-* `az role assignment create`: Make description, condition, condition_version preview (#15690)
+* `az role assignment create`: Make `--description`, `--condition`, `--condition-version` preview (#15690)
 
 **Security**
 
@@ -133,10 +130,9 @@ Release History
 
 **Storage**
 
-* Fix issue #15600: az storage fs exists: in case fs does not exist ResourceNotFoundError is returned (#15643)
-* Fix issue #15706: The examples for storage container create are incorrect (#15731)
-* `az storage blob delete-batch`: Corrected typo in documentation. (#15843)
-* Migrate from track1 to track2 (#15845)
+* Fix #15600: az storage fs exists: in case fs does not exist ResourceNotFoundError is returned (#15643)
+* Fix #15706: The examples for storage container create are incorrect (#15731)
+* `az storage blob delete-batch`: Correct typo in documentation. (#15843)
 
 2.14.1
 ++++++
