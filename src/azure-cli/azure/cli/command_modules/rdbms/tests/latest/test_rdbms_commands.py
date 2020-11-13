@@ -116,6 +116,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
 
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
                        JMESPathCheck('administratorLogin', admin_login),
