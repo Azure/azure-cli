@@ -134,6 +134,13 @@ Fix #13646: Unable to create App Service Plan in a different resource group to A
 * Fix #15706: The examples for storage container create are incorrect (#15731)
 * `az storage blob delete-batch`: Correct typo in documentation. (#15843)
 
+2.14.2
+++++++
+
+**App Service**
+
+* Fix #15604, #15605: Add Dotnet5 support
+
 2.14.1
 ++++++
 
