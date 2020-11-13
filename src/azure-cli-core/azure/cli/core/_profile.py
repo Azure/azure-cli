@@ -24,7 +24,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -273,6 +272,15 @@ class Profile:
                 if hasattr(s, 'home_tenant_id'):
                     subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
                 if hasattr(s, 'managed_by_tenants'):
+                    if s.managed_by_tenants is None:
+                        # managedByTenants is missing from the response. This is a known service issue:
+                        # https://github.com/Azure/azure-rest-api-specs/issues/9567
+                        # pylint: disable=line-too-long
+                        raise CLIError("Invalid profile is used for cloud '{cloud_name}'. "
+                                       "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>(e.g. 2019-03-01-hybrid)`. "
+                                       "For more information about using Azure CLI with Azure Stack, see "
+                                       "https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2"
+                                       .format(cloud_name=self.cli_ctx.cloud.name))
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
             consolidated.append(subscription_dict)
@@ -559,26 +567,35 @@ class Profile:
                     external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
-            def _retrieve_token():
+            def _retrieve_token(sdk_resource=None):
+                # When called by
+                #   - Track 1 SDK, use `resource` specified by CLI
+                #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for resource %r", token_resource)
+
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                    return self._get_token_from_cloud_shell(resource)
+                    return self._get_token_from_cloud_shell(token_resource)
                 if user_type == _USER:
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                     account[_TENANT_ID], resource)
+                                                                     account[_TENANT_ID], token_resource)
                 use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, token_resource,
                                                                               account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
-            def _retrieve_tokens_from_external_tenants():
+            def _retrieve_tokens_from_external_tenants(sdk_resource=None):
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
+
                 external_tokens = []
                 for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, sub_tenant_id, resource))
+                            username_or_sp_id, sub_tenant_id, token_resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, sub_tenant_id, resource))
+                            username_or_sp_id, token_resource, sub_tenant_id, token_resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -621,6 +638,8 @@ class Profile:
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        logger.debug("Profile.get_raw_token invoked with resource=%r, subscription=%r, tenant=%r",
+                     resource, subscription, tenant)
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
@@ -805,7 +824,11 @@ class SubscriptionFinder:
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
             from azure.cli.core.commands.client_factory import configure_common_settings
+            from azure.cli.core.azclierror import CLIInternalError
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            if client_type is None:
+                raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             client = client_type(credentials, api_version=api_version,
                                  base_url=self.cli_ctx.cloud.endpoints.resource_manager)
@@ -817,10 +840,13 @@ class SubscriptionFinder:
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        if password:
-            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
-        else:  # when refresh account, we will leverage local cached tokens
-            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+        try:
+            if password:
+                token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+            else:  # when refresh account, we will leverage local cached tokens
+                token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
 
         if not token_entry:
             return []
@@ -841,8 +867,11 @@ class SubscriptionFinder:
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
-        token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
-                                                                    resource, _CLIENT_ID, None)
+        try:
+            token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                        resource, _CLIENT_ID, None)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
@@ -853,7 +882,10 @@ class SubscriptionFinder:
 
     def find_through_interactive_flow(self, tenant, resource):
         context = self._create_auth_context(tenant)
-        code = context.acquire_user_code(resource, _CLIENT_ID)
+        try:
+            code = context.acquire_user_code(resource, _CLIENT_ID)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
@@ -1261,6 +1293,12 @@ def _get_authorization_code_worker(authority_url, resource, results):
         results['no_browser'] = True
         return
 
+    # Emit a warning to inform that a browser is opened.
+    # Only show the path part of the URL and hide the query string.
+    logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+                   "If no web browser is available or if the web browser fails to open, use device code flow "
+                   "with `az login --use-device-code`.", url.split('?')[0])
+
     # wait for callback from browser.
     while True:
         web_server.handle_request()
@@ -1305,3 +1343,13 @@ def _get_authorization_code(resource, authority_url):
     if results.get('no_browser'):
         raise RuntimeError()
     return results
+
+
+def _login_exception_handler(ex):
+    from requests.exceptions import InvalidURL
+    if isinstance(ex, InvalidURL):
+        import traceback
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+        logger.debug('Invalid url when acquiring token\n%s', traceback.format_exc())
+        raise UnclassifiedUserFault(error_msg='Invalid url when acquiring token',
+                                    recommendation='Please make sure the cloud is registered with valid url')

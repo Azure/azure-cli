@@ -16,7 +16,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
@@ -129,23 +129,6 @@ def process_secret_set_namespace(cmd, namespace):
     tags.update({'file-encoding': encoding})
     namespace.tags = tags
     namespace.value = content
-
-
-def process_storage_uri(ns):
-    if not ns.storage_resource_uri:
-        if ns.storage_account_name and ns.blob_container_name:
-            ns.storage_resource_uri = 'https://{}.blob.core.windows.net/{}'.format(
-                ns.storage_account_name, ns.blob_container_name
-            )
-            del ns.storage_account_name
-            del ns.blob_container_name
-        else:
-            raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
-                           '--storage-account-name NAME --blob-container-name NAME]')
-    else:
-        if ns.storage_account_name or ns.blob_container_name:
-            raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
-                           'if --storage-resource-uri is specified.')
 
 
 def process_sas_token_parameter(cmd, ns):
@@ -295,6 +278,9 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
+
+    if hsm_name:
+        raise InvalidArgumentValueError('Operation "purge" has not been supported for HSM.')
 
     if not vault_name and not hsm_name:
         raise CLIError('Please specify --vault-name or --hsm-name.')

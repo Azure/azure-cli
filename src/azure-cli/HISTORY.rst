@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.14.1
+++++++
+
+**ARM**
+
+* Hotfix: Add TS multiline string support for template inputs
+
 2.14.0
 ++++++
 

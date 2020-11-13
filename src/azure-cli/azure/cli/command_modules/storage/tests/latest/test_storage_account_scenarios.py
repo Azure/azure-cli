@@ -510,7 +510,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name = self.create_random_name(prefix='clistoragekerbkey', length=24)
         self.kwargs = {'sc': name, 'rg': resource_group}
         self.cmd('storage account create -g {rg} -n {sc} -l eastus2euap --enable-files-aadds')
-        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 2))
+        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 4))
         original_keys = self.cmd('storage account keys list -g {rg} -n {sc} --expand-key-type kerb',
                                  checks=JMESPathCheck('length(@)', 4)).get_output_in_json()
 
@@ -917,7 +917,7 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
     def test_storage_account_update_change_feed(self):
         result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], True)
@@ -1089,7 +1089,6 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_storage_account_private_endpoint(self, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'eastus',
@@ -1135,13 +1134,13 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-        with self.assertRaisesRegexp(CloudError, 'Your connection is already approved. No need to approve again.'):
+        with self.assertRaisesRegexp(CLIError, 'Your connection is already approved. No need to approve again.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
@@ -1192,18 +1191,23 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
-        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+        self.cmd('storage account create -n {sa} -g {rg} -l eastus2euap --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
-                         self.check('sku.name', 'Standard_GZRS'),
-                         self.check('failoverInProgress', None)])
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
-            self.check('name', '{sa}'),
-            self.check('sku.name', 'Standard_GZRS'),
             self.check('geoReplicationStats.canFailover', True),
             self.check('failoverInProgress', None)
         ])
 
+        time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
