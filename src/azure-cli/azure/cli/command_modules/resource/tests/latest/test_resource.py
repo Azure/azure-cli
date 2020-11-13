@@ -710,7 +710,6 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    @live_only()
     def test_create_template_specs(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
@@ -737,7 +736,6 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    @live_only()
     def test_create_template_specs_with_artifacts(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
@@ -759,9 +757,9 @@ class TemplateSpecsTest(ScenarioTest):
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
-            self.check('artifacts[0].path', 'artifacts' + os.sep + 'createResourceGroup.json'),
-            self.check('artifacts[1].path', 'artifacts' + os.sep + 'createKeyVault.json'),
-            self.check('artifacts[2].path', 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
+            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup\.json'),
+            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault\.json'),
+            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret\.json')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -774,7 +772,6 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    @live_only()
     def test_update_template_specs(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-update-template-spec', 60)
@@ -818,9 +815,9 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
-                 self.check('artifacts[0].path', 'artifacts' + os.sep + 'createResourceGroup.json'),
-                 self.check('artifacts[1].path', 'artifacts' + os.sep + 'createKeyVault.json'),
-                 self.check('artifacts[2].path', 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
+                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup\.json'),
+                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault\.json'),
+                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret\.json')
                  ])
 
         # clean up
@@ -881,7 +878,6 @@ class TemplateSpecsTest(ScenarioTest):
 class TemplateSpecsExportTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    @live_only()
     def test_export_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         dir_name = self.create_random_name('TemplateSpecExport', 30)
