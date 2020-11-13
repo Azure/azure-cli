@@ -17,7 +17,7 @@ Release History
 * `az aks install-cli`: Support customize download url (#15794)
 * `az aks browse`: Point to Azure Portal Kubernetes resources view if k8s >=1.19 or kube-dashboard not enabled (#15803)
 * Support BYO control plane identity (#15862)
-[AKS] az aks use-dev-spaces: Indicate that dev-spaces commands are deprecated
+`az aks use-dev-spaces`: Indicate that dev-spaces commands are deprecated
 
 **AMS**
 
@@ -29,7 +29,7 @@ Release History
 
 **App Service**
 
-Fix #13646: Unable to create App Service Plan in a different resource group to App Service Environment (#15497)
+* Fix #13646: Unable to create App Service Plan in a different resource group to App Service Environment (#15497)
 * Fix #11698 #15198 #14862 #15409: az webapp/functionapp config access-restriction add (#15784)
 * `az functionapp create`: Add Node 14 preview support. (#15840)
 * `az functionapp create`: Remove preview flag from custom handlers. (#15840)
