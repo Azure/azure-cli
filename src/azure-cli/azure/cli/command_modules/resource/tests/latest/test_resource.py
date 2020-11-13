@@ -757,9 +757,9 @@ class TemplateSpecsTest(ScenarioTest):
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
-            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup\.json'),
-            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault\.json'),
-            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret\.json')
+            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -815,9 +815,9 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
-                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup\.json'),
-                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault\.json'),
-                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret\.json')
+                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
+                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
+                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
                  ])
 
         # clean up
