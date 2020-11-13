@@ -199,6 +199,17 @@ class ManualInterrupt(UserFault):
     pass
 
 
+# ARM template related error types
+class InvalidTemplateError(UserFault):
+    """ ARM template validation fails. It could be caused by incorrect template files or parameters """
+    pass
+
+
+class DeploymentError(UserFault):
+    """ ARM template deployment fails. Template file is valid, and error occurs in deployment. """
+    pass
+
+
 # Validation related error types
 class ValidationError(UserFault):
     """ Fallback of the errors in validation functions.
