@@ -78,7 +78,7 @@ def _mock_resource_client(cli_ctx, client_type, **kwargs):
                 mock_sa.name = name
                 mock_sa.resource_group = rg
                 mock_sa.location = location
-                mock_sa.sku.tier.value = tier
+                mock_sa.sku.tier = tier
                 return mock_sa
             all_mocks = [
                 _get_mock_sa('sa1', 'rg1', 'eastus', 'Standard'),
