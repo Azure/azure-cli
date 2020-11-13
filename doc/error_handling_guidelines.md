@@ -36,6 +36,8 @@ The newly designed error types are provided in [azure/cli/core/azclierror.py](ht
 |    |    | -- FileOperationError
 |    |    | -- ManualInterrupt
 |    |    | -- UnclassifiedUserFault            # fallback of UserFault related errors
+|    |    | -- InvalidTemplateError
+|    |    | -- DeploymentError
 |    | -- ClientError
 |    |    | -- CLIInternalError
 |    | -- ServiceError
