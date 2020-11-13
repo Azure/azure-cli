@@ -3022,7 +3022,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
-     if max_surge:
+    if max_surge:
         instance.upgrade_settings.max_surge = max_surge
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
