@@ -394,6 +394,7 @@ def validate_label(label):
 
     return {kv[0]: kv[1]}
 
+
 def validate_max_surge(namespace):
     """validates parameters like max surge are postive integers or percents. less strict than RP"""
     if namespace.max_surge is None:

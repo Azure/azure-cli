@@ -147,6 +147,7 @@ class VnetSubnetIdNamespace:
     def __init__(self, vnet_subnet_id):
         self.vnet_subnet_id = vnet_subnet_id
 
+
 class MaxSurgeNamespace:
     def __init__(self, max_surge):
         self.max_surge = max_surge

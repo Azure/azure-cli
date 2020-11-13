@@ -3142,7 +3142,7 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                            'to enable cluster with min-count and max-count.')
         instance.min_count = int(min_count)
         instance.max_count = int(max_count)
-    
+
     if not instance.upgrade_settings:
         instance.upgrade_settings = AgentPoolUpgradeSettings()
 
