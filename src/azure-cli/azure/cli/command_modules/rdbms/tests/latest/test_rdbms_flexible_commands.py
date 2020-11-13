@@ -866,7 +866,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         if database_engine == 'mysql':
             location = self.mysql_location
         else:
-            location = self.postgre_location
+            location = self.postgres_location
 
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
