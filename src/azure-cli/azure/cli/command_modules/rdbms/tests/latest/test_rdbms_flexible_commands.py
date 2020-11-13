@@ -845,6 +845,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
 
+
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
     postgres_location = 'eastus'
@@ -862,13 +863,13 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
     def _test_flexible_server_local_context(self, database_engine, resource_group):
         from knack.util import CLIError
-
-        if not self.cli_ctx.local_context.is_on:
-            self.cmd('local-context on')
+        if database_engine == 'mysql':
+            location = self.mysql_location
+        else:
+            location = self.postgre_location
 
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        
-        
+
         self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
         self.cli_ctx.local_context.set(['all'], 'location', location)
 
