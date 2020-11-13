@@ -674,7 +674,7 @@ def create_origin_group(client: OriginGroupsOperations,
                                        ResourceReference)
 
     health_probe_settings = HealthProbeParameters(probe_path=probe_path,
-                                                  probe_method=probe_method,
+                                                  probe_request_type=probe_method,
                                                   probe_protocol=probe_protocol,
                                                   probe_interval_in_seconds=probe_interval)
 
@@ -733,8 +733,33 @@ def update_origin_group(client: OriginGroupsOperations,
                                        ResponseBasedOriginErrorDetectionParameters,
                                        ResourceReference)
 
+    # Get existing health probe settings:
+    existing = client.get(resource_group_name,
+                          profile_name,
+                          endpoint_name,
+                          name)
+    # Allow removing properties explicitly by specifying as empty string, or
+    # update without modifying by not specifying (value is None).
+    if probe_path == '':
+        probe_path = None
+    elif probe_path is None:
+        probe_path = existing.health_probe_settings.probe_path
+    if probe_method == '':
+        probe_method = None
+    elif probe_method is None:
+        probe_method = existing.health_probe_settings.probe_request_type
+    if probe_protocol == '':
+        probe_protocol = None
+    elif probe_protocol is None:
+        probe_protocol = existing.health_probe_settings.probe_protocol
+    if probe_interval == '':
+        probe_interval = None
+    elif probe_interval is None:
+        probe_interval = existing.health_probe_settings.probe_interval_in_seconds
+    origins = origins or existing.origins
+
     health_probe_settings = HealthProbeParameters(probe_path=probe_path,
-                                                  probe_method=probe_method,
+                                                  probe_request_type=probe_method,
                                                   probe_protocol=probe_protocol,
                                                   probe_interval_in_seconds=probe_interval)
 
@@ -766,7 +791,9 @@ def update_origin_group(client: OriginGroupsOperations,
         health_probe_settings=health_probe_settings,
         response_based_origin_error_detection_settings=error_detection_settings)
 
-    return client.update(resource_group_name,
+    # client.create isn't really a create, it's a PUT which is create or update,
+    # client.update doesn't allow unsetting fields.
+    return client.create(resource_group_name,
                          profile_name,
                          endpoint_name,
                          name,

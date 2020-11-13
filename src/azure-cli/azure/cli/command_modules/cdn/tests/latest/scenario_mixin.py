@@ -390,7 +390,7 @@ class CdnScenarioMixin:
         test_dir = path.dirname(path.realpath(__file__))
         default_cert_policy = path.join(test_dir, "byoc_cert_policy.json")
 
-        self.cmd(f'keyvault create --location westus2 --name {key_vault_name} -g {group_name}')
+        self.cmd(f'keyvault create --location centralus --name {key_vault_name} -g {group_name}')
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')
 

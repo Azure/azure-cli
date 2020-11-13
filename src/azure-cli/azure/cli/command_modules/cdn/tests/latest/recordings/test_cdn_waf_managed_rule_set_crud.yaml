@@ -1,0 +1,546 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn waf policy managed-rule-set list-available
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cdn/CdnWebApplicationFirewallManagedRuleSets?api-version=2020-04-15
+  response:
+    body:
+      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"DefaultRuleSet_1.0\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets/DefaultRuleSet_1.0\"\
+        ,\"type\":\"Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets\",\"properties\"\
+        :{\r\n        \"provisioningState\":\"Succeeded\",\"ruleSetType\":\"DefaultRuleSet\"\
+        ,\"ruleSetVersion\":\"1.0\",\"ruleGroups\":[\r\n          {\r\n          \
+        \  \"ruleGroupName\":\"PROTOCOL-ATTACK\",\"description\":\"Protocol attack\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"921110\",\"\
+        description\":\"HTTP Request Smuggling Attack\"\r\n              },{\r\n \
+        \               \"ruleId\":\"921120\",\"description\":\"HTTP Response Splitting\
+        \ Attack\"\r\n              },{\r\n                \"ruleId\":\"921130\",\"\
+        description\":\"HTTP Response Splitting Attack\"\r\n              },{\r\n\
+        \                \"ruleId\":\"921140\",\"description\":\"HTTP Header Injection\
+        \ Attack via headers\"\r\n              },{\r\n                \"ruleId\"\
+        :\"921150\",\"description\":\"HTTP Header Injection Attack via payload (CR/LF\
+        \ detected)\"\r\n              },{\r\n                \"ruleId\":\"921160\"\
+        ,\"description\":\"HTTP Header Injection Attack via payload (CR/LF and header-name\
+        \ detected)\"\r\n              },{\r\n                \"ruleId\":\"921151\"\
+        ,\"description\":\"HTTP Header Injection Attack via payload (CR/LF detected)\"\
+        \r\n              }\r\n            ]\r\n          },{\r\n            \"ruleGroupName\"\
+        :\"LFI\",\"description\":\"Local file inclusion\",\"rules\":[\r\n        \
+        \      {\r\n                \"ruleId\":\"930100\",\"description\":\"Path Traversal\
+        \ Attack (/../)\"\r\n              },{\r\n                \"ruleId\":\"930110\"\
+        ,\"description\":\"Path Traversal Attack (/../)\"\r\n              },{\r\n\
+        \                \"ruleId\":\"930120\",\"description\":\"OS File Access Attempt\"\
+        \r\n              },{\r\n                \"ruleId\":\"930130\",\"description\"\
+        :\"Restricted File Access Attempt\"\r\n              }\r\n            ]\r\n\
+        \          },{\r\n            \"ruleGroupName\":\"RFI\",\"description\":\"\
+        Remote file inclusion\",\"rules\":[\r\n              {\r\n               \
+        \ \"ruleId\":\"931100\",\"description\":\"Possible Remote File Inclusion (RFI)\
+        \ Attack: URL Parameter using IP Address\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"931110\",\"description\":\"Possible Remote File Inclusion\
+        \ (RFI) Attack: Common RFI Vulnerable Parameter Name used w/URL Payload\"\r\
+        \n              },{\r\n                \"ruleId\":\"931120\",\"description\"\
+        :\"Possible Remote File Inclusion (RFI) Attack: URL Payload Used w/Trailing\
+        \ Question Mark Character (?)\"\r\n              },{\r\n                \"\
+        ruleId\":\"931130\",\"description\":\"Possible Remote File Inclusion (RFI)\
+        \ Attack: Off-Domain Reference/Link\"\r\n              }\r\n            ]\r\
+        \n          },{\r\n            \"ruleGroupName\":\"RCE\",\"description\":\"\
+        Remote Command Execution attacks\",\"rules\":[\r\n              {\r\n    \
+        \            \"ruleId\":\"932100\",\"description\":\"Remote Command Execution:\
+        \ Unix Command Injection\"\r\n              },{\r\n                \"ruleId\"\
+        :\"932105\",\"description\":\"Remote Command Execution: Unix Command Injection\"\
+        \r\n              },{\r\n                \"ruleId\":\"932110\",\"description\"\
+        :\"Remote Command Execution: Windows Command Injection\"\r\n             \
+        \ },{\r\n                \"ruleId\":\"932115\",\"description\":\"Remote Command\
+        \ Execution: Windows Command Injection\"\r\n              },{\r\n        \
+        \        \"ruleId\":\"932120\",\"description\":\"Remote Command Execution:\
+        \ Windows PowerShell Command Found\"\r\n              },{\r\n            \
+        \    \"ruleId\":\"932130\",\"description\":\"Remote Command Execution: Unix\
+        \ Shell Expression Found\"\r\n              },{\r\n                \"ruleId\"\
+        :\"932140\",\"description\":\"Remote Command Execution: Windows FOR/IF Command\
+        \ Found\"\r\n              },{\r\n                \"ruleId\":\"932150\",\"\
+        description\":\"Remote Command Execution: Direct Unix Command Execution\"\r\
+        \n              },{\r\n                \"ruleId\":\"932160\",\"description\"\
+        :\"Remote Command Execution: Unix Shell Code Found\"\r\n              },{\r\
+        \n                \"ruleId\":\"932170\",\"description\":\"Remote Command Execution:\
+        \ Shellshock (CVE-2014-6271)\"\r\n              },{\r\n                \"\
+        ruleId\":\"932171\",\"description\":\"Remote Command Execution: Shellshock\
+        \ (CVE-2014-6271)\"\r\n              },{\r\n                \"ruleId\":\"\
+        932180\",\"description\":\"Restricted File Upload Attempt\"\r\n          \
+        \    }\r\n            ]\r\n          },{\r\n            \"ruleGroupName\"\
+        :\"PHP\",\"description\":\"PHP attacks\",\"rules\":[\r\n              {\r\n\
+        \                \"ruleId\":\"933100\",\"description\":\"PHP Injection Attack:\
+        \ PHP Open Tag Found\"\r\n              },{\r\n                \"ruleId\"\
+        :\"933110\",\"description\":\"PHP Injection Attack: PHP Script File Upload\
+        \ Found\"\r\n              },{\r\n                \"ruleId\":\"933120\",\"\
+        description\":\"PHP Injection Attack: Configuration Directive Found\"\r\n\
+        \              },{\r\n                \"ruleId\":\"933130\",\"description\"\
+        :\"PHP Injection Attack: Variables Found\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"933140\",\"description\":\"PHP Injection Attack: I/O\
+        \ Stream Found\"\r\n              },{\r\n                \"ruleId\":\"933150\"\
+        ,\"description\":\"PHP Injection Attack: High-Risk PHP Function Name Found\"\
+        \r\n              },{\r\n                \"ruleId\":\"933151\",\"description\"\
+        :\"PHP Injection Attack: Medium-Risk PHP Function Name Found\"\r\n       \
+        \       },{\r\n                \"ruleId\":\"933160\",\"description\":\"PHP\
+        \ Injection Attack: High-Risk PHP Function Call Found\"\r\n              },{\r\
+        \n                \"ruleId\":\"933170\",\"description\":\"PHP Injection Attack:\
+        \ Serialized Object Injection\"\r\n              },{\r\n                \"\
+        ruleId\":\"933180\",\"description\":\"PHP Injection Attack: Variable Function\
+        \ Call Found\"\r\n              }\r\n            ]\r\n          },{\r\n  \
+        \          \"ruleGroupName\":\"XSS\",\"description\":\"Cross-site scripting\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"941100\",\"\
+        description\":\"XSS Attack Detected via libinjection\"\r\n              },{\r\
+        \n                \"ruleId\":\"941101\",\"description\":\"XSS Attack Detected\
+        \ via libinjection\"\r\n              },{\r\n                \"ruleId\":\"\
+        941110\",\"description\":\"XSS Filter - Category 1: Script Tag Vector\"\r\n\
+        \              },{\r\n                \"ruleId\":\"941120\",\"description\"\
+        :\"XSS Filter - Category 2: Event Handler Vector\"\r\n              },{\r\n\
+        \                \"ruleId\":\"941130\",\"description\":\"XSS Filter - Category\
+        \ 3: Attribute Vector\"\r\n              },{\r\n                \"ruleId\"\
+        :\"941140\",\"description\":\"XSS Filter - Category 4: Javascript URI Vector\"\
+        \r\n              },{\r\n                \"ruleId\":\"941150\",\"description\"\
+        :\"XSS Filter - Category 5: Disallowed HTML Attributes\"\r\n             \
+        \ },{\r\n                \"ruleId\":\"941160\",\"description\":\"NoScript\
+        \ XSS InjectionChecker: HTML Injection\"\r\n              },{\r\n        \
+        \        \"ruleId\":\"941170\",\"description\":\"NoScript XSS InjectionChecker:\
+        \ Attribute Injection\"\r\n              },{\r\n                \"ruleId\"\
+        :\"941180\",\"description\":\"Node-Validator Blacklist Keywords\"\r\n    \
+        \          },{\r\n                \"ruleId\":\"941190\",\"description\":\"\
+        IE XSS Filters - Attack Detected.\"\r\n              },{\r\n             \
+        \   \"ruleId\":\"941200\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941210\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941220\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941230\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941240\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941250\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941260\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941270\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941280\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941290\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941300\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941310\",\"description\"\
+        :\"US-ASCII Malformed Encoding XSS Filter - Attack Detected.\"\r\n       \
+        \       },{\r\n                \"ruleId\":\"941320\",\"description\":\"Possible\
+        \ XSS Attack Detected - HTML Tag Handler\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"941330\",\"description\":\"IE XSS Filters - Attack\
+        \ Detected.\"\r\n              },{\r\n                \"ruleId\":\"941340\"\
+        ,\"description\":\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\
+        \n                \"ruleId\":\"941350\",\"description\":\"UTF-7 Encoding IE\
+        \ XSS - Attack Detected.\"\r\n              }\r\n            ]\r\n       \
+        \   },{\r\n            \"ruleGroupName\":\"SQLI\",\"description\":\"SQL injection\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"942100\",\"\
+        description\":\"SQL Injection Attack Detected via libinjection\"\r\n     \
+        \         },{\r\n                \"ruleId\":\"942110\",\"description\":\"\
+        SQL Injection Attack: Common Injection Testing Detected\"\r\n            \
+        \  },{\r\n                \"ruleId\":\"942120\",\"description\":\"SQL Injection\
+        \ Attack: SQL Operator Detected\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942140\",\"description\":\"SQL Injection Attack: Common DB\
+        \ Names Detected\"\r\n              },{\r\n                \"ruleId\":\"942150\"\
+        ,\"description\":\"SQL Injection Attack\"\r\n              },{\r\n       \
+        \         \"ruleId\":\"942160\",\"description\":\"Detects blind sqli tests\
+        \ using sleep() or benchmark().\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942170\",\"description\":\"Detects SQL benchmark and sleep\
+        \ injection attempts including conditional queries\"\r\n              },{\r\
+        \n                \"ruleId\":\"942180\",\"description\":\"Detects basic SQL\
+        \ authentication bypass attempts 1/3\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942190\",\"description\":\"Detects MSSQL code execution\
+        \ and information gathering attempts\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942200\",\"description\":\"Detects MySQL comment-/space-obfuscated\
+        \ injections and backtick termination\"\r\n              },{\r\n         \
+        \       \"ruleId\":\"942210\",\"description\":\"Detects chained SQL injection\
+        \ attempts 1/2\"\r\n              },{\r\n                \"ruleId\":\"942220\"\
+        ,\"description\":\"Looking for integer overflow attacks, these are taken from\
+        \ skipfish, except 3.0.00738585072007e-308 is the \\\"magic number\\\" crash\"\
+        \r\n              },{\r\n                \"ruleId\":\"942230\",\"description\"\
+        :\"Detects conditional SQL injection attempts\"\r\n              },{\r\n \
+        \               \"ruleId\":\"942240\",\"description\":\"Detects MySQL charset\
+        \ switch and MSSQL DoS attempts\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942250\",\"description\":\"Detects MATCH AGAINST, MERGE and\
+        \ EXECUTE IMMEDIATE injections\"\r\n              },{\r\n                \"\
+        ruleId\":\"942260\",\"description\":\"Detects basic SQL authentication bypass\
+        \ attempts 2/3\"\r\n              },{\r\n                \"ruleId\":\"942270\"\
+        ,\"description\":\"Looking for basic sql injection. Common attack string for\
+        \ mysql, oracle and others.\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942280\",\"description\":\"Detects Postgres pg_sleep injection, waitfor\
+        \ delay attacks and database shutdown attempts\"\r\n              },{\r\n\
+        \                \"ruleId\":\"942290\",\"description\":\"Finds basic MongoDB\
+        \ SQL injection attempts\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942300\",\"description\":\"Detects MySQL comments, conditions and ch(a)r\
+        \ injections\"\r\n              },{\r\n                \"ruleId\":\"942310\"\
+        ,\"description\":\"Detects chained SQL injection attempts 2/2\"\r\n      \
+        \        },{\r\n                \"ruleId\":\"942320\",\"description\":\"Detects\
+        \ MySQL and PostgreSQL stored procedure/function injections\"\r\n        \
+        \      },{\r\n                \"ruleId\":\"942330\",\"description\":\"Detects\
+        \ classic SQL injection probings 1/3\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942340\",\"description\":\"Detects basic SQL authentication\
+        \ bypass attempts 3/3\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942350\",\"description\":\"Detects MySQL UDF injection and other data/structure\
+        \ manipulation attempts\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942360\",\"description\":\"Detects concatenated basic SQL injection and\
+        \ SQLLFI attempts\"\r\n              },{\r\n                \"ruleId\":\"\
+        942361\",\"description\":\"Detects basic SQL injection based on keyword alter\
+        \ or union\"\r\n              },{\r\n                \"ruleId\":\"942370\"\
+        ,\"description\":\"Detects classic SQL injection probings 2/3\"\r\n      \
+        \        },{\r\n                \"ruleId\":\"942380\",\"description\":\"SQL\
+        \ Injection Attack\"\r\n              },{\r\n                \"ruleId\":\"\
+        942390\",\"description\":\"SQL Injection Attack\"\r\n              },{\r\n\
+        \                \"ruleId\":\"942400\",\"description\":\"SQL Injection Attack\"\
+        \r\n              },{\r\n                \"ruleId\":\"942410\",\"description\"\
+        :\"SQL Injection Attack\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942430\",\"description\":\"Restricted SQL Character Anomaly Detection (args):\
+        \ # of special characters exceeded (12)\"\r\n              },{\r\n       \
+        \         \"ruleId\":\"942440\",\"description\":\"SQL Comment Sequence Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"942450\",\"description\"\
+        :\"SQL Hex Encoding Identified\"\r\n              },{\r\n                \"\
+        ruleId\":\"942470\",\"description\":\"SQL Injection Attack\"\r\n         \
+        \     },{\r\n                \"ruleId\":\"942480\",\"description\":\"SQL Injection\
+        \ Attack\"\r\n              }\r\n            ]\r\n          },{\r\n      \
+        \      \"ruleGroupName\":\"FIX\",\"description\":\"Session Fixation attacks\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"943100\",\"\
+        description\":\"Possible Session Fixation Attack: Setting Cookie Values in\
+        \ HTML\"\r\n              },{\r\n                \"ruleId\":\"943110\",\"\
+        description\":\"Possible Session Fixation Attack: SessionID Parameter Name\
+        \ with Off-Domain Referer\"\r\n              },{\r\n                \"ruleId\"\
+        :\"943120\",\"description\":\"Possible Session Fixation Attack: SessionID\
+        \ Parameter Name with No Referer\"\r\n              }\r\n            ]\r\n\
+        \          },{\r\n            \"ruleGroupName\":\"JAVA\",\"description\":\"\
+        Java attacks\",\"rules\":[\r\n              {\r\n                \"ruleId\"\
+        :\"944100\",\"description\":\"Remote Command Execution: Suspicious Java class\
+        \ detected\"\r\n              },{\r\n                \"ruleId\":\"944110\"\
+        ,\"description\":\"Remote Command Execution: Java process spawn (CVE-2017-9805)\"\
+        \r\n              },{\r\n                \"ruleId\":\"944120\",\"description\"\
+        :\"Remote Command Execution: Java serialization (CVE-2015-5842)\"\r\n    \
+        \          },{\r\n                \"ruleId\":\"944130\",\"description\":\"\
+        Suspicious Java class detected\"\r\n              },{\r\n                \"\
+        ruleId\":\"944200\",\"description\":\"Magic bytes Detected, probable java\
+        \ serialization in use\"\r\n              },{\r\n                \"ruleId\"\
+        :\"944210\",\"description\":\"Magic bytes Detected Base64 Encoded, probable\
+        \ java serialization in use\"\r\n              },{\r\n                \"ruleId\"\
+        :\"944240\",\"description\":\"Remote Command Execution: Java serialization\
+        \ (CVE-2015-5842)\"\r\n              },{\r\n                \"ruleId\":\"\
+        944250\",\"description\":\"Remote Command Execution: Suspicious Java method\
+        \ detected\"\r\n              }\r\n            ]\r\n          }\r\n      \
+        \  ]\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '14963'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Fri, 13 Nov 2020 23:37:06 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn waf policy managed-rule-set rule-group-override list-available
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --rule-set-type --rule-set-version
+      User-Agent:
+      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cdn/CdnWebApplicationFirewallManagedRuleSets?api-version=2020-04-15
+  response:
+    body:
+      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"DefaultRuleSet_1.0\"\
+        ,\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets/DefaultRuleSet_1.0\"\
+        ,\"type\":\"Microsoft.Cdn/cdnwebapplicationfirewallmanagedrulesets\",\"properties\"\
+        :{\r\n        \"provisioningState\":\"Succeeded\",\"ruleSetType\":\"DefaultRuleSet\"\
+        ,\"ruleSetVersion\":\"1.0\",\"ruleGroups\":[\r\n          {\r\n          \
+        \  \"ruleGroupName\":\"PROTOCOL-ATTACK\",\"description\":\"Protocol attack\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"921110\",\"\
+        description\":\"HTTP Request Smuggling Attack\"\r\n              },{\r\n \
+        \               \"ruleId\":\"921120\",\"description\":\"HTTP Response Splitting\
+        \ Attack\"\r\n              },{\r\n                \"ruleId\":\"921130\",\"\
+        description\":\"HTTP Response Splitting Attack\"\r\n              },{\r\n\
+        \                \"ruleId\":\"921140\",\"description\":\"HTTP Header Injection\
+        \ Attack via headers\"\r\n              },{\r\n                \"ruleId\"\
+        :\"921150\",\"description\":\"HTTP Header Injection Attack via payload (CR/LF\
+        \ detected)\"\r\n              },{\r\n                \"ruleId\":\"921160\"\
+        ,\"description\":\"HTTP Header Injection Attack via payload (CR/LF and header-name\
+        \ detected)\"\r\n              },{\r\n                \"ruleId\":\"921151\"\
+        ,\"description\":\"HTTP Header Injection Attack via payload (CR/LF detected)\"\
+        \r\n              }\r\n            ]\r\n          },{\r\n            \"ruleGroupName\"\
+        :\"LFI\",\"description\":\"Local file inclusion\",\"rules\":[\r\n        \
+        \      {\r\n                \"ruleId\":\"930100\",\"description\":\"Path Traversal\
+        \ Attack (/../)\"\r\n              },{\r\n                \"ruleId\":\"930110\"\
+        ,\"description\":\"Path Traversal Attack (/../)\"\r\n              },{\r\n\
+        \                \"ruleId\":\"930120\",\"description\":\"OS File Access Attempt\"\
+        \r\n              },{\r\n                \"ruleId\":\"930130\",\"description\"\
+        :\"Restricted File Access Attempt\"\r\n              }\r\n            ]\r\n\
+        \          },{\r\n            \"ruleGroupName\":\"RFI\",\"description\":\"\
+        Remote file inclusion\",\"rules\":[\r\n              {\r\n               \
+        \ \"ruleId\":\"931100\",\"description\":\"Possible Remote File Inclusion (RFI)\
+        \ Attack: URL Parameter using IP Address\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"931110\",\"description\":\"Possible Remote File Inclusion\
+        \ (RFI) Attack: Common RFI Vulnerable Parameter Name used w/URL Payload\"\r\
+        \n              },{\r\n                \"ruleId\":\"931120\",\"description\"\
+        :\"Possible Remote File Inclusion (RFI) Attack: URL Payload Used w/Trailing\
+        \ Question Mark Character (?)\"\r\n              },{\r\n                \"\
+        ruleId\":\"931130\",\"description\":\"Possible Remote File Inclusion (RFI)\
+        \ Attack: Off-Domain Reference/Link\"\r\n              }\r\n            ]\r\
+        \n          },{\r\n            \"ruleGroupName\":\"RCE\",\"description\":\"\
+        Remote Command Execution attacks\",\"rules\":[\r\n              {\r\n    \
+        \            \"ruleId\":\"932100\",\"description\":\"Remote Command Execution:\
+        \ Unix Command Injection\"\r\n              },{\r\n                \"ruleId\"\
+        :\"932105\",\"description\":\"Remote Command Execution: Unix Command Injection\"\
+        \r\n              },{\r\n                \"ruleId\":\"932110\",\"description\"\
+        :\"Remote Command Execution: Windows Command Injection\"\r\n             \
+        \ },{\r\n                \"ruleId\":\"932115\",\"description\":\"Remote Command\
+        \ Execution: Windows Command Injection\"\r\n              },{\r\n        \
+        \        \"ruleId\":\"932120\",\"description\":\"Remote Command Execution:\
+        \ Windows PowerShell Command Found\"\r\n              },{\r\n            \
+        \    \"ruleId\":\"932130\",\"description\":\"Remote Command Execution: Unix\
+        \ Shell Expression Found\"\r\n              },{\r\n                \"ruleId\"\
+        :\"932140\",\"description\":\"Remote Command Execution: Windows FOR/IF Command\
+        \ Found\"\r\n              },{\r\n                \"ruleId\":\"932150\",\"\
+        description\":\"Remote Command Execution: Direct Unix Command Execution\"\r\
+        \n              },{\r\n                \"ruleId\":\"932160\",\"description\"\
+        :\"Remote Command Execution: Unix Shell Code Found\"\r\n              },{\r\
+        \n                \"ruleId\":\"932170\",\"description\":\"Remote Command Execution:\
+        \ Shellshock (CVE-2014-6271)\"\r\n              },{\r\n                \"\
+        ruleId\":\"932171\",\"description\":\"Remote Command Execution: Shellshock\
+        \ (CVE-2014-6271)\"\r\n              },{\r\n                \"ruleId\":\"\
+        932180\",\"description\":\"Restricted File Upload Attempt\"\r\n          \
+        \    }\r\n            ]\r\n          },{\r\n            \"ruleGroupName\"\
+        :\"PHP\",\"description\":\"PHP attacks\",\"rules\":[\r\n              {\r\n\
+        \                \"ruleId\":\"933100\",\"description\":\"PHP Injection Attack:\
+        \ PHP Open Tag Found\"\r\n              },{\r\n                \"ruleId\"\
+        :\"933110\",\"description\":\"PHP Injection Attack: PHP Script File Upload\
+        \ Found\"\r\n              },{\r\n                \"ruleId\":\"933120\",\"\
+        description\":\"PHP Injection Attack: Configuration Directive Found\"\r\n\
+        \              },{\r\n                \"ruleId\":\"933130\",\"description\"\
+        :\"PHP Injection Attack: Variables Found\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"933140\",\"description\":\"PHP Injection Attack: I/O\
+        \ Stream Found\"\r\n              },{\r\n                \"ruleId\":\"933150\"\
+        ,\"description\":\"PHP Injection Attack: High-Risk PHP Function Name Found\"\
+        \r\n              },{\r\n                \"ruleId\":\"933151\",\"description\"\
+        :\"PHP Injection Attack: Medium-Risk PHP Function Name Found\"\r\n       \
+        \       },{\r\n                \"ruleId\":\"933160\",\"description\":\"PHP\
+        \ Injection Attack: High-Risk PHP Function Call Found\"\r\n              },{\r\
+        \n                \"ruleId\":\"933170\",\"description\":\"PHP Injection Attack:\
+        \ Serialized Object Injection\"\r\n              },{\r\n                \"\
+        ruleId\":\"933180\",\"description\":\"PHP Injection Attack: Variable Function\
+        \ Call Found\"\r\n              }\r\n            ]\r\n          },{\r\n  \
+        \          \"ruleGroupName\":\"XSS\",\"description\":\"Cross-site scripting\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"941100\",\"\
+        description\":\"XSS Attack Detected via libinjection\"\r\n              },{\r\
+        \n                \"ruleId\":\"941101\",\"description\":\"XSS Attack Detected\
+        \ via libinjection\"\r\n              },{\r\n                \"ruleId\":\"\
+        941110\",\"description\":\"XSS Filter - Category 1: Script Tag Vector\"\r\n\
+        \              },{\r\n                \"ruleId\":\"941120\",\"description\"\
+        :\"XSS Filter - Category 2: Event Handler Vector\"\r\n              },{\r\n\
+        \                \"ruleId\":\"941130\",\"description\":\"XSS Filter - Category\
+        \ 3: Attribute Vector\"\r\n              },{\r\n                \"ruleId\"\
+        :\"941140\",\"description\":\"XSS Filter - Category 4: Javascript URI Vector\"\
+        \r\n              },{\r\n                \"ruleId\":\"941150\",\"description\"\
+        :\"XSS Filter - Category 5: Disallowed HTML Attributes\"\r\n             \
+        \ },{\r\n                \"ruleId\":\"941160\",\"description\":\"NoScript\
+        \ XSS InjectionChecker: HTML Injection\"\r\n              },{\r\n        \
+        \        \"ruleId\":\"941170\",\"description\":\"NoScript XSS InjectionChecker:\
+        \ Attribute Injection\"\r\n              },{\r\n                \"ruleId\"\
+        :\"941180\",\"description\":\"Node-Validator Blacklist Keywords\"\r\n    \
+        \          },{\r\n                \"ruleId\":\"941190\",\"description\":\"\
+        IE XSS Filters - Attack Detected.\"\r\n              },{\r\n             \
+        \   \"ruleId\":\"941200\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941210\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941220\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941230\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941240\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941250\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941260\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941270\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941280\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941290\",\"description\"\
+        :\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"941300\",\"description\":\"IE XSS Filters - Attack Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"941310\",\"description\"\
+        :\"US-ASCII Malformed Encoding XSS Filter - Attack Detected.\"\r\n       \
+        \       },{\r\n                \"ruleId\":\"941320\",\"description\":\"Possible\
+        \ XSS Attack Detected - HTML Tag Handler\"\r\n              },{\r\n      \
+        \          \"ruleId\":\"941330\",\"description\":\"IE XSS Filters - Attack\
+        \ Detected.\"\r\n              },{\r\n                \"ruleId\":\"941340\"\
+        ,\"description\":\"IE XSS Filters - Attack Detected.\"\r\n              },{\r\
+        \n                \"ruleId\":\"941350\",\"description\":\"UTF-7 Encoding IE\
+        \ XSS - Attack Detected.\"\r\n              }\r\n            ]\r\n       \
+        \   },{\r\n            \"ruleGroupName\":\"SQLI\",\"description\":\"SQL injection\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"942100\",\"\
+        description\":\"SQL Injection Attack Detected via libinjection\"\r\n     \
+        \         },{\r\n                \"ruleId\":\"942110\",\"description\":\"\
+        SQL Injection Attack: Common Injection Testing Detected\"\r\n            \
+        \  },{\r\n                \"ruleId\":\"942120\",\"description\":\"SQL Injection\
+        \ Attack: SQL Operator Detected\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942140\",\"description\":\"SQL Injection Attack: Common DB\
+        \ Names Detected\"\r\n              },{\r\n                \"ruleId\":\"942150\"\
+        ,\"description\":\"SQL Injection Attack\"\r\n              },{\r\n       \
+        \         \"ruleId\":\"942160\",\"description\":\"Detects blind sqli tests\
+        \ using sleep() or benchmark().\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942170\",\"description\":\"Detects SQL benchmark and sleep\
+        \ injection attempts including conditional queries\"\r\n              },{\r\
+        \n                \"ruleId\":\"942180\",\"description\":\"Detects basic SQL\
+        \ authentication bypass attempts 1/3\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942190\",\"description\":\"Detects MSSQL code execution\
+        \ and information gathering attempts\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942200\",\"description\":\"Detects MySQL comment-/space-obfuscated\
+        \ injections and backtick termination\"\r\n              },{\r\n         \
+        \       \"ruleId\":\"942210\",\"description\":\"Detects chained SQL injection\
+        \ attempts 1/2\"\r\n              },{\r\n                \"ruleId\":\"942220\"\
+        ,\"description\":\"Looking for integer overflow attacks, these are taken from\
+        \ skipfish, except 3.0.00738585072007e-308 is the \\\"magic number\\\" crash\"\
+        \r\n              },{\r\n                \"ruleId\":\"942230\",\"description\"\
+        :\"Detects conditional SQL injection attempts\"\r\n              },{\r\n \
+        \               \"ruleId\":\"942240\",\"description\":\"Detects MySQL charset\
+        \ switch and MSSQL DoS attempts\"\r\n              },{\r\n               \
+        \ \"ruleId\":\"942250\",\"description\":\"Detects MATCH AGAINST, MERGE and\
+        \ EXECUTE IMMEDIATE injections\"\r\n              },{\r\n                \"\
+        ruleId\":\"942260\",\"description\":\"Detects basic SQL authentication bypass\
+        \ attempts 2/3\"\r\n              },{\r\n                \"ruleId\":\"942270\"\
+        ,\"description\":\"Looking for basic sql injection. Common attack string for\
+        \ mysql, oracle and others.\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942280\",\"description\":\"Detects Postgres pg_sleep injection, waitfor\
+        \ delay attacks and database shutdown attempts\"\r\n              },{\r\n\
+        \                \"ruleId\":\"942290\",\"description\":\"Finds basic MongoDB\
+        \ SQL injection attempts\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942300\",\"description\":\"Detects MySQL comments, conditions and ch(a)r\
+        \ injections\"\r\n              },{\r\n                \"ruleId\":\"942310\"\
+        ,\"description\":\"Detects chained SQL injection attempts 2/2\"\r\n      \
+        \        },{\r\n                \"ruleId\":\"942320\",\"description\":\"Detects\
+        \ MySQL and PostgreSQL stored procedure/function injections\"\r\n        \
+        \      },{\r\n                \"ruleId\":\"942330\",\"description\":\"Detects\
+        \ classic SQL injection probings 1/3\"\r\n              },{\r\n          \
+        \      \"ruleId\":\"942340\",\"description\":\"Detects basic SQL authentication\
+        \ bypass attempts 3/3\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942350\",\"description\":\"Detects MySQL UDF injection and other data/structure\
+        \ manipulation attempts\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942360\",\"description\":\"Detects concatenated basic SQL injection and\
+        \ SQLLFI attempts\"\r\n              },{\r\n                \"ruleId\":\"\
+        942361\",\"description\":\"Detects basic SQL injection based on keyword alter\
+        \ or union\"\r\n              },{\r\n                \"ruleId\":\"942370\"\
+        ,\"description\":\"Detects classic SQL injection probings 2/3\"\r\n      \
+        \        },{\r\n                \"ruleId\":\"942380\",\"description\":\"SQL\
+        \ Injection Attack\"\r\n              },{\r\n                \"ruleId\":\"\
+        942390\",\"description\":\"SQL Injection Attack\"\r\n              },{\r\n\
+        \                \"ruleId\":\"942400\",\"description\":\"SQL Injection Attack\"\
+        \r\n              },{\r\n                \"ruleId\":\"942410\",\"description\"\
+        :\"SQL Injection Attack\"\r\n              },{\r\n                \"ruleId\"\
+        :\"942430\",\"description\":\"Restricted SQL Character Anomaly Detection (args):\
+        \ # of special characters exceeded (12)\"\r\n              },{\r\n       \
+        \         \"ruleId\":\"942440\",\"description\":\"SQL Comment Sequence Detected.\"\
+        \r\n              },{\r\n                \"ruleId\":\"942450\",\"description\"\
+        :\"SQL Hex Encoding Identified\"\r\n              },{\r\n                \"\
+        ruleId\":\"942470\",\"description\":\"SQL Injection Attack\"\r\n         \
+        \     },{\r\n                \"ruleId\":\"942480\",\"description\":\"SQL Injection\
+        \ Attack\"\r\n              }\r\n            ]\r\n          },{\r\n      \
+        \      \"ruleGroupName\":\"FIX\",\"description\":\"Session Fixation attacks\"\
+        ,\"rules\":[\r\n              {\r\n                \"ruleId\":\"943100\",\"\
+        description\":\"Possible Session Fixation Attack: Setting Cookie Values in\
+        \ HTML\"\r\n              },{\r\n                \"ruleId\":\"943110\",\"\
+        description\":\"Possible Session Fixation Attack: SessionID Parameter Name\
+        \ with Off-Domain Referer\"\r\n              },{\r\n                \"ruleId\"\
+        :\"943120\",\"description\":\"Possible Session Fixation Attack: SessionID\
+        \ Parameter Name with No Referer\"\r\n              }\r\n            ]\r\n\
+        \          },{\r\n            \"ruleGroupName\":\"JAVA\",\"description\":\"\
+        Java attacks\",\"rules\":[\r\n              {\r\n                \"ruleId\"\
+        :\"944100\",\"description\":\"Remote Command Execution: Suspicious Java class\
+        \ detected\"\r\n              },{\r\n                \"ruleId\":\"944110\"\
+        ,\"description\":\"Remote Command Execution: Java process spawn (CVE-2017-9805)\"\
+        \r\n              },{\r\n                \"ruleId\":\"944120\",\"description\"\
+        :\"Remote Command Execution: Java serialization (CVE-2015-5842)\"\r\n    \
+        \          },{\r\n                \"ruleId\":\"944130\",\"description\":\"\
+        Suspicious Java class detected\"\r\n              },{\r\n                \"\
+        ruleId\":\"944200\",\"description\":\"Magic bytes Detected, probable java\
+        \ serialization in use\"\r\n              },{\r\n                \"ruleId\"\
+        :\"944210\",\"description\":\"Magic bytes Detected Base64 Encoded, probable\
+        \ java serialization in use\"\r\n              },{\r\n                \"ruleId\"\
+        :\"944240\",\"description\":\"Remote Command Execution: Java serialization\
+        \ (CVE-2015-5842)\"\r\n              },{\r\n                \"ruleId\":\"\
+        944250\",\"description\":\"Remote Command Execution: Suspicious Java method\
+        \ detected\"\r\n              }\r\n            ]\r\n          }\r\n      \
+        \  ]\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '14963'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Fri, 13 Nov 2020 23:37:07 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

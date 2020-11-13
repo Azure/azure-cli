@@ -101,17 +101,15 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-2'
         origin = 'www.example.com'
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
+        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
+        # Create custom domain
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
         hostname = custom_domain_name + '.cdn-cli-test-2.azfdtest.xyz'
-        try:
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-        except ErrorResponseException as err:
-            if err.status_code != 400:
-                raise err
-            hostname = custom_domain_name + '.cdn-cli-test-df-2.azfdtest.xyz'
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
+        # Use alternate hostname for dogfood.
+        if '.azureedge-test.net' in endpoint['hostName']:
+            hostname = custom_domain_name + '.cdn-cli-test-2-df.azfdtest.xyz'
+        self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
@@ -142,17 +140,14 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-3'
         origin = 'www.contoso.com'
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
+        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
         hostname = custom_domain_name + '.cdn-cli-test-3.azfdtest.xyz'
-        try:
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-        except ErrorResponseException as err:
-            if err.status_code != 400:
-                raise err
-            hostname = custom_domain_name + '.cdn-cli-test-df-3.azfdtest.xyz'
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
+        # Use alternate hostnames for dogfood.
+        if '.azureedge-test.net' in endpoint['hostName']:
+            hostname = custom_domain_name + '.cdn-cli-test-3-df.azfdtest.xyz'
+        self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
 
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
@@ -184,26 +179,18 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # resource group must be manually deleted in order to re-run.
         endpoint_name = 'cdn-cli-test-4'
         origin = 'www.example.com'
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
+        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
 
         # Create custom domains for CDN managed cert and BYOC
         custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
-        hostname = custom_domain_name + '.cdn-cli-test-4.azfdtest.xyz'
         byoc_custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
+        hostname = custom_domain_name + '.cdn-cli-test-4.azfdtest.xyz'
         byoc_hostname = byoc_custom_domain_name + '.cdn-cli-test-4.azfdtest.xyz'
-        try:
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-        except ErrorResponseException as err:
-            props = getattr(err.inner_exception, 'additional_properties', {})
-            if not isinstance(props, dict) or not isinstance(props.get('error'), dict):
-                raise err
-            props = props['error']
-            if props.get('code') != 'ResourceNotFound':
-                raise err
-            hostname = custom_domain_name + '.cdn-cli-test-df-4.azfdtest.xyz'
-            self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-            byoc_hostname = custom_domain_name + '.cdn-cli-test-df-4.azfdtest.xyz'
-        # We've adjusted the hostname for dogfood, so the BYOC custom domain should be created the same in either case
+        # Use alternate hostnames for dogfood.
+        if '.azureedge-test.net' in endpoint['hostName']:
+            hostname = custom_domain_name + '.cdn-cli-test-4-df.azfdtest.xyz'
+            byoc_hostname = byoc_custom_domain_name + '.cdn-cli-test-4-df.azfdtest.xyz'
+        self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, byoc_custom_domain_name, byoc_hostname)
 
         # Verify the created custom domains don't have custom HTTPS enabled
@@ -228,6 +215,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                                                 min_tls_version='1.0',
                                                 checks=checks)
 
+        # Create a TLS cert to use for BYOC.
         vault_name = self.create_random_name(prefix='keyvault', length=20)
         cert_name = self.create_random_name(prefix='cert', length=20)
         self.byoc_create_keyvault_cert(resource_group, vault_name, cert_name)
