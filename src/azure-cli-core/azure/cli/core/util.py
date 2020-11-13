@@ -55,7 +55,7 @@ DISALLOWED_USER_NAMES = [
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
-    from jmespath.exceptions import JMESPathTypeError
+    from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
@@ -76,7 +76,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         if isinstance(ex, azclierror.AzCLIError):
             az_error = ex
 
-        elif isinstance(ex, JMESPathTypeError):
+        elif isinstance(ex, JMESPathError):
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
             az_error = azclierror.InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
@@ -96,8 +96,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = azclierror.ValidationError(error_msg)
 
         elif isinstance(ex, CLIError):
-            # TODO: Fine-grained analysis here for Unknown error
-            az_error = azclierror.UnknownError(error_msg)
+            # TODO: Fine-grained analysis here
+            az_error = azclierror.UnclassifiedUserFault(error_msg)
 
         elif isinstance(ex, AzureError):
             if extract_common_error_message(ex):

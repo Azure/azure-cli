@@ -757,9 +757,9 @@ class TemplateSpecsTest(ScenarioTest):
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
-            self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
-            self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
-            self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
+            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
+            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
+            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -815,9 +815,9 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
-                 self.check('artifacts[0].path', 'artifacts\\createResourceGroup.json'),
-                 self.check('artifacts[1].path', 'artifacts\\createKeyVault.json'),
-                 self.check('artifacts[2].path', 'artifacts\\createKeyVaultWithSecret.json')
+                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
+                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
+                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
                  ])
 
         # clean up
@@ -906,9 +906,9 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         output_path = self.cmd('ts export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
 
         template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
-        artifactFile = os.path.join(output_path, 'artifacts\\createResourceGroup.json')
-        artifactFile1 = os.path.join(output_path, 'artifacts\\createKeyVault.json')
-        artifactFile2 = os.path.join(output_path, 'artifacts\\createKeyVaultWithSecret.json')
+        artifactFile = os.path.join(output_path, 'artifacts' + os.sep + 'createResourceGroup.json')
+        artifactFile1 = os.path.join(output_path, 'artifacts' + os.sep + 'createKeyVault.json')
+        artifactFile2 = os.path.join(output_path, 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
 
         self.assertTrue(os.path.isfile(template_file))
         self.assertTrue(os.path.isfile(artifactFile))
@@ -919,9 +919,9 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         output_path2 = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder2}').get_output_in_json()
 
         _template_file = os.path.join(output_path2, (self.kwargs['template_spec_name'] + '.json'))
-        _artifactFile = os.path.join(output_path2, 'artifacts\\createResourceGroup.json')
-        _artifactFile1 = os.path.join(output_path2, 'artifacts\\createKeyVault.json')
-        _artifactFile2 = os.path.join(output_path2, 'artifacts\\createKeyVaultWithSecret.json')
+        _artifactFile = os.path.join(output_path2, 'artifacts' + os.sep + 'createResourceGroup.json')
+        _artifactFile1 = os.path.join(output_path2, 'artifacts' + os.sep + 'createKeyVault.json')
+        _artifactFile2 = os.path.join(output_path2, 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
 
         self.assertTrue(os.path.isfile(_template_file))
         self.assertTrue(os.path.isfile(_artifactFile))
@@ -992,12 +992,13 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment_old_command(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
+        deployment_name = self.create_random_name('azure-cli-subscription_level_deployment', 60)
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
-            'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60),
+            'dn': deployment_name,
             'dn2': self.create_random_name('azure-cli-subscription_level_deployment', 60),
             'storage-account-name': self.create_random_name('armbuilddemo', 20)
         })
@@ -1014,11 +1015,11 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment list', checks=[
+        self.cmd('deployment list --query "[?name == \'{}\']"'.format(deployment_name), checks=[
             self.check('[0].name', '{dn}'),
         ])
-        self.cmd('deployment list --filter "provisioningState eq \'Succeeded\'"', checks=[
-            self.check('[0].name', '{dn}'),
+        self.cmd('deployment list --filter "provisioningState eq \'Succeeded\'" --query "[?name == \'{}\']"'.format(deployment_name), checks=[
+            self.check('[0].name', '{dn}')
         ])
         self.cmd('deployment show -n {dn}', checks=[
             self.check('name', '{dn}')
@@ -1134,6 +1135,8 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
 
         self.cmd('deployment group cancel -n {dn2} -g {rg}')
 
+        self.cmd('deployment group wait -n {dn2} -g {rg} --custom "provisioningState==Canceled"')
+
         self.cmd('deployment group show -n {dn2} -g {rg}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
@@ -1189,6 +1192,8 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
                  '--parameters storageAccountName="{storage-account-name}" --no-wait')
 
         self.cmd('deployment mg cancel -n {dn2} --management-group-id {mg}')
+
+        self.cmd('deployment mg wait -n {dn2} --management-group-id {mg} --custom "provisioningState==Canceled"')
 
         self.cmd('deployment mg show -n {dn2} --management-group-id {mg}', checks=[
             self.check('properties.provisioningState', 'Canceled')
@@ -1762,7 +1767,7 @@ class DeploymentTestAtSubscriptionScopeTemplateSpecs(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment sub create -n {dn} --location WestUS --template-spec {template_spec_version_id} --parameters @"{params}"', checks=[
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-spec {template_spec_version_id} --parameters @"{params}" --parameters storageAccountName="{storage-account-name}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 

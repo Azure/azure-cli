@@ -253,21 +253,14 @@ def list_security_pricings(client):
     return client.list()
 
 
-def get_security_pricing(client, resource_name, resource_group_name=None):
-
-    if resource_group_name:
-        return client.get_resource_group_pricing(resource_group_name, resource_name)
+def get_security_pricing(client, resource_name):
 
     return client.get(resource_name)
 
 
-def create_security_pricing(client, resource_name, tier, resource_group_name=None):
-
-    if resource_group_name:
-        return client.create_or_update_resource_group_pricing(resource_group_name, resource_name, tier)
+def create_security_pricing(client, resource_name, tier):
 
     return client.update(resource_name, tier)
-
 
 # --------------------------------------------------------------------------------------------
 # Security Topology

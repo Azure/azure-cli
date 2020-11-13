@@ -61,7 +61,7 @@ DEPENDENCIES = [
     'six~=1.12',
     'pkginfo>=1.5.0.1',
     'azure-mgmt-resource==10.2.0',
-    'azure-mgmt-core==1.2.0'
+    'azure-mgmt-core==1.2.1'
 ]
 
 TESTS_REQUIRE = [

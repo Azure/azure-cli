@@ -655,7 +655,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp create') as c:
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one",
+                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
                    local_context_attribute=LocalContextAttribute(name='functionapp_name',
@@ -706,6 +706,8 @@ def load_arguments(self, _):
 
     with self.argument_context('functionapp update') as c:
         c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
+        c.argument('force', required=False, help='Required if attempting to migrate functionapp from Premium to Consumption --plan.',
+                   action='store_true')
 
     with self.argument_context('functionapp plan create') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -834,6 +836,7 @@ def load_arguments(self, _):
                        default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
+            c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
