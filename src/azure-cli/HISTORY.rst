@@ -17,7 +17,7 @@ Release History
 * `az aks install-cli`: Support customize download url (#15794)
 * `az aks browse`: Point to Azure Portal Kubernetes resources view if k8s >=1.19 or kube-dashboard not enabled (#15803)
 * Support BYO control plane identity (#15862)
-`az aks use-dev-spaces`: Indicate that dev-spaces commands are deprecated
+* `az aks use-dev-spaces`: Indicate that dev-spaces commands are deprecated (#15785)
 
 **AMS**
 
