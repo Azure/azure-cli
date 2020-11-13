@@ -1163,7 +1163,7 @@ long-summary: >4
 
 helps['vm disk attach'] = """
 type: command
-short-summary: Attach a managed persistent disk to a VM.
+short-summary: Attach a managed persistent disk to a VM. Please note that --ids only supports one disk.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
 examples:
   - name: Attach a new default sized (1023 GB) managed data disk to a VM.
