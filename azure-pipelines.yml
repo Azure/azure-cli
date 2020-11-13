@@ -209,6 +209,36 @@ jobs:
         az --version
         az self-test
 
+- job: BuildPyinstallerWindowsMSI
+  displayName: 'Build Pyinstaller Windows MSI'
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.7
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - script: |
+       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+       set
+       build_scripts/windows/scripts/build_pyinstaller.cmd
+    displayName: 'Build Pyinstaller Windows MSI'
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: Pyinstaller MSI'
+    inputs:
+      TargetPath: 'build_scripts/windows/out/'
+      ArtifactName: pyinstaller-msi
+    
 - job: BuildDockerImage
   displayName: Build Docker Image
 

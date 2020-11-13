@@ -32,7 +32,8 @@ for package, data in package_data.items():
         for f in files:
             filepath = os.path.join('src', package, module_path, f)
             target_path = os.path.dirname(os.path.join(module_path, f))
-            datas.append('(\'{}\', \'{}\'),'.format(filepath, target_path))
+            datas.append('(\'{}\', \'{}\'),'.format(
+                filepath.replace('\\', '/'), target_path.replace('\\', '/')))
 
 with open(SPEC_PATH, 'r') as fp:
     content = fp.read()
