@@ -762,7 +762,8 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
         provider = 'MariaDB'
 
     if provider == 'MySQL':
-        host = '{}.mysql.database.azure.com'.format(server_name)
+        server_endpoint = cmd.cli_ctx.cloud.suffixes.mysql_server_endpoint
+        host = '{}{}'.format(server_name, server_endpoint)
         result = {
             'mysql_cmd': "mysql {database} --host {host} --user {user}@{server} --password={password}",
             'ado.net': "Server={host}; Port=3306; Database={database}; Uid={user}@{server}; Pwd={password}",
@@ -788,17 +789,18 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             result[k] = v.format(**connection_kwargs)
 
     if provider == 'PostgreSQL':
-        host = '{}.postgres.database.azure.com'.format(server_name)
+        server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
+        host = '{}{}'.format(server_name, server_endpoint)
         result = {
-            'psql_cmd': "postgresql://{user}:{password}@{host}/postgres?sslmode=require",
+            'psql_cmd': "postgresql://{user}@{server}:{password}@{host}/{database}?sslmode=require",
             'C++ (libpq)': "host={host} port=5432 dbname={database} user={user}@{server} password={password} sslmode=require",
-            'ado.net': "Server={host};Database=postgres;Port=5432;User Id={user}@{server};Password={password};",
+            'ado.net': "Server={host};Database={database};Port=5432;User Id={user}@{server};Password={password};",
             'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}@{server}&password={password}",
             'node.js': "var client = new pg.Client('postgres://{user}@{server}:{password}@{host}:5432/{database}');",
-            'php': "host={host} port=5432 dbname={database} user={user} password={password}",
+            'php': "host={host} port=5432 dbname={database} user={user}@{server} password={password}",
             'python': "cnx = psycopg2.connect(database='{database}', user='{user}@{server}', host='{host}', password='{password}', "
                       "port='5432')",
-            'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}', :dbname => '{database}', "
+            'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}@{server}', :dbname => '{database}', "
                     ":port => '5432', :password => '{password}')"
         }
 
@@ -814,7 +816,8 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
             result[k] = v.format(**connection_kwargs)
 
     if provider == 'MariaDB':
-        host = '{}.mariadb.database.azure.com'.format(server_name)
+        server_endpoint = cmd.cli_ctx.cloud.suffixes.mariadb_server_endpoint
+        host = '{}{}'.format(server_name, server_endpoint)
         result = {
             'ado.net': "Server={host}; Port=3306; Database={database}; Uid={user}@{server}; Pwd={password}",
             'jdbc': "jdbc:mariadb://{host}:3306/{database}?user={user}@{server}&password={password}",
