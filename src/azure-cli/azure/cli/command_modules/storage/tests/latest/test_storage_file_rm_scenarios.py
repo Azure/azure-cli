@@ -146,7 +146,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
-    @StorageAccountPreparer(name_prefix="nfs", location="eastus2euap")
+    @StorageAccountPreparer(name_prefix="nfs", location="eastus2", kind='FileStorage', sku='Premium_LRS')
     def test_storage_share_rm_with_NFS(self):
 
         self.kwargs.update({

@@ -47,7 +47,7 @@ setup() {
 
     assert_consent "Add Microsoft as a trusted package signer?" ${global_consent}
     set -v
-    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/microsoft.gpg
     set +v
 
     assert_consent "Add the Azure CLI Repository to your apt sources?" ${global_consent}

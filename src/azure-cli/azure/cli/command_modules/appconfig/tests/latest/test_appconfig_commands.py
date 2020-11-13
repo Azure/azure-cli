@@ -467,7 +467,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -2044,7 +2044,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             'endpoint': endpoint
         })
 
-        # Before assigning data reader role, read operation should fail with AAD auth
+        # Before assigning data reader role, read operation should fail with AAD auth.
+        # The exception really depends on the which identity is used to run this testcase.
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status '(?:Unauthorized|Forbidden)'"):
             self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
 

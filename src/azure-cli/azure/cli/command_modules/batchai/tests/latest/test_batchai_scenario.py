@@ -21,7 +21,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 NODE_STARTUP_TIME = 10 * 60  # Compute node should start in 10 mins after cluster creation.
 CLUSTER_RESIZE_TIME = 20 * 60  # Cluster should resize in 20 mins after job submitted/completed.
-LOCATION_FOR_SCENARIO_TESTS = 'northeurope'
+LOCATION_FOR_SCENARIO_TESTS = 'eastus'
 PASSWORD = str(uuid.uuid4())
 
 
