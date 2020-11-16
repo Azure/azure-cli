@@ -1416,15 +1416,15 @@ parameters:
     long-summary: |
         Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]
+                           [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
 
-        Violations can be the number of violations to trigger an alert. It should be smaller or equal to windows.
+        Violation can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
 
-        Windows can be the number of aggregated lookback windows.
+        Evaluation can be the number of evaluation periods for dynamic threshold.
 
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
 
@@ -1509,7 +1509,7 @@ examples:
         --metric "Percentage Cpu" \n
         --op GreaterOrLessThan \n
         --violation 4 \n
-        --window 4 \n
+        --evaluation 4 \n
         --since 2020-11-02T12:11
 """
 
@@ -1553,15 +1553,15 @@ parameters:
     long-summary: |
         Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]
+                           [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
 
-        Violations can be the number of violations to trigger an alert. It should be smaller or equal to windows.
+        Violation can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
 
-        Windows can be the number of aggregated lookback windows.
+        Evaluation can be the number of evaluation periods for dynamic threshold.
 
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
 

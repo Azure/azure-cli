@@ -182,7 +182,7 @@ def validate_metrics_alert_condition(namespace):
             setattr(namespace, 'number_of_evaluation_periods', 4)
 
         if namespace.number_of_evaluation_periods < 1 or namespace.number_of_evaluation_periods > 6:
-            raise InvalidArgumentValueError('Parameter --window {} should in range 1-6.'.format(
+            raise InvalidArgumentValueError('Parameter --evaluation {} should in range 1-6.'.format(
                 namespace.number_of_evaluation_periods
             ))
 
@@ -196,7 +196,7 @@ def validate_metrics_alert_condition(namespace):
 
         if namespace.min_failing_periods_to_alert > namespace.number_of_evaluation_periods:
             raise InvalidArgumentValueError(
-                'Parameter --violation {} should be less than or equal to parameter --window {}.'.format(
+                'Parameter --violation {} should be less than or equal to parameter --evaluation {}.'.format(
                     namespace.min_failing_periods_to_alert, namespace.number_of_evaluation_periods))
     else:
         raise NotImplementedError()

@@ -100,7 +100,7 @@ class MetricAlertConditionAction(argparse._AppendAction):
 
         usage = 'usage error: --condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n' \
                 '                         [{=,!=,>,>=,<,<=} THRESHOLD]\n' \
-                '                         [{<,>,><} dynamic SENSITIVITY VIOLATIONS of WINDOWS [since DATETIME]]\n' \
+                '                         [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]\n' \
                 '                         [where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n' \
                 '                         [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]'
 
