@@ -321,7 +321,7 @@ class TestProfile(unittest.TestCase):
         result = finder._arm_client_factory(mock.MagicMock())
         self.assertEqual(result._client._base_url, 'http://foo_arm')
 
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
         cli = DummyCli()
         get_client_class_mock.return_value = None
