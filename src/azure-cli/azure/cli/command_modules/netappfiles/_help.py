@@ -50,7 +50,7 @@ parameters:
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
   - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
-  - name: ldap-signing
+  - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
 examples:
   - name: Add an active directory to the account
