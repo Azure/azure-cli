@@ -48,9 +48,9 @@ parameters:
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
-  - name: --aes_encryption
+  - name: --aes-encryption
     short-summary: If enabled, AES encryption will be enabled for SMB communication
-  - name: ldap_signing
+  - name: ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
 examples:
   - name: Add an active directory to the account
