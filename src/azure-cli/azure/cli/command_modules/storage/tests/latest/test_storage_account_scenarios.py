@@ -1052,14 +1052,14 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy', None))
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 
         with self.assertRaisesRegexp(ValidationError, "Delete Retention Policy hasn't been enabled,"):
-            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg} -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+        with self.assertRaises(ValidationError):
+            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1 -n {sa} -g {rg}')
 
         self.cmd(
             '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
@@ -1081,7 +1081,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         # Test update without properties
         self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):

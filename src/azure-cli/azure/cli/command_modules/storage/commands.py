@@ -256,7 +256,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.MGMT_STORAGE),
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01', is_preview=True) as g:
         g.show_command('show', 'get_service_properties')
-        g.custom_command('update', 'update_file_service_properties')
+        g.generic_update_command('update',
+                                 getter_name='get_service_properties',
+                                 setter_name='set_service_properties',
+                                 custom_func_name='update_file_service_properties')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
