@@ -365,7 +365,7 @@ class MonitorTests(ScenarioTest):
 
         cond1 = "total \'transactions\' > 5.0 where ResponseType includes Success and ApiName includes GetBlob"
         dim1 = self.cmd('monitor metrics alert dimension create -n ResponseType --op include -v Success').output.strip()
-        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName --op include -v GetBlob').output.strip()
+        dim2 = self.cmd('monitor metrics alert dimension create -n ApiName -v GetBlob').output.strip()
         self.cmd(
             'monitor metrics alert condition create -t static --aggregation total --metric transactions --dimension "{}" "{}" --op GreaterThan --threshold 5'.format(
                 dim1, dim2

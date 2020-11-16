@@ -111,7 +111,7 @@ def update_metric_alert(instance, scopes=None, description=None, enabled=None, t
     return instance
 
 
-def create_metric_alert_dimension(dimension_name, operator, value_list):
+def create_metric_alert_dimension(dimension_name, value_list, operator=None):
     values = ' or '.join(value_list)
     return '{} {} {} {}'.format(_metric_alert_dimension_prefix, dimension_name, operator, values)
 

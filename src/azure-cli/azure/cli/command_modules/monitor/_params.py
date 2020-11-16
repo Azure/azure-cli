@@ -146,7 +146,8 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
         c.argument('dimension_name', type=str, options_list=['--name', '-n'],
                    help='Name of the dimension.')
-        c.argument('operator', options_list=['--operator', '--op'], arg_type=get_enum_type(dim_op_conversion.values()),
+        c.argument('operator', options_list=['--operator', '--op'],
+                   arg_type=get_enum_type(dim_op_conversion.values(), default=dim_op_conversion['includes']),
                    help="Dimension operator.")
         c.argument('value_list', type=str, options_list=['--value', '-v'], nargs='+',
                    help='The values to apply on the operation.')
