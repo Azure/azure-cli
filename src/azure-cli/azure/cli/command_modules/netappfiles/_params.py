@@ -62,6 +62,7 @@ def load_arguments(self, _):
     load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type)
     load_vaultArguments(self, account_name_type)
 
+
 def load_poolArguments(self, account_name_type, pool_name_type):
     with self.argument_context('netappfiles pool') as c:
         c.argument('account_name', id_part='name')

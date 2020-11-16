@@ -142,7 +142,7 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
         tags = "Tag1=Value2"
         self.cmd("az netappfiles account backup-policy update -g {rg} -a %s --backup-policy-name %s -l %s -d %s -w %s "
                  "-m %s -e %s --tags %s" % (account_name, backup_policy_name, LOCATION, daily_backups_to_keep,
-                                  weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
+                                            weekly_backups_to_keep, monthly_backups_to_keep, enabled, tags)).get_output_in_json()
 
         # get updated backup policy and validate update
         backup_policy = self.cmd("az netappfiles account backup-policy show -g {rg} -a %s --backup-policy-name %s" %
