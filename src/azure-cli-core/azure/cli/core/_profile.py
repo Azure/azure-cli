@@ -305,18 +305,18 @@ class Profile:
         return result
 
     def _new_account(self):
+        """Build an empty Subscription which will be used as a tenant account.
+        API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
         if _USE_VENDORED_SUBSCRIPTION_SDK:
             from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
-            from azure.cli.core.vendored_sdks.subscriptions.models import SubscriptionState
             SubscriptionType = Subscription
-            StateType = SubscriptionState
         else:
             from azure.cli.core.profiles import ResourceType, get_sdk
             SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
                                                   'Subscription',
                                                   'SubscriptionState', mod='models')
         s = SubscriptionType()
-        s.state = StateType.ENABLED
+        s.state = 'Enabled'
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
