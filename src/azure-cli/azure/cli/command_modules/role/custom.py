@@ -330,73 +330,75 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
     #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
-    role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
+    if start_events:
+        # Only query Role Definitions and Graph when there are events returned
+        role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
-    for op_id in start_events:
-        e = end_events.get(op_id, None)
-        if not e:
-            continue
+        for op_id in start_events:
+            e = end_events.get(op_id, None)
+            if not e:
+                continue
 
-        entry = {}
-        op = e.operation_name and e.operation_name.value
-        if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
-            s, payload = start_events[op_id], None
-            entry = dict.fromkeys(
-                ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
-                None)
-            entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
+            entry = {}
+            op = e.operation_name and e.operation_name.value
+            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+                s, payload = start_events[op_id], None
+                entry = dict.fromkeys(
+                    ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
+                    None)
+                entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
 
-            if s.http_request:
-                if s.http_request.method == 'PUT':
-                    # 'requestbody' has a wrong camel-case. Should be 'requestBody'
-                    payload = s.properties and s.properties.get('requestbody')
-                    entry['action'] = 'Granted'
-                    entry['scope'] = e.authorization.scope
-                elif s.http_request.method == 'DELETE':
-                    payload = e.properties and e.properties.get('responseBody')
-                    entry['action'] = 'Revoked'
-            if payload:
-                try:
-                    payload = json.loads(payload)
-                except ValueError:
-                    pass
+                if s.http_request:
+                    if s.http_request.method == 'PUT':
+                        # 'requestbody' has a wrong camel-case. Should be 'requestBody'
+                        payload = s.properties and s.properties.get('requestbody')
+                        entry['action'] = 'Granted'
+                        entry['scope'] = e.authorization.scope
+                    elif s.http_request.method == 'DELETE':
+                        payload = e.properties and e.properties.get('responseBody')
+                        entry['action'] = 'Revoked'
                 if payload:
-                    if payload.get('properties') is None:
-                        continue
-                    payload = payload['properties']
-                    entry['principalId'] = payload['principalId']
-                    if not entry['scope']:
-                        entry['scope'] = payload['scope']
-                    if entry['scope']:
-                        index = entry['scope'].lower().find('/providers/microsoft.authorization')
-                        if index != -1:
-                            entry['scope'] = entry['scope'][:index]
-                        parts = list(filter(None, entry['scope'].split('/')))
-                        entry['scopeName'] = parts[-1]
-                        if len(parts) < 3:
-                            entry['scopeType'] = 'Subscription'
-                        elif len(parts) < 5:
-                            entry['scopeType'] = 'Resource group'
-                        else:
-                            entry['scopeType'] = 'Resource'
+                    try:
+                        payload = json.loads(payload)
+                    except ValueError:
+                        pass
+                    if payload:
+                        if payload.get('properties') is None:
+                            continue
+                        payload = payload['properties']
+                        entry['principalId'] = payload['principalId']
+                        if not entry['scope']:
+                            entry['scope'] = payload['scope']
+                        if entry['scope']:
+                            index = entry['scope'].lower().find('/providers/microsoft.authorization')
+                            if index != -1:
+                                entry['scope'] = entry['scope'][:index]
+                            parts = list(filter(None, entry['scope'].split('/')))
+                            entry['scopeName'] = parts[-1]
+                            if len(parts) < 3:
+                                entry['scopeType'] = 'Subscription'
+                            elif len(parts) < 5:
+                                entry['scopeType'] = 'Resource group'
+                            else:
+                                entry['scopeType'] = 'Resource'
 
-                    # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
-                    role_resource_name = payload['roleDefinitionId'].split('/')[-1]
-                    entry['roleDefinitionId'] = role_resource_name
-                    # In case the role definition has been deleted.
-                    entry['roleName'] = role_defs.get(role_resource_name, "N/A")
+                        # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
+                        role_resource_name = payload['roleDefinitionId'].split('/')[-1]
+                        entry['roleDefinitionId'] = role_resource_name
+                        # In case the role definition has been deleted.
+                        entry['roleName'] = role_defs.get(role_resource_name, "N/A")
 
-            result.append(entry)
+                result.append(entry)
 
-    # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = {x['principalId'] for x in result if x['principalId']}
-    if principal_ids:
-        graph_client = _graph_client_factory(cmd.cli_ctx)
-        stubs = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
-        if principal_dics:
-            for e in result:
-                e['principalName'] = principal_dics.get(e['principalId'], None)
+        # Fill in logical user/sp names as guid principal-id not readable
+        principal_ids = {x['principalId'] for x in result if x['principalId']}
+        if principal_ids:
+            graph_client = _graph_client_factory(cmd.cli_ctx)
+            stubs = _get_object_stubs(graph_client, principal_ids)
+            principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
+            if principal_dics:
+                for e in result:
+                    e['principalName'] = principal_dics.get(e['principalId'], None)
 
     offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
                                                     x.operation_name.value.lower().startswith(
