@@ -1049,7 +1049,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('shareDeleteRetentionPolicy', None))
 
         # Test update without properties
-        self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy', None))
 
         with self.assertRaises(SystemExit):
@@ -1075,6 +1075,11 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('shareDeleteRetentionPolicy.days', None))
 
         self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+
+        # Test update without properties
+        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
 
