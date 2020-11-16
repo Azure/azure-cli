@@ -1047,6 +1047,10 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy', None))
 
+        # Test update without properties
+        self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy', None))
+
         with self.assertRaises(SystemExit):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 

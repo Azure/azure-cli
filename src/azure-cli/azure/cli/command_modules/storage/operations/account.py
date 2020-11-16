@@ -520,12 +520,13 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
 def update_file_service_properties(cmd, client, resource_group_name, account_name, enable_delete_retention=None,
                                    delete_retention_days=None):
-
+    from azure.cli.core.azclierror import ValidationError
+    delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')()
     if enable_delete_retention is not None:
         if enable_delete_retention is False:
             delete_retention_days = None
-        delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
-            enabled=enable_delete_retention, days=delete_retention_days)
+        delete_retention_policy.enabled = enable_delete_retention
+        delete_retention_policy.days = delete_retention_days
 
     # If already enabled, only update days
     if enable_delete_retention is None and delete_retention_days is not None:
@@ -535,9 +536,9 @@ def update_file_service_properties(cmd, client, resource_group_name, account_nam
         if delete_retention_policy is not None and delete_retention_policy.enabled:
             delete_retention_policy.days = delete_retention_days
         else:
-            raise CLIError("Delete Retention Policy hasn't been enabled, and you cannot set delete retention days. "
-                           "Please set --enabled-delete-retention as true to enable Delete Retention Policy.")
-
+            raise ValidationError(
+                "Delete Retention Policy hasn't been enabled, and you cannot set delete retention days. "
+                "Please set --enabled-delete-retention as true to enable Delete Retention Policy.")
     properties = cmd.get_models('FileServiceProperties')(share_delete_retention_policy=delete_retention_policy)
     return client.set_service_properties(resource_group_name=resource_group_name,
                                          account_name=account_name,
