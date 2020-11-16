@@ -312,9 +312,8 @@ class Profile:
             SubscriptionType = Subscription
         else:
             from azure.cli.core.profiles import ResourceType, get_sdk
-            SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                                                  'Subscription',
-                                                  'SubscriptionState', mod='models')
+            SubscriptionType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                       'Subscription', mod='models')
         s = SubscriptionType()
         s.state = 'Enabled'
         return s
@@ -834,6 +833,7 @@ class SubscriptionFinder:
 
             client_type = self._get_subscription_client_class()
             if client_type is None:
+                from azure.cli.core.azclierror import CLIInternalError
                 raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                        .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
