@@ -374,7 +374,7 @@ type: command
 short-summary: Create a service principal and configure its access to Azure resources.
 long-summary: >-
     """ + CREDENTIAL_WARNING_MESSAGE + """
-    
+
 
     By default, `az ad sp create-for-rbac` assigns the Contributor role to the service principal at the subscription scope.
     To reduce your risk of a compromised service principal, use --skip-assignment to create the service principal
