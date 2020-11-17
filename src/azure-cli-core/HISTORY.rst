@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
 2.14.2
 ++++++
 * No changes

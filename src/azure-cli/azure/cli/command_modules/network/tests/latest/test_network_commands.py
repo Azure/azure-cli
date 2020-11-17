@@ -882,6 +882,43 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='test_network_ag_http_listener_with_waf_policy')
+    def test_network_ag_http_listener_with_waf_policy(self):
+
+        self.kwargs.update({
+            'ag': 'ag1',
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener',
+            'waf_1': 'waf_1',
+            'waf_2': 'waf_2',
+            'waf_3': 'waf_3',
+            'listener_2': 'listener_2',
+        })
+
+        # prepare 2 WAF policies
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_1}')
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_2}')
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_3}')
+
+        self.cmd('network public-ip create -g {rg} -n ip-1 --sku Standard')
+
+        # sku=WAF_v2 is necessary for updating HTTP listener's WAF configuration
+        create_res = self.cmd('network application-gateway create -g {rg} --name {ag} --public-ip-address ip-1 --sku WAF_v2').get_output_in_json()
+        self.assertEqual(len(create_res['applicationGateway']['httpListeners']), 1)
+        self.assertIsNone(create_res['applicationGateway']['httpListeners'][0].get('firewallPolicy'))
+
+        # update the default HTTP listener's WAF policy
+        update_res = self.cmd('network application-gateway http-listener update -g {rg} --gateway-name {ag} --name appGatewayHttpListener --waf-policy {waf_1}').get_output_in_json()
+        self.assertTrue(update_res['firewallPolicy']['id'].endswith('waf_1'))
+
+        # create another HTTP listener with WAF policy and update it to another WAF policy
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} --port 9020 --name 9020')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} --name {listener_2} --frontend-port 9020 --waf-policy {waf_2}')
+        update_res = self.cmd('network application-gateway http-listener update -g {rg} --gateway-name {ag} --name {listener_2} --waf-policy {waf_3}').get_output_in_json()
+        self.assertTrue(update_res['firewallPolicy']['id'].endswith('waf_3'))
+
+        self.cmd('network application-gateway show -g {rg} --name {ag}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
     def test_network_ag_http_listener_with_multi_host_names(self, resource_group):
 

@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import random
-import os
 
 import azure.mgmt.redhatopenshift.models as v2020_04_30
+
 from azure.cli.command_modules.aro._aad import AADManager
 from azure.cli.command_modules.aro._rbac import assign_contributor_to_vnet, assign_contributor_to_routetable
 from azure.cli.command_modules.aro._validators import validate_subnets
@@ -44,6 +44,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                ingress_visibility=None,
                tags=None,
                no_wait=False):
+
     resource_client = get_mgmt_service_client(
         cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
@@ -67,17 +68,13 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         client_sp = aad.create_service_principal(client_id)
 
     rp_client_id = FP_CLIENT_ID
-
     rp_client_sp = aad.get_service_principal(rp_client_id)
 
     for sp_id in [client_sp.object_id, rp_client_sp.object_id]:
         assign_contributor_to_vnet(cmd.cli_ctx, vnet, sp_id)
         assign_contributor_to_routetable(cmd.cli_ctx, master_subnet, worker_subnet, sp_id)
 
-    if rp_mode_development():
-        worker_vm_size = worker_vm_size or 'Standard_D2s_v3'
-    else:
-        worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
+    worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
@@ -161,10 +158,6 @@ def aro_update(client, resource_group_name, resource_name, no_wait=False):
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
                        parameters=oc)
-
-
-def rp_mode_development():
-    return os.environ.get('RP_MODE', '').lower() == 'development'
 
 
 def generate_random_id():

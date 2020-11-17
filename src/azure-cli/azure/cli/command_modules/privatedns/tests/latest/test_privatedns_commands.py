@@ -959,7 +959,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
     def test_Private_Dns_import_file_operation_error_linux(self, resource_group):
         import sys
         if sys.platform != 'linux':
-            self.skip('This test should run on Linux platform')
+            self.skipTest('This test should run on Linux platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
@@ -978,7 +978,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
     def test_Private_Dns_import_file_operation_error_windows(self, resource_group):
         import sys
         if sys.platform != 'win32':
-            self.skip('This test should run on Windows platform')
+            self.skipTest('This test should run on Windows platform')
 
         from azure.cli.core.azclierror import FileOperationError
         with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:

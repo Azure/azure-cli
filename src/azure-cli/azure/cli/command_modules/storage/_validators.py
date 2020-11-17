@@ -1249,13 +1249,14 @@ def validate_delete_retention_days(namespace):
 
 
 def validate_file_delete_retention_days(namespace):
+    from azure.cli.core.azclierror import ValidationError
     if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
-        raise ValueError(
+        raise ValidationError(
             "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
             "is set to true")
 
     if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
-        raise ValueError(
+        raise ValidationError(
             "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
 
 
