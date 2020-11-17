@@ -113,7 +113,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 # apply results transform if specified
                 transform_result = merged_kwargs.get('transform', None)
                 if transform_result:
-                    return _encode_hex(transform_result(result, **{**command_args, **{'kv_transform': True}}))
+                    return _encode_hex(transform_result(result, **{**command_args, 'kv_transform': True}))
 
                 # otherwise handle based on return type of results
                 if isinstance(result, poller_classes()):
