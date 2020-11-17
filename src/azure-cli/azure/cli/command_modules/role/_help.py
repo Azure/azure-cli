@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING_MESSAGE
 # pylint: disable=line-too-long, too-many-lines
 
 helps['ad'] = """
@@ -95,11 +96,7 @@ examples:
 helps['ad app credential reset'] = """
 type: command
 short-summary: Append or overwrite an application's password or certificate credentials
-long-summary: >-
-    The output of this command includes credentials that you must protect.
-    Be sure that you do not include these credentials in your code or check the credentials into your source control.
-    As an alternative, consider using managed identities (https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview)
-    to avoid the need to use credentials.
+long-summary: """ + CREDENTIAL_WARNING_MESSAGE + """
 examples:
   - name: Append a certificate to the application with the certificate string.
     text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
@@ -376,11 +373,8 @@ helps['ad sp create-for-rbac'] = """
 type: command
 short-summary: Create a service principal and configure its access to Azure resources.
 long-summary: >-
-    The output of this command includes credentials that you must protect.
-    Be sure that you do not include these credentials in your code or check the credentials into your source control.
-    As an alternative, consider using managed identities (https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview)
-    to avoid the need to use credentials.
-
+    """ + CREDENTIAL_WARNING_MESSAGE + """
+    
 
     By default, `az ad sp create-for-rbac` assigns the Contributor role to the service principal at the subscription scope.
     To reduce your risk of a compromised service principal, use --skip-assignment to create the service principal
@@ -457,14 +451,10 @@ examples:
 helps['ad sp credential reset'] = """
 type: command
 short-summary: Reset a service principal credential.
-long-summary: >-
+long-summary: |-
     Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
-    
 
-    The output of this command includes credentials that you must protect.
-    Be sure that you do not include these credentials in your code or check the credentials into your source control.
-    As an alternative, consider using managed identities (https://docs.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview)
-    to avoid the need to use credentials.
+    """ + CREDENTIAL_WARNING_MESSAGE + """
 parameters:
   - name: --name -n
     short-summary: Name or app ID of the service principal.

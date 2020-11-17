@@ -35,6 +35,12 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
+CREDENTIAL_WARNING_MESSAGE = (
+    "The output of this command includes credentials that you must protect. Be sure that you do not include "
+    "these credentials in your code or check the credentials into your source control. As an alternative, "
+    "consider using managed identities (https://docs.microsoft.com/azure/active-directory/managed-identities"
+    "-azure-resources/overview) to avoid the need to use credentials.")
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -1521,6 +1527,8 @@ def create_service_principal_for_rbac(
             "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 
@@ -1769,6 +1777,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     }
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 
