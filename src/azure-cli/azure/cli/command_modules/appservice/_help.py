@@ -331,10 +331,8 @@ short-summary: Import a certificate to a functionapp. The certificate can be fro
 examples:
   - name: Import an SSL certificate to a function app from Key Vault. Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --certificate-name MyCertificateName
-    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
   - name: Import an SSL certificate to a function app from Key Vault using resource id (typically if Key Vault is in another subscription). Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --certificate-name MyCertificateName
-    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
   - name: Import an App Service Certificate to a function app
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --certificate-name MyCertificateName
 
