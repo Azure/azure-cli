@@ -199,7 +199,9 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                                        "AzureWorkload")
             custom_help.validate_container(container)
             if isinstance(container, list):
-                raise ValidationError("Multiple containers with same Friendly Name found. Please give native names instead.")
+                raise ValidationError("""
+                Multiple containers with same Friendly Name found. Please give native names instead.
+                """)
             container_uri = container.name
     return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri)
 
@@ -400,7 +402,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                  vault_name, backup_management_type)
 
         if isinstance(target_container, list):
-            raise ValidationError("Multiple containers with same Friendly Name found. Please give native names instead.")
+            raise ValidationError("""
+            Multiple containers with same Friendly Name found. Please give native names instead.
+            """)
 
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
