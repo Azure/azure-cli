@@ -10,8 +10,7 @@ import azure.cli.command_modules.backup.custom_common as common
 import azure.cli.command_modules.backup.custom_wl as custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
-from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -39,7 +38,7 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
         return custom_afs.create_policy(client, resource_group_name, vault_name, name, policy)
     if backup_management_type.lower() == "azureworkload":
         if workload_type is None:
-            raise CLIError("Please provide workload type.")
+            raise RequiredArgumentMissingError("Please provide workload type. Use --workload-type.")
         return custom_wl.create_policy(client, resource_group_name, vault_name, name, policy, workload_type)
     if backup_management_type.lower() == "azureiaasvm":
         return custom.create_policy(client, resource_group_name, vault_name, name, policy)
