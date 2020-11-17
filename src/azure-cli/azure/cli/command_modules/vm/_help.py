@@ -2714,7 +2714,7 @@ examples:
   - name: Update a VM instance's bandwidth in MB per second of the managed disk.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66
   - name: Update a VM to use a custom image.
-    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.imageReference.id=imageID
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
 """
 
 helps['vmss update-instances'] = """
