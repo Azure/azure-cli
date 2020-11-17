@@ -641,11 +641,17 @@ def _get_protected_item_instance(item_type):
 def _check_map(item_type, item_type_map):
     if item_type is None:
         if item_type_map == workload_type_map:
-            raise RequiredArgumentMissingError("Workload type missing. Please enter a valid workload type.")
+            az_error = RequiredArgumentMissingError("Workload type missing. Please enter a valid workload type.")
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
         if item_type_map == protectable_item_type_map:
-            raise RequiredArgumentMissingError("""
+            az_error = RequiredArgumentMissingError("""
             Protectable item type missing. Please enter a valid protectable item type.
             """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
         raise RequiredArgumentMissingError("Item type missing. Enter a valid item type.")
     if item_type_map.get(item_type) is not None:
         return item_type_map[item_type]

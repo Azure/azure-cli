@@ -21,7 +21,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf)
-from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 
 logger = get_logger(__name__)
@@ -297,7 +297,7 @@ def get_or_read_json(json_or_file):
         with open(json_or_file) as f:
             json_obj = json.load(f)
     if json_obj is None:
-        raise ResourceNotFoundError(
+        raise ValidationError(
             """
             The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
             Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
@@ -314,7 +314,7 @@ def get_object_from_json(client, json_or_file, class_name):
     # Deserialize json to object
     param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
     if param is None:
-        raise ResourceNotFoundError(
+        raise ValidationError(
             """
             The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
             Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'

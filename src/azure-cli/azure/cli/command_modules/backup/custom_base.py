@@ -11,6 +11,7 @@ import azure.cli.command_modules.backup.custom_wl as custom_wl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
@@ -74,7 +75,7 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.list_recovery_points(client, resource_group_name, vault_name, item, start_date, end_date)
@@ -98,7 +99,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
@@ -121,7 +122,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item_name, 
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.disable_protection(cmd, client, resource_group_name, vault_name, item, delete_backup_data,
@@ -143,7 +144,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
@@ -198,7 +199,7 @@ def list_protectable_items(cmd, client, resource_group_name, vault_name, workloa
                                        "AzureWorkload")
             custom_help.validate_container(container)
             if isinstance(container, list):
-                raise CLIError("Multiple containers with same Friendly Name found. Please give native names instead.")
+                raise ValidationError("Multiple containers with same Friendly Name found. Please give native names instead.")
             container_uri = container.name
     return custom_wl.list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri)
 
@@ -266,7 +267,7 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, conta
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
     return custom.update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist,
                                            disk_list_setting, exclude_all_data_disks)
 
@@ -328,7 +329,7 @@ def restore_azurefileshare(cmd, client, resource_group_name, vault_name, rp_name
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "FullShareRestore",
@@ -347,7 +348,7 @@ def restore_azurefiles(cmd, client, resource_group_name, vault_name, rp_name, co
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
     return custom_afs.restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                                              resolve_conflict, "ItemLevelRestore",
                                              target_storage_account_name=target_storage_account,
@@ -364,7 +365,7 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
@@ -399,7 +400,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                                  vault_name, backup_management_type)
 
         if isinstance(target_container, list):
-            raise CLIError("Multiple containers with same Friendly Name found. Please give native names instead.")
+            raise ValidationError("Multiple containers with same Friendly Name found. Please give native names instead.")
 
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
@@ -414,7 +415,7 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, container_
     custom_help.validate_item(item)
 
     if isinstance(item, list):
-        raise CLIError("Multiple items found. Please give native names instead.")
+        raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.undelete_protection(cmd, client, resource_group_name, vault_name, item)
