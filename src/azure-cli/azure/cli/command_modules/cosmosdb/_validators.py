@@ -5,6 +5,7 @@
 
 from knack.util import CLIError
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 def validate_failover_policies(ns):
@@ -76,7 +77,8 @@ def validate_role_definition_body(cmd, ns):
             role_definition = shell_safe_json_parse(ns.role_definition_body)
 
         if not isinstance(role_definition, dict):
-            raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
+            raise InvalidArgumentValueError(
+                'Invalid role defintion. A valid dictionary JSON representation is expected.')
 
         if 'Id' in role_definition:
             role_definition['Id'] = _parse_resource_path(role_definition['Id'], False, "sqlRoleDefinitions")
