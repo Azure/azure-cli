@@ -224,7 +224,7 @@ AZURE_API_PROFILES = {
             'gallery_image_versions': '2019-12-01',
             'virtual_machine_scale_sets': '2020-06-01'
         }),
-        ResourceType.MGMT_KEYVAULT: '2019-09-01',
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
