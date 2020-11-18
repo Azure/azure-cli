@@ -678,6 +678,9 @@ parameters:
   - name: --spot-max-price
     type: float
     short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -742,6 +745,9 @@ parameters:
   - name: --mode
     type: string
     short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -761,6 +767,9 @@ parameters:
   - name: --node-image-only
     type: bool
     short-summary: Only upgrade agent pool's node image.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 """
 
 helps['aks remove-dev-spaces'] = """

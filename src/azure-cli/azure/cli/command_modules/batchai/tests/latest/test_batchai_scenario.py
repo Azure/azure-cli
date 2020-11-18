@@ -97,7 +97,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                     JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
                     JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                     JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                    JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                     JMESPathCheckExists("[0].downloadUrl"),
                     JMESPathCheckExists("[1].downloadUrl"),
             ])
@@ -369,7 +368,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                     JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
                     JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                     JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                    JMESPathCheckExists("[?name == 'stderr.txt']"),
                     JMESPathCheckExists("[0].downloadUrl"),
                     JMESPathCheckExists("[1].downloadUrl"),
             ])
@@ -402,7 +400,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
                 JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                 JMESPathCheckExists("[0].downloadUrl"),
                 JMESPathCheckExists("[1].downloadUrl"),
             ])
