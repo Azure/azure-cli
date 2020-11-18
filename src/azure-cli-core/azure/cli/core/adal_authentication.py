@@ -105,8 +105,8 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         # }
         if 'expiresOn' in full_token:
             import datetime
-            expires_on_timestamp = int(
-                datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f').timestamp())
+            expires_on_timestamp = int(_timestamp(
+                datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f')))
             return AccessToken(token, expires_on_timestamp)
 
         # Cloud Shell (Managed Identity) token entry sample:
@@ -220,3 +220,12 @@ def _try_scopes_to_resource(scopes):
 
     # Exactly only one scope is provided
     return scopes_to_resource(scopes)
+
+
+def _timestamp(dt):
+    # datetime.datetime can't be patched:
+    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
+    # So we wrap datetime.datetime.timestamp with this function.
+    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
+    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
+    return dt.timestamp()
