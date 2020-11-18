@@ -201,6 +201,7 @@ def get_error_type_by_azure_error(ex):
     return azclierror.UnknownError
 
 
+# pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
     import azure.cli.core.azclierror as azclierror
 
