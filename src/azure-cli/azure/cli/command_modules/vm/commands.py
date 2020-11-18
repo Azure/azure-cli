@@ -232,7 +232,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_image_templates')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
-        g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
+        g.generic_update_command('update', 'begin_create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
