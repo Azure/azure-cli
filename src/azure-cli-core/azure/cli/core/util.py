@@ -213,6 +213,8 @@ def get_error_type_by_status_code(status_code):
         return azclierror.ForbiddenError
     if status_code == '404':
         return azclierror.ResourceNotFoundError
+    if status_code.startswith('4'):
+        return azclierror.UnclassifiedUserFault
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 
