@@ -173,9 +173,8 @@ def extract_http_operation_error(ex):
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
             status_code = error.get('code', 'Unknown Code')
-            code_str = "{} - ".format(status_code)
             message = error.get('message', ex)
-            error_msg = "code: {}, {}".format(code_str, message)
+            error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
     except (ValueError, KeyError):
