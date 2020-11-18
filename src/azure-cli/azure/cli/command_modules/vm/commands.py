@@ -466,14 +466,14 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_arg_name='gallery')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.command('list', 'list_by_gallery')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete')
-        g.generic_update_command('update', setter_arg_name='gallery_image')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
         g.command('delete', 'begin_delete')
