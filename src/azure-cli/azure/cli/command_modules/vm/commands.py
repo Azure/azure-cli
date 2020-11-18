@@ -380,7 +380,7 @@ def load_command_table(self, _):
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
         g.command('list', 'list_by_host_group')
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_name='begin_create_or_update')
         g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
