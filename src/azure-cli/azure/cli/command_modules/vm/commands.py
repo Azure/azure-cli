@@ -224,7 +224,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.custom_command('list', 'list_images')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.generic_update_command('update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
