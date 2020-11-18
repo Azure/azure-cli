@@ -2392,11 +2392,14 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     server_farm_id = webapp.server_farm_id
     location = webapp.location
 
-    if key_vault_certificate_name:
-        return
-
+    if certificate_name and key_vault_certificate_name:
+        no_two_certs = "Provide only one certificate name, use \'--certificate-name\'."
+        logger.warning(no_two_certs)
+        return 
     if certificate_name:
         cert = certificate_name
+    elif key_vault_certificate_name:
+        cert = key_vault_certificate_name
     else:
         no_cert_msg = 'You must provide a certificate name, use \'--certificate-name\'.'
         logger.warning(no_cert_msg)
