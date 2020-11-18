@@ -2395,7 +2395,7 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     if certificate_name and key_vault_certificate_name:
         no_two_certs = "Provide only one certificate name, use \'--certificate-name\'."
         logger.warning(no_two_certs)
-        return 
+        return
     if certificate_name:
         cert = certificate_name
     elif key_vault_certificate_name:
