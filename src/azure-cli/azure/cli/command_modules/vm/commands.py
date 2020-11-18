@@ -253,7 +253,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
         g.custom_command('list', 'list_snapshots')
-        g.command('revoke-access', 'revoke_access')
+        g.command('revoke-access', 'begin_revoke_access')
         g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
         g.wait_command('wait')
