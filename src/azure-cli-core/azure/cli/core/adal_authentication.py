@@ -112,12 +112,11 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         # Cloud Shell (Managed Identity) token entry sample:
         # {
         #     "access_token": "eyJ0eXAiOiJKV...",
-        #     "client_id": "da95e381-d7ab-4fdc-8047-2457909c723b",
-        #     "expires_in": "86386",
-        #     "expires_on": "1605238724",
-        #     "ext_expires_in": "86399",
-        #     "not_before": "1605152024",
-        #     "resource": "https://management.azure.com/",
+        #     "refresh_token": "",
+        #     "expires_in": "2106",
+        #     "expires_on": "1605686811",
+        #     "not_before": "1605682911",
+        #     "resource": "https://management.core.windows.net/",
         #     "token_type": "Bearer"
         # }
         if 'expires_on' in full_token:
