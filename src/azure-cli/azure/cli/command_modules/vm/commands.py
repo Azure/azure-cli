@@ -265,7 +265,7 @@ def load_command_table(self, _):
 
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
+        g.command('convert', 'begin_convert_to_managed_disks', min_api='2016-04-30-preview')
         g.command('deallocate', 'begin_deallocate', supports_no_wait=True)
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('generalize', 'generalize', supports_no_wait=True)
@@ -277,15 +277,15 @@ def load_command_table(self, _):
         g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
         g.command('list-vm-resize-options', 'list_available_sizes')
         g.custom_command('open-port', 'open_vm_port')
-        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-03-30')
-        g.command('redeploy', 'redeploy', supports_no_wait=True)
+        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-03-30')
+        g.command('redeploy', 'begin_redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('simulate-eviction', 'simulate_eviction', min_api='2019-12-01')
         g.command('start', 'begin_start', supports_no_wait=True)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
+        g.command('reapply', 'begin_reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
@@ -407,7 +407,7 @@ def load_command_table(self, _):
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
-        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
+        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
@@ -457,9 +457,9 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
 
     with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
-        g.command('cancel', 'cancel')
+        g.command('cancel', 'begin_cancel')
         g.command('get-latest', 'get_latest')
-        g.command('start', 'start_os_upgrade')
+        g.command('start', 'begin_start_os_upgrade')
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
