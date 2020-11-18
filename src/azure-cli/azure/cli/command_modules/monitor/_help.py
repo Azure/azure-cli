@@ -1416,15 +1416,15 @@ parameters:
     long-summary: |
         Usage:  --condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]
+                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
 
-        Violation can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
+        Violations can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
 
-        Evaluation can be the number of evaluation periods for dynamic threshold.
+        Evaluations can be the number of evaluation periods for dynamic threshold.
 
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
 
@@ -1508,8 +1508,8 @@ examples:
         --aggregation Average \n
         --metric "Percentage Cpu" \n
         --op GreaterOrLessThan \n
-        --violation 4 \n
-        --evaluation 4 \n
+        --num-violations 4 \n
+        --num-periods 4 \n
         --since 2020-11-02T12:11
 """
 
@@ -1553,15 +1553,15 @@ parameters:
     long-summary: |
         Usage:  --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC
                            [{=,!=,>,>=,<,<=} THRESHOLD]
-                           [{<,>,><} dynamic SENSITIVITY VIOLATION of EVALUATION [since DATETIME]]
+                           [{<,>,><} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]
                            [where DIMENSION {includes,excludes} VALUE [or VALUE ...]
                            [and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]
 
         Sensitivity can be 'low', 'medium', 'high'.
 
-        Violation can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
+        Violations can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.
 
-        Evaluation can be the number of evaluation periods for dynamic threshold.
+        Evaluations can be the number of evaluation periods for dynamic threshold.
 
         Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).
 

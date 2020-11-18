@@ -171,12 +171,12 @@ def load_arguments(self, _):
         c.argument('alert_sensitivity', options_list=['--sensitivity'],
                    arg_type=get_enum_type(sens_conversion.values(), default='Medium'),
                    help="Alert sensitivity for dynamic threshold.")
-        c.argument('number_of_evaluation_periods', options_list=['--evaluation'], type=int,
+        c.argument('number_of_evaluation_periods', options_list=['--num-periods'], type=int,
                    help='The number of evaluation periods for dynamic threshold. '
                         'Range: 1-6.')
-        c.argument('min_failing_periods_to_alert', options_list=['--violation'], type=int,
+        c.argument('min_failing_periods_to_alert', options_list=['--num-violations'], type=int,
                    help='The number of violations to trigger an dynamic alert. '
-                        'Range: 1-6. It should be less than or equal to --evaluation.')
+                        'Range: 1-6. It should be less than or equal to --num-periods.')
         c.argument('ignore_data_before', options_list=['--since'],
                    arg_type=get_datetime_type(
                        help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))

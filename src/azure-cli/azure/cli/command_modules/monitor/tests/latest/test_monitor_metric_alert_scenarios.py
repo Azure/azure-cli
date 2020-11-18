@@ -377,7 +377,7 @@ class MonitorTests(ScenarioTest):
 
         cond2 = "avg 'Percentage Cpu' >< dynamic medium 1 of 6 since 2020-11-02T12:11:11+00:00"
         condition = self.cmd(
-            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" --op GreaterOrLessThan --evaluation 6 --violation 1 --since 2020-11-02T12:11:11Z --sensitivity medium',
+            'monitor metrics alert condition create -t dynamic --aggregation Average --metric "Percentage Cpu" --op GreaterOrLessThan --num-periods 6 --num-violations 1 --since 2020-11-02T12:11:11Z --sensitivity medium',
             checks=[
                 self.check('@', cond2)
             ]
