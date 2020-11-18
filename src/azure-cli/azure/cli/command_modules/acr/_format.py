@@ -98,20 +98,20 @@ def connected_acr_output_format(result):
 
 
 def connected_acr_list_output_format(result):
-    from .connected_acr import ConnectedRegistryModes
     family_tree = {}
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
         parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
-        name = '(E) ' if _get_value(reg, 'mode').lower() == ConnectedRegistryModes.REGISTRY.value else '(M) '
-        name += _get_value(reg, 'name')
+        name = ' ' + _get_value(reg, 'name')
         family_tree[_get_value(reg, 'id')] = {
             "name": name,
             "id": _get_value(reg, 'id'),
-            "status": _get_value(reg, 'statusDetails'),
+            "statusDetails": _get_value(reg, 'statusDetails'),
             "parent_name": parent_name,
             "parent_id": parent_id,
-            "loginName": _get_value(reg, 'loginServer', 'host'),
+            "loginServer_host": _get_value(reg, 'loginServer', 'host'),
+            "parent_syncProperties_lastSyncTime": _get_value(reg, 'parent', 'syncProperties', 'lastSyncTime'),
+            "mode": _get_value(reg, 'mode'),
             "childs": []
         }
 
@@ -299,9 +299,9 @@ def _connected_acr_format_group(item):
         ('NAME', _get_value(item, 'name')),
         ('STATUS', _get_value(item, 'statusDetails')),
         ('PARENT', parent_name),
-        ('LOGIN NAME', _get_value(item, 'loginServer', 'host')),
-        ('LAST UPDATED', _get_value(item, 'lastActivityTime')),
-        #('NEXT UPDATE', _get_value(item, 'nextUpdate')),.split('/connectedRegistries/')[1]
+        ('LOGIN SERVER', _get_value(item, 'loginServer', 'host')),
+        ('LAST ACTIVITY', _get_value(item, 'lastActivityTime')),
+        ('LAST SYNC', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
         ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
         ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow'))
     ])
@@ -310,9 +310,11 @@ def _connected_acr_format_group(item):
 def _connected_acr_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('STATUS', _get_value(item, 'status')),
+        ('MODE', _get_value(item, 'mode')),
+        ('STATUS', _get_value(item, 'statusDetails')),
         ('PARENT', _get_value(item, 'parent_name')),
-        ('LOGIN NAME', _get_value(item, 'loginName'))
+        ('LOGIN SERVER', _get_value(item, 'loginServer_host')),
+        ('LAST SYNC', _get_value(item, 'parent_syncProperties_lastSyncTime'))
     ])
 
 
