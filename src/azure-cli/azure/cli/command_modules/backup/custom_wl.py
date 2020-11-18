@@ -25,6 +25,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
 
 fabric_name = "Azure"
@@ -47,7 +48,9 @@ attr_map = {'sqldatabase': 'SQLDatabase',
 
 protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANADataBase': 'SAPHanaDatabase',
+                             'SAPHanaDatabase': 'SAPHanaDatabase',
                              'HANAInstance': 'SAPHanaSystem',
+                             'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
                              'SQLAG': 'SQLAG'}
 
@@ -58,9 +61,9 @@ def show_wl_policy(client, resource_group_name, vault_name, name):
 
 def list_wl_policies(client, resource_group_name, vault_name, workload_type, backup_management_type):
     if workload_type is None:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             """
-            Workload type is required for Azure Workload.
+            Workload type is required for Azure Workload. Use --workload-type.
             """)
 
     if backup_management_type is None:
@@ -69,7 +72,7 @@ def list_wl_policies(client, resource_group_name, vault_name, workload_type, bac
             Backup Management Type needs to be specified for Azure Workload.
             """)
 
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': backup_management_type,
@@ -94,7 +97,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
             Resource ID is not a valid one.
             """)
 
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
     container_name = resource_id.split('/')[-1]
 
     containers = list_protectable_containers(cmd, resource_group_name, vault_name)
@@ -122,7 +125,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
 
 def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type,
                              container_name, container_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     if not cust_help.is_native_name(container_name):
         raise CLIError(
@@ -194,7 +197,7 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
 
 
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': 'AzureWorkload',
@@ -204,7 +207,7 @@ def initialize_protectable_items(client, resource_group_name, vault_name, contai
 
 
 def create_policy(client, resource_group_name, vault_name, policy_name, policy, workload_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
     policy_object = cust_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = "AzureWorkload"
     policy_object.properties.workload_type = workload_type
@@ -236,8 +239,7 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix
 
 
 def show_protectable_item(items, name, server_name, protectable_item_type):
-    if protectable_item_type_map.get(protectable_item_type) is not None:
-        protectable_item_type = protectable_item_type_map[protectable_item_type]
+    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Name filter
     if cust_help.is_native_name(name):
         filtered_items = [item for item in items if item.name.lower() == name.lower()]
@@ -255,8 +257,20 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
 
 def show_protectable_instance(items, server_name, protectable_item_type):
-    if protectable_item_type_map.get(protectable_item_type) is not None:
-        protectable_item_type = protectable_item_type_map[protectable_item_type]
+    if server_name is None:
+        raise RequiredArgumentMissingError("""
+        Server name missing. Please provide a valid server name using --target-server-name.
+        """)
+
+    if protectable_item_type is None:
+        az_error = RequiredArgumentMissingError("""
+        Protectable item type missing. Please provide a valid protectable item type name using --target-server-type.
+        """)
+        recommendation_text = "{} are the allowed values.".format(str(list(protectable_item_type_map.keys())))
+        az_error.set_recommendation(recommendation_text)
+        raise az_error
+
+    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Server Name filter
     filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
 
@@ -268,7 +282,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
 
 
 def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': "AzureWorkload",
@@ -632,3 +646,29 @@ def _get_protected_item_instance(item_type):
     if item_type.lower() == "saphanadatabase":
         return AzureVmWorkloadSAPHanaDatabaseProtectedItem()
     return AzureVmWorkloadSQLDatabaseProtectedItem()
+
+
+def _check_map(item_type, item_type_map):
+    if item_type is None:
+        if item_type_map == workload_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Workload type missing. Please enter a valid workload type using --workload-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        if item_type_map == protectable_item_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Protectable item type missing. Please enter a valid protectable item type using --protectable-item-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        raise RequiredArgumentMissingError("Item type missing. Enter a valid item type.")
+    if item_type_map.get(item_type) is not None:
+        return item_type_map[item_type]
+    error_text = "{} is an invalid argument.".format(item_type)
+    recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+    az_error = InvalidArgumentValueError(error_text)
+    az_error.set_recommendation(recommendation_text)
+    raise az_error

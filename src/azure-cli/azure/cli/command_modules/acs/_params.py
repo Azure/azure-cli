@@ -22,10 +22,12 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
+    validate_ppg, validate_assign_identity, validate_max_surge)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
     CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
-    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
+    CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -207,6 +209,7 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
+        c.argument('assign_identity', type=str, validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
@@ -254,8 +257,10 @@ def load_arguments(self, _):
         with self.argument_context('{} install-cli'.format(scope)) as c:
             c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+            c.argument('base_src_url', help='Base download source URL for kubectl releases.')
             c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
             c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
+            c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -297,6 +302,8 @@ def load_arguments(self, _):
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
             c.argument('ppg', type=str, validator=validate_ppg)
+            c.argument('max_surge', type=str, validator=validate_max_surge)
+            c.argument('node_os_disk_type', arg_type=get_enum_type([CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -308,6 +315,7 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
+        c.argument('max_surge', type=str, validator=validate_max_surge)
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')

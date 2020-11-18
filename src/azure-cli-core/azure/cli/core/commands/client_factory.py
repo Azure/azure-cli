@@ -110,12 +110,21 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
-def configure_common_settings_track2(cli_ctx):
+def _prepare_client_kwargs_track2(cli_ctx):
+    """Prepare kwargs for Track 2 SDK client."""
     client_kwargs = {}
 
+    # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
+    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
     client_kwargs['logging_enable'] = True
+
+    # Disable ARMHttpLoggingPolicy which logs only allowed headers
+    from azure.core.pipeline.policies import SansIOHTTPPolicy
+    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
+    # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()
 
     try:
@@ -125,13 +134,20 @@ def configure_common_settings_track2(cli_ctx):
     except KeyError:
         pass
 
+    # Prepare custom headers, used by HeadersPolicy
     headers = dict(cli_ctx.data['headers'])
+
+    # - Prepare CommandName header
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
     headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # - Prepare ParameterSetName header
     if cli_ctx.data.get('safe_params'):
         headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
     client_kwargs['headers'] = headers
 
+    # Prepare x-ms-client-request-id header, used by RequestIdPolicy
     if 'x-ms-client-request-id' in cli_ctx.data['headers']:
         client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
 
@@ -150,6 +166,7 @@ def _get_mgmt_service_client(cli_ctx,
                              aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
+    from azure.cli.core.util import resource_to_scopes
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
@@ -168,7 +185,8 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
+        client_kwargs['credential_scopes'] = resource_to_scopes(resource)
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)

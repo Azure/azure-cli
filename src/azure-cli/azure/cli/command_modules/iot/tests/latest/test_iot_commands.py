@@ -20,13 +20,13 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
-        hub = 'iot-hub-for-test-11'
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
-        containerName = 'iothubcontainer1'
+        containerName = self.create_random_name(prefix='iothubcontainer1', length=24)
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
-        subscription_id = self._get_current_subscription()
+        subscription_id = self.get_subscription_id()
 
         # Test hub life cycle in free tier
         self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
@@ -397,7 +397,7 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     def test_identity_hub(self, resource_group, resource_group_location, storage_account):
         # Test IoT Hub create with identity
-        subscription_id = self._get_current_subscription()
+        subscription_id = self.get_subscription_id()
         rg = resource_group
         location = resource_group_location
 
@@ -518,8 +518,8 @@ class IoTHubTest(ScenarioTest):
                  .format(private_endpoint_type, private_endpoint_name, identity_hub, rg))
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest1'
-        eventHub = 'eventHubiothubfortest'
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
 
@@ -544,7 +544,3 @@ class IoTHubTest(ScenarioTest):
         output = self.cmd('storage account show-connection-string --resource-group {0} --name {1}'
                           .format(rg, storage_name))
         return output.get_output_in_json()['connectionString']
-
-    def _get_current_subscription(self):
-        output = self.cmd('account show')
-        return output.get_output_in_json()['id']

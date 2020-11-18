@@ -57,6 +57,24 @@ def load_arguments(self, _):
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
 
+    with self.argument_context('billing instruction list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+
+    with self.argument_context('billing instruction show') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='Instruction Name.')
+
+    with self.argument_context('billing instruction create') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='Instruction Name.')
+        c.argument('amount', type=float, help='The amount budgeted for this billing instruction.')
+        c.argument('start_date', help='The date this billing instruction goes into effect.')
+        c.argument('end_date', help='The date this billing instruction is no longer in effect.')
+        c.argument('creation_date', help='The date this billing instruction was created.')
+
     with self.argument_context('billing profile list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
         c.argument('expand', type=str, help='May be used to expand the invoice sections.')
@@ -150,6 +168,12 @@ def load_arguments(self, _):
         c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
         c.argument('invoice_section_name', options_list=['--name', '-n', '--invoice-section-name'], type=str, help=''
                    'The ID that uniquely identifies an invoice section.')
+
+    with self.argument_context('billing permission list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+        c.argument('customer_name', type=str, help='The ID that uniquely identifies a customer.')
 
     with self.argument_context('billing subscription list') as c:
         c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
@@ -248,3 +272,30 @@ def load_arguments(self, _):
 
     with self.argument_context('billing property update') as c:
         c.argument('cost_center', type=str, help='The cost center applied to the subscription.')
+
+    with self.argument_context('billing role-definition list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+
+    with self.argument_context('billing role-assignment list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+
+    with self.argument_context('billing role-assignment delete') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('profile_name', type=str, help='The ID that uniquely identifies a billing profile.')
+        c.argument('invoice_section_name', type=str, help='The ID that uniquely identifies an invoice section.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies a role '
+                   'assignment.')
+
+    with self.argument_context('billing agreement list') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('expand', type=str, help='May be used to expand the participants.')
+
+    with self.argument_context('billing agreement show') as c:
+        c.argument('account_name', type=str, help='The ID that uniquely identifies a billing account.')
+        c.argument('name', options_list=['--name', '-n'], type=str, help='The ID that uniquely identifies an '
+                   'agreement.')
+        c.argument('expand', type=str, help='May be used to expand the participants.')
