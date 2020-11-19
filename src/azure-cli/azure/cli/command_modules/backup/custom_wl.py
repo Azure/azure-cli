@@ -412,6 +412,28 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise CLIError(
+            """
+            Item must be either of type SQLDataBase or SAPHanaDatabase.
+            """)
+
+    properties = _get_protected_item_instance(backup_item_type)
+    properties.protection_state = 'ProtectionStopped'
+    properties.policy_id = ''
+    properties.is_rehydrate = True
+    param = ProtectedItemResource(properties=properties)
+
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
 def auto_enable_for_azure_wl(client, resource_group_name, vault_name, policy_object, protectable_item):
     protectable_item_object = protectable_item
     item_id = protectable_item_object.id
