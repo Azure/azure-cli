@@ -95,7 +95,7 @@ aztelemetry_exe = EXE(aztelemetry_pyz,
           strip=False,
           upx=True,
           console=True)
-aztelemetry_coll = COLLECT(azpip_exe,
+aztelemetry_coll = COLLECT(aztelemetry_exe,
                aztelemetry_a.binaries,
                aztelemetry_a.zipfiles,
                aztelemetry_a.datas,
