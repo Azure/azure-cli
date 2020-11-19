@@ -399,6 +399,10 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    with self.argument_context('keyvault key list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed keys. Default: false')
     # endregion
 
     # region KeyVault Secret
@@ -436,6 +440,9 @@ def load_arguments(self, _):
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
 
+    with self.argument_context('keyvault secret list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed secrets. Default: false')
     # endregion
 
     # region keyvault security-domain
