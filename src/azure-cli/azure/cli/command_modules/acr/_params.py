@@ -390,15 +390,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('key_encryption_key', help="key vault key uri")
         c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
 
-    with self.argument_context('acr connected-acr') as c:
+    with self.argument_context('acr connected-registry') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
-        c.argument('connected_acr_name', options_list=['--name', '-n'], help='Name for the Connected ACR. Name must start with a letter and contain only alphanumeric characters (including ‘_’) optionally separated by a ‘-’. 5 to 40 chars long. Name must be unique under the Cloud ACR hierarchy.', required=True)
+        c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the Connected ACR. Name must start with a letter and contain only alphanumeric characters (including ‘_’) optionally separated by a ‘-’. 5 to 40 chars long. Name must be unique under the Cloud ACR hierarchy.', required=True)
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='The name of the resource group where the Connected ACR registry will be created. Must be the same as the resource group for the --registry.', required=False)
         c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent ACR. If omitted, the cloud ACR will be assumed (the value from --registry).', required=False)
         c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None. ', required=False, default="Information")
         c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It\'s enabled by default.', required=False, arg_type=get_three_state_flag())
 
-    with self.argument_context('acr connected-acr create') as c:
+    with self.argument_context('acr connected-registry create') as c:
         c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
         c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be synched to the Connected ACR. It can include wildcards to select multiple repositories. It can be in the format [REPO01] [REPO02]...', required=True)
         c.argument('client_token_ids', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_ID01] [TOKEN_ID02]...', required=False)
@@ -406,7 +406,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
 
-    with self.argument_context('acr connected-acr update') as c:
+    with self.argument_context('acr connected-registry update') as c:
         c.argument('add_repository', options_list=['--add-repository'], nargs='*', required=False,
                    help='Repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('remove_repository', options_list=['--remove-repository'], nargs='*', required=False,
@@ -420,7 +420,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
 
 
-    with self.argument_context('acr connected-acr list') as c:
+    with self.argument_context('acr connected-registry list') as c:
         c.argument('cascading', options_list=['--cascading'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False, action='store_true')
 
 

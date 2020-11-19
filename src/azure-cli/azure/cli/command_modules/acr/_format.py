@@ -93,11 +93,11 @@ def agentpool_output_format(result):
     return _output_format(result, _agentpool_format_group)
 
 
-def connected_acr_output_format(result):
-    return _output_format(result, _connected_acr_format_group)
+def connected_registry_output_format(result):
+    return _output_format(result, _connected_registry_format_group)
 
 
-def connected_acr_list_output_format(result):
+def connected_registry_list_output_format(result):
     family_tree = {}
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
@@ -127,7 +127,7 @@ def connected_acr_list_output_format(result):
     for parent_id in parents:
         result_list_format.extend(_recursive_format_list_acr_childs(family_tree, parent_id))
 
-    return _output_format(result_list_format, _connected_acr_list_format_group)
+    return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
 def _recursive_format_list_acr_childs(family_tree, parent_id, level=""):
@@ -292,7 +292,7 @@ def _agentpool_format_group(item):
     ])
 
 
-def _connected_acr_format_group(item):
+def _connected_registry_format_group(item):
     parent_id = _get_value(item, 'parent', 'id')
     parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
     return OrderedDict([
@@ -307,7 +307,7 @@ def _connected_acr_format_group(item):
     ])
 
 
-def _connected_acr_list_format_group(item):
+def _connected_registry_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('MODE', _get_value(item, 'mode')),
