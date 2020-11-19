@@ -231,6 +231,7 @@ class BasicTokenCredential:
 
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         # Because get_token can't refresh the access token, always mark the token as unexpired
+        import time
         return AccessToken(self.access_token, int(time.time() + 3600))
 
 
