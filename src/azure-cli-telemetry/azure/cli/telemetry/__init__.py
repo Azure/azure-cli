@@ -18,7 +18,10 @@ def _start(config_dir):
 
     logger = get_logger('process')
 
-    args = [sys.executable, os.path.realpath(__file__), config_dir]
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):  # pyinstaller package
+        args = ['{}telemetry'.format(sys.executable), os.path.realpath(__file__), config_dir]
+    else:
+        args = [sys.executable, os.path.realpath(__file__), config_dir]
     logger.info('Creating upload process: "%s %s %s"', *args)
 
     kwargs = {'args': args}

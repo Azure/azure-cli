@@ -1212,6 +1212,5 @@ def run_pip_cmd(args):
     return exit_code, output.getvalue()
 
 
-def is_bundled():
+def is_bundled():  # pyinstaller package
     return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
-

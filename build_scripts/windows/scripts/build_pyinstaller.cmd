@@ -95,6 +95,7 @@ call deactivate
 
 robocopy %REPO_ROOT%\dist\az %BUILDING_DIR% /s /NFL /NDL
 robocopy %REPO_ROOT%\dist\azpip %BUILDING_DIR% /s /NFL /NDL
+robocopy %REPO_ROOT%\dist\aztelemetry %BUILDING_DIR% /s /NFL /NDL
 
 echo Creating the wbin (Windows binaries) folder that will be added to the path...
 mkdir %BUILDING_DIR%\wbin
