@@ -21,6 +21,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf)
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError
 
 
 logger = get_logger(__name__)
@@ -108,9 +109,17 @@ def validate_policy(policy):
     validate_object(policy, "Policy not found. Please provide a valid policy_name.")
 
 
+def validate_protectable_item(protectable_item):
+    validate_object(protectable_item, "Protectable item not found. Please provide a valid protectable_item_name.")
+
+
+def validate_azurefileshare_item(azurefileshare_item):
+    validate_object(azurefileshare_item, "Azure File Share item not found. Please provide a valid azure_file_share.")
+
+
 def validate_object(obj, error_message):
     if obj is None:
-        raise ValueError(error_message)
+        raise ResourceNotFoundError(error_message)
 
 
 def get_target_path(resource_type, path, logical_name, data_directory_paths):
@@ -288,7 +297,7 @@ def get_or_read_json(json_or_file):
         with open(json_or_file) as f:
             json_obj = json.load(f)
     if json_obj is None:
-        raise ValueError(
+        raise ValidationError(
             """
             The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
             Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'
@@ -305,7 +314,7 @@ def get_object_from_json(client, json_or_file, class_name):
     # Deserialize json to object
     param = client._deserialize(class_name, json_obj)  # pylint: disable=protected-access
     if param is None:
-        raise ValueError(
+        raise ValidationError(
             """
             The variable passed should be in valid JSON format and be supplied by az backup CLI commands.
             Make sure that you use output of relevant 'az backup show' commands and the --out is 'json'

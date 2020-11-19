@@ -22,7 +22,8 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg, validate_assign_identity)
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
+    validate_ppg, validate_assign_identity, validate_max_surge)
 from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
     CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
     CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
@@ -301,6 +302,7 @@ def load_arguments(self, _):
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
             c.argument('ppg', type=str, validator=validate_ppg)
+            c.argument('max_surge', type=str, validator=validate_max_surge)
             c.argument('node_os_disk_type', arg_type=get_enum_type([CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
@@ -313,6 +315,7 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
+        c.argument('max_surge', type=str, validator=validate_max_surge)
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')

@@ -1873,7 +1873,7 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         return 1
 
     def _network_watcher_configure(self):
-        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
+        self.cmd('network watcher configure -g {rg} --locations westus Westus2 westcentraluS --enabled')
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
         self.cmd('network watcher configure -l westus2 --enabled false')
         self.cmd('network watcher list')
