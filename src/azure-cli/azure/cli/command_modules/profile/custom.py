@@ -99,6 +99,7 @@ def set_active_subscription(cmd, subscription):
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
     profile.set_active_subscription(subscription)
+    return profile.get_subscription()
 
 
 def account_clear(cmd):
