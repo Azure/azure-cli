@@ -480,15 +480,13 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
                                    user_cert_secret_version,
                                    user_cert_protocol_type]):
 
-        # If any BYOC flags are set, make sure they all are.
+        # If any BYOC flags are set, make sure they all are (except secret version).
         if any(x is None for x in [user_cert_group_name,
                                    user_cert_vault_name,
                                    user_cert_secret_name,
-                                   user_cert_secret_version,
                                    user_cert_protocol_type]):
-            raise CLIError("--user-cert-group-name, --user-cert-vault-name, --user-cert-secret-version, ",
-                           "--user-cert-secret-version, and --user-cert-protocol-type are all required "
-                           "for user managed certificates.")
+            raise CLIError("--user-cert-group-name, --user-cert-vault-name, --user-cert-secret-name, "
+                           "and --user-cert-protocol-type are all required for user managed certificates.")
 
         if user_cert_subscription_id is None:
             user_cert_subscription_id = client.config.subscription_id

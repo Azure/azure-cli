@@ -110,7 +110,6 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         if '.azureedge-test.net' in endpoint['hostName']:
             hostname = custom_domain_name + '.cdn-cli-test-2-df.azfdtest.xyz'
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
-
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
                   JMESPathCheck('customHttpsParameters', None)]
@@ -242,3 +241,51 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         with self.assertRaises(ErrorResponseException):
             self.custom_domain_disable_https_cmd(resource_group, profile_name, endpoint_name, custom_domain_name)
+
+    @ResourceGroupPreparer()
+    def test_cdn_custom_domain_byoc_latest(self, resource_group):
+        profile_name = 'profile123'
+        self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
+
+        self.profile_create_cmd(resource_group, profile_name, sku=SkuName.standard_microsoft.value)
+        # Endpoint name and custom domain hostname are hard-coded because of
+        # custom domain CNAME requirement. If test fails to cleanup, the
+        # resource group must be manually deleted in order to re-run.
+        endpoint_name = 'cdn-cli-test-5'
+        origin = 'www.example.com'
+        endpoint = self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin).get_output_in_json()
+
+        # Create custom domain for BYOC
+        custom_domain_name = self.create_random_name(prefix='customdomain', length=20)
+        hostname = custom_domain_name + '.cdn-cli-test-5.azfdtest.xyz'
+        # Use alternate hostname for dogfood.
+        if '.azureedge-test.net' in endpoint['hostName']:
+            hostname = custom_domain_name + '.cdn-cli-test-5-df.azfdtest.xyz'
+        self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, hostname)
+
+        # Verify the created custom domain doesn't have custom HTTPS enabled.
+        checks = [JMESPathCheck('name', custom_domain_name),
+                  JMESPathCheck('hostName', hostname),
+                  JMESPathCheck('customHttpsParameters', None)]
+        self.custom_domain_show_cmd(resource_group, profile_name, endpoint_name, custom_domain_name, checks=checks)
+
+        # Create a TLS cert to use for BYOC.
+        vault_name = self.create_random_name(prefix='keyvault', length=20)
+        cert_name = self.create_random_name(prefix='cert', length=20)
+        self.byoc_create_keyvault_cert(resource_group, vault_name, cert_name)
+
+        # Enable custom HTTPS with the custom certificate.
+        checks = [JMESPathCheck('name', custom_domain_name),
+                  JMESPathCheck('hostName', hostname),
+                  JMESPathCheck('customHttpsProvisioningState', 'Enabling'),
+                  JMESPathCheck('customHttpsProvisioningSubstate', 'ImportingUserProvidedCertificate')]
+        self.custom_domain_enable_https_command(resource_group,
+                                                profile_name,
+                                                endpoint_name,
+                                                custom_domain_name,
+                                                user_cert_subscription_id=self.get_subscription_id(),
+                                                user_cert_group_name=resource_group,
+                                                user_cert_vault_name=vault_name,
+                                                user_cert_secret_name=cert_name,
+                                                user_cert_protocol_type='sni',
+                                                checks=checks)

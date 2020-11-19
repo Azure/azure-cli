@@ -69,7 +69,7 @@ DEPENDENCIES = [
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.2.0',
-    'azure-mgmt-cdn==5.0.0',
+    'azure-mgmt-cdn==5.2.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
     'azure-mgmt-compute~=14.0',
     'azure-mgmt-consumption~=2.0',
