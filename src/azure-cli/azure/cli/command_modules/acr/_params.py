@@ -48,10 +48,11 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
-        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
+    BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
+    TokenStatus, ZoneRedundancy = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
             'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
-            'TokenStatus')
+            'TokenStatus', 'ZoneRedundancy')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
@@ -75,6 +76,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         # Overwrite default shorthand of cmd to make availability for acr usage
         c.argument('cmd', options_list=['--__cmd__'])
         c.argument('cmd_value', help="Commands to execute.", options_list=['--cmd'])
+        c.argument('zone_redundancy', is_preview=True, arg_type=get_enum_type(ZoneRedundancy), help="Indicates whether or not zone redundancy should be enabled for this registry or replication. Zone-redundancy cannot be updated. Defaults to 'Disabled'.")
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:

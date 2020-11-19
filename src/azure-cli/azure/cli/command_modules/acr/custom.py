@@ -44,7 +44,8 @@ def acr_create(cmd,
                workspace=None,
                identity=None,
                key_encryption_key=None,
-               public_network_enabled=None):
+               public_network_enabled=None,
+               zone_redundancy=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -53,7 +54,8 @@ def acr_create(cmd,
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
+                        zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
