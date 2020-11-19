@@ -36,10 +36,8 @@ from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
 CREDENTIAL_WARNING_MESSAGE = (
-    "The output of this command includes credentials that you must protect. Be sure that you do not include "
-    "these credentials in your code or check the credentials into your source control. As an alternative, "
-    "consider using managed identities (https://docs.microsoft.com/azure/active-directory/managed-identities"
-    "-azure-resources/overview) to avoid the need to use credentials.")
+    "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
+    "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
 logger = get_logger(__name__)
 
