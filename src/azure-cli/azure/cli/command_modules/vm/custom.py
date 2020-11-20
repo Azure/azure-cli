@@ -2828,8 +2828,12 @@ def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no
     if instance_ids is None:
         instance_ids = ['*']
     instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
+    if cmd.supported_api_version(min_api='2020-06-01', operation_group='virtual_machine_scale_sets'):
+        return sdk_no_wait(
+            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
+            vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
-                       vm_scale_set_name, vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
+                       vm_scale_set_name, vm_instance_i_ds=instance_ids)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
