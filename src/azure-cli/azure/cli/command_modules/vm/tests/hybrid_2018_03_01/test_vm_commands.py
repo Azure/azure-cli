@@ -328,6 +328,7 @@ class VMCustomImageTest(ScenarioTest):
 
 class VMImageWithPlanTest(ScenarioTest):
 
+    @unittest.skip('You cannot purchase reservation because required AAD tenant information is missing')
     @ResourceGroupPreparer()
     def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
         # test 2 scenarios, 1. create vm from market place image, 2. create from a custom image captured from such vms
