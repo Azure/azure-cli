@@ -2097,6 +2097,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
         instance,
         subscription_id,
         resource_group_name,
+        name,
         addons,
         enable=False,
         no_wait=no_wait
@@ -2106,20 +2107,32 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
+def aks_enable_addons(cmd, client, resource_group_name, name, addons,
+                      workspace_resource_id=None,
                       subnet_name=None,
-                      appgw_name=None, appgw_subnet_cidr=None, appgw_id=None, appgw_subnet_id=None, appgw_watch_namespace=None,
+                      appgw_name=None,
+                      appgw_subnet_cidr=None,
+                      appgw_id=None,
+                      appgw_subnet_id=None,
+                      appgw_watch_namespace=None,
                       no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, subnet_name=subnet_name,
-                              appgw_name=appgw_name, appgw_subnet_cidr=appgw_subnet_cidr, appgw_id=appgw_id, appgw_subnet_id=appgw_subnet_id, appgw_watch_namespace=appgw_watch_namespace,
+    instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
+                              workspace_resource_id=workspace_resource_id,
+                              subnet_name=subnet_name,
+                              appgw_name=appgw_name,
+                              appgw_subnet_cidr=appgw_subnet_cidr,
+                              appgw_id=appgw_id,
+                              appgw_subnet_id=appgw_subnet_id,
+                              appgw_watch_namespace=appgw_watch_namespace,
                               no_wait=no_wait)
 
-    monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
-    ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+    monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
+        and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+    ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles \
+        and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
     need_pull_for_result = monitoring or ingress_appgw_addon_enabled
 
     if need_pull_for_result:
@@ -2128,10 +2141,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     else:
         result = sdk_no_wait(no_wait, client.create_or_update,
                              resource_group_name, name, instance)
-    
+
+    cloud_name = cmd.cli_ctx.cloud.name
     if monitoring and cloud_name.lower() == 'azurecloud':
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
-        cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
         from msrestazure.tools import resource_id
         cluster_resource_id = resource_id(
@@ -2564,9 +2577,14 @@ def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):
     return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
 
 
-def _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable, workspace_resource_id=None,
+def _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable,
+                   workspace_resource_id=None,
                    subnet_name=None,
-                   appgw_name=None, appgw_subnet_cidr=None, appgw_id=None, appgw_subnet_id=None, appgw_watch_namespace=None,
+                   appgw_name=None,
+                   appgw_subnet_cidr=None,
+                   appgw_id=None,
+                   appgw_subnet_id=None,
+                   appgw_watch_namespace=None,
                    no_wait=False):
     # parse the comma-separated addons argument
     addon_args = addons.split(',')
@@ -2668,8 +2686,14 @@ def _get_azext_module(extension_name, module_name):
 
 
 def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, addon_profiles=None,
-                        workspace_resource_id=None, aci_subnet_name=None, vnet_subnet_id=None,
-                        appgw_name=None, appgw_subnet_cidr=None, appgw_id=None, appgw_subnet_id=None, appgw_watch_namespace=None):
+                        workspace_resource_id=None,
+                        aci_subnet_name=None,
+                        vnet_subnet_id=None,
+                        appgw_name=None,
+                        appgw_subnet_cidr=None,
+                        appgw_id=None,
+                        appgw_subnet_id=None,
+                        appgw_watch_namespace=None):
     if not addon_profiles:
         addon_profiles = {}
     addons = addons_str.split(',') if addons_str else []
