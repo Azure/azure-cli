@@ -89,7 +89,7 @@ examples:
 
 helps['sf application-type'] = """
 type: group
-short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster. Only supports ARM deployed application types and versions.
+short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster. Only supports ARM deployed application types.
 """
 
 helps['sf application-type'] = """
@@ -135,7 +135,7 @@ examples:
 
 helps['sf application-type version'] = """
 type: group
-short-summary: Manage application type versions on an Azure Service Fabric cluster.
+short-summary: Manage application type versions on an Azure Service Fabric cluster. Only supports ARM deployed application types versions.
 """
 
 helps['sf application-type version create'] = """
