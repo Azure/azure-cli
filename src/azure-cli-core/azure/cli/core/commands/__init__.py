@@ -867,8 +867,13 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
 
+def _update_progress(progress_controller):
+    progress_controller.add(message='Running')
+
+
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
-    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0,
+                 det=False, update_progress=_update_progress):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
@@ -876,6 +881,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
+        self.det = det
+        self.update_progress = update_progress
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -947,7 +954,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller(det=True).begin()
+        self.cli_ctx.get_progress_controller(det=self.det).begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -974,13 +981,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
-                if num < total:
-                    self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
-                                                                       total_val=total)
-                else:  # add buffer when exceeding estimated time
-                    self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
-                                                                       total_val=num + 0.1)
-
+                # if num < total:
+                #     self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
+                #                                                        total_val=total)
+                # else:  # add buffer when exceeding estimated time
+                #     self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
+                #                                                        total_val=num + 0.1)
+                self.update_progress(self.cli_ctx.get_progress_controller(det=self.det))
                 self._delay()
                 num += 1
             except KeyboardInterrupt:
