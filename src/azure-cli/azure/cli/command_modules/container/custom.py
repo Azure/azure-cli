@@ -681,8 +681,6 @@ def _cycle_exec_pipe(ws):
     r, _, _ = select.select([ws.sock, sys.stdin], [], [])
     if ws.sock in r:
         data = ws.recv()
-        if not data:
-            return False
         sys.stdout.write(data)
         sys.stdout.flush()
     if sys.stdin in r:
