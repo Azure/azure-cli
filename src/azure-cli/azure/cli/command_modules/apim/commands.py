@@ -87,6 +87,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_product', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_product', supports_no_wait=True)
         g.custom_command('delete', 'delete_product', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('apim nv', nv_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_apim_nv')
