@@ -109,7 +109,7 @@ def account_clear(cmd):
     profile.logout_all()
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
           identity=False, use_device_code=False, use_cert_sn_issuer=None):
     """Log in to access Azure subscriptions"""
@@ -172,11 +172,21 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
                                # pylint: disable=line-too-long
                                "More details are available at https://github.com/AzureAD/microsoft-authentication-library-for-python/wiki/Username-Password-Authentication")
         raise CLIError(err)
-    except requests.exceptions.SSLError as err:
-        from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
+    except requests.exceptions.SSLError:
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+        raise UnclassifiedUserFault(error_msg='Certificate verification failed. '
+                                              'This typically happens when using Azure CLI behind a proxy '
+                                              'that intercepts traffic with a self-signed certificate. ',
+                                    recommendation='Please add this certificate to the trusted CA bundle. '
+                                                   'More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')  # pylint: disable=line-too-long
     except requests.exceptions.ConnectionError as err:
-        raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+        raise UnclassifiedUserFault(error_msg='Connection failure. Error detail: ' + str(err),
+                                    recommendation='Please ensure you have network connection.')
+    except requests.exceptions.InvalidURL:
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+        raise UnclassifiedUserFault(error_msg='Invalid URL.',
+                                    recommendation='Please make sure the cloud is registered with a valid Active Directory URL.')
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
         sub['cloudName'] = sub.pop('environmentName', None)
