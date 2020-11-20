@@ -500,6 +500,33 @@ class WebappConfigureTest(ScenarioTest):
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_update_site_configs_persists_ip_restrictions', location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_site_configs_persists_ip_restrictions(self, resource_group):
+        webapp_name = self.create_random_name('webapp-config-appsettings-persist', 40)
+        plan_name = self.create_random_name('webapp-config-appsettings-persist', 40)
+        subnet_name = self.create_random_name('testsubnet', 24)
+        vnet_name = self.create_random_name('testvnet', 24)
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        # make sure access-restrictions is correct
+        self.cmd('webapp config set -g {} -n {} --always-on true'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(ipSecurityRestrictions)", 1),
+            JMESPathCheck("ipSecurityRestrictions[0].action", "Allow")
+        ])
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name testclirule --priority 300 --subnet {} --vnet-name {}'.format(
+            resource_group, webapp_name, subnet_name, vnet_name))
+        self.cmd('webapp config set -g {} -n {} --always-on true'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length(ipSecurityRestrictions)", 2),
+            JMESPathCheck("ipSecurityRestrictions[0].action", "Allow"),
+            JMESPathCheck("ipSecurityRestrictions[1].action", "Deny")
+        ])
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config_appsettings', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_config_appsettings(self, resource_group):
@@ -3031,12 +3058,14 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration where theres two vnets of the same name. Chosen vnet should default to the one in the same RG
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet_name, subnet_name))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name)
         ])
         self.cmd(
             'webapp vnet-integration remove -g {} -n {}'.format(resource_group, webapp_name))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
@@ -3044,6 +3073,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         # Add vnet integration using vnet resource ID
         self.cmd('webapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, webapp_name, vnet['newVNet']['id'], subnet_name_2))
+        time.sleep(5)
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', subnet_name_2)

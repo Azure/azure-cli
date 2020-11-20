@@ -100,7 +100,7 @@ DEPENDENCIES = [
     'azure-mgmt-media~=2.1,>=2.1.0',
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.13.0',
+    'azure-mgmt-netapp~=0.14.0',
     'azure-mgmt-network~=12.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
@@ -112,6 +112,7 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
+    'azure-mgmt-resource==10.2.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.4.1',
     'azure-mgmt-servicebus~=0.6.0',
