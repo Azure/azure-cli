@@ -30,7 +30,7 @@ from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes, log_cmd_history, clean_exception_history)
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -728,7 +728,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = transform_op(result)
 
             if _is_poller(result):
-                result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name))(result)
+                progress_bar = cmd_copy.command_kwargs.get('progress', None)
+                result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name),
+                                              progress_bar=progress_bar)(result)
             elif _is_paged(result):
                 result = list(result)
 
@@ -894,13 +896,9 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
 
-def _update_progress(progress_controller):
-    progress_controller.add(message='Running')
-
-
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
     def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0,
-                 det=False, update_progress=_update_progress):
+                 progress_bar=None):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
@@ -908,8 +906,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
-        self.det = det
-        self.update_progress = update_progress
+        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -981,15 +978,14 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         from msrest.exceptions import ClientException
 
         correlation_message = ''
-        self.cli_ctx.get_progress_controller(det=self.det).begin()
+        self.cli_ctx.get_progress_controller().begin()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
+
         telemetry.poll_start()
         poll_flag = False
-        num = 0
-        total = 20
         while not poller.done():
             poll_flag = True
 
@@ -1015,10 +1011,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 #                                                        total_val=total)
                 # else:  # add buffer when exceeding estimated time
                 #     self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
-                #                                                        total_val=num + 0.1)
-                self.update_progress(self.cli_ctx.get_progress_controller(det=self.det))
+                #
+                self.progress_bar.start_time = datetime.datetime.utcnow()
+                self.progress_bar.update_progress()
                 self._delay()
-                num += 1
             except KeyboardInterrupt:
                 self.cli_ctx.get_progress_controller().stop()
                 logger.error('Long-running operation wait cancelled.  %s', correlation_message)
@@ -1031,8 +1027,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             self.cli_ctx.get_progress_controller().stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller(det=True).add(message='Done', value=total, total_val=total)
-        self.cli_ctx.get_progress_controller(det=True).end()
+        self.progress_bar.end()
+        #self.cli_ctx.get_progress_controller().end()
         if poll_flag:
             telemetry.poll_end()
 

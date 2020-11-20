@@ -108,8 +108,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
-        g.custom_command('check-name', 'check_name_availability')
-        g.custom_command('create', 'create_storage_account')
+        from azure.cli.core.commands.progress import PercentageProgressBar
+        g.command('check-name', 'check_name_availability')
+        g.custom_command('create', 'create_storage_account', progress=PercentageProgressBar(self.cli_ctx, total=20))
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get_properties')
         g.custom_command('list', 'list_storage_accounts')

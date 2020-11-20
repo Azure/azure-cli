@@ -6,6 +6,8 @@ from __future__ import division
 import sys
 
 import humanfriendly
+import threading
+import datetime
 
 BAR_LEN = 70
 
@@ -91,10 +93,10 @@ class ProgressHook:
 
     def end(self, **kwargs):
         """ ending reporting of progress """
+        self.active_progress.clear()
         kwargs['message'] = kwargs.get('message', 'Finished')
         self.reporter.closed = True
         self.add(**kwargs)
-        self.active_progress.clear()
 
     def is_running(self):
         """ whether progress is continuing """
@@ -171,3 +173,39 @@ def get_progress_view(determinant=False, outstream=sys.stderr):
     if determinant:
         return DeterminateStandardOut(out=outstream)
     return IndeterminateStandardOut(out=outstream)
+
+
+class IndeterminateProgressBar:
+    """ Define progress bar update view """
+    def __init__(self, cli_ctx, message="Running"):
+        self.cli_ctx = cli_ctx
+        self.message = message
+        self.start_time = datetime.datetime.utcnow()
+
+    def update_progress(self):
+        self.cli_ctx.get_progress_controller().add(message=self.message)
+
+    def end(self):
+        self.cli_ctx.get_progress_controller().end()
+
+
+class PercentageProgressBar:
+    """ Define progress bar update view """
+    def __init__(self, cli_ctx, total, message="Running "):
+        self.cli_ctx = cli_ctx
+        self.message = message
+        self.total = total
+        self.start_time = datetime.datetime.utcnow()
+
+    def update_progress(self):
+        current = (datetime.datetime.utcnow() - self.start_time).seconds
+        if current < self.total:
+            self.cli_ctx.get_progress_controller(det=True).add(
+                message=self.message, value=current, total_val=self.total)
+        else:
+            self.cli_ctx.get_progress_controller(det=True).add(
+                message=self.message, value=current, total_val=current+0.1)
+
+    def end(self):
+        self.cli_ctx.get_progress_controller(det=True).end(value=self.total, total_val=self.total)
+
