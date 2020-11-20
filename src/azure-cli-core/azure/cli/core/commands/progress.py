@@ -93,10 +93,10 @@ class ProgressHook:
 
     def end(self, **kwargs):
         """ ending reporting of progress """
-        self.active_progress.clear()
         kwargs['message'] = kwargs.get('message', 'Finished')
         self.reporter.closed = True
         self.add(**kwargs)
+        self.active_progress.clear()
 
     def is_running(self):
         """ whether progress is continuing """
