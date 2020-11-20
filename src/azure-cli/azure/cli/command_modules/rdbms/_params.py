@@ -192,7 +192,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
         if command_group == 'mysql':
             with self.argument_context('{} server upgrade'.format(command_group)) as c:
-                c.argument('target_server_version', options_list=['--target-server-version', '-t'], required=True, help='The server version you want to upgrade your mysql server to, like 5.7.')
+                c.argument('target_server_version', options_list=['--target-server-version', '-t'], required=True, help='The server version you want to upgrade your mysql server to, currently only support 5.7.')
 
     _complex_params('mariadb')
     _complex_params('mysql')
