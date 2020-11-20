@@ -80,14 +80,14 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        ref_message = "Reference and support levels: https://aka.cli/cli-command-status"
+        ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
         # Override the experimental message
         import knack.experimental
-        knack.experimental.EXPERIMENTAL_MESSAGE = "{} is experimental. " + ref_message
+        knack.experimental.EXPERIMENTAL_MESSAGE = "{} is experimental and under development. " + ref_message
 
         # Override the preview message
         import knack.preview
-        knack.preview.PREVIEW_MESSAGE = "{} is in preview. " + ref_message
+        knack.preview.PREVIEW_MESSAGE = "{} is in preview and under development. " + ref_message
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
