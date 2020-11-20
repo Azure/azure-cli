@@ -95,7 +95,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcliUpgrade', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcliupgrade', SERVER_NAME_MAX_LENGTH)]
 
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
