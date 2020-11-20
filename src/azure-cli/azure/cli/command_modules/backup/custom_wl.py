@@ -25,7 +25,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
 
 
 fabric_name = "Azure"
@@ -418,7 +418,7 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
 
     backup_item_type = item_uri.split(';')[0]
     if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
-        raise CLIError(
+        raise ValidationError(
             """
             Item must be either of type SQLDataBase or SAPHanaDatabase.
             """)
