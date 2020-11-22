@@ -558,11 +558,12 @@ examples:
 
 helps['aks get-credentials'] = """
 type: command
-short-summary: Get access credentials for a managed Kubernetes cluster.
+short-summary: Get access credentials for a managed Kubernetes cluster. Merge them into .kube/config file so kubectl can use them
 parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
+    long-summary: "On clusters with Azure Active Directory integration, this bypasses normal Azure AD authentication and can be used if you're permanently blocked by not having access to a valid Azure AD group with access to your cluster. Requires 'Azure Kubernetes Service Cluster Admin' role."
   - name: --file -f
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
