@@ -20,9 +20,7 @@ If in doubt, ask!
 
 [7. Network Rule Commands](#network-rule-commands)
 
-[8. Error Handling](#error-handling)
-
-[9. Coding Practices](#coding-practices)
+[8. Coding Practices](#coding-practices)
 
 ## General Patterns
 
@@ -419,10 +417,6 @@ Virtual Network Rule Arguments
                                    supplied.
     --vnet-name                  : Name of a virtual network.
 ```
-
-## Error Handling
-
-Follow the [Error Handling Guidelines](https://github.com/Azure/azure-cli/blob/dev/doc/error_handling_guidelines.md) to select a proper error type and write an actionable error message.
 
 ## Coding Practices
 

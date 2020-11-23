@@ -131,6 +131,23 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
+def process_storage_uri(ns):
+    if not ns.storage_resource_uri:
+        if ns.storage_account_name and ns.blob_container_name:
+            ns.storage_resource_uri = 'https://{}.blob.core.windows.net/{}'.format(
+                ns.storage_account_name, ns.blob_container_name
+            )
+            del ns.storage_account_name
+            del ns.blob_container_name
+        else:
+            raise CLIError('Incorrect usage: [--storage-resource-uri URI | '
+                           '--storage-account-name NAME --blob-container-name NAME]')
+    else:
+        if ns.storage_account_name or ns.blob_container_name:
+            raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
+                           'if --storage-resource-uri is specified.')
+
+
 def process_sas_token_parameter(cmd, ns):
     from azure.cli.core.profiles import ResourceType
 

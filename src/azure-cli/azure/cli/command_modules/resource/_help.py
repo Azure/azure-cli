@@ -122,7 +122,7 @@ long-summary: Get the details of the management group.
 parameters:
   - name: --name -n
     type: string
-    short-summary: Name of the management group (the last segment of the resource ID). Do not use display name.
+    short-summary: Name of the management group.
   - name: --expand -e
     type: bool
     short-summary: If given, lists the children in the first level of hierarchy.

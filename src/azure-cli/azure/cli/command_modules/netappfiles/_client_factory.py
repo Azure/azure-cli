@@ -26,23 +26,3 @@ def volumes_mgmt_client_factory(cli_ctx, _):
 
 def snapshots_mgmt_client_factory(cli_ctx, _):
     return cf_netappfiles(cli_ctx).snapshots
-
-
-def snapshot_policies_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).snapshot_policies
-
-
-def account_backups_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).account_backups
-
-
-def backups_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).backups
-
-
-def backup_policies_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).backup_policies
-
-
-def vaults_mgmt_client_factory(cli_ctx, _):
-    return cf_netappfiles(cli_ctx).vaults

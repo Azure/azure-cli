@@ -108,7 +108,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_account_custom_type) as g:
-        g.custom_command('check-name', 'check_name_availability')
+        g.command('check-name', 'check_name_availability')
         g.custom_command('create', 'create_storage_account')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get_properties')
@@ -127,14 +127,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
             3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
         """
-        g.command('failover', 'begin_failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
+        g.command('failover', 'failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
                   confirmation=failover_confirmation)
 
-    with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE,
-                            custom_command_type=storage_account_custom_type) as g:
+    with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._validators import validate_key_name
-        g.custom_command('keys renew', 'regenerate_key', validator=validate_key_name,
-                         transform=lambda x: getattr(x, 'keys', x))
+        g.command('keys renew', 'regenerate_key', validator=validate_key_name,
+                  transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
@@ -181,13 +180,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account management-policy', management_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
                             custom_command_type=management_policy_custom_type) as g:
-        g.custom_show_command('show', 'get_management_policy')
+        g.show_command('show', 'get')
         g.custom_command('create', 'create_management_policies')
-        g.generic_update_command('update', getter_name='get_management_policy',
-                                 getter_type=management_policy_custom_type,
+        g.generic_update_command('update', getter_name='get',
                                  setter_name='update_management_policies',
                                  setter_type=management_policy_custom_type)
-        g.custom_command('delete', 'delete_management_policy')
+        g.command('delete', 'delete')
 
     with self.command_group('storage account network-rule', storage_account_sdk,
                             custom_command_type=storage_account_custom_type,
@@ -326,10 +324,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     create_boolean_result_output_transformer)
         from ._validators import (process_blob_download_batch_parameters, process_blob_delete_batch_parameters,
                                   process_blob_upload_batch_parameters)
-        from ._exception_handler import file_related_exception_handler
         g.storage_command_oauth(
-            'download', 'get_blob_to_path', table_transformer=transform_blob_output,
-            exception_handler=file_related_exception_handler)
+            'download', 'get_blob_to_path', table_transformer=transform_blob_output)
         g.storage_custom_command_oauth('generate-sas', 'generate_sas_blob_uri')
         g.storage_custom_command_oauth(
             'url', 'create_blob_url', transform=transform_url)
@@ -343,8 +339,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                     'undeleted'),
                                 table_transformer=transform_boolean_for_table, min_api='2017-07-29')
         g.storage_custom_command_oauth('upload', 'upload_blob',
-                                       doc_string_source='blob#BlockBlobService.create_blob_from_path',
-                                       exception_handler=file_related_exception_handler)
+                                       doc_string_source='blob#BlockBlobService.create_blob_from_path')
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
@@ -457,24 +452,20 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     )
 
     with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk,
-                            custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
                             min_api='2018-02-01') as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
         g.show_command('show', 'get_immutability_policy',
                        transform=transform_immutability_policy)
-        g.custom_command('create', 'create_or_update_immutability_policy')
+        g.command('create', 'create_or_update_immutability_policy')
         g.command('delete', 'delete_immutability_policy',
                   transform=lambda x: None)
         g.command('lock', 'lock_immutability_policy')
-        g.custom_command('extend', 'extend_immutability_policy')
+        g.command('extend', 'extend_immutability_policy')
 
     with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk,
-                            custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
                             min_api='2018-02-01') as g:
-        g.custom_command('set', 'set_legal_hold')
-        g.custom_command('clear', 'clear_legal_hold')
+        g.command('set', 'set_legal_hold')
+        g.command('clear', 'clear_legal_hold')
         g.show_command(
             'show', 'get', transform=lambda x: getattr(x, 'legal_hold', x))
 
@@ -573,7 +564,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
         from ._format import transform_file_directory_result, transform_boolean_for_table, transform_file_output
         from ._transformers import transform_url
-        from ._exception_handler import file_related_exception_handler
         g.storage_custom_command('list', 'list_share_files', transform=transform_file_directory_result(self.cli_ctx),
                                  table_transformer=transform_file_output,
                                  doc_string_source='file#FileService.list_directories_and_files')
@@ -589,8 +579,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('update', 'set_file_properties')
         g.storage_command(
             'exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command('download', 'get_file_to_path', exception_handler=file_related_exception_handler)
-        g.storage_command('upload', 'create_file_from_path', exception_handler=file_related_exception_handler)
+        g.storage_command('download', 'get_file_to_path')
+        g.storage_command('upload', 'create_file_from_path')
         g.storage_command('metadata show', 'get_file_metadata',
                           exception_handler=show_exception_handler)
         g.storage_command('metadata update', 'set_file_metadata')

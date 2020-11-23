@@ -706,8 +706,6 @@ def load_arguments(self, _):
 
     with self.argument_context('functionapp update') as c:
         c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
-        c.argument('force', required=False, help='Required if attempting to migrate functionapp from Premium to Consumption --plan.',
-                   action='store_true')
 
     with self.argument_context('functionapp plan create') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',

@@ -63,7 +63,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('linuxFxVersion', result['runtime_version']),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -130,7 +130,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'PYTHON|3.7'),
+            JMESPathCheck('linuxFxVersion', result['runtime_version']),
             JMESPathCheck('tags.cli', 'None'),
         ])
 
@@ -518,7 +518,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', 'PYTHON|3.6'),
+            JMESPathCheck('linuxFxVersion', result['runtime_version']),
             JMESPathCheck('tags.cli', 'None')
         ])
 
@@ -815,7 +815,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify newer version
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|12-lts"),
+            JMESPathCheck('linuxFxVersion', "node|12-lts"),
             JMESPathCheck('tags.cli', 'None')
         ])
 
@@ -826,7 +826,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # verify older version
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', "NODE|10.14"),
+            JMESPathCheck('linuxFxVersion', "node|10.14"),
             JMESPathCheck('tags.cli', 'None')
         ])
 

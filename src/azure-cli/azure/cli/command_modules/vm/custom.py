@@ -1004,14 +1004,6 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
     return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
 
 
-def get_vm_to_update(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name)
-    # To avoid unnecessary permission check of image
-    vm.storage_profile.image_reference = None
-    return vm
-
-
 def get_vm_details(cmd, resource_group_name, vm_name):
     from msrestazure.tools import parse_resource_id
     from azure.cli.command_modules.vm._vm_utils import get_target_network_api
@@ -1203,7 +1195,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     if vm.hardware_profile.vm_size == size:
         logger.warning("VM is already %s", size)
         return None
@@ -1242,6 +1234,14 @@ def patch_vm(cmd, resource_group_name, vm_name, vm):
 def show_vm(cmd, resource_group_name, vm_name, show_details=False):
     return get_vm_details(cmd, resource_group_name, vm_name) if show_details \
         else get_vm(cmd, resource_group_name, vm_name)
+
+
+def get_vm_for_generic_update(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    vm = client.virtual_machines.get(resource_group_name, vm_name)
+    # To avoid unnecessary permission check of image
+    vm.storage_profile.image_reference = None
+    return vm
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
@@ -1407,7 +1407,7 @@ def list_av_sets(cmd, resource_group_name=None):
 
 # region VirtualMachines BootDiagnostics
 def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     diag_profile = vm.diagnostics_profile
     if not (diag_profile and diag_profile.boot_diagnostics and diag_profile.boot_diagnostics.enabled):
         return
@@ -1419,7 +1419,7 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
 
 def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage=None):
     from azure.cli.command_modules.vm._vm_utils import get_storage_blob_uri
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     storage_uri = None
     if storage:
         storage_uri = get_storage_blob_uri(cmd.cli_ctx, storage)
@@ -1568,7 +1568,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False,
                              size_gb=1023, lun=None, caching=None, enable_write_accelerator=False):
     '''attach a managed disk'''
     from msrestazure.tools import parse_resource_id
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
         'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
 
@@ -1593,7 +1593,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False,
 
 def detach_data_disk(cmd, resource_group_name, vm_name, disk_name):
     # here we handle both unmanaged or managed disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     # pylint: disable=no-member
     leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
     if len(vm.storage_profile.data_disks) == len(leftovers):
@@ -1872,7 +1872,7 @@ def list_vm_nics(cmd, resource_group_name, vm_name):
 
 
 def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     new_nics = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
     return _update_vm_nics(cmd, vm, existing_nics + new_nics, primary_nic)
@@ -1883,7 +1883,7 @@ def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
     def to_delete(nic_id):
         return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     nics_to_delete = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
     survived = [x for x in existing_nics if not to_delete(x.id)]
@@ -1891,7 +1891,7 @@ def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 
 
 def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     nics = _build_nic_list(cmd, nics)
     return _update_vm_nics(cmd, vm, nics, primary_nic)
 
@@ -2035,7 +2035,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
         keyvault_client = create_keyvault_data_plane_client(cmd.cli_ctx)
@@ -2067,7 +2067,7 @@ def list_vm_secrets(cmd, resource_group_name, vm_name):
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
 
     # support 2 kinds of filter:
     # a. if only keyvault is supplied, we delete its whole vault group.
@@ -2106,7 +2106,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
         raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm(cmd, resource_group_name, vm_name)
     if disk_name is None:
         import datetime
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -3173,6 +3173,7 @@ def list_image_galleries(cmd, resource_group_name=None):
 
 def create_image_gallery(cmd, resource_group_name, gallery_name, description=None,
                          location=None, no_wait=False, tags=None):
+    client = _compute_client_factory(cmd.cli_ctx)
     Gallery = cmd.get_models('Gallery')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
@@ -3225,23 +3226,6 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
     return client.gallery_images.create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
-def _add_aux_subscription(aux_subscriptions, resource_id):
-    if resource_id:
-        aux_subs = _parse_aux_subscriptions(resource_id)
-        if aux_subs and aux_subs[0] not in aux_subscriptions:
-            aux_subscriptions.extend(aux_subs)
-
-
-def _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots):
-    aux_subscriptions = []
-    _add_aux_subscription(aux_subscriptions, managed_image)
-    _add_aux_subscription(aux_subscriptions, os_snapshot)
-    if data_snapshots:
-        for data_snapshot in data_snapshots:
-            _add_aux_subscription(aux_subscriptions, data_snapshot)
-    return aux_subscriptions if aux_subscriptions else None
-
-
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
@@ -3252,9 +3236,10 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
-    aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
+    aux_subscriptions = None
+    if managed_image:
+        aux_subscriptions = _parse_aux_subscriptions(managed_image)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -3321,17 +3306,11 @@ def fix_gallery_image_date_info(date_info):
 
 
 # pylint: disable=line-too-long
-def get_image_version_to_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
+def get_image_version_for_generic_update(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name):
     client = _compute_client_factory(cmd.cli_ctx)
     version = client.gallery_image_versions.get(resource_group_name, gallery_name, gallery_image_name, gallery_image_version_name)
     # To avoid unnecessary permission check of image
     version.storage_profile.source = None
-    if version.storage_profile.os_disk_image and version.storage_profile.os_disk_image.source:
-        version.storage_profile.os_disk_image.source = None
-    if version.storage_profile.data_disk_images:
-        for i in range(len(version.storage_profile.data_disk_images)):
-            if version.storage_profile.data_disk_images[i].source:
-                version.storage_profile.data_disk_images[i].source = None
     return version
 
 
@@ -3346,7 +3325,11 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     if image_version.storage_profile.source is not None:
         image_version.storage_profile.os_disk_image = image_version.storage_profile.data_disk_images = None
 
-    client = _compute_client_factory(cmd.cli_ctx)
+    aux_subscriptions = None
+    if image_version.storage_profile and image_version.storage_profile.source and \
+            'id' in image_version.storage_profile.source:
+        aux_subscriptions = _parse_aux_subscriptions(image_version.storage_profile.source['id'])
+    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
     return sdk_no_wait(no_wait, client.gallery_image_versions.create_or_update, resource_group_name, gallery_name,
                        gallery_image_name, gallery_image_version_name, **kwargs)
@@ -3382,7 +3365,7 @@ def list_proximity_placement_groups(client, resource_group_name=None):
 
 
 # region dedicated host
-def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
+def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count=None,
                                 automatic_placement=None, location=None, zones=None, tags=None):
     DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)

@@ -10,12 +10,7 @@ from ._client_factory import (
     accounts_mgmt_client_factory,
     pools_mgmt_client_factory,
     volumes_mgmt_client_factory,
-    snapshots_mgmt_client_factory,
-    snapshot_policies_mgmt_client_factory,
-    account_backups_mgmt_client_factory,
-    backups_mgmt_client_factory,
-    backup_policies_mgmt_client_factory,
-    vaults_mgmt_client_factory)
+    snapshots_mgmt_client_factory)
 from ._exception_handler import netappfiles_exception_handler
 
 
@@ -25,69 +20,25 @@ def load_command_table(self, _):
         client_factory=accounts_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
-    load_accounts_command_groups(self, netappfiles_accounts_sdk)
 
     netappfiles_pools_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._pools_operations#PoolsOperations.{}',
         client_factory=pools_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
-    load_pools_command_groups(self, netappfiles_pools_sdk)
 
     netappfiles_volumes_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._volumes_operations#VolumesOperations.{}',
         client_factory=volumes_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
-    load_volumes_command_groups(self, netappfiles_volumes_sdk)
 
     netappfiles_snapshots_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.netapp.operations._snapshots_operations#SnapshotsOperations.{}',
         client_factory=snapshots_mgmt_client_factory,
         exception_handler=netappfiles_exception_handler
     )
-    load_snapshots_command_groups(self, netappfiles_snapshots_sdk)
 
-    netappfiles_snapshot_policies_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._snapshot_policies_operations#SnapshotPoliciesOperations.{}',
-        client_factory=snapshot_policies_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_sdk)
-
-    netappfiles_account_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._account_backups_operations#AccountBackupsOperations.{}',
-        client_factory=account_backups_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_account_backup_command_groups(self, netappfiles_account_backups_sdk)
-
-    netappfiles_backups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._backups_operations#BackupsOperations.{}',
-        client_factory=backups_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_backups_command_groups(self, netappfiles_backups_sdk)
-
-    netappfiles_backup_policies_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._backup_policies_operations#BackupPoliciesOperations.{}',
-        client_factory=backup_policies_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk)
-
-    netappfiles_vaults_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.netapp.operations._vaults_operations#VaultsOperations.{}',
-        client_factory=vaults_mgmt_client_factory,
-        exception_handler=netappfiles_exception_handler
-    )
-    load_vaults_command_groups(self, netappfiles_vaults_sdk)
-
-    with self.command_group('netappfiles', is_preview=True):
-        pass
-
-
-def load_accounts_command_groups(self, netappfiles_accounts_sdk):
     with self.command_group('netappfiles account', netappfiles_accounts_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -120,28 +71,6 @@ def load_accounts_command_groups(self, netappfiles_accounts_sdk):
                          doc_string_source='azure.mgmt.netapp.models#NetAppAccount',
                          exception_handler=netappfiles_exception_handler)
 
-
-def load_account_backup_command_groups(self, netappfiles_account_backups_sdk):
-    with self.command_group('netappfiles account backup', netappfiles_account_backups_sdk) as g:
-        g.command('list', 'list')
-
-
-def load_backup_policies_command_groups(self, netappfiles_backup_policies_sdk):
-    with self.command_group('netappfiles account backup-policy', netappfiles_backup_policies_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'delete')
-        g.custom_command('update', 'patch_backup_policy',
-                         client_factory=backup_policies_mgmt_client_factory,
-                         doc_string_source='azure.mgmt.netapp.models#BackupPolicyPatch',
-                         exception_handler=netappfiles_exception_handler)
-        g.custom_command('create', 'create_backup_policy',
-                         client_factory=backup_policies_mgmt_client_factory,
-                         doc_string_source='azure.mgmt.netapp.models#BackupPolicy',
-                         exception_handler=netappfiles_exception_handler)
-
-
-def load_pools_command_groups(self, netappfiles_pools_sdk):
     with self.command_group('netappfiles pool', netappfiles_pools_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -154,11 +83,9 @@ def load_pools_command_groups(self, netappfiles_pools_sdk):
                                  setter_name='update',
                                  custom_func_name='patch_pool',
                                  setter_arg_name='body',
-                                 doc_string_source='azure.mgmt.netapp.models#CapacityPoolPatch',
+                                 doc_string_source='azure.mgmt.netapp.models#CapacityPool',
                                  exception_handler=netappfiles_exception_handler)
 
-
-def load_volumes_command_groups(self, netappfiles_volumes_sdk):
     with self.command_group('netappfiles volume', netappfiles_volumes_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -177,7 +104,6 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
                          client_factory=volumes_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.command('pool-change', 'pool_change')
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
@@ -206,19 +132,7 @@ def load_volumes_command_groups(self, netappfiles_volumes_sdk):
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')
-        g.command('re-initialize', 're_initialize_replication')
 
-
-def load_backups_command_groups(self, netappfiles_backups_sdk):
-    with self.command_group('netappfiles volume backup', netappfiles_backups_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.command('delete', 'delete')
-        g.command('update', 'update')
-        g.command('create', 'create')
-
-
-def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
     with self.command_group('netappfiles snapshot', netappfiles_snapshots_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list')
@@ -228,26 +142,5 @@ def load_snapshots_command_groups(self, netappfiles_snapshots_sdk):
                          doc_string_source='azure.mgmt.netapp.models#Snapshot',
                          exception_handler=netappfiles_exception_handler)
 
-
-def load_snapshots_policies_command_groups(self, netappfiles_snapshot_policies_sdk):
-    with self.command_group('netappfiles snapshot policy', netappfiles_snapshot_policies_sdk) as g:
-        g.show_command('show', 'get')
-        g.command('list', 'list')
-        g.custom_command('volumes', 'list_volumes',
-                         client_factory=snapshot_policies_mgmt_client_factory,
-                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
-                         exception_handler=netappfiles_exception_handler)
-        g.command('delete', 'delete')
-        g.custom_command('update', 'patch_snapshot_policy',
-                         client_factory=snapshot_policies_mgmt_client_factory,
-                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicyPatch',
-                         exception_handler=netappfiles_exception_handler)
-        g.custom_command('create', 'create_snapshot_policy',
-                         client_factory=snapshot_policies_mgmt_client_factory,
-                         doc_string_source='azure.mgmt.netapp.models#SnapshotPolicy',
-                         exception_handler=netappfiles_exception_handler)
-
-
-def load_vaults_command_groups(self, netappfiles_vaults_sdk):
-    with self.command_group('netappfiles vault', netappfiles_vaults_sdk) as g:
-        g.command('list', 'list')
+    with self.command_group('netappfiles', is_preview=True) as g:
+        pass

@@ -346,7 +346,7 @@ AZURE_CHINA_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
-        synapse_analytics_resource_id='https://dev.azuresynapse.azure.cn',
+        synapse_analytics_resource_id='https://dev.azuresynapse.net',
         portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
@@ -377,7 +377,6 @@ AZURE_US_GOV_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.us',
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
-        synapse_analytics_resource_id='https://dev.azuresynapse.usgovcloudapi.net',
         portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
@@ -388,8 +387,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.usgovcloudapi.net',
         postgresql_server_endpoint='.postgres.database.usgovcloudapi.net',
         mariadb_server_endpoint='.mariadb.database.usgovcloudapi.net',
-        acr_login_server_endpoint='.azurecr.us',
-        synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
+        acr_login_server_endpoint='.azurecr.us'))
 
 AZURE_GERMAN_CLOUD = Cloud(
     'AzureGermanCloud',

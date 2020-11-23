@@ -19,8 +19,6 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StringContainCheck,
-    VirtualNetworkPreparer,
     LocalContextScenarioTest,
     live_only)
 from azure.cli.testsdk.preparers import (
@@ -469,6 +467,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
+<<<<<<< HEAD
 
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
@@ -835,3 +834,5 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
+=======
+>>>>>>> parent of eb4845f6b... commit merge

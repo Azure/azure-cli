@@ -483,14 +483,12 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
         self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
 
-        # Those assertions are not stable, because the order in array frontendIpConfigurations is not fixed
-        # self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
-        # self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
-        # self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
-        # self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
-        # service buggy, this properties won't be populcated so fast even in Azure CLI 2.12.0
-        # self.assertTrue(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
 
         self.cmd("network application-gateway delete -g {rg} -n {appgw}")
 
@@ -727,7 +725,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
 
-        cipher_suite = 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'
+        cipher_suite = 'TLS_RSA_WITH_AES_128_CBC_SHA256'
         self.kwargs['cipher'] = cipher_suite
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {cipher} --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[

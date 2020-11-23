@@ -498,7 +498,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
-                   help="Number of fault domains that the host group can span.")
+                   help="Number of fault domains that the host group can span. Allowed values: 1, 2, 3")
         c.argument('zones', zone_type)
 
     for scope in ["vm host", "vm host group"]:

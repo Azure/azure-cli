@@ -44,23 +44,22 @@ def get_stats(client, resource_group_name, account_name, share_name):
                       expand='stats')
 
 
-def list_share_rm(client, resource_group_name, account_name, include_deleted=None):
-    if include_deleted:
-        return client.list(resource_group_name=resource_group_name, account_name=account_name)
+def list_share_rm(client, cmd, resource_group_name, account_name, include_deleted=None):
 
-    return client.list(resource_group_name=resource_group_name, account_name=account_name, expand=None)
+    ListSharesExpand = cmd.get_models('ListSharesExpand', resource_type=ResourceType.MGMT_STORAGE)
+
+    expand = ListSharesExpand("deleted") if include_deleted is not None else None
+
+    return client.list(resource_group_name=resource_group_name, account_name=account_name,
+                       expand=expand)
 
 
-def restore_share_rm(cmd, client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
+def restore_share_rm(client, resource_group_name, account_name, share_name, deleted_version, restored_name=None):
 
     restored_name = restored_name if restored_name else share_name
 
-    deleted_share = cmd.get_models('DeletedShare',
-                                   resource_type=ResourceType.MGMT_STORAGE)(deleted_share_name=share_name,
-                                                                            deleted_share_version=deleted_version)
-
-    return client.restore(resource_group_name=resource_group_name, account_name=account_name,
-                          share_name=restored_name, deleted_share=deleted_share)
+    return client.restore(resource_group_name=resource_group_name, account_name=account_name, share_name=restored_name,
+                          deleted_share_name=share_name, deleted_share_version=deleted_version)
 
 
 def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None, access_tier=None):
@@ -385,9 +384,9 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
 
 def _file_share_exists(client, resource_group_name, account_name, share_name):
-    from azure.core.exceptions import HttpResponseError
+    from msrestazure.azure_exceptions import CloudError
     try:
-        file_share = client.get(resource_group_name, account_name, share_name, expand=None)
+        file_share = client.get(resource_group_name, account_name, share_name)
         return file_share is not None
-    except HttpResponseError:
+    except CloudError:
         return False

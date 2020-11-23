@@ -64,7 +64,7 @@ def main():
     # Generate index.html
     try:
         container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
-        generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
+        generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
     except Exception:
         print(traceback.format_exc())
 

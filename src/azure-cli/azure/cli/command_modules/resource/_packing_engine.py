@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import re
 import json
 from knack.util import CLIError
-from azure.cli.core.util import read_file_content, shell_safe_json_parse
+from azure.cli.core.util import read_file_content
 from azure.cli.command_modules.resource.custom import _remove_comments_from_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -24,28 +23,6 @@ class PackingContext():  # pylint: disable=too-few-public-methods
         self.Artifact = []
 
 
-# pylint: disable=redefined-outer-name
-def process_template(template, preserve_order=True, file_path=None):
-    from jsmin import jsmin
-
-    # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
-    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
-    template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
-    minified = jsmin(template)
-
-    # Remove extra spaces, compress multiline string(s)
-    result = re.sub(r'\s\s+', ' ', minified, flags=re.DOTALL)
-
-    try:
-        return shell_safe_json_parse(result, preserve_order)
-    except CLIError:
-        # Because the processing of removing comments and compression will lead to misplacement of error location,
-        # so the error message should be wrapped.
-        if file_path:
-            raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
-        raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
-
-
 def pack(cmd, template_file):
     """
     Packs the specified template and its referenced artifacts for use in a Template Spec.
@@ -55,7 +32,8 @@ def pack(cmd, template_file):
     root_template_file_path = os.path.abspath(template_file)
     context = PackingContext(os.path.dirname(root_template_file_path))
     template_content = read_file_content(template_file)
-    template_json = json.loads(json.dumps(process_template(template_content)))
+    sanitized_template = _remove_comments_from_json(template_content)
+    template_json = json.loads(json.dumps(sanitized_template))
     _pack_artifacts(cmd, root_template_file_path, context)
     return PackagedTemplate(template_json, getattr(context, 'Artifact'))
 
@@ -76,7 +54,8 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
     try:
         context.CurrentDirectory = os.path.dirname(template_abs_file_path)
         template_content = read_file_content(template_abs_file_path)
-        artifactable_template_obj = _remove_comments_from_json(template_content)
+        artifactable_template_obj = sanitized_template = _remove_comments_from_json(template_content)
+        template_json = json.loads(json.dumps(sanitized_template))
         template_link_to_artifact_objs = _get_template_links_to_artifacts(cmd, artifactable_template_obj,
                                                                           includeNested=True)
 
@@ -115,7 +94,8 @@ def _pack_artifacts(cmd, template_abs_file_path, context):
             TemplateSpecTemplateArtifact = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS,
                                                    'TemplateSpecTemplateArtifact', mod='models')
             template_content = read_file_content(abs_local_path)
-            template_json = json.loads(json.dumps(process_template(template_content)))
+            sanitized_template = _remove_comments_from_json(template_content)
+            template_json = json.loads(json.dumps(sanitized_template))
             artifact = TemplateSpecTemplateArtifact(path=as_relative_path, template=template_json)
             context.Artifact.append(artifact)
     finally:

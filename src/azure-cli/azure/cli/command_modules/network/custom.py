@@ -142,7 +142,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                http_settings_port=80, http_settings_protocol='Http',
                                routing_rule_type='Basic', servers=None,
                                sku=None,
-                               private_ip_address=None, public_ip_address=None,
+                               private_ip_address='', public_ip_address=None,
                                public_ip_address_allocation=None,
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
@@ -2046,18 +2046,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
-    from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
-    try:
-        file_text = read_file_content(file_name)
-    except FileNotFoundError:
-        raise FileOperationError("No such file: " + str(file_name))
-    except IsADirectoryError:
-        raise FileOperationError("Is a directory: " + str(file_name))
-    except PermissionError:
-        raise FileOperationError("Permission denied: " + str(file_name))
-    except OSError as e:
-        raise UnclassifiedUserFault(e)
-
+    file_text = read_file_content(file_name)
     zone_obj = parse_zone_file(file_text, zone_name)
 
     origin = zone_name

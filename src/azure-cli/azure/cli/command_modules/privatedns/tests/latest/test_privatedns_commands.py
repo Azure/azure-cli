@@ -955,6 +955,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
         # verify that each record in the original import is unchanged after export/re-import
         self._check_records(records1, records2)
 
+<<<<<<< HEAD
     @ResourceGroupPreparer(name_prefix='test_Private_Dns_import_file_not_found')
     def test_Private_Dns_import_file_operation_error_linux(self, resource_group):
         import sys
@@ -990,6 +991,8 @@ class PrivateDnsZoneImportTest(ScenarioTest):
             self._test_PrivateDnsZone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 
+=======
+>>>>>>> parent of eb4845f6b... commit merge
     @ResourceGroupPreparer(name_prefix='cli_private_dns_zone1_import')
     def test_Private_Dns_Zone1_Import(self, resource_group):
         self._test_PrivateDnsZone('zone1.com', 'zone1.txt')

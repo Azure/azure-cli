@@ -10,9 +10,7 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 file_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
-                                                get_three_state_flag,
-                                                tags_type)
-
+                                                get_three_state_flag)
 from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
@@ -54,7 +52,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
     with self.argument_context('iot dps') as c:
         c.argument('dps_name', dps_name_type, options_list=['--name', '-n'], id_part='name')
-        c.argument('tags', tags_type)
 
     with self.argument_context('iot dps create') as c:
         c.argument('location', get_location_type(self.cli_ctx),

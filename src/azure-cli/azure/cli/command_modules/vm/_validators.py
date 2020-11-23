@@ -545,7 +545,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
-             if a.sku.tier == sku_tier and a.location == namespace.location), None)
+             if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
 
         if account:
             # 3 - nothing specified - find viable storage account in target resource group

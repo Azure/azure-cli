@@ -172,19 +172,6 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
-    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
-    def test_hdinsight_cluster_with_relay_and_privatelink(self, storage_account_info):
-        self._create_hdinsight_cluster(
-            HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_relay_outbound_and_private_link()
-        )
-
-        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
-            self.check('properties.networkProperties.privateLink', "Enabled"),
-            self.check('properties.networkProperties.resourceProviderConnection', 'Outbound')
-        ])
-
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -580,10 +567,3 @@ class HDInsightClusterTests(ScenarioTest):
     def _with_encryption_at_host():
         return '--workernode-size Standard_DS14_V2 --headnode-size Standard_DS14_V2 ' \
                '--zookeepernode-size Standard_DS14_V2 --encryption-at-host true'
-
-    @staticmethod
-    def _with_relay_outbound_and_private_link():
-        return '--version 3.6 -l southcentralus ' \
-               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers' \
-               '/Microsoft.Network/virtualNetworks/fakevnet/subnets/default ' \
-               '--resource-provider-connection Outbound --enable-private-link'

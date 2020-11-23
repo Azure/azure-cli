@@ -20,18 +20,6 @@ def str2bool(v):
     return v
 
 
-def check_name_availability(cmd, client, name):
-    StorageAccountCheckNameAvailabilityParameters = cmd.get_models('StorageAccountCheckNameAvailabilityParameters')
-    account_name = StorageAccountCheckNameAvailabilityParameters(name=name)
-    return client.check_name_availability(account_name)
-
-
-def regenerate_key(cmd, client, account_name, key_name, resource_group_name=None):
-    StorageAccountRegenerateKeyParameters = cmd.get_models('StorageAccountRegenerateKeyParameters')
-    regenerate_key_parameters = StorageAccountRegenerateKeyParameters(key_name=key_name)
-    return client.regenerate_key(resource_group_name, account_name, regenerate_key_parameters)
-
-
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
@@ -140,7 +128,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if min_tls_version:
         params.minimum_tls_version = min_tls_version
 
-    return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
+    return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
 def list_storage_accounts(cmd, resource_group_name=None):
@@ -160,7 +148,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
     if account_name is not None:
         scf = cf_sa_for_keys(cmd.cli_ctx, None)
-        obj = scf.list_keys(resource_group_name, account_name, logging_enable=False)  # pylint: disable=no-member
+        obj = scf.list_keys(resource_group_name, account_name)  # pylint: disable=no-member
         try:
             keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
         except AttributeError:
@@ -416,8 +404,9 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):
-    from azure.core.exceptions import HttpResponseError
-    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus')
+
+    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
+        cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException')
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
@@ -432,13 +421,14 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                           account_name=account_name,
                           private_endpoint_connection_name=private_endpoint_connection_name,
                           properties=private_endpoint_connection)
-    except HttpResponseError as ex:
+    except ErrorResponseException as ex:
         if ex.response.status_code == 400:
+            from msrestazure.azure_exceptions import CloudError
             if new_status == "Approved" and old_status == "Rejected":
-                raise CLIError(ex.response, "You cannot approve the connection request after rejection. Please create "
-                                            "a new connection for approval.")
+                raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
+                                 "Please create a new connection for approval.")
             if new_status == "Approved" and old_status == "Approved":
-                raise CLIError(ex.response, "Your connection is already approved. No need to approve again.")
+                raise CloudError(ex.response, "Your connection is already approved. No need to approve again.")
         raise ex
 
 
@@ -459,31 +449,18 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, account
     )
 
 
-def create_management_policies(cmd, client, resource_group_name, account_name, policy):
+def create_management_policies(client, resource_group_name, account_name, policy):
     if os.path.exists(policy):
         policy = get_file_json(policy)
     else:
         policy = shell_safe_json_parse(policy)
-    ManagementPolicyName = cmd.get_models('ManagementPolicyName')
-    management_policy = cmd.get_models('ManagementPolicy')(policy=policy)
-    return client.create_or_update(resource_group_name, account_name,
-                                   ManagementPolicyName.DEFAULT, properties=management_policy)
+    return client.create_or_update(resource_group_name, account_name, policy=policy)
 
 
-def get_management_policy(cmd, client, resource_group_name, account_name):
-    ManagementPolicyName = cmd.get_models('ManagementPolicyName')
-    return client.get(resource_group_name, account_name, ManagementPolicyName.DEFAULT)
-
-
-def delete_management_policy(cmd, client, resource_group_name, account_name):
-    ManagementPolicyName = cmd.get_models('ManagementPolicyName')
-    return client.delete(resource_group_name, account_name, ManagementPolicyName.DEFAULT)
-
-
-def update_management_policies(cmd, client, resource_group_name, account_name, parameters=None):
-    ManagementPolicyName = cmd.get_models('ManagementPolicyName')
-    return client.create_or_update(resource_group_name, account_name,
-                                   ManagementPolicyName.DEFAULT, properties=parameters)
+def update_management_policies(client, resource_group_name, account_name, parameters=None):
+    if parameters:
+        parameters = parameters.policy
+    return client.create_or_update(resource_group_name, account_name, policy=parameters)
 
 
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
@@ -542,7 +519,12 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
     if instance.share_delete_retention_policy is not None and instance.share_delete_retention_policy.enabled is False:
         instance.share_delete_retention_policy.days = None
 
+<<<<<<< HEAD
     return instance
+=======
+    return client.set_service_properties(resource_group_name=resource_group_name, account_name=account_name,
+                                         share_delete_retention_policy=delete_retention_policy)
+>>>>>>> parent of eb4845f6b... commit merge
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
@@ -583,7 +565,7 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
                      destination_container=None, min_creation_time=None, prefix_match=None):
-    from azure.core.exceptions import HttpResponseError
+    from msrest.exceptions import ClientException
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
@@ -606,8 +588,8 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
     try:
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
-    except HttpResponseError as ex:
-        if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default' \
+    except ClientException as ex:
+        if ex.error.additional_properties['error']['code'] == 'InvalidRequestPropertyValue' and policy_id == 'default' \
                 and account_name == or_policy.source_account:
             raise CLIError(
                 'ValueError: Please specify --policy-id with auto-generated policy id value on destination account.')

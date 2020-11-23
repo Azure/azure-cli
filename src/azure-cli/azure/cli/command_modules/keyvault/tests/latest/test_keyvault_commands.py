@@ -35,7 +35,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 # for other HSM operations live/playback
-ACTIVE_HSM_NAME = 'clitest-1102'
+ACTIVE_HSM_NAME = 'clitest-1028'
 ACTIVE_HSM_URL = 'https://{}.managedhsm.azure.net'.format(ACTIVE_HSM_NAME)
 
 # For security domain playback
@@ -398,60 +398,6 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         for f in files:
             if os.path.exists(self.kwargs[f]):
                 os.remove(self.kwargs[f])
-
-
-class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
-    @record_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_hsm_selective_key_restore')
-    def test_keyvault_hsm_selective_key_restore(self):
-        self.kwargs.update({
-            'hsm_url': ACTIVE_HSM_URL,
-            'hsm_name': ACTIVE_HSM_NAME,
-            'key_name': self.create_random_name('selective-restore-', 24),
-            'storage_account': self.create_random_name('clitesthsmsa', 24),
-            'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
-        })
-
-        _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
-        key = self.cmd('az keyvault key create -n {key_name} --hsm-name {hsm_name}').get_output_in_json()
-        self.kwargs['kid'] = '/'.join(key['key']['kid'].split('/')[:-1])
-        self.cmd('az storage account create -n {storage_account} -g {rg}')
-        self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
-
-        self.kwargs['sas'] = '?' + self.cmd('az storage account generate-sas --start {sas_start} --expiry {sas_expiry} '
-                                            '--https-only '
-                                            '--permissions rwdlacu --resource-types sco --services b '
-                                            '--account-name {storage_account}').get_output_in_json().replace('%3A', ':')
-
-        backup_data = self.cmd('az keyvault backup start --hsm-name {hsm_name} --blob-container-name {blob} '
-                               '--storage-account-name {storage_account} '
-                               '--storage-container-SAS-token "{sas}"',
-                               checks=[
-                                   self.check('status', 'Succeeded'),
-                                   self.exists('startTime'),
-                                   self.exists('id'),
-                                   self.exists('azureStorageBlobContainerUri')
-                               ]).get_output_in_json()
-
-        self.kwargs['backup_folder'] = backup_data['azureStorageBlobContainerUri'].split('/')[-1]
-
-        self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=self.check('length(@)', 1))
-        self.cmd('az keyvault key delete -n {key_name} --hsm-name {hsm_name}')
-        self.cmd('az keyvault key purge -n {key_name} --hsm-name {hsm_name}')
-        self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=self.check('length(@)', 0))
-
-        self.cmd('az keyvault key restore --hsm-name {hsm_name} --blob-container-name {blob} '
-                 '--storage-account-name {storage_account} '
-                 '--storage-container-SAS-token "{sas}" '
-                 '--backup-folder "{backup_folder}" '
-                 '--name {key_name}', checks=self.check('status', 'Succeeded'))
-
-        self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=[
-            self.check('length(@)', 1),
-            self.check('[0].kid', '{kid}')
-        ])
 
 
 class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
