@@ -233,16 +233,24 @@ class TimingProgressBar:
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
 
 
+def _format_glyphs(bar_len):
+    glyphs = []
+    for num in range(bar_len):
+        item = '[{}.{}]'.format(num * ' ', (bar_len - num - 1) * ' ')
+        glyphs.append(item)
+    return glyphs
+
+
 class InfiniteProgressBar:
     """ Define progress bar update view """
     """
-      [   .  ] Running  ..
+      [  .                 ] Running ..
     """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
                 label="to be continued", stream=sys.stderr,
-                hide_cursor=False, glyphs=['[.     ]', '[ .    ]', '[  .   ]', '[   .  ]', '[    . ]', '[     .]'])
+                hide_cursor=False, glyphs=_format_glyphs(bar_len=20))
 
     def update_progress(self):
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add(message="Running")
