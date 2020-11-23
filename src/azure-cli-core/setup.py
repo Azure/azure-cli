@@ -88,10 +88,8 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
+    python_requires='>=3.6.0',
     extras_require={
-        ":python_version<'3.4'": ['enum34'],
-        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
-        ':python_version<"3.0"': ['futures'],
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
