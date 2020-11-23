@@ -7,6 +7,7 @@ Release History
 ++++++
 
 * Update index.html and update email content.
+* Clean policy automatically.
 
 0.8.0 (11/4/2020)
 ++++++
