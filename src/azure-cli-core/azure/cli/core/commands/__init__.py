@@ -952,6 +952,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
+        self.progress_bar.start_time = datetime.datetime.utcnow()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
@@ -976,13 +977,6 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
-                # if num < total:
-                #     self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
-                #                                                        total_val=total)
-                # else:  # add buffer when exceeding estimated time
-                #     self.cli_ctx.get_progress_controller(det=True).add(message='Running ', value=num,
-                #
-                self.progress_bar.start_time = datetime.datetime.utcnow()
                 self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
