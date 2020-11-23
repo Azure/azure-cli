@@ -1985,7 +1985,10 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @live_only()
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge
     @ResourceGroupPreparer(parameter_name_for_location='location')
@@ -2048,9 +2051,14 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
         })
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         # Before assigning data reader role, read operation should fail with AAD auth.
         # The exception really depends on the which identity is used to run this testcase.
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
+=======
+        # Before assigning data reader role, read operation should fail with AAD auth
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Unauthorized'"):
+>>>>>>> parent of eb4845f6b... commit merge
 =======
         # Before assigning data reader role, read operation should fail with AAD auth
         with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Unauthorized'"):

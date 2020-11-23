@@ -520,7 +520,12 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         instance.share_delete_retention_policy.days = None
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     return instance
+=======
+    return client.set_service_properties(resource_group_name=resource_group_name, account_name=account_name,
+                                         share_delete_retention_policy=delete_retention_policy)
+>>>>>>> parent of eb4845f6b... commit merge
 =======
     return client.set_service_properties(resource_group_name=resource_group_name, account_name=account_name,
                                          share_delete_retention_policy=delete_retention_policy)

@@ -23,8 +23,12 @@ from ._validators import (
     validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
 <<<<<<< HEAD
+<<<<<<< HEAD
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
     validate_ppg, validate_assign_identity, validate_max_surge)
+=======
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg)
+>>>>>>> parent of eb4845f6b... commit merge
 =======
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels, validate_ppg)
 >>>>>>> parent of eb4845f6b... commit merge

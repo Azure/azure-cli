@@ -393,6 +393,7 @@ def validate_label(label):
 
     return {kv[0]: kv[1]}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 def validate_max_surge(namespace):
@@ -417,5 +418,7 @@ def validate_assign_identity(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_identity):
             raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge

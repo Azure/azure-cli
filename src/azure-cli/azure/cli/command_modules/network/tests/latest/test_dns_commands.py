@@ -60,6 +60,7 @@ class DnsZoneImportTest(ScenarioTest):
         self._check_records(records1, records2)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @live_only()
     @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
     def test_dns_import_file_operation_error(self, resource_group):
@@ -97,6 +98,8 @@ class DnsZoneImportTest(ScenarioTest):
             self._test_zone('404zone.com', '.')
             self.assertEqual(e.errno, 1)
 
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')

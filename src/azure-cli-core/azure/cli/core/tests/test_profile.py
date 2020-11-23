@@ -322,6 +322,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(result._client._base_url, 'http://foo_arm')
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
         cli = DummyCli()
@@ -331,6 +332,8 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
             finder._arm_client_factory(mock.MagicMock())
 
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge
     @mock.patch('adal.AuthenticationContext', autospec=True)

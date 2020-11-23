@@ -34,6 +34,7 @@ def load_arguments(self, _):
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
     load_additionalArguments(self, account_name_type, pool_name_type, volume_name_type)
+<<<<<<< HEAD
 
     with self.argument_context('netappfiles account backup') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -42,6 +43,8 @@ def load_arguments(self, _):
     load_volumeArguments(self, account_name_type, pool_name_type, volume_name_type)
     load_snapshotArguments(self, account_name_type, pool_name_type, volume_name_type)
     load_vaultArguments(self, account_name_type)
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 
 
 def load_additionalArguments(self, account_name_type, pool_name_type, volume_name_type):

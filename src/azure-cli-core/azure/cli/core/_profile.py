@@ -831,6 +831,7 @@ class SubscriptionFinder:
                 return arm_client_factory(credentials)
             from azure.cli.core.profiles import ResourceType, get_api_version
 <<<<<<< HEAD
+<<<<<<< HEAD
             from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
 
             client_type = self._get_subscription_client_class()
@@ -838,6 +839,10 @@ class SubscriptionFinder:
                 from azure.cli.core.azclierror import CLIInternalError
                 raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                        .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
+=======
+            from azure.cli.core.commands.client_factory import configure_common_settings
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+>>>>>>> parent of eb4845f6b... commit merge
 =======
             from azure.cli.core.commands.client_factory import configure_common_settings
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)

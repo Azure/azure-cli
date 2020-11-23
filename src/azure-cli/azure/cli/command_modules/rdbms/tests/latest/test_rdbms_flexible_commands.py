@@ -468,6 +468,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
@@ -834,5 +835,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge

@@ -41,6 +41,7 @@ parameters:
   - name: --organizational-unit
     short-summary: The Organizational Unit (OU) within the Windows Active Directory
 <<<<<<< HEAD
+<<<<<<< HEAD
   - name: --kdc-ip
     short-summary: kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume
   - name: --ad-name
@@ -53,6 +54,8 @@ parameters:
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge
 examples:

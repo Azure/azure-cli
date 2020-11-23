@@ -95,10 +95,13 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         assert acc_with_active_directory['name'] == account_name
         assert acc_with_active_directory['activeDirectories'][0]['username'] == 'aduser'
 <<<<<<< HEAD
+<<<<<<< HEAD
         assert acc_with_active_directory['activeDirectories'][0]['status'] == 'Created'
         assert acc_with_active_directory['activeDirectories'][0]['adName'] == ad_name
         assert acc_with_active_directory['activeDirectories'][0]['aesEncryption'] is False
         assert acc_with_active_directory['activeDirectories'][0]['ldapSigning'] is False
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge
 

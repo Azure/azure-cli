@@ -37,6 +37,7 @@ def create_account(cmd, client, account_name, resource_group_name, location, tag
 # add an active directory to the netapp account
 # current limitation is 1 AD/subscription
 <<<<<<< HEAD
+<<<<<<< HEAD
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
                          server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None):
@@ -46,6 +47,11 @@ def add_active_directory(cmd, instance, account_name, resource_group_name, usern
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
                                        server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
                                        ldap_signing=ldap_signing)
+=======
+def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns, smb_server_name, organizational_unit=None):
+    active_directories = []
+    active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns, smb_server_name=smb_server_name, organizational_unit=organizational_unit)
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns, smb_server_name, organizational_unit=None):
     active_directories = []
@@ -246,6 +252,7 @@ def create_snapshot(cmd, client, account_name, pool_name, volume_name, snapshot_
     body = Snapshot(location=location)
     return client.create(resource_group_name, account_name, pool_name, volume_name, snapshot_name, body.location)
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 # -- snapshot policies --
@@ -321,5 +328,7 @@ def patch_backup_policy(client, resource_group_name, account_name, backup_policy
         enabled=enabled,
         tags=tags)
     return client.update(resource_group_name, account_name, backup_policy_name, body)
+=======
+>>>>>>> parent of eb4845f6b... commit merge
 =======
 >>>>>>> parent of eb4845f6b... commit merge

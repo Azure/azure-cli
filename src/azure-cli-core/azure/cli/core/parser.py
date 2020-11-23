@@ -298,6 +298,15 @@ class AzCliCommandParser(CLICommandParser):
                                                                      **kwargs)
         return recommendations
 
+    def _get_failure_recovery_recommendations(self, action=None, **kwargs):
+        # Gets failure recovery recommendations
+        from azure.cli.core import __version__ as core_version
+        failure_recovery_arguments = self._get_failure_recovery_arguments(action)
+        recommendations = AzCliCommandParser.recommendation_provider(core_version,
+                                                                     *failure_recovery_arguments,
+                                                                     **kwargs)
+        return recommendations
+
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
         if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):

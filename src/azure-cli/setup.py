@@ -101,7 +101,11 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
 <<<<<<< HEAD
+<<<<<<< HEAD
     'azure-mgmt-netapp~=0.14.0',
+=======
+    'azure-mgmt-netapp~=0.12.0',
+>>>>>>> parent of eb4845f6b... commit merge
 =======
     'azure-mgmt-netapp~=0.12.0',
 >>>>>>> parent of eb4845f6b... commit merge
