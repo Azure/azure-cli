@@ -291,7 +291,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
         g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
 
-    with self.command_group('deployment-scripts', resource_deploymentscripts_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS) as g:
+    with self.command_group('deployment-scripts', resource_deploymentscripts_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS, is_preview=True) as g:
         g.custom_command('list', 'list_deployment_scripts')
         g.custom_show_command('show', 'get_deployment_script')
         g.custom_command('show-log', 'get_deployment_script_logs')

@@ -13,11 +13,18 @@
             "defaultValue": "[utcNow()]"
         }
     },
+<<<<<<< HEAD
     "variables": {},
     "resources": [
         {
             "type": "Microsoft.Resources/deploymentScripts",
             "apiVersion": "2020-10-01",
+=======
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2019-10-01-preview",
+>>>>>>> parent of eb4845f6b... commit merge
             "name": "[parameters('scriptName')]",
             "location": "[resourceGroup().location]",
             "identity": {
@@ -37,7 +44,7 @@
                 "arguments": "'foo' 'bar'",
                 "scriptContent": "echo 'foo'",
                 "cleanupPreference": "OnExpiration",
-                "retentionInterval": "PT25H"
+                "retentionInterval": "P1D"
             }
         }
     ],
