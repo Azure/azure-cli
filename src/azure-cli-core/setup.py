@@ -7,9 +7,9 @@
 
 from __future__ import print_function
 from codecs import open
-from setuptools import setup
+from setuptools import setup, find_packages
 
-VERSION = "2.14.1"
+VERSION = "2.15.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -52,7 +52,6 @@ DEPENDENCIES = [
     'knack==0.7.2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
-    'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
@@ -60,8 +59,11 @@ DEPENDENCIES = [
     'requests~=2.22',
     'six~=1.12',
     'pkginfo>=1.5.0.1',
-    'azure-mgmt-resource==10.2.0',
-    'azure-mgmt-core==1.2.0'
+    'azure-mgmt-core==1.2.1',
+    # Dependencies of the vendored subscription SDK
+    # https://github.com/Azure/azure-sdk-for-python/blob/ab12b048ddf676fe0ccec16b2167117f0609700d/sdk/resources/azure-mgmt-resource/setup.py#L82-L86
+    'msrest>=0.5.0',
+    'azure-common~=1.1',
 ]
 
 TESTS_REQUIRE = [
@@ -84,12 +86,7 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    packages=[
-        'azure.cli.core',
-        'azure.cli.core.commands',
-        'azure.cli.core.extension',
-        'azure.cli.core.profiles',
-    ],
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     extras_require={
         ":python_version<'3.4'": ['enum34'],

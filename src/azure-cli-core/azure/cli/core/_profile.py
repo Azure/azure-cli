@@ -24,7 +24,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -77,6 +76,8 @@ _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+_USE_VENDORED_SUBSCRIPTION_SDK = True
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -259,7 +260,7 @@ class Profile:
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
-                _STATE: s.state.value,
+                _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
@@ -304,11 +305,17 @@ class Profile:
         return result
 
     def _new_account(self):
-        from azure.cli.core.profiles import ResourceType, get_sdk
-        SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, 'Subscription',
-                                              'SubscriptionState', mod='models')
+        """Build an empty Subscription which will be used as a tenant account.
+        API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
+            SubscriptionType = Subscription
+        else:
+            from azure.cli.core.profiles import ResourceType, get_sdk
+            SubscriptionType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                       'Subscription', mod='models')
         s = SubscriptionType()
-        s.state = StateType.enabled
+        s.state = 'Enabled'
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
@@ -450,8 +457,7 @@ class Profile:
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
-        from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
     def is_tenant_level_account(self):
@@ -822,14 +828,19 @@ class SubscriptionFinder:
         def create_arm_client_factory(credentials):
             if arm_client_factory:
                 return arm_client_factory(credentials)
-            from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import configure_common_settings
-            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+
+            client_type = self._get_subscription_client_class()
+            if client_type is None:
+                from azure.cli.core.azclierror import CLIInternalError
+                raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
-            configure_common_settings(cli_ctx, client)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -837,10 +848,13 @@ class SubscriptionFinder:
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        if password:
-            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
-        else:  # when refresh account, we will leverage local cached tokens
-            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+        try:
+            if password:
+                token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+            else:  # when refresh account, we will leverage local cached tokens
+                token_entry = context.acquire_token(resource, username, _CLIENT_ID)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
 
         if not token_entry:
             return []
@@ -861,8 +875,11 @@ class SubscriptionFinder:
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
-        token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
-                                                                    resource, _CLIENT_ID, None)
+        try:
+            token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                        resource, _CLIENT_ID, None)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
@@ -873,7 +890,10 @@ class SubscriptionFinder:
 
     def find_through_interactive_flow(self, tenant, resource):
         context = self._create_auth_context(tenant)
-        code = context.acquire_user_code(resource, _CLIENT_ID)
+        try:
+            code = context.acquire_user_code(resource, _CLIENT_ID)
+        except Exception as err:  # pylint: disable=broad-except
+            _login_exception_handler(err)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
@@ -904,16 +924,17 @@ class SubscriptionFinder:
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
@@ -922,6 +943,7 @@ class SubscriptionFinder:
                 t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
+                logger.debug("Acquiring a token with tenant=%s, resource=%s", tenant_id, resource)
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
@@ -978,9 +1000,9 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
@@ -992,6 +1014,21 @@ class SubscriptionFinder:
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
+
+    def _get_subscription_client_class(self):  # pylint: disable=no-self-use
+        """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
+        on the design of architecture.
+        """
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            # Use vendered subscription SDK to decouple from `resource` command module
+            from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
+            client_type = SubscriptionClient
+        else:
+            # Use the public SDK
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.profiles._shared import get_client_class
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        return client_type
 
 
 class CredsCache:
@@ -1331,3 +1368,13 @@ def _get_authorization_code(resource, authority_url):
     if results.get('no_browser'):
         raise RuntimeError()
     return results
+
+
+def _login_exception_handler(ex):
+    from requests.exceptions import InvalidURL
+    if isinstance(ex, InvalidURL):
+        import traceback
+        from azure.cli.core.azclierror import UnclassifiedUserFault
+        logger.debug('Invalid url when acquiring token\n%s', traceback.format_exc())
+        raise UnclassifiedUserFault(error_msg='Invalid url when acquiring token',
+                                    recommendation='Please make sure the cloud is registered with valid url')

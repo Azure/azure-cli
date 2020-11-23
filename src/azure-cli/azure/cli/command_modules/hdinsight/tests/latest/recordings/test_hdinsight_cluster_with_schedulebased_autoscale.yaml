@@ -12,26 +12,26 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/10.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20and%20name%20eq%20%27hdicli000002%27&api-version=2020-06-01
   response:
     body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMjM2IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVUkZSa0ZWVEZRNk1rUlRVVXc2TWtSWFJWTlVWVk10VFVsRFVrOVRUMFpVT2pKRlUxRk1PakpHVTBWU1ZrVlNVem95UmtOTlVsVlJRekZhT1VNNk1rWkVRVlJCUWtGVFJWTTZNa1pWTnprd1YwbFVTRXRGVWtJeFJFUTBRa1U1UTBWRFF6QTBSak16UVRZeU9UUTBSRGcxUkRrNE1qVXhNMGhKVmtWTlJWUkJVMVJQVWtVdFYwVlRWRlZUIn0%3d"}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"eastus2","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '657'
+      - '342'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:28:05 GMT
+      - Wed, 11 Nov 2020 04:10:26 GMT
       expires:
       - '-1'
       pragma:
@@ -58,164 +58,23 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/10.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMjM2IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVUkZSa0ZWVEZRNk1rUlRVVXc2TWtSWFJWTlVWVk10VFVsRFVrOVRUMFpVT2pKRlUxRk1PakpHVTBWU1ZrVlNVem95UmtOTlVsVlJRekZhT1VNNk1rWkVRVlJCUWtGVFJWTTZNa1pWTnprd1YwbFVTRXRGVWtJeFJFUTBRa1U1UTBWRFF6QTBSak16UVRZeU9UUTBSRGcxUkRrNE1qVXhNMGhKVmtWTlJWUkJVMVJQVWtVdFYwVlRWRlZUIn0%3d
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"southcentralus","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMjI4IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVaEVVRkpCUTFSSlEwVklSVTFCVGxSSUxVMUpRMUpQVTA5R1ZEb3lSVk5SVERveVJsTkZVbFpGVWxNNk1rWklSRkJTUVVOVVNVTkZTRVZOUVU0Nk1rWkVRVlJCUWtGVFJWTTZNa1pXTXpZeVF6TkVNRGhEUWtVeU4wSTBOVFUyUVRkQlFrRXhSa1UzUXpGQk5VUkRRa2hKVmtWTlJWUkJVMVJQVWtVdFJVRlRWRlZUTWctLSJ9"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '980'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 06 Aug 2020 08:28:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/10.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMjI4IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVaEVVRkpCUTFSSlEwVklSVTFCVGxSSUxVMUpRMUpQVTA5R1ZEb3lSVk5SVERveVJsTkZVbFpGVWxNNk1rWklSRkJTUVVOVVNVTkZTRVZOUVU0Nk1rWkVRVlJCUWtGVFJWTTZNa1pXTXpZeVF6TkVNRGhEUWtVeU4wSTBOVFUyUVRkQlFrRXhSa1UzUXpGQk5VUkRRa2hKVmtWTlJWUkJVMVJQVWtVdFJVRlRWRlZUTWctLSJ9
-  response:
-    body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMTY4IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVNUZWRmRQVWt0WFFWUkRTRVZTVWtjdFRVbERVazlUVDBaVU9qSkZUa1ZVVjA5U1N6b3lSazVGVkZkUFVrdFhRVlJEU0VWU1V6b3lSazVGVkZkUFVrdFhRVlJEU0VWU09qVkdWVXRUVDFWVVNDMVZTMU5QVlZSSSJ9"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '563'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 06 Aug 2020 08:28:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/10.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5qZzFSVUUtIiwibmV4dFJvd0tleSI6IjEhMTY4IU9UWTBRekV3UWtJNFFUWkRORE5DUXpnelJETTJRak14T0VNMlF6Y3pNRFZmUjFKTUxVNUZWRmRQVWt0WFFWUkRTRVZTVWtjdFRVbERVazlUVDBaVU9qSkZUa1ZVVjA5U1N6b3lSazVGVkZkUFVrdFhRVlJEU0VWU1V6b3lSazVGVkZkUFVrdFhRVlJEU0VWU09qVkdWVXRUVDFWVVNDMVZTMU5QVlZSSSJ9
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 06 Aug 2020 08:28:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"southcentralus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-06T08:26:45.4452543Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-06T08:26:45.4452543Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-08-06T08:26:45.3514778Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"southcentralus","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T04:09:05.6171438Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T04:09:05.6171438Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-11-11T04:09:05.5077748Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1193'
+      - '1179'
       content-type:
       - application/json
       date:
-      - Thu, 06 Aug 2020 08:28:08 GMT
+      - Wed, 11 Nov 2020 04:10:27 GMT
       expires:
       - '-1'
       pragma:
@@ -248,14 +107,11 @@ interactions:
       - '0'
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2019-06-01&$expand=kerb
   response:
     body:
       string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
@@ -267,7 +123,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 06 Aug 2020 08:28:10 GMT
+      - Wed, 11 Nov 2020 04:10:28 GMT
       expires:
       - '-1'
       pragma:
@@ -283,15 +139,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11996'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "southcentralus", "properties": {"clusterVersion": "4.0",
-      "osType": "Linux", "clusterDefinition": {"kind": "spark", "configurations":
-      {"gateway": {"restAuthCredential.isEnabled": "true", "restAuthCredential.username":
-      "admin", "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
+    body: '{"location": "eastus2", "properties": {"clusterVersion": "4.0", "osType":
+      "Linux", "clusterDefinition": {"kind": "spark", "configurations": {"gateway":
+      {"restAuthCredential.isEnabled": "true", "restAuthCredential.username": "admin",
+      "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
       [{"name": "headnode", "targetInstanceCount": 2, "hardwareProfile": {"vmSize":
       "large"}, "osProfile": {"linuxOperatingSystemProfile": {"username": "sshuser",
       "password": "Password1!"}}}, {"name": "workernode", "targetInstanceCount": 3,
@@ -300,7 +156,8 @@ interactions:
       5, "maxInstanceCount": 5}}]}}, "hardwareProfile": {"vmSize": "large"}, "osProfile":
       {"linuxOperatingSystemProfile": {"username": "sshuser", "password": "Password1!"}}}]},
       "storageProfile": {"storageaccounts": [{"name": "hdicli000002.blob.core.windows.net",
-      "isDefault": true, "container": "default", "key": "veryFakedStorageAccountKey=="}]}}}'
+      "isDefault": true, "container": "default", "key": "veryFakedStorageAccountKey==",
+      "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002"}]}}}'
     headers:
       Accept:
       - application/json
@@ -311,37 +168,37 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1120'
+      - '1279'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"South
-        Central US","etag":"a1b139fa-c316-47ea-b365-54deca5a5b70","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2007270451.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1b2f66c933044347819978ee9904e6c8","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
-        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-08-06T08:28:20.94","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"minSupportedTlsVersion":"1.2","excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
+        US 2","etag":"c51e9654-9cc1-49ba-94b3-42ea42097191","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2009301626.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1884b0be0b6a46c8b8252c821d17e5f4","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
+        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-11-11T04:10:43.89","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1694'
+      - '1909'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:28:22 GMT
+      - Wed, 11 Nov 2020 04:10:45 GMT
       etag:
-      - '"a1b139fa-c316-47ea-b365-54deca5a5b70"'
+      - '"c51e9654-9cc1-49ba-94b3-42ea42097191"'
       expires:
       - '-1'
       pragma:
@@ -355,11 +212,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-clusteruri:
-      - https://management.azure.com/subscriptions/964c10bb-8a6c-43bc-83d3-6b318c6c7305/resourceGroups/hdicli-dcqep/providers/Microsoft.HDInsight/clusters/hdicli-x5jsrbiv7?api-version=2018-06-01-preview
+      - https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/hdicli-udyod/providers/Microsoft.HDInsight/clusters/hdicli-2x3ighn6d?api-version=2018-06-01-preview
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1190'
     status:
       code: 200
       message: OK
@@ -376,10 +233,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -393,7 +250,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:28:53 GMT
+      - Wed, 11 Nov 2020 04:11:18 GMT
       expires:
       - '-1'
       pragma:
@@ -407,7 +264,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -424,10 +281,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -441,7 +298,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:29:24 GMT
+      - Wed, 11 Nov 2020 04:11:49 GMT
       expires:
       - '-1'
       pragma:
@@ -455,7 +312,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -472,10 +329,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -489,7 +346,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:29:54 GMT
+      - Wed, 11 Nov 2020 04:12:19 GMT
       expires:
       - '-1'
       pragma:
@@ -503,7 +360,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -520,10 +377,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -537,7 +394,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:30:26 GMT
+      - Wed, 11 Nov 2020 04:12:50 GMT
       expires:
       - '-1'
       pragma:
@@ -551,7 +408,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -568,10 +425,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -585,7 +442,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:30:56 GMT
+      - Wed, 11 Nov 2020 04:13:20 GMT
       expires:
       - '-1'
       pragma:
@@ -599,7 +456,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -616,10 +473,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -633,7 +490,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:31:27 GMT
+      - Wed, 11 Nov 2020 04:13:51 GMT
       expires:
       - '-1'
       pragma:
@@ -647,7 +504,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -664,10 +521,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -681,7 +538,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:31:57 GMT
+      - Wed, 11 Nov 2020 04:14:21 GMT
       expires:
       - '-1'
       pragma:
@@ -695,7 +552,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -712,10 +569,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -729,7 +586,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:32:28 GMT
+      - Wed, 11 Nov 2020 04:14:53 GMT
       expires:
       - '-1'
       pragma:
@@ -743,7 +600,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -760,10 +617,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -777,7 +634,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:32:58 GMT
+      - Wed, 11 Nov 2020 04:15:24 GMT
       expires:
       - '-1'
       pragma:
@@ -791,7 +648,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -808,10 +665,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -825,7 +682,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:33:29 GMT
+      - Wed, 11 Nov 2020 04:15:54 GMT
       expires:
       - '-1'
       pragma:
@@ -839,7 +696,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -856,10 +713,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -873,7 +730,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:34:01 GMT
+      - Wed, 11 Nov 2020 04:16:25 GMT
       expires:
       - '-1'
       pragma:
@@ -887,7 +744,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -904,10 +761,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -921,7 +778,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:34:31 GMT
+      - Wed, 11 Nov 2020 04:16:55 GMT
       expires:
       - '-1'
       pragma:
@@ -935,7 +792,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -952,10 +809,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -969,7 +826,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:35:02 GMT
+      - Wed, 11 Nov 2020 04:17:27 GMT
       expires:
       - '-1'
       pragma:
@@ -983,7 +840,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1000,10 +857,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1017,7 +874,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:35:32 GMT
+      - Wed, 11 Nov 2020 04:17:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,7 +888,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1048,10 +905,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1065,7 +922,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:36:04 GMT
+      - Wed, 11 Nov 2020 04:18:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1079,7 +936,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1096,10 +953,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1113,7 +970,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:36:34 GMT
+      - Wed, 11 Nov 2020 04:19:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1127,7 +984,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1144,10 +1001,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1161,7 +1018,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:37:04 GMT
+      - Wed, 11 Nov 2020 04:19:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1175,7 +1032,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1192,10 +1049,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1209,7 +1066,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:37:35 GMT
+      - Wed, 11 Nov 2020 04:20:01 GMT
       expires:
       - '-1'
       pragma:
@@ -1223,7 +1080,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1240,10 +1097,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1257,7 +1114,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:38:05 GMT
+      - Wed, 11 Nov 2020 04:20:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1271,7 +1128,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1288,10 +1145,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1305,7 +1162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:38:37 GMT
+      - Wed, 11 Nov 2020 04:21:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1319,7 +1176,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1336,10 +1193,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1353,7 +1210,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:39:08 GMT
+      - Wed, 11 Nov 2020 04:21:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1367,7 +1224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1384,10 +1241,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1401,7 +1258,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:39:41 GMT
+      - Wed, 11 Nov 2020 04:22:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1415,7 +1272,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1432,10 +1289,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1449,7 +1306,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:40:11 GMT
+      - Wed, 11 Nov 2020 04:22:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1463,7 +1320,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1480,10 +1337,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1497,7 +1354,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:40:41 GMT
+      - Wed, 11 Nov 2020 04:23:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1511,7 +1368,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1528,10 +1385,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1545,7 +1402,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:41:13 GMT
+      - Wed, 11 Nov 2020 04:23:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1559,7 +1416,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1576,10 +1433,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1593,7 +1450,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:41:43 GMT
+      - Wed, 11 Nov 2020 04:24:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1607,7 +1464,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1624,10 +1481,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1641,7 +1498,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:42:14 GMT
+      - Wed, 11 Nov 2020 04:24:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1655,7 +1512,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1672,10 +1529,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1689,7 +1546,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:42:44 GMT
+      - Wed, 11 Nov 2020 04:25:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1703,7 +1560,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1720,10 +1577,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1737,7 +1594,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:43:15 GMT
+      - Wed, 11 Nov 2020 04:25:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1751,7 +1608,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1768,10 +1625,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1785,7 +1642,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:43:46 GMT
+      - Wed, 11 Nov 2020 04:26:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1799,7 +1656,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1816,10 +1673,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1833,7 +1690,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:44:17 GMT
+      - Wed, 11 Nov 2020 04:26:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1847,7 +1704,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1864,10 +1721,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1881,7 +1738,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:44:48 GMT
+      - Wed, 11 Nov 2020 04:27:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1895,7 +1752,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1912,10 +1769,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1929,7 +1786,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:45:18 GMT
+      - Wed, 11 Nov 2020 04:27:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1943,7 +1800,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -1960,10 +1817,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1977,7 +1834,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:45:49 GMT
+      - Wed, 11 Nov 2020 04:28:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1991,7 +1848,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2008,10 +1865,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2025,7 +1882,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:46:20 GMT
+      - Wed, 11 Nov 2020 04:28:45 GMT
       expires:
       - '-1'
       pragma:
@@ -2039,7 +1896,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2056,10 +1913,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2073,7 +1930,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:46:50 GMT
+      - Wed, 11 Nov 2020 04:29:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2087,7 +1944,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2104,10 +1961,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2121,7 +1978,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:47:21 GMT
+      - Wed, 11 Nov 2020 04:29:47 GMT
       expires:
       - '-1'
       pragma:
@@ -2135,7 +1992,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2152,10 +2009,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2169,7 +2026,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:47:51 GMT
+      - Wed, 11 Nov 2020 04:30:17 GMT
       expires:
       - '-1'
       pragma:
@@ -2183,7 +2040,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2200,10 +2057,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2217,7 +2074,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:48:22 GMT
+      - Wed, 11 Nov 2020 04:30:48 GMT
       expires:
       - '-1'
       pragma:
@@ -2231,7 +2088,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2248,10 +2105,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2265,7 +2122,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:48:52 GMT
+      - Wed, 11 Nov 2020 04:31:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2279,7 +2136,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2296,10 +2153,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2313,7 +2170,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:49:24 GMT
+      - Wed, 11 Nov 2020 04:31:50 GMT
       expires:
       - '-1'
       pragma:
@@ -2327,7 +2184,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2344,10 +2201,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2361,7 +2218,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:49:55 GMT
+      - Wed, 11 Nov 2020 04:32:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2375,7 +2232,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2392,10 +2249,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2409,7 +2266,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:50:26 GMT
+      - Wed, 11 Nov 2020 04:32:52 GMT
       expires:
       - '-1'
       pragma:
@@ -2423,7 +2280,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2440,10 +2297,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2457,7 +2314,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:50:56 GMT
+      - Wed, 11 Nov 2020 04:33:23 GMT
       expires:
       - '-1'
       pragma:
@@ -2471,7 +2328,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2488,10 +2345,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2505,7 +2362,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:51:26 GMT
+      - Wed, 11 Nov 2020 04:33:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2519,7 +2376,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2536,10 +2393,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2553,7 +2410,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:51:58 GMT
+      - Wed, 11 Nov 2020 04:34:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2567,7 +2424,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2584,10 +2441,10 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2601,7 +2458,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:52:28 GMT
+      - Wed, 11 Nov 2020 04:34:54 GMT
       expires:
       - '-1'
       pragma:
@@ -2615,7 +2472,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2632,10 +2489,154 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 11 Nov 2020 04:35:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-hdi-served-by:
+      - global
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 11 Nov 2020 04:35:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-hdi-served-by:
+      - global
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 11 Nov 2020 04:36:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-hdi-served-by:
+      - global
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -2649,7 +2650,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:52:58 GMT
+      - Wed, 11 Nov 2020 04:37:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2663,7 +2664,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2680,26 +2681,26 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --version --autoscale-type --timezone --days --time --autoscale-count
+        --version --autoscale-type --timezone --days --time --autoscale-workernode-count
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"South
-        Central US","etag":"a1b139fa-c316-47ea-b365-54deca5a5b70","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.0.26","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2007270451.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1b2f66c933044347819978ee9904e6c8","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
-        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_A2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-08-06T08:28:20.94","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"minSupportedTlsVersion":"1.2","excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
+        US 2","etag":"c51e9654-9cc1-49ba-94b3-42ea42097191","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.1.2","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2009301626.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1884b0be0b6a46c8b8252c821d17e5f4","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
+        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T04:10:43.89","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2102'
+      - '2316'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:52:59 GMT
+      - Wed, 11 Nov 2020 04:37:24 GMT
       expires:
       - '-1'
       pragma:
@@ -2713,7 +2714,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2731,26 +2732,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"South
-        Central US","etag":"a1b139fa-c316-47ea-b365-54deca5a5b70","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.0.26","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2007270451.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1b2f66c933044347819978ee9904e6c8","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
-        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_A2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-08-06T08:28:20.94","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"minSupportedTlsVersion":"1.2","excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
+        US 2","etag":"c51e9654-9cc1-49ba-94b3-42ea42097191","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.1.2","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2009301626.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1884b0be0b6a46c8b8252c821d17e5f4","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
+        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T04:10:43.89","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2102'
+      - '2316'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:53:01 GMT
+      - Wed, 11 Nov 2020 04:37:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2764,7 +2765,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK
@@ -2782,26 +2783,26 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.6.0 Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"South
-        Central US","etag":"a1b139fa-c316-47ea-b365-54deca5a5b70","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.0.26","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2007270451.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1b2f66c933044347819978ee9904e6c8","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
-        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_A2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-08-06T08:28:20.94","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"minSupportedTlsVersion":"1.2","excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
+        US 2","etag":"c51e9654-9cc1-49ba-94b3-42ea42097191","tags":null,"properties":{"clusterVersion":"4.0.2000.1","clusterHdpVersion":"4.1.1.2","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-4.0.2000.1.2009301626.json","kind":"spark","componentVersion":{"spark":"2.4"}},"clusterId":"1884b0be0b6a46c8b8252c821d17e5f4","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"autoscale":{"recurrence":{"timeZone":"China
+        Standard Time","schedule":[{"days":["Monday"],"timeAndCapacity":{"time":"09:00","minInstanceCount":5,"maxInstanceCount":5}}]}},"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T04:10:43.89","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2102'
+      - '2316'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 06 Aug 2020 08:53:04 GMT
+      - Wed, 11 Nov 2020 04:37:30 GMT
       expires:
       - '-1'
       pragma:
@@ -2815,7 +2816,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-served-by:
-      - southcentralus
+      - global
     status:
       code: 200
       message: OK

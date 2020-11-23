@@ -92,6 +92,14 @@ class ClientError(AzCLIError):
         telemetry.set_failure(self.error_msg)
         if self.exception_trace:
             telemetry.set_exception(self.exception_trace, '')
+
+
+class UnknownError(AzCLIError):
+    """ Unclear errors, could not know who should be responsible for the errors.
+    DO NOT raise this error class in your codes. """
+    def send_telemetry(self):
+        super().send_telemetry()
+        telemetry.set_failure(self.error_msg)
 # endregion
 
 
@@ -125,8 +133,8 @@ class InvalidArgumentValueError(UserFault):
     pass
 
 
-class ArgumentParseError(UserFault):
-    """ Fallback of the argument parsing related errors.
+class ArgumentUsageError(UserFault):
+    """ Fallback of the argument usage related errors.
     Avoid using this class unless the error can not be classified
     into the Argument related specific error types. """
     pass
@@ -191,6 +199,17 @@ class ManualInterrupt(UserFault):
     pass
 
 
+# ARM template related error types
+class InvalidTemplateError(UserFault):
+    """ ARM template validation fails. It could be caused by incorrect template files or parameters """
+    pass
+
+
+class DeploymentError(UserFault):
+    """ ARM template deployment fails. Template file is valid, and error occurs in deployment. """
+    pass
+
+
 # Validation related error types
 class ValidationError(UserFault):
     """ Fallback of the errors in validation functions.
@@ -199,7 +218,7 @@ class ValidationError(UserFault):
     pass
 
 
-class UnknownError(UserFault):
+class UnclassifiedUserFault(UserFault):
     """ Fallback of the UserFault related error types.
     Avoid using this class unless the error can not be classified into
     the UserFault related specific error types.
