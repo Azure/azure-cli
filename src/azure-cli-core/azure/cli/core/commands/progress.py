@@ -191,6 +191,9 @@ class IndeterminateProgressBar:
 
 class PercentageProgressBar:
     """ Define progress bar update view """
+    """
+    Finished[#############################################################]  100.0000%
+    """
     def __init__(self, cli_ctx, total, message="Running "):
         self.cli_ctx = cli_ctx
         self.message = message
@@ -228,3 +231,21 @@ class TimingProgressBar:
 
     def end(self):
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
+
+
+class InfiniteProgressBar:
+    """ Define progress bar update view """
+    """
+      [   .  ] Running  ..
+    """
+    def __init__(self, cli_ctx):
+        self.cli_ctx = cli_ctx
+        self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
+                label="to be continued", stream=sys.stderr,
+                hide_cursor=False, glyphs=['[.     ]', '[ .    ]', '[  .   ]', '[   .  ]', '[    . ]', '[     .]'])
+
+    def update_progress(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add(message="Running")
+
+    def end(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end(message="Running")

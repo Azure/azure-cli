@@ -711,7 +711,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vm_linux_log_analytics_workspace_agent,
                                                                 build_vm_windows_log_analytics_workspace_agent)
     from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
-
+    progress_bar = cmd.command_kwargs.get('progress', None)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if os_disk_encryption_set is not None and not is_valid_resource_id(os_disk_encryption_set):
@@ -930,12 +930,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         if validate:
             validation_poller = client.validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+            return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(validation_poller)
 
         # creates the VM deployment
         if no_wait:
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, deployment))
+        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(client.create_or_update(resource_group_name, deployment_name, deployment))
     else:
         if validate:
             return client.validate(resource_group_name, deployment_name, properties)
@@ -943,7 +943,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         # creates the VM deployment
         if no_wait:
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, deployment_name, properties))
+        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(client.create_or_update(resource_group_name, deployment_name, properties))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
