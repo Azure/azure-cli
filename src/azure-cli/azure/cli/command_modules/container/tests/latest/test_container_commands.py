@@ -7,7 +7,7 @@ import time
 import tempfile
 import unittest
 import yaml
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only, record_only
 
 
 class AzureContainerInstanceScenarioTest(ScenarioTest):
@@ -220,6 +220,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli
     # After recording, regenerate the password for the acr instance.
+    @record_only()  # This test relies on existing ACR image
     @ResourceGroupPreparer()
     def test_container_create_with_acr(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
