@@ -105,10 +105,10 @@ class ProgressHook:
 
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
-    def __init__(self, out=None):
+    def __init__(self, out=None, spinner=None):
         super(IndeterminateStandardOut, self).__init__(
             out if out else sys.stderr)
-        self.spinner = None
+        self.spinner = spinner
 
     def write(self, args):
         """
@@ -168,11 +168,11 @@ class DeterminateStandardOut(ProgressViewBase):
         self.out.flush()
 
 
-def get_progress_view(determinant=False, outstream=sys.stderr):
+def get_progress_view(determinant=False, outstream=sys.stderr, spinner=None):
     """ gets your view """
     if determinant:
         return DeterminateStandardOut(out=outstream)
-    return IndeterminateStandardOut(out=outstream)
+    return IndeterminateStandardOut(out=outstream, spinner=spinner)
 
 
 class IndeterminateProgressBar:
@@ -209,3 +209,22 @@ class PercentageProgressBar:
     def end(self):
         self.cli_ctx.get_progress_controller(det=True).end(value=self.total, total_val=self.total)
 
+
+class TimingProgressBar:
+    """ Define progress bar update view """
+    """
+     - It may take 40 seconds (21 seconds) ..
+    """
+    def __init__(self, cli_ctx, total):
+        self.cli_ctx = cli_ctx
+        self.total = total
+        self.start_time = datetime.datetime.utcnow()
+        self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
+                label='It may take {} seconds'.format(self.total), stream=sys.stderr,
+                hide_cursor=False, timer=humanfriendly.Timer())
+
+    def update_progress(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add()
+
+    def end(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
