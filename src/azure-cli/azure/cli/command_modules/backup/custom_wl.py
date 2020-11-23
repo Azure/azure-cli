@@ -34,6 +34,8 @@ logger = get_logger(__name__)
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
+                     'SQLDataBase': 'SQLDataBase',
+                     'SAPHanaDatabase': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
