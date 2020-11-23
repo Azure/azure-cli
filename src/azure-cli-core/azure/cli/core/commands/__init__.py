@@ -696,16 +696,16 @@ class AzCliCommandInvoker(CommandInvoker):
             elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
                 result = None
 
-            transform_op = cmd_copy.command_kwargs.get('transform', None)
-            if transform_op:
-                result = transform_op(result)
-
             if _is_poller(result):
                 progress_bar = cmd_copy.command_kwargs.get('progress', None)
                 result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name),
                                               progress_bar=progress_bar)(result)
             elif _is_paged(result):
                 result = list(result)
+
+            transform_op = cmd_copy.command_kwargs.get('transform', None)
+            if transform_op:
+                result = transform_op(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
             event_data = {'result': result}
