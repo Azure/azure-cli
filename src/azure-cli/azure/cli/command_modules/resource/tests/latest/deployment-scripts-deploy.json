@@ -8,34 +8,24 @@
                 "description": "Deployment script name"
             }
         },
-        "apiVersion": {
-            "type": "string",
-            "defaultValue": "2019-10-01-preview",
-            "allowedValues": [
-                "2019-10-01-preview",
-                "2020-10-01"
-            ]
-        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
         }
     },
-    "variables": {
-        "identity": {
-            "type": "UserAssigned",
-            "userAssignedIdentities": {
-                "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]": {}
-            }
-        }
-    },
+    "variables": {},
     "resources": [
         {
             "type": "Microsoft.Resources/deploymentScripts",
-            "apiVersion": "[parameters('apiVersion')]",
+            "apiVersion": "2020-10-01",
             "name": "[parameters('scriptName')]",
             "location": "[resourceGroup().location]",
-            "identity": "[if(equals(parameters('apiVersion'), '2020-10-01'), json('null'), variables('identity'))]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/python_sdk_test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/python_test_sdk_msi')]": {}
+                }
+            },
             "kind": "AzureCLI",
             "properties": {
                 "forceUpdateTag": "[parameters('utcValue')]",
