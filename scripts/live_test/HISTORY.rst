@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.9.0 (11/23/2020)
+++++++
+
+* Update index.html and update email content.
+
 0.8.0 (11/4/2020)
 ++++++
 
