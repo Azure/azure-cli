@@ -316,6 +316,15 @@ class TestProfile(unittest.TestCase):
         result = finder._arm_client_factory(mock.MagicMock())
         self.assertEqual(result.config.base_url, 'http://foo_arm')
 
+    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
+        cli = DummyCli()
+        get_client_class_mock.return_value = None
+        finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
+        from azure.cli.core.azclierror import CLIInternalError
+        with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
+            finder._arm_client_factory(mock.MagicMock())
+
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
         cli = DummyCli()

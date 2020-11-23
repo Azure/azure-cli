@@ -24,7 +24,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -825,7 +824,11 @@ class SubscriptionFinder:
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
             from azure.cli.core.commands.client_factory import configure_common_settings
+            from azure.cli.core.azclierror import CLIInternalError
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            if client_type is None:
+                raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             client = client_type(credentials, api_version=api_version,
                                  base_url=self.cli_ctx.cloud.endpoints.resource_manager)
