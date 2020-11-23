@@ -17,7 +17,11 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
+<<<<<<< HEAD
 __version__ = "2.14.0"
+=======
+__version__ = "2.15.0"
+>>>>>>> parent of f0d68450d... {Release} HotFix: Release 2.15.1 (#15992)
 
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)

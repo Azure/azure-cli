@@ -6,7 +6,11 @@
 
 from __future__ import print_function
 
+<<<<<<< HEAD
 __version__ = "2.14.0"
+=======
+__version__ = "2.15.0"
+>>>>>>> parent of f0d68450d... {Release} HotFix: Release 2.15.1 (#15992)
 
 import os
 import sys

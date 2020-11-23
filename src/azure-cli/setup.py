@@ -18,7 +18,11 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
+<<<<<<< HEAD
 VERSION = "2.14.0"
+=======
+VERSION = "2.15.0"
+>>>>>>> parent of f0d68450d... {Release} HotFix: Release 2.15.1 (#15992)
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:

@@ -3,6 +3,21 @@
 Release History
 ===============
 
+<<<<<<< HEAD
+=======
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
+2.14.1
+++++++
+* Minor fixes
+
+>>>>>>> parent of f0d68450d... {Release} HotFix: Release 2.15.1 (#15992)
 2.14.0
 ++++++
 * Minor fixes
