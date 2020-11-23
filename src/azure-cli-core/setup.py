@@ -9,11 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-<<<<<<< HEAD
-VERSION = "2.14.0"
-=======
 VERSION = "2.15.0"
->>>>>>> parent of f0d68450d... {Release} HotFix: Release 2.15.1 (#15992)
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -63,13 +59,8 @@ DEPENDENCIES = [
     'requests~=2.22',
     'six~=1.12',
     'pkginfo>=1.5.0.1',
-<<<<<<< HEAD
     'azure-mgmt-resource==10.3.0',
     'azure-mgmt-core==1.2.0'
-=======
-    'azure-mgmt-resource==10.2.0',
-    'azure-mgmt-core==1.2.1'
->>>>>>> parent of eb4845f6b... commit merge
 ]
 
 TESTS_REQUIRE = [
