@@ -76,6 +76,10 @@ setup() {
         fi
     else
         CLI_REPO=$DIST_CODE
+        if [[ ! $(curl -sL https://packages.microsoft.com/repos/azure-cli/dists/) =~ $CLI_REPO ]]; then
+            echo "Unable to find an azure-cli package with DIST_CODE=$CLI_REPO in https://packages.microsoft.com/repos/azure-cli/dists/."
+            exit 1
+        fi
     fi
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ ${CLI_REPO} main" \
         > /etc/apt/sources.list.d/azure-cli.list
