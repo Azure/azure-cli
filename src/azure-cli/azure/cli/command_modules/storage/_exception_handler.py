@@ -12,6 +12,8 @@ def file_related_exception_handler(ex):
                                  recommendation='Please make sure you have enough permissions on the file/directory.')
     if isinstance(ex, IsADirectoryError):
         raise FileOperationError(ex, recommendation='File is excepted, not a directory.')
+    if isinstance(ex, NotADirectoryError):
+        raise FileOperationError(ex, recommendation='Directory is excepted, not a file.')
     import sys
     from six import reraise
     reraise(*sys.exc_info())
