@@ -223,7 +223,7 @@ class TimingProgressBar:
         self.total = total
         self.start_time = datetime.datetime.utcnow()
         self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
-                label='It may take {} seconds'.format(self.total), stream=sys.stderr,
+                label='This operation usually takes {} seconds'.format(self.total), stream=sys.stderr,
                 hide_cursor=False, timer=humanfriendly.Timer())
 
     def update_progress(self):
@@ -235,8 +235,8 @@ class TimingProgressBar:
 
 def _format_glyphs(bar_len):
     glyphs = []
-    for num in range(bar_len):
-        item = '[{}.{}]'.format(num * ' ', (bar_len - num - 1) * ' ')
+    for num in range(1, bar_len):
+        item = '[' + '=' * num + '>' + ' ' * (bar_len - num - 1) + ']'
         glyphs.append(item)
     return glyphs
 
