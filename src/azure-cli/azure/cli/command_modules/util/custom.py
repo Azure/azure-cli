@@ -63,10 +63,16 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         latest_version_msg = 'It will be updated to {}.'.format(latest_version) if yes \
             else 'Latest version available is {}.'.format(latest_version)
         logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
-        from knack.prompting import prompt_y_n
+        from knack.prompting import prompt_y_n, NoTTYException
         if not yes:
-            confirmation = prompt_y_n("Please check the release notes first: https://docs.microsoft.com/"
-                                      "cli/azure/release-notes-azure-cli\nDo you want to continue?", default='y')
+            logger.warning("Please check the release notes first: https://docs.microsoft.com/"
+                           "cli/azure/release-notes-azure-cli")
+            try:
+                confirmation = prompt_y_n("Do you want to continue?", default='y')
+            except NoTTYException:
+                from azure.cli.core.azclierror import UnclassifiedUserFault
+                raise UnclassifiedUserFault("No tty available.", "Please run command with --yes.")
+
             if not confirmation:
                 telemetry.set_success("Upgrade stopped by user")
                 return
@@ -146,3 +152,6 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 raise CLIError(msg)
 
     logger.warning("Upgrade finished.")
+    if not cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False):
+        logger.warning("You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. "
+                       "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update")
