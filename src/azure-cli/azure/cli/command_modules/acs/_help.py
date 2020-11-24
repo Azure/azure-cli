@@ -558,7 +558,8 @@ examples:
 
 helps['aks get-credentials'] = """
 type: command
-short-summary: Get access credentials for a managed Kubernetes cluster. Merge them into .kube/config file so kubectl can use them
+short-summary: Get access credentials for a managed Kubernetes cluster.
+long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
 parameters:
   - name: --admin -a
     type: bool
