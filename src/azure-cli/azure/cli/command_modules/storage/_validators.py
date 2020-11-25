@@ -1564,5 +1564,5 @@ def get_not_none_validator(attribute_name):
         options_list = cmd.arguments[attribute_name].type.settings.get('options_list')
         if not attribute:
             from azure.cli.core.azclierror import InvalidArgumentValueError
-            raise InvalidArgumentValueError('argument {} can not be None'.format('/'.join(options_list)))
+            raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none

@@ -206,9 +206,10 @@ def cf_blob_service(cli_ctx, kwargs):
     if connection_string:
         try:
             return t_blob_service.from_connection_string(conn_str=connection_string)
-        except ValueError:
+        except ValueError as err:
             from azure.cli.core.azclierror import InvalidArgumentValueError
-            raise InvalidArgumentValueError('Invalid connection string',
+            raise InvalidArgumentValueError('Invalid connection string: {}, err detail: {}'
+                                            .format(connection_string, str(err)),
                                             recommendation='Try `az storage account show-connection-string` '
                                                            'to get a valid connection string')
 
