@@ -236,7 +236,7 @@ class TimingProgressBar:
 def _format_glyphs(bar_len):
     glyphs = []
     for num in range(1, bar_len):
-        item = '[' + '=' * num + '>' + ' ' * (bar_len - num - 1) + ']'
+        item = '/' * num + ' ' * (bar_len - num - 1)
         glyphs.append(item)
     return glyphs
 
