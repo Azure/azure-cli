@@ -1150,114 +1150,114 @@ class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instanc
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
 
-class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+# class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
+    # @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
+    # def test_vm_create_linux_secrets(self, resource_group, resource_group_location):
 
-        self.kwargs.update({
-            'admin': 'ubuntu',
-            'loc': 'westus',
-            'image': 'UbuntuLTS',
-            'auth': 'ssh',
-            'ssh_key': TEST_SSH_KEY_PUB,
-            'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20)
-        })
+    #     self.kwargs.update({
+    #         'admin': 'ubuntu',
+    #         'loc': 'westus',
+    #         'image': 'UbuntuLTS',
+    #         'auth': 'ssh',
+    #         'ssh_key': TEST_SSH_KEY_PUB,
+    #         'vm': 'vm-name',
+    #         'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
+    #         'vault': self.create_random_name('vmlinuxkv', 20)
+    #     })
 
-        message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with self.assertRaisesRegexp(CLIError, message):
-            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
+    #     message = 'Secret is missing vaultCertificates array or it is empty at index 0'
+    #     with self.assertRaisesRegexp(CLIError, message):
+    #         self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
+    #     vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
-        time.sleep(60)
+    #     time.sleep(60)
 
-        self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
-        self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
-        self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
-        self.kwargs['secrets'] = json.dumps(vm_format)
+    #     self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+    #     self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
+    #     self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
+    #     vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
+    #     self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
+    #     self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
-        ])
+    #     self.cmd('vm show -g {rg} -n {vm}', checks=[
+    #         self.check('provisioningState', 'Succeeded'),
+    #         self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
+    #         self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
+    #     ])
 
-    @ResourceGroupPreparer()
-    def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
+    # @ResourceGroupPreparer()
+    # def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
 
-        self.kwargs.update({
-            'admin': 'windowsUser',
-            'loc': 'westus',
-            'image': 'Win2012R2Datacenter',
-            'vm': 'vm-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
-            'vault': self.create_random_name('vmkeyvault', 20)
-        })
+    #     self.kwargs.update({
+    #         'admin': 'windowsUser',
+    #         'loc': 'westus',
+    #         'image': 'Win2012R2Datacenter',
+    #         'vm': 'vm-name',
+    #         'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
+    #         'vault': self.create_random_name('vmkeyvault', 20)
+    #     })
 
-        message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
-                  'vaultCertificate index 0'
-        with self.assertRaisesRegexp(CLIError, message):
-            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'')
+    #     message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
+    #               'vaultCertificate index 0'
+    #     with self.assertRaisesRegexp(CLIError, message):
+    #         self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\' --nsg-rule NONE')
 
-        vault_out = self.cmd(
-            'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
+    #     vault_out = self.cmd(
+    #         'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
-        time.sleep(60)
+    #     time.sleep(60)
 
-        self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
-        self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
+    #     self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+    #     self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
-        self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        self.kwargs['secrets'] = self.cmd('vm secret format -s {secret_out} --certificate-store "My"').get_output_in_json()
+    #     self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
+    #     self.kwargs['secrets'] = self.cmd('vm secret format -s {secret_out} --certificate-store "My"').get_output_in_json()
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets "{secrets}"')
+    #     self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets "{secrets}" --nsg-rule NONE')
 
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', self.kwargs['secret_out']),
-            self.check('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
-        ])
+    #     self.cmd('vm show -g {rg} -n {vm}', checks=[
+    #         self.check('provisioningState', 'Succeeded'),
+    #         self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
+    #         self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', self.kwargs['secret_out']),
+    #         self.check('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
+    #     ])
 
 
-class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
+# class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
-    @AllowLargeResponse()
-    def test_vmss_create_linux_secrets(self, resource_group):
-        self.kwargs.update({
-            'loc': 'westus',
-            'vmss': 'vmss1-name',
-            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmsslinuxkv', 20),
-            'secret': 'mysecret',
-            'ssh_key': TEST_SSH_KEY_PUB
-        })
+#     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
+#     @AllowLargeResponse()
+#     def test_vmss_create_linux_secrets(self, resource_group):
+#         self.kwargs.update({
+#             'loc': 'westus',
+#             'vmss': 'vmss1-name',
+#             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
+#             'vault': self.create_random_name('vmsslinuxkv', 20),
+#             'secret': 'mysecret',
+#             'ssh_key': TEST_SSH_KEY_PUB
+#         })
 
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
+#         vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
-        time.sleep(60)
+#         time.sleep(60)
 
-        self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
-        self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
+#         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+#         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
-        self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
-        self.kwargs['secrets'] = json.dumps(vm_format)
+#         self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
+#         vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
+#         self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
+#         self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
 
-        self.cmd('vmss show -n {vmss} -g {rg}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('virtualMachineProfile.osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            self.check('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
-        ])
+#         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
+#             self.check('provisioningState', 'Succeeded'),
+#             self.check('virtualMachineProfile.osProfile.secrets[0].sourceVault.id', vault_out['id']),
+#             self.check('virtualMachineProfile.osProfile.secrets[0].vaultCertificates[0].certificateUrl', '{secret_out}')
+#         ])
 
 
 class VMSSCreateExistingOptions(ScenarioTest):
@@ -1569,18 +1569,18 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image debian --admin-username clitest1 --admin-password Test12345678!!')
         self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
-    def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
-        self.kwargs.update({
-            'vault': self.create_random_name('vault', 10),
-            'vm': 'vm1'
-        })
-        self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
-        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
-        self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789!')
-        self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
-        self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
-        self.cmd('vm encryption disable -g {rg} -n {vm}')
+    # @ResourceGroupPreparer(name_prefix='cli_test_vm_encryption', location='westus')
+    # def test_vm_disk_encryption_e2e(self, resource_group, resource_group_location):
+    #     self.kwargs.update({
+    #         'vault': self.create_random_name('vault', 10),
+    #         'vm': 'vm1'
+    #     })
+    #     self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
+    #     time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
+    #     self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789!')
+    #     self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
+    #     self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
+    #     self.cmd('vm encryption disable -g {rg} -n {vm}')
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')

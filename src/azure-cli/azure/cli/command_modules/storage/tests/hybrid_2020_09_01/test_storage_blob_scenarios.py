@@ -19,42 +19,42 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='source_account')
-    @StorageAccountPreparer(parameter_name='target_account')
-    def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
-        source_file = self.create_temp_file(16)
-        source_account_info = self.get_account_info(resource_group, source_account)
-        source_container = self.create_container(source_account_info)
-        self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
-                         source_container, source_file)
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer(parameter_name='source_account')
+    # @StorageAccountPreparer(parameter_name='target_account')
+    # def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
+    #     source_file = self.create_temp_file(16)
+    #     source_account_info = self.get_account_info(resource_group, source_account)
+    #     source_container = self.create_container(source_account_info)
+    #     self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
+    #                      source_container, source_file)
 
-        snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
-                                    source_container).get_output_in_json()['snapshot']
+    #     snapshot = self.storage_cmd('storage blob snapshot -c {} -n src', source_account_info,
+    #                                 source_container).get_output_in_json()['snapshot']
 
-        target_account_info = self.get_account_info(resource_group, target_account)
-        target_container = self.create_container(target_account_info)
-        self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
-                         'src --source-account-name {} --source-account-key {} --source-snapshot '
-                         '{} --destination-container {} --destination-blob backup',
-                         target_account_info, source_container, source_account,
-                         source_account_info[1], snapshot, target_container)
+    #     target_account_info = self.get_account_info(resource_group, target_account)
+    #     target_container = self.create_container(target_account_info)
+    #     self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
+    #                      'src --source-account-name {} --source-account-key {} --source-snapshot '
+    #                      '{} --destination-container {} --destination-blob backup',
+    #                      target_account_info, source_container, source_account,
+    #                      source_account_info[1], snapshot, target_container)
 
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)
         self.cmd('storage blob upload -c foo -n bar -f "' + source_file + '"', expect_failure=CLIError)
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_small_file(self, resource_group, storage_account):
-        for blob_type in ['block', 'page']:
-            self.verify_blob_upload_and_download(resource_group, storage_account, 1, blob_type, 0)
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer()
+    # def test_storage_blob_upload_small_file(self, resource_group, storage_account):
+    #     for blob_type in ['block', 'page']:
+    #         self.verify_blob_upload_and_download(resource_group, storage_account, 1, blob_type, 0)
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
-        for blob_type in ['block', 'page']:
-            self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer()
+    # def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
+    #     for blob_type in ['block', 'page']:
+    #         self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
                                         block_count=0, skip_download=False):
@@ -348,21 +348,21 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE, max_api='2018-11-09')
-    def test_storage_blob_suppress_400(self, resource_group, storage_account):
-        # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
-        # test 404
-        with self.assertRaises(SystemExit) as ex:
-            self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
-        self.assertEqual(ex.exception.code, 3)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer()
+    # @api_version_constraint(resource_type=ResourceType.DATA_STORAGE, max_api='2018-11-09')
+    # def test_storage_blob_suppress_400(self, resource_group, storage_account):
+    #     # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
+    #     # test 404
+    #     with self.assertRaises(SystemExit) as ex:
+    #         self.cmd('storage blob show --account-name {} -c foo -n bar.txt --auth-mode key'.format(storage_account))
+    #     self.assertEqual(ex.exception.code, 3)
 
-        # test 403
-        from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "Authentication failure"):
-            self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
+    #     # test 403
+    #     from azure.common import AzureException
+    #     with self.assertRaisesRegexp(AzureException, "Authentication failure"):
+    #         self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 
 if __name__ == '__main__':

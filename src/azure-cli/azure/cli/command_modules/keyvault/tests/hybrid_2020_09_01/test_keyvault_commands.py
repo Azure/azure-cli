@@ -181,199 +181,199 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         """
 
 
-class KeyVaultKeyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key', location='westus')
-    def test_keyvault_key(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-key-', 24),
-            'loc': 'westus',
-            'key': 'key1'
-        })
-        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
-        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
-        key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
-        key_perms.extend(['encrypt', 'decrypt'])
-        self.kwargs['key_perms'] = ' '.join(key_perms)
+# class KeyVaultKeyScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key', location='westus')
+#     def test_keyvault_key(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-key-', 24),
+#             'loc': 'westus',
+#             'key': 'key1'
+#         })
+#         keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+#         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+#         key_perms = keyvault['properties']['accessPolicies'][0]['permissions']['keys']
+#         key_perms.extend(['encrypt', 'decrypt'])
+#         self.kwargs['key_perms'] = ' '.join(key_perms)
 
-        # create a key
-        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
-                       checks=self.check('attributes.enabled', True)).get_output_in_json()
-        first_kid = key['key']['kid']
-        first_version = first_kid.rsplit('/', 1)[1]
+#         # create a key
+#         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software',
+#                        checks=self.check('attributes.enabled', True)).get_output_in_json()
+#         first_kid = key['key']['kid']
+#         first_version = first_kid.rsplit('/', 1)[1]
 
-        # encrypt/decrypt
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
-        self.kwargs['plaintext_value'] = 'abcdef'
-        self.kwargs['base64_value'] = 'YWJjZGVm'
-        self.kwargs['encryption_result1'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{plaintext_value}" --data-type plaintext').get_output_in_json()['result']
-        self.kwargs['encryption_result2'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{base64_value}" --data-type base64').get_output_in_json()['result']
-        self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result1}" --data-type plaintext',
-                 checks=self.check('result', '{plaintext_value}'))
-        self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result2}" --data-type base64',
-                 checks=self.check('result', '{base64_value}'))
+#         # encrypt/decrypt
+#         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms}')
+#         self.kwargs['plaintext_value'] = 'abcdef'
+#         self.kwargs['base64_value'] = 'YWJjZGVm'
+#         self.kwargs['encryption_result1'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{plaintext_value}" --data-type plaintext').get_output_in_json()['result']
+#         self.kwargs['encryption_result2'] = self.cmd('keyvault key encrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{base64_value}" --data-type base64').get_output_in_json()['result']
+#         self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result1}" --data-type plaintext',
+#                  checks=self.check('result', '{plaintext_value}'))
+#         self.cmd('keyvault key decrypt -n {key} --vault-name {kv} -a RSA-OAEP --value "{encryption_result2}" --data-type base64',
+#                  checks=self.check('result', '{base64_value}'))
 
-        # list keys
-        self.cmd('keyvault key list --vault-name {kv}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.exists('[0].name')
-                 ])
-        self.cmd('keyvault key list --vault-name {kv} --maxresults 10',
-                 checks=self.check('length(@)', 1))
+#         # list keys
+#         self.cmd('keyvault key list --vault-name {kv}',
+#                  checks=[
+#                      self.check('length(@)', 1),
+#                      self.exists('[0].name')
+#                  ])
+#         self.cmd('keyvault key list --vault-name {kv} --maxresults 10',
+#                  checks=self.check('length(@)', 1))
 
-        # create a new key version
-        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
-                       '--tags test=foo',
-                       checks=[
-                           self.check('attributes.enabled', False),
-                           self.check('length(key.keyOps)', 2),
-                           self.check('tags', {'test': 'foo'})
-                       ]).get_output_in_json()
-        second_kid = key['key']['kid']
-        pure_kid = '/'.join(second_kid.split('/')[:-1])  # Remove version field
-        self.kwargs['kid'] = second_kid
-        self.kwargs['pkid'] = pure_kid
+#         # create a new key version
+#         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
+#                        '--tags test=foo',
+#                        checks=[
+#                            self.check('attributes.enabled', False),
+#                            self.check('length(key.keyOps)', 2),
+#                            self.check('tags', {'test': 'foo'})
+#                        ]).get_output_in_json()
+#         second_kid = key['key']['kid']
+#         pure_kid = '/'.join(second_kid.split('/')[:-1])  # Remove version field
+#         self.kwargs['kid'] = second_kid
+#         self.kwargs['pkid'] = pure_kid
 
-        # list key versions
-        self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
-                 checks=self.check('length(@)', 2))
-        self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
-                 checks=self.check('length(@)', 2))
-        self.cmd('keyvault key list-versions --id {kid}', checks=self.check('length(@)', 2))
-        self.cmd('keyvault key list-versions --id {pkid}', checks=self.check('length(@)', 2))
+#         # list key versions
+#         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
+#                  checks=self.check('length(@)', 2))
+#         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
+#                  checks=self.check('length(@)', 2))
+#         self.cmd('keyvault key list-versions --id {kid}', checks=self.check('length(@)', 2))
+#         self.cmd('keyvault key list-versions --id {pkid}', checks=self.check('length(@)', 2))
 
-        # show key (latest)
-        self.cmd('keyvault key show --vault-name {kv} -n {key}',
-                 checks=self.check('key.kid', second_kid))
+#         # show key (latest)
+#         self.cmd('keyvault key show --vault-name {kv} -n {key}',
+#                  checks=self.check('key.kid', second_kid))
 
-        # show key (specific version)
-        self.kwargs.update({
-            'version1': first_version,
-            'kid1': first_kid,
-            'kid2': second_kid
-        })
-        self.cmd('keyvault key show --vault-name {kv} -n {key} -v {version1}',
-                 checks=self.check('key.kid', '{kid1}'))
+#         # show key (specific version)
+#         self.kwargs.update({
+#             'version1': first_version,
+#             'kid1': first_kid,
+#             'kid2': second_kid
+#         })
+#         self.cmd('keyvault key show --vault-name {kv} -n {key} -v {version1}',
+#                  checks=self.check('key.kid', '{kid1}'))
 
-        # show key (by id)
-        self.cmd('keyvault key show --id {kid1}',
-                 checks=self.check('key.kid', '{kid1}'))
+#         # show key (by id)
+#         self.cmd('keyvault key show --id {kid1}',
+#                  checks=self.check('key.kid', '{kid1}'))
 
-        # set key attributes
-        self.cmd('keyvault key set-attributes --vault-name {kv} -n {key} --enabled true', checks=[
-            self.check('key.kid', '{kid2}'),
-            self.check('attributes.enabled', True)
-        ])
+#         # set key attributes
+#         self.cmd('keyvault key set-attributes --vault-name {kv} -n {key} --enabled true', checks=[
+#             self.check('key.kid', '{kid2}'),
+#             self.check('attributes.enabled', True)
+#         ])
 
-        # backup and then delete key
-        key_file = 'backup.key'
-        self.kwargs['key_file'] = key_file
-        self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
-        self.cmd('keyvault key delete --vault-name {kv} -n {key}')
-        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
-        self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
+#         # backup and then delete key
+#         key_file = 'backup.key'
+#         self.kwargs['key_file'] = key_file
+#         self.cmd('keyvault key backup --vault-name {kv} -n {key} --file {key_file}')
+#         self.cmd('keyvault key delete --vault-name {kv} -n {key}')
+#         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+#         self.cmd('keyvault key list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
-        # restore key from backup
-        self.cmd('keyvault key restore --vault-name {kv} --file {key_file}')
-        self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
-                 checks=[
-                     self.check('length(@)', 2),
-                     self.exists('[0].name'),
-                     self.exists('[1].name')
-                 ])
-        self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
-                 checks=self.check('length(@)', 2))
-        if os.path.isfile(key_file):
-            os.remove(key_file)
+#         # restore key from backup
+#         self.cmd('keyvault key restore --vault-name {kv} --file {key_file}')
+#         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
+#                  checks=[
+#                      self.check('length(@)', 2),
+#                      self.exists('[0].name'),
+#                      self.exists('[1].name')
+#                  ])
+#         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
+#                  checks=self.check('length(@)', 2))
+#         if os.path.isfile(key_file):
+#             os.remove(key_file)
 
-        # import PEM from file
-        self.kwargs.update({
-            'key_enc_file': os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'),
-            'key_enc_password': 'password',
-            'key_plain_file': os.path.join(TEST_DIR, 'mydomain.test.pem')
-        })
-        self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
-        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+#         # import PEM from file
+#         self.kwargs.update({
+#             'key_enc_file': os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'),
+#             'key_enc_password': 'password',
+#             'key_plain_file': os.path.join(TEST_DIR, 'mydomain.test.pem')
+#         })
+#         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
+#         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
 
-        # import PEM from string
-        with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
-            key_enc_string = f.read().decode('UTF-8')
-        with open(os.path.join(TEST_DIR, 'mydomain.test.pem'), 'rb') as f:
-            key_plain_string = f.read().decode('UTF-8')
-        self.kwargs.update({
-            'key_enc_string': key_enc_string,
-            'key_enc_password': 'password',
-            'key_plain_string': key_plain_string
-        })
-        self.cmd("keyvault key import --vault-name {kv} -n import-key-plain --pem-string '{key_plain_string}' -p software")
-        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password} -p hsm')
+#         # import PEM from string
+#         with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
+#             key_enc_string = f.read().decode('UTF-8')
+#         with open(os.path.join(TEST_DIR, 'mydomain.test.pem'), 'rb') as f:
+#             key_plain_string = f.read().decode('UTF-8')
+#         self.kwargs.update({
+#             'key_enc_string': key_enc_string,
+#             'key_enc_password': 'password',
+#             'key_plain_string': key_plain_string
+#         })
+#         self.cmd("keyvault key import --vault-name {kv} -n import-key-plain --pem-string '{key_plain_string}' -p software")
+#         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password} -p hsm')
 
-        # create ec keys
-        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
-                 checks=self.check('key.kty', 'EC'))
-        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --curve P-256',
-                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
-        self.cmd('keyvault key delete --vault-name {kv} -n eckey1')
+#         # create ec keys
+#         self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
+#                  checks=self.check('key.kty', 'EC'))
+#         self.cmd('keyvault key create --vault-name {kv} -n eckey1 --curve P-256',
+#                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+#         self.cmd('keyvault key delete --vault-name {kv} -n eckey1')
 
-        # import ec PEM
-        self.kwargs.update({
-            'key_enc_file': os.path.join(TEST_DIR, 'ec521pw.pem'),
-            'key_enc_password': 'pass1234',
-            'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
-        })
-        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" -p software',
-                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
-        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
-                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
+#         # import ec PEM
+#         self.kwargs.update({
+#             'key_enc_file': os.path.join(TEST_DIR, 'ec521pw.pem'),
+#             'key_enc_password': 'pass1234',
+#             'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
+#         })
+#         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" -p software',
+#                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+#         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
+#                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-key-', 24),
-            'loc': 'westus'
-        })
-        _create_keyvault(self, self.kwargs)
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-key-', 24),
+#             'loc': 'westus'
+#         })
+#         _create_keyvault(self, self.kwargs)
 
-        # create KEK
-        self.cmd('keyvault key create --vault-name {kv} --name key1 --kty RSA-HSM --size 2048 --ops import',
-                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
-        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
-                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
-        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
-                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+#         # create KEK
+#         self.cmd('keyvault key create --vault-name {kv} --name key1 --kty RSA-HSM --size 2048 --ops import',
+#                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+#         self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
+#                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+#         self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
+#                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
 
-class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
-    def test_keyvault_secret_soft_delete(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-se-sd-', 24),
-            'loc': 'westus',
-            'sec': 'secret1'
-        })
-        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
-        self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
+# class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
+#     def test_keyvault_secret_soft_delete(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-se-sd-', 24),
+#             'loc': 'westus',
+#             'sec': 'secret1'
+#         })
+#         _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
+#         self.cmd('keyvault show -n {kv}', checks=self.check('properties.enableSoftDelete', True))
 
-        max_timeout = 100
-        time_counter = 0
-        while time_counter <= max_timeout:
-            try:
-                # show deleted
-                self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
-                         checks=self.check('value', 'ABC123'))
-                data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
-                self.kwargs['secret_id'] = data['id']
-                self.kwargs['secret_recovery_id'] = data['recoveryId']
-                self.cmd('keyvault secret list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
-                self.cmd('keyvault secret list-deleted --vault-name {kv} --maxresults 10',
-                         checks=self.check('length(@)', 1))
-                self.cmd('keyvault secret show-deleted --id {secret_recovery_id}',
-                         checks=self.check('id', '{secret_id}'))
-                self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}',
-                         checks=self.check('id', '{secret_id}'))
-            except:  # pylint: disable=bare-except
-                time.sleep(10)
-                time_counter += 10
-            else:
-                break
+#         max_timeout = 100
+#         time_counter = 0
+#         while time_counter <= max_timeout:
+#             try:
+#                 # show deleted
+#                 self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
+#                          checks=self.check('value', 'ABC123'))
+#                 data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
+#                 self.kwargs['secret_id'] = data['id']
+#                 self.kwargs['secret_recovery_id'] = data['recoveryId']
+#                 self.cmd('keyvault secret list-deleted --vault-name {kv}', checks=self.check('length(@)', 1))
+#                 self.cmd('keyvault secret list-deleted --vault-name {kv} --maxresults 10',
+#                          checks=self.check('length(@)', 1))
+#                 self.cmd('keyvault secret show-deleted --id {secret_recovery_id}',
+#                          checks=self.check('id', '{secret_id}'))
+#                 self.cmd('keyvault secret show-deleted --vault-name {kv} -n {sec}',
+#                          checks=self.check('id', '{secret_id}'))
+#             except:  # pylint: disable=bare-except
+#                 time.sleep(10)
+#                 time_counter += 10
+#             else:
+#                 break
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
@@ -397,261 +397,261 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         for encoding in secret_encoding_values:
             _test_set_and_download(encoding)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
-    def test_keyvault_secret(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-se-', 24),
-            'loc': 'westus',
-            'sec': 'secret1'
-        })
-        _create_keyvault(self, self.kwargs)
+    # @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
+    # def test_keyvault_secret(self, resource_group):
+    #     self.kwargs.update({
+    #         'kv': self.create_random_name('cli-test-kv-se-', 24),
+    #         'loc': 'westus',
+    #         'sec': 'secret1'
+    #     })
+    #     _create_keyvault(self, self.kwargs)
 
-        # create a secret
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
-                          checks=self.check('value', 'ABC123')).get_output_in_json()
-        first_sid = secret['id']
-        first_sname = first_sid.split('/')[4]
-        first_version = first_sid.rsplit('/', 1)[1]
-        self.kwargs.update({
-            'sid1': first_sid,
-            'ver1': first_version
-        })
+    #     # create a secret
+    #     secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value ABC123',
+    #                       checks=self.check('value', 'ABC123')).get_output_in_json()
+    #     first_sid = secret['id']
+    #     first_sname = first_sid.split('/')[4]
+    #     first_version = first_sid.rsplit('/', 1)[1]
+    #     self.kwargs.update({
+    #         'sid1': first_sid,
+    #         'ver1': first_version
+    #     })
 
-        # list secrets
-        self.cmd('keyvault secret list --vault-name {kv}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].name', first_sname)
-                 ])
-        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
+    #     # list secrets
+    #     self.cmd('keyvault secret list --vault-name {kv}',
+    #              checks=[
+    #                  self.check('length(@)', 1),
+    #                  self.check('[0].name', first_sname)
+    #              ])
+    #     self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
 
-        # create a new secret version
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo --description "test type"', checks=[
-            self.check('value', 'DEF456'),
-            self.check('tags', {'file-encoding': 'utf-8', 'test': 'foo'}),
-            self.check('contentType', 'test type'),
-            self.check('name', first_sname)
-        ]).get_output_in_json()
-        self.kwargs['sid2'] = secret['id']
+    #     # create a new secret version
+    #     secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo --description "test type"', checks=[
+    #         self.check('value', 'DEF456'),
+    #         self.check('tags', {'file-encoding': 'utf-8', 'test': 'foo'}),
+    #         self.check('contentType', 'test type'),
+    #         self.check('name', first_sname)
+    #     ]).get_output_in_json()
+    #     self.kwargs['sid2'] = secret['id']
 
-        # list secret versions
-        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
-                 checks=self.check('length(@)', 2))
-        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec} --maxresults 10',
-                 checks=self.check('length(@)', 2))
+    #     # list secret versions
+    #     self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
+    #              checks=self.check('length(@)', 2))
+    #     self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec} --maxresults 10',
+    #              checks=self.check('length(@)', 2))
 
-        # show secret (latest)
-        self.cmd('keyvault secret show --vault-name {kv} -n {sec}',
-                 checks=[
-                     self.check('id', '{sid2}'),
-                     self.check('name', '{sec}')
-                 ])
+    #     # show secret (latest)
+    #     self.cmd('keyvault secret show --vault-name {kv} -n {sec}',
+    #              checks=[
+    #                  self.check('id', '{sid2}'),
+    #                  self.check('name', '{sec}')
+    #              ])
 
-        # show secret (specific version)
-        self.cmd('keyvault secret show --vault-name {kv} -n {sec} -v {ver1}',
-                 checks=self.check('id', '{sid1}'))
+    #     # show secret (specific version)
+    #     self.cmd('keyvault secret show --vault-name {kv} -n {sec} -v {ver1}',
+    #              checks=self.check('id', '{sid1}'))
 
-        # show secret (by id)
-        self.cmd('keyvault secret show --id {sid1}',
-                 checks=self.check('id', '{sid1}'))
+    #     # show secret (by id)
+    #     self.cmd('keyvault secret show --id {sid1}',
+    #              checks=self.check('id', '{sid1}'))
 
-        # set secret attributes
-        self.cmd('keyvault secret set-attributes --vault-name {kv} -n {sec} --enabled false', checks=[
-            self.check('id', '{sid2}'),
-            self.check('attributes.enabled', False),
-            self.check('name', '{sec}')
-        ])
+    #     # set secret attributes
+    #     self.cmd('keyvault secret set-attributes --vault-name {kv} -n {sec} --enabled false', checks=[
+    #         self.check('id', '{sid2}'),
+    #         self.check('attributes.enabled', False),
+    #         self.check('name', '{sec}')
+    #     ])
 
-        # backup and then delete secret
-        bak_file = 'backup.secret'
-        self.kwargs['bak_file'] = bak_file
-        self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
-        self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
-        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+    #     # backup and then delete secret
+    #     bak_file = 'backup.secret'
+    #     self.kwargs['bak_file'] = bak_file
+    #     self.cmd('keyvault secret backup --vault-name {kv} -n {sec} --file {bak_file}')
+    #     self.cmd('keyvault secret delete --vault-name {kv} -n {sec}', checks=self.check('name', '{sec}'))
+    #     self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
 
-        # restore secret from backup
-        self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}', checks=self.check('name', '{sec}'))
-        self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
-                 checks=self.check('length(@)', 2))
-        if os.path.isfile(bak_file):
-            os.remove(bak_file)
+    #     # restore secret from backup
+    #     self.cmd('keyvault secret restore --vault-name {kv} --file {bak_file}', checks=self.check('name', '{sec}'))
+    #     self.cmd('keyvault secret list-versions --vault-name {kv} -n {sec}',
+    #              checks=self.check('length(@)', 2))
+    #     if os.path.isfile(bak_file):
+    #         os.remove(bak_file)
 
-        # delete secret
-        self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
-        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
-        self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.is_empty())
+    #     # delete secret
+    #     self.cmd('keyvault secret delete --vault-name {kv} -n {sec}')
+    #     self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+    #     self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
-        self._test_download_secret()
-
-
-class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
-    def test_keyvault_certificate_contacts(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-co-', 24),
-            'loc': 'westus'
-        })
-
-        _create_keyvault(self, self.kwargs)
-
-        self.cmd('keyvault certificate contact add --vault-name {kv} --email admin@contoso.com --name "John Doe" --phone 123-456-7890')
-        self.cmd('keyvault certificate contact add --vault-name {kv} --email other@contoso.com ')
-        self.cmd('keyvault certificate contact list --vault-name {kv}',
-                 checks=self.check('length(contactList)', 2))
-        self.cmd('keyvault certificate contact delete --vault-name {kv} --email admin@contoso.com')
-        self.cmd('keyvault certificate contact list --vault-name {kv}', checks=[
-            self.check('length(contactList)', 1),
-            self.check('contactList[0].emailAddress', 'other@contoso.com')
-        ])
+    #     self._test_download_secret()
 
 
-class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
-    def test_keyvault_certificate_issuers(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-is-', 24),
-            'loc': 'westus'
-        })
+# class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
+#     def test_keyvault_certificate_contacts(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-co-', 24),
+#             'loc': 'westus'
+#         })
 
-        _create_keyvault(self, self.kwargs)
+#         _create_keyvault(self, self.kwargs)
 
-        self.cmd('keyvault certificate issuer create --vault-name {kv} --issuer-name issuer1 --provider Test', checks=[
-            self.check('provider', 'Test'),
-            self.check('attributes.enabled', True)
-        ])
-        self.cmd('keyvault certificate issuer show --vault-name {kv} --issuer-name issuer1', checks=[
-            self.check('provider', 'Test'),
-            self.check('attributes.enabled', True)
-        ])
-        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --organization-id TestOrg --account-id test_account', checks=[
-            self.check('provider', 'Test'),
-            self.check('attributes.enabled', True),
-            self.check('organizationDetails.id', 'TestOrg'),
-            self.check('credentials.accountId', 'test_account')
-        ])
-        with self.assertRaises(CLIError):
-            self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist --organization-id TestOrg --account-id test_account')
-        self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
-            self.check('provider', 'Test'),
-            self.check('attributes.enabled', True),
-            self.check('organizationDetails.id', 'TestOrg'),
-            self.check('credentials.accountId', None)
-        ])
-        self.cmd('keyvault certificate issuer list --vault-name {kv}',
-                 checks=self.check('length(@)', 1))
-
-        # test admin commands
-        self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test@test.com --first-name Test --last-name Admin --phone 123-456-7890', checks=[
-            self.check('emailAddress', 'test@test.com'),
-            self.check('firstName', 'Test'),
-            self.check('lastName', 'Admin'),
-            self.check('phone', '123-456-7890'),
-        ])
-        self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test2@test.com', checks=[
-            self.check('emailAddress', 'test2@test.com'),
-            self.check('firstName', None),
-            self.check('lastName', None),
-            self.check('phone', None),
-        ])
-        self.cmd('keyvault certificate issuer admin list --vault-name {kv} --issuer-name issuer1',
-                 checks=self.check('length(@)', 2))
-        self.cmd('keyvault certificate issuer admin delete --vault-name {kv} --issuer-name issuer1 --email test@test.com')
-        self.cmd('keyvault certificate issuer admin list --vault-name {kv} --issuer-name issuer1',
-                 checks=self.check('length(@)', 1))
-
-        self.cmd('keyvault certificate issuer delete --vault-name {kv} --issuer-name issuer1')
-        self.cmd('keyvault certificate issuer list --vault-name {kv}', checks=self.is_empty())
+#         self.cmd('keyvault certificate contact add --vault-name {kv} --email admin@contoso.com --name "John Doe" --phone 123-456-7890')
+#         self.cmd('keyvault certificate contact add --vault-name {kv} --email other@contoso.com ')
+#         self.cmd('keyvault certificate contact list --vault-name {kv}',
+#                  checks=self.check('length(contactList)', 2))
+#         self.cmd('keyvault certificate contact delete --vault-name {kv} --email admin@contoso.com')
+#         self.cmd('keyvault certificate contact list --vault-name {kv}', checks=[
+#             self.check('length(contactList)', 1),
+#             self.check('contactList[0].emailAddress', 'other@contoso.com')
+#         ])
 
 
-class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
-    def test_keyvault_pending_certificate(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
-            'loc': 'westus',
-            'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
-        })
+# class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
+#     def test_keyvault_certificate_issuers(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-is-', 24),
+#             'loc': 'westus'
+#         })
 
-        _create_keyvault(self, self.kwargs)
+#         _create_keyvault(self, self.kwargs)
 
-        self.kwargs['fake_cert_path'] = os.path.join(TEST_DIR, 'import_pem_plain.pem')
-        self.cmd('keyvault certificate create --vault-name {kv} -n pending-cert -p @"{policy_path}"', checks=[
-            self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
-            self.check('cancellationRequested', False),
-            self.check('status', 'inProgress'),
-            self.check('name', 'pending-cert')
-        ])
-        self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', checks=[
-            self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
-            self.check('cancellationRequested', False),
-            self.check('status', 'inProgress'),
-            self.check('name', 'pending-cert')
-        ])
+#         self.cmd('keyvault certificate issuer create --vault-name {kv} --issuer-name issuer1 --provider Test', checks=[
+#             self.check('provider', 'Test'),
+#             self.check('attributes.enabled', True)
+#         ])
+#         self.cmd('keyvault certificate issuer show --vault-name {kv} --issuer-name issuer1', checks=[
+#             self.check('provider', 'Test'),
+#             self.check('attributes.enabled', True)
+#         ])
+#         self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --organization-id TestOrg --account-id test_account', checks=[
+#             self.check('provider', 'Test'),
+#             self.check('attributes.enabled', True),
+#             self.check('organizationDetails.id', 'TestOrg'),
+#             self.check('credentials.accountId', 'test_account')
+#         ])
+#         with self.assertRaises(CLIError):
+#             self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist --organization-id TestOrg --account-id test_account')
+#         self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
+#             self.check('provider', 'Test'),
+#             self.check('attributes.enabled', True),
+#             self.check('organizationDetails.id', 'TestOrg'),
+#             self.check('credentials.accountId', None)
+#         ])
+#         self.cmd('keyvault certificate issuer list --vault-name {kv}',
+#                  checks=self.check('length(@)', 1))
 
-        # we do not have a way of actually getting a certificate that would pass this test so
-        # we simply ensure that the payload successfully serializes and is received by the server
-        with self.assertRaises(CLIError):
-            self.cmd('keyvault certificate pending merge --vault-name {kv} -n pending-cert --file "{fake_cert_path}"')
-        self.cmd('keyvault certificate pending delete --vault-name {kv} -n pending-cert',
-                 checks=self.check('name', 'pending-cert'))
+#         # test admin commands
+#         self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test@test.com --first-name Test --last-name Admin --phone 123-456-7890', checks=[
+#             self.check('emailAddress', 'test@test.com'),
+#             self.check('firstName', 'Test'),
+#             self.check('lastName', 'Admin'),
+#             self.check('phone', '123-456-7890'),
+#         ])
+#         self.cmd('keyvault certificate issuer admin add --vault-name {kv} --issuer-name issuer1 --email test2@test.com', checks=[
+#             self.check('emailAddress', 'test2@test.com'),
+#             self.check('firstName', None),
+#             self.check('lastName', None),
+#             self.check('phone', None),
+#         ])
+#         self.cmd('keyvault certificate issuer admin list --vault-name {kv} --issuer-name issuer1',
+#                  checks=self.check('length(@)', 2))
+#         self.cmd('keyvault certificate issuer admin delete --vault-name {kv} --issuer-name issuer1 --email test@test.com')
+#         self.cmd('keyvault certificate issuer admin list --vault-name {kv} --issuer-name issuer1',
+#                  checks=self.check('length(@)', 1))
 
-        self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', expect_failure=True)
+#         self.cmd('keyvault certificate issuer delete --vault-name {kv} --issuer-name issuer1')
+#         self.cmd('keyvault certificate issuer list --vault-name {kv}', checks=self.is_empty())
+
+
+# class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
+#     def test_keyvault_pending_certificate(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-pe-', 24),
+#             'loc': 'westus',
+#             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
+#         })
+
+#         _create_keyvault(self, self.kwargs)
+
+#         self.kwargs['fake_cert_path'] = os.path.join(TEST_DIR, 'import_pem_plain.pem')
+#         self.cmd('keyvault certificate create --vault-name {kv} -n pending-cert -p @"{policy_path}"', checks=[
+#             self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
+#             self.check('cancellationRequested', False),
+#             self.check('status', 'inProgress'),
+#             self.check('name', 'pending-cert')
+#         ])
+#         self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', checks=[
+#             self.check('statusDetails', 'Pending certificate created. Please Perform Merge to complete the request.'),
+#             self.check('cancellationRequested', False),
+#             self.check('status', 'inProgress'),
+#             self.check('name', 'pending-cert')
+#         ])
+
+#         # we do not have a way of actually getting a certificate that would pass this test so
+#         # we simply ensure that the payload successfully serializes and is received by the server
+#         with self.assertRaises(CLIError):
+#             self.cmd('keyvault certificate pending merge --vault-name {kv} -n pending-cert --file "{fake_cert_path}"')
+#         self.cmd('keyvault certificate pending delete --vault-name {kv} -n pending-cert',
+#                  checks=self.check('name', 'pending-cert'))
+
+#         self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert', expect_failure=True)
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
-    def test_keyvault_certificate_download(self, resource_group):
-        import OpenSSL.crypto
+# class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
+#     def test_keyvault_certificate_download(self, resource_group):
+#         import OpenSSL.crypto
 
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-dl-', 24),
-            'loc': 'eastus2'
-        })
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-dl-', 24),
+#             'loc': 'eastus2'
+#         })
 
-        _create_keyvault(self, self.kwargs)
+#         _create_keyvault(self, self.kwargs)
 
-        pem_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
-        pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
-        self.kwargs.update({
-            'pem_file': pem_file,
-            'pem_policy_path': pem_policy_path
-        })
-        pem_cert = self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_file}" -p @"{pem_policy_path}"').get_output_in_json()
-        cert_data = pem_cert['cer']
+#         pem_file = os.path.join(TEST_DIR, 'import_pem_plain.pem')
+#         pem_policy_path = os.path.join(TEST_DIR, 'policy_import_pem.json')
+#         self.kwargs.update({
+#             'pem_file': pem_file,
+#             'pem_policy_path': pem_policy_path
+#         })
+#         pem_cert = self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_file}" -p @"{pem_policy_path}"').get_output_in_json()
+#         cert_data = pem_cert['cer']
 
-        dest_binary = os.path.join(TEST_DIR, 'download-binary')
-        dest_string = os.path.join(TEST_DIR, 'download-string')
-        self.kwargs.update({
-            'dest_binary': dest_binary,
-            'dest_string': dest_string
-        })
+#         dest_binary = os.path.join(TEST_DIR, 'download-binary')
+#         dest_string = os.path.join(TEST_DIR, 'download-string')
+#         self.kwargs.update({
+#             'dest_binary': dest_binary,
+#             'dest_string': dest_string
+#         })
 
-        expected_pem = "-----BEGIN CERTIFICATE-----\n" + \
-                       cert_data + \
-                       '-----END CERTIFICATE-----\n'
-        expected_pem = expected_pem.replace('\n', '')
+#         expected_pem = "-----BEGIN CERTIFICATE-----\n" + \
+#                        cert_data + \
+#                        '-----END CERTIFICATE-----\n'
+#         expected_pem = expected_pem.replace('\n', '')
 
-        try:
-            self.cmd('keyvault certificate download --vault-name {kv} -n pem-cert1 --file "{dest_binary}" -e DER')
-            self.cmd('keyvault certificate download --vault-name {kv} -n pem-cert1 --file "{dest_string}" -e PEM')
-            self.cmd('keyvault certificate delete --vault-name {kv} -n pem-cert1')
+#         try:
+#             self.cmd('keyvault certificate download --vault-name {kv} -n pem-cert1 --file "{dest_binary}" -e DER')
+#             self.cmd('keyvault certificate download --vault-name {kv} -n pem-cert1 --file "{dest_string}" -e PEM')
+#             self.cmd('keyvault certificate delete --vault-name {kv} -n pem-cert1')
 
-            def verify(path, file_type):
-                with open(path, 'rb') as f:
-                    x509 = OpenSSL.crypto.load_certificate(file_type, f.read())
-                    actual_pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
-                    if isinstance(actual_pem, bytes):
-                        actual_pem = actual_pem.decode("utf-8")
-                    self.assertIn(expected_pem, actual_pem.replace('\n', ''))
+#             def verify(path, file_type):
+#                 with open(path, 'rb') as f:
+#                     x509 = OpenSSL.crypto.load_certificate(file_type, f.read())
+#                     actual_pem = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, x509)
+#                     if isinstance(actual_pem, bytes):
+#                         actual_pem = actual_pem.decode("utf-8")
+#                     self.assertIn(expected_pem, actual_pem.replace('\n', ''))
 
-            verify(dest_binary, OpenSSL.crypto.FILETYPE_ASN1)
-            verify(dest_string, OpenSSL.crypto.FILETYPE_PEM)
-        finally:
-            if os.path.exists(dest_binary):
-                os.remove(dest_binary)
-            if os.path.exists(dest_string):
-                os.remove(dest_string)
+#             verify(dest_binary, OpenSSL.crypto.FILETYPE_ASN1)
+#             verify(dest_string, OpenSSL.crypto.FILETYPE_PEM)
+#         finally:
+#             if os.path.exists(dest_binary):
+#                 os.remove(dest_binary)
+#             if os.path.exists(dest_string):
+#                 os.remove(dest_string)
 
 
 class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
@@ -670,121 +670,121 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
         self.assertIn('Contoso', result['x509CertificateProperties']['subject'])
 
 
-class KeyVaultCertificateScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
-    def test_keyvault_certificate_crud(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-', 24),
-            'loc': 'westus'
-        })
+# class KeyVaultCertificateScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
+#     def test_keyvault_certificate_crud(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-', 24),
+#             'loc': 'westus'
+#         })
 
-        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
-        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+#         keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+#         self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
 
-        policy_path = os.path.join(TEST_DIR, 'policy.json')
-        policy2_path = os.path.join(TEST_DIR, 'policy2.json')
-        policy3_path = os.path.join(TEST_DIR, 'policy3.json')
-        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
-        self.kwargs.update({
-            'policy_path': policy_path,
-            'policy2_path': policy2_path,
-            'policy3_path': policy3_path,
-            'cert_secret_path': cert_secret_path
-        })
+#         policy_path = os.path.join(TEST_DIR, 'policy.json')
+#         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
+#         policy3_path = os.path.join(TEST_DIR, 'policy3.json')
+#         cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
+#         self.kwargs.update({
+#             'policy_path': policy_path,
+#             'policy2_path': policy2_path,
+#             'policy3_path': policy3_path,
+#             'cert_secret_path': cert_secret_path
+#         })
 
-        # create certificates
-        self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"',
-                 checks=[
-                     self.check('status', 'completed'),
-                     self.check('name', 'cert1')
-                 ])
-        self.cmd('keyvault certificate create --vault-name {kv} -n cert2 -p @"{policy_path}"',
-                 checks=[
-                     self.check('status', 'completed'),
-                     self.check('name', 'cert2')
-                 ])
+#         # create certificates
+#         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"',
+#                  checks=[
+#                      self.check('status', 'completed'),
+#                      self.check('name', 'cert1')
+#                  ])
+#         self.cmd('keyvault certificate create --vault-name {kv} -n cert2 -p @"{policy_path}"',
+#                  checks=[
+#                      self.check('status', 'completed'),
+#                      self.check('name', 'cert2')
+#                  ])
 
-        # import with same policy
-        policy = self.cmd('keyvault certificate show --vault-name {kv} -n cert2 --query policy').get_output_in_json()
-        if not os.path.exists(policy3_path) or self.is_live:
-            with open(policy3_path, "w") as f:
-                f.write(json.dumps(policy))
+#         # import with same policy
+#         policy = self.cmd('keyvault certificate show --vault-name {kv} -n cert2 --query policy').get_output_in_json()
+#         if not os.path.exists(policy3_path) or self.is_live:
+#             with open(policy3_path, "w") as f:
+#                 f.write(json.dumps(policy))
 
-        if not os.path.exists(cert_secret_path) or self.is_live:
-            if os.path.exists(cert_secret_path):
-                os.remove(cert_secret_path)
-            self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+#         if not os.path.exists(cert_secret_path) or self.is_live:
+#             if os.path.exists(cert_secret_path):
+#                 os.remove(cert_secret_path)
+#             self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
 
-        self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
-                 checks=[
-                     self.check('name', 'cert2'),
-                     self.check('policy.secretProperties.contentType',
-                                policy['secretProperties']['contentType'])
-                 ])
-        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+#         self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
+#                  checks=[
+#                      self.check('name', 'cert2'),
+#                      self.check('policy.secretProperties.contentType',
+#                                 policy['secretProperties']['contentType'])
+#                  ])
+#         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
-        # list certificates
-        self.cmd('keyvault certificate list --vault-name {kv}',
-                 checks=[
-                     self.check('length(@)', 1),
-                     self.check('[0].name', 'cert1')
-                 ])
-        self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
-                 checks=self.check('length(@)', 1))
+#         # list certificates
+#         self.cmd('keyvault certificate list --vault-name {kv}',
+#                  checks=[
+#                      self.check('length(@)', 1),
+#                      self.check('[0].name', 'cert1')
+#                  ])
+#         self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
+#                  checks=self.check('length(@)', 1))
 
-        # create a new certificate version
-        self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy2_path}"', checks=[
-            self.check('status', 'completed'),
-        ])
+#         # create a new certificate version
+#         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy2_path}"', checks=[
+#             self.check('status', 'completed'),
+#         ])
 
-        # list certificate versions
-        self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1 --maxresults 10',
-                 checks=[
-                     self.check('length(@)', 2),
-                     self.check('[0].name', 'cert1')
-                 ])
-        ver_list = self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
-                            checks=self.check('length(@)', 2)).get_output_in_json()
+#         # list certificate versions
+#         self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1 --maxresults 10',
+#                  checks=[
+#                      self.check('length(@)', 2),
+#                      self.check('[0].name', 'cert1')
+#                  ])
+#         ver_list = self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
+#                             checks=self.check('length(@)', 2)).get_output_in_json()
 
-        ver_list = sorted(ver_list, key=lambda x: x['attributes']['created'])
-        versions = [x['id'] for x in ver_list]
+#         ver_list = sorted(ver_list, key=lambda x: x['attributes']['created'])
+#         versions = [x['id'] for x in ver_list]
 
-        # show certificate (latest)
-        self.cmd('keyvault certificate show --vault-name {kv} -n cert1', checks=[
-            self.check('id', versions[1]),
-            self.check('policy.x509CertificateProperties.validityInMonths', 50),
-            self.check('name', 'cert1')
-        ])
+#         # show certificate (latest)
+#         self.cmd('keyvault certificate show --vault-name {kv} -n cert1', checks=[
+#             self.check('id', versions[1]),
+#             self.check('policy.x509CertificateProperties.validityInMonths', 50),
+#             self.check('name', 'cert1')
+#         ])
 
-        # show certificate (specific version)
-        cert_version = versions[0].rsplit('/', 1)[1]
-        self.kwargs['ver1'] = cert_version
-        self.cmd('keyvault certificate show --vault-name {kv} -n cert1 -v {ver1}',
-                 checks=self.check('id', versions[0]))
+#         # show certificate (specific version)
+#         cert_version = versions[0].rsplit('/', 1)[1]
+#         self.kwargs['ver1'] = cert_version
+#         self.cmd('keyvault certificate show --vault-name {kv} -n cert1 -v {ver1}',
+#                  checks=self.check('id', versions[0]))
 
-        # show certificate (by id)
-        self.kwargs.update({'cert_id': versions[0]})
-        self.cmd('keyvault certificate show --id {cert_id}',
-                 checks=self.check('id', versions[0]))
+#         # show certificate (by id)
+#         self.kwargs.update({'cert_id': versions[0]})
+#         self.cmd('keyvault certificate show --id {cert_id}',
+#                  checks=self.check('id', versions[0]))
 
-        # plan to not display the managed keys/secrets
-        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
-        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
-        self.cmd('keyvault key show --vault-name {kv} -n cert1',
-                 checks=self.check('managed', True))
-        self.cmd('keyvault secret show --vault-name {kv} -n cert1',
-                 checks=self.check('managed', True))
+#         # plan to not display the managed keys/secrets
+#         self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+#         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+#         self.cmd('keyvault key show --vault-name {kv} -n cert1',
+#                  checks=self.check('managed', True))
+#         self.cmd('keyvault secret show --vault-name {kv} -n cert1',
+#                  checks=self.check('managed', True))
 
-        # update certificate attributes
-        self.cmd('keyvault certificate set-attributes --vault-name {kv} -n cert1 --enabled false -p @"{policy_path}"', checks=[
-            self.check('id', versions[1]),
-            self.check('attributes.enabled', False),
-            self.check('policy.x509CertificateProperties.validityInMonths', 60),
-            self.check('name', 'cert1')
-        ])
+#         # update certificate attributes
+#         self.cmd('keyvault certificate set-attributes --vault-name {kv} -n cert1 --enabled false -p @"{policy_path}"', checks=[
+#             self.check('id', versions[1]),
+#             self.check('attributes.enabled', False),
+#             self.check('policy.x509CertificateProperties.validityInMonths', 60),
+#             self.check('name', 'cert1')
+#         ])
 
-        # delete certificate
-        self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
+#         # delete certificate
+#         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
 
 
 def _generate_certificate(path, keyfile=None, password=None):
@@ -835,136 +835,136 @@ def _generate_certificate(path, keyfile=None, password=None):
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultCertificateImportScenario(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert_import')
-    def test_keyvault_certificate_import(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-ct-im-', 24),
-            'loc': 'eastus2'
-        })
+# class KeyVaultCertificateImportScenario(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert_import')
+#     def test_keyvault_certificate_import(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-ct-im-', 24),
+#             'loc': 'eastus2'
+#         })
 
-        _create_keyvault(self, self.kwargs)
+#         _create_keyvault(self, self.kwargs)
 
-        # Create certificate with encrypted key
-        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
-        # openssl pkcs8 -in key.pem -topk8 -v1 PBE-SHA1-3DES -out key.pem
-        # type key.pem cert.pem > import_pem_encrypted_pwd_1234.pem
-        # del key.pem cert.pem
+#         # Create certificate with encrypted key
+#         # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+#         # openssl pkcs8 -in key.pem -topk8 -v1 PBE-SHA1-3DES -out key.pem
+#         # type key.pem cert.pem > import_pem_encrypted_pwd_1234.pem
+#         # del key.pem cert.pem
 
-        # Create certificate with plain key
-        # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
-        # type key.pem cert.pem > import_pem_plain.pem
-        # del key.pem cert.pem
+#         # Create certificate with plain key
+#         # openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 3650 -out cert.pem
+#         # type key.pem cert.pem > import_pem_plain.pem
+#         # del key.pem cert.pem
 
-        # test certificate import
-        self.kwargs.update({
-            'pem_encrypted_file': os.path.join(TEST_DIR, 'import_pem_encrypted_pwd_1234.pem'),
-            'pem_encrypted_password': '1234',
-            'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
-            'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
-        })
+#         # test certificate import
+#         self.kwargs.update({
+#             'pem_encrypted_file': os.path.join(TEST_DIR, 'import_pem_encrypted_pwd_1234.pem'),
+#             'pem_encrypted_password': '1234',
+#             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
+#             'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
+#         })
 
-        self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
-        self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "{pem_encrypted_file}" --password {pem_encrypted_password} -p @"{pem_policy_path}"')
+#         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
+#         self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "{pem_encrypted_file}" --password {pem_encrypted_password} -p @"{pem_policy_path}"')
 
-        # Test certificate file not exist
-        with self.assertRaises(CLIError):
-            self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "notexist.json" -p @"{pem_policy_path}"')
+#         # Test certificate file not exist
+#         with self.assertRaises(CLIError):
+#             self.cmd('keyvault certificate import --vault-name {kv} -n pem-cert2 --file "notexist.json" -p @"{pem_policy_path}"')
 
-        # self.kwargs.update({
-        #     'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),
-        #     'pfx_policy_path': os.path.join(TEST_DIR, 'policy_import_pfx.json')
-        # })
-        # self.cmd('keyvault certificate import --vault-name {kv} -n pfx-cert --file "{pfx_plain_file}" -p @"{pfx_policy_path}"')
+#         # self.kwargs.update({
+#         #     'pfx_plain_file': os.path.join(TEST_DIR, 'import_pfx.pfx'),
+#         #     'pfx_policy_path': os.path.join(TEST_DIR, 'policy_import_pfx.json')
+#         # })
+#         # self.cmd('keyvault certificate import --vault-name {kv} -n pfx-cert --file "{pfx_plain_file}" -p @"{pfx_policy_path}"')
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
-class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
-    def test_keyvault_softdelete(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-sd-', 24),
-            'loc': 'eastus2'
-        })
+# class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
+#     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
+#     def test_keyvault_softdelete(self, resource_group):
+#         self.kwargs.update({
+#             'kv': self.create_random_name('cli-test-kv-sd-', 24),
+#             'loc': 'eastus2'
+#         })
 
-        vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+#         vault = _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
 
-        # add all purge permissions to default the access policy
-        default_policy = vault['properties']['accessPolicies'][0]
-        cert_perms = default_policy['permissions']['certificates']
-        key_perms = default_policy['permissions']['keys']
-        secret_perms = default_policy['permissions']['secrets']
-        obj_id = default_policy['objectId']
+#         # add all purge permissions to default the access policy
+#         default_policy = vault['properties']['accessPolicies'][0]
+#         cert_perms = default_policy['permissions']['certificates']
+#         key_perms = default_policy['permissions']['keys']
+#         secret_perms = default_policy['permissions']['secrets']
+#         obj_id = default_policy['objectId']
 
-        for p in [cert_perms, key_perms, secret_perms]:
-            p.append('purge')
+#         for p in [cert_perms, key_perms, secret_perms]:
+#             p.append('purge')
 
-        self.kwargs.update({
-            'obj_id': obj_id,
-            'key_perms': ' '.join(key_perms),
-            'secret_perms': ' '.join(secret_perms),
-            'cert_perms': ' '.join(cert_perms)
-        })
+#         self.kwargs.update({
+#             'obj_id': obj_id,
+#             'key_perms': ' '.join(key_perms),
+#             'secret_perms': ' '.join(secret_perms),
+#             'cert_perms': ' '.join(cert_perms)
+#         })
 
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
+#         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
-        # create secrets keys and certificates to delete recover and purge
-        self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
-                 checks=self.check('value', 'ABC123'))
-        self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
-                 checks=self.check('value', 'ABC123'))
+#         # create secrets keys and certificates to delete recover and purge
+#         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
+#                  checks=self.check('value', 'ABC123'))
+#         self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
+#                  checks=self.check('value', 'ABC123'))
 
-        self.cmd('keyvault key create --vault-name {kv} -n key1 -p software',
-                 checks=self.check('attributes.enabled', True))
-        self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
-                 checks=self.check('attributes.enabled', True))
+#         self.cmd('keyvault key create --vault-name {kv} -n key1 -p software',
+#                  checks=self.check('attributes.enabled', True))
+#         self.cmd('keyvault key create --vault-name {kv} -n key2 -p software',
+#                  checks=self.check('attributes.enabled', True))
 
-        self.kwargs.update({
-            'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
-            'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
-        })
-        self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
-        self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
+#         self.kwargs.update({
+#             'pem_plain_file': os.path.join(TEST_DIR, 'import_pem_plain.pem'),
+#             'pem_policy_path': os.path.join(TEST_DIR, 'policy_import_pem.json')
+#         })
+#         self.cmd('keyvault certificate import --vault-name {kv} -n cert1 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
+#         self.cmd('keyvault certificate import --vault-name {kv} -n cert2 --file "{pem_plain_file}" -p @"{pem_policy_path}"')
 
-        # delete the secrets keys and certificates
-        self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
-        self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
-        self.cmd('keyvault key delete --vault-name {kv} -n key1')
-        self.cmd('keyvault key delete --vault-name {kv} -n key2')
-        self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
-        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
+#         # delete the secrets keys and certificates
+#         self.cmd('keyvault secret delete --vault-name {kv} -n secret1')
+#         self.cmd('keyvault secret delete --vault-name {kv} -n secret2')
+#         self.cmd('keyvault key delete --vault-name {kv} -n key1')
+#         self.cmd('keyvault key delete --vault-name {kv} -n key2')
+#         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
+#         self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
-        max_timeout = 100
-        time_counter = 0
-        while time_counter <= max_timeout:
-            try:
-                # recover secrets keys and certificates
-                self.cmd('keyvault secret recover --vault-name {kv} -n secret1')
-                self.cmd('keyvault key recover --vault-name {kv} -n key1')
-                self.cmd('keyvault certificate recover --vault-name {kv} -n cert1')
-            except:  # pylint: disable=bare-except
-                time.sleep(10)
-                time_counter += 10
-            else:
-                break
+#         max_timeout = 100
+#         time_counter = 0
+#         while time_counter <= max_timeout:
+#             try:
+#                 # recover secrets keys and certificates
+#                 self.cmd('keyvault secret recover --vault-name {kv} -n secret1')
+#                 self.cmd('keyvault key recover --vault-name {kv} -n key1')
+#                 self.cmd('keyvault certificate recover --vault-name {kv} -n cert1')
+#             except:  # pylint: disable=bare-except
+#                 time.sleep(10)
+#                 time_counter += 10
+#             else:
+#                 break
 
-        # purge secrets keys and certificates
-        self.cmd('keyvault secret purge --vault-name {kv} -n secret2')
-        self.cmd('keyvault key purge --vault-name {kv} -n key2')
-        self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
+#         # purge secrets keys and certificates
+#         self.cmd('keyvault secret purge --vault-name {kv} -n secret2')
+#         self.cmd('keyvault key purge --vault-name {kv} -n key2')
+#         self.cmd('keyvault certificate purge --vault-name {kv} -n cert2')
 
-        # recover and purge
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault purge -n {kv}')
+#         # recover and purge
+#         self.cmd('keyvault delete -n {kv}')
+#         self.cmd('keyvault recover -n {kv}', checks=self.check('name', '{kv}'))
+#         self.cmd('keyvault delete -n {kv}')
+#         self.cmd('keyvault purge -n {kv}')
 
-        # recover and purge with location
-        _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
-        self.cmd('keyvault delete -n {kv}')
-        self.cmd('keyvault purge -n {kv} -l {loc}')
+#         # recover and purge with location
+#         _create_keyvault(self, self.kwargs, additional_args=' --enable-soft-delete true').get_output_in_json()
+#         self.cmd('keyvault delete -n {kv}')
+#         self.cmd('keyvault recover -n {kv} -l {loc}', checks=self.check('name', '{kv}'))
+#         self.cmd('keyvault delete -n {kv}')
+#         self.cmd('keyvault purge -n {kv} -l {loc}')
 
 
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):

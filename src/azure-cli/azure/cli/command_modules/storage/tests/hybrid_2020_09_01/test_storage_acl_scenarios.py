@@ -19,13 +19,13 @@ class StorageAccessControlListTests(StorageScenarioMixin, ScenarioTest):
 
         self._verify_access_control_list(account_info, 'container', container)
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_share_acl_scenarios(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        share = self.create_share(account_info)
+    # @ResourceGroupPreparer()
+    # @StorageAccountPreparer()
+    # def test_storage_share_acl_scenarios(self, resource_group, storage_account):
+    #     account_info = self.get_account_info(resource_group, storage_account)
+    #     share = self.create_share(account_info)
 
-        self._verify_access_control_list(account_info, 'share', share)
+    #     self._verify_access_control_list(account_info, 'share', share)
 
     def _verify_access_control_list(self, account_info, service_type, container_name):
         container_id_parameter = '--{}-name {}'.format(service_type, container_name)
