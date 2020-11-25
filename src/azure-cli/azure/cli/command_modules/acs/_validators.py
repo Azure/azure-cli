@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import os.path
 import re
+from math import isnan, isclose
 from ipaddress import ip_network
 
 # pylint: disable=no-name-in-module,import-error
@@ -14,25 +15,12 @@ from knack.log import get_logger
 
 from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 import azure.cli.core.keys as keys
 
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterPropertiesAutoScalerProfile
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterPropertiesAutoScalerProfile
 
 logger = get_logger(__name__)
-
-
-def validate_connector_name(namespace):
-    """Validates a string as a legal connector name.
-
-    This validation will also occur server-side in the kubernetes, but that may take
-    for a while. So it's more user-friendly to validate in the CLI pre-flight.
-    """
-    # https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md
-    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')
-    found = regex.findall(namespace.connector_name)
-    if not found:
-        raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
-                       'and must start and end with alphanumeric characters.')
 
 
 def validate_ssh_key(namespace):
@@ -242,8 +230,8 @@ def validate_load_balancer_outbound_ports(namespace):
 def validate_load_balancer_idle_timeout(namespace):
     """validate load balancer profile idle timeout"""
     if namespace.load_balancer_idle_timeout is not None:
-        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
-            raise CLIError("--load-balancer-idle-timeout must be in the range [4,120]")
+        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 100:
+            raise CLIError("--load-balancer-idle-timeout must be in the range [4,100]")
 
 
 def validate_nodes_count(namespace):
@@ -270,6 +258,39 @@ def validate_taints(namespace):
                 raise CLIError('Invalid node taint: %s' % taint)
 
 
+def validate_priority(namespace):
+    """Validates the node pool priority string."""
+    if namespace.priority is not None:
+        if namespace.priority == '':
+            return
+        if namespace.priority != "Spot" and \
+                namespace.priority != "Regular":
+            raise CLIError("--priority can only be Spot or Regular")
+
+
+def validate_eviction_policy(namespace):
+    """Validates the node pool priority string."""
+    if namespace.eviction_policy is not None:
+        if namespace.eviction_policy == '':
+            return
+        if namespace.eviction_policy != "Delete" and \
+                namespace.eviction_policy != "Deallocate":
+            raise CLIError("--eviction-policy can only be Delete or Deallocate")
+
+
+def validate_spot_max_price(namespace):
+    """Validates the spot node pool max price."""
+    if not isnan(namespace.spot_max_price):
+        if namespace.priority != "Spot":
+            raise CLIError("--spot_max_price can only be set when --priority is Spot")
+        if len(str(namespace.spot_max_price).split(".")) > 1 and len(str(namespace.spot_max_price).split(".")[1]) > 5:
+            raise CLIError("--spot_max_price can only include up to 5 decimal places")
+        if namespace.spot_max_price <= 0 and not isclose(namespace.spot_max_price, -1.0, rel_tol=1e-06):
+            raise CLIError(
+                "--spot_max_price can only be any decimal value greater than zero, or -1 which indicates "
+                "default price to be up-to on-demand")
+
+
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
@@ -291,6 +312,15 @@ def validate_vnet_subnet_id(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.vnet_subnet_id):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+
+
+def validate_ppg(namespace):
+    if namespace.ppg is not None:
+        if namespace.ppg == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.ppg):
+            raise CLIError("--ppg is not a valid Azure resource ID.")
 
 
 def validate_nodepool_labels(namespace):
@@ -363,3 +393,12 @@ def validate_label(label):
                        "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % label)
 
     return {kv[0]: kv[1]}
+
+
+def validate_assign_identity(namespace):
+    if namespace.assign_identity is not None:
+        if namespace.assign_identity == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.assign_identity):
+            raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")

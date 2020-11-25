@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -1280,8 +1280,6 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--private-connection-resource-id {appgw_id} '
                  '--group-id {private_link_group_id_for_public}')
 
-        # list_private_endpoint_conn = self.cmd('network private-endpoint-connection list --id {appgw_id} ').get_output_in_json()
-
         # ------------------------------------------------------------------------------------------
 
         # Add another frontend IP
@@ -1303,46 +1301,61 @@ class NetworkPrivateLinkAppGwScenarioTest(ScenarioTest):
                  '--name {appgw_private_link_for_private}')
         self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
+        self.cmd('network application-gateway frontend-port create -g {rg} '
+                 '--gateway {appgw} '
+                 '--name privatePort '
+                 '--port 8080 ')
+        # The another http listener for private IP is necessary to setup an private link properly
+        self.cmd('network application-gateway http-listener create -g {rg} '
+                 '--gateway-name {appgw} '
+                 '--name privateHTTPListener '
+                 '--frontend-port privatePort '
+                 '--frontend-ip {appgw_private_ip} ')
+        # Associate a rule for private http listener
+        self.cmd('network application-gateway rule create -g {rg} '
+                 '--gateway {appgw} '
+                 '--name privateRule '
+                 '--http-listener privateHTTPListener')
+
         private_link_resource = self.cmd('network private-link-resource list --id {appgw_id}').get_output_in_json()
         self.assertEqual(len(private_link_resource), 2)
         self.assertEqual(private_link_resource[1]['name'], self.kwargs['appgw_private_ip'])
 
-        # self.kwargs.update({
-        #     'private_link_group_id_for_private': private_link_resource[1]['properties']['groupId']
-        # })
+        self.kwargs.update({
+            'private_link_group_id_for_private': private_link_resource[1]['properties']['groupId']
+        })
 
-        # The rest of code is not working, service is 500 while creating another private endpoint
-        # on the settings below. It's a bug.
-        # If want to use like below, currently have to create a request routing rule to use the private frontend
-        # ------------------------------------------------------------------
-        # # Prepare the second vnet to be connected to
-        # self.cmd('network vnet subnet create -g {rg} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--name {appgw_private_endpoint_subnet_for_private} '
-        #          '--address-prefixes 10.0.6.0/24')
-        # # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
-        # self.cmd('network vnet subnet update -g {rg} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--name {appgw_private_endpoint_subnet_for_private} '
-        #          '--disable-private-endpoint-network-policies true')
-        # # Create the second private endpoint against this application gateway's public IP
-        # self.cmd('network private-endpoint create -g {rg} '
-        #          '--name {appgw_private_endpoint_for_private} '
-        #          '--connection-name {appgw_private_endpoint_connection_for_private} '
-        #          '--vnet-name {appgw_private_endpoint_vnet} '
-        #          '--subnet {appgw_private_endpoint_subnet_for_private} '
-        #          '--private-connection-resource-id {appgw_id} '
-        #          '--group-id {private_link_group_id_for_private}')
+        # Prepare the second vnet to be connected to
+        self.cmd('network vnet subnet create -g {rg} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--name {appgw_private_endpoint_subnet_for_private} '
+                 '--address-prefixes 10.0.6.0/24')
+        # Enable private endpoint on a vnet would require --disable-private-endpoint-network-policies=true
+        self.cmd('network vnet subnet update -g {rg} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--name {appgw_private_endpoint_subnet_for_private} '
+                 '--disable-private-endpoint-network-policies true')
+        # Create the second private endpoint against this application gateway's private IP
+        self.cmd('network private-endpoint create -g {rg} '
+                 '--name {appgw_private_endpoint_for_private} '
+                 '--connection-name {appgw_private_endpoint_connection_for_private} '
+                 '--vnet-name {appgw_private_endpoint_vnet} '
+                 '--subnet {appgw_private_endpoint_subnet_for_private} '
+                 '--private-connection-resource-id {appgw_id} '
+                 '--group-id {private_link_group_id_for_private}')
 
-        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        # Could not remove unless remove all private endpoint connections
+        # self.cmd('network application-gateway private-link remove -g {rg} '
         #          '--gateway-name {appgw} '
-        #          '--name {appgw_private_link_subnet_for_public}')
+        #          '--name {appgw_private_link_for_public} '
+        #          '--yes')
 
-        # self.cmd('network applicatin-gateway private-link remove -g {rg} '
+        # self.cmd('network application-gateway private-link remove -g {rg} '
         #          '--gateway-name {appgw} '
-        #          '--name {appgw_private_link_for_private}')
+        #          '--name {appgw_private_link_for_private} '
+        #          '--yes')
 
-        # self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
+        self.cmd('network application-gateway private-link list -g {rg} --gateway-name {appgw} ')
 
 
 class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):

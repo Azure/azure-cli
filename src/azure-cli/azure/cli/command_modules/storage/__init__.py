@@ -178,6 +178,13 @@ class StorageArgumentContext(AzArgumentContext):
         self.extra('container_name', required=True)
         self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
 
+    def register_fs_directory_arguments(self):
+        self.extra('file_system_name', required=True, options_list=['-f', '--file-system'],
+                   help='File system name.')
+        self.extra('directory_path', required=True, options_list=['-p', '--path'],
+                   help='The path to a file or directory in the specified file system.')
+        self.extra('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
 
 class StorageCommandGroup(AzCommandGroup):
     def storage_command(self, name, method_name=None, command_type=None, oauth=False, generic_update=None, **kwargs):
@@ -236,7 +243,8 @@ If you want to change the default action to apply when no rule matches, please u
 Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
                     """
                     ex.args = (message,)
-            if hasattr(ex, 'status_code') and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
+            if hasattr(ex, 'status_code') and ex.status_code == 409\
+                    and hasattr(ex, 'error_code') and ex.error_code == 'NoPendingCopyOperation':
                 pass
 
         return handler

@@ -23,7 +23,7 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
-        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
           echo "Hotfix PR should target release branch."
           exit 1
         fi
@@ -122,7 +122,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3'
     inputs:
-      versionSpec: 3.x
+      versionSpec: 3.8
 
   - task: BatchScript@1
     inputs:
@@ -567,9 +567,6 @@ jobs:
       echo == Run Self-Test ==
       az self-test
 
-      echo == Audit azure-cli.rb formula ==
-      brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
-
     displayName: 'Bash Script'
 
 - job: TestHomebrewPackage
@@ -688,7 +685,7 @@ jobs:
         distro: stretch
       Buster:
         deb_system: debian
-        distro: buster 
+        distro: buster
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -719,30 +716,12 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   strategy:
     matrix:
-      Xenial:
-        deb_system: ubuntu
-        distro: xenial
-      Trusty:
-        deb_system: ubuntu
-        distro: trusty
-      Bionic:
-        deb_system: ubuntu
-        distro: bionic
-      Eoan:
-        deb_system: ubuntu
-        distro: eoan
       Focal:
         deb_system: ubuntu
         distro: focal
-      Jessie:
-        deb_system: debian
-        distro: jessie
-      Stretch:
-        deb_system: debian
-        distro: stretch
       Buster:
         deb_system: debian
-        distro: buster      
+        distro: buster
   pool:
     vmImage: 'ubuntu-16.04'
   steps:

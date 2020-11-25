@@ -122,7 +122,7 @@ long-summary: Get the details of the management group.
 parameters:
   - name: --name -n
     type: string
-    short-summary: Name of the management group.
+    short-summary: Name of the management group (the last segment of the resource ID). Do not use display name.
   - name: --expand -e
     type: bool
     short-summary: If given, lists the children in the first level of hierarchy.
@@ -256,6 +256,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -279,6 +281,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -297,6 +301,9 @@ examples:
     text: >
         az deployment create --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+  - name: Create a deployment at subscription scope from a template-spec
+    text: >
+        az deployment create --location WestUS --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment export'] = """
@@ -388,6 +395,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -414,6 +423,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment metadata.
   - name: --name -n
@@ -448,6 +459,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
@@ -549,6 +562,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -577,6 +592,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to create deployment at.
   - name: --name -n
@@ -603,6 +620,9 @@ examples:
         az deployment group create --resource-group testrg --name rollout01 \\
             --template-file azuredeploy.json  --parameters @params.json \\
             --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+  - name: Create a deployment at subscription scope from a template-spec
+    text: >
+        az deployment group create --resource-group testrg --template-spec "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/myTemplateSpec/versions/1.0"
 """
 
 helps['deployment group what-if'] = """
@@ -618,6 +638,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --resource-group -g
     short-summary: The resource group to execute deployment What-If operation at.
   - name: --name -n
@@ -726,6 +748,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -750,6 +774,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -783,6 +809,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --management-group-id -m
     short-summary: The management group id to create deployment at.
   - name: --name -n
@@ -886,6 +914,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
@@ -908,6 +938,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --location -l
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
@@ -939,6 +971,8 @@ parameters:
     short-summary: The path to the template file.
   - name: --template-uri -u
     short-summary: The URI to the template file.
+  - name: --template-spec -s
+    short-summary: The template spec resource id.
   - name: --name -n
     short-summary: The deployment name.
   - name: --location -l
@@ -2155,4 +2189,85 @@ examples:
   - name: Selectively update the set of tags on a resource with "delete" Operation.
     text: >
         az tag update --resource-id /subscriptions/{sub-id}/resourcegroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vmName} --operation delete --tags key1=value1
+"""
+
+helps['ts'] = """
+type: group
+short-summary: Manage template specs at subscription or resource group scope.
+"""
+
+helps['ts create'] = """
+type: command
+short-summary: Create a template spec and or template spec version.
+examples:
+  - name: Create a template spec.
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
+  - name: Create a template spec version.
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
+  - name: Create a template spec and a version of the template spec.
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
+"""
+
+helps['ts update'] = """
+type: command
+short-summary: Update a template spec version.
+examples:
+  - name: Update the template content of a template spec or template spec version based on the resource ID.
+    text: az ts update --template-spec resourceID -f updatedFile.json
+  - name: Update the display name of a template spec based on the resource ID.
+    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName"
+  - name: Update the description of a template spec version.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
+  - name: Update all the properties of a template spec version.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+"""
+
+helps['ts show'] = """
+type: command
+short-summary: Get the specified template spec or template spec version.
+examples:
+  - name: Show the specified template spec.
+    text: az ts show -g testrg --name TemplateSpecName
+  - name: Show the specified template spec version.
+    text: az ts show -g testrg --name TemplateSpecName --version VersionName
+  - name: Show the specified template spec or template spec version based on the resource ID.
+    text: az ts show --template-spec resourceID
+"""
+
+helps['ts export'] = """
+type: command
+short-summary: Export the specified template spec and artifacts (if any) to the specified output folder.
+examples:
+  - name: Export the specified template spec with all versions.
+    text: az ts export -g testrg --name TemplateSpecName --output-folder C:/path/
+  - name: Export the specified template spec.
+    text: az ts export -s resourceID --output-folder C:/path/
+  - name: Export the specified template spec version.
+    text: az ts export -g testrg --name TemplateSpecName --version VersionName --output-folder C:/path/
+"""
+
+helps['ts delete'] = """
+type: command
+short-summary: Delete a specified template spec or template spec version by name or resource ID..
+examples:
+  - name: Delete the specified template spec and all versions.
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName
+  - name: Delete the specified version from the template spec.
+    text: az ts delete -g MyResourceGroup --name TemplateSpecName --version VersionName
+  - name: Delete the template spec or version based on resource ID.
+    text: az ts delete --template-spec resourceID
+"""
+
+helps['ts list'] = """
+type: command
+short-summary: List template specs or template spec versions.
+examples:
+  - name: List all template specs in current default subscription.
+    text: az ts list
+  - name: List all template specs in specified subscription.
+    text: az ts list --subscription Subscription
+  - name: List all template specs in resource group.
+    text: az ts list -g MyResourceGroup
+  - name: List all versions of parent template spec.
+    text: az ts list -g MyResourceGroup -n TemplateSpecName
 """

@@ -863,7 +863,7 @@ type: command
 short-summary: Enable the boot diagnostics on a VM.
 parameters:
   - name: --storage
-    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
+    short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/). If it's not specified, managed storage will be used.
 examples:
   - name: Enable boot diagnostics on all VMs in a resource group.
     text: >
@@ -887,6 +887,18 @@ examples:
     text: |
         az vm boot-diagnostics get-boot-log --name MyVirtualMachine --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vm boot-diagnostics get-boot-log-uris'] = """
+type: command
+short-summary: Get SAS URIs for a virtual machine's boot diagnostic logs.
+parameters:
+  - name: --expire
+    short-summary: Expiration duration in minutes for the SAS URIs with a value between 1 to 1440 minutes. If not specified, SAS URIs will be generated with a default expiration duration of 120 minutes.
+examples:
+  - name: Get SAS URIs for a virtual machine's boot diagnostic logs.
+    text: >
+        az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
 helps['vm capture'] = """
@@ -930,7 +942,7 @@ examples:
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-quick-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli.'
 parameters:
   - name: --image
     type: string
@@ -1151,7 +1163,7 @@ long-summary: >4
 
 helps['vm disk attach'] = """
 type: command
-short-summary: Attach a managed persistent disk to a VM.
+short-summary: Attach a managed persistent disk to a VM. Please note that --ids only supports one disk.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
 examples:
   - name: Attach a new default sized (1023 GB) managed data disk to a VM.
@@ -2414,6 +2426,14 @@ examples:
     text: |
         az vmss extension show --name MyExtension --resource-group MyResourceGroup --vmss-name MyVmss
     crafted: true
+"""
+
+helps['vmss extension upgrade'] = """
+type: command
+short-summary: Upgrade all extensions for all VMSS instances to the latest version.
+examples:
+  - name: Upgrade all extensions to the latest version.
+    text: az vmss extension upgrade -g MyResourceGroup -n MyVmss
 """
 
 helps['vmss get-instance-view'] = """

@@ -28,8 +28,11 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
-                     'Error detail: {}')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+
+QUERY_REFERENCE = ("To learn more about --query, please visit: "
+                   "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
+
 
 _PROXYID_RE = re.compile(
     '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
@@ -50,66 +53,179 @@ DISALLOWED_USER_NAMES = [
 ]
 
 
-def handle_exception(ex):  # pylint: disable=too-many-return-statements
+def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
-    from jmespath.exceptions import JMESPathTypeError
+    from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
     from azure.common import AzureException
     from azure.core.exceptions import AzureError
+    from requests.exceptions import SSLError, HTTPError
+    import azure.cli.core.azclierror as azclierror
+    import traceback
+
+    logger.debug("azure.cli.core.util.handle_exception is called with an exception:")
+    # Print the traceback and exception message
+    logger.debug(traceback.format_exc())
 
     with CommandLoggerContext(logger):
-        if isinstance(ex, JMESPathTypeError):
-            logger.error("\nInvalid jmespath query supplied for `--query`:\n%s", ex)
-            logger.error("To learn more about --query, please visit: "
-                         "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
-            return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
-            logger.error(ex.args[0])
-            try:
-                for detail in ex.args[0].error.details:
-                    logger.error(detail)
-            except (AttributeError, TypeError):
-                pass
-            except:  # pylint: disable=bare-except
-                pass
-            return ex.args[1] if len(ex.args) >= 2 else 1
-        if isinstance(ex, ValidationError):
-            logger.error('validation error: %s', ex)
-            return 1
-        if isinstance(ex, ClientRequestError):
-            msg = str(ex)
-            if 'SSLError' in msg:
-                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+        error_msg = getattr(ex, 'message', str(ex))
+        exit_code = 1
+
+        if isinstance(ex, azclierror.AzCLIError):
+            az_error = ex
+
+        elif isinstance(ex, JMESPathError):
+            error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
+            az_error = azclierror.InvalidArgumentValueError(error_msg)
+            az_error.set_recommendation(QUERY_REFERENCE)
+
+        elif isinstance(ex, SSLError):
+            az_error = azclierror.AzureConnectionError(error_msg)
+            az_error.set_recommendation(SSLERROR_TEMPLATE)
+
+        elif isinstance(ex, CloudError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            status_code = str(getattr(ex, 'status_code', 'Unknown Code'))
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
+
+        elif isinstance(ex, ValidationError):
+            az_error = azclierror.ValidationError(error_msg)
+
+        elif isinstance(ex, CLIError):
+            # TODO: Fine-grained analysis here
+            az_error = azclierror.UnclassifiedUserFault(error_msg)
+
+        elif isinstance(ex, AzureError):
+            if extract_common_error_message(ex):
+                error_msg = extract_common_error_message(ex)
+            AzCLIErrorType = get_error_type_by_azure_error(ex)
+            az_error = AzCLIErrorType(error_msg)
+
+        elif isinstance(ex, AzureException):
+            if is_azure_connection_error(error_msg):
+                az_error = azclierror.AzureConnectionError(error_msg)
             else:
-                logger.error("request failed: %s", ex)
-            return 1
-        if isinstance(ex, KeyboardInterrupt):
-            return 1
-        if isinstance(ex, HttpOperationError):
-            try:
-                response_dict = json.loads(ex.response.text)
-                error = response_dict['error']
+                # TODO: Fine-grained analysis here for Unknown error
+                az_error = azclierror.UnknownError(error_msg)
 
-                # ARM should use ODATA v4. So should try this first.
-                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
-                if isinstance(error, dict):
-                    code = "{} - ".format(error.get('code', 'Unknown Code'))
-                    message = error.get('message', ex)
-                    logger.error("%s%s", code, message)
-                else:
-                    logger.error(error)
+        elif isinstance(ex, ClientRequestError):
+            if is_azure_connection_error(error_msg):
+                az_error = azclierror.AzureConnectionError(error_msg)
+            else:
+                az_error = azclierror.ClientRequestError(error_msg)
 
-            except (ValueError, KeyError):
-                logger.error(ex)
-            return 1
+        elif isinstance(ex, HttpOperationError):
+            message, status_code = extract_http_operation_error(ex)
+            if message:
+                error_msg = message
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
 
-        logger.error("The command failed with an unexpected error. Here is the traceback:\n")
-        logger.exception(ex)
-        logger.warning("\nTo open an issue, please run: 'az feedback'")
+        elif isinstance(ex, HTTPError):
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
+            AzCLIErrorType = get_error_type_by_status_code(status_code)
+            az_error = AzCLIErrorType(error_msg)
 
-        return 1
+        elif isinstance(ex, KeyboardInterrupt):
+            error_msg = 'Keyboard interrupt is captured.'
+            az_error = azclierror.ManualInterrupt(error_msg)
+
+        else:
+            error_msg = "The command failed with an unexpected error. Here is the traceback:"
+            az_error = azclierror.CLIInternalError(error_msg)
+            az_error.set_exception_trace(ex)
+            az_error.set_recommendation("To open an issue, please run: 'az feedback'")
+
+        if isinstance(az_error, azclierror.ResourceNotFoundError):
+            exit_code = 3
+
+        az_error.print_error()
+        az_error.send_telemetry()
+
+        return exit_code
+
+
+def extract_common_error_message(ex):
+    error_msg = None
+    try:
+        error_msg = ex.args[0]
+        for detail in ex.args[0].error.details:
+            error_msg += ('\n' + detail)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return error_msg
+
+
+def extract_http_operation_error(ex):
+    error_msg = None
+    status_code = 'Unknown Code'
+    try:
+        response = json.loads(ex.response.text)
+        if isinstance(response, str):
+            error = response
+        else:
+            error = response['error']
+        # ARM should use ODATA v4. So should try this first.
+        # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+        if isinstance(error, dict):
+            status_code = error.get('code', 'Unknown Code')
+            code_str = "{} - ".format(status_code)
+            message = error.get('message', ex)
+            error_msg = "code: {}, {}".format(code_str, message)
+        else:
+            error_msg = error
+    except (ValueError, KeyError):
+        pass
+    return error_msg, status_code
+
+
+def get_error_type_by_azure_error(ex):
+    import azure.core.exceptions as exceptions
+    import azure.cli.core.azclierror as azclierror
+
+    if isinstance(ex, exceptions.HttpResponseError):
+        status_code = str(ex.status_code)
+        return get_error_type_by_status_code(status_code)
+    if isinstance(ex, exceptions.ResourceNotFoundError):
+        return azclierror.ResourceNotFoundError
+    if isinstance(ex, exceptions.ServiceRequestError):
+        return azclierror.ClientRequestError
+    if isinstance(ex, exceptions.ServiceRequestTimeoutError):
+        return azclierror.AzureConnectionError
+    if isinstance(ex, (exceptions.ServiceResponseError, exceptions.ServiceResponseTimeoutError)):
+        return azclierror.AzureResponseError
+
+    return azclierror.UnknownError
+
+
+def get_error_type_by_status_code(status_code):
+    import azure.cli.core.azclierror as azclierror
+
+    if status_code == '400':
+        return azclierror.BadRequestError
+    if status_code == '401':
+        return azclierror.UnauthorizedError
+    if status_code == '403':
+        return azclierror.ForbiddenError
+    if status_code == '404':
+        return azclierror.ResourceNotFoundError
+    if status_code.startswith('5'):
+        return azclierror.AzureInternalError
+
+    return azclierror.UnknownError
+
+
+def is_azure_connection_error(error_msg):
+    error_msg = error_msg.lower()
+    if 'connection error' in error_msg \
+            or 'connection broken' in error_msg \
+            or 'connection aborted' in error_msg:
+        return True
+    return False
 
 
 # pylint: disable=inconsistent-return-statements
@@ -147,35 +263,6 @@ def get_installed_cli_distributions():
         VersionItem('azure-cli-core', azure_cli_core_version),
         VersionItem('azure-cli-telemetry', azure_cli_telemetry_version)
     ]
-
-
-def _update_latest_from_pypi(versions):
-    from subprocess import check_output, STDOUT, CalledProcessError
-
-    success = False
-
-    if not check_connectivity(max_retries=0):
-        return versions, success
-
-    try:
-        cmd = [sys.executable] + \
-            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
-        logger.debug('Running: %s', cmd)
-        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
-        success = True
-        for line in log_output.splitlines():
-            if not line.startswith(CLI_PACKAGE_NAME):
-                continue
-            comps = line.split()
-            mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
-            version = comps[1].replace('(', '').replace(')', '')
-            try:
-                versions[mod]['pypi'] = version
-            except KeyError:
-                pass
-    except CalledProcessError:
-        pass
-    return versions, success
 
 
 def get_latest_from_github(package_path='azure-cli'):
@@ -255,8 +342,8 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     versions = _get_local_versions()
 
     # get the versions from pypi
-    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
-    updates_available = 0
+    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_github(versions)
+    updates_available_components = []
 
     def _print(val=''):
         print(val, file=output)
@@ -271,13 +358,13 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
 
     ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
     if '*' in ver_string:
-        updates_available += 1
+        updates_available_components.append(CLI_PACKAGE_NAME)
     _print(ver_string)
     _print()
     for name in sorted(versions.keys()):
         ver_string = _get_version_string(name, versions.pop(name))
         if '*' in ver_string:
-            updates_available += 1
+            updates_available_components.append(name)
         _print(ver_string)
     _print()
     extensions = get_extensions()
@@ -308,8 +395,8 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     # if unable to query PyPI, use sentinel value to flag that
     # we couldn't check for updates
     if not success:
-        updates_available = -1
-    return version_string, updates_available
+        updates_available_components = None
+    return version_string, updates_available_components
 
 
 def get_az_version_json():
@@ -334,25 +421,27 @@ def show_updates_available(new_line_before=False, new_line_after=False):
         if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
             return
 
-    _, updates_available = get_az_version_string(use_cache=True)
-    if updates_available > 0:
+    _, updates_available_components = get_az_version_string(use_cache=True)
+    if updates_available_components:
         if new_line_before:
             logger.warning("")
-        show_updates(updates_available)
+        show_updates(updates_available_components)
         if new_line_after:
             logger.warning("")
     VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
 
 
-def show_updates(updates_available):
-    if updates_available == -1:
+def show_updates(updates_available_components):
+    if updates_available_components is None:
         logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
-    elif updates_available:  # pylint: disable=too-many-nested-blocks
+    elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
             warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
         else:
-            warning_msg = "You have %i updates available. Consider updating your CLI installation with 'az upgrade'"
-        logger.warning(warning_msg, updates_available)
+            warning_msg = "You have %i updates available."
+            if CLI_PACKAGE_NAME in updates_available_components:
+                warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
+        logger.warning(warning_msg, len(updates_available_components))
     else:
         print('Your CLI is up-to-date.')
 
@@ -707,7 +796,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         skip_authorization_header = True
 
     # Handle User-Agent
-    agents = [get_az_user_agent()]
+    agents = [get_az_rest_user_agent()]
 
     # Borrow AZURE_HTTP_USER_AGENT from msrest
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
@@ -802,19 +891,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         else:
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
-    try:
-        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
-        s = Session()
-        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
-        prepped = s.prepare_request(req)
 
-        # Merge environment settings into session
-        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
-        _log_request(prepped)
-        r = s.send(prepped, **settings)
-        _log_response(r)
-    except Exception as ex:  # pylint: disable=broad-except
-        raise CLIError(ex)
+    # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+    s = Session()
+    req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+    prepped = s.prepare_request(req)
+
+    # Merge environment settings into session
+    settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+    _log_request(prepped)
+    r = s.send(prepped, **settings)
+    _log_response(r)
 
     if not r.ok:
         reason = r.reason
@@ -995,6 +1082,17 @@ def get_az_user_agent():
     return ' '.join(agents)
 
 
+def get_az_rest_user_agent():
+    """Get User-Agent for az rest calls"""
+
+    agents = ['python/{}'.format(platform.python_version()),
+              '({})'.format(platform.platform()),
+              get_az_user_agent()
+              ]
+
+    return ' '.join(agents)
+
+
 def user_confirmation(message, yes=False):
     if yes:
         return
@@ -1049,7 +1147,7 @@ def is_guid(guid):
 
 
 def handle_version_update():
-    """Clean up information in local file that may be invalidated
+    """Clean up information in local files that may be invalidated
     because of a version update of Azure CLI
     """
     try:
@@ -1059,7 +1157,44 @@ def handle_version_update():
         if not VERSIONS['versions']:
             get_cached_latest_versions()
         elif LooseVersion(VERSIONS['versions']['core']['local']) != LooseVersion(__version__):
+            logger.debug("Azure CLI has been updated.")
+            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
             VERSIONS['versions'] = {}
             VERSIONS['update_time'] = ''
+            from azure.cli.core.cloud import refresh_known_clouds
+            refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
+
+
+def resource_to_scopes(resource):
+    """Convert the ADAL resource ID to MSAL scopes by appending the /.default suffix and return a list.
+    For example:
+       'https://management.core.windows.net/' -> ['https://management.core.windows.net//.default']
+       'https://managedhsm.azure.com' -> ['https://managedhsm.azure.com/.default']
+
+    :param resource: The ADAL resource ID
+    :return: A list of scopes
+    """
+    # https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#trailing-slash-and-default
+    # We should not trim the trailing slash, like in https://management.azure.com/
+    # In other word, the trailing slash should be preserved and scope should be https://management.azure.com//.default
+    scope = resource + '/.default'
+    return [scope]
+
+
+def scopes_to_resource(scopes):
+    """Convert MSAL scopes to ADAL resource by stripping the /.default suffix and return a str.
+    For example:
+       ['https://management.core.windows.net//.default'] -> 'https://management.core.windows.net/'
+       ['https://managedhsm.azure.com/.default'] -> 'https://managedhsm.azure.com'
+
+    :param scopes: The MSAL scopes. It can be a list or tuple of string
+    :return: The ADAL resource
+    :rtype: str
+    """
+    scope = scopes[0]
+    if scope.endswith("/.default"):
+        scope = scope[:-len("/.default")]
+
+    return scope

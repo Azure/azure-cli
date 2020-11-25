@@ -22,6 +22,10 @@ TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
+# Put a config section or key (section.name) in the allowed set to allow recording the config
+# values in the section or for the key with 'az config set'
+ALLOWED_CONFIG_SECTIONS_OR_KEYS = {'auto-upgrade', 'extension', 'core', 'logging.enable_log_file',
+                                   'output.show_survey_link'}
 
 
 class TelemetrySession:  # pylint: disable=too-many-instance-attributes
@@ -45,8 +49,15 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.mode = 'default'
+        # The AzCLIError sub-class name
+        self.error_type = 'None'
+        # The class name of the raw exception
+        self.exception_name = 'None'
+        # The stacktrace of the raw exception
+        self.stack_trace = 'None'
         self.init_time_elapsed = None
         self.invoke_time_elapsed = None
+        self.debug_info = []
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
@@ -55,6 +66,13 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.suppress_new_event = False
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        # Move the exception info into userTask record, in order to make one Telemetry record for one command
+        self.exception_name = exception.__class__.__name__
+        self.result_summary = _remove_cmd_chars(message or str(exception))
+        self.stack_trace = _remove_cmd_chars(_get_stack_trace())
+
+        # Backward compatible, so there are duplicated info recorded
+        # The logic below should be removed along with self.exceptions after confirmation
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
@@ -104,7 +122,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Reserved.ChannelUsed': 'AI',
             'Reserved.EventId': str(uuid.uuid4()),
             'Reserved.SequenceNumber': 1,
-            'Reserved.SessionId': str(uuid.uuid4()),
+            'Reserved.SessionId': _get_session_id(),
             'Reserved.TimeSinceSessionStart': 0,
 
             'Reserved.DataModel.Source': 'DataModelAPI',
@@ -122,6 +140,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
             'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
             'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -179,6 +198,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Mode', self.mode)
         from azure.cli.core._environment import _ENV_AZ_INSTALLER
         set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
+        set_custom_properties(result, 'error_type', self.error_type)
+        set_custom_properties(result, 'exception_name', self.exception_name)
+        set_custom_properties(result, 'stack_trace', self.stack_trace)
+        set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
 
         return result
 
@@ -287,6 +310,13 @@ def set_exception(exception, fault_type, summary=None):
 
 
 @decorators.suppress_all_exceptions()
+def set_error_type(error_type):
+    if _session.result != 'None':
+        return
+    _session.error_type = error_type
+
+
+@decorators.suppress_all_exceptions()
 def set_failure(summary=None):
     if _session.result != 'None':
         return
@@ -314,6 +344,27 @@ def set_user_fault(summary=None):
     _session.result = 'UserFault'
     if summary:
         _session.result_summary = _remove_cmd_chars(summary)
+
+
+@decorators.suppress_all_exceptions()
+def set_debug_info(key, info):
+    if key == 'ConfigSet':
+        info = _process_config_set_debug_info(info)
+
+    debug_info = '{}: {}'.format(key, info)
+    _session.debug_info.append(debug_info)
+
+
+@decorators.suppress_all_exceptions()
+def _process_config_set_debug_info(info):
+    processed_info = []
+    # info is a list of tuples
+    for key, section, value in info:
+        if section in ALLOWED_CONFIG_SECTIONS_OR_KEYS or key in ALLOWED_CONFIG_SECTIONS_OR_KEYS:
+            processed_info.append('{}={}'.format(key, value))
+        else:
+            processed_info.append('{}={}'.format(key, '***' if value else value))
+    return ' '.join(processed_info)
 
 
 @decorators.suppress_all_exceptions()
@@ -405,6 +456,37 @@ def _get_core_version():
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_installation_id():
     return _get_profile().get_installation_id()
+
+
+@decorators.suppress_all_exceptions(fallback_return="")
+def _get_session_id():
+    # As a workaround to get the terminal info as SessionId, this function may not be accurate.
+
+    def get_hash_result(content):
+        import hashlib
+
+        hasher = hashlib.sha256()
+        hasher.update(content.encode('utf-8'))
+        return hasher.hexdigest()
+
+    # Usually, more than one layer of sub-process will be started when excuting a CLI command. While, the create time
+    # of these sub-processes will be very close, usually in several milliseconds. We use 1 second as the threshold here.
+    # When the difference of create time between current process and its parent process is larger than the threshold,
+    # the parent process will be viewed as the terminal process.
+    try:
+        # psutil is not available on cygwin
+        import psutil
+    except ImportError:
+        return ""
+    time_threshold = 1
+    process = psutil.Process()
+    while process and process.ppid() and process.pid != process.ppid():
+        parent_process = process.parent()
+        if parent_process and process.create_time() - parent_process.create_time() > time_threshold:
+            content = '{}{}{}'.format(_get_installation_id(), parent_process.create_time(), parent_process.pid)
+            return get_hash_result(content)
+        process = parent_process
+    return ""
 
 
 @decorators.call_once
