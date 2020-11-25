@@ -81,6 +81,8 @@ class CognitiveServicesByoxTests(ScenarioTest):
         identity = self.cmd('az cognitiveservices account identity show -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(identity['type'], 'None')
 
+        time.sleep(120)
+
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)

@@ -5,6 +5,7 @@
 
 import os
 import datetime
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
@@ -84,6 +85,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04"'
                                 ' --disk-encryption-targets "TemporaryDisk"')
 
+        time.sleep(120)
+
         result = self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
@@ -104,7 +107,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
         if self.is_live or self.in_recording:
-            import time
             time.sleep(120)
 
         self.batch_cmd('batch pool show --pool-id {p_id}').assert_with_checks([
@@ -191,8 +193,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('commandLine', 'ping 127.0.0.1 -n 30')])
 
         if self.is_live or self.in_recording:
-            import time
-            time.sleep(10)
+            time.sleep(120)
         task_counts = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
         self.assertEqual(task_counts["completed"], 0)
         self.assertEqual(task_counts["active"], 1)
