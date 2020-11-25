@@ -1497,7 +1497,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql db audit-policy show -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
@@ -1699,7 +1699,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
