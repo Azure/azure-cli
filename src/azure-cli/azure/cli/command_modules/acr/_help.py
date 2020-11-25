@@ -1242,6 +1242,20 @@ examples:
             --name Contoso-Edge01-in-Wichita --yes
 """
 
+helps['acr connected-registry install'] = """
+type: command
+short-summary: Retrives information required for to activate a connected registry.
+examples:
+  - name: Prints the values requiered to activate a connected registry in json format
+    text: |
+        az acr connected-registry install --registry mycloudregistry 
+            --name Contoso-Edge01-in-Wichita 
+  - name: Prints the values requiered to activate a connected registry and generate a sync token password in json format
+    text: |
+        az acr connected-registry install --registry mycloudregistry 
+            --name Contoso-Edge01-in-Wichita --fresh-install
+"""
+
 helps['acr connected-registry list'] = """
 type: command
 short-summary: Lists all the connected registries under the current parent registry.

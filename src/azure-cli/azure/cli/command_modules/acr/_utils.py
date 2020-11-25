@@ -515,7 +515,8 @@ def create_default_scope_map(cmd,
                              scope_map_name,
                              repositories,
                              gateways,
-                             scope_map_description=""):
+                             scope_map_description="",
+                             force=False):
     from ._client_factory import cf_acr_scope_maps
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
     actions = parse_actions_from_repositories(repositories)
@@ -524,17 +525,20 @@ def create_default_scope_map(cmd,
         existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
         # for command idempotency, if the actions are the same, we accept it
         if sorted(existing_scope_map.actions) == sorted(actions):
-            return existing_scope_map.id
-        raise CLIError('The default scope map was already configured with different repository permissions.' +
-                       '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
-                       .format(registry_name, scope_map_name))
+            return existing_scope_map
+        if force and existing_scope_map:
+            logger.warning("Overriding scope map '%s' properties", scope_map_name)
+        else:
+            raise CLIError('The default scope map was already configured with different repository permissions.' +
+                           '\nPlease use "az acr scope-map update -r {} -n {} --add <REPO> --remove <REPO>" to update.'
+                           .format(registry_name, scope_map_name))
     except CloudError:
         pass
     logger.warning('Creating a scope map "%s" for provided permissions.', scope_map_name)
     poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
                                      actions, scope_map_description)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
-    return scope_map.id
+    return scope_map
 
 
 def get_token_from_id(cmd, token_id):

@@ -40,7 +40,7 @@ def acr_token_create(cmd,
         scope_map_id = create_default_scope_map(cmd, resource_group_name, registry_name,
                                                 DEFAULT_SCOPE_MAP_NAME.format(token_name),
                                                 repository_actions_list, gateway_actions_list,
-                                                "Created by token: {}".format(token_name))
+                                                "Created by token: {}".format(token_name)).id
     else:
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
         scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)
