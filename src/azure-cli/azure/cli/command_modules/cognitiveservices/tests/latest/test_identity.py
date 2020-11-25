@@ -7,9 +7,11 @@ import unittest
 import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.decorators import serial_test
 
 
 class CognitiveServicesByoxTests(ScenarioTest):
+    @serial_test()
     @ResourceGroupPreparer()
     def test_cognitiveservices_identity_assign_when_create(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
@@ -30,7 +32,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                          self.check('properties.provisioningState', 'Creating')])
 
         for i in range(10):
-            time.sleep(0.1)  # when generating recording, use a large value such as 15
+            time.sleep(15)
             account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
             if 'Creating' != account['properties']['provisioningState']:
                 break
@@ -41,6 +43,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
+    @serial_test()
     @ResourceGroupPreparer()
     def test_cognitiveservices_identity(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
