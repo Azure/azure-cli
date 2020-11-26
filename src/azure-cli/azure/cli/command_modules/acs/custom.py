@@ -1903,16 +1903,16 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         # user provided user assigned identity before creating managed cluster.
         if service_principal_profile is None and not assign_identity:
             msg = ('It is highly recommended to use USER assigned identity '
-                  '(option --assign-identity) when you want to bring your own'
-                  'subnet, which will have no latency for the role assignment to '
-                  'take effect. When using SYSTEM assigned identity, '
-                  'azure-cli will grant Network Contributor role to the '
-                  'system assigned identity after the cluster is created, and '
-                  'the role assignment will take some time to take effect, see '
-                  'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
-                  'proceed to create cluster with system assigned identity?')
+                   '(option --assign-identity) when you want to bring your own'
+                   'subnet, which will have no latency for the role assignment to '
+                   'take effect. When using SYSTEM assigned identity, '
+                   'azure-cli will grant Network Contributor role to the '
+                   'system assigned identity after the cluster is created, and '
+                   'the role assignment will take some time to take effect, see '
+                   'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                   'proceed to create cluster with system assigned identity?')
             if not yes and not prompt_y_n(msg, default="n"):
-                return
+                return None
             need_post_creation_vnet_permission_granting = True
         else:
             scope = vnet_subnet_id
@@ -1999,7 +1999,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     # addon is in the list and is enabled
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in addon_profiles and \
         addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
-    
+
     os_type = 'Linux'
     enable_virtual_node = False
     if CONST_VIRTUAL_NODE_ADDON_NAME + os_type in addon_profiles:
@@ -2143,10 +2143,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id)
             if need_post_creation_vnet_permission_granting:
                 if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                        result.identity.principal_id, scope=vnet_subnet_id,
-                                        resolve_assignee=False):
+                                               result.identity.principal_id, scope=vnet_subnet_id,
+                                               resolve_assignee=False):
                     logger.warning('Could not create a role assignment for subnet. '
-                               'Are you an Owner on this subscription?')
+                                   'Are you an Owner on this subscription?')
 
             return result
         except CloudError as ex:
@@ -2207,8 +2207,8 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     os_type = 'Linux'
     virtual_node_addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + os_type
     enable_virtual_node = (virtual_node_addon_name in instance.addon_profiles and
-                               instance.addon_profiles[virtual_node_addon_name].enabled)
-    
+                           instance.addon_profiles[virtual_node_addon_name].enabled)
+
     need_pull_for_result = enable_monitoring or ingress_appgw_addon_enabled or enable_virtual_node
 
     if need_pull_for_result:
@@ -2240,7 +2240,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
             random_agent_pool = result.agent_pool_profiles[0]
             if random_agent_pool.vnet_subnet_id != "":
                 _add_virtual_node_role_assignment(cmd, result, random_agent_pool.vnet_subnet_id)
-            # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP, 
+            # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP,
             # we don't need to handle it in client side in this case.
     else:
         result = sdk_no_wait(no_wait, client.create_or_update,
