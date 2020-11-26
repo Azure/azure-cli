@@ -392,8 +392,6 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test delete iaas pool
         self.batch_cmd('batch pool delete --pool-id {pool_i} --yes')
-        self.batch_cmd('batch pool show --pool-id {pool_i} --select "state"').assert_with_checks([
-            self.check('state', 'deleting')])
 
         # test app package reference
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
