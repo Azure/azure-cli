@@ -2271,7 +2271,8 @@ def aks_update(cmd, client, resource_group_name, name,
                aad_admin_group_object_ids=None,
                enable_ahub=False,
                disable_ahub=False,
-               no_wait=False):
+               no_wait=False,
+               tags=None):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
                                                           load_balancer_outbound_ips,
@@ -2289,7 +2290,8 @@ def aks_update(cmd, client, resource_group_name, name,
             not enable_aad and
             not update_aad_profile and
             not enable_ahub and
-            not disable_ahub):
+            not disable_ahub and
+            not tags):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
@@ -2306,7 +2308,8 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--aad-tenant-id" or '
                        '"--aad-admin-group-object-ids" or '
                        '"--enable-ahub" or '
-                       '"--disable-ahub"')
+                       '"--disable-ahub" or '
+                       '"--tags"')
 
     instance = client.get(resource_group_name, name)
     # For multi-agent pool, use the az aks nodepool command
@@ -2423,6 +2426,9 @@ def aks_update(cmd, client, resource_group_name, name,
         instance.windows_profile.license_type = 'Windows_Server'
     if disable_ahub:
         instance.windows_profile.license_type = 'None'
+
+    if tags:
+        instance.tags = tags
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
