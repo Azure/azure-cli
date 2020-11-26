@@ -2236,7 +2236,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create virtual network
         create_vnet = 'network vnet create --resource-group={resource_group} --name={vnet_name} ' \
-                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24 --yes -o json'
+                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24 -o json'
         vnet = self.cmd(create_vnet, checks=[
             self.check('newVNet.provisioningState', 'Succeeded')
         ]).get_output_in_json()
@@ -2256,7 +2256,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create aks cluster
         create_cmd = 'aks create --resource-group={resource_group} --name={aks_name} --enable-managed-identity --generate-ssh-keys ' \
                      '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
-                     '-a ingress-appgw --appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet  -o json'
+                     '-a ingress-appgw --appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet --yes -o json'
         aks_cluster = self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.ingressApplicationGateway.enabled', True),
@@ -2285,7 +2285,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create virtual network
         create_vnet = 'network vnet create --resource-group={resource_group} --name={vnet_name} ' \
-                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24 --yes -o json'
+                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24 -o json'
         vnet = self.cmd(create_vnet, checks=[
             self.check('newVNet.provisioningState', 'Succeeded')
         ]).get_output_in_json()
@@ -2329,7 +2329,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # create aks cluster
         create_cmd = 'aks create -n {aks_name} -g {resource_group} --enable-managed-identity --generate-ssh-keys ' \
                      '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
-                     '-a ingress-appgw --appgw-id {appgw_id} -o json'
+                     '-a ingress-appgw --appgw-id {appgw_id} --yes -o json'
         aks_cluster = self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.ingressApplicationGateway.enabled', True),
