@@ -239,6 +239,30 @@ jobs:
       TargetPath: 'build_scripts/windows/out/'
       ArtifactName: pyinstaller-msi
     
+- job: PrintPyinstallerFileDifference
+  displayName: 'Print Pyinstaller File Difference'
+  dependsOn: ExtractMetadata
+  condition: succeeded()
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3'
+    inputs:
+      versionSpec: 3.7
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - script: |
+       set /p CLI_VERSION=<$(System.ArtifactsDirectory)/metadata/version
+       set
+       build_scripts/windows/scripts/check_pyinstaller_files.cmd
+    displayName: 'Print File Difference'
+    
 - job: BuildDockerImage
   displayName: Build Docker Image
 
