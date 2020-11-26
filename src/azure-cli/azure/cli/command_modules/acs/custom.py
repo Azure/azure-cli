@@ -2096,10 +2096,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     for _ in range(0, max_retry):
         try:
             need_pull_for_result = (monitoring or
-                                   (enable_managed_identity and attach_acr) or
-                                   ingress_appgw_addon_enabled or
-                                   enable_virtual_node or
-                                   need_post_creation_vnet_permission_granting)
+                                    (enable_managed_identity and attach_acr) or
+                                    ingress_appgw_addon_enabled or
+                                    enable_virtual_node or
+                                    need_post_creation_vnet_permission_granting)
             if need_pull_for_result:
                 # adding a wait here since we rely on the result for role assignment
                 result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
