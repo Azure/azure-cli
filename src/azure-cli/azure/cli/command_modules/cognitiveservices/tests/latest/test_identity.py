@@ -76,6 +76,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
         identity = self.cmd('az cognitiveservices account identity show -n {sname} -g {rg}').get_output_in_json()
         self.assertEqual(identity['type'], 'SystemAssigned')
 
+        time.sleep(180)
         self.cmd('az cognitiveservices account identity remove -n {sname} -g {rg}')
 
         identity = self.cmd('az cognitiveservices account identity show -n {sname} -g {rg}').get_output_in_json()
