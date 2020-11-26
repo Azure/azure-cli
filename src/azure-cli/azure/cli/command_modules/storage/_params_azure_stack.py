@@ -192,7 +192,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    local_context_attribute=LocalContextAttribute(
                        name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         # Azure Stack always requires default kind is Storage
-        c.argument('kind', help='Indicate the type of storage account.', max_api="2017-10-01",
+        c.argument('kind', help='Indicate the type of storage account.',
                    arg_type=get_enum_type(t_kind), default='Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
