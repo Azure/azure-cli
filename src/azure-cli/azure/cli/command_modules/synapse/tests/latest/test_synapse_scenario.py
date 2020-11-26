@@ -498,9 +498,12 @@ class SynapseScenarioTests(ScenarioTest):
         import time
         time.sleep(20)
 
+        self.kwargs.update({
+            'filepath': os.path.join(TEST_DIR, 'assets/linkedservice.json')
+        })
         # create linked service
         self.cmd(
-            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/linkedservice.json',
+            'az synapse linked-service create --workspace-name {workspace} --name {name} --file @{filepath}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -581,9 +584,12 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'name': 'pipeline'})
 
+        self.kwargs.update({
+            'filepath': os.path.join(TEST_DIR, 'assets/pipeline.json')
+        })
         # create pipeline
         self.cmd(
-            'az synapse pipeline create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/pipeline.json',
+            'az synapse pipeline create --workspace-name {workspace} --name {name} --file @{filepath}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -646,9 +652,12 @@ class SynapseScenarioTests(ScenarioTest):
             'tumbling-window-trigger': 'TumblingWindowTrigger',
             'run-id': '08586024051698130326966471413CU40'})
 
+        self.kwargs.update({
+            'filepath': os.path.join(TEST_DIR, 'assets/trigger.json')
+        })
         # create trigger
         self.cmd(
-            'az synapse trigger create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/trigger.json',
+            'az synapse trigger create --workspace-name {workspace} --name {name} --file @{filepath}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -720,9 +729,12 @@ class SynapseScenarioTests(ScenarioTest):
             'workspace': 'testsynapseworkspace',
             'name': 'dataflow'})
 
+        self.kwargs.update({
+            'filepath': os.path.join(TEST_DIR, 'assets/dataflow.json')
+        })
         # create data flow
         self.cmd(
-            'az synapse data-flow create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/dataflow.json',
+            'az synapse data-flow create --workspace-name {workspace} --name {name} --file @{filepath}',
             checks=[
                 self.check('name', self.kwargs['name'])
             ])
@@ -755,9 +767,12 @@ class SynapseScenarioTests(ScenarioTest):
             'name': 'notebook',
             'spark-pool': 'testpool'})
 
+        self.kwargs.update({
+            'filepath': os.path.join(TEST_DIR, 'assets/notebook.ipynb')
+        })
         # create notebook
         self.cmd(
-            'az synapse notebook create --workspace-name {workspace} --name {name} --file @src/azure-cli/azure/cli/command_modules/synapse/tests/latest/assets/notebook.ipynb '
+            'az synapse notebook create --workspace-name {workspace} --name {name} --file @{filepath}'
             '--spark-pool-name {spark-pool}',
             checks=[
                 self.check('name', self.kwargs['name'])

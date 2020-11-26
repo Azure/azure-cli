@@ -158,6 +158,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 PACKAGE_DATA = {
+    'azure.cli.command_modules.acr': ['*.json'],
     'azure.cli.command_modules.botservice': ['*.json', '*.config'],
     'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
     'azure.cli.command_modules.servicefabric': [

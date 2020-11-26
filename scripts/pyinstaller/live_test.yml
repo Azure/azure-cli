@@ -1,0 +1,186 @@
+name: Pyinstaller Live Test $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: BuildPyinstallerDebPackages
+  displayName: Build Pyinstaller Deb Packages
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Bionic:
+        deb_system: ubuntu
+        distro: bionic
+  steps:
+  - task: Bash@3
+    displayName: 'Build Pyinstaller $(deb_system) $(distro) Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/pyinstaller/release/debian/pipeline.sh
+    env:
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Pyinstaller Artifact: debian'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: pyinstaller-$(deb_system)-$(distro)
+
+- job: RunLiveTest
+  displayName: Run Live Test
+  dependsOn:
+   - BuildPyinstallerDebPackages
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 5
+    matrix:
+      acr:
+        Target: acr
+      acs:
+        Target: acs
+      advisor:
+        Target: advisor
+      ams:
+        Target: ams
+      apim:
+        Target: apim
+      appconfig:
+        Target: appconfig
+      appservice:
+        Target: appservice
+      aro:
+        Target: aro
+      backup:
+        Target: backup
+      batch:
+        Target: batch
+      batchai:
+        Target: batchai
+      billing:
+        Target: billing
+      botservice:
+        Target: botservice
+      cdn:
+        Target: cdn
+      cloud:
+        Target: cloud
+      cognitiveservices:
+        Target: cognitiveservices
+      config:
+        Target: config
+      configure:
+        Target: configure
+      consumption:
+        Target: consumption
+      container:
+        Target: container
+      cosmosdb:
+        Target: cosmosdb
+      deploymentmanager:
+        Target: deploymentmanager
+      dla:
+        Target: dla
+      dls:
+        Target: dls
+      dms:
+        Target: dms
+      eventgrid:
+        Target: eventgrid
+      eventhubs:
+        Target: eventhubs
+      extension:
+        Target: extension
+      feedback:
+        Target: feedback
+      find:
+        Target: find
+      hdinsight:
+        Target: hdinsight
+      iot:
+        Target: iot
+      keyvault:
+        Target: keyvault
+      kusto:
+        Target: kusto
+      lab:
+        Target: lab
+      managedservices:
+        Target: managedservices
+      maps:
+        Target: maps
+      monitor:
+        Target: monitor
+      natgateway:
+        Target: natgateway
+      netappfiles:
+        Target: netappfiles
+      network:
+        Target: network
+      policyinsights:
+        Target: policyinsights
+      privatedns:
+        Target: privatedns
+      profile:
+        Target: profile
+      rdbms:
+        Target: rdbms
+      redis:
+        Target: redis
+      relay:
+        Target: relay
+      reservations:
+        Target: reservations
+      resource:
+        Target: resource
+      role:
+        Target: role
+      search:
+        Target: search
+      security:
+        Target: security
+      servicebus:
+        Target: servicebus
+      servicefabric:
+        Target: servicefabric
+      signalr:
+        Target: signalr
+      sql:
+        Target: sql
+      sqlvm:
+        Target: sqlvm
+      storage:
+        Target: storage
+      util:
+        Target: util
+      vm:
+        Target: vm
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download ubuntu:bionic Build'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+        artifactName: pyinstaller-ubuntu-bionic
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: 3.7
+    - task: Bash@3
+      displayName: 'Test Pyinstaller ubuntu bionic Package Performance'
+      env:
+        DISTRO: ubuntu
+        DISTRO_BASE_IMAGE: ubuntu:bionic
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -exv
+          CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+          dpkg -i $SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
+          time az version
+          

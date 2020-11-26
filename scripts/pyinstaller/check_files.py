@@ -25,8 +25,9 @@ def check(source_dir, pyinstaller_dir):
                     pyi_path = pyi_path + 'c'
                 if not os.path.exists(pyi_path):
                     missed_files.append(relpath)
-    print('missed file count: {}'.format(len(missed_files)))
+    
     print(json.dumps(missed_files, indent=4))
+    print('\n\nTotal missed file count: {}'.format(len(missed_files)))
 
 
 if __name__ == '__main__':
