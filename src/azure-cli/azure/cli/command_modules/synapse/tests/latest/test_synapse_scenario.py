@@ -772,7 +772,7 @@ class SynapseScenarioTests(ScenarioTest):
         })
         # create notebook
         self.cmd(
-            'az synapse notebook create --workspace-name {workspace} --name {name} --file @{filepath}'
+            'az synapse notebook create --workspace-name {workspace} --name {name} --file @{filepath} '
             '--spark-pool-name {spark-pool}',
             checks=[
                 self.check('name', self.kwargs['name'])
