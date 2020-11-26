@@ -1693,6 +1693,45 @@ def _add_ingress_appgw_addon_role_assignment(result, cmd):
                                    'Are you an Owner on this subscription?', vnet_id, CONST_INGRESS_APPGW_ADDON_NAME)
 
 
+def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
+    # Remove trailing "/subnets/<SUBNET_NAME>" to get the vnet id
+    vnet_id = vnet_subnet_id.rpartition('/')[0]
+    vnet_id = vnet_id.rpartition('/')[0]
+
+    service_principal_msi_id = None
+    is_service_principal = False
+    os_type = 'Linux'
+    addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + os_type
+    # Check if service principal exists, if it does, assign permissions to service principal
+    # Else, provide permissions to MSI
+    if (
+            hasattr(result, 'service_principal_profile') and
+            hasattr(result.service_principal_profile, 'client_id') and
+            result.service_principal_profile.client_id.lower() != 'msi'
+    ):
+        logger.info('valid service principal exists, using it')
+        service_principal_msi_id = result.service_principal_profile.client_id
+        is_service_principal = True
+    elif (
+            (hasattr(result, 'addon_profiles')) and
+            (addon_name in result.addon_profiles) and
+            (hasattr(result.addon_profiles[addon_name], 'identity')) and
+            (hasattr(result.addon_profiles[addon_name].identity, 'object_id'))
+    ):
+        logger.info('virtual node MSI exists, using it')
+        service_principal_msi_id = result.addon_profiles[addon_name].identity.object_id
+        is_service_principal = False
+
+    if service_principal_msi_id is not None:
+        if not _add_role_assignment(cmd.cli_ctx, 'Contributor',
+                                    service_principal_msi_id, is_service_principal, scope=vnet_id):
+            logger.warning('Could not create a role assignment for virtual node addon. '
+                           'Are you an Owner on this subscription?')
+    else:
+        logger.warning('Could not find service principal or user assigned MSI for role'
+                       'assignment')
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -1749,7 +1788,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
-               enable_managed_identity=False,
+               enable_managed_identity=True,
                assign_identity=None,
                attach_acr=None,
                enable_aad=False,
@@ -1760,7 +1799,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                appgw_id=None,
                appgw_subnet_id=None,
                appgw_watch_namespace=None,
-               no_wait=False):
+               no_wait=False,
+               yes=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
@@ -1835,6 +1875,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             admin_password=windows_admin_password,
             license_type=windows_license_type)
 
+    # If customer explicitly provide a service principal, disable managed identity.
+    if service_principal and client_secret:
+        enable_managed_identity = False
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
     service_principal_profile = None
@@ -1849,6 +1892,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             secret=principal_obj.get("client_secret"),
             key_vault_secret_ref=None)
 
+    need_post_creation_vnet_permission_granting = False
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
         # if service_principal_profile is None, then this cluster is an MSI cluster,
@@ -1858,10 +1902,18 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         # 2. For user assigned identity, we can grant needed permission to
         # user provided user assigned identity before creating managed cluster.
         if service_principal_profile is None and not assign_identity:
-            logger.warning('The cluster is an MSI cluster using system assigned identity, '
-                           'please manually grant Network Contributor role to the '
-                           'system assigned identity after the cluster is created, see '
-                           'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
+            msg = ('It is highly recommended to use USER assigned identity '
+                  '(option --assign-identity) when you want to bring your own'
+                  'subnet, which will have no latency for the role assignment to '
+                  'take effect. When using SYSTEM assigned identity, '
+                  'azure-cli will grant Network Contributor role to the '
+                  'system assigned identity after the cluster is created, and '
+                  'the role assignment will take some time to take effect, see '
+                  'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity, '
+                  'proceed to create cluster with system assigned identity?')
+            if not yes and not prompt_y_n(msg, default="n"):
+                return
+            need_post_creation_vnet_permission_granting = True
         else:
             scope = vnet_subnet_id
             identity_client_id = ""
@@ -1947,6 +1999,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     # addon is in the list and is enabled
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in addon_profiles and \
         addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
+    
+    os_type = 'Linux'
+    enable_virtual_node = False
+    if CONST_VIRTUAL_NODE_ADDON_NAME + os_type in addon_profiles:
+        enable_virtual_node = True
 
     aad_profile = None
     if enable_aad:
@@ -2038,7 +2095,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            need_pull_for_result = monitoring or (enable_managed_identity and attach_acr) or ingress_appgw_addon_enabled
+            need_pull_for_result = (monitoring or \
+                                   (enable_managed_identity and attach_acr) or \
+                                   ingress_appgw_addon_enabled or\
+                                   enable_virtual_node or \
+                                   need_post_creation_vnet_permission_granting)
             if need_pull_for_result:
                 # adding a wait here since we rely on the result for role assignment
                 result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
@@ -2078,6 +2139,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                     subscription_id=subscription_id)
             if ingress_appgw_addon_enabled:
                 _add_ingress_appgw_addon_role_assignment(result, cmd)
+            if enable_virtual_node:
+                _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id)
+            if need_post_creation_vnet_permission_granting:
+                if not _create_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                        result.identity.principal_id, scope=vnet_subnet_id,
+                                        resolve_assignee=False):
+                    logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
+
             return result
         except CloudError as ex:
             retry_exception = ex
@@ -2129,35 +2199,52 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                               appgw_watch_namespace=appgw_watch_namespace,
                               no_wait=no_wait)
 
-    monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
+    enable_monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in instance.addon_profiles \
         and instance.addon_profiles[CONST_INGRESS_APPGW_ADDON_NAME].enabled
-    need_pull_for_result = monitoring or ingress_appgw_addon_enabled
+
+    os_type = 'Linux'
+    virtual_node_addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + os_type
+    enable_virtual_node = (virtual_node_addon_name in instance.addon_profiles and
+                               instance.addon_profiles[virtual_node_addon_name].enabled)
+    
+    need_pull_for_result = enable_monitoring or ingress_appgw_addon_enabled or enable_virtual_node
 
     if need_pull_for_result:
+        if enable_monitoring:
+            _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
+
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, name, instance))
+
+        if enable_monitoring:
+            cloud_name = cmd.cli_ctx.cloud.name
+            # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
+            if cloud_name.lower() == 'azurecloud':
+                from msrestazure.tools import resource_id
+                cluster_resource_id = resource_id(
+                    subscription=subscription_id,
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.ContainerService', type='managedClusters',
+                    name=name
+                )
+                _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
+
+        if ingress_appgw_addon_enabled:
+            _add_ingress_appgw_addon_role_assignment(result, cmd)
+
+        if enable_virtual_node:
+            # All agent pool will reside in the same vnet, we will grant vnet level Contributor role
+            # in later function, so using a random agent pool here is OK
+            random_agent_pool = result.agent_pool_profiles[0]
+            if random_agent_pool.vnet_subnet_id != "":
+                _add_virtual_node_role_assignment(cmd, result, random_agent_pool.vnet_subnet_id)
+            # Else, the cluster is not using custom VNet, the permission is already granted in AKS RP, 
+            # we don't need to handle it in client side in this case.
     else:
         result = sdk_no_wait(no_wait, client.create_or_update,
                              resource_group_name, name, instance)
-
-    cloud_name = cmd.cli_ctx.cloud.name
-    if monitoring and cloud_name.lower() == 'azurecloud':
-        _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
-        # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
-        from msrestazure.tools import resource_id
-        cluster_resource_id = resource_id(
-            subscription=subscription_id,
-            resource_group=resource_group_name,
-            namespace='Microsoft.ContainerService', type='managedClusters',
-            name=name
-        )
-        _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-
-    if ingress_appgw_addon_enabled:
-        _add_ingress_appgw_addon_role_assignment(result, cmd)
-
     return result
 
 
@@ -2728,7 +2815,8 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
         if not aci_subnet_name or not vnet_subnet_id:
             raise CLIError('"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
         # TODO: how about aciConnectorwindows, what is its addon name?
-        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME] = ManagedClusterAddonProfile(
+        os_type = 'Linux'
+        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME + os_type] = ManagedClusterAddonProfile(
             enabled=True,
             config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
         )
