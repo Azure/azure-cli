@@ -209,8 +209,11 @@ def retry(func, timeout, interval=10):
     :param interval: polling interval
     :return:
     """
+    e = None
     for i in range(0, timeout, interval):
         try:
             return func()
-        except Exception:  # pylint: disable=broad-except
+        except Exception as local_e:  # pylint: disable=broad-except
+            e = local_e
             time.sleep(interval)
+    raise e
