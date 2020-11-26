@@ -355,23 +355,61 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
+        self.kwargs['rg'] = resource_group
+
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            # User
             user = self.create_random_name('testuser', 15)
-            self.kwargs.update({
-                'upn': user + '@azuresdkteam.onmicrosoft.com',
-                'rg': resource_group
-            })
+            self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
 
             result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
             self.kwargs['object_id'] = result['objectId']
             try:
                 # test role assignment on subscription level
-                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg}')
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role Reader -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
                 self.cmd('role assignment delete -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
             finally:
-                self.cmd('ad user delete --upn-or-object-id {upn}')
+                try:
+                    self.cmd('ad user delete --upn-or-object-id {upn}')
+                except:
+                    pass
+
+            # Group
+            self.kwargs['group_name'] = self.create_random_name('testgroup', 15)
+            result = self.cmd(
+                'ad group create --display-name {group_name} --mail-nickname {group_name}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            time.sleep(10)
+            try:
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type Group --role Reader -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                try:
+                    self.cmd('ad group delete --group {object_id}')
+                except:
+                    pass
+
+            # Service Principal
+            result = self.cmd('ad sp create-for-rbac --skip-assignment').get_output_in_json()
+            self.kwargs['app_id'] = result['appId']
+            result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type ServicePrincipal --role Reader -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
+                self.cmd('role assignment delete -g {rg}')
+                self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                try:
+                    self.cmd('ad sp delete --id {object_id}')
+                except:
+                    pass
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()

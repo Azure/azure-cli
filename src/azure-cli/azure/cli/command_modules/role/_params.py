@@ -10,7 +10,7 @@ from azure.graphrbac.models import ConsentType
 
 from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag, get_location_type, tags_type
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.cli.core.profiles import ResourceType
+# from azure.cli.core.profiles import ResourceType
 
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
@@ -202,7 +202,19 @@ def load_arguments(self, _):
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
 
     with self.argument_context('role assignment create') as c:
-        PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
+        # PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
+
+        # A temporary fix for https://github.com/Azure/azure-cli/issues/11594.
+        # As only `User', 'Group' or 'ServicePrincipal' are allowed values, the REST spec contains invalid values
+        # (like MSI) which are used only internally by the service. So hide them.
+        # https://github.com/Azure/azure-rest-api-specs/blob/962013a1cf9bf5b87e3aad75a14c7dd620acda62/specification/authorization/resource-manager/Microsoft.Authorization/preview/2020-04-01-preview/authorization-RoleAssignmentsCalls.json#L508-L522
+        from enum import Enum
+
+        class PrincipalType(str, Enum):
+            user = "User"
+            group = "Group"
+            service_principal = "ServicePrincipal"
+
         if PrincipalType:
             c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
                        help='use with --assignee-object-id to avoid errors caused by propagation latency in AAD Graph')
