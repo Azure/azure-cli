@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import time
 from contextlib import contextmanager
 
 from azure_devtools.scenario_tests import (create_random_name as create_random_name_base, RecordingProcessor,
@@ -198,3 +199,18 @@ class GeneralNameReplacer(_BuggyGeneralNameReplacer):
                     request.body = body.replace(old, new)
 
         return request
+
+
+def retry(func, timeout, interval=10):
+    """
+    Retry func until success.
+    :param timeout: in seconds
+    :param func: function
+    :param interval: polling interval
+    :return:
+    """
+    for i in range(0, timeout, interval):
+        try:
+            return func()
+        except Exception:  # pylint: disable=broad-except
+            time.sleep(interval)
