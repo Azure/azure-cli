@@ -39,7 +39,7 @@ def try_manual(func):
             decorated_path[module_path.rfind(os.path.sep) + 1:])
         manual_file_path, manual_file_name = os.path.split(manual_path)
         module_name, _ = os.path.splitext(manual_file_name)
-        manual_module = "..manual." + \
+        manual_module = "azure.cli.command_modules.billing.manual." + \
             ".".join(manual_file_path.split(os.path.sep) + [module_name, ])
         return getattr(import_module(manual_module, package=__name__), origin_func.__name__)
 
