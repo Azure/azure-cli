@@ -62,6 +62,8 @@ from azure.cli.command_modules.network._validators import (
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
     process_appgw_waf_policy_update)
 
+ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
+
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
@@ -1089,7 +1091,7 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk) as g:
+    with self.command_group('network route-table', network_rt_sdk, deprecate_info=self.deprecate(redirect=ROUTE_TABLE_DEPRECATION_INFO, hide=False)) as g:
         g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
         g.command('delete', 'delete')
         g.show_command('show', 'get')
