@@ -395,7 +395,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     pass
 
             # Service Principal
-            result = self.cmd('ad sp create-for-rbac --skip-assignment').get_output_in_json()
+            self.kwargs['sp_name'] = self.create_random_name('sp', 15)
+            result = self.cmd('ad sp create-for-rbac --skip-assignment --name {sp_name}').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
             result = self.cmd('ad sp show --id {app_id}').get_output_in_json()
             self.kwargs['object_id'] = result['objectId']
