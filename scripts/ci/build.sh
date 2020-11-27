@@ -150,6 +150,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.cer',
                        '*.yml',
                        '*.xml',
+                       '*.ipynb',
                        '**/*.cer',
                        '**/*.pem',
                        '**/*.pfx',
@@ -160,7 +161,8 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.md',
                        '**/*.bat',
                        '**/*.txt',
-                       '**/*.xml']},
+                       '**/*.xml',
+                       '**/*.ipynb']},
     install_requires=DEPENDENCIES
 )
 EOL
