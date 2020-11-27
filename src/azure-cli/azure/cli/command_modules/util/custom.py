@@ -116,7 +116,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
-            logger.warning("Update homebrew formulae")
+            logger.debug("Update homebrew formulae")
             exit_code = subprocess.call(['brew', 'update'])
             if exit_code == 0:
                 update_cmd = ['brew', 'upgrade', 'azure-cli']
@@ -138,10 +138,22 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     if exit_code:
         telemetry.set_failure("CLI upgrade failed.")
         sys.exit(exit_code)
+
+    import azure.cli.core
+    import importlib
+    importlib.reload(azure.cli.core)
+    new_version = azure.cli.core.__version__
+
+    if update_cli and new_version == local_version:
+        logger.warning("Upgrade failed unexpectedly.")
+        sys.exit(1)
+
     # Updating Azure CLI and extension together is not supported in homebrewe package.
     if installer == 'HOMEBREW' and exts:
         logger.warning("Please rerun 'az upgrade' to update all extensions.")
     else:
+        if exts:
+            logger.warning("Upgrading extensions")
         for ext_name in exts:
             try:
                 logger.warning("Checking update for %s", ext_name)
@@ -150,8 +162,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             except Exception as ex:  # pylint: disable=broad-except
                 msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
                 raise CLIError(msg)
-
-    logger.warning("Upgrade finished.")
-    if not cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False):
-        logger.warning("You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. "
-                       "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update")
+    auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
+        "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
+    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False) \
+        else auto_upgrade_msg)
