@@ -7,6 +7,9 @@
 from enum import Enum
 from functools import total_ordering
 from importlib import import_module
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class APIVersionException(Exception):
@@ -539,5 +542,7 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
         if sub_mod_prefix and '#' not in mod_attr_path:
             mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
         loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
+        if loaded_obj is None:
+            logger.debug("Cannot load %s from %s", mod_attr_path, sdk_path)
         results.append(loaded_obj)
     return results[0] if len(results) == 1 else results
