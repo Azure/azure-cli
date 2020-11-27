@@ -67,19 +67,19 @@ logger = get_logger(__name__)
 # pylint: disable=unused-argument
 def run_tests(cmd, path, module):
     sys.path.append(path)
-    logger.warning(str(sys.path))
     try:
         import azure.cli
         azure.cli.__path__.append(os.path.join(path, 'azure', 'cli'))
-        logger.warning('azure.cli.__path__: {}'.format(str(azure.cli.__path__)))
-        import azure.cli.testsdk
-        logger.warning('success to import azure.cli.testsdk')
-        module_imported = importlib.import_module('azure.cli.command_modules.{}'.format(module))
-        if os.path.exists(os.path.join(path, 'azure', 'cli', 'command_modules', module)):
-            module_imported.__path__.append(os.path.join(path, 'azure', 'cli', 'command_modules', module))
-            logger.warning('[{}] path are {}'.format(module, str(module_imported.__path__)))
+        if module == 'core':
+            import azure.cli.core
+            azure.cli.core.__path__.append(os.path.join(path, 'azure', 'cli', 'core'))
         else:
-            logger.warning('[{}] does not have full tests.'.format(module))
+            module_imported = importlib.import_module('azure.cli.command_modules.{}'.format(module))
+            if os.path.exists(os.path.join(path, 'azure', 'cli', 'command_modules', module)):
+                module_imported.__path__.append(os.path.join(path, 'azure', 'cli', 'command_modules', module))
+                logger.warning('[{}] path are {}'.format(module, str(module_imported.__path__)))
+            else:
+                logger.warning('[{}] does not have full tests.'.format(module))
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(str(ex))
 
