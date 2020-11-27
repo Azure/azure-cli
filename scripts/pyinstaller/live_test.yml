@@ -6,8 +6,26 @@ trigger:
     - '*'
 
 jobs:
+- job: ExtractMetadata
+  displayName: Extract Metadata
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: Bash@3
+    displayName: 'Extract Version'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/get_version.sh
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: metadata'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: metadata
+
 - job: BuildPyinstallerDebPackages
   displayName: Build Pyinstaller Deb Packages
+  dependsOn: ExtractMetadata
   condition: succeeded()
   pool:
     vmImage: 'ubuntu-16.04'
@@ -155,6 +173,8 @@ jobs:
         Target: sqlvm
       storage:
         Target: storage
+      synapse:
+        Target: synapse
       util:
         Target: util
       vm:
@@ -162,20 +182,24 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: 3.7
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
     - task: DownloadPipelineArtifact@1
       displayName: 'Download ubuntu:bionic Build'
       inputs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
         artifactName: pyinstaller-ubuntu-bionic
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.7'
-      inputs:
-        versionSpec: 3.7
     - task: Bash@3
       displayName: 'Test Pyinstaller ubuntu bionic Package Performance'
       env:
-        DISTRO: ubuntu
-        DISTRO_BASE_IMAGE: ubuntu:bionic
+        DISTRO: bionic
       inputs:
         targetType: 'inline'
         script: |
@@ -183,4 +207,3 @@ jobs:
           CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
           dpkg -i $SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
           time az version
-          

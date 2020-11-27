@@ -81,8 +81,6 @@ def run_tests(cmd, path, module):
         else:
             logger.warning('[{}] does not have full tests.'.format(module))
     except Exception as ex:  # pylint: disable=broad-except
-        import traceback
-        traceback.print_tb(ex)
         logger.warning(str(ex))
 
     import pytest
@@ -93,17 +91,17 @@ def run_tests(cmd, path, module):
     if module == 'core':
         module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/azure-cli-core.xml', '--pyargs', 'azure.cli.core.tests']
         exist_code = pytest.main(module_args)
-        
-    if module not in ['keyvault']:
-        if module in ['botservice', 'network', 'configure', 'monitor']:
-            module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
-            exist_code = pytest.main(module_args)
-        else:
-            module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
-            exist_code = pytest.main(module_args)
-        if exist_code == 5:
-            logger.warning('No tests found for {}, skip it.'.format(module))
-            exist_code = 0
+    elif module in ['keyvault']:
+        pass # skip keyvault currently as the test itself has some problem.
+    elif module in ['botservice', 'network', 'configure', 'monitor']:
+        module_args = pytest_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+        exist_code = pytest.main(module_args)
+    else:
+        module_args = pytest_parallel_args + ['--junit-xml', './azure_cli_test_result/{}.xml'.format(module), '--pyargs', 'azure.cli.command_modules.{}.tests'.format(module)]
+        exist_code = pytest.main(module_args)
+    if exist_code == 5:
+        logger.warning('No tests found for {}, skip it.'.format(module))
+        exist_code = 0
     sys.exit(exist_code)
 
 '''
