@@ -280,6 +280,14 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='server_audit_policy_update', supports_no_wait=True)
         g.wait_command('wait')
 
+    with self.command_group('sql server ms-support audit-policy',
+                            server_blob_auditing_policies_operations,
+                            client_factory=get_sql_server_blob_auditing_policies_operations) as g:
+
+        g.custom_show_command('show', 'server_ms_support_audit_policy_show')
+        g.generic_update_command('update', custom_func_name='server_ms_support_audit_policy_update', supports_no_wait=True)
+        g.wait_command('wait')
+
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_database_long_term_retention_policies_operations)

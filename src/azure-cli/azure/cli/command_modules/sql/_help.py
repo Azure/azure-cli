@@ -1122,6 +1122,61 @@ examples:
         az sql server audit-policy update -g mygroup -n myserver
             --event-hub-target-state Disabled
 """
+helps['sql server ms-support audit-policy'] = """
+type: group
+short-summary: Manage a server's Microsoft support operations auditing policy.
+"""
+
+helps['sql server ms-support audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the server's Microsoft support operations audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that server's Microsoft support operations audit policy exists
+    text: az sql server ms-support audit-policy wait -g mygroup -n myserver --exists
+"""
+
+helps['sql server ms-support audit-policy update'] = """
+type: command
+short-summary: Update a server's Microsoft support operations auditing policy.
+long-summary: If the Microsoft support operations policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-account mystorage
+  - name: Enable by storage endpoint and key.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
+  - name: Disable a Microsoft support operations auditing policy.
+    text: az sql server ms-support audit-policy update -g mygroup -n myserver --state Disabled
+  - name: Disable a blob storage Microsoft support operations auditing policy.
+    text: az sql server ms-support audit-policy update -g mygroup -n myserver --bsts Disabled
+  - name: Enable a log analytics Microsoft support operations auditing policy.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics Microsoft support operations auditing policy.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver
+            --lats Disabled
+  - name: Enable an event hub Microsoft support operations auditing policy.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub Microsoft support operations auditing policy for default event hub.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub Microsoft support operations auditing policy.
+    text: |
+        az sql server ms-support audit-policy update -g mygroup -n myserver
+            --event-hub-target-state Disabled
+"""
 
 helps['sql server conn-policy'] = """
 type: group
