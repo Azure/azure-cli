@@ -2117,7 +2117,7 @@ def _audit_policy_update_apply_blob_storage_details(
                 use_secondary_key=instance.is_storage_secondary_key_in_use)
 
         # Apply retenation days
-        if retention_days is not None:
+        if hasattr(instance, 'retention_days') and retention_days is not None:
             instance.retention_days = retention_days
     else:
         instance.storage_endpoint = None
@@ -2200,14 +2200,15 @@ def _audit_policy_update_global_settings(
             retention_days=retention_days)
 
         # Apply audit_actions_and_groups
-        if audit_actions_and_groups is not None:
-            instance.audit_actions_and_groups = audit_actions_and_groups
+        if hasattr(instance, 'audit_actions_and_groups'):
+            if audit_actions_and_groups is not None:
+                instance.audit_actions_and_groups = audit_actions_and_groups
 
-        if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
-            instance.audit_actions_and_groups = [
-                "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
-                "FAILED_DATABASE_AUTHENTICATION_GROUP",
-                "BATCH_COMPLETED_GROUP"]
+            if not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []:
+                instance.audit_actions_and_groups = [
+                    "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+                    "FAILED_DATABASE_AUTHENTICATION_GROUP",
+                    "BATCH_COMPLETED_GROUP"]
 
         # Apply is_azure_monitor_target_enabled
         _audit_policy_update_apply_azure_monitor_target_enabled(
