@@ -136,7 +136,9 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
-        telemetry.set_failure("CLI upgrade failed.")
+        err_msg = "CLI upgrade failed."
+        logger.warning(err_msg)
+        telemetry.set_failure(err_msg)
         sys.exit(exit_code)
 
     import azure.cli.core
@@ -145,23 +147,25 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
     new_version = azure.cli.core.__version__
 
     if update_cli and new_version == local_version:
-        logger.warning("Upgrade failed unexpectedly.")
+        err_msg = "CLI upgrade failed or aborted."
+        logger.warning(err_msg)
+        telemetry.set_failure(err_msg)
         sys.exit(1)
 
-    # Updating Azure CLI and extension together is not supported in homebrewe package.
+    # Python is reinstalled in another versioned directory with Homebrew, subprocess needs to be reloaded
     if installer == 'HOMEBREW' and exts:
-        logger.warning("Please rerun 'az upgrade' to update all extensions.")
-    else:
-        if exts:
-            logger.warning("Upgrading extensions")
-        for ext_name in exts:
-            try:
-                logger.warning("Checking update for %s", ext_name)
-                subprocess.call(['az', 'extension', 'update', '-n', ext_name],
-                                shell=platform.system() == 'Windows')
-            except Exception as ex:  # pylint: disable=broad-except
-                msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
-                raise CLIError(msg)
+        importlib.reload(subprocess)
+
+    if exts:
+        logger.warning("Upgrading extensions")
+    for ext_name in exts:
+        try:
+            logger.warning("Checking update for %s", ext_name)
+            subprocess.call(['az', 'extension', 'update', '-n', ext_name],
+                            shell=platform.system() == 'Windows')
+        except Exception as ex:  # pylint: disable=broad-except
+            msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
+            raise CLIError(msg)
     auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
         "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
     logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False) \

@@ -85,18 +85,17 @@ finally:
                 if LooseVersion(VERSIONS['versions']['core']['local']) < LooseVersion(VERSIONS['versions']['core']['pypi']):  # pylint: disable=line-too-long
                     import subprocess
                     import platform
-                    from knack.util import CLIError
+                    from azure.cli.core.azclierror import UnclassifiedUserFault  # pylint: disable=ungrouped-imports
                     logger.warning("New Azure CLI version available. Running 'az upgrade' to update automatically.")
                     update_all = az_cli.config.getboolean('auto-upgrade', 'all', True)
                     prompt = az_cli.config.getboolean('auto-upgrade', 'prompt', True)
                     cmd = ['az', 'upgrade', '--all', str(update_all)]
                     if prompt:
-                        from knack.prompting import verify_is_a_tty, NoTTYException
+                        from knack.prompting import verify_is_a_tty, NoTTYException  # pylint: disable=ungrouped-imports
                         az_upgrade_run = True
                         try:
                             verify_is_a_tty()
                         except NoTTYException:
-                            from azure.cli.core.azclierror import UnclassifiedUserFault
                             az_upgrade_run = False
                             err_msg = "Unable to prompt for auto upgrade as no tty available. " \
                                 "Run 'az config set auto-upgrade.prompt=no' to allow auto upgrade with no prompt."
@@ -112,7 +111,7 @@ finally:
                     if az_upgrade_run and upgrade_exit_code != 0:
                         err_msg = "Auto upgrade failed with exit code {}".format(exit_code)
                         logger.warning(err_msg)
-                        telemetry.set_exception(CLIError(err_msg), fault_type='auto-upgrade-failed')
+                        telemetry.set_exception(UnclassifiedUserFault(err_msg), fault_type='auto-upgrade-failed')
     except IndexError:
         pass
     except Exception as ex:  # pylint: disable=broad-except
