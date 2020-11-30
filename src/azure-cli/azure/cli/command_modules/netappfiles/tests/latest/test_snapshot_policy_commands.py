@@ -84,6 +84,7 @@ class AzureNetAppFilesSnapshotPolicyServiceScenarioTest(ScenarioTest):
         assert snapshot_policy['monthlySchedule']['daysOfMonth'] == monthly_days_of_month
         assert snapshot_policy['enabled'] == enabled
         assert snapshot_policy['tags']['Tag1'] == 'Value1'
+        assert snapshot_policy['provisioningState'] is not None
 
         # validate snapshot policy exist
         snapshot_policy_list = self.cmd("az netappfiles snapshot policy list -g {rg} -a '%s'" %

@@ -268,6 +268,7 @@ def load_command_table(self, _):
         g.command('restart', 'restart')
         g.command('start', 'start')
         g.command('stop', 'stop')
+        g.command('upgrade', 'upgrade')
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.custom_command('create', '_server_create')

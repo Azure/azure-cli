@@ -101,6 +101,8 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         assert acc_with_active_directory['activeDirectories'][0]['username'] == 'aduser'
         assert acc_with_active_directory['activeDirectories'][0]['status'] == 'Created'
         assert acc_with_active_directory['activeDirectories'][0]['adName'] == ad_name
+        assert acc_with_active_directory['activeDirectories'][0]['aesEncryption'] is False
+        assert acc_with_active_directory['activeDirectories'][0]['ldapSigning'] is False
 
         # list active directory
         active_directory = self.cmd("netappfiles account ad list -g {rg} -n %s" % account_name).get_output_in_json()

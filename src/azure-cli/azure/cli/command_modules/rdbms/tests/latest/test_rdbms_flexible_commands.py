@@ -48,7 +48,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az {} flexible-server create -l {} -g {} -n {}'
+        template = 'az {} flexible-server create -l {} -g {} -n {} --public-access none'
         execute(self.cli_ctx, template.format(self.engine_type,
                                               self.location,
                                               group, name))
@@ -117,14 +117,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
-            self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms'
+            self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms --public-access none'
                      .format(resource_group, location))
-            self.cmd('postgres flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3'
+            self.cmd('postgres flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
                      .format(resource_group, location))
         elif database_engine == 'mysql':
-            self.cmd('mysql flexible-server create -g {} -l {} --tier GeneralPurpose --sku-name Standard_D2ds_v4'
+            self.cmd('mysql flexible-server create -g {} -l {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none'
                      .format(resource_group, location))
-            self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4'
+            self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4 --public-access none'
                      .format(resource_group, location))
 
         show_output = self.cmd('{} flexible-server show -g {} -n {}'
@@ -342,19 +342,19 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_backup_retention = 1
 
         # Create
-        self.cmd('{} flexible-server create -g {} -l {} --tier {}'.format(database_engine, resource_group, location, invalid_tier), expect_failure=True)
+        self.cmd('{} flexible-server create -g {} -l {} --tier {} --public-access none'.format(database_engine, resource_group, location, invalid_tier), expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -l {} --version {}'.format(database_engine, resource_group, location, invalid_version), expect_failure=True)
+        self.cmd('{} flexible-server create -g {} -l {} --version {} --public-access none'.format(database_engine, resource_group, location, invalid_version), expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -l {} --tier {} --sku-name {}'.format(database_engine, resource_group, location, valid_tier, invalid_sku_name), expect_failure=True)
+        self.cmd('{} flexible-server create -g {} -l {} --tier {} --sku-name {} --public-access none'.format(database_engine, resource_group, location, valid_tier, invalid_sku_name), expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -l {} --backup-retention {}'.format(database_engine, resource_group, location, invalid_backup_retention), expect_failure=True)
+        self.cmd('{} flexible-server create -g {} -l {} --backup-retention {} --public-access none'.format(database_engine, resource_group, location, invalid_backup_retention), expect_failure=True)
 
         if database_engine == 'postgres':
             invalid_storage_size = 60
         elif database_engine == 'mysql':
             invalid_storage_size = 999999
-        self.cmd('{} flexible-server create -g {} -l {} --storage-size {}'.format(database_engine, resource_group, location, invalid_storage_size), expect_failure=True)
+        self.cmd('{} flexible-server create -g {} -l {} --storage-size {} --public-access none'.format(database_engine, resource_group, location, invalid_storage_size), expect_failure=True)
 
         server_name = self.create_random_name(SERVER_NAME_PREFIX, RANDOM_VARIABLE_MAX_LENGTH)
         if database_engine == 'postgres':
@@ -378,7 +378,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier {} --version {} --sku-name {} --storage-size {} --backup-retention {}'
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier {} --version {} --sku-name {} --storage-size {} --backup-retention {} --public-access none'
                  .format(database_engine, resource_group, server_name, location, tier, version, sku_name, storage_size, backup_retention))
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
 
@@ -410,7 +410,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {}'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none'
                  .format(database_engine, resource_group, master_server, location, 256))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -806,7 +806,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
     @live_only()
-    def test_mysql_flexible_server_vnet_mgmt_supplied_subnetid(self, resource_group):
+    def test_mysql_flexible_server_public_access_mgmt(self, resource_group):
         self._test_flexible_server_public_access_mgmt('mysql', resource_group)
 
     def _test_flexible_server_public_access_mgmt(self, database_engine, resource_group):

@@ -1165,16 +1165,29 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
+
+    # https://github.com/Azure/azure-cli/issues/14857
+    updating_ip_security_restrictions = False
+
     result = {}
     for s in generic_configurations:
         try:
-            result.update(get_json_object(s))
+            json_object = get_json_object(s)
+            for config_name in json_object:
+                if config_name.lower() == 'ip_security_restrictions':
+                    updating_ip_security_restrictions = True
+            result.update(json_object)
         except CLIError:
             config_name, value = s.split('=', 1)
             result[config_name] = value
 
     for config_name, value in result.items():
+        if config_name.lower() == 'ip_security_restrictions':
+            updating_ip_security_restrictions = True
         setattr(configs, config_name, value)
+
+    if not updating_ip_security_restrictions:
+        setattr(configs, 'ip_security_restrictions', None)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 

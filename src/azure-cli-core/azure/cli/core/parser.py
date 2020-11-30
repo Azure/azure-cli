@@ -275,7 +275,7 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return command, parameters, extension
+        return command, self._raw_arguments, extension
 
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
