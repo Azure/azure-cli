@@ -28,8 +28,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy. '
-                     'Error detail: {}')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
                    "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
@@ -116,6 +115,10 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         elif isinstance(ex, ClientRequestError):
             if is_azure_connection_error(error_msg):
                 az_error = azclierror.AzureConnectionError(error_msg)
+            elif isinstance(ex.inner_exception, SSLError):
+                # When SSLError happens, msrest wrap it in ClientRequestError
+                az_error = azclierror.AzureConnectionError(error_msg)
+                az_error.set_recommendation(SSLERROR_TEMPLATE)
             else:
                 az_error = azclierror.ClientRequestError(error_msg)
 
