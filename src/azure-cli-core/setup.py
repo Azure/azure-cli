@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.15.0"
+VERSION = "2.15.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -88,10 +88,8 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
+    python_requires='>=3.6.0',
     extras_require={
-        ":python_version<'3.4'": ['enum34'],
-        ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
-        ':python_version<"3.0"': ['futures'],
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
