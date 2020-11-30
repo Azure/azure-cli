@@ -97,9 +97,8 @@ type: command
 short-summary: Append or overwrite an application's password or certificate credentials
 long-summary: >-
     The output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an
-    alternative, consider using [managed identities](https://aka.ms/azadsp-managed-identities) if
-    available to avoid the need to use credentials.
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 examples:
   - name: Append a certificate to the application with the certificate string.
     text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
@@ -377,9 +376,8 @@ type: command
 short-summary: Create a service principal and configure its access to Azure resources.
 long-summary: >-
     The output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an
-    alternative, consider using [managed identities](https://aka.ms/azadsp-managed-identities) if
-    available to avoid the need to use credentials.
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 parameters:
   - name: --name -n
     short-summary: A URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
@@ -456,9 +454,8 @@ long-summary: >-
 
 
     The output includes credentials that you must protect. Be sure that you do not include these credentials
-    in your code or check the credentials into your source control. As an
-    alternative, consider using [managed identities](https://aka.ms/azadsp-managed-identities) if
-    available to avoid the need to use credentials.
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 parameters:
   - name: --name -n
     short-summary: Name or app ID of the service principal.
