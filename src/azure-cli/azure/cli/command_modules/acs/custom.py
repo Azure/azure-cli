@@ -1933,6 +1933,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         resource_group_name,
         {},
         workspace_resource_id,
+        aci_subnet_name,
+        vnet_subnet_id,
         appgw_name,
         appgw_subnet_cidr,
         appgw_id,
