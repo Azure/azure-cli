@@ -1432,10 +1432,10 @@ examples:
         az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --account-key 00000000
     - name: Copy a file asynchronously from source uri to destination storage account with sas token.
       text: |
-        az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
     - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
       text: |
-        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
 """
 
 helps['storage file copy start-batch'] = """
@@ -1480,7 +1480,7 @@ examples:
         az storage file copy start-batch --source-account-name srcaccount --source-account-key 00000000 --source-share srcshare --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --account-key 00000000
   - name: Copy all files in a file share to another storage account. with sas token.
     text: |
-        az storage file copy start-batch --source-uri "https://srcaccount.file.core.windows.net/myshare?<sastoken>" --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+        az storage file copy start-batch --source-uri "https://srcaccount.file.core.windows.net/myshare?<sastoken>" --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --sas-token <destination-sas>
 """
 
 helps['storage file delete-batch'] = """

@@ -217,6 +217,11 @@ def load_arguments(self, _):
         c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
         c.argument('aci_subnet_name')
+        c.argument('appgw_name', options_list=['--appgw-name'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_cidr', options_list=['--appgw-subnet-cidr'], arg_group='Application Gateway')
+        c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
+        c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -245,6 +250,11 @@ def load_arguments(self, _):
     with self.argument_context('aks enable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
         c.argument('subnet_name', options_list=['--subnet-name', '-s'], help='Name of an existing subnet to use with the virtual-node add-on.')
+        c.argument('appgw_name', options_list=['--appgw-name'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_cidr', options_list=['--appgw-subnet-cidr'], arg_group='Application Gateway')
+        c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
+        c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)

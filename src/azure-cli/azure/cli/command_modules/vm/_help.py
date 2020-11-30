@@ -1003,7 +1003,7 @@ examples:
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
-  - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
+  - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
   - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
@@ -2238,7 +2238,7 @@ examples:
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image centos \\
             --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
-  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
+  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
   - name: Create a Linux VM scale set from a specialized image version.
