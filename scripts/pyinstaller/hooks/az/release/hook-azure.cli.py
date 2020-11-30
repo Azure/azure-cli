@@ -20,7 +20,7 @@ _hiddenimports.extend(collect_submodules('azure.mgmt.keyvault'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.authorization'))
 _hiddenimports.extend(collect_submodules('azure.mgmt.resource'))
 _hiddenimports.extend(collect_submodules('azure.multiapi'))
-_hiddenimports.extend(collect_submodules('azure.cli.core'))
+_hiddenimports.extend(collect_submodules('azure.cli.core', filter=lambda name: 'tests' not in name))
 
 mods_ns_pkg = importlib.import_module('azure.cli.command_modules')
 command_modules = [modname for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__)]
