@@ -453,7 +453,7 @@ type: command
 short-summary: Reset a service principal credential.
 long-summary: >-
     Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
-    
+
 
     The output includes credentials that you must protect. Be sure that you do not include these credentials
     in your code or check the credentials into your source control. As an
