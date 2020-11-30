@@ -235,9 +235,8 @@ def git_operation(modules):    # pylint: disable=redefined-outer-name
     for module in modules:
         short_name = module.__name__.split('.')[-2].capitalize()
         if git.diff(module.__file__):
-            git.add(module.__file__)
-            git.commit('-m', '[{}] Merge Aladdin generated examples'.format(short_name))
-
+            # git.add(module.__file__)
+            # git.commit('-m', '[{}] Merge Aladdin generated examples'.format(short_name))
             has_changes = True
 
     if has_changes is False:
