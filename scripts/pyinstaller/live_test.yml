@@ -23,6 +23,31 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: metadata
 
+- job: BuildDebPackages
+  displayName: Build Deb Packages
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Bionic:
+        deb_system: ubuntu
+        distro: bionic
+  steps:
+  - task: Bash@3
+    displayName: 'Build $(deb_system) $(distro) Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: $(deb_system)-$(distro)
+
 - job: BuildPyinstallerDebPackages
   displayName: Build Pyinstaller Deb Packages
   dependsOn: ExtractMetadata
@@ -49,6 +74,43 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pyinstaller-$(deb_system)-$(distro)
 
+- job: PerformanceTest
+  displayName: Performance Test
+  dependsOn:
+   - BuildDebPackages
+   - BuildPyinstallerDebPackages
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download ubuntu-bionic Build'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+        artifactName: ubuntu-bionic
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download pyinstaller-ubuntu-bionic Build'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pyinstaller'
+        artifactName: pyinstaller-ubuntu-bionic
+    - task: Bash@3
+      displayName: 'Test Pyinstaller $(deb_system) $(distro) Package Performance'
+      env:
+        DISTRO: bionic
+        DISTRO_BASE_IMAGE: ubuntu:bionic
+        PASSWORD: $(AZURECLITESTPASSWORD)
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -exv
+          CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+          docker pull ${DISTRO_BASE_IMAGE}
+          docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e PASSWORD=$PASSWORD -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts/debian -v $SYSTEM_ARTIFACTSDIRECTORY/pyinstaller:/mnt/artifacts/pyinstaller -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/pyinstaller/performance/perf_check.sh"
+
 - job: RunLiveTest
   displayName: Run Live Test
   dependsOn:
@@ -57,126 +119,6 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-      acr:
-        Target: acr
-      acs:
-        Target: acs
-      advisor:
-        Target: advisor
-      ams:
-        Target: ams
-      apim:
-        Target: apim
-      appconfig:
-        Target: appconfig
-      appservice:
-        Target: appservice
-      aro:
-        Target: aro
-      backup:
-        Target: backup
-      batch:
-        Target: batch
-      batchai:
-        Target: batchai
-      billing:
-        Target: billing
-      botservice:
-        Target: botservice
-      cdn:
-        Target: cdn
-      cloud:
-        Target: cloud
-      cognitiveservices:
-        Target: cognitiveservices
-      config:
-        Target: config
-      configure:
-        Target: configure
-      consumption:
-        Target: consumption
-      container:
-        Target: container
-      cosmosdb:
-        Target: cosmosdb
-      deploymentmanager:
-        Target: deploymentmanager
-      dla:
-        Target: dla
-      dls:
-        Target: dls
-      dms:
-        Target: dms
-      eventgrid:
-        Target: eventgrid
-      eventhubs:
-        Target: eventhubs
-      extension:
-        Target: extension
-      feedback:
-        Target: feedback
-      find:
-        Target: find
-      hdinsight:
-        Target: hdinsight
-      iot:
-        Target: iot
-      keyvault:
-        Target: keyvault
-      kusto:
-        Target: kusto
-      lab:
-        Target: lab
-      managedservices:
-        Target: managedservices
-      maps:
-        Target: maps
-      monitor:
-        Target: monitor
-      natgateway:
-        Target: natgateway
-      netappfiles:
-        Target: netappfiles
-      network:
-        Target: network
-      policyinsights:
-        Target: policyinsights
-      privatedns:
-        Target: privatedns
-      profile:
-        Target: profile
-      rdbms:
-        Target: rdbms
-      redis:
-        Target: redis
-      relay:
-        Target: relay
-      reservations:
-        Target: reservations
-      resource:
-        Target: resource
-      role:
-        Target: role
-      search:
-        Target: search
-      security:
-        Target: security
-      servicebus:
-        Target: servicebus
-      servicefabric:
-        Target: servicefabric
-      signalr:
-        Target: signalr
-      sql:
-        Target: sql
-      sqlvm:
-        Target: sqlvm
-      storage:
-        Target: storage
-      synapse:
-        Target: synapse
-      util:
-        Target: util
       vm:
         Target: vm
   pool:
@@ -192,18 +134,28 @@ jobs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
         artifactName: metadata
     - task: DownloadPipelineArtifact@1
-      displayName: 'Download ubuntu:bionic Build'
+      displayName: 'Download ubuntu-bionic Build'
       inputs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+        artifactName: ubuntu-bionic
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download pyinstaller-ubuntu-bionic Build'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/pyinstaller'
         artifactName: pyinstaller-ubuntu-bionic
     - task: Bash@3
       displayName: 'Test Pyinstaller ubuntu bionic Package Performance'
       env:
         DISTRO: bionic
+        DISTRO_BASE_IMAGE: ubuntu:bionic
+        TARGET: $(Target)
+        PASSWORD: $(AZURECLITESTPASSWORD)
       inputs:
         targetType: 'inline'
         script: |
           set -exv
           CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-          dpkg -i $SYSTEM_ARTIFACTSDIRECTORY/debian/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
-          time az version
+          docker pull ${DISTRO_BASE_IMAGE}
+          docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -e PASSWORD=$PASSWORD -e TARGET=$TARGET -v $SYSTEM_ARTIFACTSDIRECTORY/pyinstaller:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/pyinstaller/pyinstaller_package_live_test.sh"
+
+          

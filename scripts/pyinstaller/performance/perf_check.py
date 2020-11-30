@@ -14,6 +14,10 @@ BENCHMARK_COMMANDS = [
     'az vm -h',
     'az vm create -h',
     'az network -h',
+    'az vm list',
+    'az resource list',
+    'az keyvault list',
+    'az group list'
 ]
 
 

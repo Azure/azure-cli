@@ -929,46 +929,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: pyinstaller-$(deb_system)-$(distro)
 
-- job: TestPyinstallerDebPackagesPerformance
-  displayName: Test Pyinstaller Deb Packages Performance
-  timeoutInMinutes: 60
-  dependsOn:
-   - BuildPyinstallerDebPackages
-  condition: succeeded()
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
-      Bionic:
-        deb_system: ubuntu
-        distro: bionic
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download $(deb_system):$(distro) Build'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: pyinstaller-$(deb_system)-$(distro)
-
-  - task: Bash@3
-    displayName: 'Test Pyinstaller $(deb_system) $(distro) Package Performance'
-    env:
-      DISTRO: $(distro)
-      DISTRO_BASE_IMAGE: $(deb_system):$(distro)
-    inputs:
-      targetType: 'inline'
-      script: |
-        set -exv
-        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-        echo "== Test pyinstaller debian package performance on ${DISTRO} =="
-        docker pull ${DISTRO_BASE_IMAGE}
-        docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/pyinstaller/release/debian/performance/perf_check.sh"
-
 - job: BuildAndTestPyinstallerDebPackages
   displayName: Build And Test Pyinstaller Deb Packages
   timeoutInMinutes: 600
