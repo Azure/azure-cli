@@ -35,6 +35,11 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
+ROLE_ASSIGNMENT_CREATE_WARNING = (
+    "In a future release, this command will NOT create any role assignment by default. (--skip-assignment will be the "
+    "default behavior.) If needed, always use --role to explicitly create a role assignment."
+)
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -1397,7 +1402,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1479,8 +1484,11 @@ def create_service_principal_for_rbac(
 
     # retry while server replication is done
     if not skip_assignment:
+        if not role:
+            role = "Contributor"
+            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
-            logger.warning('Creating a role assignment under the scope of "%s"', scope)
+            logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
