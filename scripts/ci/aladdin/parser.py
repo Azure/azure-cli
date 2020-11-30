@@ -78,7 +78,8 @@ def calculate_example_yaml_indent(raw_cli_help):
     preceding_indent = yaml_indent_key[:indent_width]
 
     if 'examples' in yaml_indent_key:
-        yaml_indent_key = raw_cli_help[yaml_indent_idx + 1]
+        yaml_indent_key = next(item for item in raw_cli_help[yaml_indent_idx:] if '- name:' in item)
+
         indent_width = re.search(r'[^ ]', yaml_indent_key).start()
         example_inner_indent = yaml_indent_key[:indent_width]
     else:
