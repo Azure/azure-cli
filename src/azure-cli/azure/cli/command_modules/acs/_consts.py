@@ -23,10 +23,19 @@ CONST_VIRTUAL_NODE_SUBNET_NAME = "SubnetName"
 CONST_KUBE_DASHBOARD_ADDON_NAME = "kubeDashboard"
 CONST_AZURE_POLICY_ADDON_NAME = "azurepolicy"
 
+# IngressApplicaitonGateway configuration keys
+CONST_INGRESS_APPGW_ADDON_NAME = "ingressApplicationGateway"
+CONST_INGRESS_APPGW_APPLICATION_GATEWAY_NAME = "applicationGatewayName"
+CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID = "applicationGatewayId"
+CONST_INGRESS_APPGW_SUBNET_ID = "subnetId"
+CONST_INGRESS_APPGW_SUBNET_CIDR = "subnetCIDR"
+CONST_INGRESS_APPGW_WATCH_NAMESPACE = "watchNamespace"
+
 ADDONS = {
     'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     'monitoring': CONST_MONITORING_ADDON_NAME,
     'virtual-node': CONST_VIRTUAL_NODE_ADDON_NAME,
     'kube-dashboard': CONST_KUBE_DASHBOARD_ADDON_NAME,
     'azure-policy': CONST_AZURE_POLICY_ADDON_NAME,
+    'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME
 }
