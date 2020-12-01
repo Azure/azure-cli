@@ -2203,6 +2203,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
     def test_aks_create_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2221,6 +2222,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.2.0.0/16")
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_byo_subnet_with_ingress_appgw_addon(self, resource_group, resource_group_location):
@@ -2272,6 +2274,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'addon_client_id': addon_client_id,
         })
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_byo_appgw_with_ingress_appgw_addon(self, resource_group, resource_group_location):
