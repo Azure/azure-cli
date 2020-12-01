@@ -2,7 +2,10 @@
 
 set -exv
 
+export USERNAME=azureuser
+
 apt update
+apt install -y apt-transport-https git gcc python3-dev libssl1.1
 
 dpkg -i /mnt/artifacts/pyinstaller/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
 mv /opt/az /opt/paz
