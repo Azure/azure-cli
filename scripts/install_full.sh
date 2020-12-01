@@ -17,6 +17,9 @@ REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/.."
 pushd ${REPO_ROOT} > /dev/null
 
 find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
+pip install ./privates/azure_mgmt_containerregistry-3.0.0rc15-py2.py3-none-any.whl
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
+pip show azure-mgmt-containerregistry
+pip list
 
 popd > /dev/null
