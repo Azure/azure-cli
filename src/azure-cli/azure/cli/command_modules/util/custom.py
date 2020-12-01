@@ -168,5 +168,5 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
             raise CLIError(msg)
     auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
         "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
-    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False) \
-        else auto_upgrade_msg)
+    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
+                   else auto_upgrade_msg)
