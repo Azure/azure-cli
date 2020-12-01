@@ -10,8 +10,6 @@ from azure.cli.core import AzCli
 class DummyCli(AzCli):
     """A dummy CLI instance can be used to facilitate automation"""
     def __init__(self, commands_loader_cls=None, **kwargs):
-        import os
-
         from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
         from azure.cli.core.azlogging import AzCliLogging
@@ -52,6 +50,6 @@ class DummyCli(AzCli):
         if os.getenv('AZURE_CLI_TEST_MODE', 'dummy') != 'installation':
             return super(DummyCli, self).invoke(args, initial_invocation_data=initial_invocation_data,
                                                 out_file=out_file)
-        if len(args) > 0 and args[0] != 'az':
+        if args and args[0] != 'az':
             args.insert(0, 'az')
         return subprocess.call(args, stdout=out_file)
