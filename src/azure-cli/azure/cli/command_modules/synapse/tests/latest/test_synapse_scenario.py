@@ -190,8 +190,8 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'zzy-test-rg',
-            'sql-pool': self.create_random_name(prefix='testsqlpool', length=15),
+            'rg': 'rg',
+            'sql-pool': 'sqlpoolcli1',
             'dest-sql-pool': self.create_random_name(prefix='destsqlpool', length=15),
             'restore-point-time': '2020-11-25T02:47:37'
         })
@@ -227,7 +227,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'zzy-test-rg',
+            'rg': 'rg',
             'sql-pool': 'sqlpoolcli1',
             'schema': 'dbo',
             'table': 'Person',
@@ -294,7 +294,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'northeurope',
             'workspace': 'testtde1',
-            'rg': 'zzy-test-rg',
+            'rg': 'rg',
             'sql-pool': 'sqlpooltde',  # self.create_random_name(prefix='testsqlpool', length=15),
         })
 
@@ -313,7 +313,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'zzy-test-rg',
+            'rg': 'rg',
             'sql-pool': 'sqlpoolcli1',  # self.create_random_name(prefix='testsqlpool', length=15),
             'storage-account': 'zzystorageforsynapse'
         })
@@ -332,7 +332,7 @@ class SynapseScenarioTests(ScenarioTest):
         self.kwargs.update({
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
-            'rg': 'zzy-test-rg',
+            'rg': 'rg',
             'sql-pool': 'sqlpoolcli1',  # self.create_random_name(prefix='testsqlpool', length=15),
             'storage-account': 'zzystorageforsynapse'
         })
