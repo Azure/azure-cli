@@ -63,7 +63,7 @@ def assign_contributor_to_vnet(cli_ctx, vnet, object_id):
     ))
 
 
-def assign_contributor_to_routetable(cli_ctx, master_subnet, worker_subnet, object_id):
+def assign_contributor_to_routetable(cli_ctx, subnets, object_id):
     auth_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION)
     network_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
 
@@ -79,7 +79,7 @@ def assign_contributor_to_routetable(cli_ctx, master_subnet, worker_subnet, obje
     )
 
     route_tables = set()
-    for sn in [master_subnet, worker_subnet]:
+    for sn in subnets:
         sid = parse_resource_id(sn)
 
         subnet = network_client.subnets.get(resource_group_name=sid['resource_group'],
