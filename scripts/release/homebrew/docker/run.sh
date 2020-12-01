@@ -12,4 +12,4 @@ pip list
 
 # default option is update_existing to build from homebrew master branch,
 # append '-b use_template' to build from formula_template.txt 
-python $root/formula_generate.py -b use_template
+python $root/formula_generate.py

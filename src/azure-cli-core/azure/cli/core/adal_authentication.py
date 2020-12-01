@@ -171,3 +171,16 @@ def _try_scopes_to_resource(scopes):
 
     # Exactly only one scope is provided
     return scopes_to_resource(scopes)
+
+
+class BasicTokenCredential:
+    # pylint:disable=too-few-public-methods
+    """A Track 2 implementation of msrest.authentication.BasicTokenAuthentication.
+    This credential shouldn't be used by any command module, expect azure-cli-core.
+    """
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        # Because get_token can't refresh the access token, always mark the token as unexpired
+        return AccessToken(self.access_token, int(time.time() + 3600))

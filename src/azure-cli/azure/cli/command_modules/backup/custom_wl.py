@@ -25,7 +25,7 @@ from azure.cli.command_modules.backup._client_factory import backup_workload_ite
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
 
 
 fabric_name = "Azure"
@@ -34,6 +34,8 @@ logger = get_logger(__name__)
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
+                     'SQLDataBase': 'SQLDataBase',
+                     'SAPHanaDatabase': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
@@ -407,6 +409,28 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise ValidationError(
+            """
+            Item must be either of type SQLDataBase or SAPHanaDatabase.
+            """)
+
+    properties = _get_protected_item_instance(backup_item_type)
+    properties.protection_state = 'ProtectionStopped'
+    properties.policy_id = ''
+    properties.is_rehydrate = True
+    param = ProtectedItemResource(properties=properties)
+
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
