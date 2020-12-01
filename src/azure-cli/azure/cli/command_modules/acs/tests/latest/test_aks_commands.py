@@ -2574,47 +2574,32 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
 
     # TODO: Remove when issue #9392 is addressed.
-    # TODO: add following test back after figuring out what happened
-    # @live_only()
-    # @AllowLargeResponse(8192)
-    # @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    # def test_aks_create_default_service_without_skip_role_assignment_msi(self, resource_group, resource_group_location):
-    #     aks_name = self.create_random_name('cliakstest', 16)
-    #     self.kwargs.update({
-    #         'resource_group': resource_group,
-    #         'name': aks_name,
-    #         'location': resource_group_location,
-    #         'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
-    #     })
-    #     # create cluster without skip_role_assignment
-    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-    #                  '--node-count=1 ' \
-    #                  '--vnet-subnet-id={vnet_subnet_id} '\
-    #                  '--no-ssh-key --yes'
-    #     self.cmd(create_cmd, checks=[
-    #         self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
-    #         self.check('provisioningState', 'Succeeded')
-    #     ])
+    @live_only()
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_default_service_without_skip_role_assignment_msi(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+        # create cluster without skip_role_assignment
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 ' \
+                     '--vnet-subnet-id={vnet_subnet_id} '\
+                     '--no-ssh-key --yes'
+        self.cmd(create_cmd, checks=[
+            self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
 
-    #     check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
-    #     self.cmd(check_role_assignment_cmd, checks=[
-    #         self.check('[0].scope', '{vnet_subnet_id}')
-    #     ])
+        check_role_assignment_cmd = 'role assignment list --scope={vnet_subnet_id}'
+        self.cmd(check_role_assignment_cmd, checks=[
+            self.check('[0].scope', '{vnet_subnet_id}')
+        ])
 
-    #     # create cluster with same role assignment
-    #     aks_name = self.create_random_name('cliakstest', 16)
-    #     self.kwargs.update({
-    #         'name': aks_name,
-    #     })
-
-    #     create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-    #                  '--node-count=1 ' \
-    #                  '--vnet-subnet-id={vnet_subnet_id} '\
-    #                  '--no-ssh-key --yes'
-    #     self.cmd(create_cmd, checks=[
-    #         self.check('agentPoolProfiles[0].vnetSubnetId', '{vnet_subnet_id}'),
-    #         self.check('provisioningState', 'Succeeded')
-    #     ])
 
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
