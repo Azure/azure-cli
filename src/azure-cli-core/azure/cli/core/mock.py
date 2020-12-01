@@ -2,7 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import os
+import subprocess
 from azure.cli.core import AzCli
 
 
@@ -46,3 +47,11 @@ class DummyCli(AzCli):
     def get_cli_version(self):
         from azure.cli.core import __version__ as cli_version
         return cli_version
+
+    def invoke(self, args, initial_invocation_data=None, out_file=None):
+        if os.getenv('AZURE_CLI_TEST_MODE', 'dummy') != 'installation':
+            return super(DummyCli, self).invoke(args, initial_invocation_data=initial_invocation_data,
+                                                out_file=out_file)
+        if len(args) > 0 and args[0] != 'az':
+            args.insert(0, 'az')
+        return subprocess.call(args, stdout=out_file)
