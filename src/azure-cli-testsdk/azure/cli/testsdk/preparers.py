@@ -10,7 +10,7 @@ from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
 
 from .base import LiveScenarioTest
 from .exceptions import CliTestError
-from .cli import prepare_cli_context
+from .reverse_dependency import get_dummy_cli
 from .utilities import StorageAccountKeyReplacer, GraphClientPasswordReplacer
 
 KEY_RESOURCE_GROUP = 'rg'
@@ -57,7 +57,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if ' ' in name_prefix:
             raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
@@ -95,7 +95,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
         self.kind = kind
@@ -151,7 +151,7 @@ class KeyVaultPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -193,7 +193,7 @@ class RoleBasedServicePrincipalPreparer(NoTrafficRecordingPreparer, SingleValueR
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
                  dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD', key='sp'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.skip_assignment = skip_assignment
         self.result = {}
         self.parameter_name = parameter_name
@@ -238,7 +238,7 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
                  dev_setting_app_name='AZURE_CLI_TEST_DEV_APP_NAME',
                  dev_setting_app_secret='AZURE_CLI_TEST_DEV_APP_SECRET', key='app'):
         super(ManagedApplicationPreparer, self).__init__(name_prefix, 24)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.parameter_name = parameter_name
         self.parameter_secret = parameter_secret
         self.result = {}
@@ -277,7 +277,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                 'Error: Space character in name prefix \'%s\'' % name_prefix)
         super(VirtualNetworkPreparer, self).__init__(
             name_prefix, random_name_length)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.parameter_name = parameter_name
         self.key = key
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -333,7 +333,7 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             raise CliTestError(
                 'Error: Space character in name prefix \'%s\'' % name_prefix)
         super(VnetNicPreparer, self).__init__(name_prefix, 15)
-        self.cli_ctx = prepare_cli_context()
+        self.cli_ctx = get_dummy_cli()
         self.parameter_name = parameter_name
         self.key = key
         self.resource_group_parameter_name = resource_group_parameter_name
