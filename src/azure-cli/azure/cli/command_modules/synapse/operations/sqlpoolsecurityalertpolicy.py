@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=unused-argument
 from azure.mgmt.synapse.models import SecurityAlertPolicyState
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
+from .sqlpoolblobauditingpolicy import _find_storage_account_resource_group, _get_storage_endpoint, \
+    _get_storage_account_name, _get_storage_key
 
 
 def sqlpool_security_alert_policy_update(
@@ -100,95 +100,3 @@ def _sqlpool_security_policy_update(
             storage_account,
             storage_resource_group,
             use_secondary_key)
-
-
-def _find_storage_account_resource_group(cli_ctx, name):
-    '''
-    Finds a storage account's resource group by querying ARM resource cache.
-
-    Why do we have to do this: so we know the resource group in order to later query the storage API
-    to determine the account's keys and endpoint. Why isn't this just a command line parameter:
-    because if it was a command line parameter then the customer would need to specify storage
-    resource group just to update some unrelated property, which is annoying and makes no sense to
-    the customer.
-    '''
-
-    storage_type = 'Microsoft.Storage/storageAccounts'
-    classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
-
-    query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
-        name, storage_type, classic_storage_type)
-
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
-    resources = list(client.resources.list(filter=query))
-
-    if not resources:
-        raise CLIError("No storage account with name '{}' was found.".format(name))
-
-    if len(resources) > 1:
-        raise CLIError("Multiple storage accounts with name '{}' were found.".format(name))
-
-    if resources[0].type == classic_storage_type:
-        raise CLIError("The storage account with name '{}' is a classic storage account which is"
-                       " not supported by this command. Use a non-classic storage account or"
-                       " specify storage endpoint and key instead.".format(name))
-
-    # Split the uri and return just the resource group
-    return resources[0].id.split('/')[4]
-
-
-def _get_storage_account_name(storage_endpoint):
-    '''
-    Determines storage account name from endpoint url string.
-    e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
-    '''
-    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
-
-    return urlparse(storage_endpoint).netloc.split('.')[0]
-
-
-def _get_storage_endpoint(
-        cli_ctx,
-        storage_account,
-        resource_group_name):
-    '''
-    Gets storage account endpoint by querying storage ARM API.
-    '''
-    from azure.mgmt.storage import StorageManagementClient
-
-    # Get storage account
-    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
-    account = client.storage_accounts.get_properties(
-        resource_group_name=resource_group_name,
-        account_name=storage_account)
-
-    # Get endpoint
-    # pylint: disable=no-member
-    endpoints = account.primary_endpoints
-    try:
-        return endpoints.blob
-    except AttributeError:
-        raise CLIError("The storage account with name '{}' (id '{}') has no blob endpoint. Use a"
-                       " different storage account.".format(account.name, account.id))
-
-
-def _get_storage_key(
-        cli_ctx,
-        storage_account,
-        resource_group_name,
-        use_secondary_key):
-    '''
-    Gets storage account key by querying storage ARM API.
-    '''
-    from azure.mgmt.storage import StorageManagementClient
-
-    # Get storage keys
-    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
-    keys = client.storage_accounts.list_keys(
-        resource_group_name=resource_group_name,
-        account_name=storage_account)
-
-    # Choose storage key
-    index = 1 if use_secondary_key else 0
-    return keys.keys[index].value  # pylint: disable=no-member

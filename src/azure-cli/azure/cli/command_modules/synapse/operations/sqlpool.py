@@ -30,14 +30,15 @@ def update_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_n
     return client.update(resource_group_name, workspace_name, sql_pool_name, sql_pool_patch_info)
 
 
-def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, dest_name, performance_level=None,
-                     restore_point_in_time=None, source_database_deletion_date=None, no_wait=False, **kwargs):
-    '''
+def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_name, destination_name,
+                     performance_level=None, restore_point_in_time=None, source_database_deletion_date=None,
+                     no_wait=False, **kwargs):
+    """
     Restores an existing or deleted SQL pool (i.e. create with 'Restore'
     or 'PointInTimeRestore' create mode.)
 
     Custom function makes create mode more convenient.
-    '''
+    """
     if not (restore_point_in_time or source_database_deletion_date):
         raise CLIError('Either --time or --deleted-time must be specified.')
 
@@ -59,7 +60,8 @@ def restore_sql_pool(cmd, client, resource_group_name, workspace_name, sql_pool_
     dest_sql_pool_info = SqlPool(sku=sku, location=source_sql_pool_info.location, create_mode=create_mode,
                                  restore_point_in_time=restore_point_in_time, source_database_id=source_database_id)
 
-    return sdk_no_wait(no_wait, client.create, resource_group_name, workspace_name, dest_name, dest_sql_pool_info)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, workspace_name, destination_name,
+                       dest_sql_pool_info)
 
 
 def sql_pool_show_connection_string(

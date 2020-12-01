@@ -26,6 +26,7 @@ definition_file_arg_type = CLIArgumentType(options_list=['--file'], completer=Fi
                                            help='Properties may be supplied from a JSON file using the `@{path}` syntax or a JSON string.')
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 storage_arg_group = "Storage"
+policy_arg_group = 'Policy'
 
 
 def _configure_security_or_audit_policy_storage_params(arg_ctx):
@@ -163,7 +164,7 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse sql pool restore') as c:
         c.argument('performance_level', help='The performance level.')
-        c.argument('dest_name',
+        c.argument('destination_name', options_list=['--dest-name', '--destination-name'],
                    help='Name of the sql pool that will be created as the restore destination.')
 
         restore_point_arg_group = 'Restore Point'
@@ -172,7 +173,6 @@ def load_arguments(self, _):
                    arg_group=restore_point_arg_group,
                    help='The point in time of the source database that will be restored to create the new database. Must be greater than or equal to the source database\'s earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified. {0}'.format(
                        time_format_help))
-
         c.argument('source_database_deletion_date',
                    options_list=['--deleted-time'],
                    arg_group=restore_point_arg_group,
@@ -186,7 +186,6 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(SqlPoolConnectionClientType))
 
         auth_group = 'Authentication'
-
         c.argument('auth_type',
                    options_list=['--auth-type', '-a'],
                    arg_group=auth_group,
@@ -226,29 +225,23 @@ def load_arguments(self, _):
 
     with self.argument_context('synapse sql pool threat-policy update') as c:
         _configure_security_or_audit_policy_storage_params(c)
-
-        policy_arg_group = 'Policy'
         notification_arg_group = 'Notification'
 
         c.argument('state',
                    arg_group=policy_arg_group,
                    help='Threat detection policy state',
                    arg_type=get_enum_type(SecurityAlertPolicyState))
-
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain threat detection logs.')
-
         c.argument('disabled_alerts',
                    arg_group=policy_arg_group,
                    help='List of disabled alerts.',
                    nargs='+')
-
         c.argument('email_addresses',
                    arg_group=notification_arg_group,
                    help='List of email addresses that alerts are sent to.',
                    nargs='+')
-
         c.argument('email_account_admins',
                    arg_group=notification_arg_group,
                    help='Whether the alert is sent to the account administrators.',
@@ -266,12 +259,9 @@ def load_arguments(self, _):
         c.argument('is_storage_secondary_key_in_use', arg_group=storage_arg_group,
                    arg_type=get_three_state_flag(), options_list=['--use-secondary-key'],
                    help='Indicates whether using the secondary storeage key or not')
-
         c.argument('is_azure_monitor_target_enabled', options_list=['--enable-azure-monitor'],
                    help='Whether enabling azure monitor target or not.',
                    arg_type=get_three_state_flag())
-
-        policy_arg_group = 'Policy'
         c.argument('state',
                    arg_group=policy_arg_group,
                    help='Auditing policy state',

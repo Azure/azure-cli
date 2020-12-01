@@ -21,17 +21,13 @@ def sqlpool_blob_auditing_policy_update(
         storage_account_subscription_id=None,
         is_storage_secondary_key_in_use=None,
         is_azure_monitor_target_enabled=None):
-    '''
+    """
     Updates a sql pool blob auditing policy. Custom update function to apply parameters to instance.
-    '''
+    """
 
     # Validate input arguments
-    blob_storage_arguments_provided = (
-        storage_account is not None or
-        storage_endpoint is not None or
-        storage_account_access_key is not None or
-        retention_days is not None)
-
+    blob_storage_arguments_provided = any(
+        [storage_account, storage_endpoint, storage_account_access_key, retention_days])
     if not state and not blob_storage_arguments_provided:
         raise CLIError('Either state or blob storage arguments are missing')
 

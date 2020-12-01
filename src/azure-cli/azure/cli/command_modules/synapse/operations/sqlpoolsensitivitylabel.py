@@ -24,7 +24,7 @@ def sqlpool_sensitivity_label_show(
         schema_name,
         table_name,
         column_name,
-        "current")  # ToDo: need to change to SensitivityLabelSource.current
+        SensitivityLabelSource.current)
 
 
 def sqlpool_sensitivity_label_update(
@@ -49,8 +49,7 @@ def sqlpool_sensitivity_label_update(
     security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
 
     information_protection_policy = security_center_client.information_protection_policies.get(
-        scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
-        information_protection_policy_name="effective")
+        scope=_create_scope(), information_protection_policy_name="effective")
 
     sensitivity_label = SensitivityLabel()
 
@@ -84,6 +83,7 @@ def sqlpool_sensitivity_label_update(
             raise CLIError('The provided label name was not found in the information protection policy.')
         sensitivity_label.label_id = label_id
         sensitivity_label.label_name = label_name
+
     if information_type:
         information_type_id = next((id for id in information_protection_policy.information_types
                                     if information_protection_policy.information_types[id].display_name.lower() ==
@@ -113,8 +113,7 @@ def sqlpool_sensitivity_label_create(
     from azure.mgmt.security import SecurityCenter
     security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
     information_protection_policy = security_center_client.information_protection_policies.get(
-        scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
-        information_protection_policy_name="effective")
+        scope=_create_scope(), information_protection_policy_name="effective")
 
     sensitivity_label = SensitivityLabel()
     # Find the label id and information type id in the policy by the label name provided
@@ -127,6 +126,7 @@ def sqlpool_sensitivity_label_create(
             raise CLIError('The provided label name was not found in the information protection policy.')
         sensitivity_label.label_id = label_id
         sensitivity_label.label_name = label_name
+
     if information_type:
         information_type_id = next((id for id in information_protection_policy.information_types
                                     if information_protection_policy.information_types[id].display_name.lower() ==
@@ -141,12 +141,12 @@ def sqlpool_sensitivity_label_create(
         resource_group_name, workspace_name, sql_pool_name, schema_name, table_name, column_name, sensitivity_label)
 
 
-def _get_tenant_id():
-    '''
-    Gets tenantId from current subscription.
-    '''
+def _create_scope():
+    # Gets tenantId from current subscription.
     from azure.cli.core._profile import Profile
-
     profile = Profile()
     sub = profile.get_subscription()
-    return sub['tenantId']
+    tenant_id = sub['tenantId']
+
+    scope_format_string = '/providers/Microsoft.Management/managementGroups/{}'
+    return scope_format_string.format(tenant_id)
