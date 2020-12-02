@@ -388,7 +388,7 @@ long-summary: >-
     in your code or check the credentials into your source control. As an alternative, consider using
     [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 
-    
+
     By default, this command assigns the 'Contributor' role to the service principal at the subscription scope.
     To reduce your risk of a compromised service principal, use --skip-assignment to avoid creating a role assignment,
     then assign a more specific role and narrow the scope to a resource or resource group.
