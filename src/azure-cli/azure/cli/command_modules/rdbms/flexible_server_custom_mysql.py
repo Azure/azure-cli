@@ -65,13 +65,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
         # Check availability for server name if it is supplied by the user
         if server_name is not None:
-            if any(x.isupper() for x in server_name):
-                raise CLIError("The server name '{}' contains at least a character in UPPERCASE. Server name should be in lowercase.".format(server_name))
             check_name_client = cf_mysql_check_resource_availability(cmd.cli_ctx, None)
             server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
             if not server_availability.name_available:
-                raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                               "other server name.".format(server_name))
+                raise CLIError(server_availability.message)
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
