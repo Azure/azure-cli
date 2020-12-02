@@ -812,14 +812,14 @@ def load_command_table(self, _):
 
     # region LoadBalancers
     with self.command_group('network lb', network_lb_sdk) as g:
-        from azure.cli.core.commands.progress import TimingProgressBar
+        from azure.cli.core.commands.progress import TimingProgressBar, InfiniteProgressBar
         g.show_command('show', 'get')
         g.custom_command('create', 'create_load_balancer', supports_no_wait=True,
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx),
                          table_transformer=deployment_validate_table_format,
                          validator=process_lb_create_namespace, exception_handler=handle_template_based_exception,
                          progress=TimingProgressBar(self.cli_ctx, total=40))
-        g.command('delete', 'begin_delete')
+        g.command('delete', 'begin_delete', progress=InfiniteProgressBar(self.cli_ctx))
         g.custom_command('list', 'list_lbs')
         g.wait_command('wait')
         g.generic_update_command('update', setter_name='begin_create_or_update')
