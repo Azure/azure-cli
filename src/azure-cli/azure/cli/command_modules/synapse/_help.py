@@ -241,7 +241,7 @@ examples:
 
 helps['synapse sql pool show-connection-string'] = """
 type: command
-short-summary: Generates a connection string to a SQL pool.
+short-summary: Generate a connection string to a SQL pool.
 examples:
   - name: Generate connection string for ado.net
     text: |-
