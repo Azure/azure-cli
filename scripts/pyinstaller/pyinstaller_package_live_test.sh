@@ -14,7 +14,7 @@ apt-get update
 apt-get install -y libssl-dev libffi-dev python3-dev debhelper zlib1g-dev
 apt-get install -y python3.7 python3.7-dev python3.7-venv
 
-dpkg -i /mnt/artifacts/debian/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
+dpkg -i /mnt/artifacts/azure-cli_$CLI_VERSION-1~${DISTRO}_all.deb
 
 python3.7 -m venv /env
 source /env/bin/activate
@@ -29,7 +29,11 @@ pip install pytest-rerunfailures
 cd /azure-cli/
 azdev setup -c .
 
+export AZURE_CLI_TEST_MODE=installation
+
 az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $PASSWORD
 az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+azdev test $TARGET --live --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=${TARGET}.report.sequential.json --html=${TARGET}.report.sequential.html --self-contained-html --reruns 3 --capture=sys"
+azdev test $TARGET --live --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n 2 --json-report --json-report-summary --json-report-file=${TARGET}.report.parallel.json --html=${TARGET}.report.parallel.html --self-contained-html --reruns 3 --capture=sys"
 
 azdev test ${TARGET} --live --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n 2 --json-report --json-report-summary --json-report-file=${TARGET}.report.parallel.json --html=${TARGET}.report.parallel.html --self-contained-html --reruns 3 -s"
