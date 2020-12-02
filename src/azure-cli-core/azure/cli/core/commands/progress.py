@@ -233,10 +233,18 @@ class TimingProgressBar:
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
 
 
-def _format_glyphs(bar_len):
+def _format_slash_glyphs(bar_len):
     glyphs = []
     for num in range(1, bar_len):
         item = '/' * num + ' ' * (bar_len - num - 1)
+        glyphs.append(item)
+    return glyphs
+
+
+def _format_dot_glyphs(bar_len):
+    glyphs = []
+    for num in range(1, bar_len):
+        item = '|' + '.' * num + ' ' * (bar_len - num) + '|'
         glyphs.append(item)
     return glyphs
 
@@ -250,7 +258,7 @@ class InfiniteProgressBar:
         self.cli_ctx = cli_ctx
         self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
                 label="to be continued", stream=sys.stderr,
-                hide_cursor=False, glyphs=_format_glyphs(bar_len=20))
+                hide_cursor=False, glyphs=_format_dot_glyphs(bar_len=10))
 
     def update_progress(self):
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add(message="Running")
