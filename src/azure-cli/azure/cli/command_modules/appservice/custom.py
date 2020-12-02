@@ -2465,8 +2465,26 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
-    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
-                                                certificate_envelope=easy_cert_def)
+
+    try:
+        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                    certificate_envelope=easy_cert_def)
+    except DefaultErrorResponseException as ex:
+        if ex.response.status_code == 202:
+            retry_times = 12
+            retry_delay = 5
+            while retry_times > 0:
+                retry_times -= 1
+                try:
+                    return client.certificates.get(resource_group_name=resource_group_name, name=hostname)
+                except DefaultErrorResponseException as inner_ex:
+                    if inner_ex.response.status_code != 404:
+                        raise CLIError(inner_ex)
+                time.sleep(retry_delay)
+            logger.warning("Managed Certificate creation in progress. Please use the command "
+                           "'az webapp config ssl list' to view your certificate once it is created")
+            return
+        raise CLIError(ex)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
@@ -4050,7 +4068,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+        if binding_name.lower() == hostname and (hostname_binding.host_name_type == 'Verified' or
+                                                 hostname_binding.host_name_type == 'Managed'):
             verified_hostname_found = True
 
     return verified_hostname_found
