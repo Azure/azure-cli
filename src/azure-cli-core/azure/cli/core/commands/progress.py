@@ -103,6 +103,18 @@ class ProgressHook:
         return not self.reporter.closed
 
 
+# TODO: cooperate with Indeterminate progress bar
+def _format_progress(msg, sign, bar_len, current):
+    bar_len = bar_len - len(msg) - 1
+
+    message = '\r{}['.format(msg)
+    # Adjust the message
+    message += (sign * current).ljust(bar_len)
+    message += ']'
+
+    return message
+
+
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None, spinner=None):
