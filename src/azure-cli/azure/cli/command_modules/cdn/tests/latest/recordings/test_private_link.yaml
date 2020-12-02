@@ -7,58 +7,11 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles?api-version=2020-04-15
-  response:
-    body:
-      string: '{"value":[]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '12'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 18 Nov 2020 22:28:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '48'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
       - cdn profile create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
@@ -68,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-18T22:28:36Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-18T22:24:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -77,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Nov 2020 22:28:38 GMT
+      - Wed, 18 Nov 2020 22:24:53 GMT
       expires:
       - '-1'
       pragma:
@@ -92,7 +45,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "Standard_Akamai"}}'
+    body: '{"location": "westus", "sku": {"name": "Standard_Microsoft"}}'
     headers:
       Accept:
       - application/json
@@ -103,11 +56,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '58'
+      - '61'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
@@ -119,20 +72,20 @@ interactions:
     body:
       string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
         ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \r\n  },\"location\"\
-        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\r\n  },\"properties\"\
+        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Microsoft\"\r\n  },\"properties\"\
         :{\r\n    \"provisioningState\":\"Creating\",\"resourceState\":\"Creating\"\
         \r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/15dafa0b-62a9-4a8e-839b-e4b4e709b896?api-version=2020-04-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/6ed347c6-943e-4eba-80d8-3e094d42a64c?api-version=2020-04-15
       cache-control:
       - no-cache
       content-length:
-      - '419'
+      - '422'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:28:42 GMT
+      - Wed, 18 Nov 2020 22:24:58 GMT
       expires:
       - '-1'
       odata-version:
@@ -166,12 +119,12 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/15dafa0b-62a9-4a8e-839b-e4b4e709b896?api-version=2020-04-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/6ed347c6-943e-4eba-80d8-3e094d42a64c?api-version=2020-04-15
   response:
     body:
       string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\"\
@@ -184,7 +137,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:28:53 GMT
+      - Wed, 18 Nov 2020 22:25:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -220,7 +173,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --sku
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
@@ -230,18 +183,18 @@ interactions:
     body:
       string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
         ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \r\n  },\"location\"\
-        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\r\n  },\"properties\"\
+        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Microsoft\"\r\n  },\"properties\"\
         :{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\":\"Active\"\
         \r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '418'
+      - '421'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:28:54 GMT
+      - Wed, 18 Nov 2020 22:25:10 GMT
       expires:
       - '-1'
       odata-version:
@@ -275,228 +228,105 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile show
+      - cdn endpoint create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g -n --profile-name --origin
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2020-04-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
-        ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \r\n  },\"location\"\
-        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\r\n  },\"properties\"\
-        :{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\":\"Active\"\
-        \r\n  }\r\n}"
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-18T22:24:51Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '418'
+      - '428'
       content-type:
-      - application/json; odata.metadata=minimal
+      - application/json; charset=utf-8
       date:
-      - Wed, 18 Nov 2020 22:28:56 GMT
+      - Wed, 18 Nov 2020 22:25:11 GMT
       expires:
       - '-1'
-      odata-version:
-      - '4.0'
       pragma:
       - no-cache
-      server:
-      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
       - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
-      x-powered-by:
-      - ASP.NET
     status:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"location": "westus", "properties": {"isCompressionEnabled": false, "isHttpAllowed":
+      true, "isHttpsAllowed": true, "origins": [{"name": "origin-0", "properties":
+      {"hostName": "www.example.com", "httpPort": 80, "httpsPort": 443, "privateLinkResourceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-sdk-test/providers/Microsoft.Network/privateLinkServices/cdn-sdk-pls-test",
+      "privateLinkLocation": "EastUS", "privateLinkApprovalMessage": "Please approve
+      the request"}}]}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles?api-version=2020-04-15
-  response:
-    body:
-      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"profile123\",\"id\"\
-        :\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
-        ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n        \r\n      },\"\
-        location\":\"WestUs\",\"sku\":{\r\n        \"name\":\"Standard_Akamai\"\r\n\
-        \      },\"properties\":{\r\n        \"provisioningState\":\"Succeeded\",\"\
-        resourceState\":\"Active\"\r\n      }\r\n    }\r\n  ]\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '478'
-      content-type:
-      - application/json; odata.metadata=minimal
-      date:
-      - Wed, 18 Nov 2020 22:28:57 GMT
-      expires:
-      - '-1'
-      odata-version:
-      - '4.0'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --tags
-      User-Agent:
-      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2020-04-15
-  response:
-    body:
-      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
-        ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \r\n  },\"location\"\
-        :\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\r\n  },\"properties\"\
-        :{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\":\"Active\"\
-        \r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '418'
-      content-type:
-      - application/json; odata.metadata=minimal
-      date:
-      - Wed, 18 Nov 2020 22:28:58 GMT
-      expires:
-      - '-1'
-      odata-version:
-      - '4.0'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"tags": {"foo": "bar"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile update
+      - cdn endpoint create
       Connection:
       - keep-alive
       Content-Length:
-      - '24'
+      - '498'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --tags
+      - -g -n --profile-name --origin
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
-    method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2020-04-15
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2020-04-15
   response:
     body:
-      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
-        ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \"foo\":\"bar\"\r\n\
-        \  },\"location\":\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\
-        \r\n  },\"properties\":{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\"\
-        :\"Active\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\"\
+        ,\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n    \r\n  },\"\
+        location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\"\
+        ,\"originHostHeader\":null,\"provisioningState\":\"Creating\",\"resourceState\"\
+        :\"Creating\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\"\
+        :\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n      {\r\n  \
+        \      \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"\
+        www.example.com\",\"httpPort\":80,\"httpsPort\":443,\"originHostHeader\":null,\"\
+        priority\":1,\"weight\":1000,\"enabled\":true,\"privateLinkResourceId\":\"\
+        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-sdk-test/providers/Microsoft.Network/privateLinkServices/cdn-sdk-pls-test\"\
+        ,\"privateLinkLocation\":\"EastUS\",\"privateLinkAlias\":null,\"privateEndpointStatus\"\
+        :null,\"privateLinkApprovalMessage\":\"Please approve the request\"\r\n  \
+        \      }\r\n      }\r\n    ],\"originGroups\":[\r\n      \r\n    ],\"defaultOriginGroup\"\
+        :null,\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\
+        \n      \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"\
+        probePath\":null,\"geoFilters\":[\r\n      \r\n    ],\"deliveryPolicy\":null,\"\
+        webApplicationFirewallPolicyLink\":null,\"urlSigningKeys\":[\r\n      \r\n\
+        \    ]\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bb009111-53e6-405a-bb87-615b5061a4c1?api-version=2020-04-15
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7c744f51-d3fe-4deb-b9f4-494f5ef4ddd5?api-version=2020-04-15
       cache-control:
       - no-cache
       content-length:
-      - '429'
+      - '1489'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:29:01 GMT
+      - Wed, 18 Nov 2020 22:25:17 GMT
       expires:
       - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bb009111-53e6-405a-bb87-615b5061a4c1/profileresults/profile123?api-version=2020-04-15
       odata-version:
       - '4.0'
       pragma:
@@ -510,12 +340,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '24'
+      - '99'
       x-powered-by:
       - ASP.NET
     status:
-      code: 202
-      message: Accepted
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
@@ -524,29 +354,29 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile update
+      - cdn endpoint create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --tags
+      - -g -n --profile-name --origin
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/bb009111-53e6-405a-bb87-615b5061a4c1?api-version=2020-04-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7c744f51-d3fe-4deb-b9f4-494f5ef4ddd5?api-version=2020-04-15
   response:
     body:
-      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\"\
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\"\
         ,\"message\":null\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '77'
+      - '78'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:29:11 GMT
+      - Wed, 18 Nov 2020 22:25:28 GMT
       expires:
       - '-1'
       odata-version:
@@ -578,32 +408,99 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile update
+      - cdn endpoint create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n --tags
+      - -g -n --profile-name --origin
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2020-04-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/7c744f51-d3fe-4deb-b9f4-494f5ef4ddd5?api-version=2020-04-15
   response:
     body:
-      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\"\
-        ,\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n    \"foo\":\"bar\"\r\n\
-        \  },\"location\":\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Akamai\"\
-        \r\n  },\"properties\":{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\"\
-        :\"Active\"\r\n  }\r\n}"
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\"\
+        ,\"message\":null\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '429'
+      - '77'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:29:12 GMT
+      - Wed, 18 Nov 2020 22:25:58 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2020-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\"\
+        ,\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n    \r\n  },\"\
+        location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\"\
+        ,\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\"\
+        :\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\"\
+        :\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n      {\r\n  \
+        \      \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"\
+        www.example.com\",\"httpPort\":80,\"httpsPort\":443,\"originHostHeader\":null,\"\
+        priority\":1,\"weight\":1000,\"enabled\":true,\"privateLinkResourceId\":\"\
+        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-sdk-test/providers/Microsoft.Network/privateLinkServices/cdn-sdk-pls-test\"\
+        ,\"privateLinkLocation\":\"EastUS\",\"privateLinkAlias\":null,\"privateEndpointStatus\"\
+        :null,\"privateLinkApprovalMessage\":\"Please approve the request\"\r\n  \
+        \      }\r\n      }\r\n    ],\"originGroups\":[\r\n      \r\n    ],\"defaultOriginGroup\"\
+        :null,\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\
+        \n      \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"\
+        probePath\":null,\"geoFilters\":[\r\n      \r\n    ],\"deliveryPolicy\":null,\"\
+        webApplicationFirewallPolicyLink\":null,\"urlSigningKeys\":[\r\n      \r\n\
+        \    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1489'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Wed, 18 Nov 2020 22:25:59 GMT
       expires:
       - '-1'
       odata-version:
@@ -637,84 +534,49 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - cdn profile delete
+      - cdn endpoint list
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
-      - -g -n
+      - -g --profile-name
       User-Agent:
       - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2020-04-15
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/955e9d46-d467-4ece-a8da-d965fa0ee190?api-version=2020-04-15
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Wed, 18 Nov 2020 22:29:15 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/955e9d46-d467-4ece-a8da-d965fa0ee190/profileresults/profile123?api-version=2020-04-15
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - cdn profile delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.8.5 (macOS-10.16-x86_64-i386-64bit) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-cdn/5.1.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/955e9d46-d467-4ece-a8da-d965fa0ee190?api-version=2020-04-15
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2020-04-15
   response:
     body:
-      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\"\
-        ,\"message\":null\r\n  }\r\n}"
+      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"endpoint000002\",\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\"\
+        ,\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n        \r\n\
+        \      },\"location\":\"WestUs\",\"properties\":{\r\n        \"hostName\"\
+        :\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\"\
+        :\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\"\
+        :true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\"\
+        :null,\"origins\":[\r\n          {\r\n            \"name\":\"origin-0\",\"\
+        properties\":{\r\n              \"hostName\":\"www.example.com\",\"httpPort\"\
+        :80,\"httpsPort\":443,\"originHostHeader\":null,\"priority\":1,\"weight\"\
+        :1000,\"enabled\":true,\"privateLinkResourceId\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cdn-sdk-test/providers/Microsoft.Network/privateLinkServices/cdn-sdk-pls-test\"\
+        ,\"privateLinkLocation\":\"EastUS\",\"privateLinkAlias\":null,\"privateEndpointStatus\"\
+        :null,\"privateLinkApprovalMessage\":\"Please approve the request\"\r\n  \
+        \          }\r\n          }\r\n        ],\"originGroups\":[\r\n          \r\
+        \n        ],\"defaultOriginGroup\":null,\"customDomains\":[\r\n          \r\
+        \n        ],\"contentTypesToCompress\":[\r\n          \r\n        ],\"isCompressionEnabled\"\
+        :false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n \
+        \         \r\n        ],\"deliveryPolicy\":null,\"webApplicationFirewallPolicyLink\"\
+        :null,\"urlSigningKeys\":[\r\n          \r\n        ]\r\n      }\r\n    }\r\
+        \n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '77'
+      - '1605'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Wed, 18 Nov 2020 22:29:25 GMT
+      - Wed, 18 Nov 2020 22:26:02 GMT
       expires:
       - '-1'
       odata-version:
@@ -733,6 +595,8 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
       x-powered-by:
       - ASP.NET
     status:
