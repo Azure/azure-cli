@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.15.1
+++++++
+
+**Profile**
+
+* Hotfix: Fix #15961: az login: UnboundLocalError: local variable 'token_entry' referenced before assignment
+
 2.15.0
 ++++++
 
@@ -502,7 +509,7 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 **Storage**
 
 * `az storage blob list`: Support OR properties with new api version (#14832)
- 
+
 2.11.0
 ++++++
 

@@ -848,13 +848,10 @@ class SubscriptionFinder:
 
     def find_from_user_account(self, username, password, tenant, resource):
         context = self._create_auth_context(tenant)
-        try:
-            if password:
-                token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
-            else:  # when refresh account, we will leverage local cached tokens
-                token_entry = context.acquire_token(resource, username, _CLIENT_ID)
-        except Exception as err:  # pylint: disable=broad-except
-            _login_exception_handler(err)
+        if password:
+            token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
+        else:  # when refresh account, we will leverage local cached tokens
+            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
 
         if not token_entry:
             return []
@@ -875,11 +872,8 @@ class SubscriptionFinder:
 
         # exchange the code for the token
         context = self._create_auth_context(tenant)
-        try:
-            token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
-                                                                        resource, _CLIENT_ID, None)
-        except Exception as err:  # pylint: disable=broad-except
-            _login_exception_handler(err)
+        token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
+                                                                    resource, _CLIENT_ID, None)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
         logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
         if tenant is None:
@@ -890,10 +884,7 @@ class SubscriptionFinder:
 
     def find_through_interactive_flow(self, tenant, resource):
         context = self._create_auth_context(tenant)
-        try:
-            code = context.acquire_user_code(resource, _CLIENT_ID)
-        except Exception as err:  # pylint: disable=broad-except
-            _login_exception_handler(err)
+        code = context.acquire_user_code(resource, _CLIENT_ID)
         logger.warning(code['message'])
         token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
@@ -1368,13 +1359,3 @@ def _get_authorization_code(resource, authority_url):
     if results.get('no_browser'):
         raise RuntimeError()
     return results
-
-
-def _login_exception_handler(ex):
-    from requests.exceptions import InvalidURL
-    if isinstance(ex, InvalidURL):
-        import traceback
-        from azure.cli.core.azclierror import UnclassifiedUserFault
-        logger.debug('Invalid url when acquiring token\n%s', traceback.format_exc())
-        raise UnclassifiedUserFault(error_msg='Invalid url when acquiring token',
-                                    recommendation='Please make sure the cloud is registered with valid url')

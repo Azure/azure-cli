@@ -14,7 +14,7 @@ short-summary: Manage and administer Azure Service Fabric clusters.
 
 helps['sf application'] = """
 type: group
-short-summary: Manage applications running on an Azure Service Fabric cluster.
+short-summary: Manage applications running on an Azure Service Fabric cluster. Only support ARM deployed applications.
 """
 
 helps['sf application create'] = """
@@ -89,7 +89,7 @@ examples:
 
 helps['sf application-type'] = """
 type: group
-short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster.
+short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster. Only support ARM deployed application types.
 """
 
 helps['sf application-type'] = """
@@ -135,7 +135,7 @@ examples:
 
 helps['sf application-type version'] = """
 type: group
-short-summary: Manage application type versions on an Azure Service Fabric cluster.
+short-summary: Manage application type versions on an Azure Service Fabric cluster. Only support ARM deployed application type versions.
 """
 
 helps['sf application-type version create'] = """
@@ -177,7 +177,7 @@ examples:
 
 helps['sf service'] = """
 type: group
-short-summary: Manage services running on an Azure Service Fabric cluster.
+short-summary: Manage services running on an Azure Service Fabric cluster. Only support ARM deployed services.
 """
 
 helps['sf service create'] = """
