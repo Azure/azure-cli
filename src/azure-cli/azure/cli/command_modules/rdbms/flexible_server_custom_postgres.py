@@ -26,6 +26,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 
 # region create without args
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def flexible_server_create(cmd, client,
                            resource_group_name=None, server_name=None,
                            location=None, backup_retention=None,
@@ -69,6 +70,8 @@ def flexible_server_create(cmd, client,
 
         # Check availability for server name if it is supplied by the user
         if server_name is not None:
+            if any(x.isupper() for x in server_name):
+                raise CLIError("The server name '{}' contains at least a character in UPPERCASE. Server name should be in lowercase.".format(server_name))
             check_name_client = cf_postgres_check_resource_availability(cmd.cli_ctx, None)
             server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
             if not server_availability.name_available:
