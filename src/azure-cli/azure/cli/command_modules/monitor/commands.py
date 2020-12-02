@@ -22,200 +22,244 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_data_exports)
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
+    from ._exception_handler import exception_handler
 
     monitor_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.monitor.custom#{}')
+        operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
+        exception_handler=exception_handler)
 
     action_group_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#ActionGroupsOperations.{}',
         client_factory=cf_action_groups,
-        operation_group='action_groups')
+        operation_group='action_groups',
+        exception_handler=exception_handler)
 
     action_group_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.action_groups#{}',
         client_factory=cf_action_groups,
-        operation_group='action_groups')
+        operation_group='action_groups',
+        exception_handler=exception_handler)
 
     activity_log_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#EventCategoriesOperations.{}',
         client_factory=cf_event_categories,
-        operation_group='event_categories')
+        operation_group='event_categories',
+        exception_handler=exception_handler)
 
     activity_log_alerts_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#ActivityLogAlertsOperations.{}',
         client_factory=cf_activity_log_alerts,
-        operation_group='activity_log_alerts')
+        operation_group='activity_log_alerts',
+        exception_handler=exception_handler)
 
     activity_log_alerts_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.activity_log_alerts#{}',
         client_factory=cf_activity_log_alerts,
-        operation_group='activity_log_alerts')
+        operation_group='activity_log_alerts',
+        exception_handler=exception_handler)
 
     alert_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#AlertRulesOperations.{}',
         client_factory=cf_alert_rules,
-        operation_group='alert_rules')
+        operation_group='alert_rules',
+        exception_handler=exception_handler)
 
     alert_rule_incidents_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#AlertRuleIncidentsOperations.{}',
         client_factory=cf_alert_rule_incidents,
-        operation_group='alert_rule_incidents')
+        operation_group='alert_rule_incidents',
+        exception_handler=exception_handler)
 
     autoscale_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#AutoscaleSettingsOperations.{}',
         client_factory=cf_autoscale,
-        operation_group='autoscale_settings')
+        operation_group='autoscale_settings',
+        exception_handler=exception_handler)
 
     autoscale_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.autoscale_settings#{}',
         client_factory=cf_autoscale,
-        operation_group='autoscale_settings')
+        operation_group='autoscale_settings',
+        exception_handler=exception_handler)
 
     diagnostics_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsOperations.{}',
         client_factory=cf_diagnostics,
-        operation_group='diagnostic_settings')
+        operation_group='diagnostic_settings',
+        exception_handler=exception_handler)
 
     diagnostics_categories_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
         client_factory=cf_diagnostics_category,
-        operation_group='diagnostic_settings_category')
+        operation_group='diagnostic_settings_category',
+        exception_handler=exception_handler)
 
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
         client_factory=cf_diagnostics,
-        operation_group='diagnostic_settings_category')
+        operation_group='diagnostic_settings_category',
+        exception_handler=exception_handler)
 
     log_profiles_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#LogProfilesOperations.{}',
         client_factory=cf_log_profiles,
-        operation_group='log_profiles')
+        operation_group='log_profiles',
+        exception_handler=exception_handler)
 
     log_profiles_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_profiles#{}',
         client_factory=cf_log_profiles,
-        operation_group='log_profiles')
+        operation_group='log_profiles',
+        exception_handler=exception_handler)
 
     subscription_dianostic_settings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#SubscriptionDiagnosticSettingsOperations.{}',
         client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings')
+        operation_group='subscription_diagnostic_settings',
+        exception_handler=exception_handler)
 
     subscription_dianostic_settings_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.subscription_diagnostic_settings#{}',
         client_factory=cf_subscription_diagnostics,
-        operation_group='subscription_diagnostic_settings')
+        operation_group='subscription_diagnostic_settings',
+        exception_handler=exception_handler)
 
     alert_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.metric_alert#{}',
         client_factory=cf_alert_rules,
-        operation_group='alert_rules')
+        operation_group='alert_rules',
+        exception_handler=exception_handler)
 
     metric_alert_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#MetricAlertsOperations.{}',
         client_factory=cf_metric_alerts,
-        operation_group='metric_alerts')
+        operation_group='metric_alerts',
+        exception_handler=exception_handler)
 
     metric_definitions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
         client_factory=cf_metric_def,
-        operation_group='metric_definitions')
+        operation_group='metric_definitions',
+        exception_handler=exception_handler)
 
     log_analytics_workspace_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#WorkspacesOperations.{}',
-        client_factory=cf_log_analytics_workspace)
+        client_factory=cf_log_analytics_workspace,
+        exception_handler=exception_handler)
 
     private_link_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkResourcesOperations.{}',
         client_factory=cf_private_link_resources,
-        operation_group='private_link_resources')
+        operation_group='private_link_resources',
+        exception_handler=exception_handler)
 
     private_link_scoped_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopedResourcesOperations.{}',
         client_factory=cf_private_link_scoped_resources,
-        operation_group='private_link_scoped_resources')
+        operation_group='private_link_scoped_resources',
+        exception_handler=exception_handler)
 
     private_link_scopes_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopesOperations.{}',
         client_factory=cf_private_link_scopes,
-        operation_group='private_link_scopes')
+        operation_group='private_link_scopes',
+        exception_handler=exception_handler)
 
     private_endpoint_connections_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#PrivateEndpointConnectionsOperations.{}',
         client_factory=cf_private_endpoint_connections,
-        operation_group='private_endpoint_connections')
+        operation_group='private_endpoint_connections',
+        exception_handler=exception_handler)
 
     private_link_scope_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.private_link_scope#{}',
-        client_factory=cf_private_link_scopes)
+        client_factory=cf_private_link_scopes,
+        exception_handler=exception_handler)
 
     log_analytics_deleted_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
-        client_factory=cf_log_analytics_deleted_workspaces)
+        client_factory=cf_log_analytics_deleted_workspaces,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
-        client_factory=cf_log_analytics_workspace)
+        client_factory=cf_log_analytics_workspace,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_management_groups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#ManagementGroupsOperations.{}',
-        client_factory=cf_log_analytics_workspace_management_groups)
+        client_factory=cf_log_analytics_workspace_management_groups,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_usage_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#UsagesOperations.{}',
-        client_factory=cf_log_analytics_workspace_usage)
+        client_factory=cf_log_analytics_workspace_usage,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_schema_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#SchemaOperations.{}',
-        client_factory=cf_log_analytics_workspace_schema)
+        client_factory=cf_log_analytics_workspace_schema,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_shared_keys_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#SharedKeysOperations.{}',
-        client_factory=cf_log_analytics_workspace_shared_keys)
+        client_factory=cf_log_analytics_workspace_shared_keys,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_intelligence_packs_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#IntelligencePacksOperations.{}',
-        client_factory=cf_log_analytics_workspace_intelligence_packs)
+        client_factory=cf_log_analytics_workspace_intelligence_packs,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_saved_search_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#SavedSearchesOperations.{}',
-        client_factory=cf_log_analytics_workspace_saved_searches)
+        client_factory=cf_log_analytics_workspace_saved_searches,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_linked_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedServicesOperations.{}',
-        client_factory=cf_log_analytics_workspace_linked_service)
+        client_factory=cf_log_analytics_workspace_linked_service,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_linked_service_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace_linked_service#{}',
-        client_factory=cf_log_analytics_workspace_linked_service)
+        client_factory=cf_log_analytics_workspace_linked_service,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_table_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#TablesOperations.{}',
-        client_factory=cf_log_analytics_workspace_tables)
+        client_factory=cf_log_analytics_workspace_tables,
+        exception_handler=exception_handler)
 
     log_analytics_workspace_data_exports_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#DataExportsOperations.{}',
-        client_factory=cf_log_analytics_workspace_data_exports)
+        client_factory=cf_log_analytics_workspace_data_exports,
+        exception_handler=exception_handler)
 
     log_analytics_cluster_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#ClustersOperations.{}',
-        client_factory=cf_log_analytics_cluster)
+        client_factory=cf_log_analytics_cluster,
+        exception_handler=exception_handler)
 
     log_analytics_cluster_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_cluster#{}',
-        client_factory=cf_log_analytics_cluster)
+        client_factory=cf_log_analytics_cluster,
+        exception_handler=exception_handler)
 
     log_analytics_linked_storage_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedStorageAccountsOperations.{}',
-        client_factory=cf_log_analytics_linked_storage)
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=exception_handler)
 
     log_analytics_linked_storage_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_linked_storage_account#{}',
-        client_factory=cf_log_analytics_linked_storage)
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=exception_handler)
 
     monitor_general_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
-        client_factory=cf_metric_alerts)
+        client_factory=cf_metric_alerts,
+        exception_handler=exception_handler)
 
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
         g.show_command('show', 'get', table_transformer=action_group_list_table)
@@ -304,7 +348,7 @@ def load_command_table(self, _):
         g.command('list-definitions', 'list', command_type=metric_definitions_sdk, table_transformer=metrics_definitions_table)
 
     with self.command_group('monitor metrics alert', metric_alert_sdk, custom_command_type=alert_custom, client_factory=cf_metric_alerts) as g:
-        g.custom_command('create', 'create_metric_alert', custom_command_type=alert_custom)
+        g.custom_command('create', 'create_metric_alert')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_metric_alerts', custom_command_type=alert_custom)
         g.show_command('show', 'get')
