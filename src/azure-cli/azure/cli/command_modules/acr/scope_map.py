@@ -22,8 +22,8 @@ class RepoScopeMapActions(Enum):
 class GatewayScopeMapActions(Enum):
     CONFIG_READ = 'config/read'
     CONFIG_WRITE = 'config/write'
-    MESSAGES_READ = 'messages/read'
-    MESSAGES_WRITE = 'messages/write'
+    MESSAGES_READ = 'message/read'
+    MESSAGES_WRITE = 'message/write'
 
 
 def acr_scope_map_create(cmd,

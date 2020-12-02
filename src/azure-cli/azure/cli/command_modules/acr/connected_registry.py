@@ -27,7 +27,7 @@ class ConnectedRegistryModes(Enum):
     MIRROR = 'mirror'
     REGISTRY = 'registry'
 
-DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'messages/read', 'messages/write']
+DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
 REPO_SCOPES_BY_MODE = {
     ConnectedRegistryModes.MIRROR.value: ['content/read', 'metadata/read'],
     ConnectedRegistryModes.REGISTRY.value: ['content/read', 'content/write', 'content/delete',
