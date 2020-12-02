@@ -1713,14 +1713,13 @@ def _add_virtual_node_role_assignment(cmd, result, vnet_subnet_id):
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
     elif (
-            (hasattr(result, 'identity')) and
-            (result.identity.type.lower() != 'none')
+            (hasattr(result, 'addon_profiles')) and
+            (addon_name in result.addon_profiles) and
+            (hasattr(result.addon_profiles[addon_name], 'identity')) and
+            (hasattr(result.addon_profiles[addon_name].identity, 'object_id'))
     ):
-        logger.info('cluster identity exists, using it')
-        if result.identity.type.lower() == 'systemassigned':
-            service_principal_msi_id = result.identity.principal_id
-        elif result.identity.type.lower() == 'userassigned':
-            service_principal_msi_id = list(result.identity.user_assigned_identities.values())[0].principal_id
+        logger.info('virtual node MSI exists, using it')
+        service_principal_msi_id = result.addon_profiles[addon_name].identity.object_id
         is_service_principal = False
 
     if service_principal_msi_id is not None:
