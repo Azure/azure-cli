@@ -282,12 +282,14 @@ def acr_connected_registry_install(cmd,
                                    client,
                                    connected_registry_name,
                                    registry_name,
+                                   registry_volume=None,
                                    fresh_install=False,
                                    resource_group_name=None):
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)           
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
+    connected_registry_localhost = connected_registry.login_server.host
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     parent_id = connected_registry.parent.id
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
@@ -295,9 +297,12 @@ def acr_connected_registry_install(cmd,
         parent = parent_id.split('/connectedRegistry/')[1]
         parent = acr_connected_registry_show(
             cmd, client, parent, registry_name, resource_group_name)
-        parent_registry_endpoint = parent.loginServer.host
+        parent_registry_endpoint = parent.login_server.host
     else:
         parent_registry_endpoint = registry.login_server
+
+    if registry_volume is None:
+        registry_volume = "<myvolume>"
 
     if fresh_install:
         from ._client_factory import cf_acr_token_credentials
@@ -317,15 +322,18 @@ def acr_connected_registry_install(cmd,
         sync_username = "<sync token username>"
         sync_password = "<sync token password>"
 
-    json = {
-        "connectedRegistryName": connected_registry_name,
-        "parentGatewayEndpoint": parent_gateway_endpoint,
-        "parentRegistryEndpoint": parent_registry_endpoint,
-        "syncTokenName": sync_token_name,
-        "syncUsername": sync_username,
-        "syncPassword": sync_password
+    return {
+        "REGISTRY_NAME": connected_registry_name,
+        "REGISTRY_LOGIN_SERVER": connected_registry_localhost,
+        "SYNC_TOKEN_NAME": sync_token_name,
+        "SYNC_TOKEN_USERNAME": sync_username,
+        "SYNC_TOKEN_PASSWORD": sync_password,
+        "REGISTRY_DATA_VOLUME": registry_volume,
+        "REGISTRY_CERTIFICATE_VOLUME": registry_volume,
+        "PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,
+        "PARENT_LOGIN_SERVER": parent_registry_endpoint,
+        "PARENT_PROTOCOL": "https"
     }
-    return json
 
 
 def acr_connected_registry_list_client_tokens(cmd,
