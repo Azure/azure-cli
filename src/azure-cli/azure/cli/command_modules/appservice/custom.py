@@ -44,7 +44,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
-from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
 
@@ -2471,16 +2471,20 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
         return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except DefaultErrorResponseException as ex:
-        if ex.response.status_code == 202:
-            poll_timeout = time.time() + 60*2  # 2 minute timeout
-            retry_delay = 5
-            while time.time() < poll_timeout:
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
                 try:
-                    return client.certificates.get(resource_group_name=resource_group_name, name=hostname)
-                except DefaultErrorResponseException as inner_ex:
-                    if inner_ex.response.status_code != 404:
-                        raise CLIError(inner_ex)
-                time.sleep(retry_delay)
+                    return r.json()
+                except ValueError:
+                    return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl list' to view your certificate once it is created")
             return
