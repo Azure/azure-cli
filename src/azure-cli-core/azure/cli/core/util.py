@@ -55,7 +55,7 @@ DISALLOWED_USER_NAMES = [
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
-    from jmespath.exceptions import JMESPathTypeError
+    from jmespath.exceptions import JMESPathError
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
@@ -76,7 +76,7 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         if isinstance(ex, azclierror.AzCLIError):
             az_error = ex
 
-        elif isinstance(ex, JMESPathTypeError):
+        elif isinstance(ex, JMESPathError):
             error_msg = "Invalid jmespath query supplied for `--query`: {}".format(error_msg)
             az_error = azclierror.InvalidArgumentValueError(error_msg)
             az_error.set_recommendation(QUERY_REFERENCE)
@@ -96,8 +96,8 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = azclierror.ValidationError(error_msg)
 
         elif isinstance(ex, CLIError):
-            # TODO: Fine-grained analysis here for Unknown error
-            az_error = azclierror.UnknownError(error_msg)
+            # TODO: Fine-grained analysis here
+            az_error = azclierror.UnclassifiedUserFault(error_msg)
 
         elif isinstance(ex, AzureError):
             if extract_common_error_message(ex):
@@ -173,9 +173,8 @@ def extract_http_operation_error(ex):
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
             status_code = error.get('code', 'Unknown Code')
-            code_str = "{} - ".format(status_code)
             message = error.get('message', ex)
-            error_msg = "code: {}, {}".format(code_str, message)
+            error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
     except (ValueError, KeyError):
@@ -202,6 +201,7 @@ def get_error_type_by_azure_error(ex):
     return azclierror.UnknownError
 
 
+# pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
     import azure.cli.core.azclierror as azclierror
 
@@ -213,6 +213,8 @@ def get_error_type_by_status_code(status_code):
         return azclierror.ForbiddenError
     if status_code == '404':
         return azclierror.ResourceNotFoundError
+    if status_code.startswith('4'):
+        return azclierror.UnclassifiedUserFault
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 

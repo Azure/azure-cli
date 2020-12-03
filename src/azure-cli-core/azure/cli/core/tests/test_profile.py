@@ -14,9 +14,17 @@ import datetime
 
 from copy import deepcopy
 
-from azure.mgmt.resource.subscriptions.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
-from azure.cli.core._profile import Profile, SubscriptionFinder
+from adal import AdalError
+
+from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+if _USE_VENDORED_SUBSCRIPTION_SDK:
+    from azure.cli.core.vendored_sdks.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+else:
+    from azure.mgmt.resource.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+
 from azure.cli.core.mock import DummyCli
 from azure.identity import AuthenticationRecord
 
@@ -620,7 +628,16 @@ class TestProfile(unittest.TestCase):
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli)
         result = finder._arm_client_factory(mock.MagicMock())
-        self.assertEqual(result.config.base_url, 'http://foo_arm')
+        self.assertEqual(result._client._base_url, 'http://foo_arm')
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
+        cli = DummyCli()
+        get_client_class_mock.return_value = None
+        finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
+        from azure.cli.core.azclierror import CLIInternalError
+        with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
+            finder._arm_client_factory(mock.MagicMock())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
@@ -1350,8 +1367,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_subscription_finder, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_get_client_class, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1380,8 +1397,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], 'microsoft.com')
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_subscription_finder, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_get_client_class, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1410,8 +1427,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], self.test_msi_tenant)
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_subscription_finder, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_get_client_class, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1478,8 +1495,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], 'microsoft.com')
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_subscription_finder, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_get_client_class, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'

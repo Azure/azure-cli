@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterAdaptiveadaptiveApplicationControlsTests(ScenarioTest):
 
-    # This test makes use of existing resources
+    @record_only()  # This test makes use of existing resources
     @AllowLargeResponse()
     def test_adaptive_application_controls(self):
 

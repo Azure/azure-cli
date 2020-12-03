@@ -287,6 +287,15 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
         raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
 
 
+def _raise_subdivision_deployment_error(error_message, error_code=None):
+    from azure.cli.core.azclierror import InvalidTemplateError, DeploymentError
+
+    if error_code == 'InvalidTemplateDeployment':
+        raise InvalidTemplateError(error_message)
+
+    raise DeploymentError(error_message)
+
+
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
 def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file=None,
                                          template_uri=None, deployment_name=None, parameters=None,
@@ -353,16 +362,20 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         )
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=properties)
-        validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment)
+        try:
+            validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, properties)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -461,16 +474,20 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment_properties, deployment_location)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -541,16 +558,20 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties)
-        validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment_properties)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -617,9 +638,13 @@ def _deploy_arm_template_at_management_group(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -627,7 +652,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -689,9 +714,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -700,7 +729,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 

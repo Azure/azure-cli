@@ -38,12 +38,13 @@ def create_account(cmd, client, account_name, resource_group_name, location, tag
 # current limitation is 1 AD/subscription
 def add_active_directory(cmd, instance, account_name, resource_group_name, username, password, domain, dns,
                          smb_server_name, organizational_unit=None, kdc_ip=None, ad_name=None,
-                         server_root_ca_cert=None, backup_operators=None):
+                         server_root_ca_cert=None, backup_operators=None, aes_encryption=None, ldap_signing=None):
     active_directories = []
     active_directory = ActiveDirectory(username=username, password=password, domain=domain, dns=dns,
                                        smb_server_name=smb_server_name, organizational_unit=organizational_unit,
                                        kdc_ip=kdc_ip, ad_name=ad_name, backup_operators=backup_operators,
-                                       server_root_ca_certificate=server_root_ca_cert)
+                                       server_root_ca_certificate=server_root_ca_cert, aes_encryption=aes_encryption,
+                                       ldap_signing=ldap_signing)
     active_directories.append(active_directory)
     body = NetAppAccountPatch(active_directories=active_directories)
     _update_mapper(instance, body, ['active_directories'])
@@ -333,12 +334,13 @@ def create_backup_policy(client, resource_group_name, account_name, backup_polic
 
 def patch_backup_policy(client, resource_group_name, account_name, backup_policy_name, location,
                         daily_backups=0, weekly_backups=0, monthly_backups=0,
-                        yearly_backups=0, enabled=False):
+                        yearly_backups=0, enabled=False, tags=None):
     body = BackupPolicyPatch(
         location=location,
         daily_backups_to_keep=daily_backups,
         weekly_backups_to_keep=weekly_backups,
         monthly_backups_to_keep=monthly_backups,
         yearly_backups_to_keep=yearly_backups,
-        enabled=enabled)
+        enabled=enabled,
+        tags=tags)
     return client.update(resource_group_name, account_name, backup_policy_name, body)

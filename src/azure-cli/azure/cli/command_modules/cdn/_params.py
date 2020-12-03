@@ -167,14 +167,38 @@ def load_arguments(self, _):
 
     # Origin #
     with self.argument_context('cdn origin') as c:
+        # Some command handlers use name, others origin_name, so we specify both
         c.argument('name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
         c.argument('origin_name', name_arg_type, id_part='child_name_2', help='Name of the origin.')
         c.argument('profile_name', help=profile_name_help, id_part='name')
         c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1', help='Name of the CDN endpoint.')
-    with self.argument_context('cdn origin update') as c:
         c.argument('http_port', type=int)
         c.argument('https_port', type=int)
+        c.argument('disabled', arg_type=get_three_state_flag())
+        c.argument('priority', type=int)
+        c.argument('weight', type=int)
+        c.argument('private_link_approval_message', options_list=['--private-link-approval-message', '-m'])
+        c.argument('private_link_resource_id', options_list=['--private-link-resource-id', '-p'])
+        c.argument('private_link_location', options_list=['--private-link-location', '-l'])
     with self.argument_context('cdn origin list') as c:
+        # list commands can't use --ids argument.
+        c.argument('profile_name', id_part=None)
+        c.argument('endpoint_name', id_part=None)
+
+    with self.argument_context('cdn origin-group') as c:
+        # Some command handlers use name, others origin_name, so we specify both
+        c.argument('name', name_arg_type, id_part='child_name_2', help='Name of the origin group.')
+        c.argument('origin_group_name', name_arg_type, id_part='child_name_2', help='Name of the origin group.')
+        c.argument('profile_name', help=profile_name_help, id_part='name')
+        c.argument('endpoint_name', endpoint_name_type, id_part='child_name_1', help='Name of the CDN endpoint.')
+        c.argument('disabled', arg_type=get_three_state_flag())
+        c.argument('probe_method', arg_type=get_enum_type(["HEAD", "GET"]))
+        c.argument('probe_protocol', arg_type=get_enum_type(["HTTP", "HTTPS"]))
+        c.argument('probe_interval', type=int)
+        c.argument('failover_threshold', type=int)
+        c.argument('detection_type', arg_type=get_enum_type(["TcpErrorsOnly", "TcpAndHttpErrors"]))
+
+    with self.argument_context('cdn origin-group list') as c:
         # list commands can't use --ids argument.
         c.argument('profile_name', id_part=None)
         c.argument('endpoint_name', id_part=None)
@@ -189,6 +213,9 @@ def load_arguments(self, _):
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
     with self.argument_context('cdn waf policy delete') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy set') as c:
+        c.argument('waf_policy_resource_group_name', options_list=['--waf-policy-resource-group-name',
+                                                                   '--policy-group'])
 
     with self.argument_context('cdn waf policy managed-rule-set') as c:
         c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')

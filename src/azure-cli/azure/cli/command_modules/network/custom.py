@@ -2046,7 +2046,18 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
-    file_text = read_file_content(file_name)
+    from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
+    try:
+        file_text = read_file_content(file_name)
+    except FileNotFoundError:
+        raise FileOperationError("No such file: " + str(file_name))
+    except IsADirectoryError:
+        raise FileOperationError("Is a directory: " + str(file_name))
+    except PermissionError:
+        raise FileOperationError("Permission denied: " + str(file_name))
+    except OSError as e:
+        raise UnclassifiedUserFault(e)
+
     zone_obj = parse_zone_file(file_text, zone_name)
 
     origin = zone_name
@@ -4039,7 +4050,8 @@ def _delete_network_watchers(cmd, client, watchers):
 
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
-    existing_watchers = [w for w in watcher_list if w.location in locations]
+    locations_list = [location.lower() for location in locations]
+    existing_watchers = [w for w in watcher_list if w.location in locations_list]
     nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:

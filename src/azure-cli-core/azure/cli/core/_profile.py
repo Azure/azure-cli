@@ -20,7 +20,6 @@ from azure.cli.core.util import in_cloud_console, can_launch_browser, resource_t
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 from azure.cli.core._identity import Identity, AdalCredentialCache, MsalSecretStore, AZURE_CLI_CLIENT_ID
 
-
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -429,18 +428,17 @@ class Profile:
         return result
 
     def _new_account(self):
+        """Build an empty Subscription which will be used as a tenant account.
+        API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
         if _USE_VENDORED_SUBSCRIPTION_SDK:
             from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
-            from azure.cli.core.vendored_sdks.subscriptions.models import SubscriptionState
             SubscriptionType = Subscription
-            StateType = SubscriptionState
         else:
             from azure.cli.core.profiles import ResourceType, get_sdk
-            SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
-                                                  'Subscription',
-                                                  'SubscriptionState', mod='models')
+            SubscriptionType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                       'Subscription', mod='models')
         s = SubscriptionType()
-        s.state = StateType.ENABLED
+        s.state = 'Enabled'
         return s
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -491,8 +489,7 @@ class Profile:
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
-        from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
     def is_tenant_level_account(self):
@@ -889,6 +886,10 @@ class SubscriptionFinder:
             from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
 
             client_type = self._get_subscription_client_class()
+            if client_type is None:
+                from azure.cli.core.azclierror import CLIInternalError
+                raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
             # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
@@ -920,6 +921,7 @@ class SubscriptionFinder:
 
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):

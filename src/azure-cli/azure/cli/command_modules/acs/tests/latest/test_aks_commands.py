@@ -2109,6 +2109,241 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('agentPoolProfiles[0].osDiskType', 'Ephemeral'),
         ])
     
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'identity_resource_id': self.generate_user_assigned_identity_resource_id(resource_group),
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group)
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-managed-identity --assign-identity={identity_resource_id} ' \
+                     '--vnet-subnet-id={vnet_subnet_id}'
+
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('identity.type', "UserAssigned")
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.exists('identity'),
+            self.exists('identityProfile')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
+
+        # get-credentials without directory in path
+        temp_path = 'kubeconfig.tmp'
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.remove(temp_path)
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_ingress_appgw_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --enable-managed-identity --service-principal xxxx --client-secret yyyy --generate-ssh-keys ' \
+                     '-a ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ingressApplicationGateway.enabled', True),
+            self.check(
+                'addonProfiles.ingressApplicationGateway.config.subnetCIDR', "10.2.0.0/16")
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_byo_subnet_with_ingress_appgw_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        vnet_name = self.create_random_name('cliakstest', 16)
+        appgw_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'aks_name': aks_name,
+            'vnet_name': vnet_name,
+            'appgw_name': appgw_name
+        })
+
+        # create virtual network
+        create_vnet = 'network vnet create --resource-group={resource_group} --name={vnet_name} ' \
+                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24  -o json'
+        vnet = self.cmd(create_vnet, checks=[
+            self.check('newVNet.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_subnet = 'network vnet subnet create -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                        '--address-prefixes 11.0.1.0/24  -o json'
+        self.cmd(create_subnet, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        vnet_id = vnet['newVNet']["id"]
+        assert vnet_id is not None
+        self.kwargs.update({
+            'vnet_id': vnet_id,
+        })
+
+        # create aks cluster
+        create_cmd = 'aks create --resource-group={resource_group} --name={aks_name} --enable-managed-identity --generate-ssh-keys ' \
+                     '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
+                     '-a ingress-appgw --appgw-name gateway --appgw-subnet-id {vnet_id}/subnets/appgw-subnet  -o json'
+        aks_cluster = self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ingressApplicationGateway.enabled', True),
+            self.check(
+                'addonProfiles.ingressApplicationGateway.config.applicationGatewayName', "gateway"),
+            self.check('addonProfiles.ingressApplicationGateway.config.subnetId',
+                       vnet_id + '/subnets/appgw-subnet')
+        ]).get_output_in_json()
+
+        addon_client_id = aks_cluster["addonProfiles"]["ingressApplicationGateway"]["identity"]["clientId"]
+
+        self.kwargs.update({
+            'addon_client_id': addon_client_id,
+        })
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_byo_appgw_with_ingress_appgw_addon(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        vnet_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'aks_name': aks_name,
+            'vnet_name': vnet_name
+        })
+
+        # create virtual network
+        create_vnet = 'network vnet create --resource-group={resource_group} --name={vnet_name} ' \
+                      '--address-prefix 11.0.0.0/16 --subnet-name aks-subnet --subnet-prefix 11.0.0.0/24  -o json'
+        vnet = self.cmd(create_vnet, checks=[
+            self.check('newVNet.provisioningState', 'Succeeded')
+        ]).get_output_in_json()
+
+        create_subnet = 'network vnet subnet create -n appgw-subnet --resource-group={resource_group} --vnet-name {vnet_name} ' \
+                        '--address-prefixes 11.0.1.0/24  -o json'
+        self.cmd(create_subnet, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        vnet_id = vnet['newVNet']["id"]
+        assert vnet_id is not None
+        self.kwargs.update({
+            'vnet_id': vnet_id,
+        })
+
+        # create public ip for app gateway
+        create_pip = 'network public-ip create -n appgw-ip -g {resource_group} ' \
+                     '--allocation-method Static --sku Standard  -o json'
+        self.cmd(create_pip, checks=[
+            self.check('publicIp.provisioningState', 'Succeeded')
+        ])
+
+        # create app gateway
+        create_appgw = 'network application-gateway create -n appgw -g {resource_group} ' \
+                       '--sku Standard_v2 --public-ip-address appgw-ip --subnet {vnet_id}/subnets/appgw-subnet'
+        self.cmd(create_appgw)
+
+        # construct group id
+        from msrestazure.tools import parse_resource_id, resource_id
+        parsed_vnet_id = parse_resource_id(vnet_id)
+        group_id = resource_id(subscription=parsed_vnet_id["subscription"],
+                               resource_group=parsed_vnet_id["resource_group"])
+        appgw_id = group_id + "/providers/Microsoft.Network/applicationGateways/appgw"
+
+        self.kwargs.update({
+            'appgw_id': appgw_id,
+            'appgw_group_id': group_id
+        })
+
+        # create aks cluster
+        create_cmd = 'aks create -n {aks_name} -g {resource_group} --enable-managed-identity --generate-ssh-keys ' \
+                     '--vnet-subnet-id {vnet_id}/subnets/aks-subnet ' \
+                     '-a ingress-appgw --appgw-id {appgw_id} -o json'
+        aks_cluster = self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('addonProfiles.ingressApplicationGateway.enabled', True),
+            self.check(
+                'addonProfiles.ingressApplicationGateway.config.applicationGatewayId', appgw_id)
+        ]).get_output_in_json()
+
+        addon_client_id = aks_cluster["addonProfiles"]["ingressApplicationGateway"]["identity"]["clientId"]
+
+        self.kwargs.update({
+            'addon_client_id': addon_client_id,
+        })
+
     @classmethod
     def generate_ssh_keys(cls):
         TEST_SSH_KEY_PUB = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ== test@example.com\n"  # pylint: disable=line-too-long
@@ -2142,3 +2377,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         prefix = upgrade_version[:upgrade_version.rfind('.')]
         create_version = next(x for x in versions if not x.startswith(prefix))
         return create_version, upgrade_version
+
+    def generate_user_assigned_identity_resource_id(self, resource_group):
+        identity_name = self.create_random_name('cli', 16)
+        identity = self.cmd('az identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        return identity.get("id")

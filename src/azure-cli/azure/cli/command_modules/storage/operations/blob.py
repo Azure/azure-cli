@@ -24,6 +24,38 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
+def set_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.set_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def clear_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.clear_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def create_or_update_immutability_policy(cmd, client, container_name, account_name,
+                                         resource_group_name=None, allow_protected_append_writes=None,
+                                         period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
+                                                       if_match, immutability_policy)
+
+
+def extend_immutability_policy(cmd, client, container_name, account_name,
+                               resource_group_name=None, allow_protected_append_writes=None,
+                               period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.extend_immutability_policy(resource_group_name, account_name, container_name,
+                                             if_match, immutability_policy)
+
+
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
                         default_encryption_scope=None, deny_encryption_scope_override=None):
@@ -65,12 +97,12 @@ def list_container_rm(cmd, client, resource_group_name, account_name, include_de
 
 
 def container_rm_exists(client, resource_group_name, account_name, container_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         container = client.get(resource_group_name=resource_group_name,
                                account_name=account_name, container_name=container_name)
         return container is not None
-    except CloudError as err:
+    except HttpResponseError as err:
         if err.status_code == 404:
             return False
         raise err
@@ -136,9 +168,10 @@ def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_
     if blob_ranges is None:
         BlobRestoreRange = cmd.get_models("BlobRestoreRange")
         blob_ranges = [BlobRestoreRange(start_range="", end_range="")]
-
-    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name=resource_group_name,
-                       account_name=account_name, time_to_restore=time_to_restore, blob_ranges=blob_ranges)
+    restore_parameters = cmd.get_models("BlobRestoreParameters")(time_to_restore=time_to_restore,
+                                                                 blob_ranges=blob_ranges)
+    return sdk_no_wait(no_wait, client.begin_restore_blob_ranges, resource_group_name=resource_group_name,
+                       account_name=account_name, parameters=restore_parameters)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):

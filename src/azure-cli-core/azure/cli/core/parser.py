@@ -20,7 +20,7 @@ from azure.cli.core.command_recommender import CommandRecommender
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from azure.cli.core.azclierror import ArgumentParseError
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
 
@@ -165,7 +165,7 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendation = recommender.recommend_a_command()
 
-        az_error = ArgumentParseError(message)
+        az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
             az_error = UnrecognizedArgumentError(message)
         elif 'arguments are required' in message:
@@ -275,7 +275,7 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return command, parameters, extension
+        return command, self._raw_arguments, extension
 
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)

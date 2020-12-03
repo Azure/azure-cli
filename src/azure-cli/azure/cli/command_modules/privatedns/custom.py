@@ -27,13 +27,24 @@ def list_privatedns_zones(cmd, resource_group_name=None):
     return client.list()
 
 
-# pylint: disable=too-many-statements, too-many-locals
+# pylint: disable=too-many-statements, too-many-locals, too-many-branches
 def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
     from azure.mgmt.privatedns.models import RecordSet
 
-    file_text = read_file_content(file_name)
+    from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
+    try:
+        file_text = read_file_content(file_name)
+    except FileNotFoundError:
+        raise FileOperationError("No such file: " + str(file_name))
+    except IsADirectoryError:
+        raise FileOperationError("Is a directory: " + str(file_name))
+    except PermissionError:
+        raise FileOperationError("Permission denied: " + str(file_name))
+    except OSError as e:
+        raise UnclassifiedUserFault(e)
+
     zone_obj = parse_zone_file(file_text, private_zone_name)
     origin = private_zone_name
     record_sets = {}
