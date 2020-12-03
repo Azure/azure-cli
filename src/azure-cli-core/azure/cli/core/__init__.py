@@ -159,6 +159,80 @@ class AzCli(CLI):
             logger.warning('Your preference of %s now saved to local context. To learn more, type in `az '
                            'local-context --help`', ', '.join(args_str) + ' is' if len(args_str) == 1 else ' are')
 
+    def invoke(self, args, initial_invocation_data=None, out_file=None):
+        """ Invoke a command.
+
+        :param args: The arguments that represent the command
+        :type args: list, tuple
+        :param initial_invocation_data: Prime the in memory collection of key-value data for this invocation.
+        :type initial_invocation_data: dict
+        :param out_file: The file to send output to. If not used, we use out_file for knack.cli.CLI instance
+        :type out_file: file-like object
+        :return: The exit code of the invocation
+        :rtype: int
+        """
+        from knack.util import CommandResultItem
+        from knack.events import EVENT_CLI_PRE_EXECUTE, EVENT_CLI_POST_EXECUTE
+
+        if not isinstance(args, (list, tuple)):
+            raise TypeError('args should be a list or tuple.')
+        exit_code = 0
+        try:
+            if self.enable_color:
+                import colorama
+                colorama.init()
+                if self.out_file == sys.__stdout__:
+                    # point out_file to the new sys.stdout which is overwritten by colorama
+                    self.out_file = sys.stdout
+
+            args = self.completion.get_completion_args() or args
+            out_file = out_file or self.out_file
+
+            self.logging.configure(args)
+            logger.debug('Command arguments: %s', args)
+
+            self.raise_event(EVENT_CLI_PRE_EXECUTE)
+            if CLI._should_show_version(args):
+                self.show_version()
+                self.result = CommandResultItem(None)
+            elif args and (args[0] == '--terminal' or args[0] == '-t'):
+                self.start_terminal()
+            else:
+                self.invocation = self.invocation_cls(cli_ctx=self,
+                                                      parser_cls=self.parser_cls,
+                                                      commands_loader_cls=self.commands_loader_cls,
+                                                      help_cls=self.help_cls,
+                                                      initial_data=initial_invocation_data)
+                cmd_result = self.invocation.execute(args)
+                self.result = cmd_result
+                exit_code = self.result.exit_code
+                output_type = self.invocation.data['output']
+                if cmd_result and cmd_result.result is not None:
+                    formatter = self.output.get_formatter(output_type)
+                    self.output.out(cmd_result, formatter=formatter, out_file=out_file)
+        except KeyboardInterrupt as ex:
+            exit_code = 1
+            self.result = CommandResultItem(None, error=ex, exit_code=exit_code)
+        except Exception as ex:  # pylint: disable=broad-except
+            exit_code = self.exception_handler(ex)
+            self.result = CommandResultItem(None, error=ex, exit_code=exit_code)
+        except SystemExit as ex:
+            exit_code = ex.code
+            self.result = CommandResultItem(None, error=ex, exit_code=exit_code)
+            raise ex
+        finally:
+            self.raise_event(EVENT_CLI_POST_EXECUTE)
+
+            if self.enable_color:
+                colorama.deinit()
+
+        return exit_code
+
+    def start_terminal(self):
+        from azure.cli.core.terminal.app import TerminalApplication
+        app = TerminalApplication()
+        app.run()
+
 
 class MainCommandsLoader(CLICommandsLoader):
 
