@@ -2019,7 +2019,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         """
         pass
 
-    # @record_only()
+    @record_only()
     @AllowLargeResponse()
     def test_network_express_route_port_generate_loa(self):
         """
