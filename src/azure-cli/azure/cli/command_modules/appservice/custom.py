@@ -2384,6 +2384,11 @@ def list_ssl_certs(cmd, resource_group_name):
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
+def show_ssl_cert(cmd, resource_group_name, certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.certificates.get(resource_group_name, certificate_name)
+
+
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
@@ -2486,7 +2491,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                 except ValueError:
                     return r.text
             logger.warning("Managed Certificate creation in progress. Please use the command "
-                           "'az webapp config ssl list' to view your certificate once it is created")
+                           "'az webapp config ssl show -g %s --certificate-name %s' "
+                           " to view your certificate once it is created", resource_group_name, hostname)
             return
         raise CLIError(ex)
 
