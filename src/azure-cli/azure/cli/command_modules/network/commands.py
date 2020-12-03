@@ -740,6 +740,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_express_route_ports')
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_express_route_port')
+        g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
         g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)

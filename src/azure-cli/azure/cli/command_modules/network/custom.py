@@ -2762,6 +2762,38 @@ def update_express_route_port(cmd, instance, tags=None):
     return instance
 
 
+def download_generated_loa_as_pdf(cmd,
+                                  resource_group_name,
+                                  express_route_port_name,
+                                  customer_name,
+                                  file_path='loa.pdf'):
+    import os
+    import base64
+
+    dirname, basename = os.path.dirname(file_path), os.path.basename(file_path)
+
+    if basename == '':
+        basename = 'loa.pdf'
+    elif basename.endswith('.pdf') is False:
+        basename = basename + '.pdf'
+
+    file_path = os.path.join(dirname, basename)
+
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    response = client.generate_loa(resource_group_name, express_route_port_name, customer_name)
+
+    encoded_content = base64.b64decode(response.encoded_content)
+
+    from azure.cli.core.azclierror import FileOperationError
+    try:
+        with open(file_path, 'wb') as f:
+            f.write(encoded_content)
+    except OSError as ex:
+        raise FileOperationError(ex)
+
+    logger.warning("The generated letter of authorization is saved at %s", file_path)
+
+
 def list_express_route_ports(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).express_route_ports
     if resource_group_name:

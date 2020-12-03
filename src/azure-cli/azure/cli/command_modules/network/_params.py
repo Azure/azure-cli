@@ -779,6 +779,13 @@ def load_arguments(self, _):
                    help='Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Gbps')
         c.argument('peering_location', help='The name of the peering location that the port is mapped to physically.')
 
+    with self.argument_context('network express-route port generate-loa', min_api='2020-06-01') as c:
+        c.argument('customer_name', help='The customer name')
+        c.argument('file_path',
+                   options_list=['--file', '-f'],
+                   help="Directory or the file path of the letter to be saved to. If the file name extension is not .pdf, Azure CLI will help to append. "
+                        "Be careful, the existing file might get overwritten")
+
     with self.argument_context('network express-route port link', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type)
         c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1',

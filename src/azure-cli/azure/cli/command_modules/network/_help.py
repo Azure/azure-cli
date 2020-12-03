@@ -2735,6 +2735,11 @@ examples:
     crafted: true
 """
 
+helps['network express-route port generate-loa'] = """
+type: command
+short-summary: Generate and download a letter of authorization for the requested ExpressRoutePort
+"""
+
 helps['network express-route port link'] = """
 type: group
 short-summary: View ExpressRoute links.
