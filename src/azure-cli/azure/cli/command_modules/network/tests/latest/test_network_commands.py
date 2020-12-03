@@ -21,6 +21,8 @@ from knack.util import CLIError
 
 from msrestazure.tools import resource_id
 
+from .credential_replacer import ExpressRoutePortLOAContentReplacer
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
@@ -1988,6 +1990,11 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            ExpressRoutePortLOAContentReplacer()
+        ])
+
     def test_network_express_route_port_identity(self):
         """
         Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
@@ -2012,7 +2019,7 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         """
         pass
 
-    @record_only()
+    # @record_only()
     @AllowLargeResponse()
     def test_network_express_route_port_generate_loa(self):
         """
