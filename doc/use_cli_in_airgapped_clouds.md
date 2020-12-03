@@ -32,10 +32,10 @@ curl -Ls -o azure-cli.deb https://mysa.airgapped.cloud.net/packages/azure-cli.de
 ## Load Cloud Endpoints
 If you are working in an Azure AirGapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL, then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
 
-If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://docs.microsoft.com/cli/azure/manage-clouds-azure-cli?view=azure-cli-latest).
+If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://docs.microsoft.com/cli/azure/manage-clouds-azure-cli).
 
 ## Set CA bundle certificate
-Please follow the first solution in [Work behind a proxy](https://docs.microsoft.com/cli/azure/use-cli-effectively?view=azure-cli-latest#work-behind-a-proxy) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://docs.microsoft.com/en-us/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
+Please follow the first solution in [Work behind a proxy](https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
 
 ## Login with service principal
 Use the service principal that was granted permission to access a subscription in the airgapped cloud to login.
