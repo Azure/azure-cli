@@ -9,7 +9,7 @@ For the new commands or features authoring in CLI modules, here are what need to
 2. [__Mandatory__] Follow the error message authoring guidelines. See section [Error Message](#Error-Message)
 3. [__Recommended__] Provide recommendations for users to take action. See section [Error Recommendation](#Error-Recommendation)
 
-__For CLI extensions, it's optional to adopt to the new error types. If applying the new error types,  `azext.minCliCoreVersion` should be set to `2.15.0` or higher versions.__
+__For CLI extensions, it's optional to adopt the new error types. If applying the new error types,  `azext.minCliCoreVersion` should be set to `2.15.0` or higher versions.__
 
 ## Error Type
 
