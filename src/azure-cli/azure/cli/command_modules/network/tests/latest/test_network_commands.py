@@ -2012,6 +2012,20 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         """
         pass
 
+    @record_only()
+    @AllowLargeResponse()
+    def test_network_express_route_port_generate_loa(self):
+        """
+        The ExpressRoutePort comes from service team and located in a different subscription. And it will be revoked after this feature.
+        So, this test is record only.
+        """
+        self.kwargs.update({
+            'rg': 'ER-AutoTriage-RG',
+            'er_port': 'ER-autotriage-erdirect',
+        })
+
+        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {er_port} -f loa1')
+
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
