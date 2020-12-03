@@ -100,6 +100,16 @@ class UnknownError(AzCLIError):
     def send_telemetry(self):
         super().send_telemetry()
         telemetry.set_failure(self.error_msg)
+
+    def print_error(self):
+        from azure.cli.core.azlogging import CommandLoggerContext
+        with CommandLoggerContext(logger):
+            # print only error message (no error type)
+            logger.error(self.error_msg)
+            # print recommendations to action
+            if self.recommendations:
+                for recommendation in self.recommendations:
+                    print(recommendation, file=sys.stderr)
 # endregion
 
 
