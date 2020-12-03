@@ -2920,6 +2920,15 @@ examples:
     text: az network cross-region-lb list -g MyResourceGroup
 """
 
+helps['network cross-region-lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the cross-region load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network cross-region-lb wait -g MyResourceGroup -n MyLB --created
+"""
+
 helps['network cross-region-lb address-pool'] = """
 type: group
 short-summary: Manage address pools of a cross-region load balancer.
@@ -2938,7 +2947,7 @@ parameters:
         frontend-ip-address: Required. Resource id of a regional load balancer.
 
         Multiple backend addresses can be specified by using more than one `--backend-address` argument.
-  - name: --backend-addresses-config-file
+  - name: --backend-addresses-config-file --config-file
     short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
     long-summary: |
         Usage: --backend-addresses-config-file @"{config_file.json}"
@@ -3156,6 +3165,15 @@ helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.
 long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+"""
+
+helps['network lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network lb wait -g MyResourceGroup -n MyLB --created
 """
 
 helps['network lb address-pool'] = """

@@ -808,6 +808,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('list', 'list_lbs')
         g.generic_update_command('update')
+        g.wait_command('wait')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -885,6 +886,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('list', 'list_lbs')
         g.generic_update_command('update')
+        g.wait_command('wait')
 
     cross_region_lb_property_map = {
         'frontend_ip_configurations': 'frontend-ip',

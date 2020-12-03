@@ -1000,8 +1000,6 @@ def load_arguments(self, _):
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
         c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
         c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
-        # c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.',
-        #            default=IPVersion.ipv4.value if IPVersion else '')
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list='--backend-pool-name', help='The name of the backend address pool.',
                        completer=get_lb_subresource_completion_list('backend_address_pools'))
@@ -1016,21 +1014,12 @@ def load_arguments(self, _):
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
         c.argument('public_ip_address', help=public_ip_help,
                    completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('public_ip_address_allocation', help='IP allocation method.',
+        c.argument('public_ip_address_allocation', options_list=['--public-ip-address-allocation', '--address-allocation'], help='IP allocation method.',
                    arg_type=get_enum_type(IPAllocationMethod))
         c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
         c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'],
                    help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
         c.ignore('public_ip_address_type')
-
-    # with self.argument_context('network cross-region-lb create', arg_group='Subnet') as c:
-    #     subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True,
-    #                                                    allow_none=True, default_none=True)
-    #     c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
-    #     c.argument('subnet_address_prefix', help='The CIDR address prefix to use when creating a new subnet.')
-    #     c.argument('virtual_network_name', virtual_network_name_type)
-    #     c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
-    #     c.ignore('vnet_type', 'subnet_type')
 
     with self.argument_context('network cross-region-lb address-pool') as c:
         c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
@@ -1039,7 +1028,7 @@ def load_arguments(self, _):
                    help='The name of the backend address pool. {}'.format(default_existing))
         c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreateForCrossRegionLB,
                    is_preview=True)
-        c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
+        c.argument('backend_addresses_config_file', options_list=['--backend-addresses-config-file', '--config-file'], type=get_json_object, is_preview=True)
 
     with self.argument_context('network cross-region-lb address-pool address') as c:
         c.argument('backend_address_pool_name',
