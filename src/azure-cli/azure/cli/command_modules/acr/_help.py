@@ -1256,6 +1256,16 @@ examples:
             --name Contoso-Edge01-in-Wichita --fresh-install
 """
 
+helps['acr connected-registry deactivate'] = """
+type: command
+short-summary: Deactivate a connected registry from Azure Container Registry.
+examples:
+  - name: Deactivate a connected registry 'Contoso-Edge01-in-Wichita' and skip verification.
+    text: |
+        az acr connected-registry deactivate --registry mycloudregistry 
+            --name Contoso-Edge01-in-Wichita --yes
+"""
+
 helps['acr connected-registry list'] = """
 type: command
 short-summary: Lists all the connected registries under the current parent registry.
