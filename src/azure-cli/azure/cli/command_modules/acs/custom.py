@@ -2727,8 +2727,9 @@ def _handle_addons_args(cmd, addons_str, subscription_id, resource_group_name, a
     if 'virtual-node' in addons:
         if not aci_subnet_name or not vnet_subnet_id:
             raise CLIError('"--enable-addons virtual-node" requires "--aci-subnet-name" and "--vnet-subnet-id".')
-        # TODO: how about aciConnectorwindows, what is its addon name?
-        addon_profiles[CONST_VIRTUAL_NODE_ADDON_NAME] = ManagedClusterAddonProfile(
+        # only Linux is supported for virtual-node
+        vn_addon_name = CONST_VIRTUAL_NODE_ADDON_NAME + "Linux"
+        addon_profiles[vn_addon_name] = ManagedClusterAddonProfile(
             enabled=True,
             config={CONST_VIRTUAL_NODE_SUBNET_NAME: aci_subnet_name}
         )
