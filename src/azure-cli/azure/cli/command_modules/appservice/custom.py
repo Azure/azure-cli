@@ -2466,15 +2466,15 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
 
+    # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
         return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except DefaultErrorResponseException as ex:
         if ex.response.status_code == 202:
-            retry_times = 12
+            poll_timeout = time.time() + 60*2  # 2 minute timeout
             retry_delay = 5
-            while retry_times > 0:
-                retry_times -= 1
+            while time.time() < poll_timeout:
                 try:
                     return client.certificates.get(resource_group_name=resource_group_name, name=hostname)
                 except DefaultErrorResponseException as inner_ex:
