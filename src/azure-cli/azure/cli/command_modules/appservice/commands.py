@@ -175,7 +175,7 @@ def load_command_table(self, _):
     with self.command_group('webapp config ssl') as g:
         g.custom_command('upload', 'upload_ssl_cert', validator=validate_app_exists_in_rg)
         g.custom_command('list', 'list_ssl_certs', exception_handler=ex_handler_factory())
-        g.custom_command('show', 'show_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_show_command('show', 'show_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory(), validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
@@ -326,6 +326,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp config ssl') as g:
         g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_ssl_certs')
+        g.custom_show_command('show', 'show_ssl_cert')
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('unbind', 'unbind_ssl_cert')
         g.custom_command('delete', 'delete_ssl_cert')
