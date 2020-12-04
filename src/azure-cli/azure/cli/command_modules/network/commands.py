@@ -60,7 +60,7 @@ from azure.cli.command_modules.network._validators import (
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace,
     process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
-    process_appgw_waf_policy_update)
+    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
 ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
 
@@ -187,7 +187,7 @@ def load_command_table(self, _):
     network_private_endpoint_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
-        min_api='2018-08-01'
+        min_api='2020-06-01'
     )
 
     network_private_endpoint_dns_zone_group_sdk = CliCommandType(
@@ -740,6 +740,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_express_route_ports')
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_express_route_port')
+        g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
         g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
@@ -810,6 +811,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('list', 'list_lbs')
         g.generic_update_command('update')
+        g.wait_command('wait')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -878,6 +880,55 @@ def load_command_table(self, _):
         g.command('list', list_network_resource_property('load_balancers', 'outbound_rules'))
         g.show_command('show', get_network_resource_property_entry('load_balancers', 'outbound_rules'))
         g.command('delete', delete_network_resource_property_entry('load_balancers', 'outbound_rules'))
+    # endregion
+
+    # region cross-region load balancer
+    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_lbs')
+        g.generic_update_command('update')
+        g.wait_command('wait')
+
+    cross_region_lb_property_map = {
+        'frontend_ip_configurations': 'frontend-ip',
+        'load_balancing_rules': 'rule',
+        'probes': 'probe',
+    }
+
+    for subresource, alias in cross_region_lb_property_map.items():
+        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
+            g.command('list', list_network_resource_property('load_balancers', subresource))
+            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
+            g.command('delete', delete_network_resource_property_entry('load_balancers', subresource))
+
+    with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
+        g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
+                                 custom_func_name='set_cross_region_lb_frontend_ip_configuration',
+                                 validator=process_cross_region_lb_frontend_ip_namespace)
+
+    with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_backend_address_pool')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+
+    with self.command_group('network cross-region-lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
+        g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
+        g.custom_command('list', 'list_lb_backend_address_pool_address')
+
+    with self.command_group('network cross-region-lb rule', network_lb_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_rule')
+        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
+                                 custom_func_name='set_cross_region_lb_rule')
+
+    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
+        g.custom_command('create', 'create_lb_probe')
+        g.generic_update_command('update', child_collection_prop_name='probes',
+                                 custom_func_name='set_lb_probe')
     # endregion
 
     # region LocalGateways

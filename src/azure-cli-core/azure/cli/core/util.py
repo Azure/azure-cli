@@ -28,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
+                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -115,6 +115,10 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         elif isinstance(ex, ClientRequestError):
             if is_azure_connection_error(error_msg):
                 az_error = azclierror.AzureConnectionError(error_msg)
+            elif isinstance(ex.inner_exception, SSLError):
+                # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
+                az_error = azclierror.AzureConnectionError(error_msg)
+                az_error.set_recommendation(SSLERROR_TEMPLATE)
             else:
                 az_error = azclierror.ClientRequestError(error_msg)
 
@@ -427,15 +431,16 @@ def show_updates_available(new_line_before=False, new_line_after=False):
     if updates_available_components:
         if new_line_before:
             logger.warning("")
-        show_updates(updates_available_components)
+        show_updates(updates_available_components, only_show_when_updates_available=True)
         if new_line_after:
             logger.warning("")
     VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
 
 
-def show_updates(updates_available_components):
+def show_updates(updates_available_components, only_show_when_updates_available=False):
     if updates_available_components is None:
-        logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+        if not only_show_when_updates_available:
+            logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available_components:  # pylint: disable=too-many-nested-blocks
         if in_cloud_console():
             warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
@@ -444,7 +449,7 @@ def show_updates(updates_available_components):
             if CLI_PACKAGE_NAME in updates_available_components:
                 warning_msg = "{} Consider updating your CLI installation with 'az upgrade'".format(warning_msg)
         logger.warning(warning_msg, len(updates_available_components))
-    else:
+    elif not only_show_when_updates_available:
         print('Your CLI is up-to-date.')
 
 

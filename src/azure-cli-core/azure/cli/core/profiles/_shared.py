@@ -135,7 +135,7 @@ class SDKProfile:  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2020-06-01',
+        ResourceType.MGMT_NETWORK: '2020-07-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
             'resource_skus': '2019-04-01',
             'disks': '2020-06-30',
@@ -153,7 +153,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2020-06-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-11-01',
-        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2020-10-01',
         ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2019-06-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2020-04-01-preview',
@@ -209,6 +209,45 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30'
+    },
+    '2020-09-01-hybrid': {
+        ResourceType.MGMT_STORAGE: '2019-06-01',
+        ResourceType.MGMT_NETWORK: '2018-11-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2020-06-01', {
+            'resource_skus': '2019-04-01',
+            'disks': '2019-07-01',
+            'disk_encryption_sets': '2019-07-01',
+            'disk_accesses': '2020-05-01',
+            'snapshots': '2019-07-01',
+            'galleries': '2019-12-01',
+            'gallery_images': '2019-12-01',
+            'gallery_image_versions': '2019-12-01',
+            'virtual_machine_scale_sets': '2020-06-01'
+        }),
+        ResourceType.MGMT_KEYVAULT: '2016-10-01',
+        ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
+        ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
+        ResourceType.MGMT_RESOURCE_POLICY: '2016-12-01',
+        ResourceType.MGMT_RESOURCE_RESOURCES: '2019-10-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_RESOURCE_TEMPLATESPECS: '2015-01-01',
+        ResourceType.MGMT_NETWORK_DNS: '2016-04-01',
+        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2016-09-01', {
+            'classic_administrators': '2015-06-01',
+            'policy_assignments': '2016-12-01',
+            'policy_definitions': '2016-12-01'
+        }),
+        ResourceType.DATA_KEYVAULT: '2016-10-01',
+        ResourceType.DATA_STORAGE: '2018-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2019-07-07',
+        ResourceType.DATA_STORAGE_FILESHARE: '2019-07-07',
+        ResourceType.DATA_STORAGE_QUEUE: '2019-07-07',
+        ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
+        ResourceType.MGMT_APPSERVICE: '2018-02-01',
+        ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
+        ResourceType.MGMT_IOTHUB: '2019-07-01-preview'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

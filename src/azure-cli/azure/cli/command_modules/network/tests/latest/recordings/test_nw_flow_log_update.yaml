@@ -13,24 +13,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001","name":"test_nw_flow_log_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-08-26T09:28:41Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001","name":"test_nw_flow_log_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-30T19:00:01Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '471'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:11 GMT
+      - Mon, 30 Nov 2020 19:00:38 GMT
       expires:
       - '-1'
       pragma:
@@ -62,101 +62,96 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n  \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\",\r\n \
-        \   \"securityRules\": [],\r\n    \"defaultSecurityRules\": [\r\n      {\r\
-        \n        \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Allow inbound traffic from all VMs in VNET\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n\
-        \          \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\":\
-        \ [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\
-        \n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Allow inbound traffic from azure load balancer\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n\
-        \          \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\":\
-        \ [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Deny all inbound traffic\",\r\n        \
-        \  \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n     \
-        \     \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n          \"\
-        access\": \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\"\
-        : \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\"\
-        : [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\"\
-        : []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowVnetOutBound\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Allow outbound traffic from all VMs to all\
-        \ VMs in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\"\
-        : \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n\
-        \          \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\"\
-        : [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n    \
-        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowInternetOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Allow outbound traffic from all VMs to Internet\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n    \
-        \      \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n      \
-        \    \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\
-        \n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n        \"\
-        id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"1127f09d-39a5-4af1-949d-794edd8b6619\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"description\": \"Deny all outbound traffic\",\r\n       \
-        \   \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n    \
-        \      \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n          \"\
-        access\": \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\"\
-        : \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\"\
-        : [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\"\
-        : []\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \ \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n    \"securityRules\": [],\r\n
+        \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n
+        \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
+        \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to all VMs
+        in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\":
+        \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n          \"access\":
+        \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\": \"Outbound\",\r\n
+        \         \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
+        \       \"etag\": \"W/\\\"adb4d1b7-3c19-45ab-9bba-ae7fddf2eb78\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
+        [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
+        \   ]\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/a72afb3a-789b-4f72-97cb-8eb357eb7798?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/10898689-08e3-41ff-9981-ec47b1c59db7?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -164,7 +159,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:18 GMT
+      - Mon, 30 Nov 2020 19:00:47 GMT
       expires:
       - '-1'
       pragma:
@@ -177,9 +172,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 594e580a-7a1f-4713-af64-d4f75cd08dd8
+      - 8821f260-90ed-486a-96f9-b5f512c5e1a8
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1186'
     status:
       code: 201
       message: Created
@@ -197,10 +192,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/a72afb3a-789b-4f72-97cb-8eb357eb7798?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/10898689-08e3-41ff-9981-ec47b1c59db7?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -212,7 +207,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:23 GMT
+      - Mon, 30 Nov 2020 19:00:53 GMT
       expires:
       - '-1'
       pragma:
@@ -229,7 +224,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2f4e49e6-78a5-4120-b39b-3afd2c6c542f
+      - 12ae4ba4-3a55-4bab-9213-d8d3fa1bb430
     status:
       code: 200
       message: OK
@@ -247,94 +242,89 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n  \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\"\
-        : \"eastus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\",\r\n \
-        \   \"securityRules\": [],\r\n    \"defaultSecurityRules\": [\r\n      {\r\
-        \n        \"name\": \"AllowVnetInBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Allow inbound traffic from all VMs in VNET\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n\
-        \          \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\":\
-        \ [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\
-        \n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Allow inbound traffic from azure load balancer\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n\
-        \          \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\":\
-        \ [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllInBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Deny all inbound traffic\",\r\n        \
-        \  \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n     \
-        \     \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n          \"\
-        access\": \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\"\
-        : \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\"\
-        : [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\"\
-        : []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowVnetOutBound\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Allow outbound traffic from all VMs to all\
-        \ VMs in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\"\
-        : \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\"\
-        ,\r\n          \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n\
-        \          \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\"\
-        : [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n    \
-        \    \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowInternetOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Allow outbound traffic from all VMs to Internet\"\
-        ,\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\"\
-        ,\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n    \
-        \      \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n      \
-        \    \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\
-        \n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\"\
-        : [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n   \
-        \   },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n        \"\
-        id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllOutBound\"\
-        ,\r\n        \"etag\": \"W/\\\"2f051944-6c11-420d-a5f6-a258972b0caf\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"description\": \"Deny all outbound traffic\",\r\n       \
-        \   \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n    \
-        \      \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\"\
-        : \"*\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n          \"\
-        access\": \"Deny\",\r\n          \"priority\": 65500,\r\n          \"direction\"\
-        : \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\"\
-        : [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\"\
-        : []\r\n        }\r\n      }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"nsg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \ \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkSecurityGroups\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n    \"securityRules\": [],\r\n
+        \   \"defaultSecurityRules\": [\r\n      {\r\n        \"name\": \"AllowVnetInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetInBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow inbound traffic from all VMs in VNET\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowAzureLoadBalancerInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowAzureLoadBalancerInBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow inbound traffic from azure load balancer\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"AzureLoadBalancer\",\r\n          \"destinationAddressPrefix\": \"*\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\":
+        \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllInBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllInBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Deny all inbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Inbound\",\r\n          \"sourcePortRanges\": [],\r\n
+        \         \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      },\r\n
+        \     {\r\n        \"name\": \"AllowVnetOutBound\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowVnetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to all VMs
+        in VNET\",\r\n          \"protocol\": \"*\",\r\n          \"sourcePortRange\":
+        \"*\",\r\n          \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"VirtualNetwork\",\r\n          \"destinationAddressPrefix\": \"VirtualNetwork\",\r\n
+        \         \"access\": \"Allow\",\r\n          \"priority\": 65000,\r\n          \"direction\":
+        \"Outbound\",\r\n          \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"AllowInternetOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/AllowInternetOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Allow outbound traffic from all VMs to Internet\",\r\n
+        \         \"protocol\": \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n
+        \         \"destinationPortRange\": \"*\",\r\n          \"sourceAddressPrefix\":
+        \"*\",\r\n          \"destinationAddressPrefix\": \"Internet\",\r\n          \"access\":
+        \"Allow\",\r\n          \"priority\": 65001,\r\n          \"direction\": \"Outbound\",\r\n
+        \         \"sourcePortRanges\": [],\r\n          \"destinationPortRanges\":
+        [],\r\n          \"sourceAddressPrefixes\": [],\r\n          \"destinationAddressPrefixes\":
+        []\r\n        }\r\n      },\r\n      {\r\n        \"name\": \"DenyAllOutBound\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1/defaultSecurityRules/DenyAllOutBound\",\r\n
+        \       \"etag\": \"W/\\\"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkSecurityGroups/defaultSecurityRules\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"description\": \"Deny all outbound traffic\",\r\n          \"protocol\":
+        \"*\",\r\n          \"sourcePortRange\": \"*\",\r\n          \"destinationPortRange\":
+        \"*\",\r\n          \"sourceAddressPrefix\": \"*\",\r\n          \"destinationAddressPrefix\":
+        \"*\",\r\n          \"access\": \"Deny\",\r\n          \"priority\": 65500,\r\n
+        \         \"direction\": \"Outbound\",\r\n          \"sourcePortRanges\":
+        [],\r\n          \"destinationPortRanges\": [],\r\n          \"sourceAddressPrefixes\":
+        [],\r\n          \"destinationAddressPrefixes\": []\r\n        }\r\n      }\r\n
+        \   ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -343,9 +333,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:23 GMT
+      - Mon, 30 Nov 2020 19:00:54 GMT
       etag:
-      - W/"2f051944-6c11-420d-a5f6-a258972b0caf"
+      - W/"e02bd872-cc1b-4d02-a48e-3dfc0cbc2ef2"
       expires:
       - '-1'
       pragma:
@@ -362,7 +352,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cc76a640-b4b5-4185-ada2-ddbcd7790e7f
+      - 28096f1f-6c0c-491e-82fe-bab2687b5239
     status:
       code: 200
       message: OK
@@ -380,24 +370,24 @@ interactions:
       ParameterSetName:
       - --resource-group --name --https-only
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001","name":"test_nw_flow_log_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-08-26T09:28:41Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001","name":"test_nw_flow_log_000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-30T19:00:01Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '471'
+      - '428'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:23 GMT
+      - Mon, 30 Nov 2020 19:00:56 GMT
       expires:
       - '-1'
       pragma:
@@ -427,14 +417,11 @@ interactions:
       Content-Length:
       - '204'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - --resource-group --name --https-only
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.10.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395?api-version=2019-06-01
   response:
@@ -448,11 +435,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:29:26 GMT
+      - Mon, 30 Nov 2020 19:01:03 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/b66c80be-12a5-44cd-a704-a8753d2c406c?monitor=true&api-version=2019-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/0e974956-aaeb-4fa6-83fe-f00723941ccc?monitor=true&api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -462,7 +449,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1188'
     status:
       code: 202
       message: Accepted
@@ -470,7 +457,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -480,13 +467,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --https-only
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-storage/11.1.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - AZURECLI/2.15.1 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/b66c80be-12a5-44cd-a704-a8753d2c406c?monitor=true&api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/0e974956-aaeb-4fa6-83fe-f00723941ccc?monitor=true&api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395","name":"storageaccount0395","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-26T09:29:26.7283505Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-26T09:29:26.7283505Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-08-26T09:29:26.6345910Z","primaryEndpoints":{"dfs":"https://storageaccount0395.dfs.core.windows.net/","web":"https://storageaccount0395.z13.web.core.windows.net/","blob":"https://storageaccount0395.blob.core.windows.net/","queue":"https://storageaccount0395.queue.core.windows.net/","table":"https://storageaccount0395.table.core.windows.net/","file":"https://storageaccount0395.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available","secondaryLocation":"westus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storageaccount0395-secondary.dfs.core.windows.net/","web":"https://storageaccount0395-secondary.z13.web.core.windows.net/","blob":"https://storageaccount0395-secondary.blob.core.windows.net/","queue":"https://storageaccount0395-secondary.queue.core.windows.net/","table":"https://storageaccount0395-secondary.table.core.windows.net/"}}}'
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395","name":"storageaccount0395","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-30T19:01:03.7214895Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-30T19:01:03.7214895Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-11-30T19:01:03.5964829Z","primaryEndpoints":{"dfs":"https://storageaccount0395.dfs.core.windows.net/","web":"https://storageaccount0395.z13.web.core.windows.net/","blob":"https://storageaccount0395.blob.core.windows.net/","queue":"https://storageaccount0395.queue.core.windows.net/","table":"https://storageaccount0395.table.core.windows.net/","file":"https://storageaccount0395.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available","secondaryLocation":"westus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://storageaccount0395-secondary.dfs.core.windows.net/","web":"https://storageaccount0395-secondary.z13.web.core.windows.net/","blob":"https://storageaccount0395-secondary.blob.core.windows.net/","queue":"https://storageaccount0395-secondary.queue.core.windows.net/","table":"https://storageaccount0395-secondary.table.core.windows.net/"}}}'
     headers:
       cache-control:
       - no-cache
@@ -495,7 +481,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Aug 2020 09:29:44 GMT
+      - Mon, 30 Nov 2020 19:01:21 GMT
       expires:
       - '-1'
       pragma:
@@ -532,29 +518,28 @@ interactions:
       ParameterSetName:
       - --resource-group --location --workspace-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-loganalytics/0.7.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-loganalytics/0.7.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2020-03-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
-        : \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\",\r\n    \"provisioningState\":\
-        \ \"Creating\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n  \
-        \    \"maxCapacityReservationLevel\": 3000,\r\n      \"lastSkuUpdate\": \"\
-        Wed, 26 Aug 2020 09:29:52 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\
-        \n    \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\":\
-        \ 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n  \
-        \  },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n\
-        \      \"quotaNextResetTime\": \"Wed, 26 Aug 2020 15:00:00 GMT\",\r\n    \
-        \  \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
-        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
-        \  \"createdDate\": \"Wed, 26 Aug 2020 09:29:52 GMT\",\r\n    \"modifiedDate\"\
-        : \"Wed, 26 Aug 2020 09:29:52 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n  \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"maxCapacityReservationLevel\":
+        3000,\r\n      \"lastSkuUpdate\": \"Mon, 30 Nov 2020 19:01:30 GMT\"\r\n    },\r\n
+        \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n
+        \     \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\":
+        true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n
+        \     \"quotaNextResetTime\": \"Tue, 01 Dec 2020 17:00:00 GMT\",\r\n      \"dataIngestionStatus\":
+        \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n
+        \   \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Mon, 30 Nov 2020 19:01:30 GMT\",\r\n    \"modifiedDate\": \"Mon, 30 Nov
+        2020 19:01:30 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \ \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -563,7 +548,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Aug 2020 09:29:54 GMT
+      - Mon, 30 Nov 2020 19:01:32 GMT
       pragma:
       - no-cache
       server:
@@ -574,7 +559,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1185'
       x-powered-by:
       - ASP.NET
       - ASP.NET
@@ -595,27 +580,26 @@ interactions:
       ParameterSetName:
       - --resource-group --location --workspace-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-loganalytics/0.7.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-loganalytics/0.7.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/Microsoft.OperationalInsights/workspaces/clitest000003?api-version=2020-03-01-preview
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
-        : \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\",\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n \
-        \     \"maxCapacityReservationLevel\": 3000,\r\n      \"lastSkuUpdate\": \"\
-        Wed, 26 Aug 2020 09:29:52 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\
-        \n    \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\":\
-        \ 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n  \
-        \  },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n\
-        \      \"quotaNextResetTime\": \"Wed, 26 Aug 2020 15:00:00 GMT\",\r\n    \
-        \  \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
-        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
-        \  \"createdDate\": \"Wed, 26 Aug 2020 09:29:52 GMT\",\r\n    \"modifiedDate\"\
-        : \"Wed, 26 Aug 2020 09:29:53 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n  \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"maxCapacityReservationLevel\":
+        3000,\r\n      \"lastSkuUpdate\": \"Mon, 30 Nov 2020 19:01:30 GMT\"\r\n    },\r\n
+        \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n
+        \     \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\":
+        true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n
+        \     \"quotaNextResetTime\": \"Tue, 01 Dec 2020 17:00:00 GMT\",\r\n      \"dataIngestionStatus\":
+        \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n
+        \   \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Mon, 30 Nov 2020 19:01:30 GMT\",\r\n    \"modifiedDate\": \"Mon, 30 Nov
+        2020 19:01:32 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \ \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -624,7 +608,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Aug 2020 09:30:24 GMT
+      - Mon, 30 Nov 2020 19:02:03 GMT
       pragma:
       - no-cache
       server:
@@ -658,24 +642,24 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-07-01
   response:
     body:
-      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"6ba8be06-a1fc-4316-ae9a-7ec237fdad2b\"","type":"Microsoft.Network/networkWatchers","location":"westus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"e9f7c8d7-0a22-402c-8c7b-b8aeba8e3985\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"da2464db-68bf-41f8-a5f3-8155dc78ae91\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"83786c07-e953-4a5d-84a5-41aa3118ac93\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
+      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"757b97c0-2398-4f09-b43b-30155680211f\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"e7e93623-0dfd-4672-9878-cd2ca98ad876\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centralus","etag":"W/\"055146a7-0d55-4742-977d-0581ec82e701\"","type":"Microsoft.Network/networkWatchers","location":"centralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"9f2d39d8-9aa5-4b5a-a1dc-f6137775373d\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"0a7d14ff-7193-479c-ab32-92c8abd420e2\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus2","etag":"W/\"d49f9616-d45b-489a-940a-de10cd0518e7\"","type":"Microsoft.Network/networkWatchers","location":"westus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centraluseuap","etag":"W/\"77826339-b130-44c8-8b62-5f0c5318dc0b\"","type":"Microsoft.Network/networkWatchers","location":"centraluseuap","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1543'
+      - '2728'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:27 GMT
+      - Mon, 30 Nov 2020 19:02:07 GMT
       expires:
       - '-1'
       pragma:
@@ -687,10 +671,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - ad52b228-d6e6-40ce-aa62-dd15b6a976d2
-      - a4709182-a945-46d8-a2df-269824c52614
-      - e2e76836-75c1-4dba-b658-1106891eeb54
-      - a64b7c01-3e7a-4c6f-b261-64d00f284325
+      - 9d32e966-8a0a-4e37-a843-6712a0ef2d2a
+      - 9a28c670-7ca1-47b6-9ccc-20ca3d456d5f
+      - a136ec1d-837f-4505-8b91-4a836f8c9542
+      - 2b7cdd52-656d-46f5-8525-8a289d5df1f9
+      - 510935e4-a564-42e9-ad07-5d8ed42209be
+      - 1e6b9c0b-a50b-4171-899f-7aecd7dba9ff
+      - 1db2854b-5b8c-4dd4-b60c-ffcd8ad46f73
     status:
       code: 200
       message: OK
@@ -708,8 +695,8 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
@@ -721,56 +708,71 @@ interactions:
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview","2017-04-26-preview","2017-03-15-preview","2017-03-03-preview","2017-01-01-preview","2015-11-01-preview","2015-03-20"],"capabilities":"CrossResourceGroupResourceMove,
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2017-04-26-preview","2017-03-15-preview","2017-03-03-preview","2017-01-01-preview","2015-11-01-preview","2015-03-20"],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations","locations":[],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview","2017-04-26-preview","2017-03-15-preview","2017-03-03-preview","2017-01-01-preview","2015-11-01-preview","2015-03-20"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"locations/operationStatuses","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview","2017-04-26-preview","2017-03-15-preview","2017-03-03-preview","2017-01-01-preview","2015-11-01-preview","2015-03-20"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"workspaces/scopedPrivateLinkProxies","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview","2017-04-26-preview","2017-03-15-preview","2017-03-03-preview","2017-01-01-preview","2015-11-01-preview","2015-03-20"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"workspaces/scopedPrivateLinkProxies","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-03-01-preview","2019-08-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-03-01-preview","capabilities":"None"},{"resourceType":"workspaces/query","locations":[],"apiVersions":["2017-10-01"],"capabilities":"None"},{"resourceType":"workspaces/metadata","locations":[],"apiVersions":["2017-10-01"],"capabilities":"None"},{"resourceType":"workspaces/dataSources","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-03-01-preview","2019-08-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-03-01-preview","capabilities":"None"},{"resourceType":"workspaces/query","locations":[],"apiVersions":["2017-10-01"],"capabilities":"None"},{"resourceType":"workspaces/metadata","locations":[],"apiVersions":["2017-10-01"],"capabilities":"None"},{"resourceType":"workspaces/dataSources","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"workspaces/linkedStorageAccounts","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"workspaces/linkedStorageAccounts","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"storageInsightConfigs","locations":[],"apiVersions":["2020-08-01","2020-03-01-preview","2014-10-10"],"capabilities":"SupportsExtension"},{"resourceType":"workspaces/linkedServices","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"storageInsightConfigs","locations":[],"apiVersions":["2020-08-01","2020-03-01-preview","2014-10-10"],"capabilities":"SupportsExtension"},{"resourceType":"workspaces/linkedServices","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"linkTargets","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview","2015-11-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"linkTargets","locations":["East
         US"],"apiVersions":["2020-03-01-preview","2015-03-20"],"capabilities":"None"},{"resourceType":"deletedWorkspaces","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
-        North","Brazil South","Switzerland North","Switzerland West"],"apiVersions":["2020-08-01","2020-03-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-08-01","2020-03-01-preview","2015-11-01-preview","2014-11-10"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"clusters","locations":["East
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","UAE North","Brazil Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2020-08-01","2020-03-01-preview","2015-11-01-preview","2014-11-10"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"workspaces/dataExports","locations":["East
+        US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
+        East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
+        East","France Central","Korea Central","North Europe","Central US","East Asia","East
+        US 2","South Central US","North Central US","West US","UK West","South Africa
+        North","Brazil South","Switzerland North","Switzerland West","Germany West
+        Central","Australia Central 2","UAE Central","UAE North","Japan West","Brazil
+        Southeast","Norway East"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"None"},{"resourceType":"clusters","locations":["East
         US","West Europe","Southeast Asia","Australia Southeast","West Central US","Japan
         East","UK South","Central India","Canada Central","West US 2","Australia Central","Australia
         East","France Central","Korea Central","North Europe","Central US","East Asia","East
         US 2","South Central US","North Central US","West US","UK West","South Africa
         North","Switzerland North","Switzerland West","Germany West Central","Australia
-        Central 2","UAE Central","Brazil South"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"CrossResourceGroupResourceMove,
+        Central 2","UAE Central","Brazil South","UAE North","Japan West","Brazil Southeast","Norway
+        East"],"apiVersions":["2020-08-01","2020-03-01-preview","2019-08-01-preview"],"defaultApiVersion":"2020-08-01","capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SystemAssignedResourceIdentity, SupportsTags,
         SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '6611'
+      - '7849'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:28 GMT
+      - Mon, 30 Nov 2020 19:02:08 GMT
       expires:
       - '-1'
       pragma:
@@ -798,29 +800,28 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003?api-version=2020-08-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\"\
-        : \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\",\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n \
-        \     \"maxCapacityReservationLevel\": 3000,\r\n      \"lastSkuUpdate\": \"\
-        Wed, 26 Aug 2020 09:29:52 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\
-        \n    \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\":\
-        \ 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n  \
-        \  },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n\
-        \      \"quotaNextResetTime\": \"Wed, 26 Aug 2020 15:00:00 GMT\",\r\n    \
-        \  \"dataIngestionStatus\": \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\"\
-        : \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n  \
-        \  \"createdDate\": \"Wed, 26 Aug 2020 09:29:52 GMT\",\r\n    \"modifiedDate\"\
-        : \"Wed, 26 Aug 2020 09:29:53 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n  \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"pergb2018\",\r\n      \"maxCapacityReservationLevel\":
+        3000,\r\n      \"lastSkuUpdate\": \"Mon, 30 Nov 2020 19:01:30 GMT\"\r\n    },\r\n
+        \   \"retentionInDays\": 30,\r\n    \"features\": {\r\n      \"legacy\": 0,\r\n
+        \     \"searchVersion\": 1,\r\n      \"enableLogAccessUsingOnlyResourcePermissions\":
+        true\r\n    },\r\n    \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n
+        \     \"quotaNextResetTime\": \"Tue, 01 Dec 2020 17:00:00 GMT\",\r\n      \"dataIngestionStatus\":
+        \"RespectQuota\"\r\n    },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n
+        \   \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Mon, 30 Nov 2020 19:01:30 GMT\",\r\n    \"modifiedDate\": \"Mon, 30 Nov
+        2020 19:01:32 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \ \"name\": \"clitest000003\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -829,7 +830,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 26 Aug 2020 09:30:28 GMT
+      - Mon, 30 Nov 2020 19:02:08 GMT
       pragma:
       - no-cache
       server:
@@ -853,7 +854,7 @@ interactions:
     body: '{"location": "eastus", "properties": {"targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1",
       "storageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002",
       "enabled": true, "flowAnalyticsConfiguration": {"networkWatcherFlowAnalyticsConfiguration":
-      {"workspaceId": "b73f65b0-0fb2-4e4c-9816-be50003d5b04", "workspaceRegion": "eastus",
+      {"workspaceId": "a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08", "workspaceRegion": "eastus",
       "workspaceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003",
       "trafficAnalyticsInterval": 60}}}}'
     headers:
@@ -872,35 +873,34 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"f9b84ea6-7109-492a-9a23-89cd8021b6f0\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"932bab47-d1a5-4db5-9b0d-dac3ceb655c2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c22ee2ac-7d0e-4f6b-9844-bb4d44576daa?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/8b6cf8dc-e913-434b-b9fa-ff53c1fd1d67?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -908,7 +908,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:35 GMT
+      - Mon, 30 Nov 2020 19:02:17 GMT
       expires:
       - '-1'
       pragma:
@@ -921,9 +921,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8b527cae-b5bc-40e3-9904-dc14ecb409fa
+      - fdfbe616-35fe-42f9-ba02-873fe94434ab
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1183'
     status:
       code: 201
       message: Created
@@ -941,10 +941,10 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/c22ee2ac-7d0e-4f6b-9844-bb4d44576daa?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/8b6cf8dc-e913-434b-b9fa-ff53c1fd1d67?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -956,7 +956,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:46 GMT
+      - Mon, 30 Nov 2020 19:02:30 GMT
       expires:
       - '-1'
       pragma:
@@ -973,7 +973,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a5403d8b-4d1b-4d39-9c8b-6ca50c7f59c0
+      - 155649e9-2dad-45e7-a4e2-f99944c34755
     status:
       code: 200
       message: OK
@@ -991,28 +991,27 @@ interactions:
       ParameterSetName:
       - --location --resource-group --nsg --storage-account --workspace --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"1a117549-56ae-40a9-91f2-eee10e85427e\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"1903ce60-de21-415d-bb1a-f151ebe05c7e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1021,9 +1020,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:47 GMT
-      etag:
-      - W/"1a117549-56ae-40a9-91f2-eee10e85427e"
+      - Mon, 30 Nov 2020 19:02:30 GMT
       expires:
       - '-1'
       pragma:
@@ -1040,7 +1037,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5a6fe0ef-82d3-4c18-a3f2-835bd07a5726
+      - 635cf8d5-0c3e-4f33-bac0-1398c71b9b4c
     status:
       code: 200
       message: OK
@@ -1058,24 +1055,24 @@ interactions:
       ParameterSetName:
       - --location --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-07-01
   response:
     body:
-      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"6ba8be06-a1fc-4316-ae9a-7ec237fdad2b\"","type":"Microsoft.Network/networkWatchers","location":"westus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"1a117549-56ae-40a9-91f2-eee10e85427e\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"da2464db-68bf-41f8-a5f3-8155dc78ae91\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"83786c07-e953-4a5d-84a5-41aa3118ac93\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
+      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"757b97c0-2398-4f09-b43b-30155680211f\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"1903ce60-de21-415d-bb1a-f151ebe05c7e\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centralus","etag":"W/\"055146a7-0d55-4742-977d-0581ec82e701\"","type":"Microsoft.Network/networkWatchers","location":"centralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"9f2d39d8-9aa5-4b5a-a1dc-f6137775373d\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"0a7d14ff-7193-479c-ab32-92c8abd420e2\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus2","etag":"W/\"d49f9616-d45b-489a-940a-de10cd0518e7\"","type":"Microsoft.Network/networkWatchers","location":"westus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centraluseuap","etag":"W/\"77826339-b130-44c8-8b62-5f0c5318dc0b\"","type":"Microsoft.Network/networkWatchers","location":"centraluseuap","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1543'
+      - '2728'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:48 GMT
+      - Mon, 30 Nov 2020 19:02:33 GMT
       expires:
       - '-1'
       pragma:
@@ -1087,10 +1084,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - 3eb0fc2b-b8b7-423a-99bd-8ffe101d4757
-      - 2837d966-ac05-4fde-af7e-67c853c21de2
-      - 85afede7-1522-43aa-8571-42b9e0874622
-      - 150ed8ce-2a18-49e6-bf17-3084f1647d75
+      - 72540ef8-23d1-421f-a5e0-42f48f9db38d
+      - ee0feae8-e3ac-471d-87f9-abdc26ea6b92
+      - 04492274-7731-4dde-98da-daa2084aac26
+      - 296c92b4-c7a2-4d55-bb93-73be0336ca21
+      - b03038db-ccf7-4fca-9b65-3669be8b2f29
+      - 885c174a-c27e-4390-8502-7705370c9703
+      - 5dd337eb-b0c1-4bbf-8db7-72ede9784a43
     status:
       code: 200
       message: OK
@@ -1108,30 +1108,29 @@ interactions:
       ParameterSetName:
       - --location --name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"1a117549-56ae-40a9-91f2-eee10e85427e\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"1903ce60-de21-415d-bb1a-f151ebe05c7e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1140,9 +1139,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:49 GMT
-      etag:
-      - W/"1a117549-56ae-40a9-91f2-eee10e85427e"
+      - Mon, 30 Nov 2020 19:02:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1159,7 +1156,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4f488b75-a26e-45dd-9e7f-c648ec514e0e
+      - adaa4526-c47d-419a-b759-5d698ba2d4b7
     status:
       code: 200
       message: OK
@@ -1177,24 +1174,24 @@ interactions:
       ParameterSetName:
       - --location --name --retention --storage-account --tags
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2020-07-01
   response:
     body:
-      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"6ba8be06-a1fc-4316-ae9a-7ec237fdad2b\"","type":"Microsoft.Network/networkWatchers","location":"westus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"1a117549-56ae-40a9-91f2-eee10e85427e\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"da2464db-68bf-41f8-a5f3-8155dc78ae91\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"83786c07-e953-4a5d-84a5-41aa3118ac93\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
+      string: '{"value":[{"name":"NetworkWatcher_westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus","etag":"W/\"757b97c0-2398-4f09-b43b-30155680211f\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus","etag":"W/\"1903ce60-de21-415d-bb1a-f151ebe05c7e\"","type":"Microsoft.Network/networkWatchers","location":"eastus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centralus","etag":"W/\"055146a7-0d55-4742-977d-0581ec82e701\"","type":"Microsoft.Network/networkWatchers","location":"centralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus2","etag":"W/\"9f2d39d8-9aa5-4b5a-a1dc-f6137775373d\"","type":"Microsoft.Network/networkWatchers","location":"eastus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westcentralus","etag":"W/\"0a7d14ff-7193-479c-ab32-92c8abd420e2\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_westus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_westus2","etag":"W/\"d49f9616-d45b-489a-940a-de10cd0518e7\"","type":"Microsoft.Network/networkWatchers","location":"westus2","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}},{"name":"NetworkWatcher_centraluseuap","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_centraluseuap","etag":"W/\"77826339-b130-44c8-8b62-5f0c5318dc0b\"","type":"Microsoft.Network/networkWatchers","location":"centraluseuap","properties":{"provisioningState":"Succeeded","runningOperationIds":[]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1543'
+      - '2728'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:51 GMT
+      - Mon, 30 Nov 2020 19:02:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1206,10 +1203,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-original-request-ids:
-      - ca582d9b-6964-496a-a55f-d92962a56383
-      - 4a0dc360-2ae0-4bf0-9321-b8b7cd8e51c3
-      - 00867899-a3d4-4982-af5e-022ebcdb8eea
-      - 060a6cfb-b67f-4e26-9b63-3c2749eebb81
+      - d801eb0d-2565-45c0-9c5a-ea19f4b51f5d
+      - a7d94c4d-37b2-4efc-b0ad-15b80d1c20b2
+      - abb02663-32cd-4e6a-a465-dc62cde2193a
+      - 2755585d-437a-4d99-a889-8ed2445a9548
+      - 1564d83f-7cab-4735-9bf5-e7e336946c5f
+      - 59b23a7e-c067-4982-8233-de462d11d680
+      - 4cfe546b-40da-4601-b62a-a198309d9f03
     status:
       code: 200
       message: OK
@@ -1227,30 +1227,29 @@ interactions:
       ParameterSetName:
       - --location --name --retention --storage-account --tags
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"1a117549-56ae-40a9-91f2-eee10e85427e\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\"\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"1903ce60-de21-415d-bb1a-f151ebe05c7e\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/testflowlog000002\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 0,\r\n      \"enabled\": false\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1259,9 +1258,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:52 GMT
-      etag:
-      - W/"1a117549-56ae-40a9-91f2-eee10e85427e"
+      - Mon, 30 Nov 2020 19:02:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1278,18 +1275,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8cbf323a-eea0-462c-8021-ff92414fec0d
+      - fb67fa1e-8202-4098-b7ef-d389036ac664
     status:
       code: 200
       message: OK
 - request:
-    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2",
       "location": "eastus", "tags": {"foo": "bar"}, "properties": {"targetResourceId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1",
       "storageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395",
       "enabled": true, "retentionPolicy": {"days": 2, "enabled": true}, "format":
       {"type": "JSON", "version": 1}, "flowAnalyticsConfiguration": {"networkWatcherFlowAnalyticsConfiguration":
-      {"enabled": false, "workspaceId": "b73f65b0-0fb2-4e4c-9816-be50003d5b04", "workspaceRegion":
+      {"enabled": false, "workspaceId": "a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08", "workspaceRegion":
       "eastus", "workspaceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003",
       "trafficAnalyticsInterval": 60}}}}'
     headers:
@@ -1308,36 +1305,34 @@ interactions:
       ParameterSetName:
       - --location --name --retention --storage-account --tags
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"db378cd7-4880-4d8a-8b24-bc5896747164\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 2,\r\n      \"enabled\": true\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\
-        \n  }\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"533524ad-0f69-42d8-9c8d-529ad267dd2a\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 2,\r\n      \"enabled\": true\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/4b932823-3782-4df7-8fd7-a6677b134499?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/615315ea-f4a9-4312-9d75-f5936132bb1b?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1345,7 +1340,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:30:56 GMT
+      - Mon, 30 Nov 2020 19:02:46 GMT
       expires:
       - '-1'
       pragma:
@@ -1362,9 +1357,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ad95627d-141c-4966-a3fc-94b08d126295
+      - a566c69c-c098-4356-b75d-fe6a6ee7d2e3
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1186'
     status:
       code: 200
       message: OK
@@ -1382,10 +1377,10 @@ interactions:
       ParameterSetName:
       - --location --name --retention --storage-account --tags
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/4b932823-3782-4df7-8fd7-a6677b134499?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/615315ea-f4a9-4312-9d75-f5936132bb1b?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1397,7 +1392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:31:07 GMT
+      - Mon, 30 Nov 2020 19:02:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1414,7 +1409,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0d39ce00-6cca-4054-b8dc-799771c5f7b2
+      - 735c78c8-21f8-46d0-bc5d-bab5198eba90
     status:
       code: 200
       message: OK
@@ -1432,29 +1427,27 @@ interactions:
       ParameterSetName:
       - --location --name --retention --storage-account --tags
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-112-generic-x86_64-with-debian-buster-sid) msrest/0.6.18
-        msrest_azure/0.6.4 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.10.1
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/FlowLogs/flow_log_test2\"\
-        ,\r\n  \"etag\": \"W/\\\"d64fab3e-a4b1-4309-9843-21df10a1c270\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        targetResourceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\"\
-        ,\r\n    \"targetResourceGuid\": \"a430c58f-3cc9-491a-8d22-991607da83c4\"\
-        ,\r\n    \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395\"\
-        ,\r\n    \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n \
-        \     \"networkWatcherFlowAnalyticsConfiguration\": {\r\n        \"enabled\"\
-        : false,\r\n        \"workspaceId\": \"b73f65b0-0fb2-4e4c-9816-be50003d5b04\"\
-        ,\r\n        \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\"\
-        ,\r\n        \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n   \
-        \ \"retentionPolicy\": {\r\n      \"days\": 2,\r\n      \"enabled\": true\r\
-        \n    },\r\n    \"format\": {\r\n      \"type\": \"JSON\",\r\n      \"version\"\
-        : 1\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkWatchers/FlowLogs\"\
-        ,\r\n  \"location\": \"eastus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\
-        \n  }\r\n}"
+      string: "{\r\n  \"name\": \"flow_log_test2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/NetworkWatcherRG/providers/Microsoft.Network/networkWatchers/NetworkWatcher_eastus/flowLogs/flow_log_test2\",\r\n
+        \ \"etag\": \"W/\\\"38935e7c-d6a3-48b8-af2b-f58a61be8798\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"targetResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Network/networkSecurityGroups/nsg1\",\r\n
+        \   \"targetResourceGuid\": \"857e404f-a335-4e92-8f06-1d342b0166c1\",\r\n
+        \   \"storageId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_nw_flow_log_000001/providers/Microsoft.Storage/storageAccounts/storageaccount0395\",\r\n
+        \   \"enabled\": true,\r\n    \"flowAnalyticsConfiguration\": {\r\n      \"networkWatcherFlowAnalyticsConfiguration\":
+        {\r\n        \"enabled\": false,\r\n        \"workspaceId\": \"a571ce26-2cdd-4e03-8be6-b8bb0bb0ba08\",\r\n
+        \       \"workspaceRegion\": \"eastus\",\r\n        \"workspaceResourceId\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_nw_flow_log_000001/providers/microsoft.operationalinsights/workspaces/clitest000003\",\r\n
+        \       \"trafficAnalyticsInterval\": 60\r\n      }\r\n    },\r\n    \"retentionPolicy\":
+        {\r\n      \"days\": 2,\r\n      \"enabled\": true\r\n    },\r\n    \"format\":
+        {\r\n      \"type\": \"JSON\",\r\n      \"version\": 1\r\n    }\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkWatchers/flowLogs\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1463,9 +1456,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 26 Aug 2020 09:31:07 GMT
-      etag:
-      - W/"d64fab3e-a4b1-4309-9843-21df10a1c270"
+      - Mon, 30 Nov 2020 19:02:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1482,7 +1473,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 21bd21d6-a62d-4bff-83eb-7bca9014e719
+      - 4cb4d8dd-3a0a-4e5d-ad03-c9a280d4f7f2
     status:
       code: 200
       message: OK
