@@ -720,10 +720,11 @@ class MsalSecretStore:
     def _load_cached_creds(self):
         persistence = self._build_persistence()
         from msal_extensions import CrossPlatLock
+        from msal_extensions.persistence import PersistenceNotFound
         with CrossPlatLock(self._lock_file):
             try:
                 self._service_principal_creds = json.loads(persistence.load())
-            except FileNotFoundError:
+            except PersistenceNotFound:
                 pass
             except Exception as ex:
                 raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
