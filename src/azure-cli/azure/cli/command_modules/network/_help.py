@@ -2735,6 +2735,11 @@ examples:
     crafted: true
 """
 
+helps['network express-route port generate-loa'] = """
+type: command
+short-summary: Generate and download a letter of authorization for the requested ExpressRoutePort
+"""
+
 helps['network express-route port link'] = """
 type: group
 short-summary: View ExpressRoute links.
@@ -2887,10 +2892,293 @@ examples:
     text: az network express-route wait -n MyCircuit -g MyResourceGroup --created
 """
 
+helps['network cross-region-lb'] = """
+type: group
+short-summary: Manage and configure cross-region load balancers.
+long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+"""
+
+helps['network cross-region-lb create'] = """
+type: command
+short-summary: Create a cross-region load balancer.
+examples:
+  - name: Create a basic load balancer.
+    text: >
+        az network cross-region-lb create -g MyResourceGroup -n MyLb
+"""
+
+helps['network cross-region-lb update'] = """
+type: command
+short-summary: Update a cross-region load balancer.
+long-summary: >
+    This command can only be used to update the tags for a load balancer. Name and resource group are immutable and cannot be updated.
+examples:
+  - name: Update the tags of a load balancer.
+    text: az network cross-region-lb update -g MyResourceGroup -n MyLb --set tags.CostCenter=MyBusinessGroup
+"""
+
+helps['network cross-region-lb list'] = """
+type: command
+short-summary: List load balancers.
+examples:
+  - name: List load balancers.
+    text: az network cross-region-lb list -g MyResourceGroup
+"""
+
+helps['network cross-region-lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the cross-region load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network cross-region-lb wait -g MyResourceGroup -n MyLB --created
+"""
+
+helps['network cross-region-lb address-pool'] = """
+type: group
+short-summary: Manage address pools of a cross-region load balancer.
+"""
+
+helps['network cross-region-lb address-pool create'] = """
+type: command
+short-summary: Create an address pool.
+parameters:
+  - name: --backend-address
+    short-summary: Backend addresses information for backend address pool.
+    long-summary: |
+        Usage: --backend-address name=addr1 frontend-ip-address=regional_lb_resource_id
+
+        name: Required. The name of the backend address.
+        frontend-ip-address: Required. Resource id of a regional load balancer.
+
+        Multiple backend addresses can be specified by using more than one `--backend-address` argument.
+  - name: --backend-addresses-config-file --config-file
+    short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
+    long-summary: |
+        Usage: --backend-addresses-config-file @"{config_file.json}"
+
+        A example config file is
+        [
+          {
+            "name": "address1",
+            "frontendIpAddress": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1"
+          },
+          {
+            "name": "address2",
+            "frontendIpAddress": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2"
+          }
+        ]
+examples:
+  - name: Create an address pool.
+    text: az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+  - name: Create an address pool with several backend addresses using key-value arguments.
+    text: az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 frontend-ip-address=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb1 --backend-address name=addr2 frontend-ip-address=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+  - name: Create an address pool with several backend addresses using config file
+    text: az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
+"""
+
+helps['network cross-region-lb address-pool address'] = """
+type: group
+short-summary: Manage backend addresses of the cross-region load balance backend address pool.
+"""
+
+helps['network cross-region-lb address-pool address add'] = """
+type: command
+short-summary: Add one backend address into the load balance backend address pool.
+examples:
+  - name: Add one backend address into the load balance backend address pool.
+    text: az network cross-region-lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --frontend-ip-address /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_lb_address_pool_addresses000001/providers/Microsoft.Network/loadBalancers/regional-lb/frontendIPConfigurations/fe-rlb2
+"""
+
+helps['network cross-region-lb address-pool address remove'] = """
+type: command
+short-summary: Remove one backend address from the load balance backend address pool.
+examples:
+  - name: Remove one backend address from the load balance backend address pool.
+    text: az network cross-region-lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+"""
+
+helps['network cross-region-lb address-pool address list'] = """
+type: command
+short-summary: List all backend addresses of the load balance backend address pool.
+examples:
+  - name: List all backend addresses of the load balance backend address pool.
+    text: az network cross-region-lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
+"""
+
+helps['network cross-region-lb frontend-ip'] = """
+type: group
+short-summary: Manage frontend IP addresses of a cross-region load balancer.
+"""
+
+helps['network cross-region-lb frontend-ip create'] = """
+type: command
+short-summary: Create a frontend IP address.
+examples:
+  - name: Create a frontend ip address for a public load balancer.
+    text: az network cross-region-lb frontend-ip create -g MyResourceGroup -n MyFrontendIp --lb-name MyLb --public-ip-address MyFrontendIp
+"""
+
+helps['network cross-region-lb frontend-ip delete'] = """
+type: command
+short-summary: Delete a frontend IP address.
+examples:
+  - name: Delete a frontend IP address.
+    text: az network cross-region-lb frontend-ip delete -g MyResourceGroup --lb-name MyLb -n MyFrontendIp
+"""
+
+helps['network cross-region-lb frontend-ip list'] = """
+type: command
+short-summary: List frontend IP addresses.
+examples:
+  - name: List frontend IP addresses.
+    text: az network cross-region-lb frontend-ip list -g MyResourceGroup --lb-name MyLb
+"""
+
+helps['network cross-region-lb frontend-ip show'] = """
+type: command
+short-summary: Get the details of a frontend IP address.
+examples:
+  - name: Get the details of a frontend IP address.
+    text: az network cross-region-lb frontend-ip show -g MyResourceGroup --lb-name MyLb -n MyFrontendIp
+"""
+
+helps['network cross-region-lb frontend-ip update'] = """
+type: command
+short-summary: Update a frontend IP address.
+examples:
+  - name: Update the frontend IP address of a public load balancer.
+    text: az network cross-region-lb frontend-ip update -g MyResourceGroup --lb-name MyLb -n MyFrontendIp --public-ip-address MyNewPublicIp
+"""
+
+helps['network cross-region-lb probe'] = """
+type: group
+short-summary: Evaluate probe information and define routing rules.
+"""
+
+helps['network cross-region-lb probe create'] = """
+type: command
+short-summary: Create a probe.
+examples:
+  - name: Create a probe on a load balancer over HTTP and port 80.
+    text: |
+        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe \\
+            --protocol http --port 80 --path /
+  - name: Create a probe on a load balancer over TCP on port 443.
+    text: |
+        az network cross-region-lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe \\
+            --protocol tcp --port 443
+"""
+
+helps['network cross-region-lb probe delete'] = """
+type: command
+short-summary: Delete a probe.
+examples:
+  - name: Delete a probe.
+    text: az network cross-region-lb probe delete -g MyResourceGroup --lb-name MyLb -n MyProbe
+"""
+
+helps['network cross-region-lb probe list'] = """
+type: command
+short-summary: List probes.
+examples:
+  - name: List probes.
+    text: az network cross-region-lb probe list -g MyResourceGroup --lb-name MyLb -o table
+"""
+
+helps['network cross-region-lb probe show'] = """
+type: command
+short-summary: Get the details of a probe.
+examples:
+  - name: Get the details of a probe.
+    text: az network cross-region-lb probe show -g MyResourceGroup --lb-name MyLb -n MyProbe
+"""
+
+helps['network cross-region-lb probe update'] = """
+type: command
+short-summary: Update a probe.
+examples:
+  - name: Update a probe with a different port and interval.
+    text: az network cross-region-lb probe update -g MyResourceGroup --lb-name MyLb -n MyProbe --port 81 --interval 10
+"""
+
+helps['network cross-region-lb rule'] = """
+type: group
+short-summary: Manage cross-region load balancing rules.
+"""
+
+helps['network cross-region-lb rule create'] = """
+type: command
+short-summary: Create a load balancing rule.
+examples:
+  - name: >
+        Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port.
+    text: |
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp \\
+            --frontend-ip-name MyFrontEndIp --frontend-port 80 \\
+            --backend-pool-name MyAddressPool --backend-port 80
+  - name: >
+        Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port with the floating ip feature.
+    text: |
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp \\
+            --frontend-ip-name MyFrontEndIp --backend-pool-name MyAddressPool  \\
+            --floating-ip true --frontend-port 80 --backend-port 80
+  - name: >
+        Create an HA ports load balancing rule that assigns a frontend IP and port to use all available backend IPs in a pool on the same port.
+    text: |
+        az network cross-region-lb rule create -g MyResourceGroup --lb-name MyLb -n MyHAPortsRule \\
+            --protocol All --frontend-port 0 --backend-port 0 --frontend-ip-name MyFrontendIp \\
+            --backend-pool-name MyAddressPool
+"""
+
+helps['network cross-region-lb rule delete'] = """
+type: command
+short-summary: Delete a load balancing rule.
+examples:
+  - name: Delete a load balancing rule.
+    text: az network cross-region-lb rule delete -g MyResourceGroup --lb-name MyLb -n MyLbRule
+"""
+
+helps['network cross-region-lb rule list'] = """
+type: command
+short-summary: List load balancing rules.
+examples:
+  - name: List load balancing rules.
+    text: az network cross-region-lb rule list -g MyResourceGroup --lb-name MyLb -o table
+"""
+
+helps['network cross-region-lb rule show'] = """
+type: command
+short-summary: Get the details of a load balancing rule.
+examples:
+  - name: Get the details of a load balancing rule.
+    text: az network cross-region-lb rule show -g MyResourceGroup --lb-name MyLb -n MyLbRule
+"""
+
+helps['network cross-region-lb rule update'] = """
+type: command
+short-summary: Update a load balancing rule.
+examples:
+  - name: Update a load balancing rule to change the protocol to UDP.
+    text: az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Udp
+    examples:
+  - name: Update a load balancing rule to support HA ports.
+    text: az network cross-region-lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule \\ --protocol All --frontend-port 0 --backend-port 0
+"""
+
 helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.
 long-summary: To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+"""
+
+helps['network lb wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the load balancer is met.
+examples:
+  - name: Wait for load balancer to return as created.
+    text: |
+        az network lb wait -g MyResourceGroup -n MyLB --created
 """
 
 helps['network lb address-pool'] = """

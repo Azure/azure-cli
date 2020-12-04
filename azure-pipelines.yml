@@ -409,6 +409,23 @@ jobs:
         pythonVersion: '$(python.version)'
         profile: 'latest'
 
+- job: AutomationTest20200901
+  displayName: Automation Test (Profile 2020-09-01)
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2020-09-01-hybrid'
+
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
   timeoutInMinutes: 120
@@ -442,23 +459,6 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: '2018-03-01-hybrid'
-
-- job: AutomationTest20170309
-  displayName: Automation Test (Profile 2017-03-09)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2017-03-09-profile'
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
@@ -677,6 +677,9 @@ jobs:
       Focal:
         deb_system: ubuntu
         distro: focal
+      Groovy:
+        deb_system: ubuntu
+        distro: groovy
       Jessie:
         deb_system: debian
         distro: jessie
