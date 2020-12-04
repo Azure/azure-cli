@@ -23,18 +23,18 @@ Release History
 **App Service**
 
 * Bugfix #14857: Let users update webapp config even with access restriction (#15945)
-* `az functionapp create`: accept "--runtime python" and  "--runtime-version 3.9" as Azure Functions v3 parameter (#16020)
-* Fixes #16041: az webapp config ssl create results in unknown error (#16124)
+* `az functionapp create`: Accept "--runtime python" and  "--runtime-version 3.9" as Azure Functions v3 parameter (#16020)
+* Fix #16041: az webapp config ssl create results in unknown error (#16124)
 
 **ARM**
 
-* `az deployment-scripts`: Removed preview flag (#16019)
+* `az deployment-scripts`: Remove preview flag (#16019)
 
 **Backup**
 
 * Fix #14976: CLI error improvements for ValueError and AttributeError cases (#15861)
-* `az backup protection undelete`: Added support for AzureWorkload protection undelete using CLI (#15979)
-* Fixed Bad Request Error for Correct Workload Type Input (#15999)
+* `az backup protection undelete`: Add support for AzureWorkload protection undelete using CLI (#15979)
+* Fix Bad Request Error for Correct Workload Type Input (#15999)
 
 **CDN**
 
@@ -92,7 +92,7 @@ Release History
 
 **Synapse**
 
-*  (#16095)
+*  Support synapse sql dw cmdlets and update az synapse workspace create cmdlet  (#16095)
 
 2.15.1
 ++++++
