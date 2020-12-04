@@ -32,28 +32,57 @@ def transform_web_list_output(webs):
 
 
 def ex_handler_factory(creating_plan=False):
-    def _polish_bad_errors(ex):
-        import json
-        from knack.util import CLIError
-        try:
-            if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
-                detail = ex.response.text
-            else:
-                detail = json.loads(ex.response.text)['Message']
-                if creating_plan:
-                    if 'Requested features are not supported in region' in detail:
-                        detail = ("Plan with linux worker is not supported in current region. For " +
-                                  "supported regions, please refer to https://docs.microsoft.com/"
-                                  "azure/app-service-web/app-service-linux-intro")
-                    elif 'Not enough available reserved instance servers to satisfy' in detail:
-                        detail = ("Plan with Linux worker can only be created in a group " +
-                                  "which has never contained a Windows worker, and vice versa. " +
-                                  "Please use a new resource group. Original error:" + detail)
-            ex = CLIError(detail)
-        except Exception:  # pylint: disable=broad-except
-            pass
+    def _ex_handler(ex):
+        ex = _polish_bad_errors(ex, creating_plan)
         raise ex
-    return _polish_bad_errors
+    return _ex_handler
+
+
+def update_function_ex_handler_factory():
+    from azure.cli.core.azclierror import ClientRequestError
+
+    def _ex_handler(ex):
+        http_error_response = False
+        if hasattr(ex, 'response'):
+            http_error_response = True
+        ex = _polish_bad_errors(ex, False)
+        # only include if an update was attempted and failed on the backend
+        if http_error_response:
+            try:
+                detail = ('If using \'--plan\', a consumption plan may be unable to migrate '
+                          'to a given premium plan. Please confirm that the premium plan '
+                          'exists in the same resource group and region. Note: Not all '
+                          'functionapp plans support premium instances. If you have verified '
+                          'your resource group and region and are still unable to migrate, '
+                          'please redeploy on a premium functionapp plan.')
+                ex = ClientRequestError(ex.args[0] + '\n\n' + detail)
+            except Exception:  # pylint: disable=broad-except
+                pass
+        raise ex
+    return _ex_handler
+
+
+def _polish_bad_errors(ex, creating_plan):
+    import json
+    from knack.util import CLIError
+    try:
+        if 'text/plain' in ex.response.headers['Content-Type']:  # HTML Response
+            detail = ex.response.text
+        else:
+            detail = json.loads(ex.response.text)['Message']
+            if creating_plan:
+                if 'Requested features are not supported in region' in detail:
+                    detail = ("Plan with linux worker is not supported in current region. For " +
+                              "supported regions, please refer to https://docs.microsoft.com/"
+                              "azure/app-service-web/app-service-linux-intro")
+                elif 'Not enough available reserved instance servers to satisfy' in detail:
+                    detail = ("Plan with Linux worker can only be created in a group " +
+                              "which has never contained a Windows worker, and vice versa. " +
+                              "Please use a new resource group. Original error:" + detail)
+        ex = CLIError(detail)
+    except Exception:  # pylint: disable=broad-except
+        pass
+    return ex
 
 
 # pylint: disable=too-many-statements
@@ -79,6 +108,8 @@ def load_command_table(self, _):
 
     staticsite_sdk = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.static_sites#{}')
 
+    appservice_domains = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_domains#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory())
@@ -91,6 +122,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('restart', 'restart_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('browse', 'view_in_browser')
+        g.custom_command('list-instances', 'list_instances', validator=validate_app_or_slot_exists_in_rg)
         # Move back to using list_runtimes function once Available Stacks API is updated (it's updated with Antares deployments)
         g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
         g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
@@ -107,7 +139,7 @@ def load_command_table(self, _):
     with self.command_group('webapp cors') as g:
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
-        g.custom_command('show', 'show_cors')
+        g.custom_show_command('show', 'show_cors')
 
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
@@ -146,7 +178,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory(), validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
-        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp config backup') as g:
@@ -222,25 +254,25 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_deleted_webapp')
         g.custom_command('restore', 'restore_deleted_webapp')
 
-    with self.command_group('webapp hybrid-connection', is_preview=True) as g:
+    with self.command_group('webapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
         g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
 
-    with self.command_group('functionapp hybrid-connection', is_preview=True) as g:
+    with self.command_group('functionapp hybrid-connection') as g:
         g.custom_command('list', 'list_hc')
         g.custom_command('add', 'add_hc')
         g.custom_command('remove', 'remove_hc')
 
-    with self.command_group('appservice hybrid-connection', is_preview=True) as g:
+    with self.command_group('appservice hybrid-connection') as g:
         g.custom_command('set-key', 'set_hc_key')
 
-    with self.command_group('webapp vnet-integration', is_preview=True) as g:
+    with self.command_group('webapp vnet-integration') as g:
         g.custom_command('add', 'add_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
 
-    with self.command_group('functionapp vnet-integration', is_preview=True) as g:
+    with self.command_group('functionapp vnet-integration') as g:
         g.custom_command('add', 'add_vnet_integration')
         g.custom_command('list', 'list_vnet_integration')
         g.custom_command('remove', 'remove_vnet_integration')
@@ -257,7 +289,7 @@ def load_command_table(self, _):
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
-    with self.command_group('appservice vnet-integration', is_preview=True) as g:
+    with self.command_group('appservice vnet-integration') as g:
         g.custom_command('list', 'appservice_list_vnet')
 
     with self.command_group('functionapp') as g:
@@ -272,7 +304,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=ex_handler_factory(),
+        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
 
     with self.command_group('functionapp config') as g:
@@ -296,7 +328,7 @@ def load_command_table(self, _):
         g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('unbind', 'unbind_ssl_cert')
         g.custom_command('delete', 'delete_ssl_cert')
-        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('functionapp deployment source') as g:
@@ -319,7 +351,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp cors') as g:
         g.custom_command('add', 'add_cors')
         g.custom_command('remove', 'remove_cors')
-        g.custom_command('show', 'show_cors')
+        g.custom_show_command('show', 'show_cors')
 
     with self.command_group('functionapp plan', appservice_plan_sdk) as g:
         g.custom_command('create', 'create_functionapp_app_service_plan', exception_handler=ex_handler_factory())
@@ -348,26 +380,44 @@ def load_command_table(self, _):
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
 
-    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
-        g.custom_command('show', 'show_webapp_access_restrictions')
+    with self.command_group('functionapp keys') as g:
+        g.custom_command('set', 'update_host_key')
+        g.custom_command('list', 'list_host_keys')
+        g.custom_command('delete', 'delete_host_key')
+
+    with self.command_group('functionapp function') as g:
+        g.custom_command('show', 'show_function')  # pylint: disable=show-command
+        g.custom_command('delete', 'delete_function')
+
+    with self.command_group('functionapp function keys') as g:
+        g.custom_command('set', 'update_function_key')
+        g.custom_command('list', 'list_function_keys')
+        g.custom_command('delete', 'delete_function_key')
+
+    with self.command_group('webapp config access-restriction', custom_command_type=webapp_access_restrictions) as g:
+        g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
 
-    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions, is_preview=True) as g:
-        g.custom_command('show', 'show_webapp_access_restrictions')
+    with self.command_group('functionapp config access-restriction', custom_command_type=webapp_access_restrictions) as g:
+        g.custom_show_command('show', 'show_webapp_access_restrictions')
         g.custom_command('add', 'add_webapp_access_restriction')
         g.custom_command('remove', 'remove_webapp_access_restriction')
         g.custom_command('set', 'set_webapp_access_restriction')
 
-    with self.command_group('appservice ase', custom_command_type=appservice_environment, is_preview=True) as g:
+    with self.command_group('appservice ase', custom_command_type=appservice_environment) as g:
         g.custom_command('list', 'list_appserviceenvironments')
         g.custom_command('list-addresses', 'list_appserviceenvironment_addresses')
         g.custom_command('list-plans', 'list_appserviceenvironment_plans')
-        g.custom_command('show', 'show_appserviceenvironment')
+        g.custom_show_command('show', 'show_appserviceenvironment')
         g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('appservice domain', custom_command_type=appservice_domains, is_preview=True) as g:
+        g.custom_command('create', 'create_domain')
+        g.custom_command('show-terms', 'show_domain_purchase_terms')
 
     with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsites')

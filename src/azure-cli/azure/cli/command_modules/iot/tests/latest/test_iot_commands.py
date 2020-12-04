@@ -20,13 +20,13 @@ class IoTHubTest(ScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
-        hub = 'iot-hub-for-test-11'
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
-        containerName = 'iothubcontainer1'
+        containerName = self.create_random_name(prefix='iothubcontainer1', length=24)
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
-        subscription_id = self._get_current_subscription()
+        subscription_id = self.get_subscription_id()
 
         # Test hub life cycle in free tier
         self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
@@ -35,6 +35,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('resourcegroup', rg),
                          self.check('name', hub),
                          self.check('sku.name', 'F1'),
+                         self.check('properties.minTlsVersion', None),
                          self.check('properties.eventHubEndpoints.events.partitionCount', '2')])
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
@@ -42,10 +43,11 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
                  .format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --mintls 2.5'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20'.format(hub, rg),
+                 ' --fileupload-notification-ttl 20 --min-tls-version 1.2'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -58,7 +60,8 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
                          self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
                          self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
-                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79')])
+                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79'),
+                         self.check('properties.minTlsVersion', '1.2')])
 
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
@@ -394,7 +397,7 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     def test_identity_hub(self, resource_group, resource_group_location, storage_account):
         # Test IoT Hub create with identity
-        subscription_id = self._get_current_subscription()
+        subscription_id = self.get_subscription_id()
         rg = resource_group
         location = resource_group_location
 
@@ -515,8 +518,8 @@ class IoTHubTest(ScenarioTest):
                  .format(private_endpoint_type, private_endpoint_name, identity_hub, rg))
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest1'
-        eventHub = 'eventHubiothubfortest'
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
 
@@ -541,7 +544,3 @@ class IoTHubTest(ScenarioTest):
         output = self.cmd('storage account show-connection-string --resource-group {0} --name {1}'
                           .format(rg, storage_name))
         return output.get_output_in_json()['connectionString']
-
-    def _get_current_subscription(self):
-        output = self.cmd('account show')
-        return output.get_output_in_json()['id']

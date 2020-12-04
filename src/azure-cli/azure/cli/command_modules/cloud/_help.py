@@ -26,6 +26,24 @@ helps['cloud register'] = """
 type: command
 short-summary: Register a cloud.
 long-summary: When registering a cloud, specify only the resource manager endpoint for the autodetection of other endpoints.
+examples:
+  - name: Register a cloud with a config file
+    text: |
+        az cloud register -n MyCloud --cloud-config @"cloud.json"
+        ("cloud.json" supports all the endpoint and suffix options in camel case or the JSON output format from `az cloud show`. See the example content below.)
+        {
+          "endpointActiveDirectory": "https://login.microsoftonline.us",
+          "suffixAcrLoginServerEndpoint": ".azurecr.us"
+        }
+        or
+        {
+          "endpoints":{
+            "activeDirectory": "https://login.microsoftonline.us"
+          },
+          "suffixes":{
+            "acrLoginServerEndpoint": ".azurecr.us"
+          }
+        }
 """
 
 helps['cloud set'] = """

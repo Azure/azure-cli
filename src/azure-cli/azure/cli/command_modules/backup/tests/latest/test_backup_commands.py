@@ -10,6 +10,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, record_only
 from azure.mgmt.recoveryservicesbackup.models import StorageType
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -22,11 +23,10 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -143,7 +143,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -178,8 +177,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
@@ -196,7 +194,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'default': 'DefaultPolicy',
             'vault': vault_name,
             'vm1': vm1,
-            'vm2': vm2
+            'vm2': vm2,
+            'policy5': self.create_random_name('clitest-policy5', 24),
         })
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
@@ -218,6 +217,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{}'])".format(vm1), 1),
             self.check("length([?properties.friendlyName == '{}'])".format(vm2), 1)
         ])
+
+        self.kwargs['policy1_json']['name'] = self.kwargs['policy5']
+        self.kwargs['backup-management-type'] = self.kwargs['policy1_json']['properties']['backupManagementType']
+        self.kwargs['policy5_json'] = json.dumps(self.kwargs['policy1_json'])
+        self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {policy5} --policy '{policy5_json}'")
+
+        self.cmd('backup policy delete -g {rg} -v {vault} -n {policy5}')
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
@@ -249,7 +255,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
@@ -334,8 +339,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -368,9 +372,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp2_json['id'].lower())
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
-    @VaultPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
 
@@ -423,14 +426,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
-    @ResourceGroupPreparer(parameter_name="target_resource_group")
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location="southeastasia")
+    @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_restore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -487,13 +490,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @unittest.skip('skip')
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location="southeastasia")
     def test_backup_job(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -525,7 +527,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @unittest.skip('skip')
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -567,7 +568,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @unittest.skip('skip')
     @ResourceGroupPreparer(location="southeastasia")
     @VaultPreparer()
     @VMPreparer()

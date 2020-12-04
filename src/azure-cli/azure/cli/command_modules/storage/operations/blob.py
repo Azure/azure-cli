@@ -21,6 +21,92 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
 from knack.log import get_logger
 from knack.util import CLIError
 
+logger = get_logger(__name__)
+
+
+def set_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.set_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def clear_legal_hold(cmd, client, container_name, account_name, tags, resource_group_name=None):
+    LegalHold = cmd.get_models('LegalHold', resource_type=ResourceType.MGMT_STORAGE)
+    legal_hold = LegalHold(tags=tags)
+    return client.clear_legal_hold(resource_group_name, account_name, container_name, legal_hold)
+
+
+def create_or_update_immutability_policy(cmd, client, container_name, account_name,
+                                         resource_group_name=None, allow_protected_append_writes=None,
+                                         period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
+                                                       if_match, immutability_policy)
+
+
+def extend_immutability_policy(cmd, client, container_name, account_name,
+                               resource_group_name=None, allow_protected_append_writes=None,
+                               period=None, if_match=None):
+    ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
+    immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
+                                             allow_protected_append_writes=allow_protected_append_writes)
+    return client.extend_immutability_policy(resource_group_name, account_name, container_name,
+                                             if_match, immutability_policy)
+
+
+def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
+                        metadata=None, public_access=None, fail_on_exist=False,
+                        default_encryption_scope=None, deny_encryption_scope_override=None):
+    if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
+                                             account_name=account_name, container_name=container_name):
+        raise CLIError('The specified container already exists.')
+
+    if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
+        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container = BlobContainer(public_access=public_access,
+                                       default_encryption_scope=default_encryption_scope,
+                                       deny_encryption_scope_override=deny_encryption_scope_override,
+                                       metadata=metadata)
+        return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                             container_name=container_name, blob_container=blob_container)
+    return client.create(resource_group_name=resource_group_name, account_name=account_name,
+                         container_name=container_name, public_access=public_access, metadata=metadata)
+
+
+def update_container_rm(cmd, instance, metadata=None, public_access=None,
+                        default_encryption_scope=None, deny_encryption_scope_override=None):
+    BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+    blob_container = BlobContainer(
+        metadata=metadata if metadata is not None else instance.metadata,
+        public_access=public_access if public_access is not None else instance.public_access,
+        default_encryption_scope=default_encryption_scope
+        if default_encryption_scope is not None else instance.default_encryption_scope,
+        deny_encryption_scope_override=deny_encryption_scope_override
+        if deny_encryption_scope_override is not None else instance.deny_encryption_scope_override,
+    )
+    return blob_container
+
+
+def list_container_rm(cmd, client, resource_group_name, account_name, include_deleted=None):
+    ListContainersInclude = cmd.get_models('ListContainersInclude', resource_type=ResourceType.MGMT_STORAGE)
+    include = ListContainersInclude("deleted") if include_deleted is not None else None
+
+    return client.list(resource_group_name=resource_group_name, account_name=account_name, include=include)
+
+
+def container_rm_exists(client, resource_group_name, account_name, container_name):
+    from azure.core.exceptions import HttpResponseError
+    try:
+        container = client.get(resource_group_name=resource_group_name,
+                               account_name=account_name, container_name=container_name)
+        return container is not None
+    except HttpResponseError as err:
+        if err.status_code == 404:
+            return False
+        raise err
+
 
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
@@ -46,10 +132,34 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
                      if_unmodified_since=None, timeout=None, bypass_immutability_policy=False,
                      processed_resource_group=None, processed_account_name=None, mgmt_client=None):
     if bypass_immutability_policy:
-        return mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+        mgmt_client.blob_containers.delete(processed_resource_group, processed_account_name, container_name)
+        return True
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def list_blobs(client, delimiter=None, include=None, marker=None, num_results=None, prefix=None,
+               show_next_marker=None, **kwargs):
+    from ..track2_util import list_generator
+
+    if delimiter:
+        generator = client.walk_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+    else:
+        generator = client.list_blobs(name_starts_with=prefix, include=include, results_per_page=num_results, **kwargs)
+
+    pages = generator.by_page(continuation_token=marker)  # BlobPropertiesPaged
+    result = list_generator(pages=pages, num_results=num_results)
+
+    if show_next_marker:
+        next_marker = {"nextMarker": pages.continuation_token}
+        result.append(next_marker)
+    else:
+        if pages.continuation_token:
+            logger.warning('Next Marker:')
+            logger.warning(pages.continuation_token)
+
+    return result
 
 
 def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
@@ -58,9 +168,10 @@ def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_
     if blob_ranges is None:
         BlobRestoreRange = cmd.get_models("BlobRestoreRange")
         blob_ranges = [BlobRestoreRange(start_range="", end_range="")]
-
-    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name=resource_group_name,
-                       account_name=account_name, time_to_restore=time_to_restore, blob_ranges=blob_ranges)
+    restore_parameters = cmd.get_models("BlobRestoreParameters")(time_to_restore=time_to_restore,
+                                                                 blob_ranges=blob_ranges)
+    return sdk_no_wait(no_wait, client.begin_restore_blob_ranges, resource_group_name=resource_group_name,
+                       account_name=account_name, parameters=restore_parameters)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
@@ -131,9 +242,8 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
                             destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
-    logger = None
+
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('copy files or blobs to blob container')
         logger.warning('    account %s', client.account_name)
         logger.warning('  container %s', container_name)
@@ -142,6 +252,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None,
         logger.warning('    pattern %s', pattern)
         logger.warning(' operations')
 
+    source_sas = source_sas.lstrip('?') if source_sas else source_sas
     if source_container:
         # copy blobs for blob container
 
@@ -216,7 +327,6 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
-        logger = get_logger(__name__)
         logger.warning('download action: from %s to %s', source, destination)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
@@ -261,7 +371,6 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             'Last Modified': upload_result.last_modified if upload_result else None,
             'eTag': upload_result.etag if upload_result else None}
 
-    logger = get_logger(__name__)
     source_files = source_files or []
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
 
@@ -488,7 +597,6 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         }
         return client.delete_blob(**delete_blob_args)
 
-    logger = get_logger(__name__)
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
@@ -634,3 +742,40 @@ def acquire_blob_lease(client, lease_duration=-1, **kwargs):
 def renew_blob_lease(client, **kwargs):
     client.renew(**kwargs)
     return client.id
+
+
+def add_progress_callback_v2(cmd, namespace):
+    def _update_progress(response):
+        if response.http_response.status_code not in [200, 201]:
+            return
+
+        message = getattr(_update_progress, 'message', 'Alive')
+        reuse = getattr(_update_progress, 'reuse', False)
+        current = response.context['upload_stream_current']
+        total = response.context['data_stream_total']
+
+        if total:
+            hook.add(message=message, value=current, total_val=total)
+            if total == current and not reuse:
+                hook.end()
+
+    hook = cmd.cli_ctx.get_progress_controller(det=True)
+    _update_progress.hook = hook
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def query_blob(client, query_expression, input_config=None, output_config=None, result_file=None, **kwargs):
+
+    reader = client.query_blob(query_expression=query_expression, blob_format=input_config, output_format=output_config,
+                               **kwargs)
+
+    if result_file is not None:
+        with open(result_file, 'wb') as stream:
+            reader.readinto(stream)
+        stream.close()
+        return None
+
+    return reader.readall().decode("utf-8")

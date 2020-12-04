@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.decorators import serial_test
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
@@ -40,6 +41,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
 
         return volume1
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
     def test_create_delete_snapshots(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -49,7 +51,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         rg = '{rg}'
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s " % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -61,6 +64,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_list = self.cmd("az netappfiles snapshot list --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 0
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netapp_test_snap_')
     def test_create_volume_from_snapshot(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -72,7 +76,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         rg = '{rg}'
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -85,6 +90,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         restored_volume = self.create_volume(account_name, pool_name, restored_volume_name, rg, snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_', parameter_name='rg', random_name_length=63)
     def test_revert_volume_from_snapshot(self, rg):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -93,7 +99,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
 
         volume = self.create_volume(account_name, pool_name, volume_name, rg)
-        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g %s -a %s -p %s -v %s -s %s -l %s" % (rg, account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name
         # check the created fields is populated. Checking exact dates are a little harder due to session records
         assert snapshot['created'] is not None
@@ -106,6 +113,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_list = self.cmd("az netappfiles snapshot list --resource-group %s --account-name %s --pool-name %s --volume-name %s" % (rg, account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 1
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
     def test_list_snapshots(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -114,12 +122,14 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         snapshot_name1 = self.create_random_name(prefix='cli-sn-', length=24)
         snapshot_name2 = self.create_random_name(prefix='cli-sn-', length=24)
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
-        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name1, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
-        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name2, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name1, ANF_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name2, ANF_LOCATION)).get_output_in_json()
 
         snapshot_list = self.cmd("az netappfiles snapshot list -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
         assert len(snapshot_list) == 2
 
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
     def test_get_snapshot(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -127,7 +137,8 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
         snapshot_name = self.create_random_name(prefix='cli-sn-', length=24)
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
-        snapshot = self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s --file-system-id %s" % (account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION, volume['fileSystemId'])).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        snapshot = self.cmd("az netappfiles snapshot create -g {rg} -a %s -p %s -v %s -s %s -l %s" % (account_name, pool_name, volume_name, snapshot_name, ANF_LOCATION)).get_output_in_json()
 
         snapshot = self.cmd("az netappfiles snapshot show -g {rg} -a %s -p %s -v %s -s %s" % (account_name, pool_name, volume_name, snapshot_name)).get_output_in_json()
         assert snapshot['name'] == account_name + '/' + pool_name + '/' + volume_name + '/' + snapshot_name

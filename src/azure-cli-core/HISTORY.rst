@@ -3,6 +3,48 @@
 Release History
 ===============
 
+2.15.1
+++++++
+* Minor fixes
+
+2.15.0
+++++++
+* Upgrade azure-mgmt-core to 1.2.1 (#15780)
+
+2.14.2
+++++++
+* No changes
+
+2.14.1
+++++++
+* Minor fixes
+
+2.14.0
+++++++
+* Minor fixes
+
+2.13.0
+++++++
+* Minor fixes
+
+2.12.1
+++++++
+* No changes
+
+2.12.0
+++++++
+* Add a new global parameter `--query-examples` (#14765)
+* Fix #15025: MSIAuthenticationWrapper not working with azure.core (#15118)
+* Error message improvement (#14855)
+
+2.11.1
+++++++
+* Minor fixes
+
+2.11.0
+++++++
+* Minor improvement
+
 2.10.1
 ++++++
 * Minor fixes
@@ -272,8 +314,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35

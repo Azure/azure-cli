@@ -63,7 +63,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_create,
             'location': 'northeurope',
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest',
             'description': 'test streaming description',
             'maxCacheAge': 11,
             'scaleUnits': 4,
@@ -78,11 +77,10 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --ips {ips} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --ips {ips} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'North Europe'),
-            self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('length(accessControl.ip.allow)', '2'),
             self.check('description', '{description}'),
             self.check('maxCacheAge', '{maxCacheAge}'),
@@ -117,7 +115,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_create,
             'location': 'australiaeast',
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
             'cdnProfile': 'testProfile',
             'description': 'test streaming description',
@@ -131,11 +128,10 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'Australia East'),
-            self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
             self.check('description', '{description}'),
@@ -149,7 +145,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.kwargs.update({
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest2',
             'cdnProvider': 'PremiumVerizon',
             'cdnProfile': 'testProfile2',
             'description': 'test streaming description2',
@@ -194,7 +189,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_create,
             'location': 'canadacentral',
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
             'cdnProfile': 'testProfile',
             'description': 'test streaming description',
@@ -207,11 +201,10 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'Canada Central'),
-            self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
             self.check('description', '{description}'),
@@ -233,7 +226,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_show,
             'location': 'australiasoutheast',
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
             'cdnProfile': 'testProfile',
             'description': 'test streaming description',
@@ -246,13 +238,12 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"')
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"')
 
         self.cmd('az ams streaming-endpoint show -g {rg} -a {amsname} -n {streamingEndpointName}', checks=[
             self.check('name', '{streamingEndpointName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', 'Australia Southeast'),
-            self.check('availabilitySetName', '{availabilitySetName}'),
             self.check('cdnProvider', '{cdnProvider}'),
             self.check('cdnProfile', '{cdnProfile}'),
             self.check('description', '{description}'),
@@ -281,7 +272,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_delete,
             'location': 'southindia',
             'streamingEndpointName1': streaming_endpoint_name1,
-            'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
             'cdnProfile': 'testProfile',
             'description': 'test streaming description',
@@ -294,7 +284,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName1} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"')
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName1} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"')
 
         self.cmd('az ams streaming-endpoint list -g {rg} -a {amsname}', checks=[
             self.check('length(@)', 2)
@@ -317,7 +307,6 @@ class AmsStreamingEndpointsTests(ScenarioTest):
             'storageAccount': storage_account_for_scale,
             'location': 'westindia',
             'streamingEndpointName': streaming_endpoint_name,
-            'availabilitySetName': 'availaTest',
             'cdnProvider': 'StandardVerizon',
             'cdnProfile': 'testProfile',
             'description': 'test streaming description',
@@ -331,7 +320,7 @@ class AmsStreamingEndpointsTests(ScenarioTest):
 
         self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
 
-        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --availability-set-name {availabilitySetName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
+        self.cmd('az ams streaming-endpoint create -g {rg} -a {amsname} -n {streamingEndpointName} --cdn-provider {cdnProvider} --cdn-profile {cdnProfile} --description "{description}" --max-cache-age {maxCacheAge} --scale-units {scaleUnits} --tags "{tags}" --client-access-policy @"{clientAccessPolicy}" --cross-domain-policy @"{crossDomainPolicy}"', checks=[
             self.check('scaleUnits', '{scaleUnits}')
         ])
 

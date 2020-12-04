@@ -106,7 +106,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_sql_database_create')
         g.custom_command('exists', 'cli_cosmosdb_sql_database_exists')
         g.command('list', 'list_sql_databases')
-        g.command('show', 'get_sql_database')
+        g.show_command('show', 'get_sql_database')
         g.command('delete', 'delete_sql_database', confirmation=True)
 
     with self.command_group('cosmosdb sql container', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
@@ -114,28 +114,28 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_sql_container_update')
         g.custom_command('exists', 'cli_cosmosdb_sql_container_exists')
         g.command('list', 'list_sql_containers')
-        g.command('show', 'get_sql_container')
+        g.show_command('show', 'get_sql_container')
         g.command('delete', 'delete_sql_container', confirmation=True)
 
     with self.command_group('cosmosdb sql stored-procedure', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_stored_procedure_create_update')
         g.custom_command('update', 'cli_cosmosdb_sql_stored_procedure_create_update')
         g.command('list', 'list_sql_stored_procedures')
-        g.command('show', 'get_sql_stored_procedure')
+        g.show_command('show', 'get_sql_stored_procedure')
         g.command('delete', 'delete_sql_stored_procedure', confirmation=True)
 
     with self.command_group('cosmosdb sql trigger', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_trigger_create')
         g.custom_command('update', 'cli_cosmosdb_sql_trigger_update')
         g.command('list', 'list_sql_triggers')
-        g.command('show', 'get_sql_trigger')
+        g.show_command('show', 'get_sql_trigger')
         g.command('delete', 'delete_sql_trigger', confirmation=True)
 
     with self.command_group('cosmosdb sql user-defined-function', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_user_defined_function_create_update')
         g.custom_command('update', 'cli_cosmosdb_sql_user_defined_function_create_update')
         g.command('list', 'list_sql_user_defined_functions')
-        g.command('show', 'get_sql_user_defined_function')
+        g.show_command('show', 'get_sql_user_defined_function')
         g.command('delete', 'delete_sql_user_defined_function', confirmation=True)
 
     # MongoDB api
@@ -145,7 +145,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_mongodb_database_create')
         g.custom_command('exists', 'cli_cosmosdb_mongodb_database_exists')
         g.command('list', 'list_mongo_db_databases')
-        g.command('show', 'get_mongo_db_database')
+        g.show_command('show', 'get_mongo_db_database')
         g.command('delete', 'delete_mongo_db_database', confirmation=True)
 
     with self.command_group('cosmosdb mongodb collection', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
@@ -153,7 +153,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_update')
         g.custom_command('exists', 'cli_cosmosdb_mongodb_collection_exists')
         g.command('list', 'list_mongo_db_collections')
-        g.command('show', 'get_mongo_db_collection')
+        g.show_command('show', 'get_mongo_db_collection')
         g.command('delete', 'delete_mongo_db_collection', confirmation=True)
 
     # Cassandra api
@@ -163,7 +163,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_cassandra_keyspace_create')
         g.custom_command('exists', 'cli_cosmosdb_cassandra_keyspace_exists')
         g.command('list', 'list_cassandra_keyspaces')
-        g.command('show', 'get_cassandra_keyspace')
+        g.show_command('show', 'get_cassandra_keyspace')
         g.command('delete', 'delete_cassandra_keyspace', confirmation=True)
 
     with self.command_group('cosmosdb cassandra table', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
@@ -171,7 +171,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_update')
         g.custom_command('exists', 'cli_cosmosdb_cassandra_table_exists')
         g.command('list', 'list_cassandra_tables')
-        g.command('show', 'get_cassandra_table')
+        g.show_command('show', 'get_cassandra_table')
         g.command('delete', 'delete_cassandra_table', confirmation=True)
 
     # Gremlin api
@@ -181,7 +181,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_gremlin_database_create')
         g.custom_command('exists', 'cli_cosmosdb_gremlin_database_exists')
         g.command('list', 'list_gremlin_databases')
-        g.command('show', 'get_gremlin_database')
+        g.show_command('show', 'get_gremlin_database')
         g.command('delete', 'delete_gremlin_database', confirmation=True)
 
     with self.command_group('cosmosdb gremlin graph', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
@@ -189,7 +189,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_update')
         g.custom_command('exists', 'cli_cosmosdb_gremlin_graph_exists')
         g.command('list', 'list_gremlin_graphs')
-        g.command('show', 'get_gremlin_graph')
+        g.show_command('show', 'get_gremlin_graph')
         g.command('delete', 'delete_gremlin_graph', confirmation=True)
 
     # Table api
@@ -197,45 +197,54 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_table_create')
         g.custom_command('exists', 'cli_cosmosdb_table_exists')
         g.command('list', 'list_tables')
-        g.command('show', 'get_table')
+        g.show_command('show', 'get_table')
         g.command('delete', 'delete_table', confirmation=True)
 
     # Offer throughput
     with self.command_group('cosmosdb sql database throughput', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
-        g.command('show', 'get_sql_database_throughput')
+        g.show_command('show', 'get_sql_database_throughput')
+        g.custom_command('migrate', 'cli_cosmosdb_sql_database_throughput_migrate')
         g.custom_command('update', 'cli_cosmosdb_sql_database_throughput_update')
 
     with self.command_group('cosmosdb sql container throughput', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
-        g.command('show', 'get_sql_container_throughput')
+        g.show_command('show', 'get_sql_container_throughput')
         g.custom_command('update', 'cli_cosmosdb_sql_container_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_sql_container_throughput_migrate')
 
     with self.command_group('cosmosdb mongodb database throughput', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
-        g.command('show', 'get_mongo_db_database_throughput')
+        g.show_command('show', 'get_mongo_db_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_database_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_mongodb_database_throughput_migrate')
 
     with self.command_group('cosmosdb mongodb collection throughput', cosmosdb_mongo_sdk, client_factory=cf_mongo_db_resources) as g:
-        g.command('show', 'get_mongo_db_collection_throughput')
+        g.show_command('show', 'get_mongo_db_collection_throughput')
         g.custom_command('update', 'cli_cosmosdb_mongodb_collection_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_mongodb_collection_throughput_migrate')
 
     with self.command_group('cosmosdb cassandra keyspace throughput', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
-        g.command('show', 'get_cassandra_keyspace_throughput')
+        g.show_command('show', 'get_cassandra_keyspace_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_keyspace_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_cassandra_keyspace_throughput_migrate')
 
     with self.command_group('cosmosdb cassandra table throughput', cosmosdb_cassandra_sdk, client_factory=cf_cassandra_resources) as g:
-        g.command('show', 'get_cassandra_table_throughput')
+        g.show_command('show', 'get_cassandra_table_throughput')
         g.custom_command('update', 'cli_cosmosdb_cassandra_table_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_cassandra_table_throughput_migrate')
 
     with self.command_group('cosmosdb gremlin database throughput', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
-        g.command('show', 'get_gremlin_database_throughput')
+        g.show_command('show', 'get_gremlin_database_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_database_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_gremlin_database_throughput_migrate')
 
     with self.command_group('cosmosdb gremlin graph throughput', cosmosdb_gremlin_sdk, client_factory=cf_gremlin_resources) as g:
-        g.command('show', 'get_gremlin_graph_throughput')
+        g.show_command('show', 'get_gremlin_graph_throughput')
         g.custom_command('update', 'cli_cosmosdb_gremlin_graph_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_gremlin_graph_throughput_migrate')
 
     with self.command_group('cosmosdb table throughput', cosmosdb_table_sdk, client_factory=cf_table_resources) as g:
-        g.command('show', 'get_table_throughput')
+        g.show_command('show', 'get_table_throughput')
         g.custom_command('update', 'cli_cosmosdb_table_throughput_update')
+        g.custom_command('migrate', 'cli_cosmosdb_table_throughput_migrate')
 
     # virtual network rules
     with self.command_group('cosmosdb network-rule', None, client_factory=cf_db_accounts) as g:

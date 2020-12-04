@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 from azure.cli.command_modules.network.zone_file import parse_zone_file
 
@@ -58,6 +58,43 @@ class DnsZoneImportTest(ScenarioTest):
 
         # verify that each record in the original import is unchanged after export/re-import
         self._check_records(records1, records2)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_not_found')
+    def test_dns_import_file_operation_error(self, resource_group):
+        import sys
+        if sys.platform != 'linux':
+            self.skip('This test should run on Linux platform')
+
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+            self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegexp(FileOperationError, 'Is a directory: ') as e:
+            self._test_zone('404zone.com', '')
+            self.assertEqual(e.errno, 1)
+
+        with self.assertRaisesRegexp(FileOperationError, 'Permission denied: ') as e:
+            self._test_zone('404zone.com', '/root/')
+            self.assertEqual(e.errno, 1)
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_dns_import_file_operation_error_windows')
+    def test_dns_import_file_operation_error_windows(self, resource_group):
+        import sys
+        if sys.platform != 'win32':
+            self.skip('This test should run on Windows platform')
+
+        from azure.cli.core.azclierror import FileOperationError
+        with self.assertRaisesRegexp(FileOperationError, 'No such file: ') as e:
+            self._test_zone('404zone.com', 'non_existing_zone_description_file.txt')
+            self.assertEqual(e.errno, 1)
+
+        # Difference with Linux platform while reading a directory
+        with self.assertRaisesRegexp(FileOperationError, 'Permission denied:') as e:
+            self._test_zone('404zone.com', '.')
+            self.assertEqual(e.errno, 1)
 
     @ResourceGroupPreparer(name_prefix='cli_dns_zone1_import')
     def test_dns_zone1_import(self, resource_group):
@@ -391,8 +428,8 @@ class DnsParseZoneFiles(unittest.TestCase):
         ])
         self._check_aaaa(zone, 'myaaaa.' + zn, [(3600, '2001:4898:e0:99:6dc4:6329:1c99:4e69')])
         self._check_cname(zone, 'mycname.' + zn, 3600, 'contoso.com.')
-        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname')])
-        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com')])
+        self._check_ptr(zone, 'myname.' + zn, [(3600, 'myptrdname.')])
+        self._check_ptr(zone, 'myptr.' + zn, [(3600, 'contoso.com.')])
         self._check_txt(zone, 'myname2.' + zn, [(3600, 9, 'manualtxt')])
         self._check_txt(zone, 'mytxt2.' + zn, [
             (7200, 7, 'abc def'),

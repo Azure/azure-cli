@@ -10,9 +10,6 @@ from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    def oauth_cmd(self, cmd, *args, **kwargs):
-        return self.cmd(cmd + ' --auth-mode login', *args, **kwargs)
-
     @api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -148,14 +145,46 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         # test block blob
         self.oauth_cmd('storage blob upload -c {container} -n {block} -f "{local_file}" --account-name {sa}')
 
-        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
+                                JMESPathCheck('deleted', False),
+                                JMESPathCheck('encryptionScope', None),
+                                JMESPathCheck('properties.appendBlobCommittedBlockCount', None),
+                                JMESPathCheck('properties.blobTier', None),
+                                JMESPathCheck('properties.blobTierChangeTime', None),
+                                JMESPathCheck('properties.blobTierInferred', None),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.contentSettings.cacheControl', None),
+                                JMESPathCheck('properties.contentSettings.contentDisposition', None),
+                                JMESPathCheck('properties.contentSettings.contentEncooding', None),
+                                JMESPathCheck('properties.contentSettings.contentLanguage', None),
+                                JMESPathCheckExists('properties.contentSettings.contentMd5'),
+                                JMESPathCheck('properties.copy.completionTime', None),
+                                JMESPathCheck('properties.copy.id', None),
+                                JMESPathCheck('properties.copy.progress', None),
+                                JMESPathCheck('properties.copy.source', None),
+                                JMESPathCheck('properties.copy.status', None),
+                                JMESPathCheck('properties.copy.statusDescription', None),
                                 JMESPathCheck('properties.pageRanges', None),
-                                JMESPathCheckExists('properties.etag'))
-        self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.creationTime'),
+                                JMESPathCheck('properties.deletedTime', None),
+                                JMESPathCheckExists('properties.etag'),
+                                JMESPathCheckExists('properties.lastModified'),
+                                JMESPathCheck('properties.lease.duration', None),
+                                JMESPathCheck('properties.lease.state', 'available'),
+                                JMESPathCheck('properties.lease.status', 'unlocked'),
+                                JMESPathCheck('snapshot', None),
+                                JMESPathCheck('objectReplicationDestinationPolicy', None),
+                                JMESPathCheck('objectReplicationSourceProperties', []),
+                                JMESPathCheck('rehydratePriority', None),
+                                JMESPathCheck('tags', None),
+                                JMESPathCheck('tagCount', None),
+                                JMESPathCheck('versionId', None))
+
+        self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .get_output_in_json()['properties']['etag']
 
         # test page blob
@@ -165,10 +194,11 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.blobType', 'PageBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
+                                JMESPathCheck('properties.pageBlobSequenceNumber', 0),
                                 JMESPathCheckExists('properties.pageRanges'))
 
         # test snapshot
-        self.kwargs['snapshot'] = self.oauth_cmd('storage blob snapshot -c {container} -n {block} --account-name {sa}')\
+        self.kwargs['snapshot'] = self.oauth_cmd('storage blob snapshot -c {container} -n {block} --account-name {sa}') \
             .get_output_in_json()['snapshot']
         self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
@@ -200,11 +230,207 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-none-match *')
 
         with self.assertRaisesRegex(ResourceModifiedError, 'ErrorCode:ConditionNotMet'):
-            self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-unmodified-since "2020-06-29T06:32Z"')
+            self.oauth_cmd(
+                'storage blob show -c {container} -n {block} --account-name {sa} --if-unmodified-since "2020-06-29T06:32Z"')
 
-        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-modified-since "2020-06-29T06:32Z"') \
+        self.oauth_cmd(
+            'storage blob show -c {container} -n {block} --account-name {sa} --if-modified-since "2020-06-29T06:32Z"') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
                                 JMESPathCheck('properties.contentSettings.contentType', 'application/octet-stream'),
                                 JMESPathCheck('properties.pageRanges', None))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
+    def test_storage_blob_list_oauth(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'container': self.create_container(account_info=account_info),
+            'local_file': self.create_temp_file(128),
+            'blob_name1': "/".join(["dir", self.create_random_name(prefix='blob', length=24)]),
+            'blob_name2': "/".join(["dir", self.create_random_name(prefix='blob', length=24)])
+        })
+
+        # Prepare blob 1
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name1} --account-name {account} ')
+
+        # Test with include snapshot
+        result = self.oauth_cmd('storage blob snapshot -c {container} -n {blob_name1} --account-name {account} ') \
+            .get_output_in_json()
+        self.assertIsNotNone(result['snapshot'])
+        snapshot = result['snapshot']
+
+        self.oauth_cmd('storage blob list -c {container} --include s --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('[0].snapshot', snapshot))
+
+        # Test with metadata
+        self.oauth_cmd(
+            'storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
+        self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('test', '1'))
+
+        self.oauth_cmd('storage blob list -c {container} --include m --account-name {account}  ') \
+            .assert_with_checks(JMESPathCheck('[0].metadata.test', '1'))
+
+        # Prepare blob 2
+        self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name2} --account-name {account} ')
+
+        self.oauth_cmd('storage blob list -c {container} --account-name {account} ').assert_with_checks(
+            JMESPathCheck('length(@)', 2))
+
+        # Test num_results and next marker
+        self.oauth_cmd('storage blob list -c {container} --num-results 1 --account-name {account} ').assert_with_checks(
+            JMESPathCheck('length(@)', 1))
+
+        result = self.oauth_cmd(
+            'storage blob list -c {container} --num-results 1 --show-next-marker --account-name {account} ') \
+            .get_output_in_json()
+        self.assertIsNotNone(result[1]['nextMarker'])
+        self.kwargs['next_marker'] = result[1]['nextMarker']
+
+        # Test with marker
+        self.oauth_cmd('storage blob list -c {container} --marker {next_marker} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Test with prefix
+        self.oauth_cmd('storage blob list -c {container} --prefix dir/ --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+
+        # Test with delimiter
+        self.oauth_cmd('storage blob list -c {container} --delimiter "/" --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1),
+                                JMESPathCheck('[0].name', 'dir/'))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
+    def test_storage_queue_list_oauth(self, resource_group, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'queue_name1': self.create_random_name(prefix='firstq', length=24),
+            'queue_name2': self.create_random_name(prefix='secondq', length=24)
+        })
+
+        # Prepare queue 1
+        self.oauth_cmd('storage queue create -n {queue_name1} --metadata key1=value1 --account-name {account} ')
+
+        # Test list
+        self.oauth_cmd('storage queue list --account-name {account}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1), JMESPathCheck('[0].metadata', None))
+
+        # Test with include-metadata
+        self.oauth_cmd('storage queue list --include-metadata --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1), JMESPathCheck('[0].metadata.key1', 'value1'))
+
+        # Prepare queue 2
+        self.oauth_cmd('storage queue create -n {queue_name2} --account-name {account} ')
+
+        self.oauth_cmd('storage queue list --account-name {account}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+
+        # Test num_results and next marker
+        self.oauth_cmd('storage queue list --num-results 1 --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        result = self.oauth_cmd(
+            'storage queue list --num-results 1 --show-next-marker --account-name {account} ') \
+            .get_output_in_json()
+        self.assertIsNotNone(result[1]['nextMarker'])
+        self.kwargs['next_marker'] = result[1]['nextMarker']
+
+        # Test with marker
+        self.oauth_cmd('storage queue list --marker {next_marker} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Test with prefix
+        self.oauth_cmd('storage queue list --prefix second --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
+class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', sku='Premium_LRS')
+    def test_storage_page_blob_set_tier_oauth(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P10 --account-name {} '.format(
+                       container_name, blob_name, source_file, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'P10'))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier P20 -r High -t page --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier P20 -t page --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'P20'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_block_blob_set_tier_oauth(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+
+        # test rehydrate from Archive to Cool by High priority
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" --account-name {} '.format(
+                       container_name, blob_name, source_file, storage_account))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Cool -r Middle --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        with self.assertRaises(SystemExit):
+            self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive -r High --account-name {} '.format(
+                           container_name, blob_name, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Cool -r High --account-name {} '.format(
+                       container_name, blob_name, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name,
+                       storage_account)).assert_with_checks(
+            JMESPathCheck('properties.blobTier', 'Archive'),
+            JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+        # test rehydrate from Archive to Hot by Standard priority
+        blob_name2 = self.create_random_name(prefix='blob', length=24)
+
+        self.oauth_cmd('storage blob upload -c {} -n {} -f "{}" --account-name {} '.format(
+                       container_name, blob_name2, source_file, storage_account))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Archive --account-name {} '.format(
+                       container_name, blob_name2, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name2,
+                       storage_account)).assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.oauth_cmd('storage blob set-tier -c {} -n {} --tier Hot --account-name {} '.format(
+                       container_name, blob_name2, storage_account))
+
+        self.oauth_cmd('az storage blob show -c {} -n {} --account-name {} '.format(container_name, blob_name2,
+                       storage_account)) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))

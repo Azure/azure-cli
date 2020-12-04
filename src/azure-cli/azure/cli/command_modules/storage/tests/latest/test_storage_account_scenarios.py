@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import os
+import time
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
@@ -402,11 +404,36 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
+        # Table service
         with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
             self.cmd('storage logging update --services t --log r --retention 1 '
                      '--version 2.0 --connection-string {}'.format(connection_string))
-        self.cmd('storage logging update --services t --log r --retention 1 '
-                 '--version 1.0 --connection-string {}'.format(connection_string))
+
+        # Set version to 1.0
+        self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
+                 .format(connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
+
+        # Use default version
+        self.cmd('storage logging update --services t --log r --retention 1 --connection-string {}'.format(
+            connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
 
     @live_only()
     @ResourceGroupPreparer()
@@ -483,7 +510,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name = self.create_random_name(prefix='clistoragekerbkey', length=24)
         self.kwargs = {'sc': name, 'rg': resource_group}
         self.cmd('storage account create -g {rg} -n {sc} -l eastus2euap --enable-files-aadds')
-        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 2))
+        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 4))
         original_keys = self.cmd('storage account keys list -g {rg} -n {sc} --expand-key-type kerb',
                                  checks=JMESPathCheck('length(@)', 4)).get_output_in_json()
 
@@ -890,7 +917,7 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
     def test_storage_account_update_change_feed(self):
         result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], True)
@@ -947,44 +974,6 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
 
-    class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
-        @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
-        @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
-        def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
-            self.kwargs.update({
-                'sa': storage_account,
-                'rg': resource_group,
-                'cmd': 'storage account file-service-properties'
-            })
-            self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy', None))
-
-            with self.assertRaises(SystemExit):
-                self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
-
-            with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
-                self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
-
-            with self.assertRaises(SystemExit):
-                self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
-
-            self.cmd(
-                '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
-
-            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
-
-            self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', None))
-
-            self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
-                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
-                JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
-
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
     @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
@@ -1000,6 +989,89 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['isVersioningEnabled'], True)
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_update_delete_retention_policy')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    def test_storage_account_update_container_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account blob-service-properties update'
+        })
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention false --container-delete-retention-days 365 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --container-delete-retention-days 1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 366 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 1)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 100)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention true --container-delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], 365)
+
+        result = self.cmd('{cmd} --enable-container-delete-retention false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], False)
+        self.assertEqual(result['containerDeleteRetentionPolicy']['days'], None)
+
+
+class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+    @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
+    def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account file-service-properties'
+        })
+        self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+
+        self.cmd(
+            '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
+
+        self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
+
+        self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+        self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
@@ -1017,7 +1089,6 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_storage_account_private_endpoint(self, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'eastus',
@@ -1063,13 +1134,13 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-        with self.assertRaisesRegexp(CloudError, 'Your connection is already approved. No need to approve again.'):
+        with self.assertRaisesRegexp(CLIError, 'Your connection is already approved. No need to approve again.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
@@ -1120,18 +1191,23 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
-        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+        self.cmd('storage account create -n {sa} -g {rg} -l eastus2euap --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
-                         self.check('sku.name', 'Standard_GZRS'),
-                         self.check('failoverInProgress', None)])
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
-            self.check('name', '{sa}'),
-            self.check('sku.name', 'Standard_GZRS'),
             self.check('geoReplicationStats.canFailover', True),
             self.check('failoverInProgress', None)
         ])
 
+        time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
@@ -1154,3 +1230,126 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('storage account delete')
         self.cmd('storage account delete -n {account_name} -y')
+
+
+class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
+    @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
+    def test_storage_account_or_policy(self, resource_group, source_account, destination_account, new_account):
+        src_account_info = self.get_account_info(resource_group, source_account)
+        src_container = self.create_container(src_account_info)
+        dest_account_info = self.get_account_info(resource_group, destination_account)
+        dest_container = self.create_container(dest_account_info)
+        self.kwargs.update({
+            'rg': resource_group,
+            'src_sc': source_account,
+            'dest_sc': destination_account,
+            'new_sc': new_account,
+            'scont': src_container,
+            'dcont': dest_container,
+        })
+
+        # Enable ChangeFeed for Source Storage Accounts
+        self.cmd('storage account blob-service-properties update -n {src_sc} -g {rg} --enable-change-feed', checks=[
+                 JMESPathCheck('changeFeed.enabled', True)])
+
+        # Enable Versioning for two Storage Accounts
+        self.cmd('storage account blob-service-properties update -n {src_sc} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        self.cmd('storage account blob-service-properties update -n {dest_sc} -g {rg} --enable-versioning', checks=[
+                 JMESPathCheck('isVersioningEnabled', True)])
+
+        # Create ORS policy on destination account
+        result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
+                          '--scont {scont} -t "2020-02-19T16:05:00Z"').get_output_in_json()
+        self.assertIn('policyId', result)
+        self.assertIn('ruleId', result['rules'][0])
+        self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
+
+        self.kwargs.update({
+            'policy_id': result["policyId"],
+            'rule_id': result["rules"][0]["ruleId"]
+        })
+
+        # Get policy properties from destination account
+        self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \
+            .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
+            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
+            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
+            .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
+            .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container))
+
+        # Add rules
+        src_container1 = self.create_container(src_account_info)
+        dest_container1 = self.create_container(dest_account_info)
+        self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+        self.cmd('storage account or-policy rule show -g {rg} -n {dest_sc} --rule-id {rule_id} --policy-id {policy_id}')\
+            .assert_with_checks(JMESPathCheck('ruleId', result["rules"][0]["ruleId"])) \
+            .assert_with_checks(JMESPathCheck('sourceContainer', src_container)) \
+            .assert_with_checks(JMESPathCheck('destinationContainer', dest_container))
+
+        result = self.cmd('storage account or-policy rule add -g {} -n {} --policy-id {} -d {} -s {} -t "2020-02-19T16:05:00Z"'.format(
+            resource_group, destination_account, self.kwargs["policy_id"], dest_container1, src_container1)).get_output_in_json()
+        self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
+
+        self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}')\
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+
+        # Update rules
+        self.cmd('storage account or-policy rule update -g {} -n {} --policy-id {} --rule-id {} --prefix-match blobA blobB -t "2020-02-20T16:05:00Z"'.format(
+            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
+            .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
+            .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
+
+        self.cmd('storage account or-policy rule show -g {} -n {} --policy-id {} --rule-id {}'.format(
+            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId'])) \
+            .assert_with_checks(JMESPathCheck('filters.prefixMatch[0]', 'blobA')) \
+            .assert_with_checks(JMESPathCheck('filters.prefixMatch[1]', 'blobB')) \
+            .assert_with_checks(JMESPathCheck('filters.minCreationTime', '2020-02-20T16:05:00Z'))
+
+        # Remove rules
+        self.cmd('storage account or-policy rule remove -g {} -n {} --policy-id {} --rule-id {}'.format(
+            resource_group, destination_account, result['policyId'], result['rules'][1]['ruleId']))
+        self.cmd('storage account or-policy rule list -g {rg} -n {dest_sc} --policy-id {policy_id}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Set ORS policy to source account
+        with self.assertRaisesRegex(CLIError, 'ValueError: Please specify --policy-id with auto-generated policy id'):
+            self.cmd('storage account or-policy create -g {rg} -n {src_sc} -d {dest_sc} -s {src_sc} --dcont {dcont} --scont {scont}')
+
+        import json
+        temp_dir = self.create_temp_dir()
+        policy_file = os.path.join(temp_dir, "policy.json")
+        with open(policy_file, "w") as f:
+            policy = self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}')\
+                .get_output_in_json()
+            json.dump(policy, f)
+        self.kwargs['policy'] = policy_file
+        self.cmd('storage account or-policy create -g {rg} -n {src_sc} -p @"{policy}"')\
+            .assert_with_checks(JMESPathCheck('type', "Microsoft.Storage/storageAccounts/objectReplicationPolicies")) \
+            .assert_with_checks(JMESPathCheck('sourceAccount', source_account)) \
+            .assert_with_checks(JMESPathCheck('destinationAccount', destination_account)) \
+            .assert_with_checks(JMESPathCheck('rules[0].sourceContainer', src_container)) \
+            .assert_with_checks(JMESPathCheck('rules[0].destinationContainer', dest_container)) \
+            .assert_with_checks(JMESPathCheck('rules[0].filters.minCreationTime', '2020-02-19T16:05:00Z'))
+
+        # Update ORS policy
+        self.cmd('storage account or-policy update -g {} -n {} --policy-id {} --source-account {}'.format(
+            resource_group, destination_account, self.kwargs["policy_id"], new_account)) \
+            .assert_with_checks(JMESPathCheck('sourceAccount', new_account))
+
+        # Delete policy from destination and source account
+        self.cmd('storage account or-policy delete -g {rg} -n {src_sc} --policy-id {policy_id}')
+        self.cmd('storage account or-policy list -g {rg} -n {src_sc}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+        self.cmd('storage account or-policy delete -g {rg} -n {dest_sc} --policy-id {policy_id}')
+        self.cmd('storage account or-policy list -g {rg} -n {dest_sc}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))

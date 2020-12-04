@@ -446,6 +446,9 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                     if old_ext.type != ext.type or old_ext.name != ext.name)
     vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=exts)
 
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
+
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)
@@ -488,6 +491,10 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
 
     index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
     vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
+
+    # Avoid unnecessary permission error
+    vmss.virtual_machine_profile.storage_profile.image_reference = None
+
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)

@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.10.1"
+__version__ = "2.15.1"
 
 import os
 import sys
@@ -35,7 +35,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
 
 
 class AzCli(CLI):
@@ -48,7 +48,9 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.util import handle_version_update
+        from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
         from knack.util import ensure_dir
 
@@ -64,12 +66,15 @@ class AzCli(CLI):
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
+        handle_version_update()
 
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
         self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
+        register_global_query_examples_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
 
@@ -100,9 +105,9 @@ class AzCli(CLI):
         from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
                                                        UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
-        ver_string, updates_available = get_az_version_string()
+        ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
-        show_updates(updates_available)
+        show_updates(updates_available_components)
 
         show_link = self.config.getboolean('output', 'show_survey_link', True)
         if show_link:

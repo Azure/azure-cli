@@ -50,6 +50,7 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a template file path in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -59,21 +60,31 @@ def load_arguments(self, _):
 
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
                                                             arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
-                                                            is_preview=True, min_api='2019-07-01')
+                                                            min_api='2019-07-01')
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
                                                            help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
-                                                           is_preview=True, min_api='2019-07-01')
+                                                           min_api='2019-07-01')
     deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
                                                                    arg_type=get_enum_type(ChangeType),
                                                                    help='Space-separated list of resource change types to be excluded from What-If results.',
-                                                                   is_preview=True, min_api='2019-07-01')
+                                                                   min_api='2019-07-01')
     tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
     tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
     tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
                                            help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
                                            min_api='2019-10-01')
+
+    latest_include_preview_type = CLIArgumentType(options_list=['--latest-include-preview', '-v'], is_preview=True,
+                                                  action='store_true', arg_group='Resource Id',
+                                                  help='Indicate that the latest api-version will be used regardless of whether it is preview version (like 2020-01-01-preview) or not. '
+                                                       'For example, if the supported api-version of resource provider is 2020-01-01-preview and 2019-01-01: '
+                                                       'when passing in this parameter it will take the latest version 2020-01-01-preview, otherwise it will take the latest stable version 2019-01-01 without passing in this parameter')
+
+    ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
+    ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
+    ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -82,7 +93,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', resource_group_name_type, arg_group='Resource Id')
         c.ignore('resource_id')
         c.argument('resource_name', resource_name_type, arg_group='Resource Id')
-        c.argument('api_version', help='The api version of the resource (omit for latest)', required=False, arg_group='Resource Id')
+        c.argument('api_version', help='The api version of the resource (omit for the latest stable version)', required=False, arg_group='Resource Id')
         c.argument('resource_provider_namespace', resource_namespace_type, arg_group='Resource Id')
         c.argument('resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list, arg_group='Resource Id')
         c.argument('parent_resource_path', resource_parent_type, arg_group='Resource Id')
@@ -90,6 +101,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
         c.argument('resource_ids', nargs='+', options_list=['--ids'], help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.', arg_group='Resource Id')
         c.argument('include_response_body', arg_type=get_three_state_flag(), help='Use if the default command output doesn\'t capture all of the property data.')
+        c.argument('latest_include_preview', latest_include_preview_type)
 
     with self.argument_context('resource list') as c:
         c.argument('name', resource_name_type)
@@ -104,7 +116,7 @@ def load_arguments(self, _):
     with self.argument_context('resource create') as c:
         c.argument('resource_id', options_list=['--id'], help='Resource ID.', action=None)
         c.argument('properties', options_list=['--properties', '-p'], help='a JSON-formatted string containing resource properties')
-        c.argument('is_full_object', action='store_true', help='Indicates that the properties object includes other options such as location, tags, sku, and/or plan.')
+        c.argument('is_full_object', action='store_true', help='Indicate that the properties object includes other options such as location, tags, sku, and/or plan.')
 
     with self.argument_context('resource link') as c:
         c.argument('target_id', options_list=['--target', c.deprecate(target='--target-id', redirect='--target', hide=True)], help='Fully-qualified resource ID of the resource link target.')
@@ -117,6 +129,9 @@ def load_arguments(self, _):
         c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
                    help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
 
+    with self.argument_context('resource wait') as c:
+        c.ignore('latest_include_preview')
+
     with self.argument_context('provider') as c:
         c.ignore('top')
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
@@ -128,7 +143,7 @@ def load_arguments(self, _):
         c.argument('wait', action='store_true', help='wait for unregistration to finish')
 
     with self.argument_context('provider operation') as c:
-        c.argument('api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for latest)")
+        c.argument('api_version', help="The api version of the 'Microsoft.Authorization/providerOperations' resource (omit for the latest stable version)")
 
     with self.argument_context('feature') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=True, help=_PROVIDER_HELP_TEXT)
@@ -245,6 +260,7 @@ def load_arguments(self, _):
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
@@ -512,3 +528,38 @@ def load_arguments(self, _):
     with self.argument_context('account management-group update') as c:
         c.argument('display_name', options_list=['--display-name', '-d'])
         c.argument('parent_id', options_list=['--parent', '-p'])
+
+    with self.argument_context('ts') as c:
+        c.argument('name', options_list=['--name', '-n'], help='The name of the template spec.')
+        c.argument('version', options_list=['--version', '-v'], help='The template spec version.')
+
+    with self.argument_context('ts create') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('location', options_list=['--location', '-l'], help='The location to store the template-spec and template-spec version(s). Cannot be changed after creation.')
+        c.argument('display_name', arg_type=ts_display_name_type)
+        c.argument('description', arg_type=ts_description_type)
+        c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
+
+    with self.argument_context('ts update') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group to store the template spec.')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('display_name', arg_type=ts_display_name_type)
+        c.argument('description', arg_type=ts_description_type)
+        c.argument('version_description', arg_type=ts_version_description_type)
+
+    with self.argument_context('ts show') as c:
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+
+    with self.argument_context('ts export') as c:
+        c.argument('output_folder', options_list=['--output-folder'], help='Existing folder to output export(s).')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+
+    with self.argument_context('ts delete') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the template spec or template spec version is stored.')
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
+
+    with self.argument_context('ts list') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type)

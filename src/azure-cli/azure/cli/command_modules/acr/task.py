@@ -23,7 +23,8 @@ from ._utils import (
 )
 from ._stream_utils import stream_logs
 from ._constants import (
-    ACR_NULL_CONTEXT
+    ACR_NULL_CONTEXT,
+    ACR_TASK_QUICKTASK,
 )
 
 logger = get_logger(__name__)
@@ -43,7 +44,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     client,
                     task_name,
                     registry_name,
-                    context_path,
+                    context_path=None,
                     agent_pool_name=None,
                     file=None,
                     cmd_value=None,
@@ -72,13 +73,40 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     resource_group_name=None,
                     assign_identity=None,
                     target=None,
-                    auth_mode=None):
+                    auth_mode=None,
+                    log_template=None,
+                    is_system_task=False):
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
+    Task = cmd.get_models('Task')
+
+    # If quicktask skip other parameters
+    if is_system_task and task_name == ACR_TASK_QUICKTASK:
+        task_create_parameters = Task(
+            location=registry.location,
+            status=status,
+            timeout=timeout,
+            log_template=log_template,
+            is_system_task=is_system_task)
+        try:
+            return client.create(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 task_name=task_name,
+                                 task_create_parameters=task_create_parameters)
+        except ValidationError as e:
+            raise CLIError(e)
+
+    if not context_path:
+        raise CLIError("If the task is not a System Task, --context-path must be provided.")
+
     if context_path.lower() == ACR_NULL_CONTEXT:
         context_path = None
+        commit_trigger_enabled = False
+        pull_request_trigger_enabled = False
+
+    if context_path is not None and context_path.lower().startswith("oci://"):
         commit_trigger_enabled = False
         pull_request_trigger_enabled = False
 
@@ -160,8 +188,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
-        'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties')
+    PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
+        'PlatformProperties', 'AgentProperties', 'TriggerProperties')
 
     identity = None
     if assign_identity is not None:
@@ -190,7 +218,9 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             cmd=cmd,
             auth_mode=auth_mode
         ),
-        agent_pool_name=agent_pool_name
+        agent_pool_name=agent_pool_name,
+        log_template=log_template,
+        is_system_task=is_system_task
     )
 
     try:
@@ -293,7 +323,7 @@ def acr_task_delete(cmd,
     return client.delete(resource_group_name, registry_name, task_name)
 
 
-def acr_task_update(cmd,  # pylint: disable=too-many-locals
+def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                     client,
                     task_name,
                     registry_name,
@@ -322,11 +352,22 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     update_trigger_endpoint=None,
                     update_trigger_payload_type=None,
                     target=None,
-                    auth_mode=None):
+                    auth_mode=None,
+                    log_template=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
     task = client.get_details(resource_group_name, registry_name, task_name)
+
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters')
+    # If quicktask skip other parameters
+    if hasattr(task, 'is_system_task') and task.is_system_task and task_name == ACR_TASK_QUICKTASK:
+        taskUpdateParameters = TaskUpdateParameters(
+            status=status,
+            timeout=timeout,
+            log_template=log_template)
+        return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
+
     step = task.step
     branch = None
     if context_path is None:
@@ -442,8 +483,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     if platform:
         platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
+    PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
+        'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters')
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
@@ -464,7 +505,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             cmd=cmd,
             auth_mode=auth_mode
         ),
-        agent_pool_name=agent_pool_name
+        agent_pool_name=agent_pool_name,
+        log_template=log_template
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
@@ -782,7 +824,8 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
                  update_trigger_token=None,
                  no_logs=False,
                  no_wait=False,
-                 resource_group_name=None):
+                 resource_group_name=None,
+                 log_template=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
@@ -812,7 +855,8 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
             TaskRunRequest(
                 task_id=task_id,
                 override_task_step_properties=override_task_step_properties,
-                agent_pool_name=agent_pool_name
+                agent_pool_name=agent_pool_name,
+                log_template=log_template
             )
         )
     )

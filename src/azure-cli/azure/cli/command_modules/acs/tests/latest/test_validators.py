@@ -61,9 +61,60 @@ class TestValidateIPRanges(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
 
+class TestClusterAutoscalerParamsValidators(unittest.TestCase):
+    def test_empty_key_empty_value(self):
+        cluster_autoscaler_profile = ["="]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+        err = "Empty key specified for cluster-autoscaler-profile"
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_cluster_autoscaler_profile(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_non_empty_key_empty_value(self):
+        cluster_autoscaler_profile = ["scan-interval="]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+
+        validators.validate_cluster_autoscaler_profile(namespace)
+
+    def test_two_empty_keys_empty_value(self):
+        cluster_autoscaler_profile = ["=", "="]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+        err = "Empty key specified for cluster-autoscaler-profile"
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_cluster_autoscaler_profile(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_one_empty_key_in_pair_one_non_empty(self):
+        cluster_autoscaler_profile = ["scan-interval=20s", "="]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+        err = "Empty key specified for cluster-autoscaler-profile"
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_cluster_autoscaler_profile(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_key(self):
+        cluster_autoscaler_profile = ["bad-key=val"]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+        err = "'bad-key' is an invalid key for cluster-autoscaler-profile"
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_cluster_autoscaler_profile(namespace)
+        self.assertIn(err, str(cm.exception),)
+
+    def test_valid_parameters(self):
+        cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+
+        validators.validate_cluster_autoscaler_profile(namespace)
+
+
 class Namespace:
-    def __init__(self, api_server_authorized_ip_ranges):
+    def __init__(self, api_server_authorized_ip_ranges=None, cluster_autoscaler_profile=None):
         self.api_server_authorized_ip_ranges = api_server_authorized_ip_ranges
+        self.cluster_autoscaler_profile = cluster_autoscaler_profile
 
 
 class TestVNetSubnetId(unittest.TestCase):
@@ -199,3 +250,34 @@ class TestLabels(unittest.TestCase):
 class LabelsNamespace:
     def __init__(self, labels):
         self.labels = labels
+
+
+class AssignIdentityNamespace:
+    def __init__(self, assign_identity):
+        self.assign_identity = assign_identity
+
+
+class TestAssignIdentity(unittest.TestCase):
+    def test_invalid_identity_id(self):
+        invalid_identity_id = "dummy identity id"
+        namespace = AssignIdentityNamespace(invalid_identity_id)
+        err = ("--assign-identity is not a valid Azure resource ID.")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_assign_identity(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_identity_id(self):
+        valid_identity_id = "/subscriptions/testid/resourceGroups/MockedResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mockIdentityID"
+        namespace = AssignIdentityNamespace(valid_identity_id)
+        validators.validate_assign_identity(namespace)
+
+    def test_none_identity_id(self):
+        none_identity_id = None
+        namespace = AssignIdentityNamespace(none_identity_id)
+        validators.validate_assign_identity(namespace)
+
+    def test_empty_identity_id(self):
+        empty_identity_id = ""
+        namespace = AssignIdentityNamespace(empty_identity_id)
+        validators.validate_assign_identity(namespace)

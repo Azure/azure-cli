@@ -253,6 +253,9 @@ aks create:
     workspace_resource_id:
       rule_exclusions:
       - option_length_too_long
+    node_osdisk_diskencryptionset_id:
+      rule_exclusions:
+      - option_length_too_long
 aks enable-addons:
   parameters:
     workspace_resource_id:
@@ -1183,6 +1186,16 @@ config set:
 config unset:
   parameters:
     key:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist show:
+  parameters:
+    name:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist delete:
+  parameters:
+    name:
       rule_exclusions:
       - no_positional_parameters
 consumption budget create:

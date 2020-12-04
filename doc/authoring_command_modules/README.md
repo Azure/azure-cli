@@ -55,10 +55,6 @@ Also, you can run `az` and if your command module contributes any commands, they
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
-**Note for locally installed Azure SDKs:**  
-If you're receiving Azure import errors, run `pip install -I azure-nspkg==1.0.0` in your virtual environment
-after installing your SDK locally.
-
 
 <a name="heading_author_command_mod"></a>Authoring command modules
 ------
@@ -217,12 +213,12 @@ History notes are auto-generated based on PR titles and descriptions starting fr
 
 Examples of customer-facing change PR title:
 
->[Storage] BREAKING CHANGE: az storage remove: Remove --auth-mode argument  
->[ARM] Fix #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
+> [Storage] BREAKING CHANGE: az storage remove: Remove --auth-mode argument  
+> [ARM] Fix #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
 
 An example of non-customer-facing change PR title:
 
->{Aladdin} Add help example for dns
+> {Aladdin} Add help example for dns
 
 ### Format PR Description
 
@@ -231,11 +227,14 @@ Please follow the instruction in the PR template to provide a description of the
 If you would like to write multiple history notes for one PR or overwrite the message in the PR title as a history note, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already contains the history note template, just change it if needed. In this case, the PR title could be a summary of all the changes in this PR and will not be put into `HISTORY.rst` in our pipeline. The PR title still needs to start with `[Component Name]`. You can delete the `History Notes` section if not needed.
 
 ### Hotfix PR
-Step 1: Create a hotfix branch based on release branch, then submit a PR to merge hotfix into release.  
-In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to manually modify `HISTORY.rst` to add history notes. The auto generated history notes for the next regular release will ignore the PR that contains `Hotfix`.  
-Step 2: Submit a PR to merge the release branch back into dev branch after the hotfix release.   
-Do **NOT** squash and merge this PR. After the PR gets approved by code owners, you should fast forward dev to release on your local machine and then push dev to upstream repository. 
+Step 1: Create a hotfix branch based on `release` branch, then submit a PR to merge the hotfix branch into `release`.
+
+In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to manually modify `HISTORY.rst` to add history notes. The auto-generated history notes for the next regular release will ignore the PR that contains `Hotfix`.
 
 An example title of hotfix change PR:
 
->{Packaging} Hotfix: Fix dependency error
+> {Packaging} Hotfix: Fix dependency error
+
+Step 2: After the hotfix version is released, submit a PR to merge `release` branch back to `dev` (e.g. [#15505](https://github.com/Azure/azure-cli/pull/15505)).
+
+⚠ Do **NOT** squash merge this PR. After the PR gets approved by code owners, merge `release` to `dev` by creating a **merge commit** on your local machine, then push `dev` to upstream repository. The PR will automatically be marked as **Merged**.
