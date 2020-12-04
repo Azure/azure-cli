@@ -64,6 +64,78 @@ class MetricAlertConditionListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MetricAlertConditionParser#dynamic.
+    def enterDynamic(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dynamic.
+    def exitDynamic(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dynamics.
+    def enterDynamics(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dynamics.
+    def exitDynamics(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_sensitivity.
+    def enterDyn_sensitivity(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_sensitivity.
+    def exitDyn_sensitivity(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_violations.
+    def enterDyn_violations(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_violations.
+    def exitDyn_violations(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_of_separator.
+    def enterDyn_of_separator(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_of_separator.
+    def exitDyn_of_separator(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_windows.
+    def enterDyn_windows(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_windows.
+    def exitDyn_windows(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_since_seperator.
+    def enterDyn_since_seperator(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_since_seperator.
+    def exitDyn_since_seperator(self, ctx):
+        pass
+
+
+    # Enter a parse tree produced by MetricAlertConditionParser#dyn_datetime.
+    def enterDyn_datetime(self, ctx):
+        pass
+
+    # Exit a parse tree produced by MetricAlertConditionParser#dyn_datetime.
+    def exitDyn_datetime(self, ctx):
+        pass
+
+
     # Enter a parse tree produced by MetricAlertConditionParser#where.
     def enterWhere(self, ctx):
         pass
