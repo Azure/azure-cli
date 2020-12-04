@@ -354,6 +354,16 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
+    with self.command_group('monitor metrics alert dimension', metric_alert_sdk, custom_command_type=alert_custom) as g:
+        from .validators import validate_metrics_alert_dimension
+        g.custom_command('create', 'create_metric_alert_dimension', custom_command_type=alert_custom,
+                         validator=validate_metrics_alert_dimension, is_preview=True)
+
+    with self.command_group('monitor metrics alert condition', metric_alert_sdk, custom_command_type=alert_custom) as g:
+        from .validators import validate_metrics_alert_condition
+        g.custom_command('create', 'create_metric_alert_condition', custom_command_type=alert_custom,
+                         validator=validate_metrics_alert_condition, is_preview=True)
+
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
