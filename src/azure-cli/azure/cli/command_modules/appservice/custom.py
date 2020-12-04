@@ -3740,12 +3740,21 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
-        # create ASP
-        logger.warning("Creating AppServicePlan '%s' ...", plan)
+    # create ASP
+    logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=loc)
+    try:
+        create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                                number_of_workers=1 if _is_linux else None, location=loc)
+    except Exception as ex:
+        if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
+            try:
+                response_content = json.loads(ex.response._content.decode('utf-8'))  # pylint: disable=protected-access
+            except Exception:
+                raise CLIError(ex)
+            raise CLIError(response_content['error']['message'])
+        raise CLIError(ex)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
