@@ -540,6 +540,8 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tag', tag_type)
+        c.argument('tags', tags_type)
         c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     with self.argument_context('ts update') as c:
@@ -549,6 +551,8 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tag', tag_type)
+        c.argument('tags', tags_type)
 
     with self.argument_context('ts show') as c:
         c.argument('template_spec', arg_type=deployment_template_spec_type)

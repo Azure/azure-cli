@@ -1780,7 +1780,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None, no_prompt=False):
+                         description=None, version=None, version_description=None, tags=None, no_prompt=False):
     artifacts = None
     input_template = None
     if location is None:
@@ -1809,23 +1809,25 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
 
         if not Exists:
             try:  # Check if parent template spec already exists.
-                rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                if tags is None: #New version should inherit tags from parent if none are provided.
+                    tags = getattr(exisiting_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=None)
+        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
 
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
+    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, tags=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1848,7 +1850,10 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
-        version_tags = getattr(existing_template, 'tags')
+        if not tags: #Remove tags if explicitely empty.
+            version_tags = {}
+        else:
+            version_tags = getattr(existing_template, 'tags')
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
@@ -1862,7 +1867,10 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    tags = getattr(existing_template, 'tags')
+    if not tags: #Remove tags if explicitely empty.
+        tags = {}
+    else:
+        tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')
     if description is None:
