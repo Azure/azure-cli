@@ -8,7 +8,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-_metric_alert_dimension_prefix = '_where_or_and_'
+_metric_alert_dimension_prefix = '_where_'
 
 
 def create_metric_alert(client, resource_group_name, rule_name, scopes, condition, disabled=False, description=None,
