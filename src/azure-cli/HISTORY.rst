@@ -12,7 +12,7 @@ Release History
 
 **AKS**
 
-* `az aks nodepool add/update/upgrade`: Take max surge parameter. (#15740)
+* `az aks nodepool add/update/upgrade`: Take max surge parameter (#15740)
 * Add support for AGIC addon (#15993)
 * Change MSI cluster to default (#16057)
 
@@ -23,7 +23,7 @@ Release History
 **App Service**
 
 * Fix #14857: Let users update webapp config even with access restriction (#15945)
-* `az functionapp create`: Accept "--runtime python" and  "--runtime-version 3.9" as Azure Functions v3 parameter (#16020)
+* `az functionapp create`: Accept `--runtime python` and  `--runtime-version 3.9` as Azure Functions v3 parameter (#16020)
 * Fix #16041: az webapp config ssl create results in unknown error (#16124)
 
 **ARM**
@@ -43,18 +43,18 @@ Release History
 
 **Key Vault**
 
-* Add a parameter `--include-managed` for `az keyvault key/secret list` to list managed resources (#15926)
+* `az keyvault key/secret list`: Add a parameter `--include-managed` to list managed resources (#15926)
 
 **Monitor**
 
-* `az monitor metrics alert create`: Support dynamic thresholds for condition parameter. (#15820)
-* `az monitor metrics alert update`: Support dynamic thresholds for condition parameter. (#15820)
-* `az monitor metrics alert dimension create`: Build a metric alert rule dimension. (#15820)
-* `az monitor metrics alert condition create`: Build a metric alert rule condition. (#15820)
+* `az monitor metrics alert create`: Support dynamic thresholds for condition parameter (#15820)
+* `az monitor metrics alert update`: Support dynamic thresholds for condition parameter (#15820)
+* `az monitor metrics alert dimension create`: Build a metric alert rule dimension (#15820)
+* `az monitor metrics alert condition create`: Build a metric alert rule condition (#15820)
 
 **MySQL**
 
-* Add MySQL version upgrade cli (#15977)
+* Add MySQL version upgrade CLI (#15977)
 
 **NetAppFiles**
 
@@ -66,7 +66,7 @@ Release History
 
 * `az network network watcher configure`: Fix NetworkWatcherCountLimitReached error caused by case sensitivity of location value (#15801)
 * `az network application-gateway http-listener`: Fix bug that cannot create and update with WAF policy name (#15929)
-* Deprecate route table V1 (#16039)
+* `az network route-table`: Deprecate route table V1 (#16039)
 * `az network cross-region-lb`: Support cross-region load balancer (#16131)
 * `az network express-route port generate-loa`: New command to generate and download the PDF letter of authorization for a ExpressRoutePort (#16135)
 
