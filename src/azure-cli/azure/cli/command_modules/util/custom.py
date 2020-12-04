@@ -63,10 +63,16 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         latest_version_msg = 'It will be updated to {}.'.format(latest_version) if yes \
             else 'Latest version available is {}.'.format(latest_version)
         logger.warning("Your current Azure CLI version is %s. %s", local_version, latest_version_msg)
-        from knack.prompting import prompt_y_n
+        from knack.prompting import prompt_y_n, NoTTYException
         if not yes:
-            confirmation = prompt_y_n("Please check the release notes first: https://docs.microsoft.com/"
-                                      "cli/azure/release-notes-azure-cli\nDo you want to continue?", default='y')
+            logger.warning("Please check the release notes first: https://docs.microsoft.com/"
+                           "cli/azure/release-notes-azure-cli")
+            try:
+                confirmation = prompt_y_n("Do you want to continue?", default='y')
+            except NoTTYException:
+                from azure.cli.core.azclierror import UnclassifiedUserFault
+                raise UnclassifiedUserFault("No tty available.", "Please run command with --yes.")
+
             if not confirmation:
                 telemetry.set_success("Upgrade stopped by user")
                 return
@@ -110,7 +116,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 else:
                     logger.warning(UPGRADE_MSG)
         elif installer == 'HOMEBREW':
-            logger.warning("Update homebrew formulae")
+            logger.debug("Update homebrew formulae")
             exit_code = subprocess.call(['brew', 'update'])
             if exit_code == 0:
                 update_cmd = ['brew', 'upgrade', 'azure-cli']
@@ -130,19 +136,37 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         else:
             logger.warning(UPGRADE_MSG)
     if exit_code:
-        telemetry.set_failure("CLI upgrade failed.")
+        err_msg = "CLI upgrade failed."
+        logger.warning(err_msg)
+        telemetry.set_failure(err_msg)
         sys.exit(exit_code)
-    # Updating Azure CLI and extension together is not supported in homebrewe package.
-    if installer == 'HOMEBREW' and exts:
-        logger.warning("Please rerun 'az upgrade' to update all extensions.")
-    else:
-        for ext_name in exts:
-            try:
-                logger.warning("Checking update for %s", ext_name)
-                subprocess.call(['az', 'extension', 'update', '-n', ext_name],
-                                shell=platform.system() == 'Windows')
-            except Exception as ex:  # pylint: disable=broad-except
-                msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
-                raise CLIError(msg)
 
-    logger.warning("Upgrade finished.")
+    import azure.cli.core
+    import importlib
+    importlib.reload(azure.cli.core)
+    new_version = azure.cli.core.__version__
+
+    if update_cli and new_version == local_version:
+        err_msg = "CLI upgrade failed or aborted."
+        logger.warning(err_msg)
+        telemetry.set_failure(err_msg)
+        sys.exit(1)
+
+    # Python is reinstalled in another versioned directory with Homebrew, subprocess needs to be reloaded
+    if installer == 'HOMEBREW' and exts:
+        importlib.reload(subprocess)
+
+    if exts:
+        logger.warning("Upgrading extensions")
+    for ext_name in exts:
+        try:
+            logger.warning("Checking update for %s", ext_name)
+            subprocess.call(['az', 'extension', 'update', '-n', ext_name],
+                            shell=platform.system() == 'Windows')
+        except Exception as ex:  # pylint: disable=broad-except
+            msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
+            raise CLIError(msg)
+    auto_upgrade_msg = "You can enable auto-upgrade with 'az config set auto-upgrade.enable=yes'. " \
+        "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
+    logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
+                   else auto_upgrade_msg)
