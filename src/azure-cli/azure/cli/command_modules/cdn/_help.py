@@ -172,6 +172,12 @@ examples:
 helps['cdn endpoint update'] = """
 type: command
 short-summary: Update a CDN endpoint to manage how content is delivered.
+parameters:
+  - name: --default-origin-group
+    type: string
+    short-summary: >
+        The origin group to use for origins not explicitly included in an origin group. Can be
+        specified as a resource ID or the name of an origin group of this endpoint.
 examples:
   - name: Turn off HTTP traffic for an endpoint.
     text: >
@@ -355,10 +361,14 @@ type: group
 short-summary: List or show existing origins related to CDN endpoints.
 """
 
-helps['cdn origin update'] = """
+helps['cdn origin create'] = """
 type: command
-short-summary: Update an origin.
+short-summary: Create an origin.
 parameters:
+  - name: --host-name
+    type: string
+    short-summary: >
+        The host name where requests to the origin will be sent.
   - name: --http-port
     type: int
     short-summary: >
@@ -367,25 +377,229 @@ parameters:
     type: int
     short-summary: >
         The port used for https requests to the origin.
-  - name: --private-link-resource-id
+  - name: --origin-host-header
+    type: string
+    short-summary: >
+        The Host header to send for requests to this origin.
+  - name: --weight
+    type: int
+    short-summary: >
+        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
+  - name: --priority
+    type: int
+    short-summary: >
+        The load balancing priority. Higher priorities will not be used for load
+        balancing if any lower priority origin is healthy. Must be between 1 and 5.
+  - name: --disabled
+    type: bool
+    short-summary: >
+        Don't use the origin for load balancing.
+  - name: --private-link-resource-id -p
     type: string
     short-summary: >
         The resource id of the private link that the origin will be connected to.
-  - name: --private-link-location
+  - name: --private-link-location -l
     type: string
     short-summary: >
         The location of the private link that the origin will be connected to.
-  - name: --private-link-approval-message
+  - name: --private-link-approval-message -m
     type: string
     short-summary: >
         The message that is shown to the approver of the private link request.
 examples:
-  - name: Update an origin with private link fields
+  - name: Create an additional origin
+    text: >
+      az cdn origin create -g group --host-name example.contoso.com --profile-name profile --endpoint-name endpoint
+      -n origin --host-name example.contoso.com --origin-host-header example.contoso.com
+      --http-port 80 --https-port 443
+  - name: Create a private origin
+    text: >
+      az cdn origin create -g group --host-name example.contoso.com --profile-name profile --endpoint-name endpoint
+      -n origin --http-port 80 --https-port 443 --private-link-resource-id
+      /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
+      --private-link-location EastUS --private-link-approval-message 'Please approve this request'
+"""
+
+helps['cdn origin update'] = """
+type: command
+short-summary: Update an origin.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: >
+        The host name where requests to the origin will be sent.
+  - name: --http-port
+    type: int
+    short-summary: >
+        The port used for http requests to the origin.
+  - name: --https-port
+    type: int
+    short-summary: >
+        The port used for https requests to the origin.
+  - name: --origin-host-header
+    type: string
+    short-summary: >
+        The Host header to send for requests to this origin.
+  - name: --weight
+    type: int
+    short-summary: >
+        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
+  - name: --priority
+    type: int
+    short-summary: >
+        The load balancing priority. Higher priorities will not be used for load
+        balancing if any lower priority origin is healthy. Must be between 1 and 5.
+  - name: --disabled
+    type: bool
+    short-summary: >
+        Don't use the origin for load balancing.
+  - name: --private-link-resource-id -p
+
+    type: string
+    short-summary: >
+        The resource id of the private link that the origin will be connected to.
+  - name: --private-link-location -l
+    type: string
+    short-summary: >
+        The location of the private link that the origin will be connected to.
+  - name: --private-link-approval-message -m
+    type: string
+    short-summary: >
+        The message that is shown to the approver of the private link request.
+examples:
+  - name: Update an origin
     text: >
       az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --http-port 80
-        --https-port 443 --private-link-resource-id
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
-        --private-link-location EastUS --private-link-approval-message 'Please approve this request'
+      --https-port 443 --priority 3 --weight 500 --host-name example.contoso.com
+  - name: Disable an origin
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --disabled
+  - name: Connect an origin to a private link service
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --http-port 80
+      --https-port 443 --private-link-resource-id
+      /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
+      --private-link-location EastUS --private-link-approval-message 'Please approve this request'
+"""
+
+helps['cdn origin-group'] = """
+type: group
+short-summary: Manage origin groups of an endpoint.
+"""
+
+helps['cdn origin-group create'] = """
+type: command
+short-summary: Create an origin group.
+parameters:
+  - name: --origins
+    type: int
+    short-summary: >
+        The origins load balanced by this origin group, as a comma-separated list of origin names or
+        origin resource IDs.
+  - name: --probe-interval
+    type: int
+    short-summary: >
+        The frequency to perform health probes in seconds.
+  - name: --probe-path
+    type: str
+    short-summary: >
+        The path relative to the origin that is used to determine the health of the origin.
+  - name: --probe-protocol
+    type: string
+    short-summary: >
+        The protocol to use for health probes.
+  - name: --probe-method
+    type: string
+    short-summary: >
+        The request method to use for health probes.
+  # Uncomment this once response error detection support is added in RP:
+  # - name: --response-error-detection-error-types
+  #   type: string
+  #   short-summary: >
+  #       The type of response errors for real user requests for which the origin will be deemed unhealthy.
+  # - name: --response-error-detection-failover-threshold
+  #   type: int
+  #   short-summary: >
+  #       The threshold of failed requests required to trigger failover as a percent of 100.
+  # - name: --response-error-detection-status-code-ranges
+  #   type: string
+  #   short-summary: >
+  #       The HTTP response status codes to count toward the response error detection failover threshold, specified
+  #       as a comma-separated list of ranges.
+examples:
+  - name: Create an origin group
+    text: >
+      az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1
+  - name: Create an origin group with a custom health probe
+    text: >
+      az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1 --probe-path /healthz --probe-interval 90
+      --probe-protocol HTTPS --probe-method GET
+  # Uncomment this once response error detection support is added in RP:
+  # - name: Create an origin group with response error detection
+  #   text: >
+  #     az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+  #     --origins origin-0,origin-1 --response-error-detection-error-types TcpErrorsOnly
+  #     --response-error-detection-failover-threshold 5
+  #     --response-error-detection-status-code-ranges 300-399,500-599
+"""
+
+helps['cdn origin-group update'] = """
+type: command
+short-summary: Update an origin group.
+parameters:
+  - name: --origins
+    type: int
+    short-summary: >
+        The origins load balanced by this origin group, as a comma-separated list of origin names from the
+        parent endpoint origin IDs.
+  - name: --probe-interval
+    type: int
+    short-summary: >
+        The frequency to perform health probes in seconds.
+  - name: --probe-path
+    type: str
+    short-summary: >
+        The path relative to the origin that is used to determine the health of the origin.
+  - name: --probe-protocol
+    type: string
+    short-summary: >
+        The protocol to use for health probes.
+  - name: --probe-method
+    type: string
+    short-summary: >
+        The request method to use for health probes.
+  # Uncomment this once response error detection support is added in RP:
+  # - name: --response-error-detection-error-types
+  #   type: string
+  #   short-summary: >
+  #       The type of response errors for real user requests for which the origin will be deemed unhealthy.
+  # - name: --response-error-detection-failover-threshold
+  #   type: int
+  #   short-summary: >
+  #       The threshold of failed requests required to trigger failover as a percent of 100.
+  # - name: --response-error-detection-status-code-ranges
+  #   type: string
+  #   short-summary: >
+  #       The HTTP response status codes to count toward the response error detection failover threshold.
+examples:
+  - name: Update which origins are included in an origin group.
+    text: >
+      az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-2
+  - name: Update an origin group with a custom health probe
+    text: >
+      az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1 --probe-path /healthz --probe-interval 90
+      --probe-protocol HTTPS --probe-method GET
+  # Uncomment this once response error detection support is added in RP:
+  # - name: Update an origin group with response error detection
+  #   text: >
+  #     az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+  #     --origins origin-0,origin-1 --response-error-detection-error-types TcpErrorsOnly
+  #     --response-error-detection-failover-threshold 5
+  #     --response-error-detection-status-code-ranges 300-399,500-599
 """
 
 helps['cdn profile'] = """

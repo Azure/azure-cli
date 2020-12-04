@@ -30,7 +30,7 @@ How to find and install an Extension
 
 - Install an extension: `az extension install --name <extension-name>`
 
-More details on usage in [Extensions for Azure CLI 2.0](https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest#install-extensions)
+More details on usage in [Extensions for Azure CLI 2.0](https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview#install-extensions)
 
 
 Doc Sections

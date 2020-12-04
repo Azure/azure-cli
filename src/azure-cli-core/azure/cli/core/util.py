@@ -28,10 +28,10 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy.')
+                     'Please add this certificate to the trusted CA bundle. More info: https://docs.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy.')
 
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
-                   "'https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest'")
+                   "'https://docs.microsoft.com/cli/azure/query-azure-cli'")
 
 
 _PROXYID_RE = re.compile(
@@ -174,9 +174,8 @@ def extract_http_operation_error(ex):
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
             status_code = error.get('code', 'Unknown Code')
-            code_str = "{} - ".format(status_code)
             message = error.get('message', ex)
-            error_msg = "code: {}, {}".format(code_str, message)
+            error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
     except (ValueError, KeyError):
@@ -203,6 +202,7 @@ def get_error_type_by_azure_error(ex):
     return azclierror.UnknownError
 
 
+# pylint: disable=too-many-return-statements
 def get_error_type_by_status_code(status_code):
     import azure.cli.core.azclierror as azclierror
 
@@ -214,6 +214,8 @@ def get_error_type_by_status_code(status_code):
         return azclierror.ForbiddenError
     if status_code == '404':
         return azclierror.ResourceNotFoundError
+    if status_code.startswith('4'):
+        return azclierror.UnclassifiedUserFault
     if status_code.startswith('5'):
         return azclierror.AzureInternalError
 

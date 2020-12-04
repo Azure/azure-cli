@@ -89,12 +89,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             version = '12'
             storage_size = 128
             location = self.postgres_location
+            location_result = 'East US'
         elif database_engine == 'mysql':
             tier = 'Burstable'
             sku_name = 'Standard_B1ms'
             storage_size = 10
             version = '5.7'
             location = self.mysql_location
+            location_result = 'West US 2'
 
         # flexible-server create with user input
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -102,6 +104,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
 
         list_checks = [JMESPathCheck('name', server_name),
+                       JMESPathCheck('location', location_result),
                        JMESPathCheck('resourceGroup', resource_group),
                        JMESPathCheck('sku.name', sku_name),
                        JMESPathCheck('sku.tier', tier),
@@ -109,8 +112,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-                 .format(database_engine, resource_group, server_name, location))
+        self.cmd('{} flexible-server create -g {} -n {}'
+                 .format(database_engine, resource_group, server_name))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
@@ -124,8 +127,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4 --public-access none'
                      .format(resource_group, location))
 
-        self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=list_checks).get_output_in_json()
+        show_output = self.cmd('{} flexible-server show -g {} -n {}'
+                               .format(database_engine, resource_group, server_name), checks=list_checks).get_output_in_json()
+        self.assertIn('subnetArmResourceId', show_output["delegatedSubnetArguments"])
+
+        if database_engine == 'mysql':
+            self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
+                     .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('name', 'flexibleserverdb')])
 
         self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
                  .format(database_engine, resource_group, server_name),
@@ -184,6 +192,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertIn('node.js', connection_string['connectionStrings'])
         self.assertIn('php', connection_string['connectionStrings'])
         self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
                  checks=[JMESPathCheck('type(@)', 'array')])
@@ -835,3 +844,52 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
+
+
+class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
+
+    postgres_location = 'eastus'
+    mysql_location = 'westus2'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_local_context(self, resource_group):
+        self._test_flexible_server_local_context('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_local_context(self, resource_group):
+        self._test_flexible_server_local_context('mysql', resource_group)
+
+    def _test_flexible_server_local_context(self, database_engine, resource_group):
+        from knack.util import CLIError
+        if database_engine == 'mysql':
+            location = self.mysql_location
+        else:
+            location = self.postgres_location
+
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
+        self.cli_ctx.local_context.set(['all'], 'location', location)
+
+        self.cmd('{} flexible-server create -n {}'.format(database_engine, server_name))
+
+        self.cmd('{} flexible-server show'.format(database_engine))
+
+        self.cmd('{} flexible-server update --backup-retention {}'
+                 .format(database_engine, 10))
+
+        self.cmd('{} flexible-server stop'.format(database_engine))
+
+        self.cmd('{} flexible-server start'.format(database_engine))
+
+        self.cmd('{} flexible-server restart'.format(database_engine))
+
+        self.cmd('{} flexible-server list'.format(database_engine))
+
+        self.cmd('{} flexible-server show-connection-string'.format(database_engine))
+
+        self.cmd('{} flexible-server list-skus'.format(database_engine))
+
+        self.cmd('{} flexible-server delete --yes'.format(database_engine))
