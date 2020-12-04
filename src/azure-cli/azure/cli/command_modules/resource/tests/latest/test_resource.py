@@ -912,13 +912,13 @@ class TemplateSpecsTest(ScenarioTest):
 
         # When updating a template spec, tags should only be removed if explicitely empty. Create should override.
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}"')
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes')
         self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {'cli-test': 'test'})])
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --tags ""')
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --tags "" --yes')
         self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {})])
 
-        self.cmd('ts update -g {rg} -n {template_spec_name} -v 2.0 -f "{tf}" --tags')
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 2.0 -f "{tf}" --tags --yes')
         self.cmd('ts show --template-spec {template_spec_version_two_id}', checks=[self.check('tags', {})])
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 3.0 -f "{tf}" --tags --yes')
