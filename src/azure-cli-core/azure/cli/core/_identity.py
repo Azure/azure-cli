@@ -30,6 +30,7 @@ logger = get_logger(__name__)
 _SERVICE_PRINCIPAL_ID = 'servicePrincipalId'
 _SERVICE_PRINCIPAL_TENANT = 'servicePrincipalTenant'
 _ACCESS_TOKEN = 'accessToken'
+_SERVICE_PRINCIPAL_SECRET = 'secret'
 _SERVICE_PRINCIPAL_CERT_FILE = 'certificateFile'
 _SERVICE_PRINCIPAL_CERT_THUMBPRINT = 'thumbprint'
 
@@ -56,9 +57,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         :param client_id::param kwargs:
         """
         self.authority = authority
-        self.tenant_id = tenant_id
+        self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self._cred_cache = kwargs.pop('cred_cache', None)
+        self._cred_cache_adal = kwargs.pop('cred_cache', None)
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self._msal_app_instance = None
         # Store for Service principal credential persistence
@@ -176,17 +177,20 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def login_with_service_principal_certificate(self, client_id, certificate_path):
         # Use CertificateCredential
-        # TODO: Persist to encrypted cache
+        # TODO: support use_cert_sn_issuer in CertificateCredential
+        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
+
+        # CertificateCredential.__init__ will verify the certificate
+        # Persist to encrypted cache
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, certificate_file=certificate_path)
         entry = sp_auth.get_entry_to_persist()
         self._msal_secret_store.save_service_principal_cred(entry)
+
         # backward compatible with ADAL, to be deprecated
         if self._cred_cache:
+            entry = sp_auth.get_entry_to_persist_legacy()
             self._cred_cache.save_service_principal_cred(entry)
-
-        # TODO: support use_cert_sn_issuer in CertificateCredential
-        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
     def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
@@ -628,7 +632,7 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
         else:
             self.secret = secret
 
-    def get_entry_to_persist(self):
+    def get_entry_to_persist_legacy(self):
         entry = {
             _SERVICE_PRINCIPAL_ID: self.client_id,
             _SERVICE_PRINCIPAL_TENANT: self.tenant_id,
@@ -639,6 +643,17 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
             entry[_SERVICE_PRINCIPAL_CERT_FILE] = self.certificate_file
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
+        return entry
+
+    def get_entry_to_persist(self):
+        entry = {
+            _SERVICE_PRINCIPAL_ID: self.client_id,
+            _SERVICE_PRINCIPAL_TENANT: self.tenant_id,
+        }
+        if hasattr(self, 'secret'):
+            entry[_SERVICE_PRINCIPAL_SECRET] = self.secret
+        else:
+            entry[_SERVICE_PRINCIPAL_CERT_FILE] = self.certificate_file
         return entry
 
 

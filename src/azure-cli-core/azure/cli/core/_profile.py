@@ -71,26 +71,18 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     return subscriptions
 
 
-def _get_authority_and_tenant(authority_url, tenant):
-    """Prepare authority and tenant for Azure Identity with ADFS support."""
-
-    # # Azure Identity doesn't accept the leading https://
-    # authority_url = authority_url[len('https://'):]
-
+def _detect_adfs_authority(authority_url, tenant):
+    """Prepare authority and tenant for Azure Identity with ADFS support.
+    If `authority_url` ends with '/adfs', `tenant` will be set to 'adfs'."""
     authority_url = authority_url.rstrip('/')
-    is_adfs = authority_url.endswith('adfs')
-    if is_adfs:
+
+    if authority_url.endswith('adfs'):
         # 'https://adfs.redmond.azurestack.corp.microsoft.com/adfs' ->
         #   ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs')
-        # Remove trailing slash in .../adfs/
-        authority_url = authority_url.rstrip('/')
         authority_url = authority_url[:-len('/adfs')]
         # The custom tenant is discarded in ADFS environment
         tenant = 'adfs'
-    else:
-        # 'https://login.microsoftonline.com' ->
-        #   ('https://login.microsoftonline.com', tenant)
-        authority_url = authority_url.rstrip('/')
+
     return authority_url, tenant
 
 
@@ -159,7 +151,7 @@ class Profile:
         auth_record = None
         # For ADFS, auth_tenant is 'adfs'
         # https://github.com/Azure/azure-sdk-for-python/blob/661cd524e88f480c14220ed1f86de06aaff9a977/sdk/identity/azure-identity/CHANGELOG.md#L19
-        authority, auth_tenant = _get_authority_and_tenant(self.cli_ctx.cloud.endpoints.active_directory, tenant)
+        authority, auth_tenant = _detect_adfs_authority(self.cli_ctx.cloud.endpoints.active_directory, tenant)
         identity = Identity(authority=authority, tenant_id=auth_tenant,
                             client_id=client_id,
                             allow_unencrypted=self.cli_ctx.config
@@ -529,7 +521,7 @@ class Profile:
             adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
             adal_cache.remove_cached_creds(user_or_sp)
 
-            logger.warning('Account %s was logged out from Azure CLI', user_or_sp)
+            logger.warning('Account %s has been logged out from Azure CLI.', user_or_sp)
         else:
             # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
             logger.warning("Account %s was not logged in to Azure CLI.", user_or_sp)

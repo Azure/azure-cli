@@ -49,6 +49,18 @@ class TestIdentity(unittest.TestCase):
             'test_refresh_token', ['https://management.core.windows.net/.default'])
         save_service_principal_cred_mock.assert_called_with(mock.ANY, adal_tokens[1])
 
+    def test_login_with_service_principal_certificate_cert_err(self):
+        import os
+        identity = Identity()
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(current_dir, 'err_sp_cert.pem')
+        # TODO: wrap exception
+        import OpenSSL
+        with self.assertRaisesRegex(OpenSSL.crypto.Error, 'no start line'):
+            identity.login_with_service_principal_certificate("00000000-0000-0000-0000-000000000000", test_cert_file)
+        with self.assertRaisesRegex(ValueError, "Could not deserialize key data."):
+            identity.login_with_service_principal_certificate("00000000-0000-0000-0000-000000000000", test_cert_file)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,8 +16,8 @@ from copy import deepcopy
 
 from adal import AdalError
 
-from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+from azure.cli.core._profile import (Profile, SubscriptionFinder, _USE_VENDORED_SUBSCRIPTION_SDK,
+                                     _detect_adfs_authority)
 if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
         (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
@@ -384,7 +384,7 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(output, subs)
 
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     @mock.patch.dict('os.environ')
     def test_login_with_environment_credential_service_principal(self, get_client_class_mock):
         os.environ['AZURE_TENANT_ID'] = self.service_principal_tenant_id
@@ -418,7 +418,7 @@ class TestProfile(unittest.TestCase):
         # assert
         self.assertEqual(output, subs)
 
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     @mock.patch('azure.identity.UsernamePasswordCredential.authenticate', autospec=True)
     @mock.patch('msal.PublicClientApplication', new_callable=PublicClientApplicationMock)
     @mock.patch.dict('os.environ')
@@ -629,15 +629,6 @@ class TestProfile(unittest.TestCase):
         finder = SubscriptionFinder(cli)
         result = finder._arm_client_factory(mock.MagicMock())
         self.assertEqual(result._client._base_url, 'http://foo_arm')
-
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
-        cli = DummyCli()
-        get_client_class_mock.return_value = None
-        finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
-        from azure.cli.core.azclierror import CLIInternalError
-        with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
-            finder._arm_client_factory(mock.MagicMock())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
@@ -1845,30 +1836,6 @@ class TestProfile(unittest.TestCase):
         with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
             ServicePrincipalAuth(test_cert_file)
 
-    def test_detect_adfs_authority_url(self):
-        # todo: msal
-        cli = DummyCli()
-        adfs_url_1 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs/'
-        cli.cloud.endpoints.active_directory = adfs_url_1
-        storage_mock = {'subscriptions': None}
-        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-
-        # test w/ trailing slash
-        r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, adfs_url_1.rstrip('/'))
-
-        # test w/o trailing slash
-        adfs_url_2 = 'https://adfs.redmond.ext-u15f2402.masd.stbtest.microsoft.com/adfs'
-        cli.cloud.endpoints.active_directory = adfs_url_2
-        r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, adfs_url_2)
-
-        # test w/ regular aad
-        aad_url = 'https://login.microsoftonline.com'
-        cli.cloud.endpoints.active_directory = aad_url
-        r = profile.auth_ctx_factory(cli, 'common', None)
-        self.assertEqual(r.authority.url, aad_url + '/common')
-
     @unittest.skip("todo: wait for identity support")
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
@@ -1912,7 +1879,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
 
         # With pytest, use -o log_cli=True to manually check the log
-
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
@@ -1988,26 +1954,51 @@ class MSRestAzureAuthStub:
 
 class TestProfileUtils(unittest.TestCase):
     def test_get_authority_and_tenant(self):
-        from azure.cli.core._profile import _get_authority_and_tenant
+        from azure.cli.core._profile import _detect_adfs_authority
 
         # Public cloud, without tenant
         expected_authority = "https://login.microsoftonline.com"
-        self.assertEqual(_get_authority_and_tenant("https://login.microsoftonline.com", None),
+        self.assertEqual(_detect_adfs_authority("https://login.microsoftonline.com", None),
                          (expected_authority, None))
         # Public cloud, with tenant
-        self.assertEqual(_get_authority_and_tenant("https://login.microsoftonline.com", '00000000-0000-0000-0000-000000000001'),
+        self.assertEqual(_detect_adfs_authority("https://login.microsoftonline.com", '00000000-0000-0000-0000-000000000001'),
                          (expected_authority, '00000000-0000-0000-0000-000000000001'))
 
         # ADFS, without tenant
         expected_authority = "https://adfs.redmond.azurestack.corp.microsoft.com"
-        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", None),
+        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", None),
                          (expected_authority, 'adfs'))
         # ADFS, without tenant (including a trailing /)
-        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs/", None),
+        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs/", None),
                          (expected_authority, 'adfs'))
         # ADFS, with tenant
-        self.assertEqual(_get_authority_and_tenant("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", '00000000-0000-0000-0000-000000000001'),
+        self.assertEqual(_detect_adfs_authority("https://adfs.redmond.azurestack.corp.microsoft.com/adfs", '00000000-0000-0000-0000-000000000001'),
                          (expected_authority, 'adfs'))
+
+
+class TestUtils(unittest.TestCase):
+    def test_get_authority_and_tenant(self):
+        # Public cloud
+        # Default tenant
+        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com', None),
+                         ('https://login.microsoftonline.com', None))
+        # Trailing slash is stripped
+        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com/', None),
+                         ('https://login.microsoftonline.com', None))
+        # Custom tenant
+        self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com', '601d729d-0000-0000-0000-000000000000'),
+                         ('https://login.microsoftonline.com', '601d729d-0000-0000-0000-000000000000'))
+
+        # ADFS
+        # Default tenant
+        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', None),
+                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
+        # Trailing slash is stripped
+        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs/', None),
+                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
+        # Tenant ID is discarded
+        self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', '601d729d-0000-0000-0000-000000000000'),
+                         ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
 
 
 if __name__ == '__main__':
