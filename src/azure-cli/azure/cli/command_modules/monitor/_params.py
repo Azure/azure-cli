@@ -144,12 +144,12 @@ def load_arguments(self, _):
         c.argument('remove_conditions', nargs='+')
 
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
-        c.argument('dimension_name', type=str, options_list=['--name', '-n'],
+        c.argument('dimension_name', options_list=['--name', '-n'],
                    help='Name of the dimension.')
         c.argument('operator', options_list=['--operator', '--op'],
                    arg_type=get_enum_type(dim_op_conversion.values(), default=dim_op_conversion['includes']),
                    help="Dimension operator.")
-        c.argument('value_list', type=str, options_list=['--value', '-v'], nargs='+',
+        c.argument('value_list', options_list=['--value', '-v'], nargs='+',
                    help='The values to apply on the operation.')
 
     with self.argument_context('monitor metrics alert condition create', arg_group=None) as c:
@@ -159,7 +159,7 @@ def load_arguments(self, _):
                    help='Name of metric.')
         c.argument('metric_namespace', options_list=['--namespace'],
                    help='Namespace of metric.')
-        c.argument('dimension_list', options_list=['--dimension'], type=str, nargs='+',
+        c.argument('dimension_list', options_list=['--dimension'], nargs='+',
                    help='Dimension created by \'az monitor metrics alert dimension create\'.')
         c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()),
                    help='Time aggregation.')
