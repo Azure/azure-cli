@@ -115,6 +115,10 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
         elif isinstance(ex, ClientRequestError):
             if is_azure_connection_error(error_msg):
                 az_error = azclierror.AzureConnectionError(error_msg)
+            elif isinstance(ex.inner_exception, SSLError):
+                # When msrest encounters SSLError, msrest wraps SSLError in ClientRequestError
+                az_error = azclierror.AzureConnectionError(error_msg)
+                az_error.set_recommendation(SSLERROR_TEMPLATE)
             else:
                 az_error = azclierror.ClientRequestError(error_msg)
 
