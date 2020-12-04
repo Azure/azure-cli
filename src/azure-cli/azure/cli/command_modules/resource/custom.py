@@ -1810,7 +1810,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         if not Exists:
             try:  # Check if parent template spec already exists.
                 exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
-                if tags is None: #New version should inherit tags from parent if none are provided.
+                if tags is None:  # New version should inherit tags from parent if none are provided.
                     tags = getattr(exisiting_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
                 tags = tags or {}
@@ -1854,7 +1854,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         location = getattr(existing_template, 'location')
 
         version_tags = tags
-        if tags is None: # Do not remove tags if not explicitely empty.
+        if tags is None:  # Do not remove tags if not explicitely empty.
             version_tags = getattr(existing_template, 'tags')
         else:
             version_tags = tags
@@ -1872,7 +1872,7 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
 
     location = getattr(existing_template, 'location')
     version_tags = tags
-    if version_tags is None: # Do not remove tags if not explicitely empty.
+    if version_tags is None:  # Do not remove tags if not explicitely empty.
         tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')

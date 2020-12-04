@@ -15,6 +15,7 @@ except ImportError:
 
 MSI_LOCAL_ID = '[system]'
 
+
 def process_ts_create_or_update_namespace(namespace):
     from azure.cli.core.commands.validators import validate_tags
     validate_tags(namespace)
