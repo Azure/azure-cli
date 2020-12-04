@@ -65,8 +65,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -193,8 +193,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -306,8 +306,8 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -388,7 +388,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'westus2'
+    mysql_location = 'southeastasia'
 
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
@@ -785,8 +785,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -820,14 +820,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, servers[0], 'all'),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAll_'),
-                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine))])
+                         StringContainCheck(servers[0])])
 
         # Case 2 : Provision a server with public access allowing all azure services
         self.cmd('{} flexible-server create -g {} -n {} --public-access {}'
                  .format(database_engine, resource_group, servers[1], '0.0.0.0'),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_'),
-                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
+                         StringContainCheck(servers[1])])
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
