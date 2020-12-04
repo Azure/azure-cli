@@ -21,6 +21,8 @@ from knack.util import CLIError
 
 from msrestazure.tools import resource_id
 
+from .credential_replacer import ExpressRoutePortLOAContentReplacer
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
@@ -1988,6 +1990,11 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            ExpressRoutePortLOAContentReplacer()
+        ])
+
     def test_network_express_route_port_identity(self):
         """
         Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
@@ -2011,6 +2018,20 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         For ussage, run `az network express-route port link update --help` to get help.
         """
         pass
+
+    @record_only()
+    @AllowLargeResponse()
+    def test_network_express_route_port_generate_loa(self):
+        """
+        The ExpressRoutePort comes from service team and located in a different subscription. And it will be revoked after this feature.
+        So, this test is record only.
+        """
+        self.kwargs.update({
+            'rg': 'ER-AutoTriage-RG',
+            'er_port': 'ER-autotriage-erdirect',
+        })
+
+        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {er_port} -f loa1')
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
