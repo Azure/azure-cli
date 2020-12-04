@@ -1813,6 +1813,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
                 if tags is None: #New version should inherit tags from parent if none are provided.
                     tags = getattr(exisiting_parent, 'tags')
             except Exception:  # pylint: disable=broad-except
+                tags = tags or {}
                 TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
                 template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
                 rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
@@ -1821,6 +1822,7 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
 
+    tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
     template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
@@ -1850,10 +1852,12 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
-        if not tags: #Remove tags if explicitely empty.
-            version_tags = {}
-        else:
+
+        version_tags = tags
+        if tags is None: # Do not remove tags if not explicitely empty.
             version_tags = getattr(existing_template, 'tags')
+        else:
+            version_tags = tags
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
@@ -1867,9 +1871,8 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    if not tags: #Remove tags if explicitely empty.
-        tags = {}
-    else:
+    version_tags = tags
+    if version_tags is None: # Do not remove tags if not explicitely empty.
         tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')

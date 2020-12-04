@@ -907,7 +907,11 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', '{version_tags}')])
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test':'test'})])
 
+
         # Tags should be removed if explicitely empty. 
+
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes')
+        self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {'cli-test':'test'})])
 
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --tags "" --yes')
         self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {})])
@@ -918,7 +922,7 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 3.0 -f "{tf}" --tags --yes')
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
 
-        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --tags "" --yes')
+        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
     
         # clean up
