@@ -72,9 +72,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from azure.cli.core._debug import change_ssl_cert_verification_track2
         self._credential_kwargs = {}
         self._credential_kwargs.update(change_ssl_cert_verification_track2())
-        # Disable ARMHttpLoggingPolicy which logs only allowed headers
-        from azure.core.pipeline.policies import SansIOHTTPPolicy
-        self._credential_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+        # Turn on NetworkTraceLoggingPolicy to show DEBUG logs
+        self._credential_kwargs['logging_enable'] = True
 
     def _load_msal_cache(self):
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
