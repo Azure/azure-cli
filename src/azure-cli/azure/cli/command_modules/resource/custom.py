@@ -48,6 +48,9 @@ from ._formatters import format_what_if_operation_result
 
 logger = get_logger(__name__)
 
+RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
+              'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements?api-version=2020-03-01-preview'}
+
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -989,11 +992,17 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait):
+def _update_provider(cli_ctx, namespace, registering, wait, accept_term=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
+    is_rpaas = namespace.lower() in RPAAS_APIS
     if registering:
+        if is_rpaas:
+            if not accept_term:
+                from azure.cli.core.azclierror import RequiredArgumentMissingError
+                raise RequiredArgumentMissingError("--accetp-term must be specified when registering an RP from RPaaS.")
+            wait = True
         r = rcf.providers.register(namespace)
     else:
         r = rcf.providers.unregister(namespace)
@@ -1007,6 +1016,10 @@ def _update_provider(cli_ctx, namespace, registering, wait):
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
+        if is_rpaas and registering:
+            # call accept term API
+            from azure.cli.core.util import send_raw_request
+            send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -1968,8 +1981,8 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait)
+def register_provider(cmd, resource_provider_namespace, wait=False, accept_term=None):
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, accept_term=accept_term)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):

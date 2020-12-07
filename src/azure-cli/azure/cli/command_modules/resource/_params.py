@@ -137,6 +137,7 @@ def load_arguments(self, _):
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('provider register') as c:
+        c.argument('accept_term', action='store_true', help='Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS.')
         c.argument('wait', action='store_true', help='wait for the registration to finish')
 
     with self.argument_context('provider unregister') as c:
