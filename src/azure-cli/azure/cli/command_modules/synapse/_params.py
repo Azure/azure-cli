@@ -251,29 +251,41 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
 
-    with self.argument_context('synapse sql pool audit-policy update') as c:
-        _configure_security_or_audit_policy_storage_params(c)
-        c.argument('storage_account_subscription_id', arg_group=storage_arg_group,
-                   options_list=['--storage-subscription'],
-                   help='The subscription id of storage account')
-        c.argument('is_storage_secondary_key_in_use', arg_group=storage_arg_group,
-                   arg_type=get_three_state_flag(), options_list=['--use-secondary-key'],
-                   help='Indicates whether using the secondary storeage key or not')
-        c.argument('is_azure_monitor_target_enabled', options_list=['--enable-azure-monitor'],
-                   help='Whether enabling azure monitor target or not.',
-                   arg_type=get_three_state_flag())
-        c.argument('state',
-                   arg_group=policy_arg_group,
-                   help='Auditing policy state',
-                   arg_type=get_enum_type(BlobAuditingPolicyState))
-        c.argument('audit_actions_and_groups',
-                   options_list=['--actions'],
-                   arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit.',
-                   nargs='+')
-        c.argument('retention_days',
-                   arg_group=policy_arg_group,
-                   help='The number of days to retain audit logs.')
+    for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
+        with self.argument_context(scope + ' update') as c:
+            _configure_security_or_audit_policy_storage_params(c)
+            c.argument('storage_account_subscription_id', arg_group=storage_arg_group,
+                       options_list=['--storage-subscription'],
+                       help='The subscription id of storage account')
+            c.argument('is_storage_secondary_key_in_use', arg_group=storage_arg_group,
+                       arg_type=get_three_state_flag(), options_list=['--use-secondary-key'],
+                       help='Indicates whether using the secondary storeage key or not')
+            c.argument('is_azure_monitor_target_enabled', options_list=['--enable-azure-monitor'],
+                       help='Whether enabling azure monitor target or not.',
+                       arg_type=get_three_state_flag())
+            c.argument('state',
+                       arg_group=policy_arg_group,
+                       help='Auditing policy state',
+                       arg_type=get_enum_type(BlobAuditingPolicyState))
+            c.argument('audit_actions_and_groups',
+                       options_list=['--actions'],
+                       arg_group=policy_arg_group,
+                       help='List of actions and action groups to audit.',
+                       nargs='+')
+            c.argument('retention_days',
+                       arg_group=policy_arg_group,
+                       help='The number of days to retain audit logs.')
+
+    with self.argument_context('synapse sql audit-policy update') as c:
+        c.argument('queue_delay_milliseconds', type=int,
+                   help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse sql ad-admin ' + scope) as c:
+            c.argument('login_name', options_list=['--display-name', '-u'],
+                       help='Display name of the Azure AD administrator user or group.')
+            c.argument('object_id', options_list=['--object-id', '-i'],
+                       help='The unique ID of the Azure AD administrator.')
 
     # synapse workspace firewall-rule
     with self.argument_context('synapse workspace firewall-rule') as c:
@@ -282,7 +294,7 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace firewall-rule list') as c:
         c.argument('workspace_name', id_part=None, help='The workspace name.')
 
-    for scope in ['show', 'create', 'delete']:
+    for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace firewall-rule ' + scope) as c:
             c.argument('rule_name', arg_type=name_type, id_part='child_name_1', help='The IP firewall rule name')
 

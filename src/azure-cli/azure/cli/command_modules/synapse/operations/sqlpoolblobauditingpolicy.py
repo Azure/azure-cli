@@ -16,35 +16,72 @@ def sqlpool_blob_auditing_policy_update(
         storage_account=None,
         storage_endpoint=None,
         storage_account_access_key=None,
-        retention_days=None,
-        audit_actions_and_groups=None,
         storage_account_subscription_id=None,
         is_storage_secondary_key_in_use=None,
+        retention_days=None,
+        audit_actions_and_groups=None,
         is_azure_monitor_target_enabled=None):
     """
     Updates a sql pool blob auditing policy. Custom update function to apply parameters to instance.
     """
 
-    # Validate input arguments
-    blob_storage_arguments_provided = any(
-        [storage_account, storage_endpoint, storage_account_access_key, retention_days])
-    if not state and not blob_storage_arguments_provided:
-        raise CLIError('Either state or blob storage arguments are missing')
+    _audit_policy_update(cmd, instance, state, storage_account, storage_endpoint, storage_account_access_key,
+                         storage_account_subscription_id, is_storage_secondary_key_in_use, retention_days,
+                         audit_actions_and_groups, is_azure_monitor_target_enabled)
+    return instance
 
-    if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
-        raise CLIError('retention-days must be a positive number greater than zero')
 
+def sqlserver_blob_auditing_policy_update(
+        cmd,
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        retention_days=None,
+        audit_actions_and_groups=None,
+        storage_account_subscription_id=None,
+        is_storage_secondary_key_in_use=None,
+        is_azure_monitor_target_enabled=None,
+        queue_delay_milliseconds=None):
+    _audit_policy_update(cmd, instance, state, storage_account, storage_endpoint, storage_account_access_key,
+                         storage_account_subscription_id, is_storage_secondary_key_in_use, retention_days,
+                         audit_actions_and_groups, is_azure_monitor_target_enabled)
+
+    # this property is only for ServerBlobAuditingPolicy
+    if queue_delay_milliseconds is not None:
+        instance.queue_delay_ms = queue_delay_milliseconds
+
+    return instance
+
+
+def _audit_policy_update(
+        cmd,
+        instance,
+        state=None,
+        storage_account=None,
+        storage_endpoint=None,
+        storage_account_access_key=None,
+        storage_account_subscription_id=None,
+        is_storage_secondary_key_in_use=None,
+        retention_days=None,
+        audit_actions_and_groups=None,
+        is_azure_monitor_target_enabled=None):
+    _validate_audit_policy_arguments(state, storage_account, storage_endpoint,
+                                     storage_account_access_key, retention_days)
+
+    # Apply State
     if state is not None:
         instance.state = BlobAuditingPolicyState[state.lower()]
 
+    # Apply additional command line arguments only if policy's state is enabled
     if _is_audit_policy_state_enabled(instance.state):
         if is_storage_secondary_key_in_use is not None:
             instance.is_storage_secondary_key_in_use = is_storage_secondary_key_in_use
-
         if is_azure_monitor_target_enabled is not None:
             instance.is_azure_monitor_target_enabled = is_azure_monitor_target_enabled
 
-        # handle storage account and storage endpoint
+        # handle storage related parameters
         _audit_policy_update_apply_blob_storage_details(cmd, instance, retention_days, storage_account,
                                                         storage_account_access_key, storage_endpoint,
                                                         storage_account_subscription_id)
@@ -58,7 +95,16 @@ def sqlpool_blob_auditing_policy_update(
                 "FAILED_DATABASE_AUTHENTICATION_GROUP",
                 "BATCH_COMPLETED_GROUP"]
 
-    return instance
+
+def _validate_audit_policy_arguments(state=None, storage_account=None, storage_endpoint=None,
+                                     storage_account_access_key=None, retention_days=None):
+    blob_storage_arguments_provided = any(
+        [storage_account, storage_endpoint, storage_account_access_key, retention_days])
+    if not state and not blob_storage_arguments_provided:
+        raise CLIError('Either state or blob storage arguments are missing')
+
+    if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
+        raise CLIError('retention-days must be a positive number greater than zero')
 
 
 def _audit_policy_update_apply_blob_storage_details(cmd, instance, retention_days, storage_account,
@@ -173,9 +219,9 @@ def _get_storage_endpoint(
         cli_ctx,
         storage_account,
         resource_group_name):
-    '''
+    """
     Gets storage account endpoint by querying storage ARM API.
-    '''
+    """
     from azure.mgmt.storage import StorageManagementClient
 
     # Get storage account
@@ -199,9 +245,9 @@ def _get_storage_key(
         storage_account,
         resource_group_name,
         use_secondary_key):
-    '''
+    """
     Gets storage account key by querying storage ARM API.
-    '''
+    """
     from azure.mgmt.storage import StorageManagementClient
 
     # Get storage keys

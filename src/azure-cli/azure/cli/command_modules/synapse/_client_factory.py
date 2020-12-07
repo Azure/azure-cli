@@ -14,6 +14,10 @@ def cf_synapse_client_workspace_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).workspaces
 
 
+def cf_synapse_client_workspace_aad_admins_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).workspace_aad_admins
+
+
 def cf_synapse_client_bigdatapool_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).big_data_pools
 
@@ -40,6 +44,10 @@ def cf_synapse_client_sqlpool_security_alert_policies_factory(cli_ctx, *_):
 
 def cf_synapse_client_sqlpool_blob_auditing_policies_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).sql_pool_blob_auditing_policies
+
+
+def cf_synapse_client_sqlserver_blob_auditing_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).workspace_managed_sql_server_blob_auditing_policies
 
 
 def cf_synapse_client_ipfirewallrules_factory(cli_ctx, *_):

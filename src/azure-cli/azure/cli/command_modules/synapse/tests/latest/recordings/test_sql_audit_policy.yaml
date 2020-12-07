@@ -7,30 +7,30 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/default?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/default?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/sqlPools/auditingSettings"}'
+      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '670'
+      - '640'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:52 GMT
+      - Tue, 08 Dec 2020 11:04:49 GMT
       expires:
       - '-1'
       pragma:
@@ -56,30 +56,30 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27teststorageforsynapse%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2020-06-01
   response:
     body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2fstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMjA4IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlpUa0ZRVTBWWFQxSkxVMUJCUTBVNk1rUk5RVTVCUjBWRVVrYzZNa1ExTkVNMU5EUkJPRG95UkVSQlJqVTZmRVJFTURSRU9FRTVSREEzTmpOQ05UY3RUVWxEVWs5VFQwWlVPakpGVTFGTU9qSkdVMFZTVmtWU1V6b3lSa1pGVGtkUlNWTkRWVk10VTA5VlZFaERSVTVVVWtGTVZWTS0ifQ%3d%3d"}'
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2fstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMTY0IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlFRVkpMVkVWVFZFVk9WaTFOU1VOU1QxTlBSbFE2TWtWT1JWUlhUMUpMT2pKR1RrVlVWMDlTUzFORlExVlNTVlJaUjFKUFZWQlRPakpHV0VsT1ZFOU9Sem95UkZaTk1Eb3lSRTVUUnkxRlFWTlVWVk0tIn0%3d"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '689'
+      - '627'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:53 GMT
+      - Tue, 08 Dec 2020 11:04:49 GMT
       expires:
       - '-1'
       pragma:
@@ -101,18 +101,18 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2FstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2FstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMjA4IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlpUa0ZRVTBWWFQxSkxVMUJCUTBVNk1rUk5RVTVCUjBWRVVrYzZNa1ExTkVNMU5EUkJPRG95UkVSQlJqVTZmRVJFTURSRU9FRTVSREEzTmpOQ05UY3RUVWxEVWs5VFQwWlVPakpGVTFGTU9qSkdVMFZTVmtWU1V6b3lSa1pGVGtkUlNWTkRWVk10VTA5VlZFaERSVTVVVWtGTVZWTS0ifQ%3D%3D
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2FstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2FstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMTY0IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlFRVkpMVkVWVFZFVk9WaTFOU1VOU1QxTlBSbFE2TWtWT1JWUlhUMUpMT2pKR1RrVlVWMDlTUzFORlExVlNTVlJaUjFKUFZWQlRPakpHV0VsT1ZFOU9Sem95UkZaTk1Eb3lSRTVUUnkxRlFWTlVWVk0tIn0%3D
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/teststorageforsynapse","name":"teststorageforsynapse","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","location":"eastus","tags":{}}]}'
@@ -124,7 +124,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:53 GMT
+      - Tue, 08 Dec 2020 11:04:50 GMT
       expires:
       - '-1'
       pragma:
@@ -146,13 +146,13 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
-      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.2 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.2 (Windows-10-10.0.18362-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/teststorageforsynapse?api-version=2019-06-01
   response:
@@ -166,7 +166,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 27 Nov 2020 12:56:54 GMT
+      - Tue, 08 Dec 2020 11:04:50 GMT
       expires:
       - '-1'
       pragma:
@@ -192,30 +192,30 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=name%20eq%20%27teststorageforsynapse%27%20and%20%28resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20or%20resourceType%20eq%20%27Microsoft.ClassicStorage%2FstorageAccounts%27%29&api-version=2020-06-01
   response:
     body:
-      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2fstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMjA4IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlpUa0ZRVTBWWFQxSkxVMUJCUTBVNk1rUk5RVTVCUjBWRVVrYzZNa1ExTkVNMU5EUkJPRG95UkVSQlJqVTZmRVJFTURSRU9FRTVSREEzTmpOQ05UY3RUVWxEVWs5VFQwWlVPakpGVTFGTU9qSkdVMFZTVmtWU1V6b3lSa1pGVGtkUlNWTkRWVk10VTA5VlZFaERSVTVVVWtGTVZWTS0ifQ%3d%3d"}'
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2fstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMTY0IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlFRVkpMVkVWVFZFVk9WaTFOU1VOU1QxTlBSbFE2TWtWT1JWUlhUMUpMT2pKR1RrVlVWMDlTUzFORlExVlNTVlJaUjFKUFZWQlRPakpHV0VsT1ZFOU9Sem95UkZaTk1Eb3lSRTVUUnkxRlFWTlVWVk0tIn0%3d"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '689'
+      - '627'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:54 GMT
+      - Tue, 08 Dec 2020 11:04:51 GMT
       expires:
       - '-1'
       pragma:
@@ -237,18 +237,18 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2FstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2FstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMjA4IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlpUa0ZRVTBWWFQxSkxVMUJCUTBVNk1rUk5RVTVCUjBWRVVrYzZNa1ExTkVNMU5EUkJPRG95UkVSQlJqVTZmRVJFTURSRU9FRTVSREEzTmpOQ05UY3RUVWxEVWs5VFQwWlVPakpGVTFGTU9qSkdVMFZTVmtWU1V6b3lSa1pGVGtkUlNWTkRWVk10VTA5VlZFaERSVTVVVWtGTVZWTS0ifQ%3D%3D
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=name+eq+%27teststorageforsynapse%27+and+(resourceType+eq+%27Microsoft.Storage%2FstorageAccounts%27+or+resourceType+eq+%27Microsoft.ClassicStorage%2FstorageAccounts%27)&api-version=2020-06-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU9UTTVPVEUtIiwibmV4dFJvd0tleSI6IjEhMTY0IU1EVXhSRVJGUTBFeFJVUTJORVE0UWtKQk5rWXhSa1kxTmpGRk5VWXpRak5mUjFKTUxWTlFRVkpMVkVWVFZFVk9WaTFOU1VOU1QxTlBSbFE2TWtWT1JWUlhUMUpMT2pKR1RrVlVWMDlTUzFORlExVlNTVlJaUjFKUFZWQlRPakpHV0VsT1ZFOU9Sem95UkZaTk1Eb3lSRTVUUnkxRlFWTlVWVk0tIn0%3D
   response:
     body:
       string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/teststorageforsynapse","name":"teststorageforsynapse","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","location":"eastus","tags":{}}]}'
@@ -260,7 +260,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:54 GMT
+      - Tue, 08 Dec 2020 11:04:51 GMT
       expires:
       - '-1'
       pragma:
@@ -282,15 +282,15 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       Content-Length:
       - '0'
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
-      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.2 (Windows-10-10.0.18362-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.2 (Windows-10-10.0.18362-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/teststorageforsynapse/listKeys?api-version=2019-06-01&$expand=kerb
   response:
@@ -304,7 +304,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 27 Nov 2020 12:56:56 GMT
+      - Tue, 08 Dec 2020 11:04:52 GMT
       expires:
       - '-1'
       pragma:
@@ -336,7 +336,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy update
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       Content-Length:
@@ -344,26 +344,79 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - --state --storage-account --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.15.0
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/default?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/default?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/sqlPools/auditingSettings"}'
+      string: ''
+    headers:
+      access-control-allow-headers:
+      - Location
+      access-control-expose-headers:
+      - Location
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/sql07ftr-dbf0c243-d60d-4f26-98b2-5eda56b3a5d5?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 08 Dec 2020 11:04:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationResults/sql07ftr-dbf0c243-d60d-4f26-98b2-5eda56b3a5d5?api-version=2019-06-01-preview
+      pragma:
+      - no-cache
+      retryafter:
+      - '60'
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql audit-policy update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --state --storage-account --workspace-name --resource-group
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/operationStatuses/sql07ftr-dbf0c243-d60d-4f26-98b2-5eda56b3a5d5?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"dbf0c243-d60d-4f26-98b2-5eda56b3a5d5","status":"Succeeded","startTime":"2020-12-08T11:04:54.31Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '670'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:58 GMT
+      - Tue, 08 Dec 2020 11:05:25 GMT
       expires:
       - '-1'
       pragma:
@@ -378,8 +431,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 200
       message: OK
@@ -391,30 +442,77 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - synapse sql pool audit-policy show
+      - synapse sql audit-policy update
       Connection:
       - keep-alive
       ParameterSetName:
-      - --name --workspace-name --resource-group
+      - --state --storage-account --workspace-name --resource-group
       User-Agent:
       - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.15.0
-      accept-language:
-      - en-US
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/default?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/default?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/sqlPools/sqlpoolcli1/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/sqlPools/auditingSettings"}'
+      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/auditingSettings"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '670'
+      - '640'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Nov 2020 12:56:59 GMT
+      - Tue, 08 Dec 2020 11:05:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql audit-policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --workspace-name --resource-group
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/default?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"retentionDays":0,"auditActionsAndGroups":["SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP","FAILED_DATABASE_AUTHENTICATION_GROUP","BATCH_COMPLETED_GROUP"],"isStorageSecondaryKeyInUse":false,"isAzureMonitorTargetEnabled":false,"state":"Enabled","storageEndpoint":"https://teststorageforsynapse.blob.core.windows.net/","storageAccountSubscriptionId":"051ddeca-1ed6-4d8b-ba6f-1ff561e5f3b3"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testsynapseworkspace/auditingSettings/Default","name":"Default","type":"Microsoft.Synapse/workspaces/auditingSettings"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 08 Dec 2020 11:05:26 GMT
       expires:
       - '-1'
       pragma:
