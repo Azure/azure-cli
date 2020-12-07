@@ -544,6 +544,9 @@ def _configure_db_dw_create_params(
                          options_list=['--zone-redundant'],
                          deprecate_info=arg_ctx.deprecate(hide=True))
 
+        # backup storage redundancy configuration is only for SQL DB.
+        arg_ctx.ignore('storage_account_type')
+
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
