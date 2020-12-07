@@ -5,13 +5,18 @@
 from azure.cli.core.commands import CliCommandType
 
 
-# pylint: disable=line-too-long, too-many-statements
+# pylint: disable=line-too-long, too-many-statements, too-many-locals
 def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_workspace_factory
     from ._client_factory import cf_synapse_client_operations_factory
     from ._client_factory import cf_synapse_client_bigdatapool_factory
     from ._client_factory import cf_synapse_client_sqlpool_factory
     from ._client_factory import cf_synapse_client_ipfirewallrules_factory
+    from ._client_factory import cf_synapse_client_sqlpool_sensitivity_labels_factory
+    from ._client_factory import cf_synapse_client_restorable_dropped_sqlpools_factory
+    from ._client_factory import cf_synapse_client_sqlpool_transparent_data_encryptions_factory
+    from ._client_factory import cf_synapse_client_sqlpool_security_alert_policies_factory
+    from ._client_factory import cf_synapse_client_sqlpool_blob_auditing_policies_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -34,6 +39,31 @@ def load_command_table(self, _):
     synapse_sqlpool_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#SqlPoolsOperations.{}',
         client_factory=cf_synapse_client_sqlpool_factory)
+
+    # Classification operation
+    synapse_sqlpool_sensitivity_labels_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#SqlPoolSensitivityLabelsOperations.{}',
+        client_factory=cf_synapse_client_sqlpool_sensitivity_labels_factory)
+
+    # List deleted
+    synapse_restorable_dropped_sqlpools_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#RestorableDroppedSqlPoolsOperations.{}',
+        client_factory=cf_synapse_client_restorable_dropped_sqlpools_factory)
+
+    # Tde operation
+    synapse_sqlpool_transparent_data_encryptions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#SqlPoolTransparentDataEncryptionsOperations.{}',
+        client_factory=cf_synapse_client_sqlpool_transparent_data_encryptions_factory)
+
+    # Threat Policy operation
+    synapse_sqlpool_security_alert_policies_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#SqlPoolSecurityAlertPoliciesOperations.{}',
+        client_factory=cf_synapse_client_sqlpool_security_alert_policies_factory)
+
+    # Audit policy operation
+    synapse_sqlpool_blob_auditing_policies_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#SqlPoolBlobAuditingPoliciesOperations.{}',
+        client_factory=cf_synapse_client_sqlpool_blob_auditing_policies_factory)
 
     synapse_firewallrules_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
@@ -119,7 +149,56 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_sql_pool')
         g.command('pause', 'pause')
         g.command('resume', 'resume')
+        g.custom_command('restore', 'restore_sql_pool')
+        g.custom_command('show-connection-string', 'sql_pool_show_connection_string')
         g.wait_command('wait')
+
+    # Management Plane Commands --SqlPool list-deleted
+    with self.command_group('synapse sql pool', command_type=synapse_restorable_dropped_sqlpools_sdk,
+                            client_factory=cf_synapse_client_restorable_dropped_sqlpools_factory) as g:
+        g.command('list-deleted', 'list_by_workspace')
+
+    #  Management Plane Commands --SqlPool Classification
+    with self.command_group('synapse sql pool classification', command_type=synapse_sqlpool_sensitivity_labels_sdk,
+                            custom_command_type=get_custom_sdk('sqlpoolsensitivitylabel',
+                                                               cf_synapse_client_sqlpool_sensitivity_labels_factory),
+                            client_factory=cf_synapse_client_sqlpool_sensitivity_labels_factory) as g:
+        g.custom_show_command('show', 'sqlpool_sensitivity_label_show')
+        g.command('list', 'list_current')
+        g.custom_command('create', 'sqlpool_sensitivity_label_create')
+        g.command('delete', 'delete')
+        g.custom_command('update', 'sqlpool_sensitivity_label_update')
+
+    with self.command_group('synapse sql pool classification recommendation',
+                            command_type=synapse_sqlpool_sensitivity_labels_sdk,
+                            custom_command_type=get_custom_sdk('sqlpoolsensitivitylabel',
+                                                               cf_synapse_client_sqlpool_sensitivity_labels_factory),
+                            client_factory=cf_synapse_client_sqlpool_sensitivity_labels_factory) as g:
+        g.command('list', 'list_recommended')
+        g.command('enable', 'enable_recommendation')
+        g.command('disable', 'disable_recommendation')
+
+    #  Management Plane Commands --SqlPool Tde
+    with self.command_group('synapse sql pool tde', command_type=synapse_sqlpool_transparent_data_encryptions_sdk,
+                            client_factory=cf_synapse_client_sqlpool_transparent_data_encryptions_factory) as g:
+        g.command('set', 'create_or_update')
+        g.show_command('show', 'get')
+
+    #  Management Plane Commands --SqlPool Threat-policy
+    with self.command_group('synapse sql pool threat-policy', command_type=synapse_sqlpool_security_alert_policies_sdk,
+                            custom_command_type=get_custom_sdk('sqlpoolsecurityalertpolicy',
+                                                               cf_synapse_client_sqlpool_security_alert_policies_factory),
+                            client_factory=cf_synapse_client_sqlpool_security_alert_policies_factory) as g:
+        g.show_command('show', 'get')
+        g.generic_update_command('update', custom_func_name='sqlpool_security_alert_policy_update')
+
+    #  Management Plane Commands --SqlPool Audit-policy
+    with self.command_group('synapse sql pool audit-policy', command_type=synapse_sqlpool_blob_auditing_policies_sdk,
+                            custom_command_type=get_custom_sdk('sqlpoolblobauditingpolicy',
+                                                               cf_synapse_client_sqlpool_blob_auditing_policies_factory),
+                            client_factory=cf_synapse_client_sqlpool_blob_auditing_policies_factory) as g:
+        g.show_command('show', 'get')
+        g.generic_update_command('update', custom_func_name='sqlpool_blob_auditing_policy_update')
 
     # Management Plane Commands --FirewallRule
     with self.command_group('synapse workspace firewall-rule', command_type=synapse_firewallrules_sdk,
