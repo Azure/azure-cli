@@ -494,7 +494,7 @@ def load_arguments(self, _):
                    help='Specify whether virtual machines or virtual machine scale sets can be placed automatically '
                         'on the dedicated host group. Automatic placement means resources are allocated on dedicated '
                         'hosts, that are chosen by Azure, under the dedicated host group. The value is defaulted to '
-                        'true when not provided.')
+                        'false when not provided.')
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
