@@ -21,7 +21,7 @@ from azure.identity import (
 )
 
 from ._environment import get_config_dir
-from .util import get_file_json, resource_to_scopes
+from .util import get_file_json, resource_to_scopes, scopes_to_resource
 
 AZURE_CLI_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 
@@ -59,7 +59,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self._cred_cache_adal = kwargs.pop('cred_cache', None)
+        self._cred_cache = AdalCredentialCache()
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self._msal_app_instance = None
         # Store for Service principal credential persistence
@@ -158,7 +158,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         # todo: remove after ADAL token deprecation
         if self._cred_cache:
-            self._cred_cache.add_credential(credential)
+            self._cred_cache.add_credential(credential, scopes, self.authority)
         return credential, auth_record
 
     def login_with_service_principal_secret(self, client_id, client_secret):
@@ -250,7 +250,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             credential = ManagedIdentityCredential()
             token = credential.get_token(*scopes)
 
-        decoded = Identity._decode_managed_identity_token(token)
+        decoded = _decode_access_token(token)
         resource_id = decoded.get('xms_mirid')
         # User-assigned identity has resourceID as
         # /subscriptions/xxx/resourcegroups/xxx/providers/Microsoft.ManagedIdentity/userAssignedIdentities/xxx
@@ -274,8 +274,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
     def login_in_cloud_shell(self, scopes):
         credential = ManagedIdentityCredential()
+        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
+        # The scopes is only used for acquiring the initial access token
         token = credential.get_token(*scopes)
-        decoded = Identity._decode_managed_identity_token(token)
+        decoded = _decode_access_token(token)
 
         cloud_shell_identity_info = {
             self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
@@ -362,19 +364,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def get_managed_identity_credential(client_id=None):
         return ManagedIdentityCredential(client_id=client_id)
 
-    @staticmethod
-    def _decode_managed_identity_token(token):
-        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
-        # The resource is only used for acquiring the initial access token
-        from msal.oauth2cli.oidc import decode_part
-        access_token = token.token
-
-        # Access token consists of headers.claims.signature. Decode the claim part
-        decoded_str = decode_part(access_token.split('.')[1])
-        logger.debug('MSI token retrieved: %s', decoded_str)
-        decoded = json.loads(decoded_str)
-        return decoded
-
     def migrate_tokens(self):
         """Migrate ADAL token cache to MSAL."""
         logger.warning("Migrating token cache from ADAL to MSAL.")
@@ -439,7 +428,7 @@ class AdalCredentialCache:
     """
 
     # TODO: Persist SP to encrypted cache
-    def __init__(self, async_persist=True, cli_ctx=None):
+    def __init__(self, async_persist=False, cli_ctx=None):
 
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
@@ -447,7 +436,6 @@ class AdalCredentialCache:
         self._service_principal_creds = []
         self._adal_token_cache_attr = None
         self._should_flush_to_disk = False
-        self._cli_ctx = cli_ctx
         self._async_persist = async_persist
         if async_persist:
             import atexit
@@ -529,7 +517,7 @@ class AdalCredentialCache:
 
     # noinspection PyBroadException
     # pylint: disable=protected-access
-    def add_credential(self, credential):
+    def add_credential(self, credential, scopes, authority):
         try:
             query = {
                 "client_id": AZURE_CLI_CLIENT_ID,
@@ -540,22 +528,21 @@ class AdalCredentialCache:
                 credential._cache.CredentialType.REFRESH_TOKEN,
                 # target=scopes,  # AAD RTs are scope-independent
                 query=query)
-            access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') +
-                                                '/.default')
+            access_token = credential.get_token(*scopes)
             import datetime
             entry = {
                 "tokenType": "Bearer",
                 "expiresOn": datetime.datetime.fromtimestamp(access_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f"),
-                "resource": self._cli_ctx.cloud.endpoints.active_directory_resource_id,
+                "resource": scopes_to_resource(scopes),
                 "userId": credential._auth_record.username,
                 "accessToken": access_token.token,
                 "refreshToken": refresh_token[0]['secret'],
                 "_clientId": AZURE_CLI_CLIENT_ID,
-                "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/') +
-                "/" + credential._auth_record.tenant_id,  # pylint: disable=bad-continuation
+                "_authority": '{}/{}'.format(authority, credential._auth_record.tenant_id),
                 "isMRRT": True
             }
             self.adal_token_cache.add([entry])
+            self.persist_cached_creds()
         except Exception as e:    # pylint: disable=broad-except
             logger.debug("Failed to store ADAL token: %s", e)
             # swallow all errors since it does not impact az
@@ -611,7 +598,7 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
     def __init__(self, client_id, tenant_id, secret=None, certificate_file=None, use_cert_sn_issuer=None):
         if not (secret or certificate_file):
             raise CLIError('Missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         self.client_id = client_id
         self.tenant_id = tenant_id
         if certificate_file:
@@ -778,3 +765,13 @@ class MsalSecretStore:
         logger.warning("Secrets are serialized as plain text and saved to `msalSecrets.cache.json`.")
         with open(self._token_file + ".json", "w") as fd:
             fd.write(json.dumps(self._service_principal_creds))
+
+
+def _decode_access_token(token):
+    # Decode the access token. We can do the same with https://jwt.ms
+    from msal.oauth2cli.oidc import decode_part
+    access_token = token.token
+
+    # Access token consists of headers.claims.signature. Decode the claim part
+    decoded_str = decode_part(access_token.split('.')[1])
+    return json.loads(decoded_str)

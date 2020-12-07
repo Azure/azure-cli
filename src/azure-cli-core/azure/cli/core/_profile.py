@@ -184,7 +184,7 @@ class Profile:
                 else:
                     credential = identity.login_with_service_principal_secret(username, password)
             else:
-                credential, auth_record = identity.login_with_username_password(username, password)
+                credential, auth_record = identity.login_with_username_password(username, password, scopes=scopes)
 
         # List tenants and find subscriptions by calling ARM
         if find_subscriptions:
@@ -609,16 +609,19 @@ class Profile:
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
-    def get_access_token_for_resource(self, username, tenant, resource):
-        """get access token for current user account, used by vsts and iot module"""
+    def get_access_token_for_scopes(self, username, tenant, scopes):
         tenant = tenant or 'common'
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant, cred_cache=self._adal_cache)
         identity_credential = identity.get_user_credential(username)
         from azure.cli.core.credential import CredentialAdaptor
-        auth = CredentialAdaptor(identity_credential, resource=resource)
-        token = auth.get_token()
+        auth = CredentialAdaptor(identity_credential)
+        token = auth.get_token(*scopes)
         return token.token
+
+    def get_access_token_for_resource(self, username, tenant, resource):
+        """get access token for current user account, used by vsts and iot module"""
+        return self.get_access_token_for_scopes(username, tenant, resource_to_scopes(resource))
 
     @staticmethod
     def _try_parse_msi_account_name(account):
@@ -666,6 +669,14 @@ class Profile:
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
+        """Get a CredentialAdaptor instance to be used with both Track 1 and Track 2 SDKs.
+
+        :param resource: The resource ID to acquire an access token. Only provide it for Track 1 SDKs.
+        :param client_id:
+        :param subscription_id:
+        :param aux_subscriptions:
+        :param aux_tenants:
+        """
         # Check if the token has been migrated to MSAL by checking "useMsalTokenCache": true
         # If not yet, do it now.
         use_msal = self._storage.get(_USE_MSAL_TOKEN_CACHE)
@@ -867,7 +878,7 @@ class SubscriptionFinder:
         self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
-        self._graph_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
         self.authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self.adal_cache = kwargs.pop("adal_cache", None)
 
@@ -886,7 +897,9 @@ class SubscriptionFinder:
             client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
             # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager,
+                                 credential_scopes=resource_to_scopes(self._arm_resource_id),
+                                 **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -907,7 +920,7 @@ class SubscriptionFinder:
         mfa_tenants = []
 
         from azure.cli.core.credential import CredentialAdaptor
-        credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
+        credential = CredentialAdaptor(credential)
         client = self._arm_client_factory(credential)
         tenants = client.tenants.list()
 
@@ -928,7 +941,9 @@ class SubscriptionFinder:
                 specific_tenant_credential = identity.get_user_credential(username)
                 # todo: remove after ADAL deprecation
                 if self.adal_cache:
-                    self.adal_cache.add_credential(specific_tenant_credential)
+                    self.adal_cache.add_credential(specific_tenant_credential,
+                                                   self.cli_ctx.cloud.endpoints.active_directory_resource_id,
+                                                   self.authority)
             # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
@@ -988,7 +1003,7 @@ class SubscriptionFinder:
 
     def find_using_specific_tenant(self, tenant, credential):
         from azure.cli.core.credential import CredentialAdaptor
-        track1_credential = CredentialAdaptor(credential, resource=self._graph_resource_id)
+        track1_credential = CredentialAdaptor(credential)
         client = self._arm_client_factory(track1_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
