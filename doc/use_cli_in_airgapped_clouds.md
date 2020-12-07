@@ -17,9 +17,9 @@ We are working on solutions to make the installation and upgrade of Azure CLI ea
 
 Package | Download Address | Install Command
 --- | --- | ---
-DEB | https://packages.microsoft.com/repos/azure-cli/pool/main/a/azure-cli/ | dpkg -i azure-cli_\<version\>-1~\<distro\>_all.deb
-RPM | https://packages.microsoft.com/yumrepos/azure-cli/ | rpm -ivh --nodeps azure-cli-\<version\>-*.rpm
-MSI | https://azurecliprod.blob.core.windows.net/msi/azure-cli-\<version\>.msi | Start-Process msiexec.exe -Wait -ArgumentList '/I azure-cli-\<version\>.msi'  
+DEB | https://packages.microsoft.com/repos/azure-cli/pool/main/a/azure-cli/ | dpkg -i azure-cli_<version\>-1~<distro\>_all.deb
+RPM | https://packages.microsoft.com/yumrepos/azure-cli/ | rpm -ivh --nodeps azure-cli-<version\>-*.rpm
+MSI | https://azurecliprod.blob.core.windows.net/msi/azure-cli-<version\>.msi | Start-Process msiexec.exe -Wait -ArgumentList '/I azure-cli-<version\>.msi'  
 
 **Note**:
 1. Replace `<version>` with the actual CLI version you need to use. On Ubuntu/Debian, replace `<distro>` with the result of the `lsb_release -cs` command.
