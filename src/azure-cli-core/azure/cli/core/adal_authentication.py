@@ -71,6 +71,10 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
         return scheme, token, full_token, external_tenant_tokens
 
+    def get_all_tokens(self, *scopes):
+        scheme, token, full_token, external_tenant_tokens = self._get_token(_try_scopes_to_resource(scopes))
+        return scheme, token, full_token, external_tenant_tokens
+
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)

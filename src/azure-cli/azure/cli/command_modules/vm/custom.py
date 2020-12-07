@@ -3257,11 +3257,22 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core._profile import Profile
+
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
         'TargetRegion')
     aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+
+    external_bearer_token = None
+    if aux_subscriptions:
+        profile = Profile(cli_ctx=cmd.cli_ctx)
+        resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
+        cred, _, _ = profile.get_login_credentials(resource=resource,
+                                                   aux_subscriptions=aux_subscriptions)
+        _, _, _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
+        external_bearer_token = external_tokens[0][0] + ' ' + external_tokens[0][1]
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
@@ -3314,11 +3325,14 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             raise CLIError('usage error: Please provide --managed-image')
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}))
 
-    return client.gallery_image_versions.begin_create_or_update(resource_group_name=resource_group_name,
-                                                                gallery_name=gallery_name,
-                                                                gallery_image_name=gallery_image_name,
-                                                                gallery_image_version_name=gallery_image_version,
-                                                                gallery_image_version=image_version)
+    return client.gallery_image_versions.begin_create_or_update(
+        resource_group_name=resource_group_name,
+        gallery_name=gallery_name,
+        gallery_image_name=gallery_image_name,
+        gallery_image_version_name=gallery_image_version,
+        gallery_image_version=image_version,
+        headers={'x-ms-authorization-auxiliary': external_bearer_token}
+    )
 
 
 def fix_gallery_image_date_info(date_info):
