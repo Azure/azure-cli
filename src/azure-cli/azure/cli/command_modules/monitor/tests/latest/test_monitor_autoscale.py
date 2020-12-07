@@ -329,22 +329,22 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_rule_for_spring_cloud', location='westus2')
     def test_monitor_autoscale_rule_for_spring_cloud(self, resource_group):
         self.kwargs.update({
-            'sc': 'clitest',
+            'sc': self.create_random_name('clitestsc', 15),
+            'rg': resource_group,
             'scapp': 'app1',
-            'deployment': 'default',
-            'rg': 'clitest',
-            'deployment_id': '/subscriptions/6c933f90-8115-4392-90f2-7077c9fa5dbd/resourceGroups/clitest/providers/Microsoft.AppPlatform/Spring/clitest/apps/app1/deployments/default'
+            'gitrepo': 'https://github.com/Azure-Samples/piggymetrics-config',
         })
-        # self.cmd(
-        #     'spring-cloud create -g {rg} -n {sc}')
-        # self.kwargs['app_id'] = self.cmd('spring-cloud app create -g {rg} -s {sc} -n {scapp}').get_output_in_json()['id']
 
-        self.cmd('monitor autoscale create --resource {deployment_id} --min-count 1 --count 1 --max-count 3')
+        self.cmd('spring-cloud create -n {sc} -g {rg}')
+        self.cmd('spring-cloud config-server git set -n {sc} -g {rg} --uri {gitrepo}')
+        self.kwargs['deployment_id'] = self.cmd('spring-cloud app create -n {scapp} -s {sc} -g {rg}').get_output_in_json()['properties']['activeDeployment']['id']
+
+        self.cmd('monitor autoscale create -g {rg} --resource {deployment_id} --min-count 1 --count 1 --max-count 3')
 
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {sc}')
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
                 self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
@@ -356,7 +356,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
                 self.check('metricTrigger.timeGrain', 'PT1M'),
                 self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'app1'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
                 self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
                 self.check('metricTrigger.dimensions[1].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[1].values[0]', 'default'),
@@ -367,7 +367,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
                 self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
@@ -379,7 +379,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
                 self.check('metricTrigger.timeGrain', 'PT1M'),
                 self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'app1'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
                 self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
                 self.check('metricTrigger.dimensions[1].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[1].values[0]', 'default'),
@@ -390,7 +390,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
             ])
 
         self.cmd(
-            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == app1 and Deployment == default" --scale out 1',
+            'monitor autoscale rule create -g {rg} --autoscale-name {sc} --condition "tomcat.global.request.total.count > 0 avg 3m where AppName == {scapp} and Deployment == default" --scale out 1',
             checks=[
                 self.check('metricTrigger.metricName', 'tomcat.global.request.total.count'),
                 self.check('metricTrigger.metricNamespace', 'Microsoft.AppPlatform/Spring'),
@@ -402,7 +402,7 @@ class TestMonitorAutoscaleComplexRules(ScenarioTest):
                 self.check('metricTrigger.timeGrain', 'PT1M'),
                 self.check('metricTrigger.dimensions[0].dimensionName', 'AppName'),
                 self.check('metricTrigger.dimensions[0].operator', 'Equals'),
-                self.check('metricTrigger.dimensions[0].values[0]', 'app1'),
+                self.check('metricTrigger.dimensions[0].values[0]', self.kwargs['scapp']),
                 self.check('metricTrigger.dimensions[1].dimensionName', 'Deployment'),
                 self.check('metricTrigger.dimensions[1].operator', 'Equals'),
                 self.check('metricTrigger.dimensions[1].values[0]', 'default'),
