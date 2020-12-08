@@ -35,7 +35,7 @@ class AladdinUserFaultType(Enum):
     InvalidAccountName = 'InvalidAccountName'
 
 
-class CommandRecommender():
+class CommandRecommender():  # pylint: disable=too-few-public-methods
     """Recommend a command for user when user's command fails.
     It combines Aladdin recommendations and examples in help files."""
 
@@ -58,15 +58,10 @@ class CommandRecommender():
         self.error_msg = error_msg
         self.cli_ctx = cli_ctx
 
-        self.help_examples = []
+        # item is a tuple with the form: (command, description, link)
         self.aladdin_recommendations = []
 
-    def set_help_examples(self, examples):
-        """Set recommendations from help files"""
-
-        self.help_examples.extend(examples)
-
-    def _set_aladdin_recommendations(self):
+    def _set_aladdin_recommendations(self):  # pylint: disable=too-many-locals
         """Set recommendations from aladdin service.
         Call the aladdin service API, parse the response and set the recommendations.
         """
@@ -127,86 +122,45 @@ class CommandRecommender():
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
             for result in response.json():
+                print(response.json())
                 # parse the response and format the recommendation
-                command, parameters, placeholders = result['command'],\
+                command, description, parameters, placeholders, link = \
+                    result['command'],\
+                    'A mocked description',\
                     result['parameters'].split(','),\
-                    result['placeholders'].split('♠')
-                recommendation = 'az {} '.format(command)
+                    result['placeholders'].split('♠'),\
+                    'A mocked link'
+                recommended_command = 'az {} '.format(command)
                 for parameter, placeholder in zip(parameters, placeholders):
-                    recommendation += '{} {} '.format(parameter, placeholder)
-                recommendations.append(recommendation.strip())
+                    recommended_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
+                recommendations.append((recommended_command.strip(), description, link))
 
         self.aladdin_recommendations.extend(recommendations)
 
-    def recommend_a_command(self):
-        """Recommend a command for user when user's command fails.
-        The recommended command will be the best matched one from
-        both the help files and the aladdin recommendations.
+    def provide_recommendations(self):
+        """Provide recommendations from Aladdin service,
+        which include both commands and reference link along with their descriptions.
         """
-
-        def get_sorted_candidates(target_args, candidate_args_list):
-            """Get the sorted candidates by target arguments"""
-
-            candidates = []
-            for index, candidate_args in enumerate(candidate_args_list):
-                matches = 0
-                for arg in candidate_args:
-                    if arg in target_args:
-                        matches += 1
-                candidates.append({
-                    'candidate_args': candidate_args,
-                    'index': index,
-                    'matches': matches
-                })
-
-            # sort the candidates by the number of matched arguments and total arguments
-            candidates.sort(key=lambda item: (item['matches'], -len(item['candidate_args'])), reverse=True)
-
-            return candidates
 
         # get recommendations from Aladdin service
         if not self._disable_aladdin_service():
             self._set_aladdin_recommendations()
 
-        recommend_command = ''
-        if self.help_examples and self.aladdin_recommendations:
-            # all the recommended commands from help examples and aladdin
-            all_commands = self.help_examples + self.aladdin_recommendations
+        recommendations = [(item[0], item[1]) for item in self.aladdin_recommendations]
+        recommended_commands = [item[0] for item in recommendations]
+        if self.aladdin_recommendations:
+            _, _, link = self.aladdin_recommendations[0]
+            recommendations.append((link, 'Read more about the command in reference docs'))
 
-            candidate_commands = []
-            candidate_args_list = []
-            target_args = self._normalize_parameters(self.parameters)
-            example_command_name = self.help_examples[0].split(' -')[0]
-
-            for command in all_commands:
-                # keep only the commands which begin with a same command name with examples
-                if command.startswith(example_command_name):
-                    candidate_args_list.append(self._normalize_parameters(command.split(' ')))
-                    candidate_commands.append(command)
-
-            # sort the candidates by the number of matched arguments and total arguments
-            candidates = get_sorted_candidates(target_args, candidate_args_list)
-            if candidates:
-                index = candidates[0]['index']
-                recommend_command = candidate_commands[index]
-
-        # fallback to use the first recommended command from Aladdin
-        elif self.aladdin_recommendations:
-            recommend_command = self.aladdin_recommendations[0]
         # set the recommend command into Telemetry
-        self._set_recommended_command_to_telemetry(recommend_command)
-        # replace the parameter values
-        recommend_command = self._replace_parameter_values(recommend_command)
+        self._set_recommended_command_to_telemetry(recommended_commands)
 
-        return recommend_command
+        return recommendations
 
-    def _set_recommended_command_to_telemetry(self, recommend_command):
+    def _set_recommended_command_to_telemetry(self, recommended_commands):  # pylint: disable=no-self-use
         """Set the recommended command to Telemetry for analysis. """
 
-        if recommend_command in self.aladdin_recommendations:
-            telemetry.set_debug_info('AladdinRecommendCommand', recommend_command)
-        elif recommend_command:
-            telemetry.set_debug_info('ExampleRecommendCommand', recommend_command)
+        telemetry.set_debug_info('AladdinRecommendCommand', ';'.join(recommended_commands))
 
     def _disable_aladdin_service(self):
         """Decide whether to disable aladdin request when a command fails.

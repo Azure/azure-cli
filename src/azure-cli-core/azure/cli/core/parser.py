@@ -161,8 +161,7 @@ class AzCliCommandParser(CLICommandParser):
         command_arguments = self._get_failure_recovery_arguments()
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
         recommender = CommandRecommender(*command_arguments, message, cli_ctx)
-        recommender.set_help_examples(self.get_examples(self.prog))
-        recommendation = recommender.recommend_a_command()
+        recommendations = recommender.provide_recommendations()
 
         az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
@@ -175,9 +174,8 @@ class AzCliCommandParser(CLICommandParser):
         if '--query' in message:
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
-        elif recommendation:
-            az_error.set_recommendation("Try this: '{}'".format(recommendation))
-            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
+        elif recommendations:
+            az_error.set_aladdin_recommendation(recommendations)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -374,16 +372,9 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             caused_by_extension_not_installed = False
-            command_name_inferred = self.prog
             error_msg = None
             if not self.command_source:
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
-                if candidates:
-                    # use the most likely candidate to replace the misspelled command
-                    args = self.prog.split() + self._raw_arguments
-                    args_inferred = [item if item != value else candidates[0] for item in args]
-                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
-
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no' and not candidates:
                     # Check if the command is from an extension
@@ -458,18 +449,15 @@ class AzCliCommandParser(CLICommandParser):
 
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
-            recommender.set_help_examples(self.get_examples(command_name_inferred))
-            recommended_command = recommender.recommend_a_command()
-            if recommended_command:
-                az_error.set_recommendation("Try this: '{}'".format(recommended_command))
+            recommendations = recommender.provide_recommendations()
+            if recommendations:
+                az_error.set_aladdin_recommendation(recommendations)
 
             # remind user to check extensions if we can not find a command to recommend
             if isinstance(az_error, CommandNotFoundError) \
                     and not az_error.recommendations and self.prog == 'az' \
                     and use_dynamic_install == 'no':
                 az_error.set_recommendation(EXTENSION_REFERENCE)
-
-            az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
 
             if not caused_by_extension_not_installed:
                 az_error.print_error()
