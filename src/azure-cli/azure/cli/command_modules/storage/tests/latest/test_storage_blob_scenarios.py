@@ -95,7 +95,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(
             [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
-             JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+             JMESPathCheck('properties.contentLength', file_size_kb * 2048)])
 
         # check that blob properties can be set back to null
         self.storage_cmd('storage blob update -n {} -c {} --content-type ""',
@@ -394,7 +394,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
 
         self.storage_cmd('storage blob service-properties show', account_info) \
-            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
+            .assert_with_checks(JMESPathCheck('staticWebsite.enabled', True),
                                 JMESPathCheck('hourMetrics.enabled', True),
                                 JMESPathCheck('minuteMetrics.enabled', False),
                                 JMESPathCheck('minuteMetrics.includeApis', None),

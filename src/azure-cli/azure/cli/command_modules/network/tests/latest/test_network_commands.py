@@ -1983,8 +1983,8 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('routingConfiguration.propagatedRouteTables.ids[0].id', self.kwargs['route_table1']),
             self.check('routingConfiguration.propagatedRouteTables.ids[1].id', self.kwargs['route_table2']),
             self.check('length(routingConfiguration.propagatedRouteTables.labels)', 2),
-            self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label1'),
-            self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label2')
+            self.check('routingConfiguration.propagatedRouteTables.labels[0]', 'label3'),
+            self.check('routingConfiguration.propagatedRouteTables.labels[1]', 'label4')
         ])
 
 
@@ -2902,7 +2902,7 @@ class NetworkNicSubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(loadBalancerBackendAddressPools)', 2))
 
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config} --private-ip-address "" --public-ip-address {ip_id}', checks=[
-            self.check('privateIpAllocationMethod', 'Dynamic'),
+            self.check('privateIpAllocationMethod', 'NonDynamic'),
             self.check("publicIpAddress.contains(id, '{ip_id}')", True)
         ])
 
