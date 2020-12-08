@@ -960,12 +960,14 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait):
+def _update_provider(cli_ctx, namespace, registering, wait, mg=False, mgID=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
-    if registering:
+    if not mg and registering:
         r = rcf.providers.register(namespace)
+    elif mg and registering:
+        r = rcf.providers.register_at_management_group_scope(namespace, mgID)
     else:
         r = rcf.providers.unregister(namespace)
 
@@ -1948,22 +1950,7 @@ def unregister_provider(cmd, resource_provider_namespace, wait=False):
 
 
 def register_management_group(cmd, resource_provider_namespace, management_group_id, wait=False):
-    import time
-    rcf = _resource_client_factory(cmd.cli_ctx)
-    r = rcf.providers.register_at_management_group_scope(resource_provider_namespace, management_group_id)
-    if r.registration_state == 'Registered':
-        return
-
-    if wait:
-        while True:
-            time.sleep(10)
-            rp_info = rcf.providers.get(resource_provider_namespace)
-            if rp_info.registration_state == 'Registered':
-                break
-    else:
-        action = 'Registering'
-        msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
-        logger.warning(msg_template, action, resource_provider_namespace)
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mg=True, mgID=management_group_id)
 
 
 def list_provider_operations(cmd):
