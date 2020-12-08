@@ -127,7 +127,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      .format(resource_group, location))
 
         self.cmd('{} flexible-server show -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=list_checks).get_output_in_json()
+                 .format(database_engine, resource_group, server_name), checks=list_checks)
 
         if database_engine == 'mysql':
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
@@ -892,3 +892,4 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('{} flexible-server list-skus'.format(database_engine))
 
         self.cmd('{} flexible-server delete --yes'.format(database_engine))
+        self.cmd('config param-persist off')
