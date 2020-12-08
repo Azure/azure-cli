@@ -301,7 +301,7 @@ def load_command_table(self, _):
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
         g.command('regenerate-auth-key', 'regenerate', command_type=synapse_integrationruntimeauthkeys_sdk,
                   client_factory=cf_synapse_client_integrationruntimeauthkeys_factory)
-        g.command('get-monitoring-data', 'get', command_type=synapse_integrationruntimemonitoringdata_sdk,
+        g.command('get-monitoring-data', 'list', command_type=synapse_integrationruntimemonitoringdata_sdk,
                   client_factory=cf_synapse_client_integrationruntimemonitoringdata_factory)
         g.command('sync-credentials', 'sync', command_type=synapse_integrationruntimecredentials_sdk,
                   client_factory=cf_synapse_client_integrationruntimecredentials_factory)
