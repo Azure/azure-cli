@@ -76,6 +76,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
+    MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', None)
     MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
@@ -208,7 +209,8 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2020-03-01',
-        ResourceType.MGMT_ARO: '2020-04-30'
+        ResourceType.MGMT_ARO: '2020-04-30',
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
     '2020-09-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
@@ -247,7 +249,8 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
-        ResourceType.MGMT_IOTHUB: '2019-07-01-preview'
+        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
@@ -282,7 +285,8 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2018-01-01-preview',
-        ResourceType.MGMT_IOTHUB: '2019-03-22'
+        ResourceType.MGMT_IOTHUB: '2019-03-22',
+        ResourceType.MGMT_DATABOXEDGE: '2019-08-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
