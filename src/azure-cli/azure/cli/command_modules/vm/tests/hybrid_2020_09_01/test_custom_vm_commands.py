@@ -407,7 +407,7 @@ class FakedVM(object):  # pylint: disable=too-few-public-methods
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
         self.location = 'westus'
         ext = mock.MagicMock()
-        ext.publisher, ext.virtual_machine_extension_type = 'Microsoft.Azure.Security', 'AzureDiskEncryptionForLinux'
+        ext.publisher, ext.type_properties_type = 'Microsoft.Azure.Security', 'AzureDiskEncryptionForLinux'
         self.resources = [ext]
         self.instance_view = mock.MagicMock()
         self.instance_view.extensions = [ext]
