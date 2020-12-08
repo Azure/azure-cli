@@ -3265,6 +3265,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     aux_subscriptions = _get_image_version_aux_subscription(managed_image, os_snapshot, data_snapshots)
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
 
+    # Auxiliary tokens, pass it to init or operation
     external_bearer_token = None
     if aux_subscriptions:
         profile = Profile(cli_ctx=cmd.cli_ctx)

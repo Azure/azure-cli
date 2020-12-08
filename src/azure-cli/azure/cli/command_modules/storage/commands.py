@@ -346,9 +346,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path',
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
-                                       validator=process_blob_upload_batch_parameters)
+                                       validator=process_blob_upload_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
-                                       validator=process_blob_download_batch_parameters)
+                                       validator=process_blob_download_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
                                        validator=process_blob_delete_batch_parameters)
         g.storage_command_oauth(

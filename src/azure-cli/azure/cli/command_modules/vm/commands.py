@@ -31,7 +31,7 @@ from azure.cli.command_modules.vm._image_builder import (
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
-from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
+from azure.cli.command_modules.monitor._exception_handler import exception_handler as monitor_exception_handler
 from azure.cli.command_modules.monitor._client_factory import cf_metric_def
 from azure.cli.core.profiles import ResourceType
 
@@ -185,14 +185,16 @@ def load_command_table(self, _):
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
-        exception_handler=monitor_exception_handler)
+        exception_handler=monitor_exception_handler
+    )
 
     metric_definitions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
         resource_type=ResourceType.MGMT_MONITOR,
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
-        exception_handler=monitor_exception_handler)
+        exception_handler=monitor_exception_handler
+    )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)

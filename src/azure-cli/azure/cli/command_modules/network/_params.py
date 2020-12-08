@@ -43,7 +43,7 @@ from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
-from azure.cli.command_modules.network._actions import AddBackendAddressCreate
+from azure.cli.command_modules.network._actions import AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -305,14 +305,6 @@ def load_arguments(self, _):
         with self.argument_context('network application-gateway {}'.format(scope)) as c:
             c.argument('application_gateway_name', app_gateway_name_type, id_part=None)
 
-    with self.argument_context('network lb rule create') as c:
-        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
-    for item in ['rule', 'pool']:
-        with self.argument_context('network lb inbound-nat-{} create'.format(item)) as c:
-            c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
     with self.argument_context('network application-gateway http-settings') as c:
         c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
         c.argument('timeout', help='Request timeout in seconds.')
@@ -560,7 +552,7 @@ def load_arguments(self, _):
         c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
 
     with self.argument_context('network dns list-references') as c:
-        c.argument('target_resources', nargs='+', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
+        c.argument('target_resources', nargs='+', min_api='2018-05-01', help='Space-separated list of resource IDs you wish to query.', validator=validate_subresource_list)
 
     with self.argument_context('network dns zone') as c:
         c.argument('zone_name', name_arg_type)
@@ -779,6 +771,13 @@ def load_arguments(self, _):
                    help='Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Gbps')
         c.argument('peering_location', help='The name of the peering location that the port is mapped to physically.')
 
+    with self.argument_context('network express-route port generate-loa', min_api='2020-06-01') as c:
+        c.argument('customer_name', help='The customer name')
+        c.argument('file_path',
+                   options_list=['--file', '-f'],
+                   help="Directory or the file path of the letter to be saved to. If the file name extension is not .pdf, Azure CLI will help to append. "
+                        "Be careful, the existing file might get overwritten")
+
     with self.argument_context('network express-route port link', min_api='2018-08-01') as c:
         c.argument('express_route_port_name', er_port_name_type)
         c.argument('link_name', options_list=['--name', '-n'], id_part='child_name_1',
@@ -867,6 +866,14 @@ def load_arguments(self, _):
     # endregion
 
     # region LoadBalancers
+    with self.argument_context('network lb rule create') as c:
+        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
+    for item in ['rule', 'pool']:
+        with self.argument_context('network lb inbound-nat-{} create'.format(item)) as c:
+            c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
     lb_subresources = [
         {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
         {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
@@ -967,6 +974,94 @@ def load_arguments(self, _):
         c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
         c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
         c.argument('disable_outbound_snat', min_api='2018-08-01', help='Configures SNAT for the VMs in the backend pool to use the publicIP address specified in the frontend of the load balancing rule.', arg_type=get_three_state_flag())
+    # endregion
+
+    # region cross-region load balancer
+    with self.argument_context('network cross-region-lb rule create') as c:
+        c.argument('backend_address_pool_name',
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
+    cross_region_lb_subresources = [
+        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
+        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
+        {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
+        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+    ]
+    for item in cross_region_lb_subresources:
+        with self.argument_context('network cross-region-lb {}'.format(item['name'])) as c:
+            c.argument('item_name', options_list=['--name', '-n'], help='The name of the {}'.format(item['display']),
+                       completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
+            c.argument('resource_name', options_list='--lb-name', help='The name of the load balancer.',
+                       completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+            c.argument('load_balancer_name', load_balancer_name_type)
+
+    with self.argument_context('network cross-region-lb') as c:
+        c.argument('load_balancer_name', load_balancer_name_type, options_list=['--name', '-n'])
+        c.argument('frontend_port', help='Port number')
+        c.argument('frontend_port_range_start', help='Port number')
+        c.argument('frontend_port_range_end', help='Port number')
+        c.argument('backend_port', help='Port number')
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration.',
+                   completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
+        c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
+        c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
+        c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
+        for item in ['backend_pool_name', 'backend_address_pool_name']:
+            c.argument(item, options_list='--backend-pool-name', help='The name of the backend address pool.',
+                       completer=get_lb_subresource_completion_list('backend_address_pools'))
+
+    with self.argument_context('network cross-region-lb create') as c:
+        c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=['--frontend-ip-zone'],
+                   help='used to create internal facing Load balancer')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources.',
+                   action='store_true')
+
+    with self.argument_context('network cross-region-lb create', arg_group='Public IP') as c:
+        public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
+        c.argument('public_ip_address', help=public_ip_help,
+                   completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument('public_ip_address_allocation', options_list=['--public-ip-address-allocation', '--address-allocation'], help='IP allocation method.',
+                   arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
+        c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=['--public-ip-zone'],
+                   help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
+        c.ignore('public_ip_address_type')
+
+    with self.argument_context('network cross-region-lb address-pool') as c:
+        c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
+        c.argument('backend_address_pool_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreateForCrossRegionLB,
+                   is_preview=True)
+        c.argument('backend_addresses_config_file', options_list=['--backend-addresses-config-file', '--config-file'], type=get_json_object, is_preview=True)
+
+    with self.argument_context('network cross-region-lb address-pool address') as c:
+        c.argument('backend_address_pool_name',
+                   options_list=['--pool-name'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
+        c.argument('frontend_ip_address', help='Resource id of the frontend ip configuration defined in regional loadbalancer.')
+
+    with self.argument_context('network cross-region-lb frontend-ip') as c:
+        c.argument('zone', zone_type, min_api='2017-06-01')
+
+    for item in ['create', 'update']:
+        with self.argument_context('network cross-region-lb frontend-ip {}'.format(item)) as c:
+            c.argument('public_ip_address',
+                       help='Name or ID of the existing public IP to associate with the configuration.')
+
+    with self.argument_context('network cross-region-lb probe') as c:
+        c.argument('interval', help='Probing time interval in seconds.')
+        c.argument('path', help='The endpoint to interrogate (http only).')
+        c.argument('port', help='The port to interrogate.')
+        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
+        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+
+    with self.argument_context('network cross-region-lb rule') as c:
+        c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
+        c.argument('probe_name', help='Name of an existing probe to associate with this rule.')
     # endregion
 
     # region LocalGateway
@@ -1564,7 +1659,7 @@ def load_arguments(self, _):
         c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName),
                    deprecate_info=c.deprecate(hide=True),)
 
-    for scope in ['public-ip', 'lb frontend-ip']:
+    for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:
             c.argument('public_ip_prefix', help='Name or ID of a public IP prefix.')
 

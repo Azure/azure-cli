@@ -3,6 +3,97 @@
 Release History
 ===============
 
+2.16.0
+++++++
+
+**ACR**
+
+* Update description for KEK param (#15866)
+
+**AKS**
+
+* `az aks nodepool add/update/upgrade`: Take max surge parameter (#15740)
+* Add support for AGIC addon (#15993)
+* Change MSI cluster to default (#16057)
+
+**APIM**
+
+* `az apim restore`: New command to restore a backup of an API Management service (#15933)
+
+**App Service**
+
+* Fix #14857: Let users update webapp config even with access restriction (#15945)
+* `az functionapp create`: Accept `--runtime python` and  `--runtime-version 3.9` as Azure Functions v3 parameter (#16020)
+* Fix #16041: az webapp config ssl create results in unknown error (#16124)
+
+**ARM**
+
+* `az deployment-scripts`: Remove preview flag (#16019)
+
+**Backup**
+
+* Fix #14976: CLI error improvements for ValueError and AttributeError cases (#15861)
+* `az backup protection undelete`: Add support for AzureWorkload protection undelete using CLI (#15979)
+* Fix Bad Request Error for Correct Workload Type Input (#15999)
+
+**CDN**
+
+* Add preview multi-origin support. (#15348)
+* Add BYOC auto-rotation. (#15348)
+
+**Key Vault**
+
+* `az keyvault key/secret list`: Add a parameter `--include-managed` to list managed resources (#15926)
+
+**Monitor**
+
+* `az monitor metrics alert create`: Support dynamic thresholds for condition parameter (#15820)
+* `az monitor metrics alert update`: Support dynamic thresholds for condition parameter (#15820)
+* `az monitor metrics alert dimension create`: Build a metric alert rule dimension (#15820)
+* `az monitor metrics alert condition create`: Build a metric alert rule condition (#15820)
+
+**MySQL**
+
+* Add MySQL version upgrade CLI (#15977)
+
+**NetAppFiles**
+
+* `az netappfiles account ad add`: Two optional parameters added, aes_encryption and ldap_signing (#15934)
+* `az netappfiles account backup-policy update`: Three optional parameters added named tags, type and id (#15934)
+* `az netappfiles snapshot policy create`: An optional parameter added named provisioning_state (#15934)
+
+**Network**
+
+* `az network network watcher configure`: Fix NetworkWatcherCountLimitReached error caused by case sensitivity of location value (#15801)
+* `az network application-gateway http-listener`: Fix bug that cannot create and update with WAF policy name (#15929)
+* `az network route-table`: Deprecate route table V1 (#16039)
+* `az network cross-region-lb`: Support cross-region load balancer (#16131)
+* `az network express-route port generate-loa`: New command to generate and download the PDF letter of authorization for a ExpressRoutePort (#16135)
+
+**Packaging**
+
+* Add Ubuntu Groovy package (#16132)
+
+**RDBMS**
+
+* Add single server show-connection-string and tests for local-context commands, server creation (#15844)
+
+**Role**
+
+* Add long-summary/warning for commands generating credentials (#15825)
+
+**Search**
+
+* Add SKU option (#15895)
+
+**Service Fabric**
+
+* Update SF app docs. only support for arm deployed resources (#16003)
+
+**Synapse**
+
+* Support synapse sql dw cmdlets and update az synapse workspace create cmdlet (#16095)
+
 2.15.1
 ++++++
 

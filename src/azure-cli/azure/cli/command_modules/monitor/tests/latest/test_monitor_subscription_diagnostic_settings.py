@@ -50,6 +50,10 @@ class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
                 "enabled": True,
             }
         ])
+        diagns = self.cmd("monitor diagnostic-settings subscription list").get_output_in_json()['value']
+        for diagn in diagns:
+            name = diagn['name']
+            self.cmd("monitor diagnostic-settings subscription delete --name {} -y".format(name))
         self.cmd("monitor diagnostic-settings subscription create -l southcentralus --name {name} --storage-account {storage} "
                  "--logs \'{log_config}\'",
                  checks=[
