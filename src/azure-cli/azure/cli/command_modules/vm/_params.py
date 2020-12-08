@@ -819,6 +819,10 @@ def load_arguments(self, _):
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
 
+    with self.argument_context('vm update') as c:
+        c.argument('license_type', help=license_msg, arg_type=get_enum_type(
+            ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_ELS_6', 'None']))
+
     with self.argument_context('vmss create') as c:
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
                    arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
