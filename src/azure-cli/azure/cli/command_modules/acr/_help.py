@@ -1214,20 +1214,20 @@ helps['acr connected-registry create'] = """
 type: command
 short-summary: Create a connected registry for an Azure Container Registry.
 examples:
-  - name: Create a connected registry with DNS name 'edge01.contoso.internal' that has 'mycloudregistry' as a parent.
+  - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent.
     text: |
-        az acr connected-registry create --registry mycloudregistry --name Contoso-Edge01-in-Wichita
-            --repository "contoso-app/hello-world contoso-service/mycomponent"
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry
+            --repository "app/hello-world service/mycomponent"
   - name: Create a mirror connected registry with only read permissions.
     text: |
         az acr connected-registry create --registry mycloudregistry
-            --mode mirror --parent Contoso-Edge01-in-Wichita
-            --name Contoso-Mirror01-in-Wichita --repository contoso-app/hello-world
+            --mode mirror --parent myconnectedregistry
+            --name mymirroracr --repository app/hello-world
   - name: Create a mirror connected registry withaudit logs disabled, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create --registry mycloudregistry
-            --mode mirror --parent Contoso-Edge01-in-Wichita
-            --name Contoso-Mirror02-in-Wichita --repository contoso-app/mycomponent
+            --mode mirror --parent myconnectedregistry
+            --name mymirroracr --repository app/mycomponent
             --sync-schedule "0 12 * * *" --sync-window PT4H
             --sync-audit-logs-enabled false
 """
@@ -1236,10 +1236,10 @@ helps['acr connected-registry delete'] = """
 type: command
 short-summary: Delete a connected registry from Azure Container Registry.
 examples:
-  - name: Delete a mirror connected registry 'Contoso-Edge01-in-Wichita' from parent registry 'mycloudregistry' and skip verification.
+  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry' and skip verification.
     text: |
         az acr connected-registry delete --registry mycloudregistry 
-            --name Contoso-Edge01-in-Wichita --yes
+            --name myconnectedregistry --yes
 """
 
 helps['acr connected-registry install'] = """
@@ -1249,21 +1249,21 @@ examples:
   - name: Prints the values requiered to activate a connected registry in json format
     text: |
         az acr connected-registry install --registry mycloudregistry 
-            --name Contoso-Edge01-in-Wichita 
+            --name myconnectedregistry 
   - name: Prints the values requiered to activate a connected registry and generate a sync token password in json format
     text: |
         az acr connected-registry install --registry mycloudregistry 
-            --name Contoso-Edge01-in-Wichita --fresh-install
+            --name myconnectedregistry --fresh-install
 """
 
 helps['acr connected-registry deactivate'] = """
 type: command
 short-summary: Deactivate a connected registry from Azure Container Registry.
 examples:
-  - name: Deactivate a connected registry 'Contoso-Edge01-in-Wichita' and skip verification.
+  - name: Deactivate a connected registry 'myconnectedregistry' and skip verification.
     text: |
         az acr connected-registry deactivate --registry mycloudregistry 
-            --name Contoso-Edge01-in-Wichita --yes
+            --name myconnectedregistry --yes
 """
 
 helps['acr connected-registry list'] = """
@@ -1276,51 +1276,50 @@ examples:
   - name: Lists all children and grandchildren of 'mycloudregistry' in expanded form in a table.
     text: >
         az acr connected-registry list --registry mycloudregistry --cascading enabled --output table
-  - name: Lists all children of 'Contoso-Edge01-in-Wichita' in expanded form inside a table.
+  - name: Lists all children of 'myconnectedregistry' in expanded form inside a table.
     text: >
-        az acr connected-registry list --registry mycloudregistry --parent Contoso-Edge01-in-Wichita --output table
+        az acr connected-registry list --registry mycloudregistry --parent myconnectedregistry --output table
 """
 
 helps['acr connected-registry list-client-tokens'] = """
 type: command
 short-summary: Lists all the connected registries under the current parent registry.
 examples:
-  - name: Lists all client tokens of 'Contoso-Mirror02-in-Witchita'.
+  - name: Lists all client tokens of 'mymirroracr'.
     text: >
-        az acr connected-registry list-client-tokens --registry mycloudregistry --name Contoso-Mirror02-in-Witchita
+        az acr connected-registry list-client-tokens --registry mycloudregistry --name mymirroracr
 """
 
 helps['acr connected-registry show'] = """
 type: command
 short-summary: Show connected registry details.
 examples:
-  - name: Show all the details of the 'Contoso-Mirror02-in-Witchita' registry in table form.
+  - name: Show all the details of the 'mymirroracr' registry in table form.
     text: |
-        az acr connected-registry show --registry mycloudregistry --name Contoso-Mirror02-in-Witchita --output table
+        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
 """
 
 helps['acr connected-registry show'] = """
 type: command
 short-summary: Show connected registry details.
 examples:
-  - name: Show all the details of the 'Contoso-Mirror02-in-Witchita' registry in table form.
+  - name: Show all the details of the 'mymirroracr' registry in table form.
     text: |
-        az acr connected-registry show --registry mycloudregistry --name Contoso-Mirror02-in-Witchita --output table
+        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
 """
 
 helps['acr connected-registry update'] = """
 type: command
 short-summary: Update a connected registry for an Azure Container Registry.
 examples:
-  - name: Update a connected registry with DNS name 'edge01.contoso.internal' that has 'mycloudregistry.azurecr.io' as a parent.
+  - name: Update the connected registry client Tokens.
     text: |
-        az acr connected-registry update --registry mycloudregistry --name Contoso-Edge01-in-Wichita
-            --repository "contoso-app/hello-world contoso-service/mycomponent"
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry
+            --add-client-token <token-id-1> --remove-client-token <token-id-2>
 
   - name: Update the sync and window time, and disable audit logs of a connected registry.
     text: |
-        az acr connected-registry create --registry mycloudregistry
-            --name Contoso-Mirror02-in-Wichita --repository contoso-app/mycomponent
+        az acr connected-registry create --registry mycloudregistry --name mymirroracr
             --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
 """
 # endregion

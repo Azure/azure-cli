@@ -63,6 +63,11 @@ def acr_connected_registry_create(cmd,
         cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
+    if not registry.data_endpoint_enabled:
+        from .custom import acr_update_custom, acr_update_get, acr_update_set
+        acr_update_set(cmd, cf_acr_registries(cmd.cli_ctx), registry_name, resource_group_name,
+                       parameters=acr_update_custom(cmd, acr_update_get(cmd), data_endpoint_enabled=True))
+
     if parent:
         try:
             parent = acr_connected_registry_show(cmd, client, parent, registry_name, resource_group_name)
@@ -100,10 +105,6 @@ def acr_connected_registry_create(cmd,
         )
     )
 
-    if not registry.data_endpoint_enabled:
-        from .custom import acr_update_custom
-        acr_update_custom(cmd, cf_acr_registries(cmd.cli_ctx), data_endpoint_enabled=True)
-
     try:
         return client.create(subscription_id=subscription_id,
                              resource_group_name=resource_group_name,
@@ -123,19 +124,12 @@ def acr_connected_registry_update(cmd,
                                   connected_registry_name,
                                   add_client_token_ids=None,
                                   remove_client_token_ids=None,
-                                  sync_token_id=None,
-                                  add_repository=None,
-                                  remove_repository=None,
                                   resource_group_name=None,
                                   sync_schedule=None,
                                   sync_window=None,
                                   log_level=None,
                                   sync_message_ttl=None,
                                   sync_audit_logs_enabled=None):
-
-    if (bool(add_repository) or bool(remove_repository)) == bool(sync_token_id):
-        raise CLIError("usage error: can't use --add-repository and --remove-repository | --sync-token-id")
-
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
@@ -156,8 +150,7 @@ def acr_connected_registry_update(cmd,
                 'ConnectedRegistryUpdateParameters', 'SyncProperties', 'LoggingProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncProperties(
-            token_id=sync_token_id if sync_token_id is not None else \
-                current_connected_registry.parent.sync_properties.token_id,
+            token_id=current_connected_registry.parent.sync_properties.token_id,
             schedule=sync_schedule,
             message_ttl=sync_message_ttl,
             sync_window=sync_window
@@ -174,11 +167,11 @@ def acr_connected_registry_update(cmd,
         )
     )
 
-    # Add or remove the repo permissions from the sync token scope map id
-    if not bool(sync_token_id) and (add_repository or remove_repository):
-        _ = _update_sync_token_scope_map(cmd, resource_group_name, registry_name, connected_registry_name,
-                                         current_connected_registry.parent.sync_properties.token_id,
-                                         current_connected_registry.mode, add_repository, remove_repository)
+    #TODO remove Add or remove the repo permissions from the sync token scope map id
+    #if add_repository or remove_repository:
+    #    _ = _update_sync_token_scope_map(cmd, resource_group_name, registry_name, connected_registry_name,
+    #                                     current_connected_registry.parent.sync_properties.token_id,
+    #                                     current_connected_registry.mode, add_repository, remove_repository)
     try:
         return client.update(resource_group_name=resource_group_name,
                              registry_name=registry_name,
@@ -286,7 +279,7 @@ def acr_connected_registry_install(cmd,
                                    fresh_install=False,
                                    resource_group_name=None):
     registry, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name)           
+        cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
     connected_registry_localhost = connected_registry.login_server.host
@@ -368,14 +361,14 @@ def _create_sync_token(cmd,
     try:
         message = "Created by connected registry sync token: {}"
         sync_scope_map_name = SYNC_SCOPE_MAP_NAME.format(connected_registry_name)
-        logger.warning("If sync scope map '%s' already exists. Properties might be overrided", sync_scope_map_name)
+        logger.warning("If sync scope map '%s' already exist properties might be overrided", sync_scope_map_name)
         sync_scope_map = create_default_scope_map(cmd, resource_group_name, registry_name, sync_scope_map_name,
                                                   repository_actions_list, gateway_actions_list,
                                                   scope_map_description=message.format(connected_registry_name),
                                                   force=True)
 
         sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
-        logger.warning("If sync token '%s' already exists. Properties might be overrided", sync_token_name)
+        logger.warning("If sync token '%s' already exist properties might be overrided", sync_token_name)
         Token = cmd.get_models('Token')
         poller = token_client.create(
             resource_group_name,

@@ -410,10 +410,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
 
     with self.argument_context('acr connected-registry update') as c:
-        c.argument('add_repository', options_list=['--add-repository'], nargs='*', required=False,
-                   help='Repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
-        c.argument('remove_repository', options_list=['--remove-repository'], nargs='*', required=False,
-                   help='Respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        # TODO cleanup
+        #c.argument('add_repository', options_list=['--add-repository'], nargs='*', required=False,
+        #           help='Repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
+        #c.argument('remove_repository', options_list=['--remove-repository'], nargs='*', required=False,
+        #           help='Respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('add_client_token_ids', options_list=['--add-client-token'], nargs='*', required=False,
                    help='Client tokens to be added. Use the format "--add-client-token [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
         c.argument('remove_client_token_ids', options_list=['--remove-client-token'], nargs='*', required=False,
