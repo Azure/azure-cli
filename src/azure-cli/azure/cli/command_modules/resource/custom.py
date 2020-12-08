@@ -49,7 +49,7 @@ from ._formatters import format_what_if_operation_result
 logger = get_logger(__name__)
 
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
-              'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements?api-version=2020-03-01-preview'}
+              'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements/default?api-version=2020-03-01-preview'}
 
 
 def _build_resource_id(**kwargs):
@@ -1001,7 +1001,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, accept_term=None):
         if is_rpaas:
             if not accept_term:
                 from azure.cli.core.azclierror import RequiredArgumentMissingError
-                raise RequiredArgumentMissingError("--accetp-term must be specified when registering an RP from RPaaS.")
+                raise RequiredArgumentMissingError("--accept-term must be specified when registering an RP from RPaaS.")
             wait = True
         r = rcf.providers.register(namespace)
     else:
