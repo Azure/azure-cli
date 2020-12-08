@@ -2381,9 +2381,9 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise CLIError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_vault_certificate_name=None,
+def import_ssl_cert(cmd, resource_group_name, name, certificate=None, key_vault_certificate_name=None,
                     key_vault=None):
-    Certificate = cmd.get_models('Certificate')
+    Certificate_Model = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
@@ -2392,12 +2392,18 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
     server_farm_id = webapp.server_farm_id
     location = webapp.location
 
-    if certificate_name and key_vault_certificate_name:
+    cert_subscription = ''
+    if certificate and key_vault_certificate_name:
         no_two_certs = "Provide only one certificate name, use \'--certificate-name\'."
         logger.warning(no_two_certs)
         return
-    if certificate_name:
-        cert = certificate_name
+    if certificate:
+        if is_valid_resource_id(certificate):
+            cert_id_parts = parse_resource_id(certificate)
+            cert = cert_id_parts['name']
+            cert_subscription = cert_id_parts['subscription']
+        else:
+            cert = certificate
     elif key_vault_certificate_name:
         cert = key_vault_certificate_name
     else:
@@ -2405,7 +2411,7 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
         logger.warning(no_cert_msg)
         return
 
-    (kv_id, kv_secret_name, error) = get_import_kv_details(cmd, client, cert, key_vault)
+    (kv_id, kv_secret_name, error) = get_import_kv_details(cmd, client, cert, key_vault, cert_subscription)
 
     if error:
         logger.warning(error)
@@ -2436,19 +2442,24 @@ def import_ssl_cert(cmd, resource_group_name, name, certificate_name=None, key_v
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
         logger.warning(lnk_msg)
 
-    kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
-
+    kv_cert_def = Certificate_Model(location=location, key_vault_id=kv_id, password='',
+                                    key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
 
 
-def get_import_kv_details(cmd, client, certificate_name, key_vault):
+def get_import_kv_details(cmd, client, certificate_name, key_vault, cert_subscription):
     kv_id = None
     kv_secret_name = certificate_name
     # if key_vault is not populated, we are attempting to import an App Service Certificate
     if not key_vault:
-        certs = client.app_service_certificate_orders.list()
+        if cert_subscription.lower() != client.config.subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=cert_subscription)
+            certs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            certs = client.app_service_certificate_orders.list()
+
         cert = None
         for c in certs:
             if c.name == certificate_name:

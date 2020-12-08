@@ -329,12 +329,15 @@ helps['functionapp config ssl import'] = """
 type: command
 short-summary: Import a certificate to a functionapp. The certificate can be from Key Vault, or an App Service Certificate.
 examples:
-  - name: Import an SSL certificate to a function app from Key Vault. Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
-    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --certificate-name MyCertificateName
-  - name: Import an SSL certificate to a function app from Key Vault using resource id (typically if Key Vault is in another subscription). Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
-    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --certificate-name MyCertificateName
+  - name: Import an SSL certificate to a function app from Key Vault. Option '--key-vault-certificate-name' has been deprecated, use '--certificate' instead
+    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --certificate MyCertificateName
+  - name: Import an SSL certificate to a function app from Key Vault using resource id (typically if Key Vault is in another subscription). Option '--key-vault-certificate-name' has been deprecated, use '--certificate' instead
+    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --certificate MyCertificateName
   - name: Import an App Service Certificate to a function app
-    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --certificate-name MyCertificateName
+    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --certificate MyCertificateName
+  - name: Import an App Service Certificate to a function app using the certificate resource id (if the certificate is in a different subscription)
+    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --certificate '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Web/certificates/[certificate name]'
+
 
 """
 
@@ -1303,12 +1306,14 @@ helps['webapp config ssl import'] = """
 type: command
 short-summary: Import a certificate to a web app. The certificate can be from Key Vault, or an App Service Certificate.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault. Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
-    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription). Option '--key-vault-certificate-name' has been deprecated, use '--certificate-name' instead
-    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --certificate-name MyCertificateName
+  - name: Import an SSL certificate to a web app from Key Vault. Option '--key-vault-certificate-name' has been deprecated, use '--certificate' instead
+    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --certificate MyCertificateName
+  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription). Option '--key-vault-certificate-name' has been deprecated, use '--certificate' instead
+    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --certificate MyCertificateName
   - name: Import an App Service Certificate to a web app
-    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --certificate-name MyCertificateName
+    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --certificate MyCertificateName
+  - name: Import an App Service Certificate to a web app using the certificate resource id (if the certificate is in a different subscription)
+    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --certificate '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Web/certificates/[certificate name]'
 
 """
 
