@@ -378,7 +378,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.size = 'Standard_DS1_v2'
         _validate_vm_create_storage_profile(cmd, ns, False)
 
-        self.assertEqual(ns.os_type, 'someOS')
+        self.assertEqual(ns.os_type.value, 'someOS')
         self.assertTrue(0 in ns.disk_info)
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
