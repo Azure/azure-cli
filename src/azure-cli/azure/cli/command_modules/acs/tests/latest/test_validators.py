@@ -148,6 +148,28 @@ class VnetSubnetIdNamespace:
         self.vnet_subnet_id = vnet_subnet_id
 
 
+class MaxSurgeNamespace:
+    def __init__(self, max_surge):
+        self.max_surge = max_surge
+
+
+class TestMaxSurge(unittest.TestCase):
+    def test_valid_cases(self):
+        valid = ["5", "33%", "1", "100%"]
+        for v in valid:
+            validators.validate_max_surge(MaxSurgeNamespace(v))
+
+    def test_throws_on_string(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_max_surge(MaxSurgeNamespace("foobar"))
+        self.assertTrue('int or percentage' in str(cm.exception), msg=str(cm.exception))
+
+    def test_throws_on_negative(self):
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_max_surge(MaxSurgeNamespace("-3"))
+        self.assertTrue('positive' in str(cm.exception), msg=str(cm.exception))
+
+
 class TestLabels(unittest.TestCase):
     def test_invalid_labels_prefix(self):
         invalid_labels = "k8s##.io/label1=value"

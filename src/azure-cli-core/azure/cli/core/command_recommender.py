@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import difflib
 from enum import Enum
 
 import azure.cli.core.telemetry as telemetry
@@ -38,13 +37,13 @@ class AladdinUserFaultType(Enum):
 
 class CommandRecommender():
     """Recommend a command for user when user's command fails.
-    It combines alladin recommendations and examples in help files."""
+    It combines Aladdin recommendations and examples in help files."""
 
     def __init__(self, command, parameters, extension, error_msg, cli_ctx):
         """
         :param command: The command name in user's input.
         :type command: str
-        :param parameters: The parameter arguments in users input.
+        :param parameters: The raw parameters in users input.
         :type parameters: list
         :param extension: The extension name in user's input if the command comes from an extension.
         :type extension: str
@@ -54,11 +53,11 @@ class CommandRecommender():
         :type cli_ctx: knack.cli.CLI
         """
         self.command = command.strip()
+        self.parameters = parameters
         self.extension = extension
         self.error_msg = error_msg
         self.cli_ctx = cli_ctx
 
-        self.parameters = self._normalize_parameters(parameters)
         self.help_examples = []
         self.aladdin_recommendations = []
 
@@ -101,7 +100,8 @@ class CommandRecommender():
             if subscription_id:
                 context['subscriptionId'] = subscription_id
 
-        parameters = [item for item in self.parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
+        parameters = self._normalize_parameters(self.parameters)
+        parameters = [item for item in parameters if item not in ['--debug', '--verbose', '--only-show-errors']]
         query = {
             "command": self.command,
             "parameters": ','.join(parameters)
@@ -127,7 +127,7 @@ class CommandRecommender():
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
             for result in response.json():
-                # parse the reponse and format the recommendation
+                # parse the response and format the recommendation
                 command, parameters, placeholders = result['command'],\
                     result['parameters'].split(','),\
                     result['placeholders'].split('♠')
@@ -143,6 +143,28 @@ class CommandRecommender():
         The recommended command will be the best matched one from
         both the help files and the aladdin recommendations.
         """
+
+        def get_sorted_candidates(target_args, candidate_args_list):
+            """Get the sorted candidates by target arguments"""
+
+            candidates = []
+            for index, candidate_args in enumerate(candidate_args_list):
+                matches = 0
+                for arg in candidate_args:
+                    if arg in target_args:
+                        matches += 1
+                candidates.append({
+                    'candidate_args': candidate_args,
+                    'index': index,
+                    'matches': matches
+                })
+
+            # sort the candidates by the number of matched arguments and total arguments
+            candidates.sort(key=lambda item: (item['matches'], -len(item['candidate_args'])), reverse=True)
+
+            return candidates
+
+        # get recommendations from Aladdin service
         if not self._disable_aladdin_service():
             self._set_aladdin_recommendations()
 
@@ -150,34 +172,31 @@ class CommandRecommender():
         if self.help_examples and self.aladdin_recommendations:
             # all the recommended commands from help examples and aladdin
             all_commands = self.help_examples + self.aladdin_recommendations
-            all_commands.sort(key=len)
 
-            filtered_commands = []
-            filtered_choices = []
-            target = ''.join(self.parameters)
+            candidate_commands = []
+            candidate_args_list = []
+            target_args = self._normalize_parameters(self.parameters)
             example_command_name = self.help_examples[0].split(' -')[0]
 
             for command in all_commands:
                 # keep only the commands which begin with a same command name with examples
                 if command.startswith(example_command_name):
-                    parameters = self._get_parameter_list(command)
-                    normalized_parameters = self._normalize_parameters(parameters)
-                    filtered_choices.append(''.join(normalized_parameters))
-                    filtered_commands.append(command)
+                    candidate_args_list.append(self._normalize_parameters(command.split(' ')))
+                    candidate_commands.append(command)
 
-            # sort the commands by argument matches
-            candidates = difflib.get_close_matches(target, filtered_choices, cutoff=0)
-
+            # sort the candidates by the number of matched arguments and total arguments
+            candidates = get_sorted_candidates(target_args, candidate_args_list)
             if candidates:
-                index = filtered_choices.index(candidates[0])
-                recommend_command = filtered_commands[index]
+                index = candidates[0]['index']
+                recommend_command = candidate_commands[index]
 
         # fallback to use the first recommended command from Aladdin
         elif self.aladdin_recommendations:
             recommend_command = self.aladdin_recommendations[0]
-
-        # set the recommened command into Telemetry
+        # set the recommend command into Telemetry
         self._set_recommended_command_to_telemetry(recommend_command)
+        # replace the parameter values
+        recommend_command = self._replace_parameter_values(recommend_command)
 
         return recommend_command
 
@@ -211,66 +230,65 @@ class CommandRecommender():
 
         return False
 
-    def _get_parameter_list(self, raw_command):  # pylint: disable=no-self-use
-        """Get the paramter list from a raw command string
-        An example: 'az group create -n test -l eastus' ==> ['-n', '-l']
-        """
-        contents = raw_command.split(' ')
-        return [item for item in contents if item.startswith('-')]
-
-    def _normalize_parameters(self, parameters):
-        """Normalize a parameter list.
-        Get the standard form of a parameter list, which includes:
-            1. Use long options to replace short options
-            2. Remove the unrecognized parameters
-            3. Sort the result parameter list
-        An example: ['-g', '-n'] ==> ['--name', '--resource-group']
-        """
+    def _get_parameter_mappings(self):
+        """Get the short option to long option mappings of a command. """
 
         from knack.deprecation import Deprecated
 
-        normalized_parameters = []
         try:
             cmd_table = self.cli_ctx.invocation.commands_loader.command_table.get(self.command, None)
             parameter_table = cmd_table.arguments if cmd_table else None
         except AttributeError:
             parameter_table = None
 
-        if parameters:
-            rules = {
-                '-h': '--help',
-                '-o': '--output',
-                '--only-show-errors': None,
-                '--help': None,
-                '--output': None,
-                '--query': None,
-                '--debug': None,
-                '--verbose': None
-            }
+        param_mappings = {
+            '-h': '--help',
+            '-o': '--output',
+            '--only-show-errors': None,
+            '--help': None,
+            '--output': None,
+            '--query': None,
+            '--debug': None,
+            '--verbose': None
+        }
 
-            if parameter_table:
-                for argument in parameter_table.values():
-                    options = argument.type.settings['options_list']
-                    options = [option for option in options if not isinstance(option, Deprecated)]
-                    # skip the positional arguments
-                    if not options:
-                        continue
-                    try:
-                        sorted_options = sorted(options, key=len, reverse=True)
-                        standard_form = sorted_options[0]
+        if parameter_table:
+            for argument in parameter_table.values():
+                options = argument.type.settings['options_list']
+                options = [option for option in options if not isinstance(option, Deprecated)]
+                # skip the positional arguments
+                if not options:
+                    continue
+                try:
+                    sorted_options = sorted(options, key=len, reverse=True)
+                    standard_form = sorted_options[0]
 
-                        for option in sorted_options[1:]:
-                            rules[option] = standard_form
-                        rules[standard_form] = None
-                    except TypeError:
-                        logger.debug('Unexpected argument options `%s` of type `%s`.', options, type(options).__name__)
+                    for option in sorted_options[1:]:
+                        param_mappings[option] = standard_form
+                    param_mappings[standard_form] = standard_form
+                except TypeError:
+                    logger.debug('Unexpected argument options `%s` of type `%s`.', options, type(options).__name__)
 
-            for parameter in parameters:
-                if parameter in rules:
-                    normalized_form = rules.get(parameter, None) or parameter
-                    normalized_parameters.append(normalized_form)
-                else:
-                    logger.debug('"%s" is an invalid parameter for command "%s".', parameter, self.command)
+        return param_mappings
+
+    def _normalize_parameters(self, raw_parameters):
+        """Normalize a parameter list.
+        Get the standard parameter names of the raw parameters, which includes:
+            1. Use long options to replace short options
+            2. Remove the unrecognized parameter names
+        An example: ['-g', 'RG', '-n', 'NAME'] ==> {'--resource-group': 'RG', '--name': 'NAME'}
+        """
+
+        parameters = self._extract_parameter_names(raw_parameters)
+        normalized_parameters = []
+
+        param_mappings = self._get_parameter_mappings()
+        for parameter in parameters:
+            if parameter in param_mappings:
+                normalized_form = param_mappings.get(parameter, None) or parameter
+                normalized_parameters.append(normalized_form)
+            else:
+                logger.debug('"%s" is an invalid parameter for command "%s".', parameter, self.command)
 
         return sorted(normalized_parameters)
 
@@ -320,3 +338,73 @@ class CommandRecommender():
             error_type = AladdinUserFaultType.ValidationError
 
         return error_type.value
+
+    def _extract_parameter_names(self, parameters):  # pylint: disable=no-self-use
+        """Extract parameter names from the raw parameters.
+        An example: ['-g', 'RG', '-n', 'NAME'] ==> ['-g', '-n']
+        """
+
+        from azure.cli.core.commands import AzCliCommandInvoker
+
+        return AzCliCommandInvoker._extract_parameter_names(parameters)  # pylint: disable=protected-access
+
+    def _replace_parameter_values(self, command):
+        """Replace the parameter values in recommended command with values in user's command
+        An example:
+            recommended command: 'az vm create -n MyVm -g MyResourceGroup --image CentOS'
+            user's command:  'az vm create --name user_vm -g user_rg'
+            ==> 'az vm create -n user_vm -g user_rg --image CentOS'
+        """
+
+        def get_parameter_kwargs(parameters):
+            """Get name value mappings from parameter list
+            An example:
+                ['-g', 'RG', '--name=NAME'] ==> {'-g': 'RG', '--name': 'NAME'}
+            """
+
+            parameter_kwargs = dict()
+            for index, parameter in enumerate(parameters):
+                if parameter.startswith('-'):
+
+                    param_name, param_val = parameter, None
+                    if '=' in parameter:
+                        pieces = parameter.split('=')
+                        param_name, param_val = pieces[0], pieces[1]
+                    elif index + 1 < len(parameters) and not parameters[index + 1].startswith('-'):
+                        param_val = parameters[index + 1]
+
+                    parameter_kwargs[param_name] = param_val
+
+            return parameter_kwargs
+
+        def get_user_param_value(target_param, user_kwargs, param_mappings):
+            """Get user's input value for the target_param. """
+
+            standard_user_kwargs = dict()
+
+            for param, val in user_kwargs.items():
+                if param in param_mappings:
+                    standard_param = param_mappings[param]
+                    standard_user_kwargs[standard_param] = val
+
+            if target_param in param_mappings:
+                standard_target_param = param_mappings[target_param]
+                if standard_target_param in standard_user_kwargs:
+                    return standard_user_kwargs[standard_target_param]
+
+            return None
+
+        user_kwargs = get_parameter_kwargs(self.parameters)
+        param_mappings = self._get_parameter_mappings()
+
+        command_args = command.split(' ')
+        for index, arg in enumerate(command_args):
+            if arg.startswith('-') and index + 1 < len(command_args) and not command_args[index + 1].startswith('-'):
+
+                user_param_val = get_user_param_value(arg, user_kwargs, param_mappings)
+                if user_param_val:
+                    command_args[index + 1] = user_param_val
+                else:
+                    command_args[index + 1] = '<{}>'.format(command_args[index + 1])
+
+        return ' '.join(command_args)

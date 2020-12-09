@@ -33,10 +33,10 @@ logger = get_logger(__name__)
 EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "please make sure the corresponding extension is installed. "
                        "To learn more about extensions, please visit "
-                       "'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'")
+                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
 OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://docs.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest' "
+                      "'https://docs.microsoft.com/cli/azure/reference-index' "
                       "to learn more")
 
 
@@ -275,7 +275,7 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return command, parameters, extension
+        return command, self._raw_arguments, extension
 
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)

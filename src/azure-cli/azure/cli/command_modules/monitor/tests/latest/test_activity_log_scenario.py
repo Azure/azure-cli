@@ -7,7 +7,7 @@ from time import sleep
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
 
-from knack.util import CLIError
+from msrest.exceptions import HttpOperationError
 
 
 # This is a live test because the start and end time can't be determined dynamically
@@ -17,5 +17,5 @@ class TestActivityLogScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_activity_log_list_scenario(self, resource_group):
-        with self.assertRaisesRegexp(CLIError, 'start time cannot be more than 90 days in the past'):
+        with self.assertRaisesRegexp(HttpOperationError, 'start time cannot be more than 90 days in the past'):
             self.cmd('monitor activity-log list --start-time 2018-01-01T00:00:00Z --end-time 2999-01-01T00:00:00Z')
