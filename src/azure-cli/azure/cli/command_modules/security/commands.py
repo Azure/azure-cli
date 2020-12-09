@@ -29,13 +29,31 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_iot_recommendations,
                               cf_security_regulatory_compliance_standards,
                               cf_security_regulatory_compliance_control,
-                              cf_security_regulatory_compliance_assessment)
+                              cf_security_regulatory_compliance_assessment,
+                              cf_security_secure_scores,
+                              cf_security_secure_score_controls,
+                              cf_security_secure_score_control_definitions)
 
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 def load_command_table(self, _):
+
+    security_secure_scores_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecureScoresOperations.{}',
+        client_factory=cf_security_secure_scores
+    )
+
+    security_secure_score_controls_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecureScoreControlsOperations.{}',
+        client_factory=cf_security_secure_score_controls
+    )
+
+    security_secure_score_control_definitions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SecureScoreControlDefinitionsOperations.{}',
+        client_factory=cf_security_secure_score_control_definitions
+    )
 
     security_regulatory_compliance_standards_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceStandardsOperations.{}',
@@ -181,6 +199,23 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#IotRecommendationsOperations.{}',
         client_factory=cf_security_iot_recommendations
     )
+
+    with self.command_group('security secure-scores',
+                            security_secure_scores_sdk,
+                            client_factory=cf_security_secure_scores) as g:
+        g.custom_command('list', 'list_secure_scores')
+        g.custom_show_command('show', 'get_secure_score')
+
+    with self.command_group('security secure-score-controls',
+                            security_secure_score_controls_sdk,
+                            client_factory=cf_security_secure_score_controls) as g:
+        g.custom_command('list', 'list_secure_score_controls')
+        g.custom_show_command('list_by_score', 'list_by_score')
+
+    with self.command_group('security secure-score-control-definitions',
+                            security_secure_score_control_definitions_sdk,
+                            client_factory=cf_security_secure_score_control_definitions) as g:
+        g.custom_command('list', 'list_secure_score_control_definitions')
 
     with self.command_group('security regulatory-compliance-standards',
                             security_regulatory_compliance_standards_sdk,

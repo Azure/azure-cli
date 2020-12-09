@@ -114,7 +114,7 @@ DEPENDENCIES = [
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==10.2.0',
     'azure-mgmt-search~=2.0',
-    'azure-mgmt-security~=0.4.1',
+    'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-signalr~=0.4.0',
