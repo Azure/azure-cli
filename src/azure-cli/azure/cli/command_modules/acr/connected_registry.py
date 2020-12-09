@@ -41,7 +41,7 @@ GATEWAY = "gateway/"
 logger = get_logger(__name__)
 
 
-def acr_connected_registry_create(cmd,
+def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-many-statements
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -64,6 +64,7 @@ def acr_connected_registry_create(cmd,
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if not registry.data_endpoint_enabled:
+        logger.info("Registry '{}' dedicated data endpoint is disabled. Enabling...")
         from .custom import acr_update_custom, acr_update_get, acr_update_set
         acr_update_set(cmd, cf_acr_registries(cmd.cli_ctx), registry_name, resource_group_name,
                        parameters=acr_update_custom(cmd, acr_update_get(cmd), data_endpoint_enabled=True))
@@ -146,6 +147,8 @@ def acr_connected_registry_update(cmd,
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-token-ids and --remove-client-token-ids arguments.\n{}'.format(errors))
 
+    if sync_message_ttl is None:
+        sync_message_ttl = current_connected_registry.parent.sync_properties.message_ttl
     ConnectedRegistryUpdateParameters, SyncProperties, LoggingProperties = cmd.get_models(
                 'ConnectedRegistryUpdateParameters', 'SyncProperties', 'LoggingProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
@@ -157,8 +160,7 @@ def acr_connected_registry_update(cmd,
         ),
         logging=LoggingProperties(
             log_level=log_level,
-            audit_log_status=sync_audit_logs_enabled if sync_audit_logs_enabled is not None else \
-                current_connected_registry.logging.audit_log_status
+            audit_log_status=sync_audit_logs_enabled
         ),
         client_token_ids=list(
             set(current_connected_registry.client_token_ids).

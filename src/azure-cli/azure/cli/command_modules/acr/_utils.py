@@ -455,7 +455,7 @@ class ResourceNotFound(CLIError):
     """
 
 
-# Scope & Tolens help functions
+# Scope & Tokens help functions
 def parse_repositories_from_actions(actions):
     if not actions:
         return []
