@@ -931,8 +931,6 @@ class SubscriptionFinder:
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
                 t.display_name = None
-            if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
-                t.display_name = t.additional_properties.get('displayName')
 
             identity = Identity(self.authority, tenant_id,
                                 allow_unencrypted=self.cli_ctx.config
@@ -957,7 +955,12 @@ class SubscriptionFinder:
                     logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
 
-            logger.info("Finding subscriptions under tenant %s.", tenant_id)
+            tenant_id_name = tenant_id
+            if t.display_name:
+                # e.g. '72f988bf-86f1-41af-91ab-2d7cd011db47 Microsoft'
+                tenant_id_name = "{} '{}'".format(tenant_id, t.display_name)
+            logger.info("Finding subscriptions under tenant %s", tenant_id_name)
+
             subscriptions = self.find_using_specific_tenant(
                 tenant_id,
                 specific_tenant_credential)
