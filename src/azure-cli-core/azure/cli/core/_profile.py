@@ -930,8 +930,6 @@ class SubscriptionFinder:
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
                 t.display_name = None
-            if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
-                t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
                 logger.debug("Acquiring a token with tenant=%s, resource=%s", tenant_id, resource)
@@ -975,7 +973,7 @@ class SubscriptionFinder:
                            "Use 'az login --allow-no-subscriptions' to have tenant level access.")
             for t in empty_tenants:
                 if t.display_name:
-                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                    logger.warning("%s %s", t.tenant_id, t.display_name)
                 else:
                     logger.warning("%s", t.tenant_id)
 
