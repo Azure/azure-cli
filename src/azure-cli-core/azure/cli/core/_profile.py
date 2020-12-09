@@ -973,7 +973,7 @@ class SubscriptionFinder:
                            "Use 'az login --allow-no-subscriptions' to have tenant level access.")
             for t in empty_tenants:
                 if t.display_name:
-                    logger.warning("%s %s", t.tenant_id, t.display_name)
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
                 else:
                     logger.warning("%s", t.tenant_id)
 
