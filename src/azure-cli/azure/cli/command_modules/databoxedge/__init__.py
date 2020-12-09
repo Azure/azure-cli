@@ -9,7 +9,7 @@
 # --------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.command_modules.databoxedge._help import *  # pylint: disable=unused-import
+import azure.cli.command_modules.databoxedge._help  # pylint: disable=unused-import
 
 
 class DataBoxEdgeManagementClientCommandsLoader(AzCommandsLoader):
