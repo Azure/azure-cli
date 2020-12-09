@@ -59,7 +59,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self.authority = authority
         self.tenant_id = tenant_id or "organizations"
         self.client_id = client_id or AZURE_CLI_CLIENT_ID
-        self._cred_cache = AdalCredentialCache()
+        # self._cred_cache = AdalCredentialCache()
+        self._cred_cache = None
         self.allow_unencrypted = kwargs.pop('allow_unencrypted', True)
         self._msal_app_instance = None
         # Store for Service principal credential persistence
@@ -645,7 +646,7 @@ class ServicePrincipalAuth:   # pylint: disable=too-few-public-methods
 
 
 class MsalSecretStore:
-    """Caches secrets in MSAL custom secret store
+    """Caches secrets in MSAL custom secret store for Service Principal authentication.
     """
 
     def __init__(self, fallback_to_plaintext=True):
@@ -669,7 +670,7 @@ class MsalSecretStore:
                            "Trying credential under tenant %s, assuming that is an app credential.",
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
-        return cred.get(_ACCESS_TOKEN, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+        return cred.get(_SERVICE_PRINCIPAL_SECRET, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
         self._load_cached_creds()

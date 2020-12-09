@@ -4,10 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=protected-access
+import os
+import json
 import unittest
 from unittest import mock
 
-from azure.cli.core._identity import Identity
+from azure.cli.core._identity import Identity, ServicePrincipalAuth, MsalSecretStore
 
 
 class TestIdentity(unittest.TestCase):
@@ -55,11 +57,74 @@ class TestIdentity(unittest.TestCase):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         test_cert_file = os.path.join(current_dir, 'err_sp_cert.pem')
         # TODO: wrap exception
-        import OpenSSL
-        with self.assertRaisesRegex(OpenSSL.crypto.Error, 'no start line'):
+        with self.assertRaisesRegex(ValueError, "Unable to load certificate."):
             identity.login_with_service_principal_certificate("00000000-0000-0000-0000-000000000000", test_cert_file)
-        with self.assertRaisesRegex(ValueError, "Could not deserialize key data."):
-            identity.login_with_service_principal_certificate("00000000-0000-0000-0000-000000000000", test_cert_file)
+
+
+class TestServicePrincipalAuth(unittest.TestCase):
+
+    def test_service_principal_auth_client_secret(self):
+        sp_auth = ServicePrincipalAuth('sp_id1', 'tenant1', 'verySecret!')
+        result = sp_auth.get_entry_to_persist()
+        self.assertEqual(result, {
+            'servicePrincipalId': 'sp_id1',
+            'servicePrincipalTenant': 'tenant1',
+            'secret': 'verySecret!'
+        })
+
+    def test_service_principal_auth_client_cert(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
+        sp_auth = ServicePrincipalAuth('sp_id1', 'tenant1', None, test_cert_file)
+
+        result = sp_auth.get_entry_to_persist()
+        self.assertEqual(result, {
+            'servicePrincipalId': 'sp_id1',
+            'servicePrincipalTenant': 'tenant1',
+            'certificateFile': test_cert_file,
+        })
+
+
+class TestMsalSecretStore(unittest.TestCase):
+
+    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
+    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
+    def test_retrieve_secret_of_service_principal_with_secret(self, mock_read_file, mock_read_file2, mock_read_file3):
+        test_sp = [{
+            'servicePrincipalId': 'myapp',
+            'servicePrincipalTenant': 'mytenant',
+            'secret': 'Secret'
+        }]
+        mock_read_file.return_value = json.dumps(test_sp)
+        mock_read_file2.return_value = json.dumps(test_sp)
+        mock_read_file3.return_value = json.dumps(test_sp)
+        from azure.cli.core._identity import MsalSecretStore
+        # action
+        secret_store = MsalSecretStore()
+        token, file = secret_store.retrieve_secret_of_service_principal("myapp", "mytenant")
+
+        self.assertEqual(token, "Secret")
+
+    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
+    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
+    def test_retrieve_secret_of_service_principal_with_cert(self, mock_read_file, mock_read_file2, mock_read_file3):
+        test_sp = [{
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "certificateFile": 'junkcert.pem'
+        }]
+        mock_read_file.return_value = json.dumps(test_sp)
+        mock_read_file2.return_value = json.dumps(test_sp)
+        mock_read_file3.return_value = json.dumps(test_sp)
+        from azure.cli.core._identity import MsalSecretStore
+        # action
+        creds_cache = MsalSecretStore()
+        token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
+
+        # assert
+        self.assertEqual(file, 'junkcert.pem')
 
 
 if __name__ == '__main__':

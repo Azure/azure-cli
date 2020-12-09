@@ -1179,7 +1179,7 @@ class TestProfile(unittest.TestCase):
             resource=cli.cloud.endpoints.active_directory_graph_resource_id)
         _, _ = cred._get_token()
         # verify
-        get_token_mock.assert_called_once_with(mock.ANY, 'https://graph.windows.net/.default')
+        get_token_mock.assert_called_once_with(mock.ANY, 'https://graph.windows.net//.default')
         self.assertEqual(tenant_id, self.tenant_id)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
@@ -1358,8 +1358,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_get_client_class, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_subscription_finder, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1388,8 +1388,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], 'microsoft.com')
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_get_client_class, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_subscription_finder, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1418,8 +1418,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], self.test_msi_tenant)
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_get_client_class, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_subscription_finder, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1486,8 +1486,8 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], 'microsoft.com')
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
-    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
-    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_get_client_class, get_token_mock):
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
+    def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_subscription_finder, get_token_mock):
         class SubscriptionFinderStub:
             def find_using_specific_tenant(self, tenant, credential):
                 # make sure the tenant and token args match 'TestProfile.test_msi_access_token'
@@ -1634,45 +1634,6 @@ class TestProfile(unittest.TestCase):
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file, mock_read_file2, mock_read_file3):
-        test_sp = [{
-            'servicePrincipalId': 'myapp',
-            'servicePrincipalTenant': 'mytenant',
-            'accessToken': 'Secret'
-        }]
-        mock_read_file.return_value = json.dumps(test_sp)
-        mock_read_file2.return_value = json.dumps(test_sp)
-        mock_read_file3.return_value = json.dumps(test_sp)
-        from azure.cli.core._identity import MsalSecretStore
-        # action
-        creds_cache = MsalSecretStore()
-        token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
-
-        self.assertEqual(token, "Secret")
-
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
-    def test_credscache_load_tokens_and_sp_creds_with_cert(self, mock_read_file, mock_read_file2, mock_read_file3):
-        test_sp = [{
-            "servicePrincipalId": "myapp",
-            "servicePrincipalTenant": "mytenant",
-            "certificateFile": 'junkcert.pem'
-        }]
-        mock_read_file.return_value = json.dumps(test_sp)
-        mock_read_file2.return_value = json.dumps(test_sp)
-        mock_read_file3.return_value = json.dumps(test_sp)
-        from azure.cli.core._identity import MsalSecretStore
-        # action
-        creds_cache = MsalSecretStore()
-        token, file = creds_cache.retrieve_secret_of_service_principal("myapp", "mytenant")
-
-        # assert
-        self.assertEqual(file, 'junkcert.pem')
-
-    @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
-    @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
     @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
@@ -1805,36 +1766,6 @@ class TestProfile(unittest.TestCase):
             creds_cache._load_cached_creds()
 
         self.assertTrue(re.findall(r'bad error for you', str(context.exception)))
-
-    def test_service_principal_auth_client_secret(self):
-        from azure.cli.core._identity import ServicePrincipalAuth
-        sp_auth = ServicePrincipalAuth('sp_id1', 'tenant1', 'verySecret!')
-        result = sp_auth.get_entry_to_persist()
-        self.assertEqual(result, {
-            'servicePrincipalId': 'sp_id1',
-            'servicePrincipalTenant': 'tenant1',
-            'accessToken': 'verySecret!'
-        })
-
-    def test_service_principal_auth_client_cert(self):
-        from azure.cli.core._identity import ServicePrincipalAuth
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'sp_cert.pem')
-        sp_auth = ServicePrincipalAuth('sp_id1', 'tenant1', None, test_cert_file)
-
-        result = sp_auth.get_entry_to_persist()
-        self.assertEqual(result, {
-            'servicePrincipalId': 'sp_id1',
-            'servicePrincipalTenant': 'tenant1',
-            'certificateFile': test_cert_file,
-            'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
-        })
-
-    def test_service_principal_auth_client_cert_err(self):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        test_cert_file = os.path.join(curr_dir, 'err_sp_cert.pem')
-        with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
-            ServicePrincipalAuth(test_cert_file)
 
     @unittest.skip("todo: wait for identity support")
     @mock.patch('adal.AuthenticationContext', autospec=True)
