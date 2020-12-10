@@ -2,28 +2,54 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [lock list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.5
-          msrest_azure/0.4.34 managementlockclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.46]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - lock list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/locks?api-version=2016-09-01
   response:
-    body: {string: '{"value":[]}'}
+    body:
+      string: '{"value":[{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_cannotdelete_resource_lock3en4tgxoualk4smbe5qf7skykvcq3c4onu6kp2ee/providers/Microsoft.Network/virtualNetworks/cli.lock.rsrcy5czyytrjgekfye2j/providers/Microsoft.Authorization/locks/cli-test-lockittdxecoshqaldrgtfg2dhte4p7hzizmvbcnh7qcqi3omn3msydndffdhzchj","type":"Microsoft.Authorization/locks","name":"cli-test-lockittdxecoshqaldrgtfg2dhte4p7hzizmvbcnh7qcqi3omn3msydndffdhzchj"},{"properties":{"level":"CanNotDelete","notes":"Auto-created
+        by Azure Backup for storage accounts registered with a Recovery Services Vault.
+        This lock is intended to guard against deletion of backups due to accidental
+        deletion of the storage account."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/gokul-testrg4/providers/microsoft.storage/storageAccounts/cd2zky4hqprtqazscripts/providers/Microsoft.Authorization/locks/AzureBackupProtectionLock","type":"Microsoft.Authorization/locks","name":"AzureBackupProtectionLock"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_idkp2emdnidcqzpqr4bqgph45b7izwtrfosv5kbkllmv55w/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetyirrar4sn6vrqoinl/providers/Microsoft.Authorization/locks/cli-test-lockqk5hwndolwcfy64aqgkslww2tossfzw6zxiyn","type":"Microsoft.Authorization/locks","name":"cli-test-lockqk5hwndolwcfy64aqgkslww2tossfzw6zxiyn"},{"properties":{"level":"CanNotDelete"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_lock_with_resource_idkp2emdnidcqzpqr4bqgph45b7izwtrfosv5kbkllmv55w/providers/Microsoft.Network/virtualNetworks/cli-lock-vnetyirrar4sn6vrqoinl/subnets/cli-lock-subnetg5t5ilbfegvb6cf/providers/Microsoft.Authorization/locks/cli-test-lockltwdg7s","type":"Microsoft.Authorization/locks","name":"cli-test-lockltwdg7s"},{"properties":{"level":"CanNotDelete","notes":"Deleting
+        a domain will make it unavailable to purchase for 60 days. Please remove the
+        lock before deleting this domain."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/dania-what-if/providers/Microsoft.DomainRegistration/domains/alias140.net/providers/Microsoft.Authorization/locks/alias140.net","type":"Microsoft.Authorization/locks","name":"alias140.net"},{"properties":{"level":"CanNotDelete","notes":"This
+        DNS zone was created when purchasing a domain and is likely still required
+        by the domain. If you still want to delete this DNS zone please remove the
+        lock and delete the zone."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/dania-what-if/providers/Microsoft.Network/dnszones/alias140.net/providers/Microsoft.Authorization/locks/alias140.net","type":"Microsoft.Authorization/locks","name":"alias140.net"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 10 Sep 2018 15:52:21 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '2866'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 15:46:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

@@ -5,11 +5,17 @@
             "name": "Azure CLI Debug (Integrated Console)",
             "type": "python",
             "request": "launch",
-            "pythonPath": "${command:python.interpreterPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
-                "--help"
+                "deployment",
+                "group",
+                "validate",
+                "-g",
+                "TemplateSpecsCLI",
+                "-s",
+                "/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Resources/templateSpecs/Notification3/versions/VersionOne"
             ],
             "console": "integratedTerminal",
             "debugOptions": [
@@ -24,7 +30,7 @@
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
-            "pythonPath": "${command:python.interpreterPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [
@@ -40,7 +46,7 @@
             "name": "Azdev Scripts",
             "type": "python",
             "request": "launch",
-            "pythonPath": "${command:python.interpreterPath}",
+            "python": "${command:python.interpreterPath}",
             "program": "${workspaceRoot}/tools/automation/__main__.py",
             "cwd": "${workspaceRoot}",
             "args": [

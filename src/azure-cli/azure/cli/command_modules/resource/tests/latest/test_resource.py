@@ -661,79 +661,79 @@ class ProviderOperationTest(ScenarioTest):
 
 class TemplateSpecsTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', location='westus')
-    def test_list_template_spec(self, resource_group, resource_group_one, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'rg': resource_group,
-            'rg1': resource_group_one,
-            'resource_group_location': resource_group_location,
-        })
+    # @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', parameter_name='resource_group_one', location='westus')
+    # @ResourceGroupPreparer(name_prefix='cli_test_template_specs_list', location='westus')
+    # def test_list_template_spec(self, resource_group, resource_group_one, resource_group_location):
+    #     curr_dir = os.path.dirname(os.path.realpath(__file__))
+    #     template_spec_name = self.create_random_name('cli-test-list-template-spec', 60)
+    #     self.kwargs.update({
+    #         'template_spec_name': template_spec_name,
+    #         'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+    #         'rg': resource_group,
+    #         'rg1': resource_group_one,
+    #         'resource_group_location': resource_group_location,
+    #     })
 
-        template_spec_in_rg = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_2 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
-        template_spec_in_rg1_3 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+    #     template_spec_in_rg = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+    #     template_spec_in_rg1_2 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
+    #     template_spec_in_rg1_3 = self.cmd('ts create -g {rg1} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}"').get_output_in_json()
 
-        self.kwargs['template_spec_id_rg'] = template_spec_in_rg['id'].replace('/versions/1.0', '')
+    #     self.kwargs['template_spec_id_rg'] = template_spec_in_rg['id'].replace('/versions/1.0', '')
 
-        self.kwargs['template_spec_version_id_rg1_2'] = template_spec_in_rg1_2['id']
-        self.kwargs['template_spec_version_id_rg1_3'] = template_spec_in_rg1_3['id']
-        self.kwargs['template_spec_id_rg1'] = template_spec_in_rg1_2['id'].replace('/versions/2.0', '')
+    #     self.kwargs['template_spec_version_id_rg1_2'] = template_spec_in_rg1_2['id']
+    #     self.kwargs['template_spec_version_id_rg1_3'] = template_spec_in_rg1_3['id']
+    #     self.kwargs['template_spec_id_rg1'] = template_spec_in_rg1_2['id'].replace('/versions/2.0', '')
 
-        self.cmd('ts list -g {rg1}', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 0),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
-                 ])
+    #     self.cmd('ts list -g {rg1}', checks=[
+    #              self.check("length([?id=='{template_spec_id_rg}'])", 0),
+    #              self.check("length([?id=='{template_spec_id_rg1}'])", 1),
+    #              ])
 
-        self.cmd('ts list -g {rg}', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 0)
-                 ])
+    #     self.cmd('ts list -g {rg}', checks=[
+    #              self.check("length([?id=='{template_spec_id_rg}'])", 1),
+    #              self.check("length([?id=='{template_spec_id_rg1}'])", 0)
+    #              ])
 
-        self.cmd('ts list -g {rg1} -n {template_spec_name}', checks=[
-                 self.check('length([])', 2),
-                 self.check("length([?id=='{template_spec_version_id_rg1_2}'])", 1),
-                 self.check("length([?id=='{template_spec_version_id_rg1_3}'])", 1)
-                 ])
+    #     self.cmd('ts list -g {rg1} -n {template_spec_name}', checks=[
+    #              self.check('length([])', 2),
+    #              self.check("length([?id=='{template_spec_version_id_rg1_2}'])", 1),
+    #              self.check("length([?id=='{template_spec_version_id_rg1_3}'])", 1)
+    #              ])
 
-        self.cmd('ts list', checks=[
-                 self.check("length([?id=='{template_spec_id_rg}'])", 1),
-                 self.check("length([?id=='{template_spec_id_rg1}'])", 1),
-                 ])
+    #     self.cmd('ts list', checks=[
+    #              self.check("length([?id=='{template_spec_id_rg}'])", 1),
+    #              self.check("length([?id=='{template_spec_id_rg1}'])", 1),
+    #              ])
 
-        # clean up
-        self.cmd('ts delete --template-spec {template_spec_id_rg} --yes')
-        self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
+    #     # clean up
+    #     self.cmd('ts delete --template-spec {template_spec_id_rg} --yes')
+    #     self.cmd('ts delete --template-spec {template_spec_id_rg1} --yes')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_create_template_specs(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'template_spec_with_multiline_strings.json').replace('\\', '\\\\'),
-            'resource_group_location': resource_group_location,
-            'description': '"AzCLI test root template spec"',
-            'version_description': '"AzCLI test version of root template spec"',
-        })
+    # @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    # def test_create_template_specs(self, resource_group, resource_group_location):
+    #     curr_dir = os.path.dirname(os.path.realpath(__file__))
+    #     template_spec_name = self.create_random_name('cli-test-create-template-spec', 60)
+    #     self.kwargs.update({
+    #         'template_spec_name': template_spec_name,
+    #         'tf': os.path.join(curr_dir, 'template_spec_with_multiline_strings.json').replace('\\', '\\\\'),
+    #         'resource_group_location': resource_group_location,
+    #         'description': '"AzCLI test root template spec"',
+    #         'version_description': '"AzCLI test version of root template spec"',
+    #     })
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
-            self.check('template.variables.provider', "[split(parameters('resource'), '/')[0]]"),
-            self.check('template.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
-            self.check('template.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
-            self.check('template.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
-            self.check('template.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
-            self.check('template.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
-            self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
-        ]).get_output_in_json()
+    #     result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --description {description} --version-description {version_description}', checks=[
+    #         self.check('template.variables.provider', "[split(parameters('resource'), '/')[0]]"),
+    #         self.check('template.variables.resourceType', "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]"),
+    #         self.check('template.variables.hyphenedName', ("[format('[0]-[1]-[2]-[3]-[4]-[5]', parameters('customer'), variables('environments')[parameters('environment')], variables('locations')[parameters('location')], parameters('group'), parameters('service'), if(equals(parameters('kind'), ''), variables('resources')[variables('provider')][variables('resourceType')], variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]")),
+    #         self.check('template.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
+    #         self.check('template.variables.isInstanceCount', "[greater(parameters('instance'), -1)]"),
+    #         self.check('template.variables.hyphenedNameAfterInstanceCount', "[if(variables('isInstanceCount'), format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))), variables('removeOptionalsFromHyphenedName'))]"),
+    #         self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
+    #     ]).get_output_in_json()
 
-        # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
+    #     # clean up
+    #     self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+    #     self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_create_template_specs_with_artifacts(self, resource_group, resource_group_location):
