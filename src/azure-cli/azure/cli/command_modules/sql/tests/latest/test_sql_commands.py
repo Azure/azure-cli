@@ -3509,10 +3509,11 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
 
         maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_Mon_Fri_10PM_6AM'
+        short_maintenance_config_id = 'MI_Mon_Fri_10PM_6AM'
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
 
         # test create sql managed_instance with FMW
-        managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
+        managed_instance_2 = self.cmd('sql mi create -g {} -n {} -l {} '
                                       '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maintenance-configuration-id "{}"'
                                       .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
                                       checks=[
@@ -3528,7 +3529,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('proxyOverride', proxy_override),
                                           JMESPathCheck('publicDataEndpointEnabled', 'True'),
                                           JMESPathCheck('timezoneId', timezone_id),
-                                          JMESPathCheck('maintenanceConfigurationId', maintenance_configuration_id)]).get_output_in_json()
+                                          JMESPathCheck('maintenanceConfigurationId', short_maintenance_config_id)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'

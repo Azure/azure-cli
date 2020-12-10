@@ -3633,8 +3633,7 @@ def managed_instance_update(
     if tags is not None:
         instance.tags = tags
 
-    if maintenance_configuration_id is not None:
-        instance.maintenance_configuration_id = maintenance_configuration_id
+    instance.maintenance_configuration_id = maintenance_configuration_id
 
     return instance
 
