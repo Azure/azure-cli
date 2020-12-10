@@ -3513,23 +3513,23 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
 
         # test create sql managed_instance with FMW
-        managed_instance_2 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maintenance-configuration-id "{}"'
-                                      .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
-                                      checks=[
-                                          JMESPathCheck('resourceGroup', resource_group_1),
-                                          JMESPathCheck('name', managed_instance_name_2),
-                                          JMESPathCheck('administratorLogin', user),
-                                          JMESPathCheck('licenseType', license_type),
-                                          JMESPathCheck('vCores', v_cores),
-                                          JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                                          JMESPathCheck('sku.tier', edition),
-                                          JMESPathCheck('sku.family', families[0]),
-                                          JMESPathCheck('collation', collation),
-                                          JMESPathCheck('proxyOverride', proxy_override),
-                                          JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                                          JMESPathCheck('timezoneId', timezone_id),
-                                          JMESPathCheck('maintenanceConfigurationId', short_maintenance_config_id)]).get_output_in_json()
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maintenance-configuration-id "{}"'
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', managed_instance_name_2),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', families[0]),
+                     JMESPathCheck('collation', collation),
+                     JMESPathCheck('proxyOverride', proxy_override),
+                     JMESPathCheck('publicDataEndpointEnabled', 'True'),
+                     JMESPathCheck('timezoneId', timezone_id),
+                     JMESPathCheck('maintenanceConfigurationId', short_maintenance_config_id)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
