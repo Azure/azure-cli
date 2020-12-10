@@ -14,18 +14,17 @@ https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guideli
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
 
-import re
+import sys
 from enum import Enum
-from colorama import Fore
 
-current_color = None
+from colorama import Fore
 
 
 class Style(str, Enum):
     PRIMARY = "primary"
     SECONDARY = "secondary"
     IMPORTANT = "important"
-    ACTION = "action"
+    ACTION = "action"  # name TBD
     HYPERLINK = "hyperlink"
     # Message colors
     ERROR = "error"
@@ -48,10 +47,9 @@ THEME = {
 }
 
 
-def print_styled_text(styled):
+def print_styled_text(styled, file=sys.stderr):
     formatted = format_styled_text(styled)
-    import sys
-    print(formatted, file=sys.stderr)
+    print(formatted, file=file)
 
 
 def format_styled_text(styled_text):
