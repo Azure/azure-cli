@@ -1448,21 +1448,29 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
-    def test_credscache_retrieve_sp_secret_with_cert(self, mock_read_file):
+    def test_credscache_retrieve_sp_cred(self, mock_read_file):
         cli = DummyCli()
-        test_sp = {
-            "servicePrincipalId": "myapp",
-            "servicePrincipalTenant": "mytenant",
-            "certificateFile": 'junkcert.pem'
-        }
-        mock_read_file.return_value = [test_sp]
+        test_cache = [
+            {
+                "servicePrincipalId": "myapp",
+                "servicePrincipalTenant": "mytenant",
+                "accessToken": "Secret"
+            },
+            {
+                "servicePrincipalId": "myapp2",
+                "servicePrincipalTenant": "mytenant",
+                "certificateFile": 'junkcert.pem'
+            }
+        ]
+        mock_read_file.return_value = test_cache
 
         # action
         creds_cache = CredsCache(cli, async_persist=False)
         creds_cache.load_adal_token_cache()
 
         # assert
-        self.assertEqual(creds_cache.retrieve_cred_for_service_principal(test_sp['servicePrincipalId']), None)
+        self.assertEqual(creds_cache.retrieve_cred_for_service_principal('myapp'), 'Secret')
+        self.assertEqual(creds_cache.retrieve_cred_for_service_principal('myapp2'), 'junkcert.pem')
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
