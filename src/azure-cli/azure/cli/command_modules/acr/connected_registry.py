@@ -19,7 +19,8 @@ from ._utils import (
     get_scope_map_from_id,
     parse_actions_from_repositories,
     parse_repositories_from_actions,
-    parse_actions_from_gateways
+    parse_actions_from_gateways,
+    build_token_id
 )
 
 class ConnectedRegistryModes(Enum):
@@ -45,8 +46,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   registry_name,
                                   connected_registry_name,
                                   repositories=None,
-                                  sync_token_id=None,
-                                  client_token_ids=None,
+                                  sync_token_name=None,
+                                  client_token_list=None,
                                   resource_group_name=None,
                                   mode=None,
                                   parent_name=None,
@@ -56,8 +57,8 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                                   log_level=None,
                                   sync_audit_logs_enabled=True):
 
-    if bool(sync_token_id) == bool(repositories):
-        raise CLIError("usage error: you need to provide either --sync-token-id or --repository, but not both.")
+    if bool(sync_token_name) == bool(repositories):
+        raise CLIError("usage error: you need to provide either --sync-token-name or --repository, but not both.")
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -82,9 +83,14 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                            "when the connected registry parent '{}' mode is '{}'.".format(parent_name, parent.mode) +
                            "For more information on connected registries, please visit https://aka.ms/acr/onprem.")
 
-    if sync_token_id is None:
+    if sync_token_name:
+        sync_token_id = build_token_id(subscription_id, resource_group_name, registry_name, sync_token_name)
+    else:
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
-                                           connected_registry_name, repositories, mode)
+                                           connected_registry_name, repositories, mode).id
+
+    for i, client_token_name in enumerate(client_token_list):
+        client_token_list[i] = build_token_id(subscription_id, resource_group_name, registry_name, client_token_name)
 
     ConnectedRegistry, LoggingProperties, SyncProperties, ParentProperties = cmd.get_models(
         'ConnectedRegistry', 'LoggingProperties', 'SyncProperties', 'ParentProperties')
@@ -100,7 +106,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                 sync_window=sync_window
             )
         ),
-        client_token_ids=client_token_ids,
+        client_token_ids=client_token_list,
         logging=LoggingProperties(
             log_level=log_level,
             audit_log_status='Enabled' if sync_audit_logs_enabled else 'Disabled'
@@ -121,8 +127,8 @@ def acr_connected_registry_update(cmd,
                                   client,
                                   registry_name,
                                   connected_registry_name,
-                                  add_client_token_ids=None,
-                                  remove_client_token_ids=None,
+                                  add_client_token_list=None,
+                                  remove_client_token_list=None,
                                   resource_group_name=None,
                                   sync_schedule=None,
                                   sync_window=None,
@@ -131,19 +137,26 @@ def acr_connected_registry_update(cmd,
                                   sync_audit_logs_enabled=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-
+    subscription_id = get_subscription_id(cmd.cli_ctx)
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
+    for i, client_token_name in enumerate(add_client_token_list):
+        add_client_token_list[i] = build_token_id(
+            subscription_id, resource_group_name, registry_name, client_token_name)
+    for i, client_token_name in enumerate(remove_client_token_list):
+        remove_client_token_list[i] = build_token_id(
+            subscription_id, resource_group_name, registry_name, client_token_name)
+
     # Add or remove from the current client token id list
-    add_client_token_set = set(add_client_token_ids) if add_client_token_ids else set()
-    remove_client_token_set = set(remove_client_token_ids) if remove_client_token_ids else set()
+    add_client_token_set = set(add_client_token_list) if add_client_token_list else set()
+    remove_client_token_set = set(remove_client_token_list) if remove_client_token_list else set()
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
         errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_client_token))
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
-            '--add-client-token-ids and --remove-client-token-ids arguments.\n{}'.format(errors))
+            '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
 
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
                 'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')

@@ -541,6 +541,11 @@ def create_default_scope_map(cmd,
     return scope_map
 
 
+def build_token_id(subscription_id, resource_group_name, registry_name, token_name):
+    return "/subscriptions/{}/resourceGroups/{}".format(subscription_id, resource_group_name) + \
+            "/providers/Microsoft.ContainerRegistry/registries/{}/tokens/{}".format(registry_name, token_name)
+
+
 def get_token_from_id(cmd, token_id):
     from ._client_factory import cf_acr_tokens
     from .token import acr_token_show

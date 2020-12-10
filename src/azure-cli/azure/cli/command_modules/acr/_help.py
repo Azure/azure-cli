@@ -1227,13 +1227,13 @@ examples:
   - name: Create a mirror connected registry with only read permissions and pass the sync token
     text: |
         az acr connected-registry create --registry mycloudregistry --mode mirror
-            --parent myconnectedregistry --name mymirroracr --sync-token mySyncToken
+            --parent myconnectedregistry --name mymirroracr --sync-token mySyncTokenName
   - name: Create a mirror connected registry with client tokens and audit logs disabled, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create --registry mycloudregistry --mode mirror
             --parent myconnectedregistry --name mymirroracr --repository app/mycomponent
             --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
-            --client-tokens myToken1 myToken2
+            --client-tokens myTokenName1 myTokenName2
 """
 
 helps['acr connected-registry delete'] = """
@@ -1310,7 +1310,7 @@ examples:
   - name: Update the connected registry client Tokens.
     text: |
         az acr connected-registry update --registry mycloudregistry --name myconnectedregistry
-            --add-client-token <token-id-1> --remove-client-token <token-id-2>
+            --remove-client-tokens myTokenName1 --add-client-tokens myTokenName2 myTokenName3
 
   - name: Update the sync and window time, and disable audit logs of a connected registry.
     text: |
