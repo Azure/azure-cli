@@ -400,6 +400,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be synched to the Connected ACR. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_id', options_list=['--sync-token-id'], help='Specifies the sync token needed to be synched to the Connected ACR. It can include access for multiple repositories.', required=False)
         c.argument('fresh_install', options_list=['--fresh-install'], help='Creates a new password for the sync token.', required=False)
+        c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
         c.argument('registry_volume', options_list=['--registry-volume'], help='Loads the values for REGISTRY_CERTIFICATE_VOLUME and REGISTRY_DATA_VOLUME.', required=False)
 
     with self.argument_context('acr connected-registry create') as c:
@@ -410,11 +411,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
 
     with self.argument_context('acr connected-registry update') as c:
-        # TODO cleanup
-        #c.argument('add_repository', options_list=['--add-repository'], nargs='*', required=False,
-        #           help='Repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
-        #c.argument('remove_repository', options_list=['--remove-repository'], nargs='*', required=False,
-        #           help='Respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('add_client_token_ids', options_list=['--add-client-token'], nargs='*', required=False,
                    help='Client tokens to be added. Use the format "--add-client-token [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
         c.argument('remove_client_token_ids', options_list=['--remove-client-token'], nargs='*', required=False,
@@ -422,10 +418,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False)
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
-
-
-    with self.argument_context('acr connected-registry list') as c:
-        c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
 
 
 def _get_helm_default_install_location():

@@ -359,7 +359,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.show_command('show', 'acr_connected_registry_show')
         g.command('deactivate', 'acr_connected_registry_deactivate')
         g.command('update', 'acr_connected_registry_update')
-        g.command('install', 'acr_connected_registry_install')
+        g.command('install-info', 'acr_connected_registry_install_info')
         g.command('list', 'acr_connected_registry_list',
                   table_transformer=connected_registry_list_output_format)
         g.command('list-client-tokens', 'acr_connected_registry_list_client_tokens',
