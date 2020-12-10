@@ -495,13 +495,13 @@ examples:
         --resource-group rg
 """
 
-helps['synapse workspace key get'] = """
+helps['synapse workspace key show'] = """
 type: command
-short-summary: Get a workspace's key by name.
+short-summary: Show a workspace's key by name.
 examples:
-  - name: Get a workspace's key.
+  - name: Show a workspace's key.
     text: |-
-        az synapse workspace key get --key-name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace key show --key-name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg
 """
 
@@ -512,6 +512,11 @@ examples:
   - name: List keys under specified workspace.
     text: |-
         az synapse workspace key list --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse workspace key wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a workspace key is met.
 """
 
 helps['synapse workspace firewall-rule'] = """
