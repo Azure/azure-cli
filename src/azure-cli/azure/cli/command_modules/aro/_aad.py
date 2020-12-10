@@ -19,7 +19,7 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class AADManager():
+class AADManager:
     MANAGED_APP_PREFIX = 'https://az.aro.azure.com/'
 
     def __init__(self, cli_ctx):
