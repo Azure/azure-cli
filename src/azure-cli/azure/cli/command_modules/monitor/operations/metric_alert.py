@@ -16,7 +16,8 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
                         auto_mitigate=None, target_resource_type=None, target_resource_region=None):
     from azure.mgmt.monitor.models import (MetricAlertResource,
                                            MetricAlertSingleResourceMultipleMetricCriteria,
-                                           MetricAlertMultipleResourceMultipleMetricCriteria)
+                                           MetricAlertMultipleResourceMultipleMetricCriteria,
+                                           MetricCriteria)
     from azure.cli.core import CLIError
     # generate names for the conditions
     for i, cond in enumerate(condition):
@@ -28,7 +29,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
             raise CLIError('--target-resource-type and --target-resource-region must be provided.')
         criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
     else:
-        if len(scopes) == 1:
+        if len(scopes) == 1 and isinstance(condition, MetricCriteria):
             criteria = MetricAlertSingleResourceMultipleMetricCriteria(all_of=condition)
         else:
             criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
