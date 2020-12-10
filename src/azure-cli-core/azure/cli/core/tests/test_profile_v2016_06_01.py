@@ -1379,7 +1379,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
         mock_arm_client.subscriptions.list.side_effect = deepcopy([[self.subscription1], [self.subscription2, sp_subscription1]])
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
-        profile._creds_cache.retrieve_secret_of_service_principal = lambda _: 'verySecret'
+        profile._creds_cache.retrieve_cred_for_service_principal = lambda _: 'verySecret'
         profile._creds_cache.flush_to_disk = lambda _: ''
         # action
         profile.refresh_accounts(finder)
@@ -1462,7 +1462,7 @@ class TestProfile(unittest.TestCase):
         creds_cache.load_adal_token_cache()
 
         # assert
-        self.assertEqual(creds_cache.retrieve_secret_of_service_principal(test_sp['servicePrincipalId']), None)
+        self.assertEqual(creds_cache.retrieve_cred_for_service_principal(test_sp['servicePrincipalId']), None)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
