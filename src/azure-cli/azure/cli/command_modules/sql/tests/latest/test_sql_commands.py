@@ -3514,7 +3514,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # test create sql managed_instance with FMW
         self.cmd('sql mi create -g {} -n {} -l {} '
-                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maintenance-configuration-id "{}"'
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maint-config-id "{}"'
                  .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),

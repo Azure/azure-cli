@@ -1672,7 +1672,7 @@ def load_arguments(self, _):
                    help='Do not prompt for confirmation.', action='store_true')
 
         c.argument('maintenance_configuration_id',
-                   options_list=['--maintenance-configuration-id', '-m'],
+                   options_list=['--maint-config-id', '-m'],
                    help='Assign maintenance configuration to this managed instance.')
 
     with self.argument_context('sql mi update') as c:
@@ -1691,6 +1691,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        c.argument('maintenance_configuration_id',
+                   options_list=['--maint-config-id', '-m'],
+                   help='Change maintenance configuration for this managed instance.')
 
         # Create args that will be used to build up the Managed Instance's Sku object
         create_args_for_complex_type(
