@@ -7,7 +7,7 @@
 
 import time
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, record_only)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 
 
 # pylint: disable=line-too-long
@@ -16,7 +16,6 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, record_only)
 
 class EHEventhubCURDScenarioTest(ScenarioTest):
 
-    @record_only()  # This test relies on existing resources in a specific subscription
     @ResourceGroupPreparer(name_prefix='cli_test_eh_eventnhub')
     def test_eh_eventhub(self, resource_group):
         self.kwargs.update({

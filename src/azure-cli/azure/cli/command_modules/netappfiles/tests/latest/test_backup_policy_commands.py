@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "eastus2"
+LOCATION = "eastus2euap"
 
 
 class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
