@@ -15,7 +15,7 @@ from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION
                          ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
                          NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT,
-                         DOTNET_TARGET_FRAMEWORK_STRING)
+                         DOTNET_TARGET_FRAMEWORK_STRING, APP_NAME_NOUNS, APP_NAME_ADJECTIVES)
 
 logger = get_logger(__name__)
 
@@ -431,3 +431,14 @@ def should_create_new_app(cmd, rg_name, app_name):  # this is currently referenc
         if item.name.lower() == app_name.lower():
             return False
     return True
+
+
+def generate_default_app_name():
+    import uuid
+    from random import choice
+
+    noun = choice(APP_NAME_NOUNS)
+    adjective = choice(APP_NAME_ADJECTIVES)
+    random_uuid = str(uuid.uuid4().hex)
+
+    return '{}-{}-{}'.format(adjective, noun, random_uuid)
