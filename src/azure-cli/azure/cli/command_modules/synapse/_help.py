@@ -32,6 +32,22 @@ examples:
         az synapse workspace create --name fromcli4 --resource-group rg \\
           --storage-account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
+  - name: Create a Synapse workspace using customer-managed key
+    text: |-
+        az synapse workspace create --name fromcli4 --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --key-identitier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+"""
+
+helps['synapse workspace activate'] = """
+type: command
+short-summary: Activate workspace using customer-managed key after creating.
+examples:
+  - name: Activate workspace using customer-managed key after creating.
+    text: |-
+        az synapse workspace activate --key-name existedkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
 helps['synapse workspace list'] = """
@@ -452,6 +468,50 @@ examples:
     text: |-
         az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
         --state Disabled
+"""
+
+helps['synapse workspace key'] = """
+type: group
+short-summary:  Manage workspace's keys.
+"""
+
+helps['synapse workspace key create'] = """
+type: command
+short-summary: Create a workspace's key.
+examples:
+  - name: Create a workspace's key.
+    text: |-
+        az synapse workspace key create --key-name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key delete'] = """
+type: command
+short-summary: Delete a workspace's key. The key at active status can't be deleted.
+examples:
+  - name: Delete a workspace's key.
+    text: |-
+        az synapse workspace key delete --key-name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key get'] = """
+type: command
+short-summary: Get a workspace's key by name.
+examples:
+  - name: Get a workspace's key.
+    text: |-
+        az synapse workspace key get --key-name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key list'] = """
+type: command
+short-summary: List keys under specified workspace.
+examples:
+  - name: List keys under specified workspace.
+    text: |-
+        az synapse workspace key list --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse workspace firewall-rule'] = """

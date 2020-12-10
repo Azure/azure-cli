@@ -47,7 +47,7 @@ def _configure_security_or_audit_policy_storage_params(arg_ctx):
 
 def load_arguments(self, _):
     # synapse workspace
-    for scope in ['show', 'create', 'update', 'delete']:
+    for scope in ['show', 'create', 'update', 'delete', 'activate']:
         with self.argument_context('synapse workspace ' + scope) as c:
             c.argument('workspace_name', arg_type=name_type, id_part='name', help='The workspace name.')
 
@@ -56,17 +56,23 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
+            c.argument('key_name', help='The workspace key name.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument("storage_account", validator=validate_storage_account,
                    help='The data lake storage account name or resource id.')
         c.argument('file_system', help='The file system of the data lake storage account.')
+        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
         c.argument('sql_admin_login_user', options_list=['--sql-admin-login-user', '-u'],
                    help='The sql administrator login user name.')
         c.argument('enable_managed_virtual_network', options_list=['--enable-managed-vnet',
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
+
+    with self.argument_context('synapse workspace activate') as c:
+        c.argument('key_name', help='The workspace key name.')
+        c.argument('key_vault_url', help='The Key Vault Url of the workspace key.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -290,6 +296,21 @@ def load_arguments(self, _):
         c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
         c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
                                           'Must be greater than or equal to startIpAddress.')
+
+    # synapse workspace key
+    with self.argument_context('synapse workspace key') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    with self.argument_context('synapse workspace key list') as c:
+        c.argument('workspace_name', id_part=None, help='The workspace name.')
+
+    for scope in ['show', 'create', 'delete']:
+        with self.argument_context('synapse workspace key ' + scope) as c:
+            c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace key name.')
+
+    for scope in ['create']:
+        with self.argument_context('synapse workspace key create') as c:
+            c.argument('key_vault_url', help='The Key Vault Url of the workspace key.')
 
     # synapse spark job
     for scope in ['job', 'session', 'statement']:

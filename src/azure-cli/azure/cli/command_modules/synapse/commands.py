@@ -12,6 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_bigdatapool_factory
     from ._client_factory import cf_synapse_client_sqlpool_factory
     from ._client_factory import cf_synapse_client_ipfirewallrules_factory
+    from ._client_factory import cf_synapse_client_cmk_factory
     from ._client_factory import cf_synapse_client_sqlpool_sensitivity_labels_factory
     from ._client_factory import cf_synapse_client_restorable_dropped_sqlpools_factory
     from ._client_factory import cf_synapse_client_sqlpool_transparent_data_encryptions_factory
@@ -69,6 +70,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
         client_factory=cf_synapse_client_ipfirewallrules_factory)
 
+    synapse_cmk_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#KeysOperations.{}',
+        client_factory=cf_synapse_client_cmk_factory)
+
     synapse_spark_session_sdk = CliCommandType(
         operations_tmpl='azure.synapse.spark.operations#SparkSessionOperations.{}',
         client_factory=None)
@@ -120,6 +125,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_workspaces')
         g.custom_command('create', 'create_workspace', supports_no_wait=True)
+        g.custom_command('activate', 'activate_workspace', client_factory=cf_synapse_client_cmk_factory, supports_no_wait=True)
         g.custom_command('update', 'update_workspace', supports_no_wait=True)
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,
@@ -207,6 +213,16 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_firewall_rule', supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
+
+    # Management Plane Commands --Keys
+    with self.command_group('synapse workspace key', command_type=synapse_cmk_sdk,
+                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_cmk_factory),
+                            client_factory=cf_synapse_client_cmk_factory) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
