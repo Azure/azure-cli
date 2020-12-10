@@ -1189,7 +1189,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None):
+               byok_string=None, kty='RSA'):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -1232,7 +1232,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         elif byok_string:
             byok_data = byok_string.encode('UTF-8')
 
-        key_obj.kty = 'RSA-HSM'
+        key_obj.kty = kty + '-HSM'
         key_obj.t = byok_data
 
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
