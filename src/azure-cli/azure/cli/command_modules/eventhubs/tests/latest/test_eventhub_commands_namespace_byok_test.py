@@ -7,7 +7,7 @@
 
 import time
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, record_only)
 
 
 # pylint: disable=line-too-long
@@ -17,6 +17,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
 class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
+    @record_only()  # This test relies on existing resources in a specific subscription
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_eh_namespace')
     def test_eh_namespace_byok(self, resource_group):
