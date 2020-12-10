@@ -37,7 +37,7 @@ examples:
         az synapse workspace create --name fromcli4 --resource-group rg \\
           --storage-account testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
-          --key-identitier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
+          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
 """
 
 helps['synapse workspace activate'] = """
@@ -46,7 +46,7 @@ short-summary: Activate workspace using customer-managed key after creating.
 examples:
   - name: Activate workspace using customer-managed key after creating.
     text: |-
-        az synapse workspace activate --key-name existedkey --workspace-name testsynapseworkspace \\
+        az synapse workspace activate --key-name existedkey --name testsynapseworkspace \\
         --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
@@ -481,7 +481,7 @@ short-summary: Create a workspace's key.
 examples:
   - name: Create a workspace's key.
     text: |-
-        az synapse workspace key create --key-name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace key create --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
@@ -491,7 +491,7 @@ short-summary: Delete a workspace's key. The key at active status can't be delet
 examples:
   - name: Delete a workspace's key.
     text: |-
-        az synapse workspace key delete --key-name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace key delete --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg
 """
 
@@ -501,7 +501,7 @@ short-summary: Show a workspace's key by name.
 examples:
   - name: Show a workspace's key.
     text: |-
-        az synapse workspace key show --key-name newkey --workspace-name testsynapseworkspace \\
+        az synapse workspace key show --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg
 """
 
