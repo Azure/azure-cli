@@ -56,7 +56,7 @@ class ProgressReporter:
     def report(self):
         """ report the progress """
         percent = self.value / self.total_val if self.value is not None and self.total_val else None
-        return {'message': self.message, 'percent': percent}
+        return {'message': self.message, 'percent': percent, 'value': self.value}
 
 
 class ProgressHook:
@@ -103,18 +103,6 @@ class ProgressHook:
         return not self.reporter.closed
 
 
-# TODO: cooperate with Indeterminate progress bar
-def _format_progress(msg, sign, bar_len, current):
-    bar_len = bar_len - len(msg) - 1
-
-    message = '\r{}['.format(msg)
-    # Adjust the message
-    message += (sign * current).ljust(bar_len)
-    message += ']'
-
-    return message
-
-
 class IndeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None, spinner=None):
@@ -156,6 +144,24 @@ def _format_value(msg, percent):
     return message
 
 
+# TODO: cooperate with Indeterminate progress bar
+def _format_progress(msg, current):
+    space = 5
+    speed = 3
+    if space * speed + len(msg) + 1 >= BAR_LEN:
+        raise ValueError("message is too long.")
+
+    message = '\r{}['.format(msg)
+
+    # Adjust the message
+    current = current % space
+    message += (' ' * current * speed + '.' + ' ' * (space - current - 1) * speed)
+
+    message += ']'
+
+    return message
+
+
 class DeterminateStandardOut(ProgressViewBase):
     """ custom output for progress reporting """
     def __init__(self, out=None):
@@ -166,12 +172,15 @@ class DeterminateStandardOut(ProgressViewBase):
         writes the progress
         :param args: args is a dictionary containing 'percent', 'message'
         """
-        percent = args.get('percent', 0)
+        percent = args.get('percent', None)
         message = args.get('message', '')
-
+        value = args.get('value', None)
         if percent:
             progress = _format_value(message, percent)
-            self.out.write(progress)
+        if value and not percent:
+            progress = _format_progress(message, value)
+
+        self.out.write(progress)
 
     def clear(self):
         self.out.write('\n')
@@ -182,7 +191,7 @@ class DeterminateStandardOut(ProgressViewBase):
 
 def get_progress_view(determinant=False, outstream=sys.stderr, spinner=None):
     """ gets your view """
-    if determinant:
+    if determinant and spinner is None:
         return DeterminateStandardOut(out=outstream)
     return IndeterminateStandardOut(out=outstream, spinner=spinner)
 
@@ -268,12 +277,11 @@ class InfiniteProgressBar:
     """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
-        self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
-                label="to be continued", stream=sys.stderr,
-                hide_cursor=False, glyphs=_format_dot_glyphs(bar_len=10))
+        self.current = 0
 
     def update_progress(self):
-        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add(message="Running")
+        self.current += 1
+        self.cli_ctx.get_progress_controller(det=True).add(message="Running", value=self.current)
 
     def end(self):
-        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end(message="Running")
+        self.cli_ctx.get_progress_controller(det=True).end(message="Running")
