@@ -15,7 +15,7 @@ import unittest
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
-from ..util import cmd_with_retry
+from ..util import retry
 
 
 class RoleScenarioTest(ScenarioTest):
@@ -197,16 +197,16 @@ class RoleCreateScenarioTest(RoleScenarioTest):
         })
 
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            cmd_with_retry(self, 'role definition create --role-definition {template}', checks=[
-                self.check('permissions[0].actions[0]', 'Microsoft.Compute/*/read')
-            ])
-            cmd_with_retry(self, 'role definition list -n {role}', checks=self.check('[0].roleName', '{role}'))
+            retry(lambda: self.cmd('role definition create --role-definition {template}', checks=[
+                self.check('permissions[0].actions[0]', 'Microsoft.Compute/*/read')]))
+            retry(lambda: self.cmd('role definition list -n {role}', checks=self.check('[0].roleName', '{role}')))
             # verify we can update
             template['Actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
                 json.dump(template, f)
-            cmd_with_retry(self, 'role definition update --role-definition {template}', checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
-            cmd_with_retry(self, 'role definition delete -n {role}', checks=self.is_empty())
+            retry(lambda: self.cmd('role definition update --role-definition {template}',
+                                   checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*')))
+            retry(lambda: self.cmd('role definition delete -n {role}', checks=self.is_empty()))
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):

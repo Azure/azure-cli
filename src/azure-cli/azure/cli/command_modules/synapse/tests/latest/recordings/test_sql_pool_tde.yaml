@@ -1,0 +1,106 @@
+interactions:
+- request:
+    body: '{"properties": {"status": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool tde set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '37'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --status --name --workspace-name --resource-group
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.15.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testtde1/sqlPools/sqlpooltde/transparentDataEncryption/current?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"current","location":null,"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testtde1/sqlPools/sqlpooltde/transparentDataEncryption/current","type":"Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption","properties":{"status":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 07:35:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse sql pool tde show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --workspace-name --resource-group
+      User-Agent:
+      - python/3.7.2 (Windows-10-10.0.18362-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-synapse/0.5.0 Azure-SDK-For-Python AZURECLI/2.15.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testtde1/sqlPools/sqlpooltde/transparentDataEncryption/current?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"current","location":"North Europe","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Synapse/workspaces/testtde1/sqlPools/sqlpooltde/transparentDataEncryption/current","type":"Microsoft.Synapse/workspaces/sqlPools/transparentDataEncryption","properties":{"status":"Enabled"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '339'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 07:35:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

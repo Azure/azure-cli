@@ -5,7 +5,6 @@
 
 from __future__ import print_function
 
-import sys
 import difflib
 
 import argparse
@@ -21,7 +20,7 @@ from azure.cli.core.command_recommender import CommandRecommender
 from azure.cli.core.azclierror import UnrecognizedArgumentError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from azure.cli.core.azclierror import ArgumentParseError
+from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.azclierror import CommandNotFoundError
 from azure.cli.core.azclierror import ValidationError
 
@@ -34,11 +33,10 @@ logger = get_logger(__name__)
 EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "please make sure the corresponding extension is installed. "
                        "To learn more about extensions, please visit "
-                       "'https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview'")
+                       "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
 OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://docs.microsoft.com/en-us/cli/azure/reference-index?view=azure-cli-latest' "
-                      "to learn more")
+                      "'https://aka.ms/cli_ref' to learn more")
 
 
 class IncorrectUsageError(CLIError):
@@ -68,12 +66,6 @@ class AzCompletionFinder(argcomplete.CompletionFinder):
 
 class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
-
-    @staticmethod
-    def recommendation_provider(version, command, parameters, extension):  # pylint: disable=unused-argument
-        logger.debug("recommendation_provider: version: %s, command: %s, parameters: %s, extension: %s",
-                     version, command, parameters, extension)
-        return []
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
@@ -172,7 +164,7 @@ class AzCliCommandParser(CLICommandParser):
         recommender.set_help_examples(self.get_examples(self.prog))
         recommendation = recommender.recommend_a_command()
 
-        az_error = ArgumentParseError(message)
+        az_error = ArgumentUsageError(message)
         if 'unrecognized arguments' in message:
             az_error = UnrecognizedArgumentError(message)
         elif 'arguments are required' in message:
@@ -188,11 +180,6 @@ class AzCliCommandParser(CLICommandParser):
             az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
         az_error.print_error()
         az_error.send_telemetry()
-
-        # For ai-did-you-mean-this
-        failure_recovery_recommendations = self._get_failure_recovery_recommendations()
-        self._suggestion_msg.extend(failure_recovery_recommendations)
-        self._print_suggestion_msg(sys.stderr)
         self.exit(2)
 
     def format_help(self):
@@ -287,26 +274,13 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return command, parameters, extension
-
-    def _get_failure_recovery_recommendations(self, action=None, **kwargs):
-        # Gets failure recovery recommendations
-        from azure.cli.core import __version__ as core_version
-        failure_recovery_arguments = self._get_failure_recovery_arguments(action)
-        recommendations = AzCliCommandParser.recommendation_provider(core_version,
-                                                                     *failure_recovery_arguments,
-                                                                     **kwargs)
-        return recommendations
+        return command, self._raw_arguments, extension
 
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
         if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
             self.specified_arguments.append(action.dest)
         return value
-
-    def _print_suggestion_msg(self, file=None):
-        if self._suggestion_msg:
-            print('\n'.join(self._suggestion_msg), file=file)
 
     def parse_known_args(self, args=None, namespace=None):
         # retrieve the raw argument list in case parsing known arguments fails.
@@ -482,7 +456,7 @@ class AzCliCommandParser(CLICommandParser):
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
-            # recommand a command for user
+            # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
             recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommended_command = recommender.recommend_a_command()
@@ -497,11 +471,8 @@ class AzCliCommandParser(CLICommandParser):
 
             az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
 
-            az_error.print_error()
-            az_error.send_telemetry()
-
             if not caused_by_extension_not_installed:
-                failure_recovery_recommendations = self._get_failure_recovery_recommendations(action)
-                self._suggestion_msg.extend(failure_recovery_recommendations)
-                self._print_suggestion_msg(sys.stderr)
+                az_error.print_error()
+                az_error.send_telemetry()
+
             self.exit(2)

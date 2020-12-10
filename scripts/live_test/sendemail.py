@@ -55,16 +55,13 @@ def main():
     testdata = test_data.TestData(ARTIFACT_DIR)
     testdata.collect()
 
-    # Send email
+    # Generate index.html, send email
     try:
-        send_email(container, testdata)
-    except Exception:
-        print(traceback.format_exc())
-
-    # Generate index.html
-    try:
+        # Generate index.html
         container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
-        generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
+        # Send email
+        send_email(html_content)
     except Exception:
         print(traceback.format_exc())
 
@@ -196,7 +193,7 @@ def write_db(container, testdata):
     print('Exit write_db()')
 
 
-def send_email(container, testdata):
+def send_email(html_content):
     print('Enter send_email()')
 
     from sendgrid import SendGridAPIClient
@@ -219,7 +216,7 @@ def send_email(container, testdata):
         "content": [
             {
                 "type": "text/html",
-                "value": get_content(container, testdata)
+                "value": html_content
             }
         ]
     }

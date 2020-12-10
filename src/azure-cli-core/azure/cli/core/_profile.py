@@ -24,7 +24,6 @@ from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_br
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
-
 logger = get_logger(__name__)
 
 # Names below are used by azure-xplat-cli to persist account information into
@@ -77,6 +76,8 @@ _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+
+_USE_VENDORED_SUBSCRIPTION_SDK = True
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -259,7 +260,7 @@ class Profile:
             subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
-                _STATE: s.state.value,
+                _STATE: s.state,
                 _USER_ENTITY: {
                     _USER_NAME: user,
                     _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
@@ -273,6 +274,15 @@ class Profile:
                 if hasattr(s, 'home_tenant_id'):
                     subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
                 if hasattr(s, 'managed_by_tenants'):
+                    if s.managed_by_tenants is None:
+                        # managedByTenants is missing from the response. This is a known service issue:
+                        # https://github.com/Azure/azure-rest-api-specs/issues/9567
+                        # pylint: disable=line-too-long
+                        raise CLIError("Invalid profile is used for cloud '{cloud_name}'. "
+                                       "To configure the cloud profile, run `az cloud set --name {cloud_name} --profile <profile>(e.g. 2019-03-01-hybrid)`. "
+                                       "For more information about using Azure CLI with Azure Stack, see "
+                                       "https://docs.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2"
+                                       .format(cloud_name=self.cli_ctx.cloud.name))
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
             consolidated.append(subscription_dict)
@@ -295,18 +305,23 @@ class Profile:
         return result
 
     def _new_account(self):
-        from azure.cli.core.profiles import ResourceType, get_sdk
-        SubscriptionType, StateType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, 'Subscription',
-                                              'SubscriptionState', mod='models')
+        """Build an empty Subscription which will be used as a tenant account.
+        API version doesn't matter as only specified attributes are preserved by _normalize_properties."""
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            from azure.cli.core.vendored_sdks.subscriptions.models import Subscription
+            SubscriptionType = Subscription
+        else:
+            from azure.cli.core.profiles import ResourceType, get_sdk
+            SubscriptionType = get_sdk(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS,
+                                       'Subscription', mod='models')
         s = SubscriptionType()
-        s.state = StateType.enabled
+        s.state = 'Enabled'
         return s
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
         # pylint: disable=too-many-statements
 
         import jwt
-        from requests import HTTPError
         from msrestazure.tools import is_valid_resource_id
         from azure.cli.core.adal_authentication import MSIAuthenticationWrapper
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -317,12 +332,13 @@ class Profile:
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
                 authenticated = False
+                from azure.cli.core.azclierror import AzureResponseError
                 try:
                     msi_creds = MSIAuthenticationWrapper(resource=resource, client_id=identity_id)
                     identity_type = MsiAccountTypes.user_assigned_client_id
                     authenticated = True
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                except AzureResponseError as ex:
+                    if 'http error: 400, reason: Bad Request' in ex.error_msg:
                         logger.info('Sniff: not an MSI client id')
                     else:
                         raise
@@ -332,8 +348,8 @@ class Profile:
                         identity_type = MsiAccountTypes.user_assigned_object_id
                         msi_creds = MSIAuthenticationWrapper(resource=resource, object_id=identity_id)
                         authenticated = True
-                    except HTTPError as ex:
-                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                    except AzureResponseError as ex:
+                        if 'http error: 400, reason: Bad Request' in ex.error_msg:
                             logger.info('Sniff: not an MSI object id')
                         else:
                             raise
@@ -441,8 +457,7 @@ class Profile:
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
-        from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == 'Enabled'), None)
         return s or subscriptions[0]
 
     def is_tenant_level_account(self):
@@ -559,26 +574,35 @@ class Profile:
                     external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
-            def _retrieve_token():
+            def _retrieve_token(sdk_resource=None):
+                # When called by
+                #   - Track 1 SDK, use `resource` specified by CLI
+                #   - Track 2 SDK, use `sdk_resource` specified by SDK and ignore `resource` specified by CLI
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for resource %r", token_resource)
+
                 if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                    return self._get_token_from_cloud_shell(resource)
+                    return self._get_token_from_cloud_shell(token_resource)
                 if user_type == _USER:
                     return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                     account[_TENANT_ID], resource)
+                                                                     account[_TENANT_ID], token_resource)
                 use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, token_resource,
                                                                               account[_TENANT_ID],
                                                                               use_cert_sn_issuer)
 
-            def _retrieve_tokens_from_external_tenants():
+            def _retrieve_tokens_from_external_tenants(sdk_resource=None):
+                token_resource = sdk_resource or resource
+                logger.debug("Retrieving token from ADAL for external tenants and resource %r", token_resource)
+
                 external_tokens = []
                 for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, sub_tenant_id, resource))
+                            username_or_sp_id, sub_tenant_id, token_resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, sub_tenant_id, resource))
+                            username_or_sp_id, token_resource, sub_tenant_id, token_resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -621,6 +645,8 @@ class Profile:
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        logger.debug("Profile.get_raw_token invoked with resource=%r, subscription=%r, tenant=%r",
+                     resource, subscription, tenant)
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
@@ -802,14 +828,19 @@ class SubscriptionFinder:
         def create_arm_client_factory(credentials):
             if arm_client_factory:
                 return arm_client_factory(credentials)
-            from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core.commands.client_factory import configure_common_settings
-            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            from azure.cli.core.commands.client_factory import _prepare_client_kwargs_track2
+
+            client_type = self._get_subscription_client_class()
+            if client_type is None:
+                from azure.cli.core.azclierror import CLIInternalError
+                raise CLIInternalError("Unable to get '{}' in profile '{}'"
+                                       .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, cli_ctx.cloud.profile))
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+            client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
+            # We don't need to change credential_scopes as 'scopes' is ignored by BasicTokenCredential anyway
             client = client_type(credentials, api_version=api_version,
-                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
-            configure_common_settings(cli_ctx, client)
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager, **client_kwargs)
             return client
 
         self._arm_client_factory = create_arm_client_factory
@@ -884,16 +915,17 @@ class SubscriptionFinder:
 
     def _find_using_common_tenant(self, access_token, resource):
         import adal
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            logger.debug("Finding subscriptions under tenant %s", tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
@@ -902,6 +934,7 @@ class SubscriptionFinder:
                 t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
+                logger.debug("Acquiring a token with tenant=%s, resource=%s", tenant_id, resource)
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
@@ -958,9 +991,9 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
-        from msrest.authentication import BasicTokenAuthentication
+        from azure.cli.core.adal_authentication import BasicTokenCredential
 
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
+        token_credential = BasicTokenCredential(access_token)
         client = self._arm_client_factory(token_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
@@ -972,6 +1005,21 @@ class SubscriptionFinder:
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
+
+    def _get_subscription_client_class(self):  # pylint: disable=no-self-use
+        """Get the subscription client class. It can come from either the vendored SDK or public SDK, depending
+        on the design of architecture.
+        """
+        if _USE_VENDORED_SUBSCRIPTION_SDK:
+            # Use vendered subscription SDK to decouple from `resource` command module
+            from azure.cli.core.vendored_sdks.subscriptions import SubscriptionClient
+            client_type = SubscriptionClient
+        else:
+            # Use the public SDK
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.profiles._shared import get_client_class
+            client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
+        return client_type
 
 
 class CredsCache:
@@ -1140,7 +1188,7 @@ class ServicePrincipalAuth:
                            'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
-            from OpenSSL.crypto import load_certificate, FILETYPE_PEM
+            from OpenSSL.crypto import load_certificate, FILETYPE_PEM, Error
             self.certificate_file = certificate_file
             self.public_certificate = None
             try:
@@ -1154,7 +1202,7 @@ class ServicePrincipalAuth:
                         match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
                                           self.cert_file_string, re.I)
                         self.public_certificate = match.group('public').strip()
-            except UnicodeDecodeError:
+            except (UnicodeDecodeError, Error):
                 raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
@@ -1260,6 +1308,12 @@ def _get_authorization_code_worker(authority_url, resource, results):
         web_server.server_close()
         results['no_browser'] = True
         return
+
+    # Emit a warning to inform that a browser is opened.
+    # Only show the path part of the URL and hide the query string.
+    logger.warning("The default web browser has been opened at %s. Please continue the login in the web browser. "
+                   "If no web browser is available or if the web browser fails to open, use device code flow "
+                   "with `az login --use-device-code`.", url.split('?')[0])
 
     # wait for callback from browser.
     while True:

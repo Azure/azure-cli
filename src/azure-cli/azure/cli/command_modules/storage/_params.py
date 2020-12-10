@@ -197,7 +197,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
-        c.argument('name', options_list=['--name', '-n'])
+        c.argument('name', options_list=['--name', '-n'],
+                   help='The name of the storage account within the specified resource group')
 
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
@@ -213,10 +214,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
-                   arg_type=get_enum_type(t_kind), default='StorageV2')
-        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
-                   arg_type=get_enum_type(t_kind), default='Storage')
+        c.argument('kind', help='Indicate the type of storage account.',
+                   arg_type=get_enum_type(t_kind),
+                   default='StorageV2' if self.cli_ctx.cloud.profile == 'latest' else 'Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
         c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
@@ -389,10 +389,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
                         'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
-    with self.argument_context('storage account management-policy update') as c:
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+    for item in ['create', 'update', 'show', 'delete']:
+        with self.argument_context('storage account management-policy {}'.format(item)) as c:
+            c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
@@ -456,13 +456,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
+        from ._validators import get_not_none_validator
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
         c.register_sas_arguments()
         c.argument('services', type=services_type(self))
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=['--account-name'])
+        c.argument('account_name', acct_name_type, options_list=['--account-name'],
+                   validator=get_not_none_validator('account_name'))
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -981,9 +983,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
 
-    with self.argument_context('storage container immutability-policy') as c:
-        c.argument('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
-                   arg_type=get_three_state_flag())
+    for item in ['create', 'extend']:
+        with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            c.argument('account_name',
+                       help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+            c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                        "the operation only if the resource's ETag matches the value specified.")
+            c.extra('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
+                    arg_type=get_three_state_flag(), help='This property can only be changed for unlocked time-based '
+                                                          'retention policies. When enabled, new blocks can be '
+                                                          'written to an append blob while maintaining immutability '
+                                                          'protection and compliance. Only new blocks can be added '
+                                                          'and any existing blocks cannot be modified or deleted. '
+                                                          'This property cannot be changed with '
+                                                          'ExtendImmutabilityPolicy API.')
+            c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
+                                             'creation, in days.')
+            c.ignore('parameters')
 
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)
@@ -1004,8 +1020,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container legal-hold') as c:
         c.argument('container_name', container_name_type)
+        c.argument('account_name',
+                   help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('tags', nargs='+',
-                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
+                   help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
+                        'to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -1094,6 +1113,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('resource_group_name', required=False)
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.argument('expand', default=None)
         c.ignore('filter', 'maxpagesize')
 
     for item in ['create', 'update']:
@@ -1370,6 +1390,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('start', type=get_datetime_type(True),
                    help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
         c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+        c.ignore('auth_mode')
 
     with self.argument_context('storage message') as c:
         c.argument('queue_name', queue_name_type)
@@ -1565,3 +1586,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='The path to a file or directory in the specified file system.', required=True)
             c.argument('permissions', validator=validate_access_control)
             c.ignore('upn')
+
+    for item in ['set-recursive', 'update-recursive', 'remove-recursive']:
+        with self.argument_context('storage fs access {}'.format(item)) as c:
+            c.register_fs_directory_arguments()
+            c.argument('acl', help='The value is a comma-separated list of access control entries. Each access control '
+                       'entry (ACE) consists of a scope, a type, a user or group identifier, and permissions in the '
+                       'format "[scope:][type]:[id]:[permissions]".  For more information, please refer to '
+                       'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.')
+            c.extra('continuation',
+                    help='Optional continuation token that can be used to resume previously stopped operation.')
+            c.extra('batch_size', type=int, help='Optional. If data set size exceeds batch size then operation will '
+                    'be split into multiple requests so that progress can be tracked. Batch size should be between 1 '
+                    'and 2000. The default when unspecified is 2000.')
+            c.extra('max_batches', type=int, help='Optional. Define maximum number of batches that single change '
+                    'Access Control operation can execute. If maximum is reached before all sub-paths are processed, '
+                    'then continuation token can be used to resume operation. Empty value indicates that maximum '
+                    'number of batches in unbound and operation continues till end.')
+            c.extra('continue_on_failure', arg_type=get_three_state_flag(),
+                    help='If set to False, the operation will terminate quickly on encountering user errors (4XX). '
+                         'If True, the operation will ignore user errors and proceed with the operation on other '
+                         'sub-entities of the directory. Continuation token will only be returned when '
+                         '--continue-on-failure is True in case of user errors. If not set the default value is False '
+                         'for this.')

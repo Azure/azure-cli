@@ -121,6 +121,33 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
     frontend_ip_configs = []
 
+    # 4 combinations are valid for creating application gateway regarding to private IP and public IP
+    # --------------------------------------------------------------------------------------------|
+    # |                   |        private_ip_address         |        private_ip_address         |
+    # |                   |         it not None               |          is None                  |
+    # --------------------------------------------------------------------------------------------|
+    # |                   |  private_ip_allocation: "Static"  | private_ip_allocation: "Dynamic"  |
+    # |                   |  frontend_private_ip built: yes   | frontend_private_ip built: no     |
+    # | public_ip_address |                                   |                                   |
+    # |    it not None    | frontend_public_ip built: yes     | frontend_public_ip built: no      |
+    # |                   |                                   |                                   |
+    # |                   | 2 frontend IP configs entries     | 1 frontend IP configs entry       |
+    # |                   |                                   |                                   |
+    # |                   | frontend_ip_config_id: public_ip  | frontend_ip_config_id:public_ip   |
+    # |                   |                                   |                                   |
+    # |                   | private link link to public IP    | private link link to public IP    |
+    # |-------------------------------------------------------------------------------------------|
+    # |                   | private_ip_allocation: "Static"   | private_ip_allocation: "Dynamic"  |
+    # | public_ip_address | frontend_private_ip built: yes    | frontend_private_ip built: no     |
+    # |     is None       |                                   |                                   |
+    # |                   | frontend_public_ip built: no      | frontend_public_ip built: no      |
+    # |                   |                                   |                                   |
+    # |                   | 1 frontend IP configs entry       | 1 frontend IP configs entry       |
+    # |                   |                                   |                                   |
+    # |                   | frontend_ip_config_id: priavte_ip | frontend_ip_config_id: priavte_ip |
+    # |                   |                                   |                                   |
+    # |                   | private link link to private IP   | private link link to private IP   |
+    # |-------------------------------------------------------------------------------------------|
     if private_ip_address is not None or public_ip_id is None:
         enable_private_link = False if public_ip_id else enable_private_link
         frontend_private_ip = _build_frontend_ip_config(cmd, frontend_private_ip_name,
@@ -198,7 +225,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ],
         'gatewayIPConfigurations': [
             {
-                'name': frontend_public_ip_name,
+                'name': frontend_public_ip_name if public_ip_id else frontend_private_ip_name,
                 'properties': {
                     'subnet': {'id': subnet_id}
                 }
@@ -269,7 +296,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
 
 def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, frontend_ip_name, public_ip_id,
                                  subnet_id, private_ip_address, private_ip_allocation,
-                                 sku, frontend_ip_zone, private_ip_address_version):
+                                 sku, frontend_ip_zone, private_ip_address_version, tier=None):
     frontend_ip_config = _build_frontend_ip_config(cmd, frontend_ip_name, public_ip_id, subnet_id, private_ip_address,
                                                    private_ip_allocation, frontend_ip_zone, private_ip_address_version)
 
@@ -292,10 +319,12 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
     }
     if sku and cmd.supported_api_version(min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
+    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+        lb['sku'].update({'tier': tier})
     return lb
 
 
-def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone, tier=None):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
@@ -312,6 +341,8 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
     }
     if sku and cmd.supported_api_version(min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
+    if tier and cmd.supported_api_version(min_api='2020-07-01'):
+        public_ip['sku'].update({'tier': tier})
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         public_ip['zones'] = zone
     return public_ip

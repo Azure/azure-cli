@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import LiveScenarioTest
+from azure.cli.testsdk import LiveScenarioTest, record_only
 from azure_devtools.scenario_tests import AllowLargeResponse
 import re
 
@@ -11,7 +11,7 @@ import re
 # TODO: revert when #9406 is addressed
 class SecurityCenterAlertsTests(LiveScenarioTest):
 
-    @AllowLargeResponse()
+    @record_only()  # this test relies on existing security alerts in resource groups
     def test_security_alerts(self):
 
         alerts = self.cmd('az security alert list').get_output_in_json()

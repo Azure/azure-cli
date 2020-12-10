@@ -611,9 +611,30 @@ type: command
 short-summary: create a new image version
 long-summary: this operation might take a long time depending on the replicate region number. Use "--no-wait" is advised.
 examples:
-  - name: Add a new image version
+  - name: Add a new image version from a managed image
     text: |
-        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/images/MyManagedImage
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/images/MyManagedImage
+  - name: Add a new image version from a virtual machine
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
+  - name: Add a new image version from another image version
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/galleries/MyGallery/images/MyImageDefinition/versions/1.0.0
+  - name: Add a new image version from a snapshot of an OS disk.
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyOsDiskSnapshot
+  - name: Add a new image version from a snapshot of an OS disk and add additional data disks
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyOsDiskSnapshot --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyDiskSnapshot --data-snapshot-luns 0
+  - name: Add a new image version from a managed disk
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk
+  - name: Add a new image version from a managed disk and add additional data disks
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk --data-snapshot-luns 0
+  - name: You can Add a new image version containing a mix of snapshots and managed disks
+    text: |
+        az sig image-version create -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/snapshots/MyDiskSnapshot1 /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk2 --data-snapshot-luns 1 2
   - name: Add a new image version replicated across multiple regions with different replication counts each. Eastus2 will have it's replica count set to the default replica count.
     text: |
         az sig image-version create -g MyResourceGroup --gallery-name MyGallery \\
@@ -631,9 +652,13 @@ examples:
         --target-regions westus=2=standard_lrs eastus=3=standard_zrs \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --managed-image imageInTheSameResourceGroup
-  - name: Add a new image version with target regions and customer managed keys for encryption.
+  - name: Add a new image version using a VM with target regions and customer managed keys for encryption. You specify which disks in the image version to encrypt. Disks encrypted in one region must be encrypted in another region with a different disk encryption set.
     text: >
-        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard --target-region-encryption DiskEncryptionSet1,0,DiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image imageInTheSameResourceGroup
+        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard eastus --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/virtualMachines/MyVM
+
+  - name: Add a new image version using disks with target regions and customer managed keys for encryption. You specify which disks in the image version to encrypt. Disks encrypted in one region must be encrypted in another region with a different disk encryption set.
+    text: >
+        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard eastus --target-region-encryption WestUSDiskEncryptionSet1,0,WestUSDiskEncryptionSet2 EastUSDiskEncryptionSet1,0,EastUSDiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --os-snapshot /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyOSDisk --data-snapshots /subscriptions/00000000-0000-0000-0000-00000000xxxx/resourceGroups/imageGroups/providers/Microsoft.Compute/disks/MyDataDisk --data-snapshot-luns 0
 """
 
 helps['sig image-version update'] = """
@@ -646,7 +671,7 @@ examples:
   - name: Replicate to one more region
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --add publishingProfile.targetRegions name=westcentralus
-  - name: Update --exclude-from-latest. If it is set to true, people deploying VMs with version omitted will not use this version.
+  - name: Change whether an image should be included in consideration for latest version in the image definition. Setting this value to true excludes the image from consideration and setting this value to false includes the image for consideration.
     text: |
         az sig image-version update -g MyResourceGroup --gallery-name MyGallery --gallery-image-definition MyImage --gallery-image-version 1.0.0 --set publishingProfile.excludeFromLatest=true
 """
@@ -978,7 +1003,7 @@ examples:
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
-  - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
+  - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init.'
     text: >
         az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
   - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
@@ -1163,7 +1188,7 @@ long-summary: >4
 
 helps['vm disk attach'] = """
 type: command
-short-summary: Attach a managed persistent disk to a VM.
+short-summary: Attach a managed persistent disk to a VM. Please note that --ids only supports one disk.
 long-summary: This allows for the preservation of data, even if the VM is reprovisioned due to maintenance or resizing.
 examples:
   - name: Attach a new default sized (1023 GB) managed data disk to a VM.
@@ -2213,7 +2238,7 @@ examples:
     text: >
         az vmss create -n MyVmss -g MyResourceGroup --image centos \\
             --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
-  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
+  - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/linux/using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
   - name: Create a Linux VM scale set from a specialized image version.
@@ -2688,6 +2713,8 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite=444
   - name: Update a VM instance's bandwidth in MB per second of the managed disk.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66
+  - name: Update a VM to use a custom image.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.imageReference.id=imageID
 """
 
 helps['vmss update-instances'] = """

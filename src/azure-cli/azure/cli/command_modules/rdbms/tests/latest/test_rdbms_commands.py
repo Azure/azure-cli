@@ -18,6 +18,7 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
+    StringContainCheck,
     live_only)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -31,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -93,7 +94,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcliupgrade', SERVER_NAME_MAX_LENGTH)]
+
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
@@ -104,7 +107,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'eastus'
+        loc = 'westus2'
         default_public_network_access = 'Enabled'
         public_network_access = 'Disabled'
         minimal_tls_version = 'TLS1_2'
@@ -114,6 +117,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoBackupRetention = 20
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
 
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
@@ -287,6 +293,32 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list'.format(database_engine),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+        connection_string = self.cmd('{} server show-connection-string -s {}'
+                                     .format(database_engine, servers[0])).get_output_in_json()
+
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ruby', connection_string['connectionStrings'])
+        # test mysql version upgrade
+        if database_engine == 'mysql':
+            self.cmd('{} server create -g {} --name {} -l {} '
+                     '--admin-user {} --admin-password {} '
+                     '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                     '--backup-retention {} --version 5.6'
+                     .format(database_engine, resource_group_1, servers[4], loc,
+                             admin_login, admin_passwords[0], skuname,
+                             geoRedundantBackup, backupRetention),
+                     checks=[
+                         JMESPathCheck('version', '5.6')])
+            self.cmd('{} server upgrade -g {} --name {} --target-server-version 5.7'
+                     .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
+            result = self.cmd('{} server show -g {} -n {}'
+                              .format(database_engine, resource_group_1, servers[4])).get_output_in_json()
+            server_version = result['version']
+            self.assertEqual(server_version, '5.7')
+
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
@@ -295,6 +327,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         if database_engine != 'mariadb':
             self.cmd('{} server delete -g {} -n {} --yes'
                      .format(database_engine, resource_group_1, servers[3]), checks=NoneCheck())
+        if database_engine == 'mysql':
+            self.cmd('{} server delete -g {} -n {} --yes'
+                     .format(database_engine, resource_group_1, servers[4]), checks=NoneCheck())
 
         # test list server should be 0
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
@@ -327,7 +362,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
+        # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
@@ -340,7 +375,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('postgres', 24))
+        # self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('postgres', 24))
         self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
@@ -429,7 +464,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'eastus'
+        location = 'westus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -1053,3 +1088,62 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
+
+
+class ServerMgmtScenarioPublicParameterTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_mariadb_server_mgmt_public_parameter(self, resource_group_1):
+        self._test_server_mgmt_public_parameter('mariadb', resource_group_1)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_mysql_server_mgmt_public_parameter(self, resource_group_1):
+        self._test_server_mgmt_public_parameter('mysql', resource_group_1)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name='resource_group_1')
+    @live_only()
+    def test_postgres_server_mgmt_public_parameter(self, resource_group_1):
+        self._test_server_mgmt_public_parameter('postgres', resource_group_1)
+
+    def _test_server_mgmt_public_parameter(self, database_engine, resource_group_1):
+        servers = [self.create_random_name('azuredbclipublicall', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbclipublicazureservices', SERVER_NAME_MAX_LENGTH)]
+        admin_login = 'cloudsa'
+        admin_password = 'SecretPassword123'
+        old_cu = 2
+        family = 'Gen5'
+        skuname = 'GP_{}_{}'.format(family, old_cu)
+        loc = 'westus2'
+
+        # test public access for all IPs on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --public {}'
+                 .format(database_engine, resource_group_1, servers[0], loc,
+                         admin_login, admin_password, skuname, 'all'),
+                 checks=[JMESPathCheck('name', servers[0]),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('sku.capacity', old_cu),
+                         StringContainCheck('AllowAll_')])
+
+        # test public access for all azure services on server
+        self.cmd('{} server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --public {}'
+                 .format(database_engine, resource_group_1, servers[1], loc,
+                         admin_login, admin_password, skuname, '0.0.0.0'),
+                 checks=[JMESPathCheck('name', servers[1]),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('sku.capacity', old_cu),
+                         StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_')])
+        # test delete server
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
+        self.cmd('{} server delete -g {} --name {} --yes'
+                 .format(database_engine, resource_group_1, servers[1]), checks=NoneCheck())
+        # test list server should be 0
+        self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])

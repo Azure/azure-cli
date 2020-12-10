@@ -37,3 +37,27 @@ class SparkStatementLanguage(str, Enum):
     SparkDotNet = 'SparkDotNet'
     CSharp = 'CSharp'
     SQL = 'SQL'
+
+
+# pylint: disable=too-few-public-methods
+class SqlPoolConnectionClientType(str, Enum):
+    '''
+    Types of SQL clients whose connection strings we can generate.
+    '''
+
+    AdoDotNet = 'ado.net'
+    Jdbc = 'jdbc'
+    Php = 'php'
+    Odbc = 'odbc'
+    PhpPdo = 'php_pdo'
+
+
+class SqlPoolConnectionClientAuthenticationType(str, Enum):
+    '''
+    Types of SQL client authentication mechanisms for connection strings
+    that we can generate.
+    '''
+
+    SqlPassword = 'SqlPassword'
+    ActiveDirectoryPassword = 'ADPassword'
+    ActiveDirectoryIntegrated = 'ADIntegrated'

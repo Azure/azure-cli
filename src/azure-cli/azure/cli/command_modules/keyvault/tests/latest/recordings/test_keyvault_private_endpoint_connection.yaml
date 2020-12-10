@@ -9,7 +9,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-graphrbac/0.60.0 Azure-SDK-For-Python
       accept-language:
       - en-US
@@ -31,19 +31,19 @@ interactions:
       dataserviceversion:
       - 3.0;
       date:
-      - Tue, 15 Sep 2020 08:03:47 GMT
+      - Thu, 12 Nov 2020 05:16:26 GMT
       duration:
-      - '2497679'
+      - '2563828'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - 1HvD8lAPaWsbC2Joke2OmWSHZYhlf6+j+tmR6MNGsas=
+      - w4viU0SAUaGwPZCk7ugfs1wrda74oS3d1e7RSlJYkpk=
       ocp-aad-session-key:
-      - A2HzqqTCDz2M69VIfdmA0UvCjKca_saiEL_akI-F4HMILu5V73rpQzDr0yIJ8rB8BEKX4X3yJlspi6KkcEohSPXVM5ktb_721ElpLT8CsOjDwVzzVYs7vgHCo-LCURCu.9DXIAt4lo7t9sOc7CS_8bSKJB1gdrkaPHX1RV7iTb8E
+      - vCgCQ8cWILPyvdsQXORBCqP5Xcq4V2P66UvsbhU5d_uCNGMYwCb73dGs6KcjfcljxTNAPPHUojWh38zFsCllrpSep_tFDgKTEqTvfmt_5BGIARKEAQbvumCwDbfN7Ao8.f2LMXLu3s_Zo7bDk_Ut_6iX_85NqWvE0HCfhdfdpdqg
       pragma:
       - no-cache
       request-id:
-      - 2523d78a-6176-4740-b992-e9ae69b6694b
+      - dc5d5cbf-a9ec-4346-b425-95b5b16759f7
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
@@ -67,8 +67,8 @@ interactions:
       "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
       "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
       "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}], "enableSoftDelete":
-      false, "softDeleteRetentionInDays": 90, "networkAcls": {"bypass": "AzureServices",
-      "defaultAction": "Allow", "ipRules": [], "virtualNetworkRules": []}}}'
+      true, "softDeleteRetentionInDays": 7, "networkAcls": {"bypass": "AzureServices",
+      "defaultAction": "Allow"}}}'
     headers:
       Accept:
       - application/json
@@ -79,27 +79,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '918'
+      - '874'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -l --sku --enable-soft-delete
+      - -g -n -l --sku --retention-days --enable-soft-delete
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1162'
+      - '1160'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:03:55 GMT
+      - Thu, 12 Nov 2020 05:16:35 GMT
       expires:
       - '-1'
       pragma:
@@ -117,9 +117,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1190'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -137,23 +137,23 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -l --sku --enable-soft-delete
+      - -g -n -l --sku --retention-days --enable-soft-delete
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1158'
+      - '1156'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:25 GMT
+      - Thu, 12 Nov 2020 05:17:06 GMT
       expires:
       - '-1'
       pragma:
@@ -171,7 +171,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -197,24 +197,24 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"7085f5f0-0c24-4525-a9d1-308219262646\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"ffbe3b9c-0207-497c-96b3-5b76c8e0aa23\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"b6319cff-0e0a-4ebf-b617-cd3022810936\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e7b4d4a6-df6b-4ff8-ab22-e002a955e590\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"7085f5f0-0c24-4525-a9d1-308219262646\\\"\",\r\n
+        \       \"etag\": \"W/\\\"ffbe3b9c-0207-497c-96b3-5b76c8e0aa23\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -225,7 +225,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b6ddd5ca-9e23-417c-99f7-dfd820b7f3dd?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/68b4969b-b652-4d82-91e2-8ce4ee18ce8c?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -233,7 +233,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:31 GMT
+      - Thu, 12 Nov 2020 05:17:13 GMT
       expires:
       - '-1'
       pragma:
@@ -246,9 +246,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f2c2a8cd-de70-4342-8c18-40f85fd949c2
+      - 9893f130-ff0d-488a-a5b2-faa34f8d482b
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
+      - '1197'
     status:
       code: 201
       message: Created
@@ -266,10 +266,10 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/b6ddd5ca-9e23-417c-99f7-dfd820b7f3dd?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/68b4969b-b652-4d82-91e2-8ce4ee18ce8c?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -281,7 +281,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:34 GMT
+      - Thu, 12 Nov 2020 05:17:17 GMT
       expires:
       - '-1'
       pragma:
@@ -298,7 +298,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 790d10e3-2d87-42d9-bb61-17005a9e7c0d
+      - 203de40d-f280-4baa-b0c3-1b8ddc7b1cf7
     status:
       code: 200
       message: OK
@@ -316,22 +316,22 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
-        \ \"etag\": \"W/\\\"239f8038-9f69-4012-8b2e-a4253d4ea8f0\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"695af0db-f7f2-4d37-b4d0-0cea54553512\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"b6319cff-0e0a-4ebf-b617-cd3022810936\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"e7b4d4a6-df6b-4ff8-ab22-e002a955e590\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \       \"etag\": \"W/\\\"239f8038-9f69-4012-8b2e-a4253d4ea8f0\\\"\",\r\n
+        \       \"etag\": \"W/\\\"695af0db-f7f2-4d37-b4d0-0cea54553512\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -346,9 +346,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:34 GMT
+      - Thu, 12 Nov 2020 05:17:17 GMT
       etag:
-      - W/"239f8038-9f69-4012-8b2e-a4253d4ea8f0"
+      - W/"695af0db-f7f2-4d37-b4d0-0cea54553512"
       expires:
       - '-1'
       pragma:
@@ -365,7 +365,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 07a22790-dffd-41d2-b82b-2f9b7e58db13
+      - f11a326c-cb8f-4cd5-bf7a-0e8ee17219a6
     status:
       code: 200
       message: OK
@@ -383,16 +383,16 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"239f8038-9f69-4012-8b2e-a4253d4ea8f0\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"695af0db-f7f2-4d37-b4d0-0cea54553512\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -405,9 +405,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:35 GMT
+      - Thu, 12 Nov 2020 05:17:18 GMT
       etag:
-      - W/"239f8038-9f69-4012-8b2e-a4253d4ea8f0"
+      - W/"695af0db-f7f2-4d37-b4d0-0cea54553512"
       expires:
       - '-1'
       pragma:
@@ -424,7 +424,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8b69fe0a-d31d-4ead-8206-fbcf33206248
+      - add485cb-5485-4ddb-a6ec-e553f706fdf3
     status:
       code: 200
       message: OK
@@ -448,23 +448,23 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"725a71a6-70df-4bdb-ba2c-8679b9254409\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"3ccd20ae-346a-4906-9f36-25b31a4970c4\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/cb691a7e-54e9-4d07-b7f7-f36364debe00?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/0d6736e8-cb74-4408-8d5c-2cf68e480917?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -472,7 +472,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:36 GMT
+      - Thu, 12 Nov 2020 05:17:19 GMT
       expires:
       - '-1'
       pragma:
@@ -489,9 +489,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ba267044-9bc1-4eae-8298-759f1b524fb8
+      - 65eb5b2f-a802-46d5-bee5-f40ef69dd95f
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -509,10 +509,10 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/cb691a7e-54e9-4d07-b7f7-f36364debe00?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/0d6736e8-cb74-4408-8d5c-2cf68e480917?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -524,7 +524,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:40 GMT
+      - Thu, 12 Nov 2020 05:17:23 GMT
       expires:
       - '-1'
       pragma:
@@ -541,7 +541,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 454a40a0-f040-4691-b2c8-1629eb978543
+      - 38a8eada-5d6e-41d0-b21c-430fae060bf7
     status:
       code: 200
       message: OK
@@ -559,14 +559,14 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
-        \ \"etag\": \"W/\\\"ca7a1a65-3504-4728-81fb-62a699a9d61b\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"c019e868-b321-4ca4-9879-7e860548cc4f\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -579,9 +579,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:41 GMT
+      - Thu, 12 Nov 2020 05:17:24 GMT
       etag:
-      - W/"ca7a1a65-3504-4728-81fb-62a699a9d61b"
+      - W/"c019e868-b321-4ca4-9879-7e860548cc4f"
       expires:
       - '-1'
       pragma:
@@ -598,7 +598,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ba945f5c-c715-407d-8ade-522800305edb
+      - 668688a3-3b35-4c27-850c-cbdce1436cfd
     status:
       code: 200
       message: OK
@@ -623,21 +623,21 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"d715a374-2d00-4a2f-b569-ef3567d4659e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2f40172f-1938-4d6c-8f22-98aa9970785e\\\"\",\r\n  \"type\":
         \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
-        \"f9352cf7-1302-4813-8d62-ebc8d79df2a4\",\r\n    \"privateLinkServiceConnections\":
+        \"dc5c7f4d-01fd-43a1-8ce7-5da66f68de43\",\r\n    \"privateLinkServiceConnections\":
         [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"d715a374-2d00-4a2f-b569-ef3567d4659e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2f40172f-1938-4d6c-8f22-98aa9970785e\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002\",\r\n
         \         \"groupIds\": [\r\n            \"vault\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
@@ -646,13 +646,13 @@ interactions:
         \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
         \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
         \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.ba404749-c4f5-4306-909d-849b8f3d9f7c\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.6c0b717a-e98b-4eca-910f-8d43400c65b3\"\r\n
         \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/fb66bdd2-436e-4cda-93aa-066da3b68218?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a2dcca27-0e6f-4654-985c-ea13141762a6?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -660,7 +660,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:04:49 GMT
+      - Thu, 12 Nov 2020 05:17:34 GMT
       expires:
       - '-1'
       pragma:
@@ -673,9 +673,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4a32d1e8-289b-4f5d-a3a2-15f6c5ed1b50
+      - 5bf7d394-935e-40d1-a0dd-6426fe395ea5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -694,22 +694,22 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/fb66bdd2-436e-4cda-93aa-066da3b68218?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a2dcca27-0e6f-4654-985c-ea13141762a6?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:00 GMT
+      - Thu, 12 Nov 2020 05:17:45 GMT
       expires:
       - '-1'
       pragma:
@@ -726,7 +726,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ca1ad748-0fa8-4c30-bd75-96e0dfda4533
+      - c3348c39-4070-4050-aa19-9b74248c5768
     status:
       code: 200
       message: OK
@@ -745,42 +745,22 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/a2dcca27-0e6f-4654-985c-ea13141762a6?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
-        \ \"etag\": \"W/\\\"f4eae598-f558-453c-a9fb-d0207335454a\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"f9352cf7-1302-4813-8d62-ebc8d79df2a4\",\r\n    \"privateLinkServiceConnections\":
-        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
-        \       \"etag\": \"W/\\\"f4eae598-f558-453c-a9fb-d0207335454a\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002\",\r\n
-        \         \"groupIds\": [\r\n            \"vault\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
-        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
-        \"\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n
-        \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
-        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
-        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
-        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.ba404749-c4f5-4306-909d-849b8f3d9f7c\"\r\n
-        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
-        \"cli-test-kv-pec-000002.vaultcore.azure.net\",\r\n        \"ipAddresses\":
-        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2456'
+      - '29'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:00 GMT
-      etag:
-      - W/"f4eae598-f558-453c-a9fb-d0207335454a"
+      - Thu, 12 Nov 2020 05:18:05 GMT
       expires:
       - '-1'
       pragma:
@@ -797,7 +777,78 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e9ec764f-b577-41a9-b8e4-46c48cec9d03
+      - f1e1600b-e0e7-448a-96b3-afbb5e50b344
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-id
+      User-Agent:
+      - python/3.8.5 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.14.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"f647e65a-498d-41f8-af02-2769d2b4049a\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"eastus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"dc5c7f4d-01fd-43a1-8ce7-5da66f68de43\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000006\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000006\",\r\n
+        \       \"etag\": \"W/\\\"f647e65a-498d-41f8-af02-2769d2b4049a\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002\",\r\n
+        \         \"groupIds\": [\r\n            \"vault\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
+        {\r\n            \"status\": \"Approved\",\r\n            \"description\":
+        \"\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n
+        \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.6c0b717a-e98b-4eca-910f-8d43400c65b3\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"cli-test-kv-pec-000002.vaultcore.azure.net\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 12 Nov 2020 05:18:06 GMT
+      etag:
+      - W/"f647e65a-498d-41f8-af02-2769d2b4049a"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a323c3bd-0a61-4125-8077-da1c725c7f5e
     status:
       code: 200
       message: OK
@@ -815,21 +866,21 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkvtest20200513","name":"bimkvtest20200513","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimtestsd1","name":"bimtestsd1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_key5rufghubl2uiq6kokryuvjxatfrgktaqx7nn2tmfbgxqoou5pqluti/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-ymhxk4aa","name":"cli-test-kv-key-ymhxk4aa","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_plrz2ly4xxdkgtu7w4t7q43vhazypeyifqkzeclh6hf5qjpszlqkoldqj/providers/Microsoft.KeyVault/vaults/cli-test-kv-plr-m6j46ji2","name":"cli-test-kv-plr-m6j46ji2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_secret_soft_deletegi6mwpoezcfznrol6c6icgm5fmzl7zojafipmji/providers/Microsoft.KeyVault/vaults/cli-test-kv-se-sd-ydks5s","name":"cli-test-kv-se-sd-ydks5s","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_key_downloadrrn7c3zjx5ecxktvai2fmjbzua4knza3d3asswyyfks7v2ok6ln/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-d-ahart2","name":"cli-test-kv-key-d-ahart2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/feng-cli-rg/providers/Microsoft.KeyVault/vaults/fengkv","name":"fengkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0227","name":"jlkv0227","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0309","name":"jlkv0309","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9393","name":"zhoxingtest9393","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9ac53638","name":"zhoxingtest9ac53638","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zuh/providers/Microsoft.KeyVault/vaults/zuhvault","name":"zuhvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv1","name":"bim-kv1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkv2","name":"bimkv2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.KeyVault/vaults/cli-sni-kv","name":"cli-sni-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5780'
+      - '3217'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:01 GMT
+      - Thu, 12 Nov 2020 05:18:06 GMT
       expires:
       - '-1'
       pragma:
@@ -857,21 +908,21 @@ interactions:
       ParameterSetName:
       - -n
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1824'
+      - '1822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:02 GMT
+      - Thu, 12 Nov 2020 05:18:09 GMT
       expires:
       - '-1'
       pragma:
@@ -889,7 +940,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -909,7 +960,7 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
@@ -923,7 +974,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:04 GMT
+      - Thu, 12 Nov 2020 05:18:11 GMT
       expires:
       - '-1'
       pragma:
@@ -941,7 +992,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -961,21 +1012,21 @@ interactions:
       ParameterSetName:
       - --vault-name --name
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkvtest20200513","name":"bimkvtest20200513","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimtestsd1","name":"bimtestsd1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_key5rufghubl2uiq6kokryuvjxatfrgktaqx7nn2tmfbgxqoou5pqluti/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-ymhxk4aa","name":"cli-test-kv-key-ymhxk4aa","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_plrz2ly4xxdkgtu7w4t7q43vhazypeyifqkzeclh6hf5qjpszlqkoldqj/providers/Microsoft.KeyVault/vaults/cli-test-kv-plr-m6j46ji2","name":"cli-test-kv-plr-m6j46ji2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_secret_soft_deletegi6mwpoezcfznrol6c6icgm5fmzl7zojafipmji/providers/Microsoft.KeyVault/vaults/cli-test-kv-se-sd-ydks5s","name":"cli-test-kv-se-sd-ydks5s","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_key_downloadrrn7c3zjx5ecxktvai2fmjbzua4knza3d3asswyyfks7v2ok6ln/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-d-ahart2","name":"cli-test-kv-key-d-ahart2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/feng-cli-rg/providers/Microsoft.KeyVault/vaults/fengkv","name":"fengkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0227","name":"jlkv0227","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0309","name":"jlkv0309","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9393","name":"zhoxingtest9393","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9ac53638","name":"zhoxingtest9ac53638","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zuh/providers/Microsoft.KeyVault/vaults/zuhvault","name":"zuhvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv1","name":"bim-kv1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkv2","name":"bimkv2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.KeyVault/vaults/cli-sni-kv","name":"cli-sni-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5780'
+      - '3217'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:05 GMT
+      - Thu, 12 Nov 2020 05:18:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1003,7 +1054,7 @@ interactions:
       ParameterSetName:
       - --vault-name --name
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
@@ -1017,7 +1068,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:07 GMT
+      - Thu, 12 Nov 2020 05:18:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1035,7 +1086,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1055,21 +1106,21 @@ interactions:
       ParameterSetName:
       - --vault-name -n
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkvtest20200513","name":"bimkvtest20200513","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimtestsd1","name":"bimtestsd1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_key5rufghubl2uiq6kokryuvjxatfrgktaqx7nn2tmfbgxqoou5pqluti/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-ymhxk4aa","name":"cli-test-kv-key-ymhxk4aa","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_plrz2ly4xxdkgtu7w4t7q43vhazypeyifqkzeclh6hf5qjpszlqkoldqj/providers/Microsoft.KeyVault/vaults/cli-test-kv-plr-m6j46ji2","name":"cli-test-kv-plr-m6j46ji2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_secret_soft_deletegi6mwpoezcfznrol6c6icgm5fmzl7zojafipmji/providers/Microsoft.KeyVault/vaults/cli-test-kv-se-sd-ydks5s","name":"cli-test-kv-se-sd-ydks5s","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_key_downloadrrn7c3zjx5ecxktvai2fmjbzua4knza3d3asswyyfks7v2ok6ln/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-d-ahart2","name":"cli-test-kv-key-d-ahart2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/feng-cli-rg/providers/Microsoft.KeyVault/vaults/fengkv","name":"fengkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0227","name":"jlkv0227","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0309","name":"jlkv0309","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9393","name":"zhoxingtest9393","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9ac53638","name":"zhoxingtest9ac53638","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zuh/providers/Microsoft.KeyVault/vaults/zuhvault","name":"zuhvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv1","name":"bim-kv1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkv2","name":"bimkv2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.KeyVault/vaults/cli-sni-kv","name":"cli-sni-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '5780'
+      - '3217'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:07 GMT
+      - Thu, 12 Nov 2020 05:18:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1097,7 +1148,7 @@ interactions:
       ParameterSetName:
       - --vault-name -n
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
@@ -1111,7 +1162,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:07 GMT
+      - Thu, 12 Nov 2020 05:18:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1129,7 +1180,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1149,21 +1200,21 @@ interactions:
       ParameterSetName:
       - -g -n --object-id --certificate-permissions
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1824'
+      - '1822'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:09 GMT
+      - Thu, 12 Nov 2020 05:18:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1181,7 +1232,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1196,7 +1247,7 @@ interactions:
       "recover"], "certificates": ["list", "get"], "storage": ["get", "list", "delete",
       "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}],
       "vaultUri": "https://cli-test-kv-pec-000002.vault.azure.net/", "enabledForDeployment":
-      false, "enableSoftDelete": false, "softDeleteRetentionInDays": 90}}'
+      false, "enableSoftDelete": true, "softDeleteRetentionInDays": 7}}'
     headers:
       Accept:
       - application/json
@@ -1207,27 +1258,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '768'
+      - '766'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --object-id --certificate-permissions
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["list","get"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","actionsRequired":"None"}}}],"accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["list","get"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"vaultUri":"https://cli-test-kv-pec-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1689'
+      - '1687'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:10 GMT
+      - Thu, 12 Nov 2020 05:18:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1245,9 +1296,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1198'
       x-powered-by:
       - ASP.NET
     status:
@@ -1267,7 +1318,7 @@ interactions:
       ParameterSetName:
       - --id --description --no-wait
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
@@ -1281,7 +1332,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:10 GMT
+      - Thu, 12 Nov 2020 05:18:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1299,7 +1350,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1324,16 +1375,16 @@ interactions:
       ParameterSetName:
       - --id --description --no-wait
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0800b1e8b01b470abb34380b78459ad6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"92bca2e6a2184d16b9fa7cb0ec0e8ef5","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvcmVqZWN0Iiwic3QiOiIyMDIwLTA5LTE1VDA4OjA1OjExLjgxNDU4MzVaIiwiZXRhZyI6IjA4MDBiMWU4YjAxYjQ3MGFiYjM0MzgwYjc4NDU5YWQ2In0
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvcmVqZWN0Iiwic3QiOiIyMDIwLTExLTEyVDA1OjE4OjIwLjg2NzUzMTNaIiwiZXRhZyI6IjkyYmNhMmU2YTIxODRkMTZiOWZhN2NiMGVjMGU4ZWY1In0
       cache-control:
       - no-cache
       content-length:
@@ -1341,7 +1392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:12 GMT
+      - Thu, 12 Nov 2020 05:18:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1359,9 +1410,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1181'
+      - '1195'
       x-powered-by:
       - ASP.NET
     status:
@@ -1381,12 +1432,12 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0800b1e8b01b470abb34380b78459ad6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"92bca2e6a2184d16b9fa7cb0ec0e8ef5","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1396,7 +1447,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:13 GMT
+      - Thu, 12 Nov 2020 05:18:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1414,7 +1465,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1434,12 +1485,12 @@ interactions:
       ParameterSetName:
       - --id --created
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"0800b1e8b01b470abb34380b78459ad6","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"92bca2e6a2184d16b9fa7cb0ec0e8ef5","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1449,7 +1500,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:15 GMT
+      - Thu, 12 Nov 2020 05:18:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1467,7 +1518,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1487,12 +1538,12 @@ interactions:
       ParameterSetName:
       - --id --created
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"705bbcb35c0548bfb16e9b62c8bb23fa","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"2301d584aa3f4513867df12e729c85c2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1502,7 +1553,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:45 GMT
+      - Thu, 12 Nov 2020 05:18:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1520,7 +1571,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1540,12 +1591,12 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"705bbcb35c0548bfb16e9b62c8bb23fa","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"2301d584aa3f4513867df12e729c85c2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1555,7 +1606,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:47 GMT
+      - Thu, 12 Nov 2020 05:18:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1573,7 +1624,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1593,21 +1644,21 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.KeyVault%2Fvaults%27&api-version=2015-11-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkvtest20200513","name":"bimkvtest20200513","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimtestsd1","name":"bimtestsd1","type":"Microsoft.KeyVault/vaults","location":"westus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_certopv4knhr2wjishc42ntx4ygumec6t5uku55oj4srzfzd2mablzm5g/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-krgqbmmqh","name":"cli-test-kv-ct-krgqbmmqh","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_key5rufghubl2uiq6kokryuvjxatfrgktaqx7nn2tmfbgxqoou5pqluti/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-t7g24ixu","name":"cli-test-kv-key-t7g24ixu","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_key5rufghubl2uiq6kokryuvjxatfrgktaqx7nn2tmfbgxqoou5pqluti/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-ymhxk4aa","name":"cli-test-kv-key-ymhxk4aa","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_secret_soft_deletegi6mwpoezcfznrol6c6icgm5fmzl7zojafipmji/providers/Microsoft.KeyVault/vaults/cli-test-kv-se-sd-ydks5s","name":"cli-test-kv-se-sd-ydks5s","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_secreteg4rotmsvada6pipftzw33lkejxji6arg2rgvc3m2g6wbfchbnt/providers/Microsoft.KeyVault/vaults/cli-test-kv-se-ocslkpxff","name":"cli-test-kv-se-ocslkpxff","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contactslexnqwthsrxo2isnhe3uzgysni53msnjlfmxq3m5uuf2j4tc4m/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-b4aq7n","name":"cli-test-kv-ct-co-b4aq7n","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_downloadsmhooqut3wy62nshupcdx3f3s6cptld7bfg2vedv5afmnitbid/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-dl-nzevge","name":"cli-test-kv-ct-dl-nzevge","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_key_downloadrrn7c3zjx5ecxktvai2fmjbzua4knza3d3asswyyfks7v2ok6ln/providers/Microsoft.KeyVault/vaults/cli-test-kv-key-d-ahart2","name":"cli-test-kv-key-d-ahart2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/feng-cli-rg/providers/Microsoft.KeyVault/vaults/fengkv","name":"fengkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0227","name":"jlkv0227","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jlrg1/providers/Microsoft.KeyVault/vaults/jlkv0309","name":"jlkv0309","type":"Microsoft.KeyVault/vaults","location":"southeastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9393","name":"zhoxingtest9393","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/Microsoft.KeyVault/vaults/zhoxingtest9ac53638","name":"zhoxingtest9ac53638","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{"hidden-DevTestLabs-LabUId":"6e279161-d008-42b7-90a1-6801fc4bc4ca","CreatedBy":"DevTestLabs"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zuh/providers/Microsoft.KeyVault/vaults/zuhvault","name":"zuhvault","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv2","name":"azps-test-kv2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azps-test-group/providers/Microsoft.KeyVault/vaults/azps-test-kv4","name":"azps-test-kv4","type":"Microsoft.KeyVault/vaults","location":"southcentralus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv1","name":"bim-kv1","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bim-kv5","name":"bim-kv5","type":"Microsoft.KeyVault/vaults","location":"eastus2euap","tags":{"k1":"v1"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/bimkv2","name":"bimkv2","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim-rg/providers/Microsoft.KeyVault/vaults/dogfood-env-pwd","name":"dogfood-env-pwd","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test","name":"bimkv-nr-test","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test2","name":"bimkv-nr-test2","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimkv-nr-test3","name":"bimkv-nr-test3","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/bim_pl_test_rg/providers/Microsoft.KeyVault/vaults/bimplkv","name":"bimplkv","type":"Microsoft.KeyVault/vaults","location":"eastus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002","name":"cli-test-kv-pec-000002","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fytest/providers/Microsoft.KeyVault/vaults/vault1569","name":"vault1569","type":"Microsoft.KeyVault/vaults","location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/jiasli-cli-dev/providers/Microsoft.KeyVault/vaults/cli-sni-kv","name":"cli-sni-kv","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yeming/providers/Microsoft.KeyVault/vaults/yeming","name":"yeming","type":"Microsoft.KeyVault/vaults","location":"eastasia","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '7033'
+      - '3217'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:47 GMT
+      - Thu, 12 Nov 2020 05:18:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1635,12 +1686,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"705bbcb35c0548bfb16e9b62c8bb23fa","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"2301d584aa3f4513867df12e729c85c2","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
         are rejected!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1650,7 +1701,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:49 GMT
+      - Thu, 12 Nov 2020 05:18:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1668,7 +1719,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1693,16 +1744,16 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"8a09fadc906748458ebb73582f1c174e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"4ca58b2339ad424f8a6848e114bb878e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvYXBwcm92ZSIsInN0IjoiMjAyMC0wOS0xNVQwODowNTo1MC43NTIzMzMxWiIsImV0YWciOiI4YTA5ZmFkYzkwNjc0ODQ1OGViYjczNTgyZjFjMTc0ZSJ9
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01&kv-operation=eyJjb2RlIjoicHJpdmF0ZUVuZHBvaW50Q29ubmVjdGlvbnMvYXBwcm92ZSIsInN0IjoiMjAyMC0xMS0xMlQwNToxOTowMS41Mzk4MDY3WiIsImV0YWciOiI0Y2E1OGIyMzM5YWQ0MjRmOGE2ODQ4ZTExNGJiODc4ZSJ9
       cache-control:
       - no-cache
       content-length:
@@ -1710,7 +1761,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:51 GMT
+      - Thu, 12 Nov 2020 05:19:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1728,9 +1779,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1179'
+      - '1199'
       x-powered-by:
       - ASP.NET
     status:
@@ -1750,12 +1801,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"8a09fadc906748458ebb73582f1c174e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"4ca58b2339ad424f8a6848e114bb878e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1765,7 +1816,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:51 GMT
+      - Thu, 12 Nov 2020 05:19:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1783,7 +1834,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1803,12 +1854,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"8a09fadc906748458ebb73582f1c174e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"4ca58b2339ad424f8a6848e114bb878e","properties":{"provisioningState":"Updating","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1818,7 +1869,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:52 GMT
+      - Thu, 12 Nov 2020 05:19:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1836,7 +1887,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
@@ -1856,12 +1907,12 @@ interactions:
       ParameterSetName:
       - --vault-name --name --description
       User-Agent:
-      - AZURECLI/2.11.1 azsdk-python-azure-mgmt-keyvault/7.0.0b3 Python/3.7.5 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.14.1 azsdk-python-azure-mgmt-keyvault/8.0.0 Python/3.8.5 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"a83c4ac7a8ec4c00a23596ab9c9b2b5f","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-pec-000002/privateEndpointConnections/cli-pec-000006","name":"cli-pec-000006","type":"Microsoft.KeyVault/vaults/privateEndpointConnections","location":"eastus2","etag":"e616ce3e8bd34f21aa7f57fa3364f206","properties":{"provisioningState":"Succeeded","privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_keyvault_pec000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
         are approved!","actionsRequired":"None"}}}'
     headers:
       cache-control:
@@ -1871,7 +1922,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 15 Sep 2020 08:05:54 GMT
+      - Thu, 12 Nov 2020 05:19:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1889,7 +1940,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.55.0
+      - 1.1.131.0
       x-powered-by:
       - ASP.NET
     status:
