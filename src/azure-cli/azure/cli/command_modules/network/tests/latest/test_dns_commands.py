@@ -128,6 +128,10 @@ class DnsZoneImportTest(ScenarioTest):
     def test_dns_zone8_import(self, resource_group):
         self._test_zone('zone8.com', 'zone8.txt')
 
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone9_import')
+    def test_dns_zone9_import(self, resource_group):
+        self._test_zone('zone9.com', 'zone9.txt')
+
 
 class DnsScenarioTest(ScenarioTest):
 
