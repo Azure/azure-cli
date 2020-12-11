@@ -158,7 +158,7 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
 
     from azure.cli.command_modules.storage.util import glob_files_remotely, mkdir_p
 
-    source_files = glob_files_remotely(cmd, client, source, pattern)
+    source_files = glob_files_remotely(cmd, client, source, pattern, snapshot)
 
     if dryrun:
         source_files_list = list(source_files)

@@ -146,6 +146,18 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          src_share, local_folder)
         self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # download the specified snapshot
+        snapshot = self.storage_cmd('storage share snapshot -n {}', storage_account_info, src_share).\
+            get_output_in_json()['snapshot']
+
+        # delete some files and check whether the files in the previous snapshot will be affected
+        self.storage_cmd('storage file delete-batch -s {} --pattern apple/*', storage_account_info, src_share)
+
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --snapshot "{}" ', storage_account_info, src_share,
+                         local_folder, snapshot)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
