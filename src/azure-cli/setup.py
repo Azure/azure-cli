@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn==5.2.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
-    'azure-mgmt-compute~=14.0',
+    'azure-mgmt-compute~=18.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc15',
@@ -114,7 +114,7 @@ DEPENDENCIES = [
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-resource==10.3.0',
     'azure-mgmt-search~=2.0',
-    'azure-mgmt-security~=0.4.1',
+    'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-signalr~=0.4.0',
