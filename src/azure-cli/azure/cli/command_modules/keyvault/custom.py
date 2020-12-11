@@ -1113,7 +1113,7 @@ def restore_key(cmd, client, file_path=None, vault_base_url=None, hsm_name=None,
 
     if not file_path and not any([storage_account_name, blob_container_name, token, backup_folder]):
         raise RequiredArgumentMissingError('Please specify --file/-f or --storage-account-name & '
-                                           '--blob-container-name & ----storage-container-SAS-token & --backup-folder')
+                                           '--blob-container-name & --storage-container-SAS-token & --backup-folder')
 
     if file_path:
         with open(file_path, 'rb') as file_in:
@@ -1198,7 +1198,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, byok_kty='RSA', release_policy=None, exportable=None):
+               byok_string=None, kty='RSA', release_policy=None, exportable=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     if is_azure_stack_profile(cmd):
@@ -1247,9 +1247,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         elif byok_string:
             byok_data = byok_string.encode('UTF-8')
 
-        if not byok_kty:
-            byok_kty = 'RSA'
-        key_obj.kty = byok_kty + '-HSM'
+        key_obj.kty = kty + '-HSM'
         key_obj.t = byok_data
 
     if is_azure_stack_profile(cmd):

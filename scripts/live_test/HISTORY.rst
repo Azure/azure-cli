@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.9.0 (11/23/2020)
+++++++
+
+* Update index.html and update email content.
+* Clean policy automatically.
+* Fix "No log output captured" problem.
+
+0.8.0 (11/4/2020)
+++++++
+
+* Optimize index.html CSS style.
+* Support a permanent link of latest testing results.
+
 0.7.0 (10/23/2020)
 ++++++
 

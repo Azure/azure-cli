@@ -227,3 +227,11 @@ example:
     text: az postgres server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """
+
+helps['postgres flexible-server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a PostgreSQL flexible-server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az postgres flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""

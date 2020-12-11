@@ -147,7 +147,6 @@ def cf_sa_for_keys(cli_ctx, _):
     logger = get_logger(__name__)
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     client = storage_client_factory(cli_ctx)
-    client.config.enable_http_logger = False
     return client.storage_accounts
 
 
@@ -205,7 +204,14 @@ def cf_blob_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
     if connection_string:
-        return t_blob_service.from_connection_string(conn_str=connection_string)
+        try:
+            return t_blob_service.from_connection_string(conn_str=connection_string)
+        except ValueError as err:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('Invalid connection string: {}, err detail: {}'
+                                            .format(connection_string, str(err)),
+                                            recommendation='Try `az storage account show-connection-string` '
+                                                           'to get a valid connection string')
 
     account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential

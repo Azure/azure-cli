@@ -1,0 +1,274 @@
+{
+    /*
+    comment
+    */
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "customer": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 3,
+        "defaultValue": "[resourceGroup().tags['customer-short']]",
+        "metadata": {
+          "description": "A short unique identifer for the customer owning the resource. E.g. 'mc'='Marel Connect', 'io'='Innova'"
+        }
+      },
+      "environment": {
+        "type": "string",
+        "allowedValues": [
+          // Short
+          "dev",
+          "test",
+          "int",
+          "stage",
+          "prod",
+  
+          // Long
+          "development",
+          "testing",
+          "integration",
+          "staging",
+          "production"
+        ],
+        "defaultValue": "[resourceGroup().tags['environment']]",
+        "metadata": {
+          "description": "The environment being deployed to."
+        }
+      },
+      "location": {
+        "type": "string",
+        "allowedValues": [
+          "eastasia",
+          "southeastasia",
+          "centralus",
+          "eastus",
+          "eastus2",
+          "westus",
+          "northcentralus",
+          "southcentralus",
+          "northeurope",
+          "westeurope",
+          "japanwest",
+          "japaneast",
+          "brazilsouth",
+          "australiaeast",
+          "australiasoutheast",
+          "southindia",
+          "centralindia",
+          "westindia",
+          "canadacentral",
+          "canadaeast",
+          "uksouth",
+          "ukwest",
+          "westcentralus",
+          "westus2",
+          "koreacentral",
+          "koreasouth",
+          "francecentral",
+          "francesouth",
+          "australiacentral",
+          "australiacentral2",
+          "southafricanorth",
+          "southafricawest",
+          "global"
+        ],
+        "defaultValue": "[if(contains(resourceGroup().tags, 'location'), resourceGroup().tags['location'], resourceGroup().location)]",
+        "metadata": {
+          "description": "The location of the data center the resorce will be deployed to."
+        }
+      },
+      "group": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 12,
+        "defaultValue": "[resourceGroup().tags['group']]",
+        "metadata": {
+          "description": "The group identifier"
+        }
+      },
+      "resource": {
+        "type": "string",
+        "metadata": {
+          "description": "The type of resource the name is being generated for. e.g. 'Microsoft.Storage/storageAccounts'"
+        }
+      },
+     "kind": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Sometimes a 'kind' needs to be specified. Then this parameter needs to be provided. E.g. resource='Microsoft.Web/sites' kind='functionapp'"
+        }
+      },
+      "instance": {
+        "type": "int",
+        "defaultValue": -1,
+        "metadata": {
+          "description": "If name is for a repeated resource then this should be an integer >= 0"
+        }
+      },
+      "useHyphen": {
+        "type": "bool",
+        "defaultValue": true,
+        "metadata": {
+          "description": "Determines if the name should include hyphens or not. e.g. 'mc-d-euw-data-kv' vs 'mcdeuwdatakv'"
+        }
+      }
+    },
+    "functions": [],
+    "variables": {
+  
+      "environments": {
+        // Short
+        "dev": "d",
+        "test": "t",
+        "int": "i",
+        "stage": "s",
+        "prod": "p",
+  
+        // Long
+        "development": "d",
+        "testing": "t",
+        "integration": "i",
+        "staging": "s",
+        "production": "p"
+      },
+  
+      "locations": {
+        "eastasia": "ase",
+        "southeastasia": "asse",
+        "centralus": "usc",
+        "eastus": "use",
+        "eastus2": "use2",
+        "westus": "usw",
+        "northcentralus": "usnc",
+        "southcentralus": "ussc",
+        "northeurope": "eun",
+        "westeurope": "euw",
+        "japanwest": "jpw",
+        "japaneast": "jpe",
+        "brazilsouth": "brs",
+        "australiaeast": "aue",
+        "australiasoutheast": "ause",
+        "southindia": "ins",
+        "centralindia": "inc",
+        "westindia": "inw",
+        "canadacentral": "cac",
+        "canadaeast": "cae",
+        "uksouth": "uks",
+        "ukwest": "ukw",
+        "westcentralus": "uswe",
+        "westus2": "usw2",
+        "koreacentral": "krc",
+        "koreasouth": "krs",
+        "francecentral": "frc",
+        "francesouth": "frs",
+        "australiacentral": "auc",
+        "australiacentral2": "auc2",
+        "southafricanorth": "zan",
+        "southafricawest": "zaw",
+        "global": "global"
+      },
+  
+      /* 
+      comment.
+      comment.
+      comment.
+      */ 
+      "resources": {
+        "Microsoft.Web": {
+          "publishingUsers": null,
+          "ishostnameavailable": null,
+          "validate": null,
+          "isusernameavailable": null,
+          "sourceControls": null,
+          "availableStacks": null,
+          "staticSites": null,
+          "listSitesAssignedToHostName": null,
+          "locations/getNetworkPolicies": null,
+          "locations/operations": null,
+          "locations/operationResults": null,
+          "sites/networkConfig": null,
+          "sites/slots/networkConfig": null,
+          "sites/hostNameBindings": null,
+          "sites/slots/hostNameBindings": null,
+          "operations": null,
+          "certificates": null,
+          "serverFarms": "asp",
+          "sites": {
+            // comment
+            "api": "appsvc",
+            "app": "appui",
+            "functionapp": "fa"
+          },
+          "sites/slots": null,
+          "runtimes": null,
+          "recommendations": null,
+          "resourceHealthMetadata": null,
+          "georegions": null,
+          "sites/premieraddons": null,
+          "hostingEnvironments": null,
+          "hostingEnvironments/multiRolePools": null,
+          "hostingEnvironments/workerPools": null,
+          "kubeEnvironments": null,
+          "deploymentLocations": null,
+          "deletedSites": null,
+          "locations/deletedSites": null,
+          "ishostingenvironmentnameavailable": null,
+          "locations/deleteVirtualNetworkOrSubnets": null,
+          "connections": null,
+          "customApis": null,
+          "locations": null,
+          "locations/listWsdlInterfaces": null,
+          "locations/extractApiDefinitionFromWsdl": null,
+          "locations/managedApis": null,
+          "locations/runtimes": null,
+          "locations/apiOperations": null,
+          "connectionGateways": null,
+          "locations/connectionGatewayInstallations": null,
+          "checkNameAvailability": null,
+          "billingMeters": null,
+          "verifyHostingEnvironmentVnet": null,
+          "serverFarms/eventGridFilters": null,
+          "sites/eventGridFilters": null,
+          "sites/slots/eventGridFilters": null,
+          "hostingEnvironments/eventGridFilters": null,
+          "serverFarms/firstPartyApps": null,
+          "serverFarms/firstPartyApps/keyVaultSettings": null
+        }
+      },
+  
+      "provider": "[split(parameters('resource'), '/')[0]]",
+  
+      "resourceType": "[replace(parameters('resource'), concat(variables('provider'), '/'), '')]",
+  
+      "hyphenedName": "[format('[0]-[1]-[2]-[3]-[4]-[5]',
+                               parameters('customer'),
+                               variables('environments')[parameters('environment')],
+                               variables('locations')[parameters('location')],
+                               parameters('group'),
+                               parameters('service'),
+                               if(equals(parameters('kind'), ''), 
+                                  variables('resources')[variables('provider')][variables('resourceType')],
+                                  variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]",
+  
+      "removeOptionalsFromHyphenedName": "[replace(variables('hyphenedName'), '--', '-')]",
+  
+      "isInstanceCount": "[greater(parameters('instance'), -1)]",
+      "hyphenedNameAfterInstanceCount": "[if(variables('isInstanceCount'),
+                                             format('[0]-[1]', variables('removeOptionalsFromHyphenedName'), string(parameters('instance'))),
+                                             variables('removeOptionalsFromHyphenedName'))]",
+  
+      "name": "[if(parameters('useHyphen'),
+                   variables('hyphenedNameAfterInstanceCount'),
+                   replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]"
+    },
+    "resources": [
+    ],
+    "outputs": {
+      "name": {
+        "type": "string",
+        "value": "[toLower(variables('name'))]"
+      }
+    }
+  }

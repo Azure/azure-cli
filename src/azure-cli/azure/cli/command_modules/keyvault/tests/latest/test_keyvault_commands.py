@@ -416,7 +416,7 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
 
         _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
         key = self.cmd('az keyvault key create -n {key_name} --hsm-name {hsm_name}').get_output_in_json()
-        self.kwargs['kid'] = key['key']['kid']
+        self.kwargs['kid'] = '/'.join(key['key']['kid'].split('/')[:-1])
         self.cmd('az storage account create -n {storage_account} -g {rg}')
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
@@ -450,7 +450,7 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
 
         self.cmd('az keyvault key list --hsm-name {hsm_name}', checks=[
             self.check('length(@)', 1),
-            self.check('[0].key.kid', '{kid}')
+            self.check('[0].kid', '{kid}')
         ])
 
 

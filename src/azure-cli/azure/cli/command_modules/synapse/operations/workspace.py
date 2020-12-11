@@ -15,7 +15,8 @@ def list_workspaces(cmd, client, resource_group_name=None):
 
 
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
-                     sql_admin_login_user, sql_admin_login_password, location, tags=None, no_wait=False):
+                     sql_admin_login_user, sql_admin_login_password, location, enable_managed_virtual_network=None,
+                     tags=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
@@ -26,6 +27,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         sql_administrator_login=sql_admin_login_user,
         sql_administrator_login_password=sql_admin_login_password,
         location=location,
+        managed_virtual_network="default" if enable_managed_virtual_network is True else None,
         tags=tags
     )
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, workspace_info)
