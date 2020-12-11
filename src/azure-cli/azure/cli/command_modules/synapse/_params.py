@@ -56,7 +56,10 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
-            c.argument('key_name', help='The workspace key name.')
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default.")
+
+    with self.argument_context('synapse workspace update') as c:
+        c.argument('disable_all_allowed_aad_tenant_ids', options_list=['--disable-tenant-ids'], arg_type=get_three_state_flag(), help="Disable all approved Azure AD tenants which outbound data traffic allowed to.")
 
     with self.argument_context('synapse workspace create') as c:
         c.argument("storage_account", validator=validate_storage_account,
@@ -69,10 +72,11 @@ def load_arguments(self, _):
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
+        c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace activate') as c:
-        c.argument('key_name', help='The workspace key name.')
-        c.argument('key_vault_url', help='The Key Vault Url of the workspace key.')
+        c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -306,11 +310,11 @@ def load_arguments(self, _):
 
     for scope in ['show', 'create', 'delete']:
         with self.argument_context('synapse workspace key ' + scope) as c:
-            c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace key name.')
+            c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
 
     for scope in ['create']:
         with self.argument_context('synapse workspace key create') as c:
-            c.argument('key_vault_url', help='The Key Vault Url of the workspace key.')
+            c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
 
     # synapse spark job
     for scope in ['job', 'session', 'statement']:

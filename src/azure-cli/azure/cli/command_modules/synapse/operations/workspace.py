@@ -5,7 +5,7 @@
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
-    DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails
+    DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings
 
 
 # Synapse workspace
@@ -16,7 +16,7 @@ def list_workspaces(cmd, client, resource_group_name=None):
 
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
-                     tags=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, tags=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
@@ -25,6 +25,9 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         key_identifier = key_identifier[:-1]
     workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
     encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
+    managed_virtual_network_settings = None
+    if enable_managed_virtual_network:
+        managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
     workspace_info = Workspace(
         identity=identity,
         default_data_lake_storage=default_data_lake_storage,
@@ -32,6 +35,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         sql_administrator_login_password=sql_admin_login_password,
         location=location,
         managed_virtual_network="default" if enable_managed_virtual_network is True else None,
+        managed_virtual_network_settings=managed_virtual_network_settings,
         encryption=encryption,
         tags=tags
     )
@@ -39,8 +43,11 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
 
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     tags=None, no_wait=False):
-    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password)
+                     allowed_aad_tenant_ids=None, disable_all_allowed_aad_tenant_ids=None, tags=None, no_wait=False):
+    if disable_all_allowed_aad_tenant_ids is True:
+        allowed_aad_tenant_ids = []
+    updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None
+    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, managed_virtual_network_settings=updated_vnet_settings)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
 
 
@@ -62,9 +69,9 @@ def create_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_
                        start_ip_address=start_ip_address, end_ip_address=end_ip_address)
 
 
-def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_vault_url, no_wait=False):
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_vault_url=key_vault_url)
+def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_vault_url=key_identifier)
 
 
-def activate_workspace(cmd, client, resource_group_name, workspace_name, key_name, key_vault_url, no_wait=False):
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=True, key_name=key_name, key_vault_url=key_vault_url)
+def activate_workspace(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=True, key_name=key_name, key_vault_url=key_identifier)
