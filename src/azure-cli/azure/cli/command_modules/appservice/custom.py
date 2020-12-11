@@ -1717,12 +1717,14 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
         ase_def = None
         if location is None:
             location = _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
-
+    logger.warning('create')
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
+    logger.warning(sku_def)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None), name=name,
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+    logger.warning(plan_def)
     return sdk_no_wait(no_wait, client.app_service_plans.create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
 
@@ -4086,7 +4088,7 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
 
 def _validate_asp_sku(app_service_environment, sku):
     # Isolated SKU is supported only for ASE
-    if sku in ['I1', 'I2', 'I3']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")

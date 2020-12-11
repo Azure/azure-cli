@@ -9,7 +9,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.resource import ResourceManagementClient
 
 # Models
-from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
+from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment)
 
 # Utils
@@ -41,7 +41,8 @@ def show_appserviceenvironment(cmd, name, resource_group_name=None):
     return ase_client.get(resource_group_name, name)
 
 
-def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vnet_name=None, ignore_route_table=False,
+def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='asev2', outbound_subnet=None,
+                                     vnet_name=None, ignore_route_table=False,
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
                                      force_network_security_group=False, ignore_subnet_size_validation=False,
@@ -53,22 +54,38 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
     # Therefore the current method use direct ARM.
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+    outbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, outbound_subnet, vnet_name, resource_group_name)
 
-    _validate_subnet_empty(cmd.cli_ctx, subnet_id)
-    if not ignore_subnet_size_validation:
-        _validate_subnet_size(cmd.cli_ctx, subnet_id)
-    if not ignore_route_table:
-        _ensure_route_table(cmd.cli_ctx, resource_group_name, name, location, subnet_id, force_route_table)
-    if not ignore_network_security_group:
-        _ensure_network_security_group(cmd.cli_ctx, resource_group_name, name, location,
-                                       subnet_id, force_network_security_group)
+    if kind == 'asev2':
+        _validate_subnet_empty(cmd.cli_ctx, subnet_id)
+        if not ignore_subnet_size_validation:
+            _validate_subnet_size(cmd.cli_ctx, subnet_id)
+        if not ignore_route_table:
+            _ensure_route_table(cmd.cli_ctx, resource_group_name, name, location, subnet_id, force_route_table)
+        if not ignore_network_security_group:
+            _ensure_network_security_group(cmd.cli_ctx, resource_group_name, name, location,
+                                           subnet_id, force_network_security_group)
+    elif kind == 'asev3':
+        if not ignore_subnet_size_validation:
+            _validate_subnet_size(cmd.cli_ctx, outbound_subnet_id)
+        _ensure_subnets_asev3(cmd.cli_ctx, subnet_id, outbound_subnet_id)
 
     logger.info('Create App Service Environment...')
+    return
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
-                                                                 subnet_id=subnet_id, virtual_ip_type=virtual_ip_type,
-                                                                 front_end_scale_factor=front_end_scale_factor,
-                                                                 front_end_sku=front_end_sku, tags=None)
+
+    if kind == 'asev2':
+        ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
+                                                                     subnet_id=subnet_id,
+                                                                     virtual_ip_type=virtual_ip_type,
+                                                                     front_end_scale_factor=front_end_scale_factor,
+                                                                     front_end_sku=front_end_sku, tags=None)
+    elif kind == 'asev3':
+        ase_deployment_properties = _build_asev3_deployment_properties(name=name, location=location,
+                                                                       inbound_subnet_id=subnet_id,
+                                                                       outbound_subnet_id=outbound_subnet_id,
+                                                                       front_end_scale_factor=front_end_scale_factor,
+                                                                       front_end_sku=front_end_sku, tags=None)
 
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
@@ -90,6 +107,9 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
+    if ase_def.kind.lower() != 'asev2':
+        raise CLIError('Only ASE v2 currently supports updates')
+
     worker_sku = _map_worker_sku(front_end_sku)
     ase_def.worker_pools = ase_def.worker_pools or []  # v1 feature, but cannot be null
     ase_def.internal_load_balancing_mode = None  # Workaround issue with flag enums in Swagger
@@ -106,6 +126,9 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
+    ase = ase_client.get(resource_group_name, name)
+    if ase.kind.lower() == 'asev3':
+        raise CLIError('list-addresses is currently not supported for ASEv3. Inbound IP is associated with the private endpoint.')
     return ase_client.get_vip_info(resource_group_name, name)
 
 
@@ -205,7 +228,57 @@ def _validate_subnet_size(cli_ctx, subnet_id):
     address = subnet_obj.address_prefix
     size = int(address[address.index('/') + 1:])
     if size > 24:
-        raise CLIError('Subnet is too small. Should be at least /24.')
+        raise CLIError('Subnet size could cause scaling issues. Recommended size is at least /24. '
+                       'Use --ignore-subnet-size-validation to skip size test.')
+
+
+def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
+    network_client = _get_network_client_factory(cli_ctx)
+
+    # Inbound
+    in_subnet_id_parts = parse_resource_id(inbound_subnet_id)
+    in_vnet_resource_group = in_subnet_id_parts['resource_group']
+    in_vnet_name = in_subnet_id_parts['name']
+    in_subnet_name = in_subnet_id_parts['resource_name']
+    in_subnet_obj = network_client.subnets.get(in_vnet_resource_group, in_vnet_name, in_subnet_name)
+    if in_subnet_obj.private_endpoint_network_policies == 'Enabled':
+        logger.warning('Disabling inbound subnet Private Endpoint Network Policy setting.')
+        in_subnet_obj.private_endpoint_network_policies = 'Disabled'
+        try:
+            poller = network_client.subnets.create_or_update(
+                in_vnet_resource_group, in_vnet_name,
+                in_subnet_name, subnet_parameters=in_subnet_obj)
+            LongRunningOperation(cli_ctx)(poller)
+        except Exception:
+            raise CLIError('Inbound subnet must have Private Endpoint Network Policy disabled.'
+                           'Use: az network vnet subnet update --disable-private-endpoint-network-policies')
+
+    # Outbound
+    out_subnet_id_parts = parse_resource_id(outbound_subnet_id)
+    out_vnet_resource_group = out_subnet_id_parts['resource_group']
+    out_vnet_name = out_subnet_id_parts['name']
+    out_subnet_name = out_subnet_id_parts['resource_name']
+    out_subnet_obj = network_client.subnets.get(out_vnet_resource_group, out_vnet_name, out_subnet_name)
+    if out_subnet_obj.resource_navigation_links:
+        raise CLIError('Outbound subnet is not empty.')
+
+    delegations = out_subnet_obj.delegations
+    delegated = False
+    for d in delegations:
+        if d.service_name.lower() == "microsoft.web/hostingenvironments":
+            delegated = True
+
+    if not delegated:
+        logger.warning('Adding delegation for hostingEnvironments to outbound subnet.')
+        out_subnet_obj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/hostingEnvironments")]
+        try:
+            poller = network_client.subnets.create_or_update(
+                out_vnet_resource_group, out_vnet_name,
+                out_subnet_name, subnet_parameters=out_subnet_obj)
+            LongRunningOperation(cli_ctx)(poller)
+        except Exception:
+            raise CLIError('Outbound subnet must be delegated to Microsoft.Web/hostingEnvironments. '
+                           'Use: az network vnet subnet update --delegations "Microsoft.Web/hostingEnvironments"')
 
 
 def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
@@ -362,7 +435,7 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
         'location': location,
         'InternalLoadBalancingMode': ilb_mode,
         'virtualNetwork': {
-            'Id': subnet_id
+            'id': subnet_id
         }
     }
     if front_end_scale_factor:
@@ -383,6 +456,65 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
 
     deployment_template = ArmTemplateBuilder()
     deployment_template.add_resource(ase_resource)
+    template = deployment_template.build()
+    parameters = deployment_template.build_parameters()
+
+    deploymentProperties = DeploymentProperties(template=template, parameters=parameters, mode='Incremental')
+    deployment = Deployment(properties=deploymentProperties)
+    return deployment
+
+
+def _build_asev3_deployment_properties(name, location, inbound_subnet_id, outbound_subnet_id, tags=None):
+    ase_properties = {
+        "location": location,
+        "virtualNetwork": {
+            "id": outbound_subnet_id
+        }
+    }
+
+    ase_resource = {
+        "name": name,
+        "type": "Microsoft.Web/hostingEnvironments",
+        "location": location,
+        "apiVersion": "2019-08-01",
+        "kind": "ASEV3",
+        "tags": tags,
+        "properties": ase_properties
+    }
+
+    privateLinkConnectionName = '{}-privateLink'.format(name)
+    pe_properties = {
+        "subnet": {
+            "id": inbound_subnet_id
+        },
+        "privateLinkServiceConnections": [
+            {
+                "name": privateLinkConnectionName,
+                "properties": {
+                    "privateLinkServiceId": "[resourceId('Microsoft.Web/hostingEnvironments', '{}')]".format(name),
+                    "groupIds": [
+                        "hostingEnvironments"
+                    ]
+                }
+            }
+        ]
+    }
+
+    privateEndpointName = '{}-privateEndpoint'.format(name)
+    pe_resource = {
+        "name": privateEndpointName,
+        "type": "Microsoft.Network/privateEndpoints",
+        "location": location,
+        "apiVersion": "2019-04-01",
+        "dependsOn": [
+            "[resourceId('Microsoft.Web/hostingEnvironments', '{}')]".format(name)
+        ],
+        "properties": pe_properties
+    }
+
+    deployment_template = ArmTemplateBuilder()
+    deployment_template.add_resource(ase_resource)
+    deployment_template.add_resource(pe_resource)
     template = deployment_template.build()
     parameters = deployment_template.build_parameters()
 
