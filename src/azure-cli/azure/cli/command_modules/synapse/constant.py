@@ -13,6 +13,7 @@ SPARK_DOTNET_UDFS_FOLDER_NAME = 'udfs'
 SPARK_SERVICE_ENDPOINT_API_VERSION = '2019-11-01-priview'
 AdministratorType = "activeDirectory"
 
+
 class SynapseSqlCreateMode(str, Enum):
     Default = 'Default'
     Recovery = 'Recovery'

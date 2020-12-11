@@ -32,4 +32,3 @@ def get_tenant_id():
     sub = profile.get_subscription()
     tenant_id = sub['tenantId']
     return tenant_id
-
