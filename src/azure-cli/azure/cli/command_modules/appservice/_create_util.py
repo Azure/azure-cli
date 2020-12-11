@@ -433,12 +433,29 @@ def should_create_new_app(cmd, rg_name, app_name):  # this is currently referenc
     return True
 
 
-def generate_default_app_name():
-    import uuid
-    from random import choice
+def generate_default_app_name(cmd):
+    def generate_name(cmd):
+        import uuid
+        from random import choice
 
-    noun = choice(APP_NAME_NOUNS)
-    adjective = choice(APP_NAME_ADJECTIVES)
-    random_uuid = str(uuid.uuid4().hex)
+        noun = choice(APP_NAME_NOUNS)
+        adjective = choice(APP_NAME_ADJECTIVES)
+        random_uuid = str(uuid.uuid4().hex)
 
-    return '{}-{}-{}'.format(adjective, noun, random_uuid)
+        name = '{}-{}-{}'.format(adjective, noun, random_uuid)
+        name_available = get_site_availability(cmd, name).name_available
+
+        if name_available:
+            return name
+        return ""
+
+    retry_times = 5
+    generated_name = generate_name(cmd)
+    while not generated_name and retry_times > 0:
+        retry_times -= 1
+        generated_name = generate_name(cmd)
+
+    if not generated_name:
+        raise CLIError("Unable to generate a default name for webapp. Please specify webapp name using --name flag")
+    return generated_name
+
