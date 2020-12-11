@@ -789,6 +789,7 @@ def load_arguments(self, _):
                    help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
+        c.argument('enable_automatic_upgrade', action='store_true', help='Indicate the extension should be automatically upgraded by the platform if there is a newer version of the extension available.')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
