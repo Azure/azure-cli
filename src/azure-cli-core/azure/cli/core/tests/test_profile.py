@@ -17,13 +17,13 @@ from copy import deepcopy
 from adal import AdalError
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _USE_VENDORED_SUBSCRIPTION_SDK,
-                                     _detect_adfs_authority)
+                                     _detect_adfs_authority, _attach_token_tenant)
 if _USE_VENDORED_SUBSCRIPTION_SDK:
     from azure.cli.core.vendored_sdks.subscriptions.models import \
-        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+        (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 else:
     from azure.mgmt.resource.subscriptions.models import \
-        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+        (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from azure.cli.core.mock import DummyCli
 from azure.identity import AuthenticationRecord
@@ -50,7 +50,7 @@ class TestProfile(unittest.TestCase):
         cls.authentication_record = AuthenticationRecord(cls.tenant_id, cls.client_id,
                                                          "https://login.microsoftonline.com", cls.home_account_id,
                                                          cls.user1)
-        cls.state1 = SubscriptionState.enabled
+        cls.state1 = 'Enabled'
         cls.managed_by_tenants = [ManagedByTenantStub('00000003-0000-0000-0000-000000000000'),
                                   ManagedByTenantStub('00000004-0000-0000-0000-000000000000')]
         # Dummy Subscription from SDK azure.mgmt.resource.subscriptions.v2019_06_01.operations._subscriptions_operations.SubscriptionsOperations.list
@@ -89,7 +89,7 @@ class TestProfile(unittest.TestCase):
             'environmentName': 'AzureCloud',
             'id': '1',
             'name': cls.display_name1,
-            'state': cls.state1.value,
+            'state': cls.state1,
             'user': {
                 'name': cls.user1,
                 'type': 'user'
@@ -127,7 +127,7 @@ class TestProfile(unittest.TestCase):
         cls.user2 = 'bar@bar.com'
         cls.id2 = 'subscriptions/2'
         cls.display_name2 = 'bar account'
-        cls.state2 = SubscriptionState.past_due
+        cls.state2 = 'PastDue'
         cls.subscription2_raw = SubscriptionStub(cls.id2,
                                                  cls.display_name2,
                                                  cls.state2,
@@ -141,7 +141,7 @@ class TestProfile(unittest.TestCase):
             'environmentName': 'AzureCloud',
             'id': '2',
             'name': cls.display_name2,
-            'state': cls.state2.value,
+            'state': cls.state2,
             'user': {
                 'name': cls.user2,
                 'type': 'user'
@@ -467,6 +467,36 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties(self.user1, [self.subscription1], False, is_environment=True)
         self.assertEqual(consolidated[0]['user']['isEnvironmentCredential'], True)
 
+    def test_normalize_v2016_06_01(self):
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        from azure.cli.core.vendored_sdks.subscriptions.v2016_06_01.models import Subscription \
+            as Subscription_v2016_06_01
+        subscription = Subscription_v2016_06_01()
+        subscription.id = self.id1
+        subscription.display_name = self.display_name1
+        subscription.state = self.state1
+        subscription.tenant_id = self.tenant_id
+        # The subscription shouldn't have managed_by_tenants and home_tenant_id
+
+        consolidated = profile._normalize_properties(self.user1, [subscription], False)
+        expected = {
+            'id': '1',
+            'name': self.display_name1,
+            'state': 'Enabled',
+            'user': {
+                'name': 'foo@foo.com',
+                'type': 'user'
+            },
+            'isDefault': False,
+            'tenantId': self.tenant_id,
+            'environmentName': 'AzureCloud'
+        }
+        self.assertEqual(expected, consolidated[0])
+        # verify serialization works
+        self.assertIsNotNone(json.dumps(consolidated[0]))
+
     def test_normalize_with_unicode_in_subscription_name(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
@@ -474,7 +504,7 @@ class TestProfile(unittest.TestCase):
         polished_display_name = 'sub?'
         test_subscription = SubscriptionStub('subscriptions/sub1',
                                              test_display_name,
-                                             SubscriptionState.enabled,
+                                             'Enabled',
                                              'tenant1')
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
@@ -489,7 +519,7 @@ class TestProfile(unittest.TestCase):
         polished_display_name = ''
         test_subscription = SubscriptionStub('subscriptions/sub1',
                                              test_display_name,
-                                             SubscriptionState.enabled,
+                                             'Enabled',
                                              'tenant1')
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
@@ -1930,6 +1960,23 @@ class TestUtils(unittest.TestCase):
         # Tenant ID is discarded
         self.assertEqual(_detect_adfs_authority('https://adfs.redmond.azurestack.corp.microsoft.com/adfs', '601d729d-0000-0000-0000-000000000000'),
                          ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs'))
+
+    def test_attach_token_tenant(self):
+        from azure.cli.core.vendored_sdks.subscriptions.v2016_06_01.models import Subscription \
+            as Subscription_v2016_06_01
+        subscription = Subscription_v2016_06_01()
+        _attach_token_tenant(subscription, "token_tenant_1")
+        self.assertEqual(subscription.tenant_id, "token_tenant_1")
+        self.assertFalse(hasattr(subscription, "home_tenant_id"))
+
+    def test_attach_token_tenant_v2016_06_01(self):
+        from azure.cli.core.vendored_sdks.subscriptions.v2019_11_01.models import Subscription \
+            as Subscription_v2019_11_01
+        subscription = Subscription_v2019_11_01()
+        subscription.tenant_id = "home_tenant_1"
+        _attach_token_tenant(subscription, "token_tenant_1")
+        self.assertEqual(subscription.tenant_id, "token_tenant_1")
+        self.assertEqual(subscription.home_tenant_id, "home_tenant_1")
 
 
 if __name__ == '__main__':

@@ -99,6 +99,19 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
+def _attach_token_tenant(subscription, tenant):
+    """Attach the token tenant ID to the subscription as tenant_id, so that CLI knows which token should be used
+    to access the subscription.
+
+    This function supports multiple APIs:
+      - v2016_06_01's Subscription doesn't have tenant_id
+      - v2019_11_01's Subscription has tenant_id representing the home tenant ID. It will mapped to home_tenant_id
+    """
+    if hasattr(subscription, "tenant_id"):
+        setattr(subscription, 'home_tenant_id', subscription.tenant_id)
+    setattr(subscription, 'tenant_id', tenant)
+
+
 # pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile:
 
@@ -851,24 +864,6 @@ class MsiAccountTypes:
     user_assigned_object_id = 'MSIObject'
     user_assigned_resource_id = 'MSIResource'
 
-    @staticmethod
-    def valid_msi_account_types():
-        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
-                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
-
-    @staticmethod
-    def msi_auth_factory(cli_account_name, identity, resource):
-        from azure.cli.core.credential import MSIAuthenticationWrapper
-        if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIAuthenticationWrapper(resource=resource)
-        if cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIAuthenticationWrapper(resource=resource, client_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIAuthenticationWrapper(resource=resource, object_id=identity)
-        if cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIAuthenticationWrapper(resource=resource, msi_res_id=identity)
-        raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
-
 
 class SubscriptionFinder:
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
@@ -1011,10 +1006,7 @@ class SubscriptionFinder:
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
-            # map tenantId from REST API to homeTenantId
-            if hasattr(s, "tenant_id"):
-                setattr(s, 'home_tenant_id', s.tenant_id)
-            setattr(s, 'tenant_id', tenant)
+            _attach_token_tenant(s, tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
         return all_subscriptions
