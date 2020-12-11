@@ -22,6 +22,26 @@ def cf_synapse_client_sqlpool_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).sql_pools
 
 
+def cf_synapse_client_sqlpool_sensitivity_labels_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_sensitivity_labels
+
+
+def cf_synapse_client_restorable_dropped_sqlpools_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).restorable_dropped_sql_pools
+
+
+def cf_synapse_client_sqlpool_transparent_data_encryptions_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_transparent_data_encryptions
+
+
+def cf_synapse_client_sqlpool_security_alert_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_security_alert_policies
+
+
+def cf_synapse_client_sqlpool_blob_auditing_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_blob_auditing_policies
+
+
 def cf_synapse_client_ipfirewallrules_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).ip_firewall_rules
 

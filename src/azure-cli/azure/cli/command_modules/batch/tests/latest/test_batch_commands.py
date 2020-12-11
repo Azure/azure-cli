@@ -552,7 +552,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         attrs = list(self.command_job._get_attrs(models.ResourceFile, 'task.resource_files'))
         self.assertEqual(len(attrs), 6)
         attrs = list(self.command_job._get_attrs(models.JobManagerTask, 'job.job_manager_task'))
-        self.assertEqual(len(attrs), 6)
+        self.assertEqual(len(attrs), 7)
         attrs = list(self.command_job._get_attrs(models.JobAddParameter, 'job'))
         self.assertEqual(len(attrs), 7)
 
@@ -570,13 +570,13 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertTrue('metadata' in [a for a, _ in args])
         handler = operations._job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 16)
+        self.assertEqual(len(args), 17)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations._task_operations.TaskOperations.add
         args = list(self.command_task._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 11)
+        self.assertEqual(len(args), 12)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])
@@ -602,7 +602,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('destination' in [a for a, _ in args])
         handler = operations._job_schedule_operations.JobScheduleOperations.add
         args = [a for a, _ in self.command_conflicts._load_transformed_arguments(handler)]
-        self.assertEqual(len(args), 20)
+        self.assertEqual(len(args), 21)
         self.assertTrue('id' in args)
         self.assertTrue('job_manager_task_id' in args)
         self.assertFalse('job_manager_task_max_wall_clock_time' in args)
@@ -611,6 +611,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('yes' in args)
         self.assertTrue('json_file' in args)
         self.assertFalse('destination' in args)
+        self.assertTrue('required_slots' in args)
         handler = operations._compute_node_operations.ComputeNodeOperations.reboot
         args = list(self.command_node._load_transformed_arguments(handler))
         self.assertEqual(len(args), 7)
