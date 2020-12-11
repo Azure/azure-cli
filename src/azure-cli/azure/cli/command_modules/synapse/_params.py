@@ -281,6 +281,8 @@ def load_arguments(self, _):
                    options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
                    help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
 
+    with self.argument_context('synapse sql ad-admin') as c:
+        c.argument('workspace_name', help='The workspace name.')
     for scope in ['create', 'update']:
         with self.argument_context('synapse sql ad-admin ' + scope) as c:
             c.argument('login_name', options_list=['--display-name', '-u'],
@@ -299,10 +301,11 @@ def load_arguments(self, _):
         with self.argument_context('synapse workspace firewall-rule ' + scope) as c:
             c.argument('rule_name', arg_type=name_type, id_part='child_name_1', help='The IP firewall rule name')
 
-    with self.argument_context('synapse workspace firewall-rule create') as c:
-        c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
-        c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
-                                          'Must be greater than or equal to startIpAddress.')
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse workspace firewall-rule ' + scope) as c:
+            c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
+            c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
+                                              'Must be greater than or equal to startIpAddress.')
 
     # synapse spark job
     for scope in ['job', 'session', 'statement']:
