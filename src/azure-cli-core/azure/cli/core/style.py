@@ -55,7 +55,20 @@ def print_styled_text(styled, file=sys.stderr):
 def format_styled_text(styled_text):
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
+
     for text in styled_text:
+        # str can also be indexed, bypassing IndexError, so explicitly check if the type is tuple
+        if not (isinstance(text, tuple) and len(text) == 2):
+            from azure.cli.core.azclierror import CLIInternalError
+            raise CLIInternalError("Invalid styled text. It should be a list of 2-element tuples.")
+
+        style = text[0]
+        if style not in THEME:
+            from azure.cli.core.azclierror import CLIInternalError
+            raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+
         formatted_parts.append(THEME[text[0]] + text[1])
+
+    # Reset control sequence
     formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)
