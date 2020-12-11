@@ -48,7 +48,7 @@ class TestIdentity(unittest.TestCase):
         identity.migrate_tokens()
         msal_app_mock = build_persistent_msal_app_mock.return_value
         msal_app_mock.acquire_token_by_refresh_token.assert_called_with(
-            'test_refresh_token', ['https://management.core.windows.net/.default'])
+            'test_refresh_token', ['https://management.core.windows.net//.default'])
         save_service_principal_cred_mock.assert_called_with(mock.ANY, adal_tokens[1])
 
     def test_login_with_service_principal_certificate_cert_err(self):
