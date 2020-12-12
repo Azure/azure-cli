@@ -1317,6 +1317,8 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
+        g.custom_command('getdns', 'getdns_bastion_host')
+        g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'delete')
     # endregion
 

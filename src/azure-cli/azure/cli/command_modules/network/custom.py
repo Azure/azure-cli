@@ -24,6 +24,10 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
+from .tunnel import TunnelServer
+
+import threading
+import time
 
 logger = get_logger(__name__)
 
@@ -6903,6 +6907,48 @@ def list_bastion_host(cmd, resource_group_name=None):
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
+
+
+def getdns_bastion_host(cmd, resource_group_name, name):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    bastion = client.get(resource_group_name, name)
+    return bastion.dns_name
+
+def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+
+    bastion = client.get(resource_group_name, name)
+
+    if port is None:
+        port = 0  # Will auto-select a free port from 1024-65535
+
+    tunnel_server = TunnelServer('', port, bastion.dns_name, resource_id, resource_port)
+
+    return tunnel_server
+
+
+def create_bastion_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None, timeout=None):
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port)
+
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+
+    logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+   
+    logger.warning('Ctrl + C to close')
+
+    if timeout:
+        time.sleep(int(timeout))
+    else:
+        while t.is_alive():
+            time.sleep(5)
+
+def _start_tunnel(tunnel_server):
+    tunnel_server.start_server()
+
 # endregion
 
 
