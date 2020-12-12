@@ -553,7 +553,7 @@ def get_token_from_id(cmd, token_id):
     # SCOPE MAP ID example
     #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/tokens/<9>'
     token_info = token_id.lstrip('/').split('/')
-    if len(token_info) is not 10:
+    if len(token_info) != 10:
         raise CLIError("Not valid scope map id: {}".format(token_id))
     resource_group_name = token_info[3]
     registry_name = token_info[7]
@@ -568,7 +568,7 @@ def get_scope_map_from_id(cmd, scope_map_id):
     # SCOPE MAP ID example
     #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/scopeMaps/<9>'
     scope_info = scope_map_id.lstrip('/').split('/')
-    if len(scope_info) is not 10:
+    if len(scope_info) != 10:
         raise CLIError("Not valid scope map id: {}".format(scope_map_id))
     resource_group_name = scope_info[3]
     registry_name = scope_info[7]

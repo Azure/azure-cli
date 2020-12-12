@@ -41,7 +41,7 @@ GATEWAY = "gateway/"
 logger = get_logger(__name__)
 
 
-def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-many-statements
+def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-many-statements
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -123,7 +123,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
         raise CLIError(e)
 
 
-def acr_connected_registry_update(cmd,
+def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-many-statements
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -157,6 +157,10 @@ def acr_connected_registry_update(cmd,
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
+    client_token_list = list(
+        set(current_connected_registry.client_token_ids).
+        union(add_client_token_set).
+        difference(remove_client_token_set))
 
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
                 'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
@@ -171,11 +175,7 @@ def acr_connected_registry_update(cmd,
             log_level=log_level,
             audit_log_status=sync_audit_logs_enabled
         ),
-        client_token_ids=list(
-            set(current_connected_registry.client_token_ids).
-            union(add_client_token_set).
-            difference(remove_client_token_set)
-        )
+        client_token_ids=client_token_list
     )
 
     try:
