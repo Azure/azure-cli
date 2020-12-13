@@ -151,13 +151,13 @@ def _format_progress(msg, current):
     if space * speed + len(msg) + 1 >= BAR_LEN:
         raise ValueError("message is too long.")
 
-    message = '\r{}['.format(msg)
+    message = '\r{} |'.format(msg)
 
     # Adjust the message
     current = current % space
     message += (' ' * current * speed + '.' + ' ' * (space - current - 1) * speed)
 
-    message += ']'
+    message += '|'
 
     return message
 
@@ -177,8 +177,11 @@ class DeterminateStandardOut(ProgressViewBase):
         value = args.get('value', None)
         if percent:
             progress = _format_value(message, percent)
-        if value and not percent:
-            progress = _format_progress(message, value)
+        else:
+            if value == "Finished":
+                progress = "\rFinished!"
+            else:
+                progress = _format_progress(message, value)
 
         self.out.write(progress)
 
@@ -284,4 +287,4 @@ class InfiniteProgressBar:
         self.cli_ctx.get_progress_controller(det=True).add(message="Running", value=self.current)
 
     def end(self):
-        self.cli_ctx.get_progress_controller(det=True).end(message="Running")
+        self.cli_ctx.get_progress_controller(det=True).end(value="Finished")
