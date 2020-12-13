@@ -1899,7 +1899,8 @@ def delete_template_spec(cmd, resource_group_name=None, name=None, version=None,
             version = None
     if version:
         return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
-    return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name)
+    else:
+        return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name)
 
 
 def list_template_specs(cmd, resource_group_name=None, name=None):
