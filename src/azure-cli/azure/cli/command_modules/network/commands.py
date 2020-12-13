@@ -819,7 +819,7 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format,
                          validator=process_lb_create_namespace, exception_handler=handle_template_based_exception,
                          progress=TimingProgressBar(self.cli_ctx, total=40))
-        g.command('delete', 'begin_delete', progress=InfiniteProgressBar(self.cli_ctx))
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_lbs')
         g.wait_command('wait')
         g.generic_update_command('update', setter_name='begin_create_or_update')
