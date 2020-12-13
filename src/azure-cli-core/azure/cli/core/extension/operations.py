@@ -245,17 +245,17 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
 
     extension_name = _add_whl_ext(cli_ctx=cmd_cli_ctx, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
-    try:
-        ext = get_extension(extension_name)
-        _augment_telemetry_with_ext_info(extension_name, ext)
-        if extension_name and ext.experimental:
-            logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
-                           "Please use with discretion.", extension_name)
-        elif extension_name and ext.preview:
-            logger.warning("The installed extension '%s' is in preview.", extension_name)
-        CommandIndex().invalidate()
-    except ExtensionNotInstalledException:
-        pass
+    # try:
+    #     ext = get_extension(extension_name)
+    #     _augment_telemetry_with_ext_info(extension_name, ext)
+    #     if extension_name and ext.experimental:
+    #         logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
+    #                        "Please use with discretion.", extension_name)
+    #     elif extension_name and ext.preview:
+    #         logger.warning("The installed extension '%s' is in preview.", extension_name)
+    #     CommandIndex().invalidate()
+    # except ExtensionNotInstalledException:
+    #     pass
 
 
 def remove_extension(extension_name):

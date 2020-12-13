@@ -28,6 +28,11 @@ from .tunnel import TunnelServer
 
 import threading
 import time
+import paramiko
+import sys
+import os
+import platform
+import subprocess
 
 logger = get_logger(__name__)
 
@@ -6914,6 +6919,85 @@ def getdns_bastion_host(cmd, resource_group_name, name):
     bastion = client.get(resource_group_name, name)
     return bastion.dns_name
 
+SSH_EXTENSION_NAME = 'ssh'
+SSH_EXTENSION_MODULE = 'azext_ssh.custom'
+SSH_EXTENSION_VERSION = '0.1.3'
+
+def _get_azext_module(extension_name, module_name):
+    try:
+        # Adding the installed extension in the path
+        from azure.cli.core.extension.operations import add_extension_to_path
+        add_extension_to_path(extension_name)
+        # Import the extension module
+        from importlib import import_module
+        azext_custom = import_module(module_name)
+        return azext_custom
+    except ImportError as ie:
+        raise CLIError(ie)
+
+
+def _test_extension(extension_name):
+    from azure.cli.core.extension import (ExtensionNotInstalledException, get_extension)
+    from pkg_resources import parse_version
+    ext = get_extension(extension_name)
+    if parse_version(ext.version) < parse_version(SSH_EXTENSION_VERSION):
+        raise CLIError('SSH Extension (version >= %s) must be installed'.format(SSH_EXTENSION_VERSION))
+
+def _get_ssh_path(ssh_command="ssh"):
+    ssh_path = ssh_command
+
+    if platform.system() == 'Windows':
+        arch_data = platform.architecture()
+        is_32bit = arch_data[0] == '32bit'
+        sys_path = 'SysNative' if is_32bit else 'System32'
+        system_root = os.environ['SystemRoot']
+        system32_path = os.path.join(system_root, sys_path)
+        ssh_path = os.path.join(system32_path, "openSSH", (ssh_command + ".exe"))
+        logger.debug("Platform architecture: %s", str(arch_data))
+        logger.debug("System Root: %s", system_root)
+        logger.debug("Attempting to run ssh from path %s", ssh_path)
+
+        if not os.path.isfile(ssh_path):
+            raise util.CLIError("Could not find " + ssh_command + ".exe. Is the OpenSSH client installed?")
+
+    return ssh_path
+
+
+def _get_host(username, ip):
+    return username + "@" + ip
+
+
+def _build_args(cert_file, private_key_file):
+    private_key = []
+    if private_key_file:
+        private_key = ["-i", private_key_file]
+    certificate = ["-o", "CertificateFile=" + cert_file]
+    return private_key + certificate
+
+def ssh_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=None):
+
+    _test_extension(SSH_EXTENSION_NAME)
+
+    if not resource_port:
+        resource_port = 22
+
+    parsed_id = parse_resource_id(resource_id)
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+
+    azssh = _get_azext_module(SSH_EXTENSION_NAME, SSH_EXTENSION_MODULE)
+    public_key_file, private_key_file = azssh._check_or_create_public_private_files(None, None)
+    cert_file, username = azssh._get_and_write_certificate(cmd, public_key_file, private_key_file+'-cert.pub')
+    
+    command = [_get_ssh_path(), _get_host(username, 'localhost')]
+    command = command + _build_args(cert_file, private_key_file)
+    command = command + ["-p", str(tunnel_server.local_port)]
+    command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
+    logger.debug("Running ssh command %s", ' '.join(command))
+    subprocess.call(command, shell=platform.system() == 'Windows')
+
 def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
 
@@ -6922,23 +7006,23 @@ def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
 
-    tunnel_server = TunnelServer('', port, bastion.dns_name, resource_id, resource_port)
+    tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, resource_id, resource_port)
 
     return tunnel_server
 
 
-def create_bastion_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None, timeout=None):
+def create_bastion_tunnel(cmd, resource_group_name, name, resource_id, resource_port=None, port=None, timeout=None):
     tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
 
-    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+    # logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
 
-    logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+    # logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
    
-    logger.warning('Ctrl + C to close')
+    # logger.warning('Ctrl + C to close')
 
     if timeout:
         time.sleep(int(timeout))

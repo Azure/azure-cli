@@ -1313,11 +1313,11 @@ def load_command_table(self, _):
     # endregion
 
     # region Bastion
-    with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
+    with self.command_group('network bastion', network_bastion_hosts_sdk) as g:
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
-        g.custom_command('getdns', 'getdns_bastion_host')
+        g.custom_command('ssh', 'ssh_bastion_host')
         g.custom_command('tunnel', 'create_bastion_tunnel')
         g.command('delete', 'delete')
     # endregion
