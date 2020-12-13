@@ -275,10 +275,8 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
-    # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
-    result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
     try:
-        return shell_safe_json_parse(result, preserve_order)
+        return shell_safe_json_parse(minified, preserve_order, strict=False) # use strict=False to allow multiline strings
     except CLIError:
         # Because the processing of removing comments and compression will lead to misplacement of error location,
         # so the error message should be wrapped.
