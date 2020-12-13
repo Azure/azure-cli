@@ -318,6 +318,26 @@ class AzCliCommandParser(CLICommandParser):
                 return None
         return EXT_CMD_TREE
 
+    def _get_all_extensions(self, cmd_chain, exts):
+        """Find all the extension names in cmd_chain (dict of extension command subtree) and store
+        in exts.
+        An example of cmd_chain may look like (a command sub tree of the 'aks' command group):
+        {
+            "create": "aks-preview",
+            "update": "aks-preview",
+            "app": {
+                "up": "deploy-to-azure"
+            },
+            "use-dev-spaces": "dev-spaces"
+        }
+        Then the resulting exts is {'aks-preview', 'deploy-to-azure', 'dev-spaces'}
+        """
+        for key in cmd_chain:
+            if isinstance(cmd_chain[key], str):
+                exts.add(cmd_chain[key])
+            else:
+                self._get_all_extensions(cmd_chain[key], exts)
+
     def _search_in_extension_commands(self, command_str):
         """Search the command in an extension commands dict which mimics a prefix tree.
         If the value of the dict item is a string, then the key represents the end of a complete command
@@ -346,7 +366,10 @@ class AzCliCommandParser(CLICommandParser):
                 cmd_chain = cmd_chain[part]
             except KeyError:
                 return None
-        return None
+        # command_str is prefix of one or more complete commands.
+        all_exts = set()
+        self._get_all_extensions(cmd_chain, all_exts)
+        return list(all_exts) if all_exts else None
 
     def _get_extension_use_dynamic_install_config(self):
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
@@ -385,6 +408,27 @@ class AzCliCommandParser(CLICommandParser):
                     from azure.cli.core.util import roughly_parse_command
                     command_str = roughly_parse_command(args[1:])
                     ext_name = self._search_in_extension_commands(command_str)
+                    import collections
+                    # The input command matches the prefix of one or more extension commands
+                    if isinstance(ext_name, collections.Iterable):
+                        if len(ext_name) > 1:
+                            from knack.prompting import prompt_choice_list, NoTTYException
+                            try:
+                                prompt_msg = "The command requires the latest version of one of the following " \
+                                    "extensions. You need to pick one to install:"
+                                choice_idx = prompt_choice_list(prompt_msg, ext_name)
+                                ext_name = ext_name[choice_idx]
+                                use_dynamic_install = 'yes_without_prompt'
+                            except NoTTYException:
+                                error_msg = "{}{}\nUnable to prompt for selection as no tty available. Please " \
+                                    "update or install the extension with 'az extension add --upgrade -n " \
+                                    "<extension-name>'.".format(prompt_msg, ext_name)
+                                logger.error(error_msg)
+                                telemetry.set_user_fault(error_msg)
+                                self.exit(2)
+                        else:
+                            ext_name = ext_name[0]
+
                     if ext_name:
                         caused_by_extension_not_installed = True
                         telemetry.set_command_details(command_str,
@@ -435,8 +479,8 @@ class AzCliCommandParser(CLICommandParser):
                                 self.exit(2)
                         else:
                             error_msg = "The command requires the latest version of extension {ext_name}. " \
-                                "To install, run 'az extension add --upgrade -n {ext_name}'." \
-                                    .format(ext_name=ext_name) if not error_msg else error_msg
+                                "To install, run 'az extension add --upgrade -n {ext_name}'.".format(
+                                    ext_name=ext_name) if not error_msg else error_msg
                 if not error_msg:
                     # parser has no `command_source`, value is part of command itself
                     error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
