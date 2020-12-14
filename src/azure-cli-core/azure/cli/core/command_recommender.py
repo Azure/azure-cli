@@ -122,18 +122,15 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
             for result in response.json():
-                print(response.json())
                 # parse the response and format the recommendation
-                command, description, parameters, placeholders, link = \
-                    result['command'],\
-                    'A mocked description',\
-                    result['parameters'].split(','),\
-                    result['placeholders'].split('♠'),\
-                    'A mocked link'
-                recommended_command = 'az {} '.format(command)
-                for parameter, placeholder in zip(parameters, placeholders):
-                    recommended_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
-                recommendations.append((recommended_command.strip(), description, link))
+                recommendation = {
+                    'command': result['command'],
+                    'description': 'A mocked description',
+                    'parameters': result['parameters'].split(','),
+                    'placeholders': result['placeholders'].split('♠'),
+                    'link': 'A mocked link'
+                }
+                recommendations.append(recommendation)
 
         self.aladdin_recommendations.extend(recommendations)
 
@@ -141,26 +138,77 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         """Provide recommendations from Aladdin service,
         which include both commands and reference link along with their descriptions.
         """
+        from azure.cli.core.style import Style
+
+        def format_raw_command(command, parameters, placeholders):
+            """Format the command info to get an executable command. """
+            raw_command = 'az {} '.format(command)
+            for parameter, placeholder in zip(parameters, placeholders):
+                raw_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
+            return raw_command.strip()
+
+        def format_decorated_command(command, parameters, placeholders):
+            """Format the command info to get an decorated command.
+            The decorations of a command include:
+                1. Use '<>' to wrap the placeholders for the parameters not specified by users
+                2. Use user's input values to replace the placeholders for the parameters users have specified
+                2. Apply colorization for the command
+            """
+            placeholders = ['<{}>'.format(placeholder) for placeholder in placeholders if placeholder]
+            full_command = format_raw_command(command, parameters, placeholders)
+            # replace the placeholders with user's input values only when the recommended
+            # command's name is the same with user's input command name
+            if command == self.command:
+                full_command = self._replace_parameter_values(full_command)
+
+            # get styled command
+            styled_command = []
+            command_args = full_command.split(' ')
+            for index, arg in enumerate(command_args):
+                spaced_arg = ' {}'.format(arg) if index > 0 else arg
+                if index > 0 and command_args[index - 1].startswith('-') and not arg.startswith('-'):
+                    styled_command.append((Style.PRIMARY, spaced_arg))
+                else:
+                    styled_command.append((Style.ACTION, spaced_arg))
+
+            return styled_command
 
         # get recommendations from Aladdin service
-        if not self._disable_aladdin_service():
+        if not self._disable_aladdin_service() and \
+           not self.cli_ctx.config.getboolean('core', 'disable_error_recommendation', False):
             self._set_aladdin_recommendations()
 
-        recommendations = [(item[0], item[1]) for item in self.aladdin_recommendations]
-        recommended_commands = [item[0] for item in recommendations]
+        raw_commands = []
+        decorated_recommendations = []
+        for recommendation in self.aladdin_recommendations:
+            # generate raw commands recorded in Telemetry
+            raw_command = format_raw_command(recommendation['command'],
+                                             recommendation['parameters'],
+                                             recommendation['placeholders'])
+            raw_commands.append(raw_command)
+
+            # generate decorated commands shown to users
+            decorated_command = format_decorated_command(recommendation['command'],
+                                                         recommendation['parameters'],
+                                                         recommendation['placeholders'])
+            decorated_description = [(Style.SECONDARY, recommendation['description'] + '\n')]
+            decorated_recommendations.append((decorated_command, decorated_description))
+
+        # add reference link as a recommendation
         if self.aladdin_recommendations:
-            _, _, link = self.aladdin_recommendations[0]
-            recommendations.append((link, 'Read more about the command in reference docs'))
+            decorated_link = [(Style.HYPERLINK, self.aladdin_recommendations[0]['link'])]
+            decorated_description = [(Style.SECONDARY, 'Read more about the command in reference docs')]
+            decorated_recommendations.append((decorated_link, decorated_description))
 
         # set the recommend command into Telemetry
-        self._set_recommended_command_to_telemetry(recommended_commands)
+        self._set_recommended_command_to_telemetry(raw_commands)
 
-        return recommendations
+        return decorated_recommendations
 
-    def _set_recommended_command_to_telemetry(self, recommended_commands):  # pylint: disable=no-self-use
+    def _set_recommended_command_to_telemetry(self, raw_commands):  # pylint: disable=no-self-use
         """Set the recommended command to Telemetry for analysis. """
 
-        telemetry.set_debug_info('AladdinRecommendCommand', ';'.join(recommended_commands))
+        telemetry.set_debug_info('AladdinRecommendCommand', ';'.join(raw_commands))
 
     def _disable_aladdin_service(self):
         """Decide whether to disable aladdin request when a command fails.
@@ -354,11 +402,8 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         command_args = command.split(' ')
         for index, arg in enumerate(command_args):
             if arg.startswith('-') and index + 1 < len(command_args) and not command_args[index + 1].startswith('-'):
-
                 user_param_val = get_user_param_value(arg, user_kwargs, param_mappings)
                 if user_param_val:
                     command_args[index + 1] = user_param_val
-                else:
-                    command_args[index + 1] = '<{}>'.format(command_args[index + 1])
 
         return ' '.join(command_args)

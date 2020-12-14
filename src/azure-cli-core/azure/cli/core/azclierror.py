@@ -61,6 +61,7 @@ class AzCLIError(CLIError):
 
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
+        from azure.cli.core.style import print_styled_text
         with CommandLoggerContext(logger):
             # print error message
             logger.error(self.error_msg)
@@ -77,8 +78,8 @@ class AzCLIError(CLIError):
             if self.aladdin_recommendations:
                 print('\nTRY THIS:', file=sys.stderr)
                 for recommendation, description in self.aladdin_recommendations:
-                    print(recommendation, file=sys.stderr)
-                    print(description + '\n', file=sys.stderr)
+                    print_styled_text(recommendation, file=sys.stderr)
+                    print_styled_text(description, file=sys.stderr)
 
     def send_telemetry(self):
         telemetry.set_error_type(self.__class__.__name__)
