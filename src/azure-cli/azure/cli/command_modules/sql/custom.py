@@ -1868,9 +1868,9 @@ def _audit_policy_create_diagnostic_setting(
     name = category_name
 
     import inspect
-    test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
-                      e.function == "test_sql_server_security_mgmt" or\
-                        e.function == "test_sql_server_ms_support_mgmt"), None) is not None
+
+    test_methods = ["test_sql_db_security_mgmt", "test_sql_server_security_mgmt", "test_sql_server_ms_support_mgmt"]
+    test_mode = next((e for e in inspect.stack() if e.function in test_methods), None) is not None
 
     # For test environment the name should be constant, i.e. match the name written in recorded yaml file
     if test_mode:
