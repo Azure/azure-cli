@@ -1654,14 +1654,20 @@ def _audit_policy_show(
         database_name=None,
         category_name=None):
     '''
-    Common code to get server or database audit policy including diagnostic settings
+    Common code to get server (DevOps) or database audit policy including diagnostic settings
     '''
 
     # Request audit policy
     if database_name is None:
-        audit_policy = client.get(
-            resource_group_name=resource_group_name,
-            server_name=server_name)
+        if category_name == 'DevOpsOperationsAudit':
+            audit_policy = client.get(
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                dev_ops_auditing_settings_name='default')
+        else:
+            audit_policy = client.get(
+                resource_group_name=resource_group_name,
+                server_name=server_name)
     else:
         audit_policy = client.get(
             resource_group_name=resource_group_name,
@@ -1863,7 +1869,8 @@ def _audit_policy_create_diagnostic_setting(
 
     import inspect
     test_mode = next((e for e in inspect.stack() if e.function == "test_sql_db_security_mgmt" or
-                      e.function == "test_sql_server_security_mgmt"), None) is not None
+                      e.function == "test_sql_server_security_mgmt" or\
+                        e.function == "test_sql_server_ms_support_mgmt"), None) is not None
 
     # For test environment the name should be constant, i.e. match the name written in recorded yaml file
     if test_mode:
@@ -2437,6 +2444,7 @@ def server_ms_support_audit_policy_update(
         instance,
         server_name,
         resource_group_name,
+        dev_ops_auditing_settings_name="default",
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
