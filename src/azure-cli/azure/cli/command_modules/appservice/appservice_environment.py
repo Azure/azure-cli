@@ -41,7 +41,7 @@ def show_appserviceenvironment(cmd, name, resource_group_name=None):
     return ase_client.get(resource_group_name, name)
 
 
-def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='asev2', outbound_subnet=None,
+def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='asev2', inbound_subnet=None,
                                      vnet_name=None, ignore_route_table=False,
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
@@ -54,7 +54,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
     # Therefore the current method use direct ARM.
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-    outbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, outbound_subnet, vnet_name, resource_group_name)
+    deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
 
     if kind == 'asev2':
         _validate_subnet_empty(cmd.cli_ctx, subnet_id)
@@ -65,28 +65,26 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
         if not ignore_network_security_group:
             _ensure_network_security_group(cmd.cli_ctx, resource_group_name, name, location,
                                            subnet_id, force_network_security_group)
-    elif kind == 'asev3':
-        if not ignore_subnet_size_validation:
-            _validate_subnet_size(cmd.cli_ctx, outbound_subnet_id)
-        _ensure_subnets_asev3(cmd.cli_ctx, subnet_id, outbound_subnet_id)
 
-    logger.info('Create App Service Environment...')
-    return
-    deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-
-    if kind == 'asev2':
         ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
                                                                      subnet_id=subnet_id,
                                                                      virtual_ip_type=virtual_ip_type,
                                                                      front_end_scale_factor=front_end_scale_factor,
                                                                      front_end_sku=front_end_sku, tags=None)
+
     elif kind == 'asev3':
+        inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, inbound_subnet, vnet_name, resource_group_name)
+        if not ignore_subnet_size_validation:
+            _validate_subnet_size(cmd.cli_ctx, subnet_id)
+        _ensure_subnets_asev3(cmd.cli_ctx, inbound_subnet_id, subnet_id)
+
         ase_deployment_properties = _build_asev3_deployment_properties(name=name, location=location,
-                                                                       inbound_subnet_id=subnet_id,
-                                                                       outbound_subnet_id=outbound_subnet_id,
+                                                                       inbound_subnet_id=inbound_subnet_id,
+                                                                       outbound_subnet_id=subnet_id,
                                                                        front_end_scale_factor=front_end_scale_factor,
                                                                        front_end_sku=front_end_sku, tags=None)
 
+    logger.info('Create App Service Environment...')
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
@@ -108,7 +106,7 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
     if ase_def.kind.lower() != 'asev2':
-        raise CLIError('Only ASE v2 currently supports updates')
+        raise CLIError('Only ASE v2 currently supports update')
 
     worker_sku = _map_worker_sku(front_end_sku)
     ase_def.worker_pools = ase_def.worker_pools or []  # v1 feature, but cannot be null
@@ -128,7 +126,8 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        raise CLIError('list-addresses is currently not supported for ASEv3. Inbound IP is associated with the private endpoint.')
+        raise CLIError('list-addresses is currently not supported for ASEv3. \
+                       Inbound IP is associated with the private endpoint.')
     return ase_client.get_vip_info(resource_group_name, name)
 
 
