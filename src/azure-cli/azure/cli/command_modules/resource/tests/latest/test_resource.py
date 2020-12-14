@@ -888,7 +888,7 @@ class TemplateSpecsTest(ScenarioTest):
 
         # Tags should be applied to both the parent template spec and template spec version if neither existed:
 
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --tag cli-test=test').get_output_in_json()
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --tags cli-test=test').get_output_in_json()
         self.kwargs['template_spec_version_one_id'] = result['id']
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
