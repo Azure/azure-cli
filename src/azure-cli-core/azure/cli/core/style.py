@@ -19,6 +19,8 @@ from enum import Enum
 
 from colorama import Fore
 
+is_powershell = None
+
 
 class Style(str, Enum):
     PRIMARY = "primary"
@@ -47,12 +49,25 @@ THEME = {
 }
 
 
+# Blue and bright blue is not visible under the default theme of powershell.exe
+POWERSHELL_COLOR_REPLACEMENT = {
+    Fore.BLUE: Fore.LIGHTWHITE_EX,
+    Fore.LIGHTBLUE_EX: Fore.LIGHTWHITE_EX
+}
+
+
 def print_styled_text(styled, file=sys.stderr):
     formatted = format_styled_text(styled)
     print(formatted, file=file)
 
 
 def format_styled_text(styled_text):
+    # Use a module-level cache to save whether the terminal is powershell.exe
+    global is_powershell
+    if is_powershell is None:
+        from azure.cli.core.util import get_parent_proc_name
+        is_powershell = get_parent_proc_name() == "powershell.exe"
+
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
 
@@ -63,11 +78,17 @@ def format_styled_text(styled_text):
             raise CLIInternalError("Invalid styled text. It should be a list of 2-element tuples.")
 
         style = text[0]
+        # Check if the specified style is defined
         if style not in THEME:
             from azure.cli.core.azclierror import CLIInternalError
             raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
 
-        formatted_parts.append(THEME[text[0]] + text[1])
+        escape_seq = THEME[text[0]]
+        # Transform the color in powershell
+        if is_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
+            escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
+
+        formatted_parts.append(escape_seq + text[1])
 
     # Reset control sequence
     formatted_parts.append(Fore.RESET)
