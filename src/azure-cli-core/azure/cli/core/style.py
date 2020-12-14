@@ -63,7 +63,6 @@ def print_styled_text(styled_text, file=None):
         - (style, text)
         - [(style, text), ...]
     :param file: The file to print the styled text. The default target is sys.stderr.
-    :return:
     """
     formatted = format_styled_text(styled_text)
     # Always fetch the latest sys.stderr in case it has been wrapped by colorama.
@@ -72,6 +71,7 @@ def print_styled_text(styled_text, file=None):
 
 def format_styled_text(styled_text):
     """Format styled text.
+    To turn off color, set `format_styled_text.enable_color = False`.
 
     :param styled_text: See print_styled_text for detail.
     """
