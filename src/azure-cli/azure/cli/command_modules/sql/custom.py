@@ -2459,6 +2459,10 @@ def server_ms_support_audit_policy_update(
     Update server Microsoft support operations audit policy
     '''
 
+    # Avoid style error
+    if dev_ops_auditing_settings_name is None:
+        dev_ops_auditing_settings_name = "default"
+
     return _audit_policy_update(
         cmd=cmd,
         instance=instance,
