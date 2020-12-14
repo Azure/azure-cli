@@ -775,6 +775,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # create a temp directory and unzip the code to this folder
         import zipfile
         import tempfile
+        import time
         temp_dir = tempfile.mkdtemp()
         zip_ref = zipfile.ZipFile(zip_file_name, 'r')
         zip_ref.extractall(temp_dir)
@@ -809,6 +810,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         # test changing runtime to newer version
+        time.sleep(30)
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['name'] == full_result['name'])
@@ -820,6 +822,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         # test changing runtime to older version
+        time.sleep(30)
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['name'] == full_result['name'])
