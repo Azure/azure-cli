@@ -179,7 +179,7 @@ class DeterminateStandardOut(ProgressViewBase):
             progress = _format_value(message, percent)
         else:
             if value == "Finished":
-                progress = "\rFinished!"
+                progress = "\rFinished!".ljust(BAR_LEN)
             else:
                 progress = _format_progress(message, value)
 
