@@ -68,8 +68,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
             check_name_client = cf_mysql_check_resource_availability(cmd.cli_ctx, None)
             server_availability = check_name_client.execute(server_name, DELEGATION_SERVICE_NAME)
             if not server_availability.name_available:
-                raise CLIError("The server name '{}' already exists.Please re-run command with some "
-                               "other server name.".format(server_name))
+                raise CLIError(server_availability.message)
 
         # Populate desired parameters
         location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,

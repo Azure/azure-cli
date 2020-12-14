@@ -175,7 +175,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('resource_group_name', required=False, validator=process_resource_group)
 
     with self.argument_context('storage account check-name') as c:
-        c.argument('name', options_list=['--name', '-n'])
+        c.argument('name', options_list=['--name', '-n'],
+                   help='The name of the storage account within the specified resource group')
 
     with self.argument_context('storage account delete') as c:
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
@@ -190,9 +191,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
-                   arg_type=get_enum_type(t_kind), default='StorageV2')
-        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
+        # Azure Stack always requires default kind is Storage
+        c.argument('kind', help='Indicate the type of storage account.',
                    arg_type=get_enum_type(t_kind), default='Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
@@ -342,10 +342,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('policy', type=file_type, completer=FilesCompleter(),
                    help='The Storage Account ManagementPolicies Rules, in JSON format. See more details in: '
                         'https://docs.microsoft.com/azure/storage/common/storage-lifecycle-managment-concepts.')
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
-    with self.argument_context('storage account management-policy update') as c:
-        c.argument('account_name', help='The name of the storage account within the specified resource group.')
+    for item in ['create', 'update', 'show', 'delete']:
+        with self.argument_context('storage account management-policy {}'.format(item)) as c:
+            c.argument('account_name', help='The name of the storage account within the specified resource group.')
 
     with self.argument_context('storage account keys list') as c:
         c.argument('account_name', acct_name_type, id_part=None)
@@ -721,9 +721,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
 
-    with self.argument_context('storage container immutability-policy') as c:
-        c.argument('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
-                   arg_type=get_three_state_flag())
+    for item in ['create', 'extend']:
+        with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            c.extra('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
+                    arg_type=get_three_state_flag(), help='This property can only be changed for unlocked time-based '
+                                                          'retention policies. When enabled, new blocks can be '
+                                                          'written to an append blob while maintaining immutability '
+                                                          'protection and compliance. Only new blocks can be added '
+                                                          'and any existing blocks cannot be modified or deleted. '
+                                                          'This property cannot be changed with '
+                                                          'ExtendImmutabilityPolicy API.')
+            c.extra('period', type=int, help='The immutability period for the blobs in the container since the policy '
+                                             'creation, in days.')
+            c.ignore('parameters')
 
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)
@@ -745,7 +755,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container legal-hold') as c:
         c.argument('container_name', container_name_type)
         c.argument('tags', nargs='+',
-                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
+                   help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
+                        'to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -809,6 +820,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
+            c.argument('expand', default=None)
             c.ignore('filter', 'maxpagesize', 'skip_token')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:

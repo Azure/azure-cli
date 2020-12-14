@@ -46,7 +46,7 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
 
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
 from ._client_factory import resource_service_factory
-from ._utils import open_certificate, generateKey
+from ._utils import open_certificate, generate_key
 
 
 logger = get_logger(__name__)
@@ -84,18 +84,21 @@ def iot_dps_get(client, dps_name, resource_group_name=None):
     return client.iot_dps_resource.get(dps_name, resource_group_name)
 
 
-def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1):
+def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1, tags=None):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     dps_property = IotDpsPropertiesDescription()
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
-                                                     sku=IotDpsSkuInfo(name=sku, capacity=unit))
+                                                     sku=IotDpsSkuInfo(name=sku, capacity=unit),
+                                                     tags=tags)
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
 
 
-def iot_dps_update(client, dps_name, parameters, resource_group_name):
+def iot_dps_update(client, dps_name, parameters, resource_group_name, tags=None):
+    if tags is not None:
+        parameters.tags = tags
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, parameters)
 
 
@@ -632,9 +635,9 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     requested_policy = [p for p in policies if p.key_name.lower() == policy_name.lower()]
     if regenerate_key == RenewKeyType.Primary.value:
-        requested_policy[0].primary_key = generateKey()
+        requested_policy[0].primary_key = generate_key()
     if regenerate_key == RenewKeyType.Secondary.value:
-        requested_policy[0].secondary_key = generateKey()
+        requested_policy[0].secondary_key = generate_key()
     if regenerate_key == RenewKeyType.Swap.value:
         temp = requested_policy[0].primary_key
         requested_policy[0].primary_key = requested_policy[0].secondary_key

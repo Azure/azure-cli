@@ -6,6 +6,7 @@
 # pylint:disable=too-many-lines
 
 import os
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -21,6 +22,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -462,7 +464,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
-            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            namespace.os_type = image_info.storage_profile.os_disk.os_type
             image_data_disks = image_info.storage_profile.data_disks or []
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
@@ -470,7 +472,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
                                                            gallery_image_name=res['child_name_1'])
-            namespace.os_type = image_info.os_type.value
+            namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
@@ -545,7 +547,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
-             if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
+             if a.sku.tier == sku_tier and a.location == namespace.location), None)
 
         if account:
             # 3 - nothing specified - find viable storage account in target resource group
@@ -1483,7 +1485,6 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
 
 def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
     source_from_vm = False
     try:
@@ -1495,12 +1496,12 @@ def process_image_create_namespace(cmd, namespace):
             compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
             vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
             source_from_vm = True
-    except CloudError:
+    except ResourceNotFoundError:
         pass
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+        namespace.os_type = vm_info.storage_profile.os_disk.os_type
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
@@ -1526,7 +1527,6 @@ def process_image_create_namespace(cmd, namespace):
 
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
-    from msrestazure.azure_exceptions import CloudError
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
@@ -1542,7 +1542,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         try:
             info = compute_client.snapshots.get(resource_group_name, source)
             source_snapshot = info.id
-        except CloudError:
+        except ResourceNotFoundError:
             info = compute_client.disks.get(resource_group_name, source)
             source_disk = info.id
 

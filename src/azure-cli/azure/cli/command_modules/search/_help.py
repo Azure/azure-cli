@@ -27,6 +27,14 @@ type: group
 short-summary: Manage Azure Search services.
 """
 
+helps['search service create'] = """
+type: command
+short-summary: Creates a Search service in the given resource group.
+parameters:
+  - name: --sku
+    short-summary: 'The SKU of the search service, which determines price tier and capacity limits. Accepted Values: Free, Basic, Standard, Standard2, Standard3'
+"""
+
 helps['search service update'] = """
 type: command
 short-summary: Update partition and replica of the given search service.

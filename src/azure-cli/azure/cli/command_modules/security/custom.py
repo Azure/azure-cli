@@ -670,3 +670,32 @@ def get_regulatory_compliance_assessment(client, resource_name, standard_name, c
     return client.get(regulatory_compliance_standard_name=standard_name,
                       regulatory_compliance_control_name=control_name,
                       regulatory_compliance_assessment_name=resource_name)
+
+# --------------------------------------------------------------------------------------------
+# Security Secure Score
+# --------------------------------------------------------------------------------------------
+
+
+def list_secure_scores(client):
+
+    return client.list()
+
+
+def get_secure_score(client, resource_name):
+
+    return client.get(resource_name)
+
+
+def list_secure_score_controls(client):
+
+    return client.list()
+
+
+def list_by_score(client, resource_name):
+
+    return client.list_by_secure_score(resource_name)
+
+
+def list_secure_score_control_definitions(client):
+
+    return client.list_by_subscription()

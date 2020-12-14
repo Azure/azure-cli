@@ -13,6 +13,8 @@ from azure.cli.command_modules.advisor.custom import (
     _parse_operation_id,
     _parse_recommendation_uri)
 
+from azure.cli.testsdk.decorators import serial_test
+
 
 class AzureAdvisorUnitTest(unittest.TestCase):
 
@@ -68,6 +70,7 @@ class AzureAdvisorUnitTest(unittest.TestCase):
 
 class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
+    @serial_test()
     def test_recommendations(self):
         # List should return at least one recommendation with filters
         output = self.cmd('advisor recommendation list --category Security',
@@ -104,6 +107,7 @@ class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
                  checks=[self.check("[0].id", recommendation_id),
                          self.check("[0].suppressionIds", None)])
 
+    @serial_test()
     def test_recommendations_resource_group(self):
         resource_group = 'cli-live-test-rg'
         self.kwargs.update({

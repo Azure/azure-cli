@@ -394,19 +394,19 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image1} --source {vm}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
             self.check("storageProfile.osDisk.managedDisk", None),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
         # Create image from vm id
         self.cmd('image create -g {rg} -n {image2} --source {vm_id}', checks=[
             self.check("sourceVirtualMachine.id", '{vm_id}'),
             self.check("storageProfile.osDisk.managedDisk", None),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
         # Create image from disk id
         self.cmd('image create -g {rg} -n {image3} --source {os_disk_id} --os-type linux --hyper-v-generation "V1"', checks=[
             self.check("sourceVirtualMachine", None),
             self.check("storageProfile.osDisk.managedDisk.id", '{os_disk_id}'),
-            self.check('hyperVgeneration', 'V1')
+            self.check('hyperVGeneration', 'V1')
         ])
 
 
@@ -751,12 +751,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
             self.check('diskIopsReadOnly', 200),
-            self.check('diskMbpsReadOnly', 30)
+            self.check('diskMBpsReadOnly', 30)
         ])
 
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-only 250 --disk-mbps-read-only 40', checks=[
             self.check('diskIopsReadOnly', 250),
-            self.check('diskMbpsReadOnly', 40)
+            self.check('diskMBpsReadOnly', 40)
         ])
 
         self.cmd('disk create -g {rg} -n {disk2} --image-reference {image}', checks=[
@@ -768,9 +768,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
         self.cmd('sig create -g {rg} --gallery-name {g1}')
-        self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsSecureBootSupported=true IsMeasuredBootSupported=false" --hyper-v-generation V2', checks=[
+        self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsSecureBootSupported=false IsMeasuredBootSupported=false" --hyper-v-generation V2', checks=[
             self.check('features[0].name', 'IsSecureBootSupported'),
-            self.check('features[0].value', 'true'),
+            self.check('features[0].value', 'false'),
             self.check('features[1].name', 'IsMeasuredBootSupported'),
             self.check('features[1].value', 'false'),
         ])
@@ -938,6 +938,7 @@ class VMNoWaitScenarioTest(ScenarioTest):
         })
         self.cmd('vm create -g {rg} -n {vm} --admin-username user12 --admin-password testPassword0 --authentication-type password --image UbuntuLTS --nsg-rule NONE --no-wait',
                  checks=self.is_empty())
+        time.sleep(30)
         self.cmd('vm wait -g {rg} -n {vm} --custom "instanceView.statuses[?code==\'PowerState/running\']"',
                  checks=self.is_empty())
         self.cmd('vm get-instance-view -g {rg} -n {vm}',
@@ -1102,7 +1103,7 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension show --resource-group {rg} --vm-name {vm} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('virtualMachineExtensionType', '{ext_type}')
+            self.check('typePropertiesType', '{ext_type}')
         ])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext_name}')
 
@@ -1308,7 +1309,7 @@ class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instanc
 class VMMonitorTestDefault(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
-        from ._test_util import TimeSpanProcessor
+        from azure.cli.command_modules.vm.tests.latest._test_util import TimeSpanProcessor
         TIMESPANTEMPLATE = '0000-00-00'
         super(VMMonitorTestDefault, self).__init__(
             method_name,
@@ -1658,7 +1659,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('type1', '{ext_type}')
+            self.check('typePropertiesType', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
@@ -2006,7 +2007,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 4 --sku UltraSSD_LRS --disk-iops-read-write 500 --disk-mbps-read-write 8 --zone 2')
         self.cmd('disk update -g {rg} -n {disk1} --disk-iops-read-write 510 --disk-mbps-read-write 10', checks=[
             self.check('diskIopsReadWrite', 510),
-            self.check('diskMbpsReadWrite', 10)
+            self.check('diskMBpsReadWrite', 10)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli-test-std_zrs', location='eastus2')
@@ -3862,7 +3863,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', '{gallery}'))
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized --hyper-v-generation V2 -p publisher1 -f offer1 -s sku1',
                  checks=[self.check('name', '{image}'), self.check('osState', 'Specialized'),
-                         self.check('hyperVgeneration', 'V2')])
+                         self.check('hyperVGeneration', 'V2')])
         self.cmd('disk create -g {rg} -n d1 --size-gb 10')
         self.cmd('disk create -g {rg} -n d2 --size-gb 10')
         self.cmd('disk create -g {rg} -n d3 --size-gb 10')
@@ -4704,8 +4705,8 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
                  checks=[
                      self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskIopsReadWrite', '444'),
                      self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskIopsReadWrite', '555'),
-                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskMbpsReadWrite', '66'),
-                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskMbpsReadWrite', '77'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite', '66'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite', '77'),
                  ])
 
 

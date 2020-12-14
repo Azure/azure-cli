@@ -21,7 +21,7 @@ from azure.cli.command_modules.keyvault._completers import (
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
-    process_storage_uri, validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
+    validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
@@ -66,6 +66,10 @@ def load_arguments(self, _):
         oct_hsm = "oct-HSM"  #: Oct with a private key which is not exportable from the HSM.
 
     JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
+
+    class CLIKeyTypeForBYOKImport(str, Enum):
+        ec = "EC"  #: Elliptic Curve.
+        rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -342,6 +346,10 @@ def load_arguments(self, _):
         c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
+    with self.argument_context('keyvault key import') as c:
+        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport),
+                   help='The type of key to import (only for BYOK).')
+
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('pem_string', type=file_type, help='PEM string containing the key to be imported.', validator=validate_key_import_source)
@@ -362,6 +370,20 @@ def load_arguments(self, _):
     with self.argument_context('keyvault key restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local key backup from which to restore key.')
+
+    with self.argument_context('keyvault key restore', arg_group='Storage Id') as c:
+        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'],
+                   help='Azure Blob storage container Uri. If specified, all '
+                        'other \'Storage Id\' arguments should be omitted')
+        c.argument('storage_account_name', help='Name of Azure Storage Account.')
+        c.argument('blob_container_name', help='Name of Blob Container.')
+
+    with self.argument_context('keyvault key restore', arg_group='Restoring keys from storage account') as c:
+        c.argument('token', options_list=['--storage-container-SAS-token', '-t'],
+                   help='The SAS token pointing to an Azure Blob storage container')
+        c.argument('backup_folder', help='Name of the blob container which contains the backup')
+        c.argument('key_name', options_list=['--name', '-n'],
+                   help='Name of the key. (Only for restoring from storage account)')
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
@@ -385,6 +407,10 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    with self.argument_context('keyvault key list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed keys. Default: false')
     # endregion
 
     # region KeyVault Secret
@@ -422,6 +448,9 @@ def load_arguments(self, _):
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
 
+    with self.argument_context('keyvault secret list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed secrets. Default: false')
     # endregion
 
     # region keyvault security-domain
@@ -470,7 +499,7 @@ def load_arguments(self, _):
                 c.ignore('cls')
 
     with self.argument_context('keyvault backup start', arg_group='Storage Id') as c:
-        c.argument('storage_resource_uri', required=False, validator=process_storage_uri,
+        c.argument('storage_resource_uri', required=False,
                    help='Azure Blob storage container Uri. If specified all other \'Storage Id\' arguments '
                         'should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')
@@ -486,7 +515,7 @@ def load_arguments(self, _):
                    help='Name of the blob container which contains the backup')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
-        c.extra('storage_resource_uri', required=False, validator=process_storage_uri,
+        c.extra('storage_resource_uri', required=False,
                 help='Azure Blob storage container Uri. If specified all other \'Storage Id\' '
                      'arguments should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')

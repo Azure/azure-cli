@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
 import requests
 import adal
 
@@ -21,6 +20,12 @@ logger = get_logger(__name__)
 class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-methods
 
     def __init__(self, token_retriever, external_tenant_token_retriever=None):
+        # DO NOT call _token_retriever from outside azure-cli-core. It is only available for user or
+        # Service Principal credential (AdalAuthentication), but not for Managed Identity credential
+        # (MSIAuthenticationWrapper).
+        # To retrieve a raw token, either call
+        #   - Profile.get_raw_token, which is more direct
+        #   - AdalAuthentication.get_token, which is designed for Track 2 SDKs
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
@@ -64,15 +69,65 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
         return scheme, token, full_token, external_tenant_tokens
 
+    def get_all_tokens(self, *scopes):
+        scheme, token, full_token, external_tenant_tokens = self._get_token(_try_scopes_to_resource(scopes))
+        return scheme, token, full_token, external_tenant_tokens
+
     # This method is exposed for Azure Core.
     def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
         logger.debug("AdalAuthentication.get_token invoked by Track 2 SDK with scopes=%s", scopes)
 
         _, token, full_token, _ = self._get_token(_try_scopes_to_resource(scopes))
-        try:
-            return AccessToken(token, int(full_token['expiresIn'] + time.time()))
-        except KeyError:  # needed to deal with differing unserialized MSI token payload
+
+        # NEVER use expiresIn (expires_in) as the token is cached and expiresIn will be already out-of date
+        # when being retrieved.
+
+        # User token entry sample:
+        # {
+        #     "tokenType": "Bearer",
+        #     "expiresOn": "2020-11-13 14:44:42.492318",
+        #     "resource": "https://management.core.windows.net/",
+        #     "userId": "test@azuresdkteam.onmicrosoft.com",
+        #     "accessToken": "eyJ0eXAiOiJKV...",
+        #     "refreshToken": "0.ATcAImuCVN...",
+        #     "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+        #     "_authority": "https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+        #     "isMRRT": True,
+        #     "expiresIn": 3599
+        # }
+
+        # Service Principal token entry sample:
+        # {
+        #     "tokenType": "Bearer",
+        #     "expiresIn": 3599,
+        #     "expiresOn": "2020-11-12 13:50:47.114324",
+        #     "resource": "https://management.core.windows.net/",
+        #     "accessToken": "eyJ0eXAiOiJKV...",
+        #     "isMRRT": True,
+        #     "_clientId": "22800c35-46c2-4210-b8a7-d8c3ec3b526f",
+        #     "_authority": "https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a"
+        # }
+        if 'expiresOn' in full_token:
+            import datetime
+            expires_on_timestamp = int(_timestamp(
+                datetime.datetime.strptime(full_token['expiresOn'], '%Y-%m-%d %H:%M:%S.%f')))
+            return AccessToken(token, expires_on_timestamp)
+
+        # Cloud Shell (Managed Identity) token entry sample:
+        # {
+        #     "access_token": "eyJ0eXAiOiJKV...",
+        #     "refresh_token": "",
+        #     "expires_in": "2106",
+        #     "expires_on": "1605686811",
+        #     "not_before": "1605682911",
+        #     "resource": "https://management.core.windows.net/",
+        #     "token_type": "Bearer"
+        # }
+        if 'expires_on' in full_token:
             return AccessToken(token, int(full_token['expires_on']))
+
+        from azure.cli.core.azclierror import CLIInternalError
+        raise CLIInternalError("No expiresOn or expires_on is available in the token entry.")
 
     # This method is exposed for msrest.
     def signed_session(self, session=None):  # pylint: disable=arguments-differ
@@ -104,6 +159,17 @@ class MSIAuthenticationWrapper(MSIAuthentication):
             # If available, use resource provided by SDK
             self.resource = resource
         self.set_token()
+        # Managed Identity token entry sample:
+        # {
+        #     "access_token": "eyJ0eXAiOiJKV...",
+        #     "client_id": "da95e381-d7ab-4fdc-8047-2457909c723b",
+        #     "expires_in": "86386",
+        #     "expires_on": "1605238724",
+        #     "ext_expires_in": "86399",
+        #     "not_before": "1605152024",
+        #     "resource": "https://management.azure.com/",
+        #     "token_type": "Bearer"
+        # }
         return AccessToken(self.token['access_token'], int(self.token['expires_on']))
 
     def set_token(self):
@@ -119,9 +185,13 @@ class MSIAuthenticationWrapper(MSIAuthentication):
         except requests.exceptions.HTTPError as err:
             logger.debug('throw requests.exceptions.HTTPError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
-            raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
-                                     'Get Token request returned http error: {}, reason: {}'
-                                     .format(err.response.status, err.response.reason))
+            try:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned http error: {}, reason: {}'
+                                         .format(err.response.status, err.response.reason))
+            except AttributeError:
+                raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                         'Get Token request returned: {}'.format(err.response))
         except TimeoutError as err:
             logger.debug('throw TimeoutError when doing MSIAuthentication: \n%s',
                          traceback.format_exc())
@@ -153,3 +223,26 @@ def _try_scopes_to_resource(scopes):
 
     # Exactly only one scope is provided
     return scopes_to_resource(scopes)
+
+
+class BasicTokenCredential:
+    # pylint:disable=too-few-public-methods
+    """A Track 2 implementation of msrest.authentication.BasicTokenAuthentication.
+    This credential shouldn't be used by any command module, expect azure-cli-core.
+    """
+    def __init__(self, access_token):
+        self.access_token = access_token
+
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        # Because get_token can't refresh the access token, always mark the token as unexpired
+        import time
+        return AccessToken(self.access_token, int(time.time() + 3600))
+
+
+def _timestamp(dt):
+    # datetime.datetime can't be patched:
+    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
+    # So we wrap datetime.datetime.timestamp with this function.
+    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
+    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
+    return dt.timestamp()
