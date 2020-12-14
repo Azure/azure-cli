@@ -257,6 +257,24 @@ class TimingProgressBar:
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
 
 
+class SpinnerProgressBar:
+    """ Define progress bar update view """
+    """
+     - It may take 40 seconds (21 seconds) ..
+    """
+    def __init__(self, cli_ctx):
+        self.cli_ctx = cli_ctx
+        self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
+                label='Running', stream=sys.stderr,
+                hide_cursor=False)
+
+    def update_progress(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add()
+
+    def end(self):
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
+
+
 def _format_slash_glyphs(bar_len):
     glyphs = []
     for num in range(1, bar_len):
