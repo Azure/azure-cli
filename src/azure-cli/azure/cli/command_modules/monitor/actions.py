@@ -141,7 +141,10 @@ class MetricAlertAddAction(argparse._AppendAction):
         try:
             webhook_property_candidates = dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
         except ValueError:
-            raise InvalidArgumentValueError("value of " + option_string + " is invalid. Please refer to --help to get insight of correct format")
+            err_msg = "value of {} is invalid. Please refer to --help to get insight of correct format".format(
+                option_string
+            )
+            raise InvalidArgumentValueError(err_msg)
 
         from azure.mgmt.monitor.models import MetricAlertAction
         action = MetricAlertAction(
