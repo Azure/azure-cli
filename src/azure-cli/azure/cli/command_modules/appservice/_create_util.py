@@ -458,4 +458,3 @@ def generate_default_app_name(cmd):
     if not generated_name:
         raise CLIError("Unable to generate a default name for webapp. Please specify webapp name using --name flag")
     return generated_name
-
