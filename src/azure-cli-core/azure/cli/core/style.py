@@ -19,8 +19,6 @@ from enum import Enum
 
 from colorama import Fore
 
-is_powershell = None
-
 
 class Style(str, Enum):
     PRIMARY = "primary"
@@ -56,20 +54,47 @@ POWERSHELL_COLOR_REPLACEMENT = {
 }
 
 
-def print_styled_text(styled, file=sys.stderr):
-    formatted = format_styled_text(styled)
-    print(formatted, file=file)
+def print_styled_text(styled_text, file=None):
+    """
+    Print styled text.
+
+    :param styled_text: The input text. Can be in these formats:
+        - text
+        - (style, text)
+        - [(style, text), ...]
+    :param file: The file to print the styled text. The default target is sys.stderr.
+    :return:
+    """
+    formatted = format_styled_text(styled_text)
+    # Always fetch the latest sys.stderr in case it has been wrapped by colorama.
+    print(formatted, file=file or sys.stderr)
 
 
 def format_styled_text(styled_text):
-    # Use a module-level cache to save whether the terminal is powershell.exe
-    global is_powershell
-    if is_powershell is None:
+    """Format styled text.
+
+    :param styled_text: See print_styled_text for detail.
+    """
+
+    # Use a function-level cache to save whether the terminal is powershell.exe, because get_parent_proc_name is
+    # an expensive call.
+    if not hasattr(format_styled_text, "is_powershell"):
         from azure.cli.core.util import get_parent_proc_name
-        is_powershell = get_parent_proc_name() == "powershell.exe"
+        setattr(format_styled_text, "is_powershell", get_parent_proc_name() == "powershell.exe")
+
+    is_powershell = getattr(format_styled_text, "is_powershell")
+    enable_color = getattr(format_styled_text, "enable_color", True)
 
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
+
+    # A str as PRIMARY text
+    if isinstance(styled_text, str):
+        styled_text = [(Style.PRIMARY, styled_text)]
+
+    # A tuple
+    if isinstance(styled_text, tuple):
+        styled_text = [styled_text]
 
     for text in styled_text:
         # str can also be indexed, bypassing IndexError, so explicitly check if the type is tuple
@@ -84,12 +109,16 @@ def format_styled_text(styled_text):
             raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
 
         escape_seq = THEME[text[0]]
-        # Transform the color in powershell
+        # Replace blue in powershell.exe
         if is_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
             escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
 
-        formatted_parts.append(escape_seq + text[1])
+        if enable_color:
+            formatted_parts.append(escape_seq + text[1])
+        else:
+            formatted_parts.append(text[1])
 
     # Reset control sequence
-    formatted_parts.append(Fore.RESET)
+    if enable_color:
+        formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)

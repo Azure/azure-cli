@@ -49,6 +49,7 @@ class AzCli(CLI):
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.style import format_styled_text
         from azure.cli.core.util import handle_version_update
         from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
@@ -79,6 +80,8 @@ class AzCli(CLI):
         register_cache_arguments(self)
 
         self.progress_controller = None
+
+        format_styled_text.enable_color = self.enable_color
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id

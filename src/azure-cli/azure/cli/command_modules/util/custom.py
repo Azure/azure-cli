@@ -174,7 +174,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
 def demo_style(cmd):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text
-    print("[available styles]\n")
+    print_styled_text("[available styles]\n")
     styled_text = [
         (Style.PRIMARY, "Bright White: Primary text color\n"),
         (Style.SECONDARY, "White: Secondary text color\n"),
@@ -187,7 +187,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[interactive]\n")
+    print_styled_text("[interactive]\n")
     # NOTE! Unicode character ⦾ ⦿ will most likely not be displayed correctly
     styled_text = [
         (Style.ACTION, "?"),
@@ -203,7 +203,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[progress report]\n")
+    print_styled_text("[progress report]\n")
     # NOTE! Unicode character ✓ will most likely not be displayed correctly
     styled_text = [
         (Style.SUCCESS, '(✓) Done: '),
@@ -219,7 +219,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[error handing]\n")
+    print_styled_text("[error handing]\n")
     styled_text = [
         (Style.ERROR, "ERROR: Command not found: az storage create\n"),
         (Style.PRIMARY, "TRY\n"),
@@ -234,7 +234,7 @@ def demo_style(cmd):  # pylint: disable=unused-argument
     ]
     print_styled_text(styled_text)
 
-    print("[post-output hint]\n")
+    print_styled_text("[post-output hint]\n")
     styled_text = [
         (Style.PRIMARY, "The default subscription is "),
         (Style.IMPORTANT, "AzureSDKTest (0b1f6471-1bf0-4dda-aec3-cb9272f09590)"),
