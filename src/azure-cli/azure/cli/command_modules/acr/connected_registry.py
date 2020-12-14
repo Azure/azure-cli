@@ -281,7 +281,6 @@ def acr_connected_registry_install_info(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
-                                        registry_volume=None,
                                         fresh_install=False,
                                         resource_group_name=None):
     registry, resource_group_name = validate_managed_registry(
@@ -299,9 +298,6 @@ def acr_connected_registry_install_info(cmd,
         parent_registry_endpoint = parent.login_server.host
     else:
         parent_registry_endpoint = registry.login_server
-
-    if registry_volume is None:
-        registry_volume = "<myvolume>"
 
     if fresh_install:
         from ._client_factory import cf_acr_token_credentials
@@ -327,8 +323,6 @@ def acr_connected_registry_install_info(cmd,
         "ACR_SYNC_TOKEN_NAME": sync_token_name,
         "ACR_SYNC_TOKEN_USERNAME": sync_username,
         "ACR_SYNC_TOKEN_PASSWORD": sync_password,
-        "ACR_REGISTRY_DATA_VOLUME": registry_volume,
-        "ACR_REGISTRY_CERTIFICATE_VOLUME": registry_volume,
         "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,
         "ACR_PARENT_LOGIN_SERVER": parent_registry_endpoint,
         "ACR_PARENT_PROTOCOL": "https"

@@ -401,7 +401,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token needed to be synched to the Connected ACR. It can include access for multiple repositories.', required=False)
         c.argument('fresh_install', options_list=['--fresh-install'], help='Creates a new password for the sync token.', required=False)
         c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
-        c.argument('registry_volume', options_list=['--registry-volume'], help='Loads the values for REGISTRY_CERTIFICATE_VOLUME and REGISTRY_DATA_VOLUME.', required=False)
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
