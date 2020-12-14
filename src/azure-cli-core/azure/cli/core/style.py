@@ -54,7 +54,7 @@ POWERSHELL_COLOR_REPLACEMENT = {
 }
 
 
-def print_styled_text(styled_text, file=None):
+def print_styled_text(styled_text='', file=None):
     """
     Print styled text.
 
@@ -69,11 +69,15 @@ def print_styled_text(styled_text, file=None):
     print(formatted, file=file or sys.stderr)
 
 
-def format_styled_text(styled_text):
+def format_styled_text(styled_text, enable_color=None):
     """Format styled text.
-    To turn off color, set `format_styled_text.enable_color = False`.
+    Color is turned on by default. To turn off color for all invocations of this function, set
+    `format_styled_text.enable_color = False`. To turn off color only for one invocation, set parameter
+    `enable_color=False`.
 
     :param styled_text: See print_styled_text for detail.
+    :param enable_color: Whether color should be enabled. If not provided, the function attribute `enable_color`
+     will be honored.
     """
 
     # Use a function-level cache to save whether the terminal is powershell.exe, because get_parent_proc_name is
@@ -83,7 +87,8 @@ def format_styled_text(styled_text):
         setattr(format_styled_text, "is_powershell", get_parent_proc_name() == "powershell.exe")
 
     is_powershell = getattr(format_styled_text, "is_powershell")
-    enable_color = getattr(format_styled_text, "enable_color", True)
+    if enable_color is None:
+        enable_color = getattr(format_styled_text, "enable_color", True)
 
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
