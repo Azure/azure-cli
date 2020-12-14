@@ -408,9 +408,8 @@ class AzCliCommandParser(CLICommandParser):
                     from azure.cli.core.util import roughly_parse_command
                     command_str = roughly_parse_command(args[1:])
                     ext_name = self._search_in_extension_commands(command_str)
-                    import collections
                     # The input command matches the prefix of one or more extension commands
-                    if isinstance(ext_name, collections.Iterable):
+                    if isinstance(ext_name, list):
                         if len(ext_name) > 1:
                             from knack.prompting import prompt_choice_list, NoTTYException
                             try:
