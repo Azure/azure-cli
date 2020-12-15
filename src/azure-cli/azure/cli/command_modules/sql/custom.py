@@ -2084,6 +2084,11 @@ def _audit_policy_update_apply_blob_storage_details(
     Apply blob storage details on policy update
     '''
 
+    if hasattr(instance, 'is_storage_secondary_key_in_use'):
+        is_storage_secondary_key_in_use = instance.is_storage_secondary_key_in_use
+    else:
+        is_storage_secondary_key_in_use = False
+
     if blob_storage_target_state is None:
         # Original audit policy has no storage_endpoint
         if not instance.storage_endpoint:
@@ -2098,7 +2103,7 @@ def _audit_policy_update_apply_blob_storage_details(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=instance.is_storage_secondary_key_in_use)
+                use_secondary_key=is_storage_secondary_key_in_use)
     elif _is_audit_policy_state_enabled(blob_storage_target_state):
         # Resolve storage_endpoint using provided storage_account
         if storage_account is not None:
@@ -2121,7 +2126,7 @@ def _audit_policy_update_apply_blob_storage_details(
                 cli_ctx=cmd.cli_ctx,
                 storage_account=storage_account,
                 resource_group_name=storage_resource_group,
-                use_secondary_key=instance.is_storage_secondary_key_in_use)
+                use_secondary_key=is_storage_secondary_key_in_use)
 
         # Apply retenation days
         if hasattr(instance, 'retention_days') and retention_days is not None:

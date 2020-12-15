@@ -1849,7 +1849,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('state', state_disabled)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacems01"
+        log_analytics_workspace_name = "clilaworkspacems03"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),
