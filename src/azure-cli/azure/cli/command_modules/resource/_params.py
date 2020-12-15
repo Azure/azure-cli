@@ -540,7 +540,6 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
-        c.argument('tag', tag_type)
         c.argument('tags', tags_type)
         c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
