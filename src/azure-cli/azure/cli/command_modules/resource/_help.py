@@ -2218,7 +2218,7 @@ type: command
 short-summary: Create a template spec and or template spec version.
 examples:
   - name: Create a template spec.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tag key1=value1
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
   - name: Create a template spec version.
     text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
   - name: Create a template spec and a version of the template spec.
@@ -2232,7 +2232,7 @@ examples:
   - name: Update the template content of a template spec or template spec version based on the resource ID.
     text: az ts update --template-spec resourceID -f updatedFile.json
   - name: Update the display name and tag(s) of a template spec based on the resource ID.
-    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName" --tag key1=value1
+    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName" --tags key1=value1
   - name: Update the description of a template spec version with no prompt.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description" --yes
   - name: Update all the properties of a template spec version.
