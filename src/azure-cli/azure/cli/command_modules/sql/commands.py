@@ -45,7 +45,6 @@ from ._util import (
     get_sql_firewall_rules_operations,
     get_sql_instance_pools_operations,
     get_sql_managed_databases_operations,
-    get_sql_managed_database_restore_details_operations,
     get_sql_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_backups_operations,
@@ -291,7 +290,7 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'server_ms_support_audit_policy_show')
         g.generic_update_command('update', custom_func_name='server_ms_support_audit_policy_update', supports_no_wait=True)
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
 
     database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
@@ -744,24 +743,6 @@ def load_command_table(self, _):
             supports_no_wait=True,
             is_preview=True)
         g.wait_command('wait')
-
-    with self.command_group('sql midb log-replay',
-                            managed_databases_operations,
-                            client_factory=get_sql_managed_databases_operations) as g:
-        g.custom_command('start', 'managed_db_log_replay_start', supports_no_wait=True)
-        g.command('stop', 'delete', confirmation=True, supports_no_wait=True)
-        g.command('complete', 'complete_restore')
-        g.wait_command('wait')
-
-    managed_database_restore_details_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseRestoreDetailsOperations.{}',
-        client_factory=get_sql_managed_database_restore_details_operations)
-
-    with self.command_group('sql midb log-replay',
-                            managed_database_restore_details_operations,
-                            client_factory=get_sql_managed_database_restore_details_operations) as g:
-
-        g.show_command('show', 'get')
 
     ###############################################
     #                sql virtual cluster         #

@@ -302,6 +302,12 @@ event_hub_param_type = CLIArgumentType(
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
+devops_auditing_settings_name_param_type = CLIArgumentType(
+    arg_group='Policy',
+    options_list=['--dev-ops-auditing-settings-name', '--dev-ops-asn'],
+    configured_default='sql-server',
+    help='The name of the DevOps auditing settings.')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -1462,6 +1468,9 @@ def load_arguments(self, _):
                    help='Auditing policy state',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
+        c.argument('dev_ops_auditing_settings_name',
+                   devops_auditing_settings_name_param_type)
+
         c.argument('blob_storage_target_state',
                    blob_storage_target_state_param_type)
 
@@ -1991,47 +2000,6 @@ def load_arguments(self, _):
 
         c.argument('storage_account_type',
                    arg_type=backup_storage_redundancy_param_type)
-
-    with self.argument_context('sql midb log-replay start') as c:
-        create_args_for_complex_type(
-            c, 'parameters', ManagedDatabase, [
-                'auto_complete',
-                'last_backup_name',
-                'storage_container_uri',
-                'storage_container_sas_token'
-            ])
-
-        c.argument('auto_complete',
-                   required=False,
-                   options_list=['--auto-complete', '-a'],
-                   action='store_true',
-                   help='The flag that in usage with last_backup_name automatically completes log replay servise.')
-
-        c.argument('last_backup_name',
-                   required=False,
-                   options_list=['--last-backup-name', '--last-bn'],
-                   help='The name of the last backup to restore.')
-
-        c.argument('storage_container_uri',
-                   required=True,
-                   options_list=['--storage-uri', '--su'],
-                   help='The URI of the storage container where backups are.')
-
-        c.argument('storage_container_sas_token',
-                   required=True,
-                   options_list=['--storage-sas', '--ss'],
-                   help='The authorization Sas token to access storage container where backups are.')
-
-    with self.argument_context('sql midb log-replay complete') as c:
-        create_args_for_complex_type(
-            c, 'parameters', ManagedDatabase, [
-                'last_backup_name'
-            ])
-
-        c.argument('last_backup_name',
-                   required=False,
-                   options_list=['--last-backup-name', '--last-bn'],
-                   help='The name of the last backup to restore.')
 
     ###############################################
     #                sql virtual cluster          #

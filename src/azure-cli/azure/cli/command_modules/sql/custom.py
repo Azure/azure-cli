@@ -1767,6 +1767,20 @@ def server_ms_support_audit_policy_show(
         category_name='DevOpsOperationsAudit')
 
 
+def server_ms_support_audit_policy_get(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Get server Microsoft support operations audit policy
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default')
+
+
 def _audit_policy_validate_arguments(
         state=None,
         blob_storage_target_state=None,
