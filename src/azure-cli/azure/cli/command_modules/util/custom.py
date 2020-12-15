@@ -174,7 +174,19 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
 
 def demo_style(cmd):  # pylint: disable=unused-argument
     from azure.cli.core.style import Style, print_styled_text
-    print_styled_text("[available styles]\n")
+    print_styled_text("[How to call print_styled_text]")
+    # Print an empty line
+    print_styled_text()
+    # Various methods to print
+    print_styled_text("- Print using a str")
+    print_styled_text("- Print using multiple", "strs")
+    print_styled_text((Style.PRIMARY, "- Print using a tuple"))
+    print_styled_text((Style.PRIMARY, "- Print using multiple"), (Style.IMPORTANT, "tuples"))
+    print_styled_text([(Style.PRIMARY, "- Print using a "), (Style.IMPORTANT, "list")])
+    print_styled_text([(Style.PRIMARY, "- Print using multiple")], [(Style.IMPORTANT, "lists")])
+    print_styled_text()
+
+    print_styled_text("[Available styles]\n")
     styled_text = [
         (Style.PRIMARY, "Bright White: Primary text color\n"),
         (Style.SECONDARY, "White: Secondary text color\n"),

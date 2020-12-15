@@ -54,19 +54,19 @@ POWERSHELL_COLOR_REPLACEMENT = {
 }
 
 
-def print_styled_text(styled_text='', file=None):
+def print_styled_text(*styled_text_objects, file=None, **kwargs):
     """
     Print styled text.
 
-    :param styled_text: The input text. Can be in these formats:
+    :param styled_text_objects: The input text objects. Each object can be in these formats:
         - text
         - (style, text)
         - [(style, text), ...]
     :param file: The file to print the styled text. The default target is sys.stderr.
     """
-    formatted = format_styled_text(styled_text)
+    formatted_list = [format_styled_text(obj) for obj in styled_text_objects]
     # Always fetch the latest sys.stderr in case it has been wrapped by colorama.
-    print(formatted, file=file or sys.stderr)
+    print(*formatted_list, file=file or sys.stderr, **kwargs)
 
 
 def format_styled_text(styled_text, enable_color=None):

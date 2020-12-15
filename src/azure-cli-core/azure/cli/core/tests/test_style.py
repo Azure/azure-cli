@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import sys
 import unittest
-from azure.cli.core.style import Style, format_styled_text
+from unittest import mock
+
+from azure.cli.core.style import Style, format_styled_text, print_styled_text
 
 
 class TestStyle(unittest.TestCase):
@@ -86,6 +89,24 @@ class TestStyle(unittest.TestCase):
         self.assertEqual(formatted, excepted_plaintext)
 
         delattr(format_styled_text, "enable_color")
+
+    @mock.patch("builtins.print")
+    @mock.patch("azure.cli.core.style.format_styled_text")
+    def test_print_styled_text(self, mock_format_styled_text, mock_print):
+        # Just return the original input
+        mock_format_styled_text.side_effect = lambda obj: obj
+
+        # Default to stderr
+        print_styled_text("test text")
+        mock_print.assert_called_with("test text", file=sys.stderr)
+
+        # No args
+        print_styled_text()
+        mock_print.assert_called_with(file=sys.stderr)
+
+        # Multiple args
+        print_styled_text("test text 1", "test text 2")
+        mock_print.assert_called_with("test text 1", "test text 2", file=sys.stderr)
 
 
 if __name__ == '__main__':
