@@ -5002,5 +5002,24 @@ class VMDiskLogicalSectorSize(ScenarioTest):
         ])
 
 
+class VMSSHKeyScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_')
+    def test_vm_ssh_key(self, resource_group):
+        self.cmd('sshkey create -g {rg} -n k1')
+        self.cmd('sshkey generate -g {rg} -n k1')
+        self.cmd('sshkey list')
+        self.cmd('sshkey show -g {rg} -n k1', checks=[
+            self.check('name', 'k1'),
+            self.exists('publicKey')
+        ])
+        self.cmd('sshkey create -g {rg} -n k2')
+        self.cmd('sshkey delete -g {rg} -n k2')
+
+        self.cmd('vm create -g {rg} -n vm1 --image centos --nsg-rule None --ssh-key-name k1')
+        self.cmd('vm create -g {rg} -n vm2 --image centos --nsg-rule None --ssh-key-name k2 --ssh-key-values')
+        self.cmd('vm create -g {rg} -n vm2 --image centos --nsg-rule None --ssh-key-name k3 --generate-ssh-keys')
+
+
 if __name__ == '__main__':
     unittest.main()

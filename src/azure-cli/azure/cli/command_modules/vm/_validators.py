@@ -7,6 +7,8 @@
 
 import os
 
+from azure.cli.core.azclierror import ValidationError
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -22,7 +24,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -944,7 +946,7 @@ def _validate_vm_create_nics(cmd, namespace):
     logger.debug('existing NIC(s) will be used')
 
 
-def _validate_vm_vmss_create_auth(namespace):
+def _validate_vm_vmss_create_auth(namespace, cmd=None):
     if namespace.storage_profile in [StorageProfile.ManagedSpecializedOSDisk,
                                      StorageProfile.SASpecializedOSDisk]:
         return
@@ -985,7 +987,7 @@ def _validate_vm_vmss_create_auth(namespace):
         if namespace.admin_password:
             raise CLIError('Admin password cannot be used with SSH authentication type.')
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
 
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
@@ -998,7 +1000,7 @@ def _validate_vm_vmss_create_auth(namespace):
             _prompt_for_password(namespace)
         _validate_admin_password(namespace.admin_password, namespace.os_type)
 
-        validate_ssh_key(namespace)
+        validate_ssh_key(namespace, cmd)
         if not namespace.ssh_dest_key_path:
             namespace.ssh_dest_key_path = '/home/{}/.ssh/authorized_keys'.format(namespace.admin_username)
 
@@ -1051,7 +1053,18 @@ def _validate_admin_password(password, os_type):
         raise CLIError(error_msg)
 
 
-def validate_ssh_key(namespace):
+def validate_ssh_key(namespace, cmd=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if namespace.ssh_key_name:
+        if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
+            try:
+                ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
+            except HttpResponseError:
+                raise ValidationError('asdf')
+
+            ssh_key_value = ssh_key_resource.public_key
+            print(ssh_key_value)
+            exit(1)
     if namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
             logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
@@ -1165,7 +1178,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
 
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vm_create_dedicated_host(cmd, namespace)
