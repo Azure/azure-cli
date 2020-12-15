@@ -66,6 +66,10 @@ DEPENDENCIES = [
     'azure-common~=1.1',
 ]
 
+# dependencies for specific OSes
+if not sys.platform.startswith('cygwin'):
+    DEPENDENCIES.append('psutil~=5.7')
+
 TESTS_REQUIRE = [
     'mock'
 ]
