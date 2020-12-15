@@ -1842,7 +1842,7 @@ def _audit_policy_validate_arguments(
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
             (storage_account is not None or storage_endpoint is not None or
-             storage_account_access_key is not None or retention_days is not None):
+             storage_account_access_key is not None):
         raise CLIError('Blob storage account arguments cannot be specified'
                        ' if blob-storage-target-state is not provided or disabled')
 
@@ -1850,8 +1850,8 @@ def _audit_policy_validate_arguments(
         if storage_account is not None and storage_endpoint is not None:
             raise CLIError('storage-account and storage-endpoint cannot be provided at the same time')
 
-        if storage_account is None and storage_endpoint is None and retention_days is None:
-            raise CLIError('Either storage-account or storage-endpoint or retention-days must be provided')
+        if storage_account is None and storage_endpoint is None:
+            raise CLIError('Either storage-account or storage-endpoint must be provided')
 
     # Server upper limit
     max_retention_days = 3285
