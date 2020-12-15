@@ -35,8 +35,7 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "To learn more about extensions, please visit "
                        "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
-OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://aka.ms/cli_ref' to learn more")
+OVERVIEW_REFERENCE = ("https://aka.ms/cli_ref")
 
 
 class IncorrectUsageError(CLIError):
@@ -161,6 +160,7 @@ class AzCliCommandParser(CLICommandParser):
         command_arguments = self._get_failure_recovery_arguments()
         cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
         recommender = CommandRecommender(*command_arguments, message, cli_ctx)
+        recommender.set_help_examples(self.get_examples(self.prog))
         recommendations = recommender.provide_recommendations()
 
         az_error = ArgumentUsageError(message)
@@ -372,9 +372,16 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             caused_by_extension_not_installed = False
+            command_name_inferred = self.prog
             error_msg = None
             if not self.command_source:
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                if candidates:
+                    # use the most likely candidate to replace the misspelled command
+                    args = self.prog.split() + self._raw_arguments
+                    args_inferred = [item if item != value else candidates[0] for item in args]
+                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
+
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no' and not candidates:
                     # Check if the command is from an extension
@@ -449,6 +456,7 @@ class AzCliCommandParser(CLICommandParser):
 
             # recommend a command for user
             recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
+            recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommendations = recommender.provide_recommendations()
             if recommendations:
                 az_error.set_aladdin_recommendation(recommendations)

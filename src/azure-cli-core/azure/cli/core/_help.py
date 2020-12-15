@@ -201,7 +201,14 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             contents = [item for item in command.split(' ') if item]
             return ' '.join(contents).strip()
 
-        return [(strip_command(example.command), example.name) for example in help_file.examples]
+        examples = []
+        for example in help_file.examples:
+            examples.append({
+                'command': strip_command(example.command),
+                'description': example.name
+            })
+
+        return examples
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders

@@ -57,9 +57,15 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         self.extension = extension
         self.error_msg = error_msg
         self.cli_ctx = cli_ctx
-
-        # item is a tuple with the form: (command, description, link)
+        # the item is a dict with the form {'command': #, 'description': #}
+        self.help_examples = []
+        # the item is a dict with the form {'command': #, 'description': #, 'link': #}
         self.aladdin_recommendations = []
+
+    def set_help_examples(self, examples):  # pylint: disable=too-many-locals
+        """Set recommendations from help files"""
+
+        self.help_examples.extend(examples)
 
     def _set_aladdin_recommendations(self):  # pylint: disable=too-many-locals
         """Set recommendations from aladdin service.
@@ -73,7 +79,8 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         from http import HTTPStatus
         from azure.cli.core import __version__ as version
 
-        api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
+        # api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
+        api_url = 'https://aladdindevwestus-app.aladdindevwestus-env.p.azurewebsites.net//api/v1/suggestions'
         correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
         subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
         # Used for DDOS protection and rate limiting
@@ -122,13 +129,16 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         recommendations = []
         if response and response.status_code == HTTPStatus.OK:
             for result in response.json():
-                # parse the response and format the recommendation
+                # parse the response to get the raw command
+                raw_command = 'az {} '.format(result['command'])
+                for parameter, placeholder in zip(result['parameters'].split(','), result['placeholders'].split('♠')):
+                    raw_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
+
+                # format the recommendation
                 recommendation = {
-                    'command': result['command'],
-                    'description': 'A mocked description',
-                    'parameters': result['parameters'].split(','),
-                    'placeholders': result['placeholders'].split('♠'),
-                    'link': 'A mocked link'
+                    'command': raw_command.strip(),
+                    'description': result['description'],
+                    'link': result['link']
                 }
                 recommendations.append(recommendation)
 
@@ -140,30 +150,53 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         """
         from azure.cli.core.style import Style
 
-        def format_raw_command(command, parameters, placeholders):
-            """Format the command info to get an executable command. """
-            raw_command = 'az {} '.format(command)
-            for parameter, placeholder in zip(parameters, placeholders):
-                raw_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
-            return raw_command.strip()
+        def sort_recommendations(recommendations):
+            """Sort the recommendations by parameter matching.
+            The sorting rules below are applied in oder:
+                1. Commands starting with the user's input command name are ahead of those don't
+                2. Commands having more matched arguments are ahead of those having less
+                3. Commands having less arguments are ahead of those having more
+            """
 
-        def format_decorated_command(command, parameters, placeholders):
+            candidates = []
+            target_arg_list = self._normalize_parameters(self.parameters)
+            for recommendation in recommendations:
+                matches = 0
+                arg_list = self._normalize_parameters(recommendation['command'].split(' '))
+
+                # ignore those not starting with the use's input command name
+                if recommendation['command'].startswith('az {}'.format(self.command)):
+                    for arg in arg_list:
+                        if arg in target_arg_list:
+                            matches += 1
+                else:
+                    matches = -1
+
+                candidates.append({
+                    'recommendation': recommendation,
+                    'arg_list': arg_list,
+                    'matches': matches
+                })
+
+            # sort the candidates by the number of matched arguments and total arguments
+            candidates.sort(key=lambda item: (item['matches'], -len(item['arg_list'])), reverse=True)
+
+            return [candidate['recommendation'] for candidate in candidates]
+
+        def decorate_command(raw_command):
             """Format the command info to get an decorated command.
             The decorations of a command include:
-                1. Use '<>' to wrap the placeholders for the parameters not specified by users
-                2. Use user's input values to replace the placeholders for the parameters users have specified
+                1. Use user's input values to replace the placeholders for the parameters users have specified
                 2. Apply colorization for the command
             """
-            placeholders = ['<{}>'.format(placeholder) for placeholder in placeholders if placeholder]
-            full_command = format_raw_command(command, parameters, placeholders)
             # replace the placeholders with user's input values only when the recommended
             # command's name is the same with user's input command name
-            if command == self.command:
-                full_command = self._replace_parameter_values(full_command)
+            if raw_command.startswith('az {}'.format(self.command)):
+                raw_command = self._replace_parameter_values(raw_command)
 
-            # get styled command
+            # command colorization
             styled_command = []
-            command_args = full_command.split(' ')
+            command_args = raw_command.split(' ')
             for index, arg in enumerate(command_args):
                 spaced_arg = ' {}'.format(arg) if index > 0 else arg
                 if index > 0 and command_args[index - 1].startswith('-') and not arg.startswith('-'):
@@ -178,27 +211,34 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
            not self.cli_ctx.config.getboolean('core', 'disable_error_recommendation', False):
             self._set_aladdin_recommendations()
 
+        # recommendations are either from Aladdin or help examples
+        recommendations = self.aladdin_recommendations
+        if not recommendations:
+            recommendations = self.help_examples
+
+        # order the recommendations by parameter matching, get the top 3 recommended commands
+        recommendations = sort_recommendations(recommendations)[:3]
+
         raw_commands = []
         decorated_recommendations = []
-        for recommendation in self.aladdin_recommendations:
+        for recommendation in recommendations:
             # generate raw commands recorded in Telemetry
-            raw_command = format_raw_command(recommendation['command'],
-                                             recommendation['parameters'],
-                                             recommendation['placeholders'])
+            raw_command = recommendation['command']
             raw_commands.append(raw_command)
 
             # generate decorated commands shown to users
-            decorated_command = format_decorated_command(recommendation['command'],
-                                                         recommendation['parameters'],
-                                                         recommendation['placeholders'])
+            decorated_command = decorate_command(raw_command)
             decorated_description = [(Style.SECONDARY, recommendation['description'] + '\n')]
             decorated_recommendations.append((decorated_command, decorated_description))
 
         # add reference link as a recommendation
+        from azure.cli.core.parser import OVERVIEW_REFERENCE
+        decorated_link = [(Style.HYPERLINK, OVERVIEW_REFERENCE)]
         if self.aladdin_recommendations:
             decorated_link = [(Style.HYPERLINK, self.aladdin_recommendations[0]['link'])]
-            decorated_description = [(Style.SECONDARY, 'Read more about the command in reference docs')]
-            decorated_recommendations.append((decorated_link, decorated_description))
+
+        decorated_description = [(Style.SECONDARY, 'Read more about the command in reference docs')]
+        decorated_recommendations.append((decorated_link, decorated_description))
 
         # set the recommend command into Telemetry
         self._set_recommended_command_to_telemetry(raw_commands)
