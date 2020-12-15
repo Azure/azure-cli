@@ -106,7 +106,7 @@ def connected_registry_list_output_format(result):
         family_tree[_get_value(reg, 'id')] = {
             "name": name,
             "id": _get_value(reg, 'id'),
-            "statusDetails": _get_value(reg, 'statusDetails'),
+            "connectionState": _get_value(reg, 'connectionState'),
             "parent_name": parent_name,
             "parent_id": parent_id,
             "loginServer_host": _get_value(reg, 'loginServer', 'host'),
@@ -134,7 +134,7 @@ def _recursive_format_list_acr_childs(family_tree, parent_id, level=""):
     connected_registry = family_tree[parent_id]
     childs = connected_registry['childs']
     if connected_registry['parent_id'] in family_tree:
-        level += "-"
+        level += "\t"
         connected_registry['name'] = level + connected_registry['name']
     result = [connected_registry]
     for child_id in childs:
@@ -297,11 +297,12 @@ def _connected_registry_format_group(item):
     parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
-        ('STATUS', _get_value(item, 'statusDetails')),
+        ('MODE', _get_value(item, 'mode')),
+        ('CONNECTION STATE', _get_value(item, 'connectionState')),
         ('PARENT', parent_name),
         ('LOGIN SERVER', _get_value(item, 'loginServer', 'host')),
-        ('LAST ACTIVITY', _get_value(item, 'lastActivityTime')),
-        ('LAST SYNC', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
+        ('LAST ACTIVITY (UTC)', _get_value(item, 'lastActivityTime')),
+        ('LAST SYNC (UTC)', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
         ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
         ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow'))
     ])
@@ -311,10 +312,10 @@ def _connected_registry_list_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
         ('MODE', _get_value(item, 'mode')),
-        ('STATUS', _get_value(item, 'statusDetails')),
+        ('CONNECTION STATE', _get_value(item, 'connectionState')),
         ('PARENT', _get_value(item, 'parent_name')),
         ('LOGIN SERVER', _get_value(item, 'loginServer_host')),
-        ('LAST SYNC', _get_value(item, 'parent_syncProperties_lastSyncTime'))
+        ('LAST SYNC (UTC)', _get_value(item, 'parent_syncProperties_lastSyncTime'))
     ])
 
 
