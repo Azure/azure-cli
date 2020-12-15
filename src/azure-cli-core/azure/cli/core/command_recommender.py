@@ -62,7 +62,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         # the item is a dict with the form {'command': #, 'description': #, 'link': #}
         self.aladdin_recommendations = []
 
-    def set_help_examples(self, examples):  # pylint: disable=too-many-locals
+    def set_help_examples(self, examples):
         """Set recommendations from help files"""
 
         self.help_examples.extend(examples)
@@ -80,6 +80,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         from azure.cli.core import __version__ as version
 
         # api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
+        # test endpoint, need to be replaced
         api_url = 'https://aladdindevwestus-app.aladdindevwestus-env.p.azurewebsites.net//api/v1/suggestions'
         correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
         subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
@@ -145,14 +146,14 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         self.aladdin_recommendations.extend(recommendations)
 
     def provide_recommendations(self):
-        """Provide recommendations from Aladdin service,
-        which include both commands and reference link along with their descriptions.
+        """Provide recommendations either from Aladdin service or CLI help examples,
+        which include both commands and reference links along with their descriptions.
         """
         from azure.cli.core.style import Style
 
         def sort_recommendations(recommendations):
             """Sort the recommendations by parameter matching.
-            The sorting rules below are applied in oder:
+            The sorting rules below are applied in order:
                 1. Commands starting with the user's input command name are ahead of those don't
                 2. Commands having more matched arguments are ahead of those having less
                 3. Commands having less arguments are ahead of those having more
@@ -164,7 +165,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
                 matches = 0
                 arg_list = self._normalize_parameters(recommendation['command'].split(' '))
 
-                # ignore those not starting with the use's input command name
+                # ignore commands that do not start with the use's input command name
                 if recommendation['command'].startswith('az {}'.format(self.command)):
                     for arg in arg_list:
                         if arg in target_arg_list:
@@ -206,17 +207,20 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
             return styled_command
 
+        # do not recommend commands if it is disabled by config
+        if self.cli_ctx and self.cli_ctx.config.getboolean('core', 'disable_error_recommendation', False):
+            return []
+
         # get recommendations from Aladdin service
-        if not self._disable_aladdin_service() and \
-           not self.cli_ctx.config.getboolean('core', 'disable_error_recommendation', False):
+        if not self._disable_aladdin_service():
             self._set_aladdin_recommendations()
 
-        # recommendations are either from Aladdin or help examples
+        # recommendations are either all from Aladdin or all from help examples
         recommendations = self.aladdin_recommendations
         if not recommendations:
             recommendations = self.help_examples
 
-        # order the recommendations by parameter matching, get the top 3 recommended commands
+        # sort the recommendations by parameter matching, get the top 3 recommended commands
         recommendations = sort_recommendations(recommendations)[:3]
 
         raw_commands = []

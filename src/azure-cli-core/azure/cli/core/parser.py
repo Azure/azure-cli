@@ -380,7 +380,7 @@ class AzCliCommandParser(CLICommandParser):
                     # use the most likely candidate to replace the misspelled command
                     args = self.prog.split() + self._raw_arguments
                     args_inferred = [item if item != value else candidates[0] for item in args]
-                    command_name_inferred = ' '.join(args_inferred).split('-')[0]
+                    command_name_inferred = (' '.join(args_inferred).split('-')[0]).strip()
 
                 use_dynamic_install = self._get_extension_use_dynamic_install_config()
                 if use_dynamic_install != 'no' and not candidates:
