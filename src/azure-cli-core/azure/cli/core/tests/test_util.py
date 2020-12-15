@@ -15,7 +15,8 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
+     get_parent_proc_name)
 from azure.cli.core.mock import DummyCli
 
 
@@ -411,6 +412,36 @@ class TestUtils(unittest.TestCase):
         # resource without trailing slash
         self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
                          ['https://managedhsm.azure.com/.default'])
+
+    @mock.patch("psutil.Process")
+    def test_get_parent_proc_name(self, mock_process_type):
+        process = mock_process_type.return_value
+        parent1 = process.parent.return_value
+        parent2 = parent1.parent.return_value
+        parent3 = parent2.parent.return_value
+
+        # Windows, in a virtual env, launched by pwsh.exe
+        process.name.return_value = "python.exe"
+        parent1.name.return_value = "python.exe"
+        parent2.name.return_value = "cmd.exe"
+        parent3.name.return_value = "pwsh.exe"
+        self.assertEqual(get_parent_proc_name(), "pwsh.exe")
+
+        # Windows, in a virtual env, launched by powershell.exe
+        parent3.name.return_value = "powershell.exe"
+        self.assertEqual(get_parent_proc_name(), "powershell.exe")
+
+        # Windows, launched by cmd.exe
+        parent1.name.return_value = "cmd.exe"
+        parent2.name.return_value = "explorer.exe"
+        self.assertEqual(get_parent_proc_name(), "cmd.exe")
+
+        # Linux
+        process.name.return_value = "python"
+        parent1.name.return_value = "bash"
+        parent2.name.return_value = "init"
+        parent3.name.return_value = "init"
+        self.assertEqual(get_parent_proc_name(), "bash")
 
 
 class TestBase64ToHex(unittest.TestCase):

@@ -1218,7 +1218,7 @@ def get_parent_proc_name():
     parent = psutil.Process(os.getpid()).parent()
 
     if parent and parent.name().lower().startswith('python'):
-        # CLI is run inside a virtual environment which launches another python
+        # On Windows, CLI is run inside a virtual environment which launches another python
         parent = parent.parent()
 
     if parent:
