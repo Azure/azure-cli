@@ -143,12 +143,14 @@ def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-ma
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
-    for i, client_token_name in enumerate(add_client_token_list):
-        add_client_token_list[i] = build_token_id(
-            subscription_id, resource_group_name, registry_name, client_token_name)
-    for i, client_token_name in enumerate(remove_client_token_list):
-        remove_client_token_list[i] = build_token_id(
-            subscription_id, resource_group_name, registry_name, client_token_name)
+    if add_client_token_list is not None:
+        for i, client_token_name in enumerate(add_client_token_list):
+            add_client_token_list[i] = build_token_id(
+                subscription_id, resource_group_name, registry_name, client_token_name)
+    if remove_client_token_list is not None:
+        for i, client_token_name in enumerate(remove_client_token_list):
+            remove_client_token_list[i] = build_token_id(
+                subscription_id, resource_group_name, registry_name, client_token_name)
 
     # Add or remove from the current client token id list
     add_client_token_set = set(add_client_token_list) if add_client_token_list else set()
