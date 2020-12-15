@@ -79,16 +79,11 @@ def format_styled_text(styled_text, enable_color=None):
     :param enable_color: Whether color should be enabled. If not provided, the function attribute `enable_color`
      will be honored.
     """
-
-    # Use a function-level cache to save whether the terminal is powershell.exe, because get_parent_proc_name is
-    # an expensive call.
-    if not hasattr(format_styled_text, "is_powershell"):
-        from azure.cli.core.util import get_parent_proc_name
-        setattr(format_styled_text, "is_powershell", get_parent_proc_name() == "powershell.exe")
-
-    is_powershell = getattr(format_styled_text, "is_powershell")
     if enable_color is None:
         enable_color = getattr(format_styled_text, "enable_color", True)
+
+    from azure.cli.core.util import get_parent_proc_name
+    is_powershell = get_parent_proc_name() == "powershell.exe"
 
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []

@@ -1208,7 +1208,8 @@ def scopes_to_resource(scopes):
     return scope
 
 
-def get_parent_proc_name():
+def _get_parent_proc_name():
+    # Un-cached function to get parent process name.
     try:
         import psutil
     except ImportError:
@@ -1231,3 +1232,12 @@ def get_parent_proc_name():
         # if powershell is not the grandparent, simply return the parent's name.
         return parent.name()
     return None
+
+
+def get_parent_proc_name():
+    # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
+    # function-level cache to save the result.
+    if not hasattr(get_parent_proc_name, "return_value"):
+        parent_proc_name = _get_parent_proc_name()
+        setattr(get_parent_proc_name, "return_value", parent_proc_name)
+    return getattr(get_parent_proc_name, "return_value")
