@@ -87,7 +87,7 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
         sync_token_id = build_token_id(subscription_id, resource_group_name, registry_name, sync_token_name)
     else:
         sync_token_id = _create_sync_token(cmd, resource_group_name, registry_name,
-                                           connected_registry_name, repositories, mode).id
+                                           connected_registry_name, repositories, mode)
 
     for i, client_token_name in enumerate(client_token_list):
         client_token_list[i] = build_token_id(subscription_id, resource_group_name, registry_name, client_token_name)
