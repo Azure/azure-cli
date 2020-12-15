@@ -302,12 +302,6 @@ event_hub_param_type = CLIArgumentType(
     help='The name of the event hub. If none is specified '
          'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
 
-devops_auditing_settings_name_param_type = CLIArgumentType(
-    arg_group='Policy',
-    options_list=['--dev-ops-auditing-settings-name', '--dev-ops-asn'],
-    configured_default='sql-server',
-    help='The name of the DevOps auditing settings.')
-
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -1467,9 +1461,6 @@ def load_arguments(self, _):
                    arg_group=policy_arg_group,
                    help='Auditing policy state',
                    arg_type=get_enum_type(BlobAuditingPolicyState))
-
-        c.argument('dev_ops_auditing_settings_name',
-                   devops_auditing_settings_name_param_type)
 
         c.argument('blob_storage_target_state',
                    blob_storage_target_state_param_type)

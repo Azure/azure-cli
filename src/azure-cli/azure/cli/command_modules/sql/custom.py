@@ -1781,6 +1781,22 @@ def server_ms_support_audit_policy_get(
         dev_ops_auditing_settings_name='default')
 
 
+def server_ms_support_audit_policy_set(
+        client,
+        server_name,
+        resource_group_name,
+        parameters):
+    '''
+    Set server Microsoft support operations audit policy
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default',
+        parameters=parameters)
+
+
 def _audit_policy_validate_arguments(
         state=None,
         blob_storage_target_state=None,
@@ -2463,7 +2479,6 @@ def server_ms_support_audit_policy_update(
         instance,
         server_name,
         resource_group_name,
-        dev_ops_auditing_settings_name="default",
         state=None,
         blob_storage_target_state=None,
         storage_account=None,
@@ -2477,10 +2492,6 @@ def server_ms_support_audit_policy_update(
     '''
     Update server Microsoft support operations audit policy
     '''
-
-    # Avoid style error
-    if dev_ops_auditing_settings_name is None:
-        dev_ops_auditing_settings_name = "default"
 
     return _audit_policy_update(
         cmd=cmd,

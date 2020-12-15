@@ -289,7 +289,12 @@ def load_command_table(self, _):
                             client_factory=get_sql_server_dev_ops_audit_settings_operations) as g:
 
         g.custom_show_command('show', 'server_ms_support_audit_policy_show')
-        g.generic_update_command('update', custom_func_name='server_ms_support_audit_policy_update', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='server_ms_support_audit_policy_update',
+                                 setter_name='server_ms_support_audit_policy_set',
+                                 setter_type=CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}'),
+                                 getter_name='server_ms_support_audit_policy_get',
+                                 getter_type=CliCommandType(operations_tmpl='azure.cli.command_modules.sql.custom#{}'),
+                                 supports_no_wait=True)
         g.custom_wait_command('wait', 'server_ms_support_audit_policy_get')
 
     database_long_term_retention_policies_operations = CliCommandType(
