@@ -276,7 +276,7 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
     try:
-        return shell_safe_json_parse(minified, preserve_order, strict=False) # use strict=False to allow multiline strings
+        return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
         # Because the processing of removing comments and compression will lead to misplacement of error location,
         # so the error message should be wrapped.
