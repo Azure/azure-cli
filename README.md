@@ -111,7 +111,7 @@ The software may collect information about you and your use of the software and 
 
 ### Telemetry Configuration
 
-The collection of telemetry is currently enabled by default. If you want to turn it off, you can run `az config set core.collect_telemetry=no`. You can enable it back to help us improve our product by running `az config set core.collect_telemetry=yes`.
+Telemetry collection is on by default. To opt out, please run `az config set core.collect_telemetry=no` to turn it off.
 
 ## Reporting issues and feedback
 
