@@ -2762,6 +2762,38 @@ def update_express_route_port(cmd, instance, tags=None):
     return instance
 
 
+def download_generated_loa_as_pdf(cmd,
+                                  resource_group_name,
+                                  express_route_port_name,
+                                  customer_name,
+                                  file_path='loa.pdf'):
+    import os
+    import base64
+
+    dirname, basename = os.path.dirname(file_path), os.path.basename(file_path)
+
+    if basename == '':
+        basename = 'loa.pdf'
+    elif basename.endswith('.pdf') is False:
+        basename = basename + '.pdf'
+
+    file_path = os.path.join(dirname, basename)
+
+    client = network_client_factory(cmd.cli_ctx).express_route_ports
+    response = client.generate_loa(resource_group_name, express_route_port_name, customer_name)
+
+    encoded_content = base64.b64decode(response.encoded_content)
+
+    from azure.cli.core.azclierror import FileOperationError
+    try:
+        with open(file_path, 'wb') as f:
+            f.write(encoded_content)
+    except OSError as ex:
+        raise FileOperationError(ex)
+
+    logger.warning("The generated letter of authorization is saved at %s", file_path)
+
+
 def list_express_route_ports(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).express_route_ports
     if resource_group_name:
@@ -3377,6 +3409,229 @@ def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     return ncf.load_balancer_backend_address_pools.delete(resource_group_name,
                                                           load_balancer_name,
                                                           backend_address_pool_name)
+
+
+# region cross-region lb
+def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_name, location=None, tags=None,
+                                      backend_pool_name=None, frontend_ip_name='LoadBalancerFrontEnd',
+                                      public_ip_address=None, public_ip_address_allocation=None,
+                                      public_ip_dns_name=None, public_ip_address_type=None, validate=False,
+                                      no_wait=False, frontend_ip_zone=None, public_ip_zone=None):
+    from azure.cli.core.util import random_string
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.network._template_builder import (
+        build_load_balancer_resource, build_public_ip_resource)
+
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    IPAllocationMethod = cmd.get_models('IPAllocationMethod')
+
+    sku = 'standard'
+    tier = 'Global'
+
+    tags = tags or {}
+    public_ip_address = public_ip_address or 'PublicIP{}'.format(load_balancer_name)
+    backend_pool_name = backend_pool_name or '{}bepool'.format(load_balancer_name)
+    if not public_ip_address_allocation:
+        public_ip_address_allocation = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
+            else IPAllocationMethod.dynamic.value
+
+    # Build up the ARM template
+    master_template = ArmTemplateBuilder()
+    lb_dependencies = []
+
+    public_ip_id = public_ip_address if is_valid_resource_id(public_ip_address) else None
+
+    network_id_template = resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+        namespace='Microsoft.Network')
+
+    if public_ip_address_type == 'new':
+        lb_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+        master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
+                                                              tags,
+                                                              public_ip_address_allocation,
+                                                              public_ip_dns_name,
+                                                              sku, public_ip_zone, tier))
+        public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
+                                                        public_ip_address)
+
+    load_balancer_resource = build_load_balancer_resource(
+        cmd, load_balancer_name, location, tags, backend_pool_name, frontend_ip_name,
+        public_ip_id, None, None, None, sku, frontend_ip_zone, None, tier)
+    load_balancer_resource['dependsOn'] = lb_dependencies
+    master_template.add_resource(load_balancer_resource)
+    master_template.add_output('loadBalancer', load_balancer_name, output_type='object')
+
+    template = master_template.build()
+
+    # deploy ARM template
+    deployment_name = 'lb_deploy_' + random_string(32)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+
+    if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+        deployment = Deployment(properties=properties)
+
+        if validate:
+            from azure.cli.core.commands import LongRunningOperation
+            _log_pprint_template(template)
+            validation_poller = client.validate(resource_group_name, deployment_name, deployment)
+            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
+        return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
+
+    if validate:
+        _log_pprint_template(template)
+        return client.validate(resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
+
+
+def create_cross_region_lb_frontend_ip_configuration(
+        cmd, resource_group_name, load_balancer_name, item_name, public_ip_address=None,
+        public_ip_prefix=None, zone=None):
+    FrontendIPConfiguration, SubResource = cmd.get_models(
+        'FrontendIPConfiguration', 'SubResource')
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+
+    new_config = FrontendIPConfiguration(
+        name=item_name,
+        public_ip_address=SubResource(id=public_ip_address) if public_ip_address else None,
+        public_ip_prefix=SubResource(id=public_ip_prefix) if public_ip_prefix else None)
+
+    if zone and cmd.supported_api_version(min_api='2017-06-01'):
+        new_config.zones = zone
+
+    upsert_to_collection(lb, 'frontend_ip_configurations', new_config, 'name')
+    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+    return get_property(poller.result().frontend_ip_configurations, item_name)
+
+
+def set_cross_region_lb_frontend_ip_configuration(
+        cmd, instance, parent, item_name, public_ip_address=None, public_ip_prefix=None):
+    PublicIPAddress, SubResource = cmd.get_models('PublicIPAddress', 'SubResource')
+
+    if public_ip_address == '':
+        instance.public_ip_address = None
+    elif public_ip_address is not None:
+        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
+
+    if public_ip_prefix:
+        instance.public_ip_prefix = SubResource(id=public_ip_prefix)
+
+    return parent
+
+
+def create_cross_region_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                                backend_addresses=None, backend_addresses_config_file=None):
+    if backend_addresses and backend_addresses_config_file:
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+    if backend_addresses_config_file:
+        if not isinstance(backend_addresses_config_file, list):
+            raise CLIError('Config file must be a list. Please see example as a reference.')
+        for addr in backend_addresses_config_file:
+            if not isinstance(addr, dict):
+                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
+    ncf = network_client_factory(cmd.cli_ctx)
+    (BackendAddressPool,
+     LoadBalancerBackendAddress,
+     FrontendIPConfiguration) = cmd.get_models('BackendAddressPool',
+                                               'LoadBalancerBackendAddress',
+                                               'FrontendIPConfiguration')
+
+    addresses_pool = []
+    if backend_addresses:
+        addresses_pool.extend(backend_addresses)
+    if backend_addresses_config_file:
+        addresses_pool.extend(backend_addresses_config_file)
+
+    # pylint: disable=line-too-long
+    try:
+        new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                    load_balancer_frontend_ip_configuration=FrontendIPConfiguration(id=addr['frontend_ip_address'])) for addr in addresses_pool] if addresses_pool else None
+    except KeyError:
+        raise CLIError('Each backend address must have name and frontend_ip_configuration information.')
+    new_pool = BackendAddressPool(name=backend_address_pool_name,
+                                  load_balancer_backend_addresses=new_addresses)
+    return ncf.load_balancer_backend_address_pools.create_or_update(resource_group_name,
+                                                                    load_balancer_name,
+                                                                    backend_address_pool_name,
+                                                                    new_pool)
+
+
+def add_cross_region_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
+                                                     backend_address_pool_name, address_name, frontend_ip_address):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    # pylint: disable=line-too-long
+    (LoadBalancerBackendAddress, FrontendIPConfiguration) = cmd.get_models('LoadBalancerBackendAddress', 'FrontendIPConfiguration')
+    new_address = LoadBalancerBackendAddress(name=address_name,
+                                             load_balancer_frontend_ip_configuration=FrontendIPConfiguration(id=frontend_ip_address) if frontend_ip_address else None)
+    if address_pool.load_balancer_backend_addresses is None:
+        address_pool.load_balancer_backend_addresses = []
+    address_pool.load_balancer_backend_addresses.append(new_address)
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
+
+
+def create_cross_region_lb_rule(
+        cmd, resource_group_name, load_balancer_name, item_name,
+        protocol, frontend_port, backend_port, frontend_ip_name=None,
+        backend_address_pool_name=None, probe_name=None, load_distribution='default',
+        floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+    LoadBalancingRule = cmd.get_models('LoadBalancingRule')
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = cached_get(cmd, ncf.load_balancers.get, resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
+    if not backend_address_pool_name:
+        backend_address_pool_name = _get_default_name(lb, 'backend_address_pools', '--backend-pool-name')
+    new_rule = LoadBalancingRule(
+        name=item_name,
+        protocol=protocol,
+        frontend_port=frontend_port,
+        backend_port=backend_port,
+        frontend_ip_configuration=get_property(lb.frontend_ip_configurations,
+                                               frontend_ip_name),
+        backend_address_pool=get_property(lb.backend_address_pools,
+                                          backend_address_pool_name),
+        probe=get_property(lb.probes, probe_name) if probe_name else None,
+        load_distribution=load_distribution,
+        enable_floating_ip=floating_ip,
+        idle_timeout_in_minutes=idle_timeout,
+        enable_tcp_reset=enable_tcp_reset)
+    upsert_to_collection(lb, 'load_balancing_rules', new_rule, 'name')
+    poller = cached_put(cmd, ncf.load_balancers.create_or_update, lb, resource_group_name, load_balancer_name)
+    return get_property(poller.result().load_balancing_rules, item_name)
+
+
+def set_cross_region_lb_rule(
+        cmd, instance, parent, item_name, protocol=None, frontend_port=None,
+        frontend_ip_name=None, backend_port=None, backend_address_pool_name=None, probe_name=None,
+        load_distribution=None, floating_ip=None, idle_timeout=None, enable_tcp_reset=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('protocol', protocol)
+        c.set_param('frontend_port', frontend_port)
+        c.set_param('backend_port', backend_port)
+        c.set_param('idle_timeout_in_minutes', idle_timeout)
+        c.set_param('load_distribution', load_distribution)
+        c.set_param('enable_tcp_reset', enable_tcp_reset)
+        c.set_param('enable_floating_ip', floating_ip)
+
+    if frontend_ip_name is not None:
+        instance.frontend_ip_configuration = \
+            get_property(parent.frontend_ip_configurations, frontend_ip_name)
+
+    if backend_address_pool_name is not None:
+        instance.backend_address_pool = \
+            get_property(parent.backend_address_pools, backend_address_pool_name)
+
+    if probe_name == '':
+        instance.probe = None
+    elif probe_name is not None:
+        instance.probe = get_property(parent.probes, probe_name)
+
+    return parent
+# endregion
 
 
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
@@ -4050,7 +4305,8 @@ def _delete_network_watchers(cmd, client, watchers):
 
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
-    existing_watchers = [w for w in watcher_list if w.location in locations]
+    locations_list = [location.lower() for location in locations]
+    existing_watchers = [w for w in watcher_list if w.location in locations_list]
     nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:

@@ -214,10 +214,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
-                   arg_type=get_enum_type(t_kind), default='StorageV2')
-        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
-                   arg_type=get_enum_type(t_kind), default='Storage')
+        c.argument('kind', help='Indicate the type of storage account.',
+                   arg_type=get_enum_type(t_kind),
+                   default='StorageV2' if self.cli_ctx.cloud.profile == 'latest' else 'Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
         c.argument('https_only', arg_type=get_three_state_flag(), max_api='2018-11-01',
@@ -457,13 +456,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
+        from ._validators import get_not_none_validator
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
         c.register_sas_arguments()
         c.argument('services', type=services_type(self))
         c.argument('resource_types', type=resource_type_type(self))
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
-        c.argument('account_name', acct_name_type, options_list=['--account-name'])
+        c.argument('account_name', acct_name_type, options_list=['--account-name'],
+                   validator=get_not_none_validator('account_name'))
         c.argument('permission', options_list=('--permissions',),
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
@@ -1022,7 +1023,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name',
                    help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
         c.argument('tags', nargs='+',
-                   help='Each tag should be 3 to 23 alphanumeric characters and is normalized to lower case')
+                   help='Space-separated tags. Each tag should be 3 to 23 alphanumeric characters and is normalized '
+                        'to lower case')
 
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list

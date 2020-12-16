@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.15.1"
+VERSION = "2.16.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -52,7 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
-    'azure-batch~=9.0',
+    'azure-batch~=10.0.0',
     'azure-cli-core=={}.*'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
@@ -69,9 +69,9 @@ DEPENDENCIES = [
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing==1.0.0',
     'azure-mgmt-botservice~=0.2.0',
-    'azure-mgmt-cdn==5.0.0',
+    'azure-mgmt-cdn==5.2.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
-    'azure-mgmt-compute~=14.0',
+    'azure-mgmt-compute~=18.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc15',
@@ -100,8 +100,8 @@ DEPENDENCIES = [
     'azure-mgmt-media~=2.1,>=2.1.0',
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.13.0',
-    'azure-mgmt-network~=12.0.0',
+    'azure-mgmt-netapp~=0.14.0',
+    'azure-mgmt-network~=13.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=3.1.0rc1',
@@ -112,8 +112,9 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
+    'azure-mgmt-resource==10.3.0',
     'azure-mgmt-search~=2.0',
-    'azure-mgmt-security~=0.4.1',
+    'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-signalr~=0.4.0',
@@ -122,7 +123,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=16.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.48.0',
-    'azure-mgmt-synapse~=0.3.0',
+    'azure-mgmt-synapse~=0.5.0',
     'azure-multiapi-storage~=0.5.2',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
@@ -174,6 +175,7 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
+    python_requires='>=3.6.0',
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],

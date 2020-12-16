@@ -31,7 +31,7 @@ from azure.cli.command_modules.vm._image_builder import (
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format, handle_template_based_exception
 
-from azure.cli.command_modules.monitor._exception_handler import monitor_exception_handler
+from azure.cli.command_modules.monitor._exception_handler import exception_handler as monitor_exception_handler
 from azure.cli.command_modules.monitor._client_factory import cf_metric_def
 from azure.cli.core.profiles import ResourceType
 
@@ -185,29 +185,31 @@ def load_command_table(self, _):
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
-        exception_handler=monitor_exception_handler)
+        exception_handler=monitor_exception_handler
+    )
 
     metric_definitions_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#MetricDefinitionsOperations.{}',
         resource_type=ResourceType.MGMT_MONITOR,
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
-        exception_handler=monitor_exception_handler)
+        exception_handler=monitor_exception_handler
+    )
 
     with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
-        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('grant-access', 'grant_disk_access')
         g.custom_command('list', 'list_managed_disks', table_transformer='[].' + transform_disk_show_table_output)
-        g.command('revoke-access', 'revoke_access')
+        g.command('revoke-access', 'begin_revoke_access')
         g.show_command('show', 'get', table_transformer=transform_disk_show_table_output)
-        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_name='begin_create_or_update', setter_arg_name='disk', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, operation_group='disk_encryption_sets', client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set', setter_name='begin_create_or_update')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_encryption_sets')
         g.command('list-associated-resources', 'list_associated_resources', min_api='2020-06-30')
@@ -218,14 +220,14 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_disk_accesses')
         g.wait_command('wait')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.custom_command('list', 'list_images')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update_image')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_image')
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
@@ -250,12 +252,12 @@ def load_command_table(self, _):
 
     with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace, supports_no_wait=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
         g.custom_command('list', 'list_snapshots')
-        g.command('revoke-access', 'revoke_access')
+        g.command('revoke-access', 'begin_revoke_access')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_snapshot', setter_name='begin_create_or_update', setter_arg_name='snapshot', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('vm', compute_vm_sdk) as g:
@@ -265,9 +267,9 @@ def load_command_table(self, _):
 
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
-        g.command('deallocate', 'deallocate', supports_no_wait=True)
-        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('convert', 'begin_convert_to_managed_disks', min_api='2016-04-30-preview')
+        g.command('deallocate', 'begin_deallocate', supports_no_wait=True)
+        g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
         g.command('generalize', 'generalize', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
@@ -277,19 +279,19 @@ def load_command_table(self, _):
         g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
         g.command('list-vm-resize-options', 'list_available_sizes')
         g.custom_command('open-port', 'open_vm_port')
-        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-03-30')
-        g.command('redeploy', 'redeploy', supports_no_wait=True)
+        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-03-30')
+        g.command('redeploy', 'begin_redeploy', supports_no_wait=True)
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('simulate-eviction', 'simulate_eviction', min_api='2019-12-01')
-        g.command('start', 'start', supports_no_wait=True)
-        g.command('stop', 'power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
+        g.command('start', 'begin_start', supports_no_wait=True)
+        g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
+        g.command('reapply', 'begin_reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        g.command('assess-patches', 'assess_patches', min_api='2020-06-01')
+        g.command('assess-patches', 'begin_assess_patches', min_api='2020-06-01')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -320,7 +322,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_encryption_status', table_transformer=transform_vm_encryption_show_table_output)
 
     with self.command_group('vm extension', compute_vm_extension_sdk) as g:
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
@@ -380,8 +382,8 @@ def load_command_table(self, _):
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
         g.command('list', 'list_by_host_group')
-        g.generic_update_command('update')
-        g.command('delete', 'delete', confirmation=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01') as g:
@@ -398,7 +400,7 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_vmss_identity')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list', 'list_vmss', table_transformer=get_vmss_table_output_transformer(self))
@@ -407,7 +409,7 @@ def load_command_table(self, _):
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
-        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
+        g.command('perform-maintenance', 'begin_perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
@@ -457,26 +459,26 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
 
     with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
-        g.command('cancel', 'cancel')
+        g.command('cancel', 'begin_cancel')
         g.command('get-latest', 'get_latest')
-        g.command('start', 'start_os_upgrade')
+        g.command('start', 'begin_start_os_upgrade')
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_image_gallery')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_image_galleries')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='gallery')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery')
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
         g.command('list', 'list_by_gallery')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='gallery_image')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='gallery_image')
 
     with self.command_group('sig image-version', compute_gallery_image_versions_sdk, operation_group='gallery_image_versions', min_api='2018-06-01') as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get', table_transformer='{Name:name, ResourceGroup:resourceGroup, ProvisioningState:provisioningState, TargetRegions: publishingProfile.targetRegions && join(`, `, publishingProfile.targetRegions[*].name), ReplicationState:replicationStatus.aggregatedState}')
         g.command('list', 'list_by_gallery_image')
         g.custom_command('create', 'create_image_version', supports_no_wait=True)

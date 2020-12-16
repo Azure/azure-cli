@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.16.0
+++++++
+* Add 2020-09-01-hybrid API profile for AzureStack (#15096)
+
 2.15.1
 ++++++
 * Minor fixes

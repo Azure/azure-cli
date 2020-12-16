@@ -67,6 +67,10 @@ def load_arguments(self, _):
 
     JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
 
+    class CLIKeyTypeForBYOKImport(str, Enum):
+        ec = "EC"  #: Elliptic Curve.
+        rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
          'KeyPermissions', 'SecretPermissions', 'CertificatePermissions', 'StoragePermissions',
@@ -342,6 +346,10 @@ def load_arguments(self, _):
         c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
+    with self.argument_context('keyvault key import') as c:
+        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport),
+                   help='The type of key to import (only for BYOK).')
+
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('pem_string', type=file_type, help='PEM string containing the key to be imported.', validator=validate_key_import_source)
@@ -399,6 +407,10 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    with self.argument_context('keyvault key list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed keys. Default: false')
     # endregion
 
     # region KeyVault Secret
@@ -436,6 +448,9 @@ def load_arguments(self, _):
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
 
+    with self.argument_context('keyvault secret list') as c:
+        c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
+                help='Include managed secrets. Default: false')
     # endregion
 
     # region keyvault security-domain
