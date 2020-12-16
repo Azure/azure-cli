@@ -40,12 +40,13 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None,
                workspace=None,
                identity=None,
                key_encryption_key=None,
                public_network_enabled=None,
-               zone_redundancy=None):
+               zone_redundancy=None,
+               network_bypass_options=None,
+               tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -64,6 +65,8 @@ def acr_create(cmd,
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
+
+    _handle_network_bypass(registry, network_bypass_options)
 
     lro_poller = client.create(resource_group_name, registry_name, registry)
 
@@ -102,6 +105,7 @@ def acr_update_custom(cmd,
                       default_action=None,
                       data_endpoint_enabled=None,
                       public_network_enabled=None,
+                      network_bypass_options=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -123,6 +127,8 @@ def acr_update_custom(cmd,
     if public_network_enabled is not None:
         _configure_public_network_access(cmd, instance, public_network_enabled)
 
+    _handle_network_bypass(instance, network_bypass_options)
+
     return instance
 
 
@@ -130,6 +136,12 @@ def _configure_public_network_access(cmd, registry, enabled):
     PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
     registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
 
+
+def _handle_network_bypass(registry, network_bypass_options):
+    if network_bypass_options is not None:
+        registry.network_rule_bypass_options = network_bypass_options
+
+    return registry
 
 def acr_update_get(cmd):
     """Returns an empty RegistryUpdateParameters object.
