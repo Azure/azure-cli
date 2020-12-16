@@ -221,6 +221,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
         g.command('delete', 'delete')
+        g.wait_command('wait')
 
     # Management Plane Commands --Sql audit-policy
     with self.command_group('synapse sql audit-policy',

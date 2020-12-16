@@ -103,9 +103,6 @@ def _validate_audit_policy_arguments(state=None, storage_account=None, storage_e
     if not state and not blob_storage_arguments_provided:
         raise CLIError('Either state or blob storage arguments are missing')
 
-    if retention_days is not None and (not retention_days.isdigit() or int(retention_days) <= 0):
-        raise CLIError('retention-days must be a positive number greater than zero')
-
 
 def _audit_policy_update_apply_blob_storage_details(cmd, instance, retention_days, storage_account,
                                                     storage_account_access_key, storage_endpoint,

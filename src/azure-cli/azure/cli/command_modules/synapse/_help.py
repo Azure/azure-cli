@@ -202,6 +202,11 @@ examples:
         az synapse sql ad-admin delete --workspace-name testsynapseworkspace --resource-group rg
 """
 
+helps['synapse sql ad-admin wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
+"""
+
 helps['synapse sql audit-policy'] = """
 type: group
 short-summary: Manage SQL auditing policy.

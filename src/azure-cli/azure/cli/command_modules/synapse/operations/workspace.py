@@ -6,7 +6,6 @@
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails
-from ..util import get_resource_group_location
 
 
 # Synapse workspace
@@ -22,7 +21,6 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
     default_data_lake_storage = DataLakeStorageAccountDetails(account_url=account_url, filesystem=file_system)
-    location = location or get_resource_group_location(cmd.cli_ctx, resource_group_name)
 
     workspace_info = Workspace(
         identity=identity,

@@ -7,7 +7,8 @@ from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list
+    get_resource_name_completion_list, get_location_type
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
@@ -58,6 +59,7 @@ def load_arguments(self, _):
             c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('synapse workspace create') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument("storage_account", validator=validate_storage_account,
                    help='The data lake storage account name or resource id.')
         c.argument('file_system', help='The file system of the data lake storage account.')
@@ -232,6 +234,7 @@ def load_arguments(self, _):
                    help='Threat detection policy state',
                    arg_type=get_enum_type(SecurityAlertPolicyState))
         c.argument('retention_days',
+                   type=int,
                    arg_group=policy_arg_group,
                    help='The number of days to retain threat detection logs.')
         c.argument('disabled_alerts',
@@ -273,6 +276,7 @@ def load_arguments(self, _):
                        help='List of actions and action groups to audit.',
                        nargs='+')
             c.argument('retention_days',
+                       type=int,
                        arg_group=policy_arg_group,
                        help='The number of days to retain audit logs.')
 
