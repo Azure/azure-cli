@@ -640,7 +640,7 @@ def load_arguments(self, _):
     # region VM & VMSS Shared
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
-            c.argument('no_auto_upgrade', arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
+            c.argument('no_auto_upgrade', options_list=['--no-auto-upgrade-minor'], arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
         with self.argument_context('{} run-command'.format(scope)) as c:
             c.argument('command_id', completer=get_vm_run_command_completion_list, help="The command id. Use 'az {} run-command list' to get the list".format(scope))
@@ -782,6 +782,8 @@ def load_arguments(self, _):
             c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
             c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
             c.argument('version', help='The version of the extension. To pin extension version to this value, please specify --no-auto-upgrade.')
+            c.argument('enable_auto_upgrade', arg_type=get_three_state_flag(),
+                       help='Indicate the extension should be automatically upgraded by the platform if there is a newer version of the extension available.')
 
     with self.argument_context('vm extension set') as c:
         c.argument('vm_extension_name', name_arg_type,
@@ -789,7 +791,6 @@ def load_arguments(self, _):
                    help='Name of the extension.', id_part=None)
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
-        c.argument('enable_automatic_upgrade', options_list=['--enable-automatic-upgrade', '-a'], action='store_true', help='Indicate the extension should be automatically upgraded by the platform if there is a newer version of the extension available.')
 
     with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')

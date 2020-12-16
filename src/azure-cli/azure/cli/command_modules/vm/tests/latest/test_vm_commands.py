@@ -1066,7 +1066,7 @@ class VMExtensionScenarioTest(ScenarioTest):
 
         self.cmd('vm extension list --vm-name {vm} --resource-group {rg}',
                  checks=self.check('length([])', 0))
-        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update')
+        self.cmd('vm extension set -n {ext} --publisher {pub} --version 1.2 --vm-name {vm} --resource-group {rg} --protected-settings "{config}" --force-update --enable-auto-upgrade false')
         result = self.cmd('vm get-instance-view -n {vm} -g {rg}', checks=[
             self.check('*.extensions[0].name', ['VMAccessForLinux']),
         ]).get_output_in_json()
@@ -1078,6 +1078,7 @@ class VMExtensionScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', '{ext}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
         uuid.UUID(result['forceUpdateTag'])
         self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
@@ -1589,12 +1590,13 @@ class VMSSExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -n {vmss} -g {rg} --image UbuntuLTS --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1')
 
-        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update')
+        self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
         result = self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {net-ext}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{net-ext}'),
             self.check('publisher', '{net-pub}'),
-            self.check('provisionAfterExtensions', None)
+            self.check('provisionAfterExtensions', None),
+            self.check('enableAutomaticUpgrade', False)
         ]).get_output_in_json()
 
         uuid.UUID(result['forceUpdateTag'])  # verify that command does generate a valid guid to trigger force update.

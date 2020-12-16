@@ -1391,6 +1391,10 @@ examples:
   - name: Add a customScript extension to VM(s) specified by --ids.
     text: |
         az vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}
+  - name: Add an extension and enable automatic upgrade.
+    text: |
+        az vm extension set -n extName --publisher publisher --vm-name MyVM -g MyResourceGroup \\
+        --enable-automatic-upgrade true
 parameters:
   - name: --name -n
     populator-commands:
@@ -2462,6 +2466,10 @@ examples:
             --version 2.0 --publisher Microsoft.Azure.Extensions \\
             --provision-after-extensions NetworkWatcherAgentLinux VMAccessForLinux  \\
             --settings '{"commandToExecute": "echo testing"}'
+  - name: Add an extension and enable automatic upgrade.
+    text: >
+        az vmss extension set -n extName --publisher publisher --vmss-name my-vmss -g my-group \\
+        --enable-automatic-upgrade true
 """
 
 helps['vmss extension show'] = """
