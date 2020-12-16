@@ -32,7 +32,7 @@ class SecurityCenterAlertsTests(ScenarioTest):
 
         assert alert is not None
 
-        # check rg level
+        # check rg level 
 
         self.cmd('az security alert update -g {} -l {} -n {} --status Activate'.format(rg, location, alertName))
 
