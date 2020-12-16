@@ -5168,7 +5168,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
         information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
+        label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
 
         self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
                  .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
