@@ -143,28 +143,34 @@ def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-ma
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
 
+    # Add or remove from the current client token id list
     if add_client_token_list is not None:
         for i, client_token_name in enumerate(add_client_token_list):
             add_client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
+        add_client_token_set = set(add_client_token_list)
+    else:
+        add_client_token_set = set()
     if remove_client_token_list is not None:
         for i, client_token_name in enumerate(remove_client_token_list):
             remove_client_token_list[i] = build_token_id(
                 subscription_id, resource_group_name, registry_name, client_token_name)
+        remove_client_token_set = set(remove_client_token_list)
+    else:
+        remove_client_token_set = set()
 
-    # Add or remove from the current client token id list
-    add_client_token_set = set(add_client_token_list) if add_client_token_list else set()
-    remove_client_token_set = set(remove_client_token_list) if remove_client_token_list else set()
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
         errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_client_token))
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
-    client_token_list = list(
-        set(current_connected_registry.client_token_ids).
-        union(add_client_token_set).
-        difference(remove_client_token_set))
+
+    current_client_token_set = set(current_connected_registry.client_token_ids) \
+        if current_connected_registry.client_token_ids else set()
+    client_token_set = current_client_token_set.union(add_client_token_set).difference(remove_client_token_set)
+
+    client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
                 'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
@@ -343,7 +349,7 @@ def acr_connected_registry_list_client_tokens(cmd,
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
     if current_connected_registry.client_token_ids is None:
-        raise CLIError("No Client tokens found: update your connected registry to add client tokens.")
+        raise CLIError("No Client tokens found: You can update your connected registry to add client tokens.")
 
     result = []
     for token_id in current_connected_registry.client_token_ids:
