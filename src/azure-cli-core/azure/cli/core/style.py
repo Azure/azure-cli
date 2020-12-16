@@ -32,7 +32,8 @@ class Style(str, Enum):
     WARNING = "warning"
 
 
-THEME = {
+# Theme to be used on a dark-themed terminal
+THEME_DARK = {
     # Style to ANSI escape sequence mapping
     # https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
     Style.PRIMARY: Fore.LIGHTWHITE_EX,
@@ -46,6 +47,17 @@ THEME = {
     Style.WARNING: Fore.LIGHTYELLOW_EX,
 }
 
+# Theme to be used on a light-themed terminal
+THEME_LIGHT = {
+    Style.PRIMARY: Fore.BLACK,
+    Style.SECONDARY: Fore.LIGHTBLACK_EX,
+    Style.IMPORTANT: Fore.MAGENTA,
+    Style.ACTION: Fore.BLUE,
+    Style.HYPERLINK: Fore.CYAN,
+    Style.ERROR: Fore.RED,
+    Style.SUCCESS: Fore.GREEN,
+    Style.WARNING: Fore.YELLOW,
+}
 
 # Blue and bright blue is not visible under the default theme of powershell.exe
 POWERSHELL_COLOR_REPLACEMENT = {
@@ -69,18 +81,27 @@ def print_styled_text(*styled_text_objects, file=None, **kwargs):
     print(*formatted_list, file=file or sys.stderr, **kwargs)
 
 
-def format_styled_text(styled_text, enable_color=None):
+def format_styled_text(styled_text, theme=None, enable_color=None):
     """Format styled text.
     Color is turned on by default. To turn off color for all invocations of this function, set
     `format_styled_text.enable_color = False`. To turn off color only for one invocation, set parameter
     `enable_color=False`.
 
     :param styled_text: See print_styled_text for detail.
+    :param theme: The theme used to format text. Cant be 'light', 'dark' or the theme dict.
     :param enable_color: Whether color should be enabled. If not provided, the function attribute `enable_color`
      will be honored.
     """
     if enable_color is None:
         enable_color = getattr(format_styled_text, "enable_color", True)
+    if theme is None:
+        theme = getattr(format_styled_text, "theme", THEME_DARK)
+
+    # Convert str to the theme dict
+    if theme == 'dark':
+        theme = THEME_DARK
+    if theme == 'light':
+        theme = THEME_LIGHT
 
     from azure.cli.core.util import get_parent_proc_name
     is_powershell = get_parent_proc_name() == "powershell.exe"
@@ -104,11 +125,11 @@ def format_styled_text(styled_text, enable_color=None):
 
         style = text[0]
         # Check if the specified style is defined
-        if style not in THEME:
+        if style not in theme:
             from azure.cli.core.azclierror import CLIInternalError
             raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
 
-        escape_seq = THEME[text[0]]
+        escape_seq = theme[text[0]]
         # Replace blue in powershell.exe
         if is_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
             escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]

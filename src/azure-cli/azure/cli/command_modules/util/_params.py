@@ -37,3 +37,7 @@ def load_arguments(self, _):
     with self.argument_context('upgrade') as c:
         c.argument('update_all', options_list=['--all'], arg_type=get_three_state_flag(), help='Enable updating extensions as well.', default='true')
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for checking release notes.')
+
+    with self.argument_context('demo style') as c:
+        c.argument('no_color', arg_type=get_three_state_flag(), help='Disable color.', default=False)
+        c.argument('theme', arg_type=get_enum_type(['dark', 'light']), help='The theme to format styled text.', default='dark')
