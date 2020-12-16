@@ -26,6 +26,10 @@ def cf_origins(cli_ctx, _):
     return cf_cdn(cli_ctx).origins
 
 
+def cf_origin_groups(cli_ctx, _):
+    return cf_cdn(cli_ctx).origin_groups
+
+
 def cf_resource_usage(cli_ctx, _):
     return cf_cdn(cli_ctx).resource_usage
 

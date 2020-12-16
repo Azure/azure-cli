@@ -614,6 +614,14 @@ examples:
     crafted: true
 """
 
+helps['mysql server upgrade'] = """
+type: command
+short-summary: Upgrade mysql server to a higher version, like 5.6 to 5.7.
+examples:
+  - name: Upgrade mysql server.
+    text: az mysql server upgrade --name testsvr --resource-group testgroup --subscription MySubscription --target-server-version 5.7
+"""
+
 helps['mysql server restore'] = """
 type: command
 short-summary: Restore a server from backup.
@@ -1212,12 +1220,50 @@ examples:
     text: az postgres server ad-admin wait --server-name testsvr -g testgroup --created
 """
 
-helps['mysql flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a MySQL flexible-server database.
+helps['mysql server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql server show-connection-string -s testServer -u username -p password -d databasename
 """
 
-helps['postgres flexible-server show-connection-string'] = """
-    type: command
-    short-summary: Show the connection strings for a PostgreSQL flexible-server database.
+helps['postgres server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a PostgreSQL server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az postgres server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['mariadb server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MariaDB server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mariadb server show-connection-string -s testServer -u username -p password -d databasename
+"""
+
+helps['postgres server list-skus'] = """
+type: command
+short-summary: List available sku's in the given region.
+examples:
+  - name: List available sku's in the given region.
+    text: az postgres server list-skus -l eastus
+"""
+
+helps['mysql server list-skus'] = """
+type: command
+short-summary: List available sku's in the given region.
+examples:
+  - name: List available sku's in the given region.
+    text: az mysql server list-skus -l eastus
+"""
+
+helps['mariadb server list-skus'] = """
+type: command
+short-summary: List available sku's in the given region.
+examples:
+  - name: List available sku's in the given region.
+    text: az mariadb server list-skus -l eastus
 """

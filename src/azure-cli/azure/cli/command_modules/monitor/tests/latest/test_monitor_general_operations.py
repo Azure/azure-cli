@@ -202,7 +202,7 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
             'sa2': self.create_random_name('sa', 24),
             'ag1': 'ag1',
             'rg': resource_group,
-            'ext_sub': 'f64d4ee8-be94-457d-ba26-3fa6b6506cef',
+            'ext_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'ext_rg': self.create_random_name('test_rg', 24),
         })
 

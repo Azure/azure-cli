@@ -14,11 +14,16 @@ import re
 from copy import deepcopy
 
 from adal import AdalError
-from azure.mgmt.resource.subscriptions.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY, _USE_VENDORED_SUBSCRIPTION_SDK)
+if _USE_VENDORED_SUBSCRIPTION_SDK:
+    from azure.cli.core.vendored_sdks.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+else:
+    from azure.mgmt.resource.subscriptions.models import \
+        (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
+
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -314,7 +319,16 @@ class TestProfile(unittest.TestCase):
         cli.cloud.endpoints.resource_manager = 'http://foo_arm'
         finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
         result = finder._arm_client_factory(mock.MagicMock())
-        self.assertEqual(result.config.base_url, 'http://foo_arm')
+        self.assertEqual(result._client._base_url, 'http://foo_arm')
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
+    def test_subscription_finder_fail_on_arm_client_factory(self, get_client_class_mock):
+        cli = DummyCli()
+        get_client_class_mock.return_value = None
+        finder = SubscriptionFinder(cli, None, None, arm_client_factory=None)
+        from azure.cli.core.azclierror import CLIInternalError
+        with self.assertRaisesRegexp(CLIInternalError, 'Unable to get'):
+            finder._arm_client_factory(mock.MagicMock())
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     def test_get_auth_info_for_logged_in_service_principal(self, mock_auth_context):
@@ -1072,7 +1086,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['id'], self.id1.split('/')[-1])
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_system_assigned(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1110,7 +1124,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_no_subscriptions(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1148,7 +1162,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['tenantId'], self.test_msi_tenant)
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_client_id(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1191,7 +1205,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_object_id(self, mock_subscription_finder, mock_get_client_class,
                                                                             mock_msi_auth):
-        from requests import HTTPError
+        from azure.cli.core.azclierror import AzureResponseError
 
         class SubscriptionFinderStub:
             def find_from_raw_token(self, tenant, token):
@@ -1216,9 +1230,8 @@ class TestProfile(unittest.TestCase):
                         'access_token': TestProfile.test_msi_access_token
                     }
                 else:
-                    mock_obj = mock.MagicMock()
-                    mock_obj.status, mock_obj.reason = 400, 'Bad Request'
-                    raise HTTPError(response=mock_obj)
+                    raise AzureResponseError('Failed to connect to MSI. Please make sure MSI is configured correctly.\n'
+                                             'Get Token request returned http error: 400, reason: Bad Request')
 
         profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None}, use_global_creds_cache=False,
                           async_persist=False)
@@ -1235,7 +1248,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscriptions[0]['user']['assignedIdentityInfo'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
-    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._get_subscription_client_class', autospec=True)
     def test_find_subscriptions_in_vm_with_msi_user_assigned_with_res_id(self, mock_get_client_class, mock_get):
 
         class ClientStub:
@@ -1800,6 +1813,12 @@ class TestProfile(unittest.TestCase):
             'certificateFile': test_cert_file,
             'thumbprint': 'F0:6A:53:84:8B:BE:71:4A:42:90:D6:9D:33:52:79:C1:D0:10:73:FD'
         })
+
+    def test_service_principal_auth_client_cert_err(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        test_cert_file = os.path.join(curr_dir, 'err_sp_cert.pem')
+        with self.assertRaisesRegexp(CLIError, 'Invalid certificate'):
+            ServicePrincipalAuth(test_cert_file)
 
     def test_detect_adfs_authority_url(self):
         cli = DummyCli()

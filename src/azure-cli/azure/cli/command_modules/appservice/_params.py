@@ -105,8 +105,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
-        c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container',
-                   is_preview=True)
+        c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
@@ -132,7 +131,8 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Use `az webapp list-runtimes` for available list")  # TODO ADD completer
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+                                                                     "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one",
@@ -231,6 +231,8 @@ def load_arguments(self, _):
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
         with self.argument_context(scope + ' config ssl create') as c:
             c.argument('hostname', help='The custom domain name')
+        with self.argument_context(scope + ' config ssl show') as c:
+            c.argument('certificate_name', help='The name of the certificate')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -320,7 +322,7 @@ def load_arguments(self, _):
             c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
             c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
             c.argument('linux_fx_version', help="The runtime stack used for your linux-based webapp, e.g., \"RUBY|2.5.5\", \"NODE|10.14\", \"PHP|7.2\", \"DOTNETCORE|2.1\". See https://aka.ms/linux-stacks for more info.")
-            c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016", is_preview=True)
+            c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016")
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
             c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'],
@@ -604,6 +606,9 @@ def load_arguments(self, _):
                    help="name of the appserviceplan associated with the webapp",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+                                                                     "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -652,7 +657,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp create') as c:
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one",
+                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one. If using an App Service plan from a different resource group, the full resource id must be used and not the plan name.",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
                    local_context_attribute=LocalContextAttribute(name='functionapp_name',
@@ -703,6 +708,8 @@ def load_arguments(self, _):
 
     with self.argument_context('functionapp update') as c:
         c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
+        c.argument('force', required=False, help='Required if attempting to migrate functionapp from Premium to Consumption --plan.',
+                   action='store_true')
 
     with self.argument_context('functionapp plan create') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -831,6 +838,7 @@ def load_arguments(self, _):
                        default=False)
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
+            c.argument('vnet_resource_group', help='Resource group of virtual network (default is web app resource group)')
         with self.argument_context(scope + ' config access-restriction remove') as c:
             c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
