@@ -1401,6 +1401,11 @@ examples:
           --name testintegrationruntime
 """
 
+helps['synapse integration-runtime wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a integration runtime is met.
+"""
+
 helps['synapse integration-runtime upgrade'] = """
 type: command
 short-summary: Upgrade self-hosted integration runtime.

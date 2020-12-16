@@ -24,7 +24,3 @@ def create(cmd, client, resource_group_name, workspace_name, integration_runtime
     properties = IntegrationRuntime.from_dict(properties)
     return sdk_no_wait(no_wait, client.create, resource_group_name, workspace_name,
                        integration_runtime_name, properties, if_match)
-
-
-def delete(cmd, client, resource_group_name, workspace_name, integration_runtime_name, no_wait=False):
-    return sdk_no_wait(no_wait, client.delete, resource_group_name, workspace_name, integration_runtime_name)

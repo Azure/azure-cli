@@ -294,7 +294,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create', supports_no_wait=True)
-        g.custom_command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.command('update', 'update')
         g.command('upgrade', 'upgrade')
         g.command('list-auth-key', 'list', command_type=synapse_integrationruntimeauthkeys_sdk,
@@ -309,6 +309,7 @@ def load_command_table(self, _):
                   client_factory=cf_synapse_client_integrationruntimeconnectioninfos_factory)
         g.command('get-status', 'get', command_type=synapse_integrationruntimestatus_sdk,
                   client_factory=cf_synapse_client_integrationruntimestatus_factory)
+        g.wait_command('wait')
 
     with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
                             client_factory=cf_synapse_client_integrationruntimenodes_factory) as g:

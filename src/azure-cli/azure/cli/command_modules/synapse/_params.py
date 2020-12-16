@@ -602,16 +602,22 @@ def load_arguments(self, _):
         c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
 
     # synapse integration runtime
-    with self.argument_context('synapse integration-runtime show') as c:
+    with self.argument_context('synapse integration-runtime') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
-    with self.argument_context('synapse integration-runtime list') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type)
+    for scope in ['list', 'list-auth-key', 'wait']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part=None)
+
+    for scope in ['list-auth-key', 'wait']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
+
+    for scope in ['show', 'create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
     with self.argument_context('synapse integration-runtime create') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
         c.argument('integration_runtime_type', options_list=['--type'], arg_type=get_enum_type(['Managed', 'SelfHosted']), help='The integration runtime type.')
         c.argument('description', help='The integration runtime description.')
         c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
@@ -623,63 +629,21 @@ def load_arguments(self, _):
         c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
         c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
 
-    with self.argument_context('synapse integration-runtime delete') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-
     with self.argument_context('synapse integration-runtime update') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
         c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')
         c.argument('update_delay_offset', help='The time of the day for the self-hosted integration runtime auto-update.')
 
-    with self.argument_context('synapse integration-runtime upgrade') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-
-    with self.argument_context('synapse integration-runtime list-auth-key') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-
     with self.argument_context('synapse integration-runtime regenerate-auth-key') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
         c.argument('key_name', arg_type=get_enum_type(['authKey1', 'authKey2']), help='The name of the authentication key to regenerate.')
 
-    with self.argument_context('synapse integration-runtime get-monitoring-data') as c:
+    with self.argument_context('synapse integration-runtime-node') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
         c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
 
-    with self.argument_context('synapse integration-runtime-node show') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-        c.argument('node_name', help='The integration runtime node name.')
+    for scope in ['show', 'update', 'delete', 'get-ip-address']:
+        with self.argument_context('synapse integration-runtime-node ' + scope) as c:
+            c.argument('node_name', help='The integration runtime node name.')
 
     with self.argument_context('synapse integration-runtime-node update') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-        c.argument('node_name', help='The integration runtime node name.')
         c.argument('concurrent_jobs_limit', options_list=['--concurrent-jobs'], help='The number of concurrent jobs permitted to '
                    'run on the integration runtime node. Values between 1 and maxConcurrentJobs are allowed.')
-
-    with self.argument_context('synapse integration-runtime-node delete') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-        c.argument('node_name', help='The integration runtime node name.')
-
-    with self.argument_context('synapse integration-runtime-node get-ip-address') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-        c.argument('node_name', help='The integration runtime node name.')
-
-    with self.argument_context('synapse integration-runtime sync-credentials') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-
-    with self.argument_context('synapse integration-runtime get-connection-info') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
-
-    with self.argument_context('synapse integration-runtime get-status') as c:
-        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
-        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
