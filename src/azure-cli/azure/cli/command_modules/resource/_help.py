@@ -2218,11 +2218,11 @@ type: command
 short-summary: Create a template spec and or template spec version.
 examples:
   - name: Create a template spec.
-    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -l WestUS --display-name "MyDisplayName" --description "Simple template spec" --tags key1=value1
   - name: Create a template spec version.
-    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -v 2.0 -l WestUS --template-file templateSpec.json --version-description "Less simple template spec" --tags key1=value1 key3=value3
   - name: Create a template spec and a version of the template spec.
-    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec"
+    text: az ts create -g testRG --name TemplateSpecName -v 1.0 -l WestUS --template-file templateSpec.json --display-name "MyDisplayName" --description "Simple template spec" --version-description "Version of simple template spec" --tags key1=value1 key2=value2
 """
 
 helps['ts update'] = """
@@ -2231,12 +2231,15 @@ short-summary: Update a template spec version.
 examples:
   - name: Update the template content of a template spec or template spec version based on the resource ID.
     text: az ts update --template-spec resourceID -f updatedFile.json
-  - name: Update the display name of a template spec based on the resource ID.
-    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName"
-  - name: Update the description of a template spec version.
-    text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description"
+  - name: Update the display name and tag(s) of a template spec based on the resource ID.
+    text: az ts update --template-spec resourceID --display-name "NewParentDisplayName" --tags key1=value1
+  - name: Update the description of a template spec version with no prompt.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 --version-description "New description" --yes
   - name: Update all the properties of a template spec version.
     text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --display-name "New parent display name" --description "New parent description" --version-description "New child description"
+  - name: Remove tag(s) from template spec version with no prompt.
+    text: az ts update -g ExistingRG --name ExistingName -v 3.0 -f updatedTemplate.json --tags --yes
+
 """
 
 helps['ts show'] = """

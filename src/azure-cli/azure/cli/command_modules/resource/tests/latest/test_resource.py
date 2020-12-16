@@ -874,6 +874,63 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_id}'])", 0))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
+    def test_template_spec_create_and_update_with_tags(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-template-spec-tags', 60)
+        self.kwargs.update({
+            'template_spec_name': template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+            'display_name': self.create_random_name('create-spec', 20),
+            'version_tags': {'cliName1': 'cliValue1', 'cliName4': 'cliValue4'}
+        })
+
+        # Tags should be applied to both the parent template spec and template spec version if neither existed:
+
+        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --tags cli-test=test').get_output_in_json()
+        self.kwargs['template_spec_version_one_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+
+        self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+        self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+
+        # New template spec version should inherit tags from parent template spec if tags are not specified:
+
+        self.cmd('ts create -g {rg} -n {template_spec_name} -v 2.0 -l {resource_group_location} -f "{tf}"')
+        self.kwargs['template_spec_version_two_id'] = result['id'].replace('/versions/1.0', '/versions/2.0')
+
+        self.cmd('ts show --template-spec {template_spec_version_two_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+
+        # Tags should only apply to template spec version (and not the parent template spec) if parent already exist:
+
+        self.cmd('ts create -g {rg} -n {template_spec_name} -v 3.0 -l {resource_group_location} -f "{tf}" --tags cliName1=cliValue1 cliName4=cliValue4')
+        self.kwargs['template_spec_version_three_id'] = result['id'].replace('/versions/1.0', '/versions/3.0')
+
+        self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', '{version_tags}')])
+        self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+
+        # When updating a template spec, tags should only be removed if explicitely empty. Create should override.
+
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes')
+        self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --tags "" --yes')
+        self.cmd('ts show --template-spec {template_spec_version_one_id}', checks=[self.check('tags', {})])
+
+        self.cmd('ts update -g {rg} -n {template_spec_name} -v 2.0 -f "{tf}" --tags --yes')
+        self.cmd('ts show --template-spec {template_spec_version_two_id}', checks=[self.check('tags', {})])
+
+        self.cmd('ts create -g {rg} -n {template_spec_name} -v 3.0 -f "{tf}" --tags --yes')
+        self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
+        self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
+
+        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
+        self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
+
+        # clean up
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
+
 
 class TemplateSpecsExportTest(LiveScenarioTest):
 
