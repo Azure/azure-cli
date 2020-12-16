@@ -753,7 +753,7 @@ class AzCliCommandInvoker(CommandInvoker):
             deprecate_kwargs['object_type'] = 'command'
             del deprecate_kwargs['_get_tag']
             del deprecate_kwargs['_get_message']
-            deprecations.append(ImplicitDeprecated(**deprecate_kwargs))
+            deprecations.append(ImplicitDeprecated(cli_ctx=self.cli_ctx, **deprecate_kwargs))
 
         previews = [] + getattr(parsed_args, '_argument_previews', [])
         if cmd.preview_info:
@@ -771,7 +771,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 preview_kwargs['object_type'] = 'command'
                 del preview_kwargs['_get_tag']
                 del preview_kwargs['_get_message']
-                previews.append(ImplicitPreviewItem(**preview_kwargs))
+                previews.append(ImplicitPreviewItem(cli_ctx=self.cli_ctx,**preview_kwargs))
 
         experimentals = [] + getattr(parsed_args, '_argument_experimentals', [])
         if cmd.experimental_info:
@@ -789,7 +789,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimental_kwargs['object_type'] = 'command'
                 del experimental_kwargs['_get_tag']
                 del experimental_kwargs['_get_message']
-                experimentals.append(ImplicitExperimentalItem(**experimental_kwargs))
+                experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
             for d in deprecations:
