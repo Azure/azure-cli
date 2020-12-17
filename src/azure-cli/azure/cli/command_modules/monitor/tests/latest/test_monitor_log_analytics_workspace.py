@@ -419,7 +419,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the number of allowed export rules in your workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
@@ -429,7 +429,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the number of allowed export rules in your workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
@@ -451,7 +451,7 @@ class TestLogProfileScenarios(ScenarioTest):
         })
         self.cmd(
             'monitor log-analytics workspace data-export update -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
-            '--destination {namespace_id} --all --enable true',
+            '--destination {namespace_id} --enable true -t Usage Alert',
             checks=[
             ])
 
@@ -461,7 +461,7 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd(
             'monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
-            '--destination {eventhub_id} --all --enable false',
+            '--destination {eventhub_id} --enable false -t {table_name}',
             checks=[
             ])
 

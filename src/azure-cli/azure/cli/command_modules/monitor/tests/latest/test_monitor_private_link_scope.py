@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only
 
 
 class TestMonitorPrivateLinkScope(ScenarioTest):
@@ -12,7 +12,8 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         super(TestMonitorPrivateLinkScope, self).__init__(method_name)
         self.cmd('extension add -n application-insights')
 
-    @ResourceGroupPreparer(location='eastus2euap')
+    @record_only()  # record_only as the log-analytics workspace creation is buggy
+    @ResourceGroupPreparer(location='westus2')
     def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': resource_group,
