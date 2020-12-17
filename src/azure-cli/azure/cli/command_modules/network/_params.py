@@ -1733,6 +1733,7 @@ def load_arguments(self, _):
         c.argument('profile_status', options_list=['--status'], help='Status of the Traffic Manager profile.', arg_type=get_enum_type(ProfileStatus))
         c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic', 'Multivalue', 'Subnet']))
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
+        c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
@@ -1746,6 +1747,7 @@ def load_arguments(self, _):
         c.argument('status_code_ranges', help='Space-separated list of status codes in MIN-MAX or VAL format.', nargs='+', validator=validate_status_code_ranges)
 
     with self.argument_context('network traffic-manager profile update') as c:
+        c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('monitor_protocol', monitor_protocol_type, default=None)
 
     with self.argument_context('network traffic-manager profile check-dns') as c:

@@ -3963,6 +3963,18 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
 
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
+    @ResourceGroupPreparer('cli_test_traffic_manager2')
+    def test_network_traffic_manager2(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile2',
+            'dns': 'mytrafficmanager001100a2'
+        })
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
+
+        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
+                 checks=self.check('maxReturn', 4))
+
     @ResourceGroupPreparer('cli_test_traffic_manager_subnet')
     def test_network_traffic_manager_subnet_routing(self, resource_group):
 
