@@ -395,14 +395,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the Connected ACR. Name must start with a letter and contain only alphanumeric characters (including ‘_’) optionally separated by a ‘-’. 5 to 40 chars long. Name must be unique under the Cloud ACR hierarchy.', required=True)
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='The name of the resource group where the Connected ACR registry will be created. Must be the same as the resource group for the --registry.', required=False)
         c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent Connected Registry.', required=False)
-        c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None. ', required=False, default="Information")
-        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It\'s enabled by default.', required=False, arg_type=get_three_state_flag())
         c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be synched to the Connected ACR. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token needed to be synched to the Connected ACR. It can include access for multiple repositories.', required=False)
         c.argument('fresh_install', options_list=['--fresh-install'], help='Creates a new password for the sync token.', required=False)
         c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
+        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It\'s enabled by default.', required=False, arg_type=get_three_state_flag())
 
     with self.argument_context('acr connected-registry create') as c:
+        c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None. ', required=False, default="Information")
         c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
@@ -410,6 +410,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
 
     with self.argument_context('acr connected-registry update') as c:
+        c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None. ', required=False)
         c.argument('add_client_token_list', options_list=['--add-client-tokens'], nargs='*', required=False,
                    help='Client tokens to be added. Use the format "--add-client-tokens [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
         c.argument('remove_client_token_list', options_list=['--remove-client-tokens'], nargs='*', required=False,
