@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
+from msrest.exceptions import HttpOperationError
 
 
 class TestLogProfileScenarios(ScenarioTest):
@@ -162,14 +163,14 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'azurewatson')
+                     self.check('name', 'customlogs')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage add '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_2} {sa_id_3}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_2} {sa_id_3}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
                      self.check('storageAccountIds[1]', '{sa_id_2}'),
@@ -177,14 +178,14 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage remove '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_2}'),
                      self.check('storageAccountIds[1]', '{sa_id_3}')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage show '
-                 '--type AzureWatson -g {rg} -n {name}',
+                 '--type CustomLogs -g {rg} -n {name}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_2}'),
                      self.check('storageAccountIds[1]', '{sa_id_3}')
@@ -197,10 +198,10 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
-                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1} {sa_id_4}',
+                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('storageAccountIds[1]', '{sa_id_4}')
+                     self.check('name', 'azurewatson')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage list '
@@ -210,7 +211,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage delete '
-                 '--type CustomLogs -g {rg} -n {name} -y')
+                 '--type AzureWatson -g {rg} -n {name} -y')
 
         self.cmd('monitor log-analytics workspace linked-storage list '
                  '-g {rg} -n {name}',
@@ -413,23 +414,22 @@ class TestLogProfileScenarios(ScenarioTest):
                  '--destination {sa_id_1} --enable -t {table_name}',
                  checks=[
                  ])
-        from knack.util import CLIError
-        with self.assertRaisesRegexp(CLIError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
+        with self.assertRaisesRegexp(HttpOperationError, 'Table SecurityEvent Heartbeat does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(CLIError, 'Table ABC does not exist in the workspace'):
+        with self.assertRaisesRegexp(HttpOperationError, 'Table ABC does not exist in the workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(CLIError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import time
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
@@ -403,11 +404,36 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
+        # Table service
         with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
             self.cmd('storage logging update --services t --log r --retention 1 '
                      '--version 2.0 --connection-string {}'.format(connection_string))
-        self.cmd('storage logging update --services t --log r --retention 1 '
-                 '--version 1.0 --connection-string {}'.format(connection_string))
+
+        # Set version to 1.0
+        self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
+                 .format(connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
+
+        # Use default version
+        self.cmd('storage logging update --services t --log r --retention 1 --connection-string {}'.format(
+            connection_string))
+        time.sleep(10)
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('table.version', '1.0'),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', True),
+            JMESPathCheck('table.retentionPolicy.enabled', True),
+            JMESPathCheck('table.retentionPolicy.days', 1)
+        ])
 
     @live_only()
     @ResourceGroupPreparer()
@@ -484,7 +510,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         name = self.create_random_name(prefix='clistoragekerbkey', length=24)
         self.kwargs = {'sc': name, 'rg': resource_group}
         self.cmd('storage account create -g {rg} -n {sc} -l eastus2euap --enable-files-aadds')
-        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 2))
+        self.cmd('storage account keys list -g {rg} -n {sc}', checks=JMESPathCheck('length(@)', 4))
         original_keys = self.cmd('storage account keys list -g {rg} -n {sc} --expand-key-type kerb',
                                  checks=JMESPathCheck('length(@)', 4)).get_output_in_json()
 
@@ -891,7 +917,7 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
     def test_storage_account_update_change_feed(self):
         result = self.cmd('storage account blob-service-properties update --enable-change-feed true -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], True)
@@ -1013,6 +1039,7 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
     @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
     def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+        from azure.cli.core.azclierror import ValidationError
         self.kwargs.update({
             'sa': storage_account,
             'rg': resource_group,
@@ -1021,14 +1048,18 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
             JMESPathCheck('shareDeleteRetentionPolicy', None))
 
-        with self.assertRaises(SystemExit):
+        # Test update without properties
+        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+        with self.assertRaises(ValidationError):
             self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
 
-        with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
-            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+        with self.assertRaisesRegexp(ValidationError, "Delete Retention Policy hasn't been enabled,"):
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg} -n {sa} -g {rg}')
 
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+        with self.assertRaises(ValidationError):
+            self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1 -n {sa} -g {rg}')
 
         self.cmd(
             '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
@@ -1047,6 +1078,11 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
             JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
 
+        # Test update without properties
+        self.cmd('{cmd} update --account-name {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+            JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
@@ -1063,7 +1099,6 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_storage_account_private_endpoint(self, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'eastus',
@@ -1109,13 +1144,13 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-        with self.assertRaisesRegexp(CloudError, 'Your connection is already approved. No need to approve again.'):
+        with self.assertRaisesRegexp(CLIError, 'Your connection is already approved. No need to approve again.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
@@ -1166,18 +1201,23 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
-        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+        self.cmd('storage account create -n {sa} -g {rg} -l eastus2euap --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
-                         self.check('sku.name', 'Standard_GZRS'),
-                         self.check('failoverInProgress', None)])
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
-            self.check('name', '{sa}'),
-            self.check('sku.name', 'Standard_GZRS'),
             self.check('geoReplicationStats.canFailover', True),
             self.check('failoverInProgress', None)
         ])
 
+        time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[

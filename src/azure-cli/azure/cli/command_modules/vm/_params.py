@@ -348,8 +348,8 @@ def load_arguments(self, _):
         c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
 
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
-        c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name of the dedicated host group containing the dedicated host this VM will reside in.")
-        c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="Name or ID of the dedicated host this VM will reside in. If a name is specified, a host group must be specified via `--host-group`.")
+        c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
+        c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together.")
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -483,8 +483,7 @@ def load_arguments(self, _):
                    help="Replace the host automatically if a failure occurs")
         c.argument('license_type', arg_type=get_enum_type(DedicatedHostLicenseTypes),
                    help="The software license type that will be applied to the VMs deployed on the dedicated host.")
-        c.argument('sku', arg_type=get_enum_type(['DSv3-Type1', 'ESv3-Type1', 'FSv2-Type2']),
-                   help="Sku of the dedicated host.")
+        c.argument('sku', help="SKU of the dedicated host. Available SKUs: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/dedicated-host/")
 
     with self.argument_context('vm host list') as c:
         c.argument('host_group_name', id_part=None)
@@ -495,11 +494,11 @@ def load_arguments(self, _):
                    help='Specify whether virtual machines or virtual machine scale sets can be placed automatically '
                         'on the dedicated host group. Automatic placement means resources are allocated on dedicated '
                         'hosts, that are chosen by Azure, under the dedicated host group. The value is defaulted to '
-                        'true when not provided.')
+                        'false when not provided.')
 
     with self.argument_context('vm host group create') as c:
         c.argument('platform_fault_domain_count', options_list=["--platform-fault-domain-count", "-c"], type=int,
-                   help="Number of fault domains that the host group can span. Allowed values: 1, 2, 3")
+                   help="Number of fault domains that the host group can span.")
         c.argument('zones', zone_type)
 
     for scope in ["vm host", "vm host group"]:
@@ -820,6 +819,10 @@ def load_arguments(self, _):
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a Spot VM/VMSS. -1 indicates that the Spot VM/VMSS should not be evicted for price reasons')
 
+    with self.argument_context('vm update') as c:
+        c.argument('license_type', help=license_msg, arg_type=get_enum_type(
+            ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_ELS_6', 'None']))
+
     with self.argument_context('vmss create') as c:
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
                    arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
@@ -856,6 +859,7 @@ def load_arguments(self, _):
         c.argument('release_note_uri', help='The release note uri')
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('disallowed_disk_types', nargs='*', help='disk types which would not work with the image, e.g., Standard_LRS')
+        c.argument('features', help='A list of gallery image features. E.g. "IsSecureBootSupported=true IsMeasuredBootSupported=false"')
 
     with self.argument_context('sig create') as c:
         c.argument('description', help='the description of the gallery')

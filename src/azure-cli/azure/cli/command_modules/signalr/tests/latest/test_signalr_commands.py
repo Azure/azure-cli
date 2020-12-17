@@ -18,10 +18,14 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         tags_key = 'key'
         tags_val = 'value'
         service_mode = 'Classic'
+        enable_message_logs_input = 'true'
+        enable_message_logs_check = True
         allowed_origins = ['http://example1.com', 'http://example2.com']
         updated_sku = 'Free_F1'
         updated_tags_val = 'value2'
         update_service_mode = 'Serverless'
+        update_enable_message_logs_input = 'false'
+        update_enable_message_logs_check = False
         added_allowed_origins = ['http://example3.com', 'http://example4.com']
 
         self.kwargs.update({
@@ -30,17 +34,21 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             'sku': sku,
             'unit_count': unit_count,
             'tags': '{}={}'.format(tags_key, tags_val),
+            'enable_message_logs_input': enable_message_logs_input,
+            'enable_message_logs_check': enable_message_logs_check,
             'service_mode': service_mode,
             'allowed_origins': ' '.join(allowed_origins),
             'updated_sku': updated_sku,
             'updated_tags': '{}={}'.format(tags_key, updated_tags_val),
             'update_service_mode': update_service_mode,
+            'update_enable_message_logs_input': update_enable_message_logs_input,
+            'update_enable_message_logs_check': update_enable_message_logs_check,
             'added_allowed_origins': ' '.join(added_allowed_origins),
             'default_action': "Deny",
         })
 
         # Test create
-        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags} --service-mode {service_mode} --allowed-origins {allowed_origins} --default-action {default_action}',
+        self.cmd('az signalr create -n {signalr_name} -g {rg} --sku {sku} --unit-count {unit_count} -l {location} --tags {tags} --service-mode {service_mode} --enable-message-logs {enable_message_logs_input} --allowed-origins {allowed_origins} --default-action {default_action}',
                  checks=[
                      self.check('name', '{signalr_name}'),
                      self.check('location', '{location}'),
@@ -49,6 +57,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('sku.capacity', '{unit_count}'),
                      self.check('tags.{}'.format(tags_key), tags_val),
                      self.check('features[0].value', '{service_mode}'),
+                     self.check('features[2].value', '{enable_message_logs_check}'),
                      self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
@@ -64,6 +73,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('sku.name', '{sku}'),
             self.check('sku.capacity', '{unit_count}'),
             self.check('features[0].value', '{service_mode}'),
+            self.check('features[2].value', '{enable_message_logs_check}'),
             self.check('cors.allowedOrigins', allowed_origins),
             self.exists('hostName'),
             self.exists('publicPort'),
@@ -80,6 +90,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('[0].sku.name', '{sku}'),
             self.check('[0].sku.capacity', '{unit_count}'),
             self.check('[0].features[0].value', '{service_mode}'),
+            self.check('[0].features[2].value', '{enable_message_logs_check}'),
             self.check('[0].cors.allowedOrigins', allowed_origins),
             self.exists('[0].hostName'),
             self.exists('[0].publicPort'),
@@ -89,7 +100,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
         ])
 
         # Test update
-        self.cmd('az signalr update -n {signalr_name} -g {rg} --sku {updated_sku} --tags {updated_tags} --service-mode {update_service_mode}',
+        self.cmd('az signalr update -n {signalr_name} -g {rg} --sku {updated_sku} --tags {updated_tags} --service-mode {update_service_mode} --enable-message-logs {update_enable_message_logs_input}',
                  checks=[
                      self.check('name', '{signalr_name}'),
                      self.check('location', '{location}'),
@@ -97,6 +108,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('sku.name', '{updated_sku}'),
                      self.check('tags.{}'.format(tags_key), updated_tags_val),
                      self.check('features[0].value', '{update_service_mode}'),
+                     self.check('features[2].value', '{update_enable_message_logs_check}'),
                      self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
