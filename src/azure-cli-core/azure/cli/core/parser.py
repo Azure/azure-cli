@@ -36,8 +36,7 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
                        "'https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview'")
 
 OVERVIEW_REFERENCE = ("Still stuck? Run '{command} --help' to view all commands or go to "
-                      "'https://docs.microsoft.com/cli/azure/reference-index' "
-                      "to learn more")
+                      "'https://aka.ms/cli_ref' to learn more")
 
 
 class IncorrectUsageError(CLIError):

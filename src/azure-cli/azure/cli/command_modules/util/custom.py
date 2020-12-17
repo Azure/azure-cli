@@ -170,3 +170,77 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
         "More details in https://docs.microsoft.com/cli/azure/update-azure-cli#automatic-update"
     logger.warning("Upgrade finished.%s", "" if cmd.cli_ctx.config.getboolean('auto-upgrade', 'enable', False)
                    else auto_upgrade_msg)
+
+
+def demo_style(cmd):  # pylint: disable=unused-argument
+    from azure.cli.core.style import Style, print_styled_text
+    print("[available styles]\n")
+    styled_text = [
+        (Style.PRIMARY, "Bright White: Primary text color\n"),
+        (Style.SECONDARY, "White: Secondary text color\n"),
+        (Style.IMPORTANT, "Bright Magenta: Important text color\n"),
+        (Style.ACTION, "Bright Blue: Commands, parameters, and system inputs\n"),
+        (Style.HYPERLINK, "Bright Cyan: Hyperlink\n"),
+        (Style.ERROR, "Bright Red: Error message indicator\n"),
+        (Style.SUCCESS, "Bright Green: Success message indicator\n"),
+        (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
+    ]
+    print_styled_text(styled_text)
+
+    print("[interactive]\n")
+    # NOTE! Unicode character ⦾ ⦿ will most likely not be displayed correctly
+    styled_text = [
+        (Style.ACTION, "?"),
+        (Style.PRIMARY, " Select a SKU for your app:\n"),
+        (Style.PRIMARY, "⦾ Free            "),
+        (Style.SECONDARY, "Dev/Test workloads: 1 GB memory, 60 minutes/day compute\n"),
+        (Style.PRIMARY, "⦾ Basic           "),
+        (Style.SECONDARY, "Dev/Test workloads: 1.75 GB memory, monthly charges apply\n"),
+        (Style.PRIMARY, "⦾ Standard        "),
+        (Style.SECONDARY, "Production workloads: 1.75 GB memory, monthly charges apply\n"),
+        (Style.ACTION, "⦿ Premium         "),
+        (Style.SECONDARY, "Production workloads: 3.5 GB memory, monthly charges apply\n"),
+    ]
+    print_styled_text(styled_text)
+
+    print("[progress report]\n")
+    # NOTE! Unicode character ✓ will most likely not be displayed correctly
+    styled_text = [
+        (Style.SUCCESS, '(✓) Done: '),
+        (Style.PRIMARY, "Creating a resource group for myfancyapp\n"),
+        (Style.SUCCESS, '(✓) Done: '),
+        (Style.PRIMARY, "Creating an App Service Plan for myfancyappplan on a "),
+        (Style.IMPORTANT, "premium instance"),
+        (Style.PRIMARY, " that has a "),
+        (Style.IMPORTANT, "monthly charge"),
+        (Style.PRIMARY, "\n"),
+        (Style.SUCCESS, '(✓) Done: '),
+        (Style.PRIMARY, "Creating a webapp named myfancyapp\n"),
+    ]
+    print_styled_text(styled_text)
+
+    print("[error handing]\n")
+    styled_text = [
+        (Style.ERROR, "ERROR: Command not found: az storage create\n"),
+        (Style.PRIMARY, "TRY\n"),
+        (Style.ACTION, "az storage account create --name"),
+        (Style.PRIMARY, " mystorageaccount "),
+        (Style.ACTION, "--resource-group"),
+        (Style.PRIMARY, " MyResourceGroup\n"),
+        (Style.SECONDARY, "Create a storage account. For more detail, see "),
+        (Style.HYPERLINK, "https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create?"
+                          "tabs=azure-cli#create-a-storage-account-1"),
+        (Style.SECONDARY, "\n"),
+    ]
+    print_styled_text(styled_text)
+
+    print("[post-output hint]\n")
+    styled_text = [
+        (Style.PRIMARY, "The default subscription is "),
+        (Style.IMPORTANT, "AzureSDKTest (0b1f6471-1bf0-4dda-aec3-cb9272f09590)"),
+        (Style.PRIMARY, ". To switch to another subscription, run "),
+        (Style.ACTION, "az account set --subscription"),
+        (Style.PRIMARY, " <subscription ID>\n"),
+        (Style.WARNING, "WARNING: The subscription has been disabled!")
+    ]
+    print_styled_text(styled_text)
