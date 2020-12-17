@@ -143,6 +143,7 @@ def _handle_network_bypass(registry, network_bypass_options):
 
     return registry
 
+
 def acr_update_get(cmd):
     """Returns an empty RegistryUpdateParameters object.
     """
