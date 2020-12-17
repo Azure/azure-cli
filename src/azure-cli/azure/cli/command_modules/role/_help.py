@@ -395,8 +395,8 @@ long-summary: >-
     See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
 
 
-    WARNING: In a future release, this command will NOT create any role assignment by default. (--skip-assignment will be the
-    default behavior.) If needed, always use --role to explicitly create a role assignment.
+    WARNING: In a future release, this command will NOT create 'Contributor' role assignment by default.
+    If needed, always use --role to explicitly create a role assignment.
 parameters:
   - name: --name -n
     short-summary: A URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
