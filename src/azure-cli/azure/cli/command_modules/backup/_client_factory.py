@@ -100,6 +100,10 @@ def backup_protected_items_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_protected_items
 
 
+def backup_protected_items_crr_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protected_items_crr
+
+
 def backup_operation_statuses_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_operation_statuses
 
@@ -128,6 +132,10 @@ def job_cancellations_cf(cli_ctx, *_):
 # Recovery Client Factories
 def recovery_points_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).recovery_points
+
+
+def recovery_points_crr_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).recovery_points_crr
 
 
 def restores_cf(cli_ctx, *_):

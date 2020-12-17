@@ -6,7 +6,7 @@
 
 import azure.cli.command_modules.backup.custom_help as custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
-    protection_containers_cf, protected_items_cf
+    protection_containers_cf, protected_items_cf, backup_protected_items_crr_cf, recovery_points_crr_cf
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
 # pylint: disable=import-error
@@ -24,16 +24,22 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
-                   status="Registered"):
+                   status="Registered", use_secondary_region=None):
+    container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        if container_type and container_type.lower() == "azurestorage":
+            raise InvalidArgumentValueError("--use-secondary-region flag is not supported for container of type AzureStorage. Please either remove the flag or query for any other container type.")
+        #Code for retreiving container for secondary region
+        print(use_secondary_region)
+
     if custom_help.is_native_name(name):
         return protection_containers_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name, name)
-    container_type = custom_help.validate_and_extract_container_type(name, backup_management_type)
-    containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name)
+    containers = _get_containers(client, container_type, status, resource_group_name, vault_name, name, use_secondary_region)
     return custom_help.get_none_one_or_many(containers)
 
 
-def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered"):
-    return _get_containers(client, backup_management_type, status, resource_group_name, vault_name)
+def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered", use_secondary_region=None):
+    return _get_containers(client, backup_management_type, status, resource_group_name, vault_name, use_secondary_region=use_secondary_region)
 
 
 def show_policy(client, resource_group_name, vault_name, name):
@@ -51,11 +57,17 @@ def list_policies(client, resource_group_name, vault_name, workload_type=None, b
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
-              workload_type=None):
-    if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
-        client = protected_items_cf(cmd.cli_ctx)
-        return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
+              workload_type=None, use_secondary_region=None):
     container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        if container_type and container_type.lower() == "azurestorage":
+            raise InvalidArgumentValueError("--use-secondary-region flag is not supported for container of type AzureStorage. Please either remove the flag or query for any other container type.")
+        #Code for retreiving item for secondary region
+        print(use_secondary_region)
+    else:
+        if custom_help.is_native_name(name) and custom_help.is_native_name(container_name):
+            client = protected_items_cf(cmd.cli_ctx)
+            return client.get(vault_name, resource_group_name, fabric_name, container_name, name)
 
     items = list_items(cmd, client, resource_group_name, vault_name, workload_type, container_name,
                        container_type)
@@ -69,12 +81,19 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               container_type=None):
+               container_type=None, use_secondary_region=None):
     workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': container_type,
         'itemType': workload_type})
 
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        if container_type and container_type.lower() == "azurestorage":
+            raise InvalidArgumentValueError("--use-secondary-region flag is not supported for --backup-management-type AzureStorage. Please either remove the flag or query for any other backup-management-type.")
+        #Code for retreiving item list for secondary region
+        client = backup_protected_items_crr_cf(cmd.cli_ctx)
+        print(use_secondary_region)
+        
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = custom_help.get_list_from_paged_response(items)
 
@@ -89,11 +108,11 @@ def list_items(cmd, client, resource_group_name, vault_name, workload_type=None,
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
-                        workload_type=None, backup_management_type=None):
+                        workload_type=None, backup_management_type=None, use_secondary_region=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     backup_management_type, workload_type, use_secondary_region)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
@@ -102,6 +121,18 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     # Get container and item URIs
     container_uri = custom_help.get_protection_container_uri_from_id(item.id)
     item_uri = custom_help.get_protected_item_uri_from_id(item.id)
+
+    container_type = custom_help.validate_and_extract_container_type(container_name, backup_management_type)
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        if container_type and container_type.lower() == "azurestorage":
+            raise InvalidArgumentValueError("--use-secondary-region flag is not supported for --backup-management-type AzureStorage. Please either remove the flag or query for any other backup-management-type.")
+        #Code for retreiving rp for secondary region
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
+        paged_rps = custom_help.get_list_from_paged_response(recovery_points)
+        filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
+        print(use_secondary_region)
+        return custom_help.get_none_one_or_many(filtered_rps)
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
@@ -119,7 +150,7 @@ def new_policy(client, resource_group_name, vault_name, policy, policy_name, con
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def _get_containers(client, backup_management_type, status, resource_group_name, vault_name, container_name=None):
+def _get_containers(client, backup_management_type, status, resource_group_name, vault_name, container_name=None, use_secondary_region=None):
     filter_dict = {
         'backupManagementType': backup_management_type,
         'status': status
@@ -129,6 +160,12 @@ def _get_containers(client, backup_management_type, status, resource_group_name,
         filter_dict['friendlyName'] = container_name
 
     filter_string = custom_help.get_filter_string(filter_dict)
+
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        if backup_management_type.lower() == "azurestorage":
+            raise InvalidArgumentValueError("--use-secondary-region flag is not supported for --backup-management-type AzureStorage. Please either remove the flag or query for any other backup-management-type.")
+        #Code for retreiving container list for secondary region
+        print(use_secondary_region)
 
     paged_containers = client.list(vault_name, resource_group_name, filter_string)
     containers = custom_help.get_list_from_paged_response(paged_containers)

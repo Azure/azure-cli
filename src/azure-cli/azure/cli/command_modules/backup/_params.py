@@ -78,6 +78,7 @@ def load_arguments(self, _):
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
         c.argument('soft_delete_feature_state', arg_type=get_enum_type(['Enable', 'Disable']), help='Set soft-delete feature state for a Recovery Services Vault.')
+        c.argument('cross_region_restore_flag', arg_type=get_enum_type(["True", "False"]), help='Set cross-region-restore feature state for a Recovery Services Vault. Default: False.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -87,9 +88,12 @@ def load_arguments(self, _):
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.')
         c.argument('backup_management_type', backup_management_type)
+        c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to show container in secondary region. Default: No.')
+
     with self.argument_context('backup container list') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
+        c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to list containers in secondary region. Default: No.')
 
     with self.argument_context('backup container unregister') as c:
         c.argument('backup_management_type', backup_management_type)
@@ -114,6 +118,7 @@ def load_arguments(self, _):
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to show item in secondary region. Default: No.')
 
     # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup item set-policy') as c:
@@ -126,6 +131,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', arg_type=get_enum_type(allowed_backup_management_types + ["MAB"]), help=backup_management_type_help)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to list items in secondary region. Default: No.')
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -170,12 +176,14 @@ def load_arguments(self, _):
             c.argument('backup_management_type', backup_management_type)
             c.argument('container_name', container_name_type)
             c.argument('workload_type', workload_type)
+            c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to list recoverypoints in secondary region. Default: No.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.')
         c.argument('backup_management_type', backup_management_type)
         c.argument('container_name', container_name_type)
         c.argument('workload_type', workload_type)
+        c.argument('use_secondary_region', arg_type=get_enum_type(['Yes', 'No']), help='Use this flag to show recoverypoints in secondary region. Default: No.')
 
     # Protection
     with self.argument_context('backup protection') as c:

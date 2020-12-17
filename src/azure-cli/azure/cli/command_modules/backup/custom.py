@@ -27,7 +27,7 @@ from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf, backup_resource_vault_config_cf)
+    protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf)
 
 logger = get_logger(__name__)
 
@@ -91,7 +91,7 @@ def list_vaults(client, resource_group_name=None):
 
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
-                          soft_delete_feature_state=None):
+                          soft_delete_feature_state=None, cross_region_restore_flag=None):
     if soft_delete_feature_state:
         soft_delete_feature_state += "d"
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
@@ -102,7 +102,8 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
-    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
+    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
+                                                 cross_region_restore_flag=cross_region_restore_flag)
     backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
     return client.update(vault_name, resource_group_name, backup_storage_config_resource)
 
@@ -400,7 +401,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None, use_secondary_region=None):
+    
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -410,6 +412,11 @@ def list_recovery_points(client, resource_group_name, vault_name, item, start_da
     filter_string = _get_filter_string({
         'startDate': query_start_date,
         'endDate': query_end_date})
+
+    if use_secondary_region and use_secondary_region.lower() == "yes":
+        #Code for retreiving vm rp list for secondary region
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+        print(use_secondary_region)
 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)

@@ -374,7 +374,7 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     if not is_native_name(container_name) and backup_management_type is None:
         raise CLIError("""backup management type required""")
 
-    if backup_management_type is not None:
+    if not is_native_name(container_name) and backup_management_type is not None:
         if backup_management_type in backup_management_type_map.values():
             return backup_management_type
         return backup_management_type_map[backup_management_type]

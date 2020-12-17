@@ -106,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=3.1.0rc1',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.6.0',
+    'azure-mgmt-recoveryservicesbackup~=0.10.0',
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
