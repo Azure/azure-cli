@@ -220,7 +220,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
                                  setter_arg_name='aad_admin_info', supports_no_wait=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
     # Management Plane Commands --Sql audit-policy
