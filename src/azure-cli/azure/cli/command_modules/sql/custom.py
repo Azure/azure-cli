@@ -2081,7 +2081,8 @@ def _audit_policy_update_diagnostic_settings(
     # Add original 'audit_diagnostic_settings' to rollback_data list
     rollback_data = [("update", audit_diagnostic_setting)]
 
-    # Create new diagnostic settings with enabled SQLSecurityAuditEvents\DevOpsOperationsAudit category only if azure monitor is enabled
+    # Create new diagnostic settings with enabled SQLSecurityAuditEvents\DevOpsOperationsAudit category
+    # only if azure monitor is enabled
     if is_azure_monitor_target_enabled:
         created_diagnostic_setting = _audit_policy_create_diagnostic_setting(
             cmd=cmd,
