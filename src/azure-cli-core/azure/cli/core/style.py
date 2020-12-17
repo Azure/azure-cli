@@ -14,6 +14,7 @@ https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guideli
 For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
 
+import os
 import sys
 from enum import Enum
 
@@ -61,8 +62,8 @@ THEME_LIGHT = {
 
 # Blue and bright blue is not visible under the default theme of powershell.exe
 POWERSHELL_COLOR_REPLACEMENT = {
-    Fore.BLUE: Fore.LIGHTWHITE_EX,
-    Fore.LIGHTBLUE_EX: Fore.LIGHTWHITE_EX
+    Fore.BLUE: Fore.RESET,
+    Fore.LIGHTBLUE_EX: Fore.RESET
 }
 
 
@@ -143,3 +144,27 @@ def format_styled_text(styled_text, theme=None, enable_color=None):
     if enable_color:
         formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)
+
+
+def _is_modern_terminal():
+    # Windows Terminal: https://github.com/microsoft/terminal/issues/1040
+    if 'WT_SESSION' in os.environ:
+        return True
+    # VS Code: https://github.com/microsoft/vscode/pull/30346
+    if os.environ.get('TERM_PROGRAM', '').lower() == 'vscode':
+        return True
+    return False
+
+
+def is_modern_terminal():
+    """Detect whether the current terminal is a modern terminal that supports Unicode and
+    Console Virtual Terminal Sequences.
+
+    Currently, these terminals can be detected:
+      - Windows Terminal
+      - VS Code terminal
+    """
+    # This function wraps _is_modern_terminal and use a function-level cache to save the result.
+    if not hasattr(is_modern_terminal, "return_value"):
+        setattr(is_modern_terminal, "return_value", _is_modern_terminal())
+    return getattr(is_modern_terminal, "return_value")
