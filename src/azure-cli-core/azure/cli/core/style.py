@@ -36,7 +36,7 @@ class Style(str, Enum):
 THEME_DARK = {
     # Style to ANSI escape sequence mapping
     # https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-    Style.PRIMARY: Fore.LIGHTWHITE_EX,
+    Style.PRIMARY: Fore.RESET,
     Style.SECONDARY: Fore.LIGHTBLACK_EX,  # may use WHITE, but will lose contrast to LIGHTWHITE_EX
     Style.IMPORTANT: Fore.LIGHTMAGENTA_EX,
     Style.ACTION: Fore.LIGHTBLUE_EX,
@@ -49,7 +49,7 @@ THEME_DARK = {
 
 # Theme to be used on a light-themed terminal
 THEME_LIGHT = {
-    Style.PRIMARY: Fore.BLACK,
+    Style.PRIMARY: Fore.RESET,
     Style.SECONDARY: Fore.LIGHTBLACK_EX,
     Style.IMPORTANT: Fore.MAGENTA,
     Style.ACTION: Fore.BLUE,
