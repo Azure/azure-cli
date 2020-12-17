@@ -732,7 +732,7 @@ class TemplateSpecsTest(ScenarioTest):
         ]).get_output_in_json()
 
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -768,7 +768,7 @@ class TemplateSpecsTest(ScenarioTest):
         ])
 
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -1944,8 +1944,8 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_unregister(self):
-        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
-            self.check_pattern('properties.state', 'Unregistering|Unregistered')
+         self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
+             self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
 
@@ -2554,7 +2554,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
     def test_managedappdef(self, resource_group):
 
         self.kwargs.update({
-            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'upn': self.create_random_name('testuser', 15) + '@detienne001gmail.onmicrosoft.com',
             'sub': self.get_subscription_id()
         })
 
@@ -2619,7 +2619,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
-            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'upn': self.create_random_name('testuser', 15) + '@detienne001gmail.onmicrosoft.com',
             'sub': self.get_subscription_id()
         })
 
@@ -2687,7 +2687,7 @@ class ManagedAppScenarioTest(ScenarioTest):
     def test_managedapp(self, resource_group):
 
         self.kwargs.update({
-            'upn': self.create_random_name('testuser', 15) + '@azuresdkteam.onmicrosoft.com',
+            'upn': self.create_random_name('testuser', 15) + '@detienne001gmail.onmicrosoft.com',
             'sub': self.get_subscription_id()
         })
 
@@ -2816,9 +2816,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_sub': '6898adc8-5045-473d-a1bf-7012564f43cb',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': '01a4073e-87c8-47cd-aafc-1439b4b5ea2c'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['rg']))
@@ -2939,9 +2939,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
+            'aux_sub': '6898adc8-5045-473d-a1bf-7012564f43cb',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
-            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            'aux_tenant': '01a4073e-87c8-47cd-aafc-1439b4b5ea2c'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['rg']))

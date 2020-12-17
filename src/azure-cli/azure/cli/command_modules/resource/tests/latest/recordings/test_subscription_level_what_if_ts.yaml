@@ -13,8 +13,8 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:34 GMT
+      - Thu, 17 Dec 2020 19:32:50 GMT
       expires:
       - '-1'
       pragma:
@@ -60,8 +60,8 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -79,7 +79,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:34 GMT
+      - Thu, 17 Dec 2020 19:32:50 GMT
       expires:
       - '-1'
       pragma:
@@ -94,7 +94,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -105,35 +105,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-10-12T14:50:36.8054952Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-12T14:50:36.8054952Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T19:32:52.7046823Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T19:32:52.7046823Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-deploy-what-if-sub-deploy000002\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '719'
+      - '734'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:36 GMT
+      - Thu, 17 Dec 2020 19:32:52 GMT
       expires:
       - '-1'
       pragma:
@@ -158,7 +159,8 @@ interactions:
       "apiVersion": "2018-05-01", "properties": {"policyType": "Custom", "policyRule":
       {"if": {"field": "location", "equals": "[parameters(''denyLocation'')]"}, "then":
       {"effect": "deny"}}}}], "outputs": {"policyDefinitionId": {"type": "string",
-      "value": "[resourceId(''Microsoft.Authorization/policyDefinitions'', variables(''policyDefinitionName''))]"}}}}}'
+      "value": "[resourceId(''Microsoft.Authorization/policyDefinitions'', variables(''policyDefinitionName''))]"}}}},
+      "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -169,26 +171,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '801'
+      - '813'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-10-12T14:50:37.8921207Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-12T14:50:37.8921207Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T19:32:54.0096447Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T19:32:54.0096447Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
         \       }\r\n      },\r\n      \"variables\": {\r\n        \"policyDefinitionName\":
@@ -210,11 +212,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1871'
+      - '1886'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:37 GMT
+      - Thu, 17 Dec 2020 19:32:53 GMT
       expires:
       - '-1'
       pragma:
@@ -244,12 +246,12 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources","namespace":"Microsoft.Resources","authorization":{"applicationId":"3b990c8b-9607-4c2a-8b04-1d41985facca"},"resourceTypes":[{"resourceType":"tenants","locations":[],"apiVersions":["2020-01-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"operationresults","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"notifyResourceJobs","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01"],"capabilities":"None"},{"resourceType":"tags","locations":[],"apiVersions":["2019-10-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyCompliance","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"checkresourcename","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"calculateTemplateHash","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions","locations":[],"apiVersions":["2019-10-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/operationresults","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"resourceGroups","locations":["Central
@@ -267,48 +269,48 @@ interactions:
         East","UK South","UK West","Korea Central","Korea South","France Central","South
         Africa North","UAE North","Australia Central","Switzerland North","Germany
         West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsTags,
-        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
+        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"bulkDelete","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"SupportsTags,
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"deploymentScripts/logs","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
         Asia","Southeast Asia","Australia East","Australia Central","Australia Central
         2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
-        North","Central US EUAP","Germany West Central","East US 2","East US","Central
-        US","North Central US","East US 2 EUAP","France Central","UK South","UK West","Central
-        India","West India","South India","Japan East","Japan West","Korea Central","Korea
-        South","North Europe","Norway East","UAE North","West Central US","West Europe","West
-        US 2","West US","South Central US","South Africa North"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        North","Germany West Central","East US 2","East US","Central US","North Central
+        US","France Central","UK South","UK West","Central India","West India","South
+        India","Japan East","Japan West","Korea Central","Korea South","North Europe","Norway
+        East","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US","South Africa North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"templateSpecs/versions","locations":["East
         Asia","Southeast Asia","Australia East","Australia Central","Australia Central
         2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
-        North","Central US EUAP","Germany West Central","East US 2","East US","Central
-        US","North Central US","East US 2 EUAP","France Central","UK South","UK West","Central
-        India","West India","South India","Japan East","Japan West","Korea Central","Korea
-        South","North Europe","Norway East","UAE North","West Central US","West Europe","West
-        US 2","West US","South Central US","South Africa North"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        North","Germany West Central","East US 2","East US","Central US","North Central
+        US","France Central","UK South","UK West","Central India","West India","South
+        India","Japan East","Japan West","Korea Central","Korea South","North Europe","Norway
+        East","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US","South Africa North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationFree"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '15916'
+      - '16332'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:38 GMT
+      - Thu, 17 Dec 2020 19:32:55 GMT
       expires:
       - '-1'
       pragma:
@@ -336,20 +338,20 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-10-12T14:50:37.8921207Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-12T14:50:37.8921207Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T19:32:54.0096447Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T19:32:54.0096447Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
         \       }\r\n      },\r\n      \"variables\": {\r\n        \"policyDefinitionName\":
@@ -371,11 +373,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1871'
+      - '1886'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:39 GMT
+      - Thu, 17 Dec 2020 19:32:55 GMT
       expires:
       - '-1'
       pragma:
@@ -412,15 +414,15 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-12T14:50:39.9642014Z","duration":"PT0S","correlationId":"7053e87c-924a-4520-93db-f488a255ef9d","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-17T19:32:56.4413795Z","duration":"PT0S","correlationId":"35d3b3d2-f403-43bb-aa71-21a50fe71f98","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -429,7 +431,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:39 GMT
+      - Thu, 17 Dec 2020 19:32:55 GMT
       expires:
       - '-1'
       pragma:
@@ -466,26 +468,26 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-10-12T14:50:42.0751557Z","duration":"PT1.7701273S","correlationId":"7ae348c7-34fc-46a5-8af3-72e4f7365f25","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-17T19:32:58.0674756Z","duration":"PT1.272653S","correlationId":"efa4dd48-b908-4af7-b921-696ff0c9b53c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1/operationStatuses/08585990926451725815?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1/operationStatuses/08585933733086827864?api-version=2020-10-01
       cache-control:
       - no-cache
       content-length:
-      - '932'
+      - '931'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:50:41 GMT
+      - Thu, 17 Dec 2020 19:32:57 GMT
       expires:
       - '-1'
       pragma:
@@ -513,10 +515,10 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585990926451725815?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585933733086827864?api-version=2020-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -528,7 +530,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:51:12 GMT
+      - Thu, 17 Dec 2020 19:33:28 GMT
       expires:
       - '-1'
       pragma:
@@ -556,13 +558,13 @@ interactions:
       ParameterSetName:
       - --location --template-spec
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-10-12T14:50:43.6541764Z","duration":"PT3.349148S","correlationId":"7ae348c7-34fc-46a5-8af3-72e4f7365f25","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/1","name":"1","type":"Microsoft.Resources/deployments","location":"westus","properties":{"templateLink":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0","contentVersion":"1.0.0.0"},"templateHash":"1669246125929096641","parameters":{"denyLocation":{"type":"String","value":"northeurope"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-17T19:32:59.0791656Z","duration":"PT2.284343S","correlationId":"efa4dd48-b908-4af7-b921-696ff0c9b53c","providers":[{"namespace":"Microsoft.Authorization","resourceTypes":[{"resourceType":"policyDefinitions","locations":[null]}]}],"dependencies":[],"outputs":{"policyDefinitionId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -571,7 +573,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:51:12 GMT
+      - Thu, 17 Dec 2020 19:33:28 GMT
       expires:
       - '-1'
       pragma:
@@ -599,12 +601,12 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources","namespace":"Microsoft.Resources","authorization":{"applicationId":"3b990c8b-9607-4c2a-8b04-1d41985facca"},"resourceTypes":[{"resourceType":"tenants","locations":[],"apiVersions":["2020-01-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"locations","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"operationresults","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"notifyResourceJobs","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01"],"capabilities":"None"},{"resourceType":"tags","locations":[],"apiVersions":["2019-10-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01"],"capabilities":"SupportsExtension"},{"resourceType":"checkPolicyCompliance","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"checkresourcename","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"calculateTemplateHash","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions","locations":[],"apiVersions":["2019-10-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/resources","locations":[],"apiVersions":["2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/providers","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/operationresults","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"resourceGroups","locations":["Central
@@ -622,48 +624,48 @@ interactions:
         East","UK South","UK West","Korea Central","Korea South","France Central","South
         Africa North","UAE North","Australia Central","Switzerland North","Germany
         West Central","Norway East","East US 2 EUAP","Central US EUAP"],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsTags,
-        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
+        SupportsLocation"},{"resourceType":"subscriptions/resourcegroups/resources","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/locations","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-06-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagnames","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"subscriptions/tagNames/tagValues","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"deployments/operations","locations":[],"apiVersions":["2020-06-01","2019-09-01","2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"None"},{"resourceType":"links","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2016-06-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2018-05-01"}],"capabilities":"SupportsExtension"},{"resourceType":"operations","locations":[],"apiVersions":["2015-01-01"],"apiProfiles":[{"profileVersion":"2018-06-01-profile","apiVersion":"2015-01-01"}],"capabilities":"None"},{"resourceType":"bulkDelete","locations":[],"apiVersions":["2019-05-01","2019-04-01","2019-03-01","2018-11-01","2018-09-01","2018-08-01","2018-07-01","2018-05-01","2018-02-01","2018-01-01","2017-08-01","2017-06-01","2017-05-10","2017-05-01","2017-03-01","2016-09-01","2016-07-01","2016-06-01","2016-02-01","2015-11-01","2015-01-01","2014-04-01-preview"],"capabilities":"None"},{"resourceType":"deploymentScripts","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"SupportsTags,
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"deploymentScripts/logs","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"None"},{"resourceType":"locations/deploymentScriptOperationResults","locations":["East
         Asia","Southeast Asia","Australia East","Brazil South","Canada Central","East
         US 2","East US","Central US","North Central US","UK South","Central India","South
         India","Japan East","Korea Central","North Europe","West Central US","West
         Europe","West US 2","West US","South Central US","Canada East","Central US
-        EUAP","East US 2 EUAP"],"apiVersions":["2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
+        EUAP","East US 2 EUAP"],"apiVersions":["2020-10-01","2019-10-01-preview"],"capabilities":"None"},{"resourceType":"templateSpecs","locations":["East
         Asia","Southeast Asia","Australia East","Australia Central","Australia Central
         2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
-        North","Central US EUAP","Germany West Central","East US 2","East US","Central
-        US","North Central US","East US 2 EUAP","France Central","UK South","UK West","Central
-        India","West India","South India","Japan East","Japan West","Korea Central","Korea
-        South","North Europe","Norway East","UAE North","West Central US","West Europe","West
-        US 2","West US","South Central US","South Africa North"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        North","Germany West Central","East US 2","East US","Central US","North Central
+        US","France Central","UK South","UK West","Central India","West India","South
+        India","Japan East","Japan West","Korea Central","Korea South","North Europe","Norway
+        East","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US","South Africa North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"templateSpecs/versions","locations":["East
         Asia","Southeast Asia","Australia East","Australia Central","Australia Central
         2","Australia Southeast","Brazil South","Canada Central","Canada East","Switzerland
-        North","Central US EUAP","Germany West Central","East US 2","East US","Central
-        US","North Central US","East US 2 EUAP","France Central","UK South","UK West","Central
-        India","West India","South India","Japan East","Japan West","Korea Central","Korea
-        South","North Europe","Norway East","UAE North","West Central US","West Europe","West
-        US 2","West US","South Central US","South Africa North"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        North","Germany West Central","East US 2","East US","Central US","North Central
+        US","France Central","UK South","UK West","Central India","West India","South
+        India","Japan East","Japan West","Korea Central","Korea South","North Europe","Norway
+        East","UAE North","West Central US","West Europe","West US 2","West US","South
+        Central US","South Africa North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-06-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationFree"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '15916'
+      - '16332'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:51:13 GMT
+      - Thu, 17 Dec 2020 19:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -691,20 +693,20 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment_what_if_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-deploy-what-if-sub-deploy000002/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-10-12T14:50:37.8921207Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-10-12T14:50:37.8921207Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T19:32:54.0096447Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T19:32:54.0096447Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"denyLocation\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"northeurope\"\r\n
         \       }\r\n      },\r\n      \"variables\": {\r\n        \"policyDefinitionName\":
@@ -726,11 +728,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1871'
+      - '1886'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:51:14 GMT
+      - Thu, 17 Dec 2020 19:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -768,12 +770,12 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/whatIf?api-version=2020-10-01
   response:
     body:
       string: ''
@@ -783,11 +785,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 12 Oct 2020 14:51:15 GMT
+      - Thu, 17 Dec 2020 19:33:31 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtRUYzMTNERTE6MkQyMTI0OjJENDk2MToyRDlENzg6MkQ5NDU2NDU5RTY4M0MiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtM0RFRDJCM0U6MkRFNDE1OjJENDBBRjoyREEzMEQ6MkREODFFRjEzMEJGOTgiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
       pragma:
       - no-cache
       strict-transport-security:
@@ -813,13 +815,13 @@ interactions:
       ParameterSetName:
       - --location --template-spec --parameters --no-pretty-print
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.13.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtRUYzMTNERTE6MkQyMTI0OjJENDk2MToyRDlENzg6MkQ5NDU2NDU5RTY4M0MiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IkRlcGxveW1lbnRXaGF0SWZKb2ItLTEtM0RFRDJCM0U6MkRFNDE1OjJENDBBRjoyREEzMEQ6MkREODFFRjEzMEJGOTgiLCJqb2JMb2NhdGlvbiI6Indlc3R1cyJ9?api-version=2020-10-01
   response:
     body:
-      string: '{"status":"Succeeded","properties":{"correlationId":"ef313de1-2124-4961-9d78-9456459e683c","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
+      string: '{"status":"Succeeded","properties":{"correlationId":"3ded2b3e-e415-40af-a30d-d81ef130bf98","changes":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","changeType":"Modify","before":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"northeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"after":{"apiVersion":"2018-05-01","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy-for-what-if-test","name":"policy-for-what-if-test","properties":{"mode":"Indexed","policyRule":{"if":{"equals":"westeurope","field":"location"},"then":{"effect":"deny"}},"policyType":"Custom"},"type":"Microsoft.Authorization/policyDefinitions"},"delta":[{"path":"properties.policyRule.if.equals","propertyChangeType":"Modify","before":"northeurope","after":"westeurope"}]}]}}'
     headers:
       cache-control:
       - no-cache
@@ -828,7 +830,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 12 Oct 2020 14:51:30 GMT
+      - Thu, 17 Dec 2020 19:33:47 GMT
       expires:
       - '-1'
       pragma:
