@@ -482,6 +482,11 @@ helps['ams live-event start'] = """
     short-summary: Start a live event.
 """
 
+helps['ams live-event standby'] = """
+    type: command
+    short-summary: Allocate a live event to be started later.
+"""
+
 helps['ams live-event show'] = """
     type: command
     short-summary: Show the details of a live event.

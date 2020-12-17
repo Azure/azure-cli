@@ -17,10 +17,10 @@ from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedP
 
 
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
-                     insights_to_extract=None, audio_language=None, on_error=None,
+                     insights_to_extract=None, video_analysis_mode=None, audio_language=None, audio_analysis_mode=None, on_error=None,
                      relative_priority=None, description=None, resolution=None):
 
-    outputs = [build_transform_output(preset, insights_to_extract, audio_language,
+    outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode,
                                       on_error, relative_priority, resolution)]
 
     return client.create_or_update(resource_group_name, account_name, transform_name,
@@ -28,7 +28,7 @@ def create_transform(client, account_name, resource_group_name, transform_name, 
 
 
 def add_transform_output(client, account_name, resource_group_name, transform_name, preset,
-                         insights_to_extract=None, audio_language=None, on_error=None,
+                         insights_to_extract=None, video_analysis_mode=None, audio_language=None, audio_analysis_mode=None, on_error=None,
                          relative_priority=None, resolution=None):
 
     transform = client.get(resource_group_name, account_name, transform_name)
@@ -36,13 +36,13 @@ def add_transform_output(client, account_name, resource_group_name, transform_na
     if not transform:
         show_resource_not_found_message(resource_group_name, account_name, 'transforms', transform_name)
 
-    transform.outputs.append(build_transform_output(preset, insights_to_extract, audio_language,
+    transform.outputs.append(build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode,
                                                     on_error, relative_priority, resolution))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
 
 
-def build_transform_output(preset, insights_to_extract, audio_language, on_error,
+def build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode, on_error,
                            relative_priority, resolution):
 
     validate_arguments(preset, insights_to_extract, audio_language, resolution)
@@ -51,8 +51,10 @@ def build_transform_output(preset, insights_to_extract, audio_language, on_error
     if preset == 'VideoAnalyzer':
         transform_output.preset.audio_language = audio_language
         transform_output.preset.insights_to_extract = insights_to_extract
+        transform_output.preset.mode = video_analysis_mode
     elif preset == 'AudioAnalyzer':
         transform_output.preset.audio_language = audio_language
+        transform_output.preset.mode = audio_analysis_mode
     elif preset == 'FaceDetector':
         transform_output.preset.resolution = resolution
 

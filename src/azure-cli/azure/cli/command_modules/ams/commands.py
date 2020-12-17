@@ -201,6 +201,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('start', 'start',
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
+        g.custom_command('standby', 'standby',
+                         custom_command_type=get_custom_sdk('live_event', get_live_events_client),
+                         supports_no_wait=True)
         g.custom_command('stop', 'stop',
                          custom_command_type=get_custom_sdk('live_event', get_live_events_client),
                          supports_no_wait=True)
