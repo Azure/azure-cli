@@ -47,7 +47,8 @@ jobs:
         displayName: 'Run Wheel Build Script'
         inputs:
           targetType: 'filePath'
-          filePath: scripts/release/pypi/build.sh $(System.PullRequest.TargetBranch)
+          filePath: scripts/release/pypi/build.sh
+          arguments: $(System.PullRequest.TargetBranch)
 
       - task: PublishPipelineArtifact@0
         displayName: 'Publish Artifact: pypi'
