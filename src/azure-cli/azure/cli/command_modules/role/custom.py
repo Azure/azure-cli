@@ -40,7 +40,7 @@ CREDENTIAL_WARNING_MESSAGE = (
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
 ROLE_ASSIGNMENT_CREATE_WARNING = (
-    "In a future release, this command will NOT create any role assignment by default. (--skip-assignment will be the "
+    "In a future release, this command will NOT create a role assignment by default. (--skip-assignment will be the "
     "default behavior.) If needed, always use --role to explicitly create a role assignment."
 )
 
