@@ -1497,7 +1497,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql db audit-policy show -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
@@ -1699,7 +1699,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
@@ -1765,6 +1765,187 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+
+class SqlServerMSSupportScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @SqlServerPreparer(location='westeurope')
+    @StorageAccountPreparer(location='westus')
+    @StorageAccountPreparer(parameter_name='storage_account_2',
+                            resource_group_parameter_name='resource_group_2')
+    def test_sql_server_ms_support_mgmt(self, resource_group, resource_group_2,
+                                        resource_group_location, server,
+                                        storage_account, storage_account_2):
+
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
+
+        # get MS support audit policy
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('blobStorageTargetState', state_disabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # update MS support audit policy - enable
+        self.cmd('sql server ms-support audit-policy update -g {} -n {}'
+                 ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
+                 .format(resource_group, server, state_enabled, state_enabled, key, storage_endpoint),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageEndpoint', storage_endpoint)])
+
+        # get MS support audit policy
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # update MS support audit policy - specify storage account and resource group. use secondary key
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
+                 .format(resource_group, server, state_enabled, storage_account_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2)])
+
+        # update MS support audit policy - disable
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # create log analytics workspace
+        log_analytics_workspace_name = "clilaworkspacems03"
+
+        log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
+                                              .format(resource_group, log_analytics_workspace_name),
+                                              checks=[
+                                                  JMESPathCheck('resourceGroup', resource_group),
+                                                  JMESPathCheck('name', log_analytics_workspace_name),
+                                                  JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+
+        # update MS support audit policy - enable log analytics target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
+                 ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
+                 .format(resource_group, server, state_enabled, state_enabled, log_analytics_workspace_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_enabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update MS support audit policy - disable log analytics target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --log-analytics-target-state {}'
+                 .format(resource_group, server, state_enabled, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # create event hub namespace
+        eventhub_namespace = 'cliehnamespacems01'
+
+        self.cmd('eventhubs namespace create -g {} -n {}'
+                 .format(resource_group, eventhub_namespace),
+                 checks=[
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        # create event hub
+        eventhub_name = 'cliehms01'
+
+        self.cmd('eventhubs eventhub create -g {} -n {} --namespace-name {}'
+                 .format(resource_group, eventhub_name, eventhub_namespace),
+                 checks=[
+                     JMESPathCheck('status', 'Active')])
+
+        # create event hub autorization rule
+        eventhub_auth_rule = 'cliehauthrulems01'
+
+        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+
+        # update MS support audit policy - enable event hub target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                 ' --event-hub-authorization-rule-id {} --event-hub {}'
+                 .format(resource_group, server, state_enabled, state_enabled,
+                         eventhub_auth_rule_id, eventhub_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_enabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update MS support audit policy - disable event hub target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                 .format(resource_group, server, state_enabled, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
