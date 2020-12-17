@@ -53,7 +53,7 @@ DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=10.0.0',
-    'azure-cli-core=={}.*'.format("2.16.0"),
+    'azure-cli-core=={}.*'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',

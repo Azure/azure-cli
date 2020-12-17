@@ -38,7 +38,7 @@ function title {
 ##############################################
 # Update version strings
 title 'Determine version'
-# . $script_dir/version.sh $1
+. $script_dir/version.sh post1
 # echo -n $version > ./artifacts/version
 
 ##############################################
