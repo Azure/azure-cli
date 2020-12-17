@@ -12,7 +12,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         super(TestMonitorPrivateLinkScope, self).__init__(method_name)
         self.cmd('extension add -n application-insights')
 
-    @record_only()  # record_only as the log-analytics workspace creation is buggy
+    @record_only()  # record_only as the private-link-scope scoped-resource cannot find the components of application insights
     @ResourceGroupPreparer(location='westus2')
     def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -52,6 +52,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             'workspace_id': workspace_id
         })
 
+        # this command failed as service cannot find component of application insights
         self.cmd('monitor private-link-scope scoped-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}', checks=[
             self.check('name', '{assigned_app}')
         ])
