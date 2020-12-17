@@ -1056,16 +1056,18 @@ def _validate_admin_password(password, os_type):
 def validate_ssh_key(namespace, cmd=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if namespace.ssh_key_name:
+        # --ssh-key-name
         if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
+            # name must exist
             try:
                 ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
             except HttpResponseError:
-                raise ValidationError('asdf')
-
-            ssh_key_value = ssh_key_resource.public_key
-            print(ssh_key_value)
-            exit(1)
-    if namespace.ssh_key_value:
+                raise ValidationError('SSH key {} does not exist!'.format(namespace.ssh_key_name))
+            namespace.ssh_key_value = [ssh_key_resource.public_key]
+            logger.info('Get a key from --ssh-key-name successfully')
+        elif namespace.ssh_key_value:
+            pass
+    elif namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
             logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
             namespace.generate_ssh_keys = False

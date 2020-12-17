@@ -19,14 +19,12 @@ helps['sshkey'] = """
 
 helps['sshkey list'] = """
     type: command
-    short-summary: "Lists all of the SSH public keys in the specified resource group. Use the nextLink property in the \
-response to get the next page of SSH public keys. And Lists all of the SSH public keys in the subscription. Use the \
-nextLink property in the response to get the next page of SSH public keys."
+    short-summary: "List all of the SSH public keys."
 """
 
 helps['sshkey show'] = """
     type: command
-    short-summary: "Retrieves information about an SSH public key."
+    short-summary: "Retrieve information about an SSH public key."
     examples:
       - name: Get an ssh public key.
         text: |-
@@ -35,7 +33,7 @@ helps['sshkey show'] = """
 
 helps['sshkey create'] = """
     type: command
-    short-summary: "Creates a new SSH public key resource."
+    short-summary: "Create a new SSH public key resource."
     examples:
       - name: Create a new SSH public key resource.
         text: |-
@@ -45,7 +43,7 @@ helps['sshkey create'] = """
 
 helps['sshkey update'] = """
     type: command
-    short-summary: "Updates a new SSH public key resource."
+    short-summary: "Update an SSH public key resource."
 """
 
 helps['sshkey delete'] = """
@@ -55,7 +53,7 @@ helps['sshkey delete'] = """
 
 helps['sshkey generate'] = """
     type: command
-    short-summary: "Generates and returns a public/private key pair and populates the SSH public key resource with the \
+    short-summary: "Generate and return a public/private key pair and populates the SSH public key resource with the \
 public key. The length of the key will be 3072 bits. This operation can only be performed once per SSH public key \
 resource."
     examples:
