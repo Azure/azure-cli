@@ -172,7 +172,7 @@ class CacheObject:
 
         doc_string = doc_string.replace('\r', '').replace('\n', ' ')
         doc_string = re.sub(' +', ' ', doc_string)
-        model_name_regex = re.compile(r':return: (.*that returns )?(?P<model>[a-zA-Z]*)')
+        model_name_regex = re.compile(r':return: (?:.*?that returns (?:either )?)?(?P<model>[a-zA-Z]*)')
         model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
             self._model_name = model_name_regex.search(doc_string).group('model')
