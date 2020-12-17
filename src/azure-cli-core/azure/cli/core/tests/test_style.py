@@ -3,11 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import sys
 import unittest
 from unittest import mock
 
-from azure.cli.core.style import Style, format_styled_text, print_styled_text
+from azure.cli.core.style import Style, format_styled_text, print_styled_text, _is_modern_terminal
 
 
 class TestStyle(unittest.TestCase):
@@ -107,6 +108,17 @@ class TestStyle(unittest.TestCase):
         # Multiple args
         print_styled_text("test text 1", "test text 2")
         mock_print.assert_called_with("test text 1", "test text 2", file=sys.stderr)
+
+
+class TestUtils(unittest.TestCase):
+
+    def test_is_modern_terminal(self):
+        with mock.patch.dict("os.environ", clear=True):
+            self.assertEqual(_is_modern_terminal(), False)
+        with mock.patch.dict("os.environ", WT_SESSION='c25cb945-246a-49e5-b37a-1e4b6671b916'):
+            self.assertEqual(_is_modern_terminal(), True)
+        with mock.patch.dict("os.environ", TERM_PROGRAM='vscode'):
+            self.assertEqual(_is_modern_terminal(), True)
 
 
 if __name__ == '__main__':
