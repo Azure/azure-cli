@@ -127,8 +127,8 @@ def _prepare_client_kwargs_track2(cli_ctx):
     client_kwargs['logging_enable'] = True
 
     # Disable ARMHttpLoggingPolicy which logs only allowed headers
-    from azure.core.pipeline.policies import SansIOHTTPPolicy
-    client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+    # from azure.core.pipeline.policies import SansIOHTTPPolicy
+    # client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
 
     # Prepare User-Agent header, used by UserAgentPolicy
     client_kwargs['user_agent'] = get_az_user_agent()

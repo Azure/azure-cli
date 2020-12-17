@@ -15,7 +15,7 @@ Logging for Azure CLI
 
 - Level: Based on the verbosity option given by users, the logging levels for root and CLI parent loggers are:
 
-               CLI Parent                  Root
+              'azure' parent               Root
             Console     File        Console     File
 omitted     Warning     Debug       Critical    Debug
 --verbose   Info        Debug       Critical    Debug
@@ -30,7 +30,7 @@ import datetime
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
 from knack.events import EVENT_CLI_POST_EXECUTE
-from knack.log import CLILogging, get_logger
+from knack.log import CLILogging
 from knack.util import ensure_dir
 
 
@@ -42,12 +42,21 @@ class AzCliLogging(CLILogging):
     _COMMAND_METADATA_LOGGER = 'az_command_data_logger'
 
     def __init__(self, name, cli_ctx=None):
-        super(AzCliLogging, self).__init__(name, cli_ctx)
+        super(AzCliLogging, self).__init__(name, cli_ctx, cli_logger_name="azure")
         self.command_log_dir = os.path.join(cli_ctx.config.config_dir, 'commands')
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
         self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
+
+        import knack.log
+        knack.log.get_logger = get_logger
+
+    def configure(self, args):
+        super(AzCliLogging, self).configure(args)
+        from knack.log import CliLogLevel
+        if self.log_level == CliLogLevel.DEBUG:
+            logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
 
     def get_command_log_dir(self):
         return self.command_log_dir
@@ -204,3 +213,20 @@ class CommandLoggerContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.hdlr:
             self.logger.removeHandler(self.hdlr)
+
+
+def get_logger(module_name=None):
+    """Override knack.log.get_logger to prefix 'azext_' with 'azure.cli.', so that logs
+    printed by 'azext_*' modules falls into the 'azure' logger.
+
+    For example:
+      azext_account.generated.custom => azure.cli.azext_account.generated.custom
+    """
+    if module_name:
+        logger_name = module_name
+        if logger_name.startswith('azext_'):
+            logger_name = "azure.cli." + module_name
+    else:
+        # Any get_logger invocation without a logger name goes to 'azure.cli'
+        logger_name = 'azure.cli'
+    return logging.getLogger(logger_name)
