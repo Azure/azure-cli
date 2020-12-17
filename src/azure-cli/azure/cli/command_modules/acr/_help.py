@@ -528,10 +528,11 @@ examples:
   - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
         az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
-  - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and all gateway actions for `connectedRegistry`.
+  - name: Create a scope map that allows all repository actions for `test`, and all gateway actions for `connectedRegistry`.
     text: >
-        az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read
-            --description "Sample scope map." --gateway connectedRegistry config/read config/write message/read message/write
+        az acr scope-map create -n MyScopeMap -r MyRegistry --description "Sample scope map."
+          --repository test content/delete content/read content/write metadata/read metadata/write
+          --gateway connectedRegistry config/read config/write message/read message/write
 
 """
 
