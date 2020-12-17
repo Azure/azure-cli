@@ -58,6 +58,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
+    MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', 'DataBoxEdgeManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -76,7 +77,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_CONSUMPTION = ('azure.mgmt.consumption', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
-    MGMT_DATABOXEDGE = ('azure.mgmt.databoxedge', None)
     MGMT_DEPLOYMENTMANAGER = ('azure.mgmt.deploymentmanager', None)
     MGMT_DATALAKE_ANALYTICS = ('azure.mgmt.datalake.analytics', None)
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)

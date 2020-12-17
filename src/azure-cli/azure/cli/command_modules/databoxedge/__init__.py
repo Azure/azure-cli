@@ -16,12 +16,11 @@ class DataBoxEdgeManagementClientCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        from .generated._client_factory import cf_databoxedge_cl
+        from azure.cli.core.profiles import ResourceType
         databoxedge_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.databoxedge.custom#{}',
-            client_factory=cf_databoxedge_cl)
+            operations_tmpl='azure.cli.command_modules.databoxedge.custom#{}')
         parent = super(DataBoxEdgeManagementClientCommandsLoader, self)
-        parent.__init__(cli_ctx=cli_ctx, custom_command_type=databoxedge_custom)
+        parent.__init__(cli_ctx=cli_ctx, custom_command_type=databoxedge_custom, resource_type=ResourceType.MGMT_DATABOXEDGE)
 
     def load_command_table(self, args):
         from .generated.commands import load_command_table
