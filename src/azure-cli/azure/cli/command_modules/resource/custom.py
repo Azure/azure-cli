@@ -1856,8 +1856,6 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         version_tags = tags
         if tags is None:  # Do not remove tags if not explicitely empty.
             version_tags = getattr(existing_template, 'tags')
-        else:
-            version_tags = tags
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:

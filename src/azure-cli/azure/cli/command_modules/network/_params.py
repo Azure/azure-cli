@@ -812,10 +812,10 @@ def load_arguments(self, _):
     with self.argument_context('network private-endpoint') as c:
         c.argument('private_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name') + ' and do not specify the --vnet-name'
         c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
-        c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
+        c.argument('private_connection_resource_id', help='The resource id of the private endpoint to connect to')
         c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'],
                    help='The ID of the group obtained from the remote resource that this private endpoint should connect to. '
                         'You can use "az network private-link-resource list" to obtain the supported group ids. You must provide this except for PrivateLinkService')

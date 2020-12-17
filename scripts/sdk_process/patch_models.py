@@ -36,6 +36,7 @@ from msrest.exceptions import HttpOperationError
 """
 
 track2_header = copyright_header + b"""import datetime
+import msrest
 import msrest.serialization
 from typing import Dict, List, Optional, Union
 from msrest.exceptions import HttpOperationError
@@ -232,7 +233,8 @@ if __name__ == "__main__":
 
     track2_packages = [
         'azure.mgmt.keyvault',
-        'azure.mgmt.storage'
+        'azure.mgmt.storage',
+        'azure.mgmt.compute'
     ]
     prefix = sys.argv[1] if len(sys.argv) >= 2 else "azure.mgmt"
     for autorest_package in find_autorest_generated_folder(prefix):
