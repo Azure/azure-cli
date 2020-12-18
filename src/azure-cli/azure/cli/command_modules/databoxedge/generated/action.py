@@ -36,6 +36,6 @@ class AddSku(argparse.Action):
             elif kl == 'tier':
                 d['tier'] = v[0]
             else:
-                raise CLIError('Unsupported Key {} is provided for parameter sku. All possible keys are: name, tier'.
-                format(k))
+                raise CLIError('Unsupported Key {} is provided for parameter sku. All possible keys are: name, tier'
+                               .format(k))
         return d

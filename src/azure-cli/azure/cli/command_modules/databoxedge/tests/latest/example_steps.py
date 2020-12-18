@@ -413,4 +413,3 @@ def step_list_sku(test, rg, checks=None):
 @try_manual
 def step_list_sku_min(test, rg, checks=None):
     return step_list_sku(test, rg, checks)
-
