@@ -861,14 +861,16 @@ class TemplateSpecsTest(ScenarioTest):
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
         self.cmd('ts show --template-spec {template_spec_version_id}')
         self.cmd('ts show --template-spec {template_spec_id}')
 
         self.cmd('ts delete --template-spec {template_spec_version_id} --yes')
         self.cmd('ts list -g {rg}',
-                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
+                 checks=[
+                     self.check("length([?id=='{template_spec_id}'])", 1),
+                     self.check("length([?id=='{template_spec_version_id}'])", 0)])
 
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
         self.cmd('ts list -g {rg}',
