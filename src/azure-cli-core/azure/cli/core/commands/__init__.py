@@ -172,6 +172,11 @@ class CacheObject:
 
         doc_string = doc_string.replace('\r', '').replace('\n', ' ')
         doc_string = re.sub(' +', ' ', doc_string)
+
+        # pylint: disable=line-too-long
+        # In track1, the doc_string for return type is like ':return: An instance of LROPoller that returns ConnectionSharedKey or ClientRawResponse<ConnectionSharedKey>'
+        # In track2, the doc_string for return type is like ':return: An instance of LROPoller that returns either ConnectionSharedKey or the result of cls(response)'
+        # Add '(?:either )?' to match 'either' zero or one times to support track2.
         model_name_regex = re.compile(r':return: (?:.*?that returns (?:either )?)?(?P<model>[a-zA-Z]*)')
         model_path_regex = re.compile(r':rtype:.*(?P<path>azure.mgmt[a-zA-Z0-9_\.]*)')
         try:
