@@ -18,7 +18,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_condition_create000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_condition_create000001?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001","name":"cli_test_metric_alert_condition_create000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-10T07:23:20Z"},"properties":{"provisioningState":"Succeeded"}}'
@@ -123,7 +123,7 @@ interactions:
       via:
       - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
-      - HIT, HIT
+      - MISS, HIT
       x-cache-hits:
       - 1, 1
       x-content-type-options:
@@ -247,7 +247,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Resources/deployments/vm_deploy_QLsim8bZkBL4xHZp7DGAgQhkTWlZpWMH","name":"vm_deploy_QLsim8bZkBL4xHZp7DGAgQhkTWlZpWMH","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1551405893203595999","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-10T07:23:30.0475407Z","duration":"PT2.5563652S","correlationId":"cc9d58f6-4a70-4430-8d33-a2285059a1c6","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000002VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000002NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000002NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000002PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000002PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000002VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000002VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_condition_create000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000002","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000002"}]}}'
@@ -257,7 +257,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2925'
+      - '838'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -270,6 +270,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - gateway
       x-ms-ratelimit-remaining-subscription-writes:
       - '1196'
     status:

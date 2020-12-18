@@ -18,7 +18,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001","name":"cli_test_metric_alert_v2000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-10T07:29:42Z"},"properties":{"provisioningState":"Succeeded"}}'
@@ -123,9 +123,9 @@ interactions:
       via:
       - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
-      - HIT, HIT
+      - MISS, HIT
       x-cache-hits:
-      - 1, 1
+      - 0, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
@@ -247,7 +247,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_metric_alert_v2000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Resources/deployments/vm_deploy_pQMj3EJiuNy1VveV1k0wrzBEikYfNt4u","name":"vm_deploy_pQMj3EJiuNy1VveV1k0wrzBEikYfNt4u","type":"Microsoft.Resources/deployments","properties":{"templateHash":"8661280777014678114","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-10T07:29:53.713021Z","duration":"PT2.4665928S","correlationId":"4d359ba6-2081-4b9e-aaea-798d12eb6d48","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Network/virtualNetworks/clitest-vm000003VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"clitest-vm000003VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Network/networkSecurityGroups/clitest-vm000003NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clitest-vm000003NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Network/publicIPAddresses/clitest-vm000003PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clitest-vm000003PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Network/networkInterfaces/clitest-vm000003VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clitest-vm000003VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clitest-vm000003"}]}}'
@@ -270,6 +270,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - gateway
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:

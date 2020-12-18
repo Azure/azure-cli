@@ -1,61 +1,5 @@
 interactions:
 - request:
-    body: '{"name": "iot-hub-for-cert-test000003"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - iot hub create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '60'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkNameAvailability?api-version=2020-03-01
-  response:
-    body:
-      string: '{"nameAvailable":true,"reason":"Invalid","message":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '56'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 11:32:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -69,16 +13,15 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000002?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-14T11:32:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002","name":"clitest.rg000002","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-18T11:32:40Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -87,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:32:50 GMT
+      - Fri, 18 Dec 2020 11:32:41 GMT
       expires:
       - '-1'
       pragma:
@@ -125,19 +68,643 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.Devices''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.Devices","message":"The
+        subscription is not registered to use namespace ''Microsoft.Devices''. See
+        https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:32:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:32:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:32:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices","namespace":"Microsoft.Devices","authorizations":[{"applicationId":"0cd79364-7a90-4354-9984-6e36c841418d","roleDefinitionId":"C121DF10-FE58-4BC4-97F9-8296879F7BBB"},{"applicationId":"29f411f1-b2cf-4043-8ac8-2185d7316811"},{"applicationId":"89d10474-74af-4874-99a7-c23c2f643083","roleDefinitionId":"7df22794-26e3-4f94-9d50-a4f0f6e1cb41"}],"resourceTypes":[{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"checkProvisioningServiceNameAvailability","locations":[],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"]},{"resourceType":"usages","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-09-01","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01-preview","2018-04-01","2018-01-22-preview","2018-01-22","2017-11-15","2017-09-25-preview","2017-08-21-preview","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"]},{"resourceType":"IotHubs","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-07-10-preview","2020-06-15","2020-04-01","2020-03-01","2020-01-01","2019-11-04","2019-07-01-preview","2019-03-22-preview","2019-03-22","2018-12-01-preview","2018-04-01","2018-01-22","2017-07-01","2017-01-19","2016-02-03","2015-08-15-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/eventGridFilters","locations":["West
+        US","East US","West US 2","West Central US","East US 2","Central US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Australia
+        East","Australia Southeast","UK South","UK West","South India","Central India","Canada
+        Central","Canada East","Brazil South","South Central US","Korea South","Korea
+        Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2018-07-31","2018-01-15-preview"]},{"resourceType":"ProvisioningServices","locations":["East
+        US","West US","West Europe","North Europe","Southeast Asia","East Asia","Australia
+        East","Australia Southeast","Japan West","Japan East","UK West","UK South","East
+        US 2","Central US","West US 2","West Central US","North Central US","South
+        Central US","Australia Central","Australia Central 2","France Central","France
+        South","Canada East","Canada Central","East US 2 EUAP","Central US EUAP"],"apiVersions":["2020-03-01","2020-01-01","2018-01-22","2017-11-15","2017-08-21-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"IotHubs/securitySettings","locations":["West
+        US","North Europe","East Asia","East US","West Europe","Southeast Asia","Japan
+        East","Japan West","Australia East","Australia Southeast","West US 2","West
+        Central US","East US 2","Central US","UK South","UK West","South India","Central
+        India","Canada Central","Canada East","Brazil South","South Central US","Korea
+        South","Korea Central","France Central","North Central US","Australia Central","Australia
+        Central 2","Germany North","Germany West Central","South Africa North","South
+        Africa West","UAE Central","UAE North","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-09-01"]},{"resourceType":"ElasticPools","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-12-01-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"ElasticPools/IotHubTenants","locations":["Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-07-01-preview","2019-03-22-preview","2018-01-22-preview","2017-09-25-preview","2017-07-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 11:33:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"eventHubEndpoints": {"events": {"retentionTimeInDays":
+      1, "partitionCount": 4}}, "storageEndpoints": {"$default": {"sasTtlAsIso8601":
+      "PT1H", "connectionString": "", "containerName": ""}}, "messagingEndpoints":
+      {"fileNotifications": {"ttlAsIso8601": "PT1H", "maxDeliveryCount": 10}}, "enableFileUploadNotifications":
+      false, "cloudToDevice": {"maxDeliveryCount": 10, "defaultTtlAsIso8601": "PT1H",
+      "feedback": {"lockDurationAsIso8601": "PT5S", "ttlAsIso8601": "PT1H", "maxDeliveryCount":
+      10}}}, "sku": {"name": "S1", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - iot hub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '570'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --sku
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2020-03-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"a1bfa635-f2bf-42f1-86b5-848c674fc321","resourcegroup":"clitest.rg000002","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNjdjZTk4YjgtMjYwNC00ODUxLWE0ZDUtZDQ2MDg4NGMwNDVk?api-version=2020-03-01&operationSource=os_ih&asyncinfo
       cache-control:
       - no-cache
       content-length:
@@ -145,7 +712,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:32:56 GMT
+      - Fri, 18 Dec 2020 11:33:56 GMT
       expires:
       - '-1'
       pragma:
@@ -157,7 +724,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '4999'
+      - '4998'
     status:
       code: 201
       message: Created
@@ -175,11 +742,10 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNjdjZTk4YjgtMjYwNC00ODUxLWE0ZDUtZDQ2MDg4NGMwNDVk?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -191,7 +757,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:33:28 GMT
+      - Fri, 18 Dec 2020 11:34:28 GMT
       expires:
       - '-1'
       pragma:
@@ -223,11 +789,10 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNjdjZTk4YjgtMjYwNC00ODUxLWE0ZDUtZDQ2MDg4NGMwNDVk?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -239,7 +804,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:33:58 GMT
+      - Fri, 18 Dec 2020 11:34:58 GMT
       expires:
       - '-1'
       pragma:
@@ -271,11 +836,10 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNjdjZTk4YjgtMjYwNC00ODUxLWE0ZDUtZDQ2MDg4NGMwNDVk?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -287,7 +851,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:34:29 GMT
+      - Fri, 18 Dec 2020 11:35:27 GMT
       expires:
       - '-1'
       pragma:
@@ -319,11 +883,10 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNTNmNTA2ZjAtNTllZS00ZGIyLTlmMjYtZmQ4NDg5ZjU1ZmI2?api-version=2020-03-01&operationSource=os_ih&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/operationResults/b3NfaWhfNjdjZTk4YjgtMjYwNC00ODUxLWE0ZDUtZDQ2MDg4NGMwNDVk?api-version=2020-03-01&operationSource=os_ih&asyncinfo
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -335,7 +898,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:00 GMT
+      - Fri, 18 Dec 2020 11:35:57 GMT
       expires:
       - '-1'
       pragma:
@@ -367,24 +930,23 @@ interactions:
       ParameterSetName:
       - -n -g --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","resourcegroup":"clitest.rg000002","etag":"AAAAAFSFzEE=","properties":{"locations":[{"location":"West
-        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot-hub-for-cert-test000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot-hub-for-cert-test73ly","endpoint":"sb://iothub-ns-iot-hub-fo-3829634-daf086971e.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003","name":"iot-hub-for-cert-test000003","type":"Microsoft.Devices/IotHubs","location":"westus","tags":{},"subscriptionid":"a1bfa635-f2bf-42f1-86b5-848c674fc321","resourcegroup":"clitest.rg000002","etag":"AAAABo2nI68=","properties":{"locations":[{"location":"West
+        US","role":"primary"},{"location":"East US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"iot-hub-for-cert-test000003.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"iot-hub-for-cert-testh7ru","endpoint":"sb://iothub-ns-iot-hub-fo-6690249-7d0643ca32.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT1M","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None"},"sku":{"name":"S1","tier":"Standard","capacity":1},"identity":{"type":"None"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1746'
+      - '1773'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:01 GMT
+      - Fri, 18 Dec 2020 11:35:58 GMT
       expires:
       - '-1'
       pragma:
@@ -416,9 +978,8 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n -p
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -434,7 +995,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:03 GMT
+      - Fri, 18 Dec 2020 11:35:59 GMT
       expires:
       - '-1'
       pragma:
@@ -453,7 +1014,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIFaphRoc8+ZowDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzI0N1oXDTIw\r\nMDcxNzExMzI0N1owIzEhMB8GA1UEAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5m\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA6PBd9yWNMNsNamiWE7eyF\r\nz2H+Io4TaCj5dRwZD2HOSUVnffh28ejAkflOZXiSQvv39pCHSusdlk181sgoi95d\r\nREB8JNf7oTRCHi1N/k1tVloWn3NgcdCApvJNflqXeyeNfujCX3697YhHNqDzeViJ\r\nlWlLaGAOXnrrxf6ONGcnb1XR6mouYNFhHZcDpGGLx9EJ7XIQxFVJ7gKuVl9gt7P6\r\n33lV5SLp6g2cyyKaPUbpRTos8NnSGatkYO/F//RYTxsuTPi6VcoV/Uesg/0/0qot\r\nxncf8tJuK+CryUAN727vDktoFADDEY4F6rpwHL/Q7hFAKUct8r4rT9GP+HC8aqD9\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAg2FfnuwQEmPWWnENFuEqN6J2+H94drmZOOb9ZdZat\r\nITBniO/EIcynE+vl1Yk6Y6RMZd/aZLW8w8BGSurLvrHqI/WefaA9FDyAv1myVmZH\r\nxHAu7skeWro2xwUmQCMU+eSHWmildJ+SIxuiylUDUNZOMhelSUzy5T+TvQMJG1wh\r\n7GthGCgQT+kTi0TXDC9rF2boOwTViMCXHh/WxCyi7I7sYFYDQmBHefNiJ78uOkR1\r\nHJZeI31vlXlx6Bim1qzhuQJ1399aHpRfJSi3geb83Xqr/nKV+hRl1kCpaWKV5K3F\r\nSbVINcLn1Lop6+LELZdBhQtrrwa7X4oh/7096Wv5ram5\r\n-----END
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIOOgswhH2QkYwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRlbnRqZDVkd3VvZXU0c3RoMB4XDTIwMTIxNzExMzI0MFoXDTIw\r\nMTIyMTExMzI0MFowIzEhMB8GA1UEAwwYVEVTVENFUlRlbnRqZDVkd3VvZXU0c3Ro\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAspGbpv6EthmYqBaZPH62R\r\nfbsuu+oF70OVb6LHEhZ27g2xI93SzsUViId9YVmdqUPoIaRfcjGLsyB9Ht67FElP\r\n1U2+cqyK8P9z6+KlwW4ZlDBpdt6R/ybl1TWQiEuD2daBPKF8hQAsXki7U039HYvC\r\nAePRuj9vprv28s2Hm+ltJaSpDX20bY45IQQP4X0CPiASPXYHkuhMNkHOBjyfmRJf\r\n/McwAjUpBYUQXsG2a/aqb8fgNAC0v8pdmjgvISUOpIhUOnP8RY60W20IcfargsjK\r\nDItXipneWcLEc306guiEHd9nag3185iojZSQLoiJT++52NPw9wg6iXcg6c7thjK7\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAWwxwfFXCjVdtBm5TNznPCtz76HiMQEEbqYl1lFKER\r\nlthbJhsEXSVLnZ7NUb/RxZLkvyCHZOMM39ZovHaN8RPRRoxGoM4WWXaX+jUmjVSE\r\nEVSnNAsXllGjTLixNe5zl9jrkwgG/FeyQFDneNDKJSfFB7OSRVCuHruHY2cFyvrp\r\nD2hGrw2dN/AJCGFkMfdgJQk92TYVP8RkogUMTo+z4s/bXeNtIocHU0XoNHzrStEL\r\nV6NotIWaNzdNszRn4IHofJ+Go+jo2CbBlbnlsNPwFu1Z2K9/T5u3DJtlGD3BYtHT\r\njD/zf4VbGoTxD9RKTb05lxarZ+COfQ3jITWUsl3GEnQM\r\n-----END
       CERTIFICATE-----\r\n"}'
     headers:
       Accept:
@@ -471,29 +1032,26 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n -p
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
-        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
-        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":"-----BEGIN
-        CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIFaphRoc8+ZowDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzI0N1oXDTIw\r\nMDcxNzExMzI0N1owIzEhMB8GA1UEAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5m\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQA6PBd9yWNMNsNamiWE7eyF\r\nz2H+Io4TaCj5dRwZD2HOSUVnffh28ejAkflOZXiSQvv39pCHSusdlk181sgoi95d\r\nREB8JNf7oTRCHi1N/k1tVloWn3NgcdCApvJNflqXeyeNfujCX3697YhHNqDzeViJ\r\nlWlLaGAOXnrrxf6ONGcnb1XR6mouYNFhHZcDpGGLx9EJ7XIQxFVJ7gKuVl9gt7P6\r\n33lV5SLp6g2cyyKaPUbpRTos8NnSGatkYO/F//RYTxsuTPi6VcoV/Uesg/0/0qot\r\nxncf8tJuK+CryUAN727vDktoFADDEY4F6rpwHL/Q7hFAKUct8r4rT9GP+HC8aqD9\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAg2FfnuwQEmPWWnENFuEqN6J2+H94drmZOOb9ZdZat\r\nITBniO/EIcynE+vl1Yk6Y6RMZd/aZLW8w8BGSurLvrHqI/WefaA9FDyAv1myVmZH\r\nxHAu7skeWro2xwUmQCMU+eSHWmildJ+SIxuiylUDUNZOMhelSUzy5T+TvQMJG1wh\r\n7GthGCgQT+kTi0TXDC9rF2boOwTViMCXHh/WxCyi7I7sYFYDQmBHefNiJ78uOkR1\r\nHJZeI31vlXlx6Bim1qzhuQJ1399aHpRfJSi3geb83Xqr/nKV+hRl1kCpaWKV5K3F\r\nSbVINcLn1Lop6+LELZdBhQtrrwa7X4oh/7096Wv5ram5\r\n-----END
-        CERTIFICATE-----\r\n"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Mon, 21 Dec 2020
+        11:32:40 GMT","thumbprint":"D0EF7AD1E0BE97BABE7D0517DEB11747EEA06C56","isVerified":false,"created":"Fri,
+        18 Dec 2020 11:36:00 GMT","updated":"Fri, 18 Dec 2020 11:36:00 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAABo2nJUE="}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1891'
+      - '697'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:03 GMT
+      - Fri, 18 Dec 2020 11:35:59 GMT
       expires:
       - '-1'
       pragma:
@@ -509,7 +1067,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1134'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -527,18 +1085,17 @@ interactions:
       ParameterSetName:
       - --hub-name -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates?api-version=2020-03-01
   response:
     body:
-      string: '{"value":[{"properties":{"subject":"TESTCERT000001","expiry":"Fri,
-        17 Jul 2020 11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
-        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}]}'
+      string: '{"value":[{"properties":{"subject":"TESTCERT000001","expiry":"Mon,
+        21 Dec 2020 11:32:40 GMT","thumbprint":"D0EF7AD1E0BE97BABE7D0517DEB11747EEA06C56","isVerified":false,"created":"Fri,
+        18 Dec 2020 11:36:00 GMT","updated":"Fri, 18 Dec 2020 11:36:00 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAABo2nJUE="}]}'
     headers:
       cache-control:
       - no-cache
@@ -547,7 +1104,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:05 GMT
+      - Fri, 18 Dec 2020 11:36:00 GMT
       expires:
       - '-1'
       pragma:
@@ -579,18 +1136,17 @@ interactions:
       ParameterSetName:
       - --hub-name -g -n
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
-        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
-        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:04 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGTeM="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Mon, 21 Dec 2020
+        11:32:40 GMT","thumbprint":"D0EF7AD1E0BE97BABE7D0517DEB11747EEA06C56","isVerified":false,"created":"Fri,
+        18 Dec 2020 11:36:00 GMT","updated":"Fri, 18 Dec 2020 11:36:00 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAABo2nJUE="}'
     headers:
       cache-control:
       - no-cache
@@ -599,7 +1155,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:07 GMT
+      - Fri, 18 Dec 2020 11:36:01 GMT
       expires:
       - '-1'
       pragma:
@@ -631,31 +1187,30 @@ interactions:
       Content-Length:
       - '0'
       If-Match:
-      - AAAAAFSGTeM=
+      - AAAABo2nJUE=
       ParameterSetName:
       - --hub-name -g -n --etag
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/generateVerificationCode?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"verificationCode":"206ABC001B5676EE67FF5304E52411C1A7D59126AB093B06","subject":"TESTCERT000001","expiry":"Fri,
-        17 Jul 2020 11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":false,"created":"Tue,
-        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:09 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGT6k="}'
+      string: '{"properties":{"verificationCode":"D672E8435A79A509E945CBB761EC9E974F44777487789EDE","subject":"TESTCERT000001","expiry":"Mon,
+        21 Dec 2020 11:32:40 GMT","thumbprint":"D0EF7AD1E0BE97BABE7D0517DEB11747EEA06C56","isVerified":false,"created":"Fri,
+        18 Dec 2020 11:36:00 GMT","updated":"Fri, 18 Dec 2020 11:36:02 GMT","certificate":"MIIDHTCCAgWgAwIBAgIIOOgswhH2QkYwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UEAwwYVEVTVENFUlRlbnRqZDVkd3VvZXU0c3RoMB4XDTIwMTIxNzExMzI0MFoXDTIwMTIyMTExMzI0MFowIzEhMB8GA1UEAwwYVEVTVENFUlRlbnRqZDVkd3VvZXU0c3RoMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAspGbpv6EthmYqBaZPH62Rfbsuu+oF70OVb6LHEhZ27g2xI93SzsUViId9YVmdqUPoIaRfcjGLsyB9Ht67FElP1U2+cqyK8P9z6+KlwW4ZlDBpdt6R/ybl1TWQiEuD2daBPKF8hQAsXki7U039HYvCAePRuj9vprv28s2Hm+ltJaSpDX20bY45IQQP4X0CPiASPXYHkuhMNkHOBjyfmRJf/McwAjUpBYUQXsG2a/aqb8fgNAC0v8pdmjgvISUOpIhUOnP8RY60W20IcfargsjKDItXipneWcLEc306guiEHd9nag3185iojZSQLoiJT++52NPw9wg6iXcg6c7thjK7AgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sNMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQAWwxwfFXCjVdtBm5TNznPCtz76HiMQEEbqYl1lFKERlthbJhsEXSVLnZ7NUb/RxZLkvyCHZOMM39ZovHaN8RPRRoxGoM4WWXaX+jUmjVSEEVSnNAsXllGjTLixNe5zl9jrkwgG/FeyQFDneNDKJSfFB7OSRVCuHruHY2cFyvrpD2hGrw2dN/AJCGFkMfdgJQk92TYVP8RkogUMTo+z4s/bXeNtIocHU0XoNHzrStELV6NotIWaNzdNszRn4IHofJ+Go+jo2CbBlbnlsNPwFu1Z2K9/T5u3DJtlGD3BYtHTjD/zf4VbGoTxD9RKTb05lxarZ+COfQ3jITWUsl3GEnQM"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAABo2nJWg="}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '767'
+      - '1833'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:09 GMT
+      - Fri, 18 Dec 2020 11:36:01 GMT
       expires:
       - '-1'
       pragma:
@@ -671,12 +1226,12 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIIMB8GQtH2G8AwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRucWQ0eGlxemlkYWxubG5mMB4XDTIwMDcxMzExMzUxMFoXDTIw\r\nMDcxNzExMzUxMFowOzE5MDcGA1UEAwwwMjA2QUJDMDAxQjU2NzZFRTY3RkY1MzA0\r\nRTUyNDExQzFBN0Q1OTEyNkFCMDkzQjA2MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQAxLricd/AJoPKkITZL0IRBRgdkBJoYa2T6HhAhhLYuYBbGRsg8wIAz\r\nkWGk5eidaq6Rqiiqxib//4AuIbWy56930N37XKZUh7BtqBq0pjExaiBoU7mNCM2l\r\ntXMtiNrjVCcQXkRSgECi5+8HbhpFwpc6wMblWrPTAqr7vBV0SI75pePB9NM6S+g3\r\nWoqWXM6bKsHbL5aVvX7ciF1VnSEy4BYKK4+O8oXbj/colkNlBHw90RU+wTmwf0on\r\nLV1T8mTZJ2Xjr2Fu8i1h2UhDokY1XnrB/7Dz1mdgvJXCFEaC1g6+A7VN1fKKrKxv\r\n3Bz+KOrSkq6OlCCy0W36e3mBCkFMpiztAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQANtcYW9+FwKu0f\r\nk70DuRx4VAaAe85EMJOs5EKCO9/pHw8oflUowi247w3R+/od082go26PrELkpfM7\r\nzvtWvMoFcSqEYZyHLa1fL7n4hKMnJX5Y9VZz1ajnAJRcwQarAyGl3jI3AHH0EAcu\r\nEZ3R/YD3xgxTKJhcgCb1vEEL96tvvXvvWCN91j5FaZRivaFw6L0wNUWSnP3Ky11j\r\nL38sN7jrOWmFiHvELlDhur5PWMfwG/w5lWb8e/5xdfEgJP2PbDe2Q7xycmbALaWq\r\nPJ+UeFM/QIUGlwzUY7JtgW2jlqEmXNtgt8+btWak+bpZw3MtqjIB+6Z5R6fjfU1C\r\nKQ+cwEvT\r\n-----END
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIIXUnPtmU143gwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlRlbnRqZDVkd3VvZXU0c3RoMB4XDTIwMTIxNzExMzYwMVoXDTIw\r\nMTIyMTExMzYwMVowOzE5MDcGA1UEAwwwRDY3MkU4NDM1QTc5QTUwOUU5NDVDQkI3\r\nNjFFQzlFOTc0RjQ0Nzc3NDg3Nzg5RURFMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQAqaBt39Eh2DSzC9rU0hl2mYlkDKIEOfDVyqCTMbfXifMssjasEYMb2\r\nnTkiukQNah3IoWxV4c37mSVbAlCMazDwfi5WEkj7MnHuXGBQxFJXut24CdtMb1lP\r\nPLQWb1M70wa1h57aH1lZaWYWWyrCFrqCSNx6HVpHVH1lTP7bZYARDOon/RZXFHlN\r\nqyRzjsZLzqryVSTUW0BtYv3n1jTFe5azgeZkssLughnSmRfBqz9Zp3Yy/CiXQV5T\r\nLS+owRQJoV+AKgrJABh25KuMYWSjRAq5YXYLaM6VqsjFt7FVRrfH4GZUnQGI30Pg\r\nNxVntlenwz6bliMVMP/W+jhPuzrQdRULAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQABEFg0jwTlA5yb\r\nL3pKE4IymwlouHV0apy39nVaRZ/KyydmZqsIItfwP/seLI9qPhIj5ptmT/ZGtpC1\r\nX2eaGiozGe1wfZb2fYIGGxouJrgh0aOAZLfBQjDtiYy0KBWXcUMJlEWuu/hHq4gB\r\nqhb/NvByrgvyqw7EarujAokty+1+v29K5+0ZVSp8oPOUqIdhzvf3dP/DcCx7iB/C\r\nWKBut5HREeyKk6PWTPen7KmYGtqFtcErCaNMq7g4jSGoC1pD1+vby41XGqsM7mJd\r\nmUOTRrL8kUJ+csoC6+wQ9qomOSzeSlAwN8jn7Smq38CEymtYf9oOZx2ckbEMNuSZ\r\nKGzUR65x\r\n-----END
       CERTIFICATE-----\r\n"}'
     headers:
       Accept:
@@ -692,22 +1247,21 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       If-Match:
-      - AAAAAFSGT6k=
+      - AAAABo2nJWg=
       ParameterSetName:
       - --hub-name -g -n -p --etag
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004/verify?api-version=2020-03-01
   response:
     body:
-      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Fri, 17 Jul 2020
-        11:32:47 GMT","thumbprint":"406286789A659B65F3A979C4C236DCEE3D81EEE4","isVerified":true,"created":"Tue,
-        14 Jul 2020 11:35:04 GMT","updated":"Tue, 14 Jul 2020 11:35:11 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAFSGT7g="}'
+      string: '{"properties":{"subject":"TESTCERT000001","expiry":"Mon, 21 Dec 2020
+        11:32:40 GMT","thumbprint":"D0EF7AD1E0BE97BABE7D0517DEB11747EEA06C56","isVerified":true,"created":"Fri,
+        18 Dec 2020 11:36:00 GMT","updated":"Fri, 18 Dec 2020 11:36:03 GMT","certificate":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000002/providers/Microsoft.Devices/IotHubs/iot-hub-for-cert-test000003/certificates/certificate-000004","name":"certificate-000004","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAABo2nJX8="}'
     headers:
       cache-control:
       - no-cache
@@ -716,7 +1270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 11:35:10 GMT
+      - Fri, 18 Dec 2020 11:36:03 GMT
       expires:
       - '-1'
       pragma:
@@ -732,7 +1286,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -750,13 +1304,12 @@ interactions:
       Content-Length:
       - '0'
       If-Match:
-      - AAAAAFSGT7g=
+      - AAAABo2nJX8=
       ParameterSetName:
       - --hub-name -g -n --etag
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 AZURECLISHELL/0.4.4
-        AZURECLISHELL/0.4.4 msrest_azure/0.6.3 azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python
-        AZURECLI/2.9.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-iothub/0.12.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
@@ -770,7 +1323,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 14 Jul 2020 11:35:13 GMT
+      - Fri, 18 Dec 2020 11:36:04 GMT
       expires:
       - '-1'
       pragma:
@@ -782,7 +1335,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14983'
+      - '14999'
     status:
       code: 200
       message: OK

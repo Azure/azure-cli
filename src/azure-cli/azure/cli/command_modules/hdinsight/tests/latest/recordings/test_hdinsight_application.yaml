@@ -14,24 +14,24 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20and%20name%20eq%20%27hdicli000002%27&api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.Storage%2FstorageAccounts%27%20and%20name%20eq%20%27hdicli000002%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"eastus2","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"eastus2","tags":{}}],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2fstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-10-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5UbERNREktIiwibmV4dFJvd0tleSI6IjEhMTY4IVFURkNSa0UyTXpWR01rSkdOREpHTVRnMlFqVTRORGhETmpjMFJrTXpNakZmUjFKTUxWUkZUVkJNUVZSRlUxQkZRMU5EVEVrdFRVbERVazlUVDBaVU9qSkZVa1ZUVDFWU1EwVlRPakpHVkVWTlVFeEJWRVZUVUVWRFV6b3lSbFZZVkVWVFZEb3lSbFpGVWxOSlQwNVRPakpHTnprMUxVVkJVMVJWVXctLSJ9"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '342'
+      - '893'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:09:56 GMT
+      - Fri, 18 Dec 2020 07:57:44 GMT
       expires:
       - '-1'
       pragma:
@@ -60,12 +60,58 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceType+eq+%27Microsoft.Storage%2FstorageAccounts%27+and+name+eq+%27hdicli000002%27&api-version=2020-10-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5UbERNREktIiwibmV4dFJvd0tleSI6IjEhMTY4IVFURkNSa0UyTXpWR01rSkdOREpHTVRnMlFqVTRORGhETmpjMFJrTXpNakZmUjFKTUxWUkZUVkJNUVZSRlUxQkZRMU5EVEVrdFRVbERVazlUVDBaVU9qSkZVa1ZUVDFWU1EwVlRPakpHVkVWTlVFeEJWRVZUVUVWRFV6b3lSbFZZVkVWVFZEb3lSbFpGVWxOSlQwNVRPakpHTnprMUxVVkJVMVJWVXctLSJ9
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:57:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
+        --ssh-user --ssh-password
+      User-Agent:
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T03:08:35.7658499Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T03:08:35.7658499Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-11-11T03:08:35.6564677Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T07:56:24.5980782Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T07:56:24.5980782Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-12-18T07:56:24.5199519Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -74,7 +120,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 11 Nov 2020 03:09:57 GMT
+      - Fri, 18 Dec 2020 07:57:44 GMT
       expires:
       - '-1'
       pragma:
@@ -109,7 +155,7 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2019-06-01&$expand=kerb
   response:
@@ -123,7 +169,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 11 Nov 2020 03:09:58 GMT
+      - Fri, 18 Dec 2020 07:57:45 GMT
       expires:
       - '-1'
       pragma:
@@ -139,7 +185,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11994'
+      - '11999'
     status:
       code: 200
       message: OK
@@ -172,8 +218,942 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.HDInsight''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.HDInsight","message":"The
+        subscription is not registered to use namespace ''Microsoft.HDInsight''. See
+        https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '448'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:57:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:57:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:57:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6863'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.HDInsight","namespace":"Microsoft.HDInsight","authorizations":[{"applicationId":"9191c4da-09fe-49d9-a5f1-d41cbe92ad95","roleDefinitionId":"d102a6f3-d9cb-4633-8950-1243b975886c","managedByRoleDefinitionId":"346da55d-e1db-4a5a-89db-33ab3cdb6fc6"},{"applicationId":"7865c1d2-f040-46cc-875f-831a1ef6a28a","roleDefinitionId":"e27c0895-d168-46d5-8b65-870eb2350378"}],"resourceTypes":[{"resourceType":"clusters","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters/applications","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"clusters/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Australia East","Australia Southeast","Brazil South","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/capabilities","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/usages","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/billingSpecs","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/operationresults","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/azureasyncoperations","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"locations/validateCreateRequest","locations":["East
+        US 2","South Central US","Australia Southeast","Central India","West Central
+        US","West US 2","Canada East","Canada Central","Brazil South","UK South","UK
+        West","East Asia","Australia East","Japan East","Japan West","North Europe","West
+        Europe","North Central US","Central US","Southeast Asia","East US","Korea
+        South","Korea Central","West US","South India","France Central","UAE North","UAE
+        Central","Switzerland North","Switzerland West","South Africa North","Germany
+        West Central","East US 2 EUAP"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]},{"resourceType":"operations","locations":["East
+        Asia","Southeast Asia","East US","East US 2","West US","North Central US","South
+        Central US","Central US","North Europe","West Europe","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India"],"apiVersions":["2018-06-01-preview","2015-03-01-preview"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '6862'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 07:58:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"clusterVersion": "default", "osType":
+      "Linux", "clusterDefinition": {"kind": "spark", "configurations": {"gateway":
+      {"restAuthCredential.isEnabled": "true", "restAuthCredential.username": "admin",
+      "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
+      [{"name": "headnode", "targetInstanceCount": 2, "hardwareProfile": {"vmSize":
+      "large"}, "osProfile": {"linuxOperatingSystemProfile": {"username": "sshuser",
+      "password": "Password1!"}}}, {"name": "workernode", "targetInstanceCount": 3,
+      "hardwareProfile": {"vmSize": "large"}, "osProfile": {"linuxOperatingSystemProfile":
+      {"username": "sshuser", "password": "Password1!"}}}]}, "storageProfile": {"storageaccounts":
+      [{"name": "hdicli000002.blob.core.windows.net", "isDefault": true, "container":
+      "default", "key": "veryFakedStorageAccountKey==", "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - hdinsight create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1097'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
+        --ssh-user --ssh-password
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
@@ -181,20 +1161,20 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"f04023a8-9139-4021-8d66-94f423334094","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"bbffc33cfd79406ea8d6c36575a8a84d","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-11-11T03:10:11.417","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
+        US 2","etag":"d603224a-78fb-4b98-9f8c-0600e1206ef2","tags":null,"properties":{"clusterVersion":"3.6.1000.3","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.3.1806251927.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"4a15e59de43f4115bbdf3f4f6cebe0bb","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-12-18T07:59:05.947","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1740'
+      - '1738'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:10:14 GMT
+      - Fri, 18 Dec 2020 07:59:05 GMT
       etag:
-      - '"f04023a8-9139-4021-8d66-94f423334094"'
+      - '"d603224a-78fb-4b98-9f8c-0600e1206ef2"'
       expires:
       - '-1'
       pragma:
@@ -208,11 +1188,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-clusteruri:
-      - https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/hdicli-4rcyq/providers/Microsoft.HDInsight/clusters/hdicli-qeood6qk6?api-version=2018-06-01-preview
+      - https://management.azure.com/subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/hdicli-q2olv/providers/Microsoft.HDInsight/clusters/hdicli-4e5hfp34z?api-version=2018-06-01-preview
       x-ms-hdi-served-by:
       - global
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -231,8 +1211,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -246,7 +1226,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:10:46 GMT
+      - Fri, 18 Dec 2020 07:59:36 GMT
       expires:
       - '-1'
       pragma:
@@ -279,8 +1259,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -294,7 +1274,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:11:17 GMT
+      - Fri, 18 Dec 2020 08:00:07 GMT
       expires:
       - '-1'
       pragma:
@@ -327,8 +1307,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -342,7 +1322,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:11:47 GMT
+      - Fri, 18 Dec 2020 08:00:38 GMT
       expires:
       - '-1'
       pragma:
@@ -375,8 +1355,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -390,7 +1370,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:12:18 GMT
+      - Fri, 18 Dec 2020 08:01:08 GMT
       expires:
       - '-1'
       pragma:
@@ -423,8 +1403,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -438,7 +1418,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:12:49 GMT
+      - Fri, 18 Dec 2020 08:01:38 GMT
       expires:
       - '-1'
       pragma:
@@ -471,8 +1451,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -486,7 +1466,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:13:21 GMT
+      - Fri, 18 Dec 2020 08:02:09 GMT
       expires:
       - '-1'
       pragma:
@@ -519,8 +1499,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -534,7 +1514,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:13:51 GMT
+      - Fri, 18 Dec 2020 08:02:41 GMT
       expires:
       - '-1'
       pragma:
@@ -567,8 +1547,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -582,7 +1562,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:14:22 GMT
+      - Fri, 18 Dec 2020 08:03:11 GMT
       expires:
       - '-1'
       pragma:
@@ -615,8 +1595,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -630,7 +1610,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:14:52 GMT
+      - Fri, 18 Dec 2020 08:03:42 GMT
       expires:
       - '-1'
       pragma:
@@ -663,8 +1643,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -678,7 +1658,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:15:24 GMT
+      - Fri, 18 Dec 2020 08:04:12 GMT
       expires:
       - '-1'
       pragma:
@@ -711,8 +1691,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -726,7 +1706,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:15:54 GMT
+      - Fri, 18 Dec 2020 08:04:42 GMT
       expires:
       - '-1'
       pragma:
@@ -759,8 +1739,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -774,7 +1754,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:16:25 GMT
+      - Fri, 18 Dec 2020 08:05:13 GMT
       expires:
       - '-1'
       pragma:
@@ -807,8 +1787,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -822,7 +1802,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:16:55 GMT
+      - Fri, 18 Dec 2020 08:05:43 GMT
       expires:
       - '-1'
       pragma:
@@ -855,8 +1835,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -870,7 +1850,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:17:27 GMT
+      - Fri, 18 Dec 2020 08:06:14 GMT
       expires:
       - '-1'
       pragma:
@@ -903,1833 +1883,26 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --ssh-user --ssh-password
       User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/2.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"status":"InProgress"}'
+      string: '{"status":"Failed","error":{"code":"InvalidDocumentErrorCode","message":"DeploymentDocument
+        ''AmbariConfiguration'' failed the validation. Error: ''{\n  \"status\" :
+        400,\n  \"message\" : \"Topology validation failed: org.apache.ambari.server.topology.InvalidTopologyException:
+        The following config types are not defined in the stack: [livy2-client-conf]
+        \"\n}. Please use only the valid configuration types and try again.''"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '23'
+      - '423'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 11 Nov 2020 03:17:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:18:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:19:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:19:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:20:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:20:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:21:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:21:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:22:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:22:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:23:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:23:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:24:09 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:24:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:25:10 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:25:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:26:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:26:42 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --ssh-user --ssh-password
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"f04023a8-9139-4021-8d66-94f423334094","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3026-7","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"bbffc33cfd79406ea8d6c36575a8a84d","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T03:10:11.417","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2152'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"f04023a8-9139-4021-8d66-94f423334094","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3026-7","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"bbffc33cfd79406ea8d6c36575a8a84d","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T03:10:11.417","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2152'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"properties": {"computeProfile": {"roles": [{"name": "edgenode", "targetInstanceCount":
-      1, "hardwareProfile": {"vmSize": "Standard_D3_V2"}}]}, "installScriptActions":
-      [{"name": "InstallHue", "uri": "https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh",
-      "parameters": "-version latest -port 20000", "roles": ["edgenode"]}], "httpsEndpoints":
-      [], "applicationType": "CustomApplication"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '429'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g -n --cluster-name --script-uri --script-action-name --script-parameters
-        -v
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"EB68C48D-7789-43AE-BABE-931FC257FED4","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"Accepted","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '845'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:21 GMT
-      etag:
-      - '"EB68C48D-7789-43AE-BABE-931FC257FED4"'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-appuri:
-      - https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/hdicli-4rcyq/providers/Microsoft.HDInsight/clusters/hdicli-qeood6qk6/applications/hdicliapp-zbrgkm?api-version=2018-06-01-preview
-      x-ms-hdi-served-by:
-      - global
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --cluster-name --script-uri --script-action-name --script-parameters
-        -v
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --cluster-name --script-uri --script-action-name --script-parameters
-        -v
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:27:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:28:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:28:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:29:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:30:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:30:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"A7F37896-170E-4B30-8BC4-C7F7760E0B56","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"AzureVMConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '883'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:31:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"AD5A06E5-0344-4121-8F44-3A248D3F77F6","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[],"provisioningState":"InProgress","applicationState":"ApplicationConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '887'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:31:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"6190BD0C-8928-4E37-9775-0F8381C3BD53","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":null,"destinationPort":22,"publicPort":22}],"provisioningState":"InProgress","applicationState":"ApplicationConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '941'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:32:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"6190BD0C-8928-4E37-9775-0F8381C3BD53","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":null,"destinationPort":22,"publicPort":22}],"provisioningState":"InProgress","applicationState":"ApplicationConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '941'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:32:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"6190BD0C-8928-4E37-9775-0F8381C3BD53","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":null,"destinationPort":22,"publicPort":22}],"provisioningState":"InProgress","applicationState":"ApplicationConfiguration","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '941'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:33:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --created -n -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"9BE3DA28-612F-4813-8ED7-F649AFEF4B09","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":"hdicliapp-000004.hdicli-000003-ssh.azurehdinsight.net:22","destinationPort":22,"publicPort":22}],"provisioningState":"Succeeded","applicationState":"Running","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '980'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:33:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"9BE3DA28-612F-4813-8ED7-F649AFEF4B09","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":"hdicliapp-000004.hdicli-000003-ssh.azurehdinsight.net:22","destinationPort":22,"publicPort":22}],"provisioningState":"Succeeded","applicationState":"Running","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '992'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:33:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight application show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --cluster-name
-      User-Agent:
-      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/applications/hdicliapp-000004","name":"hdicliapp-000004","type":"Microsoft.HDInsight/clusters/applications","etag":"9BE3DA28-612F-4813-8ED7-F649AFEF4B09","tags":null,"properties":{"computeProfile":{"roles":[{"name":"edgenode","targetInstanceCount":1,"VMGroupName":"edgenode1","hardwareProfile":{"vmSize":"standard_d3_v2"},"encryptDataDisks":false}]},"installScriptActions":[{"name":"InstallHue","uri":"https://hdiconfigactions.blob.core.windows.net/linuxhueconfigactionv02/install-hue-uber-v02.sh","roles":["edgenode"]}],"uninstallScriptActions":[],"httpsEndpoints":[],"sshEndpoints":[{"location":"hdicliapp-000004.hdicli-000003-ssh.azurehdinsight.net:22","destinationPort":22,"publicPort":22}],"provisioningState":"Succeeded","applicationState":"Running","createdDate":"2020-11-11T03:27:20.96","applicationType":"CustomApplication"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '980'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 11 Nov 2020 03:33:40 GMT
+      - Fri, 18 Dec 2020 08:06:44 GMT
       expires:
       - '-1'
       pragma:

@@ -13,15 +13,15 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001","name":"cli_test_monitor_autoscale_fixed000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-24T07:24:33Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001","name":"cli_test_monitor_autoscale_fixed000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-18T07:39:30Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jul 2020 07:24:37 GMT
+      - Fri, 18 Dec 2020 07:39:31 GMT
       expires:
       - '-1'
       pragma:
@@ -109,36 +109,35 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 24 Jul 2020 07:24:38 GMT
+      - Fri, 18 Dec 2020 07:39:32 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Fri, 24 Jul 2020 07:29:38 GMT
+      - Fri, 18 Dec 2020 07:44:32 GMT
       source-age:
-      - '209'
+      - '7'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding, Accept-Encoding
+      - Authorization,Accept-Encoding
       via:
-      - 1.1 varnish (Varnish/6.0)
-      - 1.1 varnish
+      - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
-      - HFM, HIT
+      - HIT, HIT
       x-cache-hits:
-      - 0, 2
+      - 1, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 7f3195938955c940fc0308236694048877367ee6
+      - 5803eb7ff8a5c3665ff2780af96cd7c138a3a198
       x-frame-options:
       - deny
       x-github-request-id:
-      - 982A:7BBB:14EB6C:181486:5F1A8A0F
+      - EFFE:43CE:42785A:4B3DF4:5FDC5589
       x-served-by:
-      - cache-sin18035-SIN
+      - cache-mia11345-MIA
       x-timer:
-      - S1595575478.245665,VS0,VE0
+      - S1608277173.722857,VS0,VE0
       x-xss-protection:
       - 1; mode=block
     status:
@@ -158,8 +157,8 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -175,7 +174,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jul 2020 07:24:38 GMT
+      - Fri, 18 Dec 2020 07:39:32 GMT
       expires:
       - '-1'
       pragma:
@@ -190,7 +189,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
       [{"name": "vmss1VNET", "type": "Microsoft.Network/virtualNetworks", "location":
@@ -203,8 +202,8 @@ interactions:
       "location": "westus", "tags": {}, "apiVersion": "2018-01-01", "dependsOn": ["Microsoft.Network/virtualNetworks/vmss1VNET",
       "Microsoft.Network/publicIpAddresses/vmss1LBPublicIP"], "properties": {"backendAddressPools":
       [{"name": "vmss1LBBEPool"}], "inboundNatPools": [{"name": "vmss1LBNatPool",
-      "properties": {"frontendIPConfiguration": {"id": "[concat(resourceId(\''Microsoft.Network/loadBalancers\'',
-      \''vmss1LB\''), \''/frontendIPConfigurations/\'', \''loadBalancerFrontEnd\'')]"},
+      "properties": {"frontendIPConfiguration": {"id": "[concat(resourceId(''Microsoft.Network/loadBalancers'',
+      ''vmss1LB''), ''/frontendIPConfigurations/'', ''loadBalancerFrontEnd'')]"},
       "protocol": "tcp", "frontendPortRangeStart": "50000", "frontendPortRangeEnd":
       "50119", "backendPort": 22}}], "frontendIPConfigurations": [{"name": "loadBalancerFrontEnd",
       "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP"}}}]}},
@@ -216,15 +215,15 @@ interactions:
       "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType": null}},
       "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
       "18.04-LTS", "version": "latest"}}, "networkProfile": {"networkInterfaceConfigurations":
-      [{"name": "vmss183a5Nic", "properties": {"primary": "true", "ipConfigurations":
-      [{"name": "vmss183a5IPConfig", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},
+      [{"name": "vmss11d1cNic", "properties": {"primary": "true", "ipConfigurations":
+      [{"name": "vmss11d1cIPConfig", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},
       "loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/backendAddressPools/vmss1LBBEPool"}],
       "loadBalancerInboundNatPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/inboundNatPools/vmss1LBNatPool"}]}}]}}]},
-      "osProfile": {"computerNamePrefix": "vmss183a5", "adminUsername": "testadmin",
-      "adminPassword": "[parameters(\''adminPassword\'')]"}}, "singlePlacementGroup":
-      null}}], "outputs": {"VMSS": {"type": "object", "value": "[reference(resourceId(\''Microsoft.Compute/virtualMachineScaleSets\'',
-      \''vmss1\''),providers(\''Microsoft.Compute\'', \''virtualMachineScaleSets\'').apiVersions[0])]"}}},
-      "parameters": {"adminPassword": {"value": "TestTest12#$"}}, "mode": "Incremental"}}'''
+      "osProfile": {"computerNamePrefix": "vmss11d1c", "adminUsername": "testadmin",
+      "adminPassword": "[parameters(''adminPassword'')]"}}, "singlePlacementGroup":
+      null}}], "outputs": {"VMSS": {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
+      ''vmss1''),providers(''Microsoft.Compute'', ''virtualMachineScaleSets'').apiVersions[0])]"}}},
+      "parameters": {"adminPassword": {"value": "TestTest12#$"}}, "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -241,26 +240,30 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/vmss_deploy_md5N5ZyjdPyACXhAwlGKc7mx7YOWeLp0","name":"vmss_deploy_md5N5ZyjdPyACXhAwlGKc7mx7YOWeLp0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11635668661051838082","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-24T07:24:42.5410286Z","duration":"PT1.890373S","correlationId":"d985e868-0148-4005-9f48-faf1cc7b0f4f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}]}}'
+      string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
+        deployment failed with error: ''The resource with id: ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1''
+        failed validation with message: ''The requested size for resource ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1''
+        is currently not available in location ''westus'' zones '''' for subscription
+        ''a1bfa635-f2bf-42f1-86b5-848c674fc321''. Please try another size or deploy
+        to a different location or zones. See https://aka.ms/azureskunotavailable
+        for details.''.''."}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/vmss_deploy_md5N5ZyjdPyACXhAwlGKc7mx7YOWeLp0/operationStatuses/08586060314048269720?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '2731'
+      - '834'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Jul 2020 07:24:43 GMT
+      - Fri, 18 Dec 2020 07:39:34 GMT
       expires:
       - '-1'
       pragma:
@@ -269,714 +272,11 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-failure-cause:
+      - gateway
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1198'
     status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586060314048269720?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:25:14 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586060314048269720?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:25:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586060314048269720?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586060314048269720?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Resources/deployments/vmss_deploy_md5N5ZyjdPyACXhAwlGKc7mx7YOWeLp0","name":"vmss_deploy_md5N5ZyjdPyACXhAwlGKc7mx7YOWeLp0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11635668661051838082","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-24T07:26:44.490299Z","duration":"PT2M3.8396434S","correlationId":"d985e868-0148-4005-9f48-faf1cc7b0f4f","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmss1LBPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss1LB"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB","resourceType":"Microsoft.Network/loadBalancers","resourceName":"vmss1LB"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss1"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":true,"upgradePolicy":{"mode":"Manual"},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmss183a5","adminUsername":"testadmin","linuxConfiguration":{"disablePasswordAuthentication":false,"provisionVMAgent":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Premium_LRS"},"diskSizeGB":30},"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"18.04-LTS","version":"latest"}},"networkProfile":{"networkInterfaceConfigurations":[{"name":"vmss183a5Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmss183a5IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet"},"privateIPAddressVersion":"IPv4","loadBalancerBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/backendAddressPools/vmss1LBBEPool"}],"loadBalancerInboundNatPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/inboundNatPools/vmss1LBNatPool"}]}}]}}]}},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"5d4dd2fb-cc74-411c-8b8f-2a97f27fc361"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/publicIPAddresses/vmss1LBPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET"}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '5433'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vmss show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1?api-version=2020-06-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"vmss1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_DS1_v2\",\r\n
-        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"properties\":
-        {\r\n    \"singlePlacementGroup\": true,\r\n    \"upgradePolicy\": {\r\n      \"mode\":
-        \"Manual\"\r\n    },\r\n    \"virtualMachineProfile\": {\r\n      \"osProfile\":
-        {\r\n        \"computerNamePrefix\": \"vmss183a5\",\r\n        \"adminUsername\":
-        \"testadmin\",\r\n        \"linuxConfiguration\": {\r\n          \"disablePasswordAuthentication\":
-        false,\r\n          \"provisionVMAgent\": true\r\n        },\r\n        \"secrets\":
-        [],\r\n        \"allowExtensionOperations\": true,\r\n        \"requireGuestProvisionSignal\":
-        true\r\n      },\r\n      \"storageProfile\": {\r\n        \"osDisk\": {\r\n
-        \         \"createOption\": \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n
-        \         \"managedDisk\": {\r\n            \"storageAccountType\": \"Premium_LRS\"\r\n
-        \         },\r\n          \"diskSizeGB\": 30\r\n        },\r\n        \"imageReference\":
-        {\r\n          \"publisher\": \"Canonical\",\r\n          \"offer\": \"UbuntuServer\",\r\n
-        \         \"sku\": \"18.04-LTS\",\r\n          \"version\": \"latest\"\r\n
-        \       }\r\n      },\r\n      \"networkProfile\": {\"networkInterfaceConfigurations\":[{\"name\":\"vmss183a5Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmss183a5IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/virtualNetworks/vmss1VNET/subnets/vmss1Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/backendAddressPools/vmss1LBBEPool\"}],\"loadBalancerInboundNatPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Network/loadBalancers/vmss1LB/inboundNatPools/vmss1LBNatPool\"}]}}]}}]}\r\n
-        \   },\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\":
-        true,\r\n    \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
-        \"5d4dd2fb-cc74-411c-8b8f-2a97f27fc361\"\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '2638'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:47 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetVMScaleSet3Min;373,Microsoft.Compute/GetVMScaleSet30Min;2569
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource --count
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001?api-version=2020-06-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001","name":"cli_test_monitor_autoscale_fixed000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-24T07:24:33Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:48 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"location": "westus", "properties": {"profiles": [{"name": "default",
-      "capacity": {"minimum": "3", "maximum": "3", "default": "3"}, "rules": []}],
-      "notifications": [{"operation": "Scale", "email": {"customEmails": []}, "webhooks":
-      []}], "enabled": true, "name": "vmss1", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '497'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --resource --count
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '826'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --autoscale-name -n --start --end --count --timezone
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '826'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"profiles": [{"name":
-      "default", "capacity": {"minimum": "3", "maximum": "3", "default": "3"}, "rules":
-      []}, {"name": "Christmas", "capacity": {"minimum": "5", "maximum": "5", "default":
-      "5"}, "rules": [], "fixedDate": {"timeZone": "Pacific Standard Time", "start":
-      "2018-12-24T00:00:00.000Z", "end": "2018-12-26T00:00:00.000Z"}}], "notifications":
-      [{"operation": "Scale", "email": {"sendToSubscriptionAdministrator": false,
-      "sendToSubscriptionCoAdministrators": false, "customEmails": []}, "webhooks":
-      []}], "enabled": true, "name": "vmss1", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '818'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --autoscale-name -n --start --end --count --timezone
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]},{"name":"Christmas","capacity":{"minimum":"5","maximum":"5","default":"5"},"rules":[],"fixedDate":{"timeZone":"Pacific
-        Standard Time","start":"2018-12-24T00:00:00Z","end":"2018-12-26T00:00:00Z"}}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1022'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --autoscale-name
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]},{"name":"Christmas","capacity":{"minimum":"5","maximum":"5","default":"5"},"rules":[],"fixedDate":{"timeZone":"Pacific
-        Standard Time","start":"2018-12-24T00:00:00Z","end":"2018-12-26T00:00:00Z"}}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1022'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:26:59 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --autoscale-name -n
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]},{"name":"Christmas","capacity":{"minimum":"5","maximum":"5","default":"5"},"rules":[],"fixedDate":{"timeZone":"Pacific
-        Standard Time","start":"2018-12-24T00:00:00Z","end":"2018-12-26T00:00:00Z"}}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1022'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:27:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"profiles": [{"name":
-      "default", "capacity": {"minimum": "3", "maximum": "3", "default": "3"}, "rules":
-      []}], "notifications": [{"operation": "Scale", "email": {"sendToSubscriptionAdministrator":
-      false, "sendToSubscriptionCoAdministrators": false, "customEmails": []}, "webhooks":
-      []}], "enabled": true, "name": "vmss1", "targetResourceUri": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1"}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '596'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -g --autoscale-name -n
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '826'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:27:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor autoscale profile list
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g --autoscale-name
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-monitor/0.10.0
-        Azure-SDK-For-Python AZURECLI/2.9.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1?api-version=2015-04-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/microsoft.insights/autoscalesettings/vmss1","name":"vmss1","type":"Microsoft.Insights/autoscaleSettings","location":"westus","tags":{},"properties":{"profiles":[{"name":"default","capacity":{"minimum":"3","maximum":"3","default":"3"},"rules":[]}],"enabled":true,"name":"vmss1","targetResourceUri":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_autoscale_fixed000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss1","notifications":[{"operation":"Scale","email":{"sendToSubscriptionAdministrator":false,"sendToSubscriptionCoAdministrators":false,"customEmails":[]},"webhooks":[]}]}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '826'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Jul 2020 07:27:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
+      code: 400
+      message: Bad Request
 version: 1

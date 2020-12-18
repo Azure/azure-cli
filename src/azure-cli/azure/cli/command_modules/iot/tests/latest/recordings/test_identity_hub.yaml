@@ -291,7 +291,7 @@ interactions:
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/identity-hub-deployment","name":"identity-hub-deployment","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11350779003338463755","parameters":{"name":{"type":"String","value":"identity-test-hub-cli-1"},"location":{"type":"String","value":"westus2"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-11-12T19:27:36.2709345Z","duration":"PT0S","correlationId":"cd6531a2-f105-4231-9daf-d90d169bc164","providers":[{"namespace":"Microsoft.Devices","resourceTypes":[{"resourceType":"IotHubs","locations":["westus2"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/identity-test-hub-cli-1","resourceType":"Microsoft.Devices/IotHubs","resourceName":"identity-test-hub-cli-1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/updateIotHubWithKeyEncryptionKey","resourceType":"Microsoft.Resources/deployments","resourceName":"updateIotHubWithKeyEncryptionKey"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/identity-test-hub-cli-1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/updateIotHubWithKeyEncryptionKey"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/identity-test-hub-cli-1"}]}}'
@@ -372,7 +372,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/identity-hub-deployment","name":"identity-hub-deployment","type":"Microsoft.Resources/deployments","properties":{"templateHash":"11350779003338463755","parameters":{"name":{"type":"String","value":"identity-test-hub-cli-1"},"location":{"type":"String","value":"westus2"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-11-12T19:27:36.8725649Z","duration":"PT0.1744387S","correlationId":"80068386-1c8e-4a52-8656-84be03c18c86","providers":[{"namespace":"Microsoft.Devices","resourceTypes":[{"resourceType":"IotHubs","locations":["westus2"]}]},{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/IotHubs/identity-test-hub-cli-1","resourceType":"Microsoft.Devices/IotHubs","resourceName":"identity-test-hub-cli-1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/updateIotHubWithKeyEncryptionKey","resourceType":"Microsoft.Resources/deployments","resourceName":"updateIotHubWithKeyEncryptionKey"}]}}'
@@ -1472,8 +1472,6 @@ interactions:
       - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -1748,7 +1746,19 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"location": "westus2", "tags": {}, "etag": "AAAABo2qp/o=", "properties":
+      {"ipFilterRules": [], "minTlsVersion": "1.2", "eventHubEndpoints": {"events":
+      {"retentionTimeInDays": 4, "partitionCount": 4}}, "routing": {"endpoints": {"serviceBusQueues":
+      [], "serviceBusTopics": [], "eventHubs": [], "storageContainers": []}, "routes":
+      [], "fallbackRoute": {"name": "$fallback", "source": "DeviceMessages", "condition":
+      "true", "endpointNames": ["events"], "isEnabled": true}}, "storageEndpoints":
+      {"$default": {"sasTtlAsIso8601": "PT1H", "connectionString": "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=clitest000002;AccountKey=veryFakedStorageAccountKey==",
+      "containerName": "iothubcontainer", "authenticationType": "identitybased"}},
+      "messagingEndpoints": {"fileNotifications": {"lockDurationAsIso8601": "PT1M",
+      "ttlAsIso8601": "P1DT8H", "maxDeliveryCount": 80}}, "enableFileUploadNotifications":
+      true, "cloudToDevice": {"maxDeliveryCount": 46, "defaultTtlAsIso8601": "P1DT10H",
+      "feedback": {"lockDurationAsIso8601": "PT10S", "ttlAsIso8601": "P1DT19H", "maxDeliveryCount":
+      76}}, "features": "None"}, "sku": {"name": "S1", "capacity": 1}}'
     headers:
       Accept:
       - application/json
