@@ -17,6 +17,10 @@ from .example_steps import step_order_create
 from .example_steps import step_order_show
 from .example_steps import step_order_list
 from .example_steps import step_order_delete
+from .example_steps import step_order_create_min
+from .example_steps import step_order_show_min
+from .example_steps import step_order_list_min
+from .example_steps import step_order_delete_min
 from .. import (
     try_manual,
     raise_if,
@@ -60,6 +64,16 @@ def call_scenario(test, rg):
     step_order_list(test, rg, checks=[
         test.check('length(@)', 0),
     ])
+    cleanup_scenario(test, rg)
+
+
+@try_manual
+def call_scenario_min(test, rg):
+    setup_scenario(test, rg)
+    step_order_create_min(test, rg, checks=[])
+    step_order_show_min(test, rg, checks=[])
+    step_order_list_min(test, rg, checks=[])
+    step_order_delete_min(test, rg, checks=[])
     cleanup_scenario(test, rg)
 
 

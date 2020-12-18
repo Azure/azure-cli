@@ -13,6 +13,7 @@ from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk import ResourceGroupPreparer
 from .example_steps import step_list_sku
+from .example_steps import step_list_sku_min
 from .. import (
     try_manual,
     raise_if,
@@ -40,6 +41,13 @@ def cleanup_scenario(test, rg):
 def call_scenario(test, rg):
     setup_scenario(test, rg)
     step_list_sku(test, rg, checks=[JMESPathCheckGreaterThan('length(@)', 0)])
+    cleanup_scenario(test, rg)
+
+
+@try_manual
+def call_scenario_min(test, rg):
+    setup_scenario(test, rg)
+    step_list_sku_min(test, rg, checks=[])
     cleanup_scenario(test, rg)
 
 

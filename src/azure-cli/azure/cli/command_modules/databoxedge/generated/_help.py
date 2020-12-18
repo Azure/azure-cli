@@ -281,8 +281,8 @@ helps['databoxedge order create'] = """
         text: |-
                az databoxedge order create --device-name "testedgedevice" --company-name "Microsoft" --contact-person \
 "John Mcclane" --email-list "john@microsoft.com" --phone "(800) 426-9400" --address-line1 "Microsoft Corporation" \
---address-line2 "One Microsoft Way" --address-line3 "Redmond" --city "WA" --country "United States" --postal-code "98052" \
---state "WA" --resource-group "GroupForEdgeAutomation"
+--address-line2 "One Microsoft Way" --address-line3 "Redmond" --city "WA" --country "United States" --postal-code \
+"98052" --state "WA" --resource-group "GroupForEdgeAutomation"
 """
 
 helps['databoxedge order update'] = """

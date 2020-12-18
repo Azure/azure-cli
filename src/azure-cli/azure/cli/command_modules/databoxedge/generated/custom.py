@@ -8,6 +8,7 @@
 # regenerated.
 # --------------------------------------------------------------------------
 # pylint: disable=too-many-lines
+# pylint: disable=unused-argument
 
 from azure.cli.core.util import sdk_no_wait
 
@@ -166,7 +167,7 @@ def databoxedge_bandwidth_schedule_create(client,
                        parameters=parameters)
 
 
-def databoxedge_bandwidth_schedule_update(client,
+def databoxedge_bandwidth_schedule_update(instance,
                                           device_name,
                                           name,
                                           resource_group_name,
@@ -175,17 +176,15 @@ def databoxedge_bandwidth_schedule_update(client,
                                           rate_in_mbps,
                                           days,
                                           no_wait=False):
-    parameters = {}
-    parameters['start'] = start
-    parameters['stop'] = stop
-    parameters['rate_in_mbps'] = rate_in_mbps
-    parameters['days'] = days
-    return sdk_no_wait(no_wait,
-                       client.create_or_update,
-                       device_name=device_name,
-                       name=name,
-                       resource_group_name=resource_group_name,
-                       parameters=parameters)
+    if start is not None:
+        instance.start = start
+    if stop is not None:
+        instance.stop = stop
+    if rate_in_mbps is not None:
+        instance.rate_in_mbps = rate_in_mbps
+    if days is not None:
+        instance.days = days
+    return instance
 
 
 def databoxedge_bandwidth_schedule_delete(client,
@@ -233,37 +232,37 @@ def databoxedge_order_show(client,
 def databoxedge_order_create(client,
                              device_name,
                              resource_group_name,
-                             shipping_address_address_line1,
-                             shipping_address_postal_code,
-                             shipping_address_city,
-                             shipping_address_state,
-                             shipping_address_country,
-                             contact_information_contact_person,
-                             contact_information_company_name,
-                             contact_information_phone,
-                             contact_information_email_list,
-                             current_status_status=None,
-                             current_status_comments=None,
-                             shipping_address_address_line2=None,
-                             shipping_address_address_line3=None,
+                             address_line1,
+                             postal_code,
+                             city,
+                             state,
+                             country,
+                             contact_person,
+                             company_name,
+                             phone,
+                             email_list,
+                             status=None,
+                             comments=None,
+                             address_line2=None,
+                             address_line3=None,
                              no_wait=False):
     order = {}
     order['current_status'] = {}
-    order['current_status']['status'] = current_status_status
-    order['current_status']['comments'] = current_status_comments
+    order['current_status']['status'] = status
+    order['current_status']['comments'] = comments
     order['shipping_address'] = {}
-    order['shipping_address']['address_line1'] = shipping_address_address_line1
-    order['shipping_address']['address_line2'] = shipping_address_address_line2
-    order['shipping_address']['address_line3'] = shipping_address_address_line3
-    order['shipping_address']['postal_code'] = shipping_address_postal_code
-    order['shipping_address']['city'] = shipping_address_city
-    order['shipping_address']['state'] = shipping_address_state
-    order['shipping_address']['country'] = shipping_address_country
+    order['shipping_address']['address_line1'] = address_line1
+    order['shipping_address']['address_line2'] = address_line2
+    order['shipping_address']['address_line3'] = address_line3
+    order['shipping_address']['postal_code'] = postal_code
+    order['shipping_address']['city'] = city
+    order['shipping_address']['state'] = state
+    order['shipping_address']['country'] = country
     order['contact_information'] = {}
-    order['contact_information']['contact_person'] = contact_information_contact_person
-    order['contact_information']['company_name'] = contact_information_company_name
-    order['contact_information']['phone'] = contact_information_phone
-    order['contact_information']['email_list'] = contact_information_email_list
+    order['contact_information']['contact_person'] = contact_person
+    order['contact_information']['company_name'] = company_name
+    order['contact_information']['phone'] = phone
+    order['contact_information']['email_list'] = email_list
     return sdk_no_wait(no_wait,
                        client.create_or_update,
                        device_name=device_name,
@@ -271,45 +270,50 @@ def databoxedge_order_create(client,
                        order=order)
 
 
-def databoxedge_order_update(client,
+def databoxedge_order_update(instance,
                              device_name,
                              resource_group_name,
-                             current_status_status=None,
-                             current_status_comments=None,
-                             shipping_address_address_line1=None,
-                             shipping_address_address_line2=None,
-                             shipping_address_address_line3=None,
-                             shipping_address_postal_code=None,
-                             shipping_address_city=None,
-                             shipping_address_state=None,
-                             shipping_address_country=None,
-                             contact_information_contact_person=None,
-                             contact_information_company_name=None,
-                             contact_information_phone=None,
-                             contact_information_email_list=None,
+                             status=None,
+                             comments=None,
+                             address_line1=None,
+                             address_line2=None,
+                             address_line3=None,
+                             postal_code=None,
+                             city=None,
+                             state=None,
+                             country=None,
+                             contact_person=None,
+                             company_name=None,
+                             phone=None,
+                             email_list=None,
                              no_wait=False):
-    order = {}
-    order['current_status'] = {}
-    order['current_status']['status'] = current_status_status
-    order['current_status']['comments'] = current_status_comments
-    order['shipping_address'] = {}
-    order['shipping_address']['address_line1'] = shipping_address_address_line1
-    order['shipping_address']['address_line2'] = shipping_address_address_line2
-    order['shipping_address']['address_line3'] = shipping_address_address_line3
-    order['shipping_address']['postal_code'] = shipping_address_postal_code
-    order['shipping_address']['city'] = shipping_address_city
-    order['shipping_address']['state'] = shipping_address_state
-    order['shipping_address']['country'] = shipping_address_country
-    order['contact_information'] = {}
-    order['contact_information']['contact_person'] = contact_information_contact_person
-    order['contact_information']['company_name'] = contact_information_company_name
-    order['contact_information']['phone'] = contact_information_phone
-    order['contact_information']['email_list'] = contact_information_email_list
-    return sdk_no_wait(no_wait,
-                       client.create_or_update,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name,
-                       order=order)
+    if status is not None:
+        instance.current_status.status = status
+    if comments is not None:
+        instance.current_status.comments = comments
+    if address_line1 is not None:
+        instance.shipping_address.address_line1 = address_line1
+    if address_line2 is not None:
+        instance.shipping_address.address_line2 = address_line2
+    if address_line3 is not None:
+        instance.shipping_address.address_line3 = address_line3
+    if postal_code is not None:
+        instance.shipping_address.postal_code = postal_code
+    if city is not None:
+        instance.shipping_address.city = city
+    if state is not None:
+        instance.shipping_address.state = state
+    if country is not None:
+        instance.shipping_address.country = country
+    if contact_person is not None:
+        instance.contact_information.contact_person = contact_person
+    if company_name is not None:
+        instance.contact_information.company_name = company_name
+    if phone is not None:
+        instance.contact_information.phone = phone
+    if email_list is not None:
+        instance.contact_information.email_list = email_list
+    return instance
 
 
 def databoxedge_order_delete(client,

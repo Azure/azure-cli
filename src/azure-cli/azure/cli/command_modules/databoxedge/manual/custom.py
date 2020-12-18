@@ -12,31 +12,6 @@
 from azure.cli.core.util import sdk_no_wait
 
 
-def databoxedge_bandwidth_schedule_update(client,
-                                          device_name,
-                                          name,
-                                          resource_group_name,
-                                          start=None,
-                                          stop=None,
-                                          rate_in_mbps=None,
-                                          days=None,
-                                          no_wait=False):
-    schedule = client.get(device_name=device_name,
-                          name=name,
-                          resource_group_name=resource_group_name)
-    parameters = {}
-    parameters['start'] = schedule.start if start is None else start
-    parameters['stop'] = schedule.stop if stop is None else stop
-    parameters['rate_in_mbps'] = schedule.rate_in_mbps if rate_in_mbps is None else rate_in_mbps
-    parameters['days'] = schedule.days if days is None else days
-    return sdk_no_wait(no_wait,
-                       client.create_or_update,
-                       device_name=device_name,
-                       name=name,
-                       resource_group_name=resource_group_name,
-                       parameters=parameters)
-
-
 def databoxedge_device_update(client,
                               device_name,
                               resource_group_name,
@@ -50,98 +25,63 @@ def databoxedge_device_update(client,
                          parameters=parameters)
 
 
+def databoxedge_bandwidth_schedule_update(instance,
+                                          device_name,
+                                          name,
+                                          resource_group_name,
+                                          start=None,
+                                          stop=None,
+                                          rate_in_mbps=None,
+                                          days=None,
+                                          no_wait=False):
+    if start is not None:
+        instance.start = start
+    if stop is not None:
+        instance.stop = stop
+    if rate_in_mbps is not None:
+        instance.rate_in_mbps = rate_in_mbps
+    if days is not None:
+        instance.days = days
+    return instance
+
+
 def databoxedge_order_create(client,
                              device_name,
                              resource_group_name,
-                             shipping_address_address_line1,
-                             shipping_address_postal_code,
-                             shipping_address_city,
-                             shipping_address_state,
-                             shipping_address_country,
-                             contact_information_contact_person,
-                             contact_information_company_name,
-                             contact_information_phone,
-                             contact_information_email_list,
-                             current_status_status=None,
-                             current_status_comments=None,
-                             shipping_address_address_line2=None,
-                             shipping_address_address_line3=None,
+                             address_line1,
+                             postal_code,
+                             city,
+                             state,
+                             country,
+                             contact_person,
+                             company_name,
+                             phone,
+                             email_list,
+                             status=None,
+                             comments=None,
+                             address_line2=None,
+                             address_line3=None,
                              no_wait=False):
     order = {}
-    if current_status_status:
+    if status:
         order['current_status'] = {}
-        order['current_status']['status'] = current_status_status
-        order['current_status']['comments'] = current_status_comments
+        order['current_status']['status'] = status
+        order['current_status']['comments'] = comments
     order['shipping_address'] = {}
-    order['shipping_address']['address_line1'] = shipping_address_address_line1
-    order['shipping_address']['address_line2'] = shipping_address_address_line2
-    order['shipping_address']['address_line3'] = shipping_address_address_line3
-    order['shipping_address']['postal_code'] = shipping_address_postal_code
-    order['shipping_address']['city'] = shipping_address_city
-    order['shipping_address']['state'] = shipping_address_state
-    order['shipping_address']['country'] = shipping_address_country
+    order['shipping_address']['address_line1'] = address_line1
+    order['shipping_address']['address_line2'] = address_line2
+    order['shipping_address']['address_line3'] = address_line3
+    order['shipping_address']['postal_code'] = postal_code
+    order['shipping_address']['city'] = city
+    order['shipping_address']['state'] = state
+    order['shipping_address']['country'] = country
     order['contact_information'] = {}
-    order['contact_information']['contact_person'] = contact_information_contact_person
-    order['contact_information']['company_name'] = contact_information_company_name
-    order['contact_information']['phone'] = contact_information_phone
-    order['contact_information']['email_list'] = contact_information_email_list
+    order['contact_information']['contact_person'] = contact_person
+    order['contact_information']['company_name'] = company_name
+    order['contact_information']['phone'] = phone
+    order['contact_information']['email_list'] = email_list
     return sdk_no_wait(no_wait,
                        client.create_or_update,
                        device_name=device_name,
                        resource_group_name=resource_group_name,
                        order=order)
-
-
-def databoxedge_order_update(client,
-                             device_name,
-                             resource_group_name,
-                             current_status_status=None,
-                             current_status_comments=None,
-                             shipping_address_address_line1=None,
-                             shipping_address_address_line2=None,
-                             shipping_address_address_line3=None,
-                             shipping_address_postal_code=None,
-                             shipping_address_city=None,
-                             shipping_address_state=None,
-                             shipping_address_country=None,
-                             contact_information_contact_person=None,
-                             contact_information_company_name=None,
-                             contact_information_phone=None,
-                             contact_information_email_list=None,
-                             no_wait=False):
-    order = client.get(device_name=device_name,
-                       resource_group_name=resource_group_name)
-    new_order = {}
-    if current_status_status:
-        order['current_status'] = {}
-        order['current_status']['status'] = current_status_status
-        order['current_status']['comments'] = current_status_comments
-    new_order['shipping_address'] = {}
-    new_order['shipping_address']['address_line1'] = order.shipping_address.address_line1 \
-        if shipping_address_address_line1 is None else shipping_address_address_line1
-    new_order['shipping_address']['address_line2'] = order.shipping_address.address_line2 \
-        if shipping_address_address_line2 is None else shipping_address_address_line2
-    new_order['shipping_address']['address_line3'] = order.shipping_address.address_line3 \
-        if shipping_address_address_line3 is None else shipping_address_address_line3
-    new_order['shipping_address']['postal_code'] = order.shipping_address.postal_code \
-        if shipping_address_postal_code is None else shipping_address_postal_code
-    new_order['shipping_address']['city'] = order.shipping_address.city \
-        if shipping_address_city is None else shipping_address_city
-    new_order['shipping_address']['state'] = order.shipping_address.state \
-        if shipping_address_state is None else shipping_address_state
-    new_order['shipping_address']['country'] = order.shipping_address.country \
-        if shipping_address_country is None else shipping_address_country
-    new_order['contact_information'] = {}
-    new_order['contact_information']['contact_person'] = order.contact_information.contact_person \
-        if contact_information_contact_person is None else contact_information_contact_person
-    new_order['contact_information']['company_name'] = order.contact_information.company_name \
-        if contact_information_company_name is None else contact_information_company_name
-    new_order['contact_information']['phone'] = order.contact_information.phone \
-        if contact_information_phone is None else contact_information_phone
-    new_order['contact_information']['email_list'] = order.contact_information.email_list \
-        if contact_information_email_list is None else contact_information_email_list
-    return sdk_no_wait(no_wait,
-                       client.create_or_update,
-                       device_name=device_name,
-                       resource_group_name=resource_group_name,
-                       order=new_order)

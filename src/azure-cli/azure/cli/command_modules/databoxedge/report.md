@@ -373,7 +373,7 @@ az databoxedge order show --device-name "testedgedevice" --resource-group "Group
 ```
 az databoxedge order create --device-name "testedgedevice" --company-name "Microsoft" --contact-person "John Mcclane" \
 --email-list "john@microsoft.com" --phone "(800) 426-9400" --address-line1 "Microsoft Corporation" --address-line2 \
-"One Microsoft Way" --address-line3 "Redmond" --city "WA" --country "USA" --postal-code "98052" --state "WA" \
+"One Microsoft Way" --address-line3 "Redmond" --city "WA" --country "United States" --postal-code "98052" --state "WA" \
 --resource-group "GroupForEdgeAutomation"
 ```
 ##### <a name="ParametersOrdersCreateOrUpdate#Create">Parameters</a> 
@@ -381,19 +381,19 @@ az databoxedge order create --device-name "testedgedevice" --company-name "Micro
 |------|----|-----------|----------|------------|
 |**--device-name**|string|The order details of a device.|device_name|deviceName|
 |**--resource-group-name**|string|The resource group name.|resource_group_name|resourceGroupName|
-|**--current-status-status**|choice|Status of the order as per the allowed status types.|status|status|
-|**--current-status-comments**|string|Comments related to this status change.|comments|comments|
-|**--shipping-address-address-line1**|string|The address line1.|address_line1|addressLine1|
-|**--shipping-address-address-line2**|string|The address line2.|address_line2|addressLine2|
-|**--shipping-address-address-line3**|string|The address line3.|address_line3|addressLine3|
-|**--shipping-address-postal-code**|string|The postal code.|postal_code|postalCode|
-|**--shipping-address-city**|string|The city name.|city|city|
-|**--shipping-address-state**|string|The state name.|state|state|
-|**--shipping-address-country**|string|The country name.|country|country|
-|**--contact-information-contact-person**|string|The contact person name.|contact_person|contactPerson|
-|**--contact-information-company-name**|string|The name of the company.|company_name|companyName|
-|**--contact-information-phone**|string|The phone number.|phone|phone|
-|**--contact-information-email-list**|array|The email list.|email_list|emailList|
+|**--status**|choice|Status of the order as per the allowed status types.|status|status|
+|**--comments**|string|Comments related to this status change.|comments|comments|
+|**--address-line1**|string|The address line1.|address_line1|addressLine1|
+|**--address-line2**|string|The address line2.|address_line2|addressLine2|
+|**--address-line3**|string|The address line3.|address_line3|addressLine3|
+|**--postal-code**|string|The postal code.|postal_code|postalCode|
+|**--city**|string|The city name.|city|city|
+|**--state**|string|The state name.|state|state|
+|**--country**|string|The country name.|country|country|
+|**--contact-person**|string|The contact person name.|contact_person|contactPerson|
+|**--company-name**|string|The name of the company.|company_name|companyName|
+|**--phone**|string|The phone number.|phone|phone|
+|**--email-list**|array|The email list.|email_list|emailList|
 
 #### <a name="OrdersCreateOrUpdate#Update">Command `az databoxedge order update`</a>
 
@@ -402,19 +402,19 @@ az databoxedge order create --device-name "testedgedevice" --company-name "Micro
 |------|----|-----------|----------|------------|
 |**--device-name**|string|The order details of a device.|device_name|deviceName|
 |**--resource-group-name**|string|The resource group name.|resource_group_name|resourceGroupName|
-|**--current-status-status**|choice|Status of the order as per the allowed status types.|status|status|
-|**--current-status-comments**|string|Comments related to this status change.|comments|comments|
-|**--shipping-address-address-line1**|string|The address line1.|address_line1|addressLine1|
-|**--shipping-address-address-line2**|string|The address line2.|address_line2|addressLine2|
-|**--shipping-address-address-line3**|string|The address line3.|address_line3|addressLine3|
-|**--shipping-address-postal-code**|string|The postal code.|postal_code|postalCode|
-|**--shipping-address-city**|string|The city name.|city|city|
-|**--shipping-address-state**|string|The state name.|state|state|
-|**--shipping-address-country**|string|The country name.|country|country|
-|**--contact-information-contact-person**|string|The contact person name.|contact_person|contactPerson|
-|**--contact-information-company-name**|string|The name of the company.|company_name|companyName|
-|**--contact-information-phone**|string|The phone number.|phone|phone|
-|**--contact-information-email-list**|array|The email list.|email_list|emailList|
+|**--status**|choice|Status of the order as per the allowed status types.|status|status|
+|**--comments**|string|Comments related to this status change.|comments|comments|
+|**--address-line1**|string|The address line1.|address_line1|addressLine1|
+|**--address-line2**|string|The address line2.|address_line2|addressLine2|
+|**--address-line3**|string|The address line3.|address_line3|addressLine3|
+|**--postal-code**|string|The postal code.|postal_code|postalCode|
+|**--city**|string|The city name.|city|city|
+|**--state**|string|The state name.|state|state|
+|**--country**|string|The country name.|country|country|
+|**--contact-person**|string|The contact person name.|contact_person|contactPerson|
+|**--company-name**|string|The name of the company.|company_name|companyName|
+|**--phone**|string|The phone number.|phone|phone|
+|**--email-list**|array|The email list.|email_list|emailList|
 
 #### <a name="OrdersDelete">Command `az databoxedge order delete`</a>
 

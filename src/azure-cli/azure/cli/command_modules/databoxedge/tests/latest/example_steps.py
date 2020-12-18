@@ -25,6 +25,17 @@ def step_device_create(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_create_min(test, rg, checks=None):
+    if checks is None:
+        checks = []
+    test.cmd('az databoxedge device create '
+             '--location "eastus" '
+             '--name "{myDevice}" '
+             '--resource-group "{rg}"',
+             checks=checks)
+
+
 # EXAMPLE: /Devices/get/DataBoxEdgeDeviceGetByName
 @try_manual
 def step_device_show(test, rg, checks=None):
@@ -34,6 +45,11 @@ def step_device_show(test, rg, checks=None):
              '--name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_device_show_min(test, rg, checks=None):
+    return step_device_show(test, rg, checks)
 
 
 # EXAMPLE: /Devices/get/DataBoxEdgeDeviceGetByResourceGroup
@@ -46,6 +62,11 @@ def step_device_list(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_list_min(test, rg, checks=None):
+    return step_device_list(test, rg, checks)
+
+
 # EXAMPLE: /Devices/get/DataBoxEdgeDeviceGetBySubscription
 @try_manual
 def step_device_list2(test, rg, checks=None):
@@ -54,6 +75,11 @@ def step_device_list2(test, rg, checks=None):
     test.cmd('az databoxedge device list '
              '-g ""',
              checks=checks)
+
+
+@try_manual
+def step_device_list2_min(test, rg, checks=None):
+    return step_device_list2(test, rg, checks)
 
 
 # EXAMPLE: /Devices/get/UpdateSummaryGet
@@ -67,6 +93,11 @@ def step_device_show_update_summary(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_show_update_summary_min(test, rg, checks=None):
+    return step_device_show_update_summary(test, rg, checks)
+
+
 # EXAMPLE: /Devices/patch/DataBoxEdgeDevicePatch
 @try_manual
 def step_device_update(test, rg, checks=None):
@@ -75,6 +106,16 @@ def step_device_update(test, rg, checks=None):
     test.cmd('az databoxedge device update '
              '--name "{myDevice}" '
              '--tags Key1="value1" Key2="value2" '
+             '--resource-group "{rg}"',
+             checks=checks)
+
+
+@try_manual
+def step_device_update_min(test, rg, checks=None):
+    if checks is None:
+        checks = []
+    test.cmd('az databoxedge device update '
+             '--name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
 
@@ -90,6 +131,11 @@ def step_device_download_update(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_download_update_min(test, rg, checks=None):
+    return step_device_download_update(test, rg, checks)
+
+
 # EXAMPLE: /Devices/post/InstallUpdatesPost
 @try_manual
 def step_device_install_update(test, rg, checks=None):
@@ -101,6 +147,11 @@ def step_device_install_update(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_install_update_min(test, rg, checks=None):
+    return step_device_install_update(test, rg, checks)
+
+
 # EXAMPLE: /Devices/post/ScanForUpdatesPost
 @try_manual
 def step_device_scan_for_update(test, rg, checks=None):
@@ -110,6 +161,11 @@ def step_device_scan_for_update(test, rg, checks=None):
              '--name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_device_scan_for_update_min(test, rg, checks=None):
+    return step_device_scan_for_update(test, rg, checks)
 
 
 # EXAMPLE: /Alerts/get/AlertGet
@@ -124,6 +180,11 @@ def step_alert_show(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_alert_show_min(test, rg, checks=None):
+    return step_alert_show(test, rg, checks)
+
+
 # EXAMPLE: /Alerts/get/AlertGetAllInDevice
 @try_manual
 def step_alert_list(test, rg, checks=None):
@@ -133,6 +194,11 @@ def step_alert_list(test, rg, checks=None):
              '--device-name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_alert_list_min(test, rg, checks=None):
+    return step_alert_list(test, rg, checks)
 
 
 # EXAMPLE: /BandwidthSchedules/put/BandwidthSchedulePut
@@ -151,6 +217,11 @@ def step_bandwidth_schedule_create(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_bandwidth_schedule_create_min(test, rg, checks=None):
+    return step_bandwidth_schedule_create(test, rg, checks)
+
+
 # EXAMPLE: /BandwidthSchedules/get/BandwidthScheduleGet
 @try_manual
 def step_bandwidth_schedule_show(test, rg, checks=None):
@@ -163,6 +234,11 @@ def step_bandwidth_schedule_show(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_bandwidth_schedule_show_min(test, rg, checks=None):
+    return step_bandwidth_schedule_show(test, rg, checks)
+
+
 # EXAMPLE: /BandwidthSchedules/get/BandwidthScheduleGetAllInDevice
 @try_manual
 def step_bandwidth_schedule_list(test, rg, checks=None):
@@ -172,6 +248,11 @@ def step_bandwidth_schedule_list(test, rg, checks=None):
              '--device-name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_bandwidth_schedule_list_min(test, rg, checks=None):
+    return step_bandwidth_schedule_list(test, rg, checks)
 
 
 # EXAMPLE: /BandwidthSchedules/delete/BandwidthScheduleDelete
@@ -186,6 +267,11 @@ def step_bandwidth_schedule_delete(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_bandwidth_schedule_delete_min(test, rg, checks=None):
+    return step_bandwidth_schedule_delete(test, rg, checks)
+
+
 # EXAMPLE: /Jobs/get/JobsGet
 @try_manual
 def step_show_job(test, rg, checks=None):
@@ -198,6 +284,11 @@ def step_show_job(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_show_job_min(test, rg, checks=None):
+    return step_show_job(test, rg, checks)
+
+
 # EXAMPLE: /Nodes/get/NodesGetAllInDevice
 @try_manual
 def step_list_node(test, rg, checks=None):
@@ -207,6 +298,11 @@ def step_list_node(test, rg, checks=None):
              '--device-name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_list_node_min(test, rg, checks=None):
+    return step_list_node(test, rg, checks)
 
 
 # EXAMPLE: /Orders/put/OrderPut
@@ -231,6 +327,16 @@ def step_order_create(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_order_create_min(test, rg, checks=None):
+    if checks is None:
+        checks = []
+    test.cmd('az databoxedge order create '
+             '--device-name "{myDevice}" '
+             '--resource-group "{rg}"',
+             checks=checks)
+
+
 # EXAMPLE: /Orders/get/OrderGet
 @try_manual
 def step_order_show(test, rg, checks=None):
@@ -240,6 +346,11 @@ def step_order_show(test, rg, checks=None):
              '--device-name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_order_show_min(test, rg, checks=None):
+    return step_order_show(test, rg, checks)
 
 
 # EXAMPLE: /Orders/get/OrderGetAllInDevice
@@ -253,6 +364,11 @@ def step_order_list(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_order_list_min(test, rg, checks=None):
+    return step_order_list(test, rg, checks)
+
+
 # EXAMPLE: /Orders/delete/OrderDelete
 @try_manual
 def step_order_delete(test, rg, checks=None):
@@ -262,6 +378,11 @@ def step_order_delete(test, rg, checks=None):
              '--device-name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
+
+
+@try_manual
+def step_order_delete_min(test, rg, checks=None):
+    return step_order_delete(test, rg, checks)
 
 
 # EXAMPLE: /Devices/delete/DataBoxEdgeDeviceDelete
@@ -275,6 +396,11 @@ def step_device_delete(test, rg, checks=None):
              checks=checks)
 
 
+@try_manual
+def step_device_delete_min(test, rg, checks=None):
+    return step_device_delete(test, rg, checks)
+
+
 # EXAMPLE: /Skus/get/ListSkus
 @try_manual
 def step_list_sku(test, rg, checks=None):
@@ -282,3 +408,9 @@ def step_list_sku(test, rg, checks=None):
         checks = []
     test.cmd('az databoxedge list-sku',
              checks=checks)
+
+
+@try_manual
+def step_list_sku_min(test, rg, checks=None):
+    return step_list_sku(test, rg, checks)
+

@@ -13,11 +13,17 @@ from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk import ResourceGroupPreparer
 from .example_steps import step_device_create
+from .example_steps import step_device_show
 from .example_steps import step_device_list
 from .example_steps import step_device_list2
 from .example_steps import step_device_update
-from .example_steps import step_device_show
 from .example_steps import step_device_delete
+from .example_steps import step_device_create_min
+from .example_steps import step_device_show_min
+from .example_steps import step_device_list_min
+from .example_steps import step_device_list2_min
+from .example_steps import step_device_update_min
+from .example_steps import step_device_delete_min
 from .. import (
     try_manual,
     raise_if,
@@ -80,6 +86,35 @@ def call_general(test, rg):
     step_device_list(test, rg, checks=[
         test.check('length(@)', 0),
     ])
+    cleanup_general(test, rg)
+
+
+@try_manual
+def call_general_min(test, rg):
+    setup_general(test, rg)
+    step_device_create_min(test, rg, checks=[
+        test.check("location", "eastus", case_sensitive=False),
+        test.check("name", "{myDevice}", case_sensitive=False),
+    ])
+    step_device_show_min(test, rg, checks=[
+        test.check("location", "eastus", case_sensitive=False),
+        test.check("name", "{myDevice}", case_sensitive=False),
+    ])
+    step_device_list_min(test, rg, checks=[
+        test.check('length(@)', 1),
+    ])
+    step_device_list2_min(test, rg, checks=[
+        test.check('length(@)', 1),
+    ])
+    step_device_update_min(test, rg, checks=[
+        test.check("location", "eastus", case_sensitive=False),
+        test.check("name", "{myDevice}", case_sensitive=False),
+    ])
+    step_device_show_min(test, rg, checks=[
+        test.check("location", "eastus", case_sensitive=False),
+        test.check("name", "{myDevice}", case_sensitive=False),
+    ])
+    step_device_delete_min(test, rg, checks=[])
     cleanup_general(test, rg)
 
 
