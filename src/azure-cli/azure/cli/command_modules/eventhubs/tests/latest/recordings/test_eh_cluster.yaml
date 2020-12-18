@@ -34,7 +34,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 07:51:13 GMT
+      - Fri, 18 Dec 2020 20:36:52 GMT
       expires:
       - '-1'
       pragma:
@@ -44,7 +44,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1194'
     status:
       code: 201
       message: Created
@@ -75,17 +75,607 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2018-01-01-preview
   response:
     body:
-      string: '{"error":{"message":"This operation is not supported for your subscription
-        and/or tenant. Please contact Event Hubs support. CorrelationId: 2d990c51-ce4b-471a-a6cd-11c18fe0d87c","code":"BadRequest"}}'
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.EventHub''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.EventHub","message":"The
+        subscription is not registered to use namespace ''Microsoft.EventHub''. See
+        https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '199'
+      - '445'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 07:51:16 GMT
+      - Fri, 18 Dec 2020 20:36:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:36:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:37:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3415'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub","namespace":"Microsoft.EventHub","authorizations":[{"applicationId":"80369ed6-5f11-4dd9-bef3-692475845e77","roleDefinitionId":"eb8e1991-5de0-42a6-a64b-29b059341b7b"},{"applicationId":"6201d19e-14fb-4472-a2d6-5634a5c97568"}],"resourceTypes":[{"resourceType":"namespaces","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","UAE
+        North","Australia Central","Switzerland North","Germany West Central","Norway
+        East"],"apiVersions":["2018-01-01-preview","2017-04-01","2015-08-01","2014-09-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"clusters","locations":["Australia
+        East","Australia Southeast","Central US","East US","East US 2","West US","West
+        US 2","North Central US","South Central US","West Central US","East Asia","Southeast
+        Asia","Brazil South","Japan East","Japan West","North Europe","West Europe","Central
+        India","South India","West India","Canada Central","Canada East","UK West","UK
+        South","Korea Central","Korea South","France Central","South Africa North","Australia
+        Central","Switzerland North","Germany West Central","Norway East"],"apiVersions":["2018-01-01-preview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"namespaces/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/networkrulesets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"namespaces/privateEndpointConnections","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"namespaces/eventhubs","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/authorizationrules","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/eventhubs/consumergroups","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"checkNamespaceAvailability","locations":[],"apiVersions":["2015-08-01","2014-09-01"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"sku","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs","locations":[],"apiVersions":["2017-04-01"]},{"resourceType":"namespaces/disasterrecoveryconfigs/checkNameAvailability","locations":[],"apiVersions":["2017-04-01","2015-08-01","2014-09-01"]},{"resourceType":"locations","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"locations/deleteVirtualNetworkOrSubnets","locations":[],"apiVersions":["2018-01-01-preview","2017-04-01"]},{"resourceType":"availableClusterRegions","locations":[],"apiVersions":["2018-01-01-preview"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3414'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {"tag1": "value1"}, "sku": {"name":
+      "Dedicated", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2020-12-18T20:38:16.303Z","updatedAt":"2020-12-18T20:38:16.303Z","metricId":"PROD-SN3-530"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2020-12-18T20:38:16.303Z","updatedAt":"2020-12-18T20:38:16.303Z","metricId":"PROD-SN3-530"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:16 GMT
       expires:
       - '-1'
       pragma:
@@ -97,11 +687,443 @@ interactions:
       - Service-Bus-Resource-Provider/CH3
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {"{tag1": "value1}"}, "sku": {"name":
+      "Standard", "tier": "Standard"}, "properties": {"clusterArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '291'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"5e87627b-4ffa-4abf-8040-b1103c84a2fd:eventhubs-nscli000002","createdAt":"2020-12-18T20:38:20.18Z","updatedAt":"2020-12-18T20:38:20.18Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '896'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '49'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Created","metricId":"5e87627b-4ffa-4abf-8040-b1103c84a2fd:eventhubs-nscli000002","createdAt":"2020-12-18T20:38:20.18Z","updatedAt":"2020-12-18T20:38:20.18Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Activating"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '896'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:38:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"5e87627b-4ffa-4abf-8040-b1103c84a2fd:eventhubs-nscli000002","createdAt":"2020-12-18T20:38:20.18Z","updatedAt":"2020-12-18T20:39:08.863Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '895'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --cluster-arm-id
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard","tier":"Standard","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"South
+        Central US","tags":{"{tag1":"value1}"},"properties":{"zoneRedundant":false,"isAutoInflateEnabled":false,"maximumThroughputUnits":0,"clusterArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","kafkaEnabled":true,"provisioningState":"Succeeded","metricId":"5e87627b-4ffa-4abf-8040-b1103c84a2fd:eventhubs-nscli000002","createdAt":"2020-12-18T20:38:20.18Z","updatedAt":"2020-12-18T20:39:08.863Z","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '895'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster namespace list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001/namespaces?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '169'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/CH3
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/CH3
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag1":"value1"},"properties":{"createdAt":"2020-12-18T20:38:16.303Z","updatedAt":"2020-12-18T20:38:16.303Z","metricId":"PROD-SN3-530"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "southcentralus", "tags": {"tag2": "value2"}, "sku": {"name":
+      "Dedicated", "capacity": 1}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '103'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --tags
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2020-12-18T20:38:16.303Z","updatedAt":"2020-12-18T20:39:26.727Z","metricId":"PROD-SN3-530"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '434'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1198'
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs cluster list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-eventhub/4.1.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters?api-version=2018-01-01-preview
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Dedicated","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgehcluster-cli-test/providers/Microsoft.EventHub/clusters/eventhubs-clus1-000001","name":"eventhubs-clus1-000001","type":"Microsoft.EventHub/clusters","location":"southcentralus","tags":{"tag2":"value2"},"properties":{"createdAt":"2020-12-18T20:38:16.303Z","updatedAt":"2020-12-18T20:39:26.727Z","metricId":"PROD-SN3-530"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '446'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 20:39:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
