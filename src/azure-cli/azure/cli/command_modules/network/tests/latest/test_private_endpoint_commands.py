@@ -806,7 +806,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approving')])
 
         # Create second endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
