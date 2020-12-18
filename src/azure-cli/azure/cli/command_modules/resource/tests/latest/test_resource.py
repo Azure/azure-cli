@@ -1944,8 +1944,8 @@ class FeatureScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     def test_feature_unregister(self):
-         self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
-             self.check_pattern('properties.state', 'Unregistering|Unregistered')
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=[
+            self.check_pattern('properties.state', 'Unregistering|Unregistered')
         ])
 
 
