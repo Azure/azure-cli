@@ -72,3 +72,22 @@ def format_styled_text(styled_text):
     # Reset control sequence
     formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)
+
+
+def get_styled_command(raw_command):
+    styled_command = []
+    argument_begins = False
+
+    for index, arg in enumerate(raw_command.split()):
+        spaced_arg = ' {}'.format(arg) if index > 0 else arg
+        style = Style.PRIMARY
+
+        if arg.startswith('-') and '=' not in arg:
+            style = Style.ACTION
+            argument_begins = True
+        elif not argument_begins and '=' not in arg:
+            style = Style.ACTION
+
+        styled_command.append((style, spaced_arg))
+
+    return styled_command
