@@ -333,7 +333,7 @@ examples:
         --resource-group rg
 """
 
-helps['sql db classification recommendation enable'] = """
+helps['synapse sql pool classification recommendation enable'] = """
 type: command
 short-summary: Enable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
 examples:
@@ -343,7 +343,7 @@ examples:
         --resource-group rg --schema dbo --table mytable --column mycolumn
 """
 
-helps['sql db classification recommendation disable'] = """
+helps['synapse sql pool classification recommendation disable'] = """
 type: command
 short-summary: Disable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
 examples:
