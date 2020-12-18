@@ -1926,7 +1926,6 @@ def load_arguments(self, _):
         c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
         c.argument('key_length', type=int, help='The virtual network connection reset shared key length, should between 1 and 128.')
         c.argument('value', help='The virtual network connection shared key value.')
-        c.argument('id', help='Resource ID.')
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')
