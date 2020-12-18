@@ -2431,6 +2431,20 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
+
+    if kv_subscription.lower() != client.config.subscription_id.lower():
+        diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                           subscription_id=kv_subscription)
+        ascs = diff_subscription_client.app_service_certificate_orders.list()
+    else:
+        ascs = client.app_service_certificate_orders.list()
+
+    for asc in ascs:
+        if asc.name == key_vault_certificate_name:
+            kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+    if not kv_secret_name:
+        kv_secret_name = key_vault_certificate_name
+
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
@@ -2440,7 +2454,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
