@@ -8,7 +8,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only, record_only)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
@@ -304,6 +304,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
+    @record_only()  # record_only as the private-link-scope scoped-resource cannot find the components of application insights
     @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_private_link_scope(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -341,6 +342,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
             'workspace_id': workspace_id
         })
 
+        # this command failed as service cannot find component of application insights
         self.cmd('monitor private-link-scope scoped-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}', checks=[
             self.check('name', '{assigned_ws}')
         ])
