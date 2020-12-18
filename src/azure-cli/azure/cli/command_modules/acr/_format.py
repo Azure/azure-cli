@@ -101,7 +101,7 @@ def connected_registry_list_output_format(result):
     family_tree = {}
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
-        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
+        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1] #TODO roy remove 
         name = ' ' + _get_value(reg, 'name')
         family_tree[_get_value(reg, 'id')] = {
             "name": name,
@@ -115,26 +115,26 @@ def connected_registry_list_output_format(result):
             "childs": []
         }
 
-    parents = []
+    roots = []
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
         if parent_id.isspace() or parent_id not in family_tree:
-            parents.append(_get_value(reg, 'id'))
+            roots.append(_get_value(reg, 'id'))
         else:
             family_tree[parent_id]["childs"].append(_get_value(reg, 'id'))
 
     result_list_format = []
-    for parent_id in parents:
-        result_list_format.extend(_recursive_format_list_acr_childs(family_tree, parent_id))
+    for connected_registry_id in roots:
+        result_list_format.extend(_recursive_format_list_acr_childs(family_tree, connected_registry_id))
 
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
-def _recursive_format_list_acr_childs(family_tree, parent_id, level=""):
-    connected_registry = family_tree[parent_id]
+def _recursive_format_list_acr_childs(family_tree, connected_registry_id, level=""):
+    connected_registry = family_tree[connected_registry_id]
     childs = connected_registry['childs']
     if connected_registry['parent_id'] in family_tree:
-        level += "\t"
+        level += "\t" #TODO roy remove if no tree view
         connected_registry['name'] = level + connected_registry['name']
     result = [connected_registry]
     for child_id in childs:

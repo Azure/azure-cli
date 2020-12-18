@@ -987,7 +987,7 @@ examples:
   - name: Create a token which has read permissions on hello-world repository.
     text: >
         az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
-  - name: Create a token without credentials and all gateway permissions.
+  - name: Create a token without credentials and with all gateway permissions.
     text: >
         az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
             --gateway registry config/read config/write message/read message/write
@@ -1214,7 +1214,7 @@ examples:
 # region connected-registry
 helps['acr connected-registry'] = """
 type: group
-short-summary: Manage Edge/On-Prem Container Registries with Azure Container Registries.
+short-summary: Manage connected registry resources with Azure Container Registries.
 """
 
 helps['acr connected-registry create'] = """
@@ -1249,7 +1249,7 @@ examples:
 
 helps['acr connected-registry install-info'] = """
 type: command
-short-summary: Retrives information required for to activate a connected registry.
+short-summary: Retrieves information required to activate a connected registry.
 examples:
   - name: Prints the values requiered to activate a connected registry in json format
     text: |
@@ -1315,7 +1315,7 @@ examples:
 
   - name: Update the sync and window time, and disable audit logs of a connected registry.
     text: |
-        az acr connected-registry create --registry mycloudregistry --name mymirroracr
+        az acr connected-registry update --registry mycloudregistry --name mymirroracr
             --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
 """
 # endregion

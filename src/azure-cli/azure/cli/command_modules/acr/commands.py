@@ -42,7 +42,7 @@ from ._client_factory import (
     cf_acr_token_credentials,
     cf_acr_private_endpoint_connections,
     cf_acr_agentpool,
-    cf_acr_connected_registry
+    cf_acr_connected_registries
 )
 
 
@@ -161,7 +161,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_connected_registry_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.connected_registry#{}',
         table_transformer=connected_registry_output_format,
-        client_factory=cf_acr_connected_registry
+        client_factory=cf_acr_connected_registries
     )
 
     acr_private_endpoint_connection_util = CliCommandType(

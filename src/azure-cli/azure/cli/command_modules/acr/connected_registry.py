@@ -67,7 +67,7 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
         from .custom import acr_update_custom, acr_update_get, acr_update_set
         acr_update_set(cmd, cf_acr_registries(cmd.cli_ctx), registry_name, resource_group_name,
                        parameters=acr_update_custom(cmd, acr_update_get(cmd), data_endpoint_enabled=True))
-        logger.info("Registry '%s' dedicated data endpoint successfully enabled.", registry_name)
+        logger.info("Registry '%s' dedicated data endpoint has been successfully enabled.", registry_name)
 
     ErrorResponseException = cmd.get_models('ErrorResponseException')
     parent = None
@@ -161,7 +161,7 @@ def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-ma
 
     duplicate_client_token = set.intersection(add_client_token_set, remove_client_token_set)
     if duplicate_client_token:
-        errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_client_token))
+        errors = sorted(map(lambda action: action[action.rfind('/') + 1:], duplicate_client_token))
         raise CLIError(
             'Update ambiguity. Duplicate client token ids were provided with ' +
             '--add-client-tokens and --remove-client-tokens arguments.\n{}'.format(errors))
@@ -207,7 +207,7 @@ def acr_connected_registry_delete(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
-    user_confirmation("Are you sure you want to delete the Connected Registry '{}' from '{}'?".format(
+    user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
     try:
         result = client.delete(resource_group_name, registry_name, connected_registry_name)
@@ -234,7 +234,7 @@ def acr_connected_registry_deactivate(cmd,
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    user_confirmation("Are you sure you want to deactivate the Connected Registry '{}' from '{}'?".format(
+    user_confirmation("Are you sure you want to deactivate the Connected Registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
     return client.deactivate(subscription_id=subscription_id,
                              resource_group_name=resource_group_name,
@@ -297,7 +297,7 @@ def acr_connected_registry_install_info(cmd,
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
-    connected_registry_localhost = connected_registry.login_server.host
+    connected_registry_login_server = connected_registry.login_server.host
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     parent_id = connected_registry.parent.id
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
@@ -316,20 +316,20 @@ def acr_connected_registry_install_info(cmd,
         poller = acr_token_credential_generate(
             cmd, cred_client, registry_name, sync_token_name,
             password1=True, password2=True, resource_group_name=resource_group_name)
-        #   expiration_in_days=expiration_in_days, expiration=expiration)
         credentials = LongRunningOperation(cmd.cli_ctx)(poller)
         sync_username = credentials.username
         sync_password = {
             "password1": credentials.passwords[0].value,
             "password2": credentials.passwords[1].value
         }
+        logger.warning('Please store your generated credentials safely.')
     else:
         sync_username = "<sync token username>"
         sync_password = "<sync token password>"
 
     return {
         "ACR_REGISTRY_NAME": connected_registry_name,
-        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_localhost,
+        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
         "ACR_SYNC_TOKEN_NAME": sync_token_name,
         "ACR_SYNC_TOKEN_USERNAME": sync_username,
         "ACR_SYNC_TOKEN_PASSWORD": sync_password,
@@ -349,7 +349,7 @@ def acr_connected_registry_list_client_tokens(cmd,
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
     if current_connected_registry.client_token_ids is None:
-        raise CLIError("No Client tokens found: You can update your connected registry to add client tokens.")
+        raise CLIError("No client tokens found: You can update your connected registry to add client tokens.")
 
     result = []
     for token_id in current_connected_registry.client_token_ids:
@@ -374,14 +374,14 @@ def _create_sync_token(cmd,
     try:
         message = "Created by connected registry sync token: {}"
         sync_scope_map_name = SYNC_SCOPE_MAP_NAME.format(connected_registry_name)
-        logger.warning("If sync scope map '%s' already exist properties will be overrided", sync_scope_map_name)
+        logger.warning("If sync scope map '%s' already exists, its actions will be overwritten", sync_scope_map_name)
         sync_scope_map = create_default_scope_map(cmd, resource_group_name, registry_name, sync_scope_map_name,
                                                   repository_actions_list, gateway_actions_list,
                                                   scope_map_description=message.format(connected_registry_name),
                                                   force=True)
 
         sync_token_name = SYNC_TOKEN_NAME.format(connected_registry_name)
-        logger.warning("If sync token '%s' already exist properties will be overrided", sync_token_name)
+        logger.warning("If sync token '%s' already exists, it properties will be overwritten", sync_token_name)
         Token = cmd.get_models('Token')
         poller = token_client.create(
             resource_group_name,
