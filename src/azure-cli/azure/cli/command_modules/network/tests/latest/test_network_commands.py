@@ -632,9 +632,9 @@ class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
         self.cmd('network application-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}"')
         self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert1} {cert2} --host-name-from-backend-pool true --no-wait --port 443 --protocol https')
         self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --root-certs {cert2} {cert1} --no-wait')
-        # self.cmd('network application-gateway show -g {rg} -n {gateway}',
-        #          checks=self.check('length(backendHttpSettingsCollection[1].trustedRootCertificates)', 2))
-        # self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --no-wait')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}',
+                 checks=self.check('length(backendHttpSettingsCollection[1].trustedRootCertificates)', 2))
+        self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --no-wait')
 
 
 class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
