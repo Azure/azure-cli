@@ -313,9 +313,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     repo_valid_actions = "Valid actions are {}".format({action.value for action in RepoScopeMapActions})
     gateway_valid_actions = "Valid actions are {}".format({action.value for action in GatewayScopeMapActions})
     with self.argument_context('acr scope-map update') as c:
-        c.argument('add_repository', options_list=['--add-repository'], nargs='+', action='append', required=False,
+        c.argument('add_repository', options_list=['--add-repository', c.deprecate(target='--add', redirect='--add-repository', hide=True)], nargs='+', action='append', required=False,
                    help='repository permissions to be added. Use the format "--add-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
-        c.argument('remove_repository', options_list=['--remove-repository'], nargs='+', action='append', required=False,
+        c.argument('remove_repository', options_list=['--remove-repository', c.deprecate(target='--remove', redirect='--remove-repository', hide=True)], nargs='+', action='append', required=False,
                    help='respsitory permissions to be removed. Use the format "--remove-repository REPO [ACTION1 ACTION2 ...]" per flag. ' + repo_valid_actions)
         c.argument('add_gateway', options_list=['--add-gateway'], nargs='+', action='append', required=False,
                    help='gateway permissions to be added. Use the format "--add-gateway GATEWAY [ACTION1 ACTION2 ...]" per flag. ' + gateway_valid_actions)
