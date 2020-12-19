@@ -27,33 +27,34 @@ interactions:
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/users?api-version=1.6
   response:
     body:
-      string: '{"odata.error":{"code":"Authorization_RequestDenied","message":{"lang":"en","value":"Insufficient
-        privileges to complete the operation."},"requestId":"01668568-54fc-49f7-b3ff-90b3d350390e","date":"2020-12-19T00:52:47"}}'
+      string: '{"odata.error":{"code":"Request_BadRequest","message":{"lang":"en","value":"The
+        domain portion of the userPrincipalName property is invalid. You must use
+        one of the verified domain names in your organization."},"requestId":"57caa295-2c88-458c-a6d4-1bb2f2ac3f64","date":"2020-12-19T10:25:14","values":[{"item":"PropertyName","value":"userPrincipalName"},{"item":"PropertyErrorCode","value":"InvalidValue"}]}}'
     headers:
       access-control-allow-origin:
       - '*'
       cache-control:
       - no-cache
       content-length:
-      - '219'
+      - '407'
       content-type:
       - application/json; odata=minimalmetadata; streaming=true; charset=utf-8
       dataserviceversion:
       - 3.0;
       date:
-      - Sat, 19 Dec 2020 00:52:47 GMT
+      - Sat, 19 Dec 2020 10:25:13 GMT
       duration:
-      - '847265'
+      - '726577'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - +wP/7vd5+5YurfC/KCsX3jUAS2OZ2VhL1D5T6A0EWMI=
+      - q3sboAbAOws5A1wKtMtNLSHpyHR29FEWJnVCO06NP/c=
       ocp-aad-session-key:
-      - 6Rk5sygP2hzA-vj--swob_dmvn71T3hUV6BGsGj1GbvNyvqUeRCJvenFk9swOJ0E5jZalaNIzL44a006ewe59-MVJMCvR0n_DsyaoExQ_fYSW9q041bHibfE-aJnM_tVzjvUbBMSqTWmVQQHQyOaCTwUOfsIoA8M9Wret7l1gzM.iIggI9-qDN2fMb56W053s3TMxzaPU9_Gzl3h7DsmW6U
+      - iZF3ukqL9K8hsVzeEQ5uQRULtrrnWu_jxbNf---1Z4yV0ujLwttT4NfGFYD9CkpX0Q8aGrNLKpFICUYIhsJcNV5BgISkgqWeKWvQmbbNOT4KYcVqBTGxuaondguNz3Hh.45ibUXhZVQnXtkAgOySctCw7lXMEPLRThrbsGsPuQOw
       pragma:
       - no-cache
       request-id:
-      - 01668568-54fc-49f7-b3ff-90b3d350390e
+      - 57caa295-2c88-458c-a6d4-1bb2f2ac3f64
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
@@ -65,6 +66,6 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 403
-      message: Forbidden
+      code: 400
+      message: Bad Request
 version: 1
