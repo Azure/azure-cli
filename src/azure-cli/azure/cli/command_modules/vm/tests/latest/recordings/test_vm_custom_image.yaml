@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_custom_image000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image000001","name":"cli_test_vm_custom_image000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-18T14:16:41Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image000001","name":"cli_test_vm_custom_image000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-19T01:24:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:16:42 GMT
+      - Sat, 19 Dec 2020 01:24:41 GMT
       expires:
       - '-1'
       pragma:
@@ -109,13 +109,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:16:43 GMT
+      - Sat, 19 Dec 2020 01:24:41 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Fri, 18 Dec 2020 14:21:43 GMT
+      - Sat, 19 Dec 2020 01:29:41 GMT
       source-age:
-      - '5'
+      - '11'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -123,21 +123,21 @@ interactions:
       via:
       - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
-      - HFM, HIT
+      - HIT, HIT
       x-cache-hits:
-      - 0, 1
+      - 3, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 06017f620722eb5aaa479266a69d77241b661a90
+      - 7f1390475300a6faab19bbfb417b0143abf5e3f1
       x-frame-options:
       - deny
       x-github-request-id:
-      - 9A04:45D7:5A51D3:653F42:5FDCB9C6
+      - FB20:139C:5F9EA9:6BED70:5FDD4D23
       x-served-by:
-      - cache-mia11362-MIA
+      - cache-mia11360-MIA
       x-timer:
-      - S1608301004.816727,VS0,VE0
+      - S1608341082.588852,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -171,7 +171,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:16:43 GMT
+      - Sat, 19 Dec 2020 01:24:41 GMT
       expires:
       - '-1'
       pragma:
@@ -216,7 +216,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:16:44 GMT
+      - Sat, 19 Dec 2020 01:24:42 GMT
       expires:
       - '-1'
       pragma:
@@ -234,7 +234,7 @@ interactions:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
-      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstoragee14de1dde7188d",
+      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstorage3fff0538ff2fac",
       "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": [],
       "properties": {"accountType": "Premium_LRS"}}, {"name": "vm-unmanaged-diskVNET",
       "type": "Microsoft.Network/virtualNetworks", "location": "westus", "apiVersion":
@@ -253,12 +253,12 @@ interactions:
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image000001/providers/Microsoft.Network/publicIPAddresses/vm-unmanaged-diskPublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image000001/providers/Microsoft.Network/networkSecurityGroups/vm-unmanaged-diskNSG"}}},
       {"apiVersion": "2020-06-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "vm-unmanaged-disk", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstoragee14de1dde7188d",
+      "vm-unmanaged-disk", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstorage3fff0538ff2fac",
       "Microsoft.Network/networkInterfaces/vm-unmanaged-diskVMNic"], "properties":
       {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile": {"networkInterfaces":
       [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image000001/providers/Microsoft.Network/networkInterfaces/vm-unmanaged-diskVMNic"}]},
-      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_e14de1dde7",
-      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstoragee14de1dde7188d.blob.core.windows.net/vhds/osdisk_e14de1dde7.vhd"}},
+      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_3fff0538ff",
+      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstorage3fff0538ff2fac.blob.core.windows.net/vhds/osdisk_3fff0538ff.vhd"}},
       "imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
       "18.04-LTS", "version": "latest"}}, "osProfile": {"computerName": "vm-unmanaged-disk",
       "adminUsername": "sdk-test-admin", "adminPassword": "[parameters(''adminPassword'')]"}}}],
@@ -303,7 +303,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:16:45 GMT
+      - Sat, 19 Dec 2020 01:24:42 GMT
       expires:
       - '-1'
       pragma:
@@ -315,7 +315,7 @@ interactions:
       x-ms-failure-cause:
       - gateway
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 400
       message: Bad Request

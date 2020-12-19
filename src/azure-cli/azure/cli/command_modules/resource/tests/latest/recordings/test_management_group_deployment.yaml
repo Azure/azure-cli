@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:17:19 GMT
+      - Sat, 19 Dec 2020 00:52:01 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +46,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -81,7 +81,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:17:29 GMT
+      - Sat, 19 Dec 2020 00:52:11 GMT
       expires:
       - '-1'
       pragma:
@@ -133,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:17:30 GMT
+      - Sat, 19 Dec 2020 00:52:12 GMT
       expires:
       - '-1'
       location:
@@ -141,7 +141,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - d412cf72-b054-4f78-bb51-50366d3e7be3
+      - 9da5a5dc-abfb-4a2e-913b-c0be1d08fd62
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-ba-restapi:
@@ -182,7 +182,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:17:40 GMT
+      - Sat, 19 Dec 2020 00:52:23 GMT
       expires:
       - '-1'
       location:
@@ -190,7 +190,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - 6488ddc1-88c5-422b-a157-37c8acfbd65d
+      - d347fe36-fad2-437b-869c-cad401be5b30
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-ba-restapi:
@@ -229,7 +229,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:17:51 GMT
+      - Sat, 19 Dec 2020 00:52:32 GMT
       expires:
       - '-1'
       location:
@@ -237,7 +237,7 @@ interactions:
       pragma:
       - no-cache
       request-id:
-      - cff42ac9-f608-46df-90e4-3dd41bc007cc
+      - 64fa28e2-5bbb-4b05-b859-37358659c236
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-ba-restapi:
@@ -267,558 +267,30 @@ interactions:
     uri: https://management.azure.com/providers/Microsoft.Management/operationResults/create/managementGroups/azure-cli-management000002?api-version=2018-03-01-preview
   response:
     body:
-      string: '{"id":"/providers/Microsoft.Management/managementGroups/azure-cli-management000002","type":"/providers/Microsoft.Management/managementGroups","name":"azure-cli-management000002","status":"Succeeded","properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","displayName":"azure-cli-management000002","details":{"version":1,"updatedTime":"2020-12-18T12:17:40.4241756Z","updatedBy":"414d10da-615f-49a7-90a0-a7008fb31cd3","parent":{"id":"/providers/Microsoft.Management/managementGroups/72f988bf-86f1-41af-91ab-2d7cd011db47","name":"72f988bf-86f1-41af-91ab-2d7cd011db47","displayName":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}}}'
+      string: '{"error":{"code":"BadRequest","message":"Reader level access is required
+        on the management group or group ancestors.","details":null}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '642'
+      - '134'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 12:18:02 GMT
+      - Sat, 19 Dec 2020 00:52:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - ad2c839a-c700-4873-a69a-eebc4e879126
+      - 468ca2a8-5176-42f6-9e83-e83ffb03ab57
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
       x-ba-restapi:
       - 1.0.3.1589
       x-content-type-options:
       - nosniff
     status:
-      code: 200
-      message: OK
-- request:
-    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"nestedsubId\":
-      {\"value\": \"a1bfa635-f2bf-42f1-86b5-848c674fc321az\"}, \"targetMG\": {\"value\":
-      \"azure-cli-management000002\"}, \"nestedRG\": {\"value\": \"azure-cli-sub-resource-group000003\"},
-      \"storageAccountName\": {\"value\": \"armbuilddemo000005\"}}, \"mode\": \"Incremental\",
-      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"targetMG\":
-      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"nestedsubId\": {\r\n      \"type\":
-      \"string\"\r\n    },\r\n    \"nestedRG\": {\r\n      \"type\": \"string\"\r\n
-      \   },\r\n    \"storageAccountName\": {\r\n      \"type\": \"string\"\r\n    }\r\n
-      \ },\r\n  \"variables\": {\r\n    \"mgScope\": \"[concat('/providers/Microsoft.Management/managementGroups/',
-      parameters('targetMG'))]\"\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyDefinitions\",\r\n      \"name\": \"policy2\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"properties\": {\r\n        \"policyType\":
-      \"Custom\",\r\n        \"parameters\": {\r\n\r\n        },\r\n        \"policyRule\":
-      {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n            \"equals\":
-      \"northeurope\"\r\n          },\r\n          \"then\": {\r\n            \"effect\":
-      \"deny\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyAssignments\",\r\n      \"name\": \"location-lock\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"dependsOn\": [\r\n        \"policy2\"\r\n
-      \     ],\r\n      \"properties\": {\r\n        \"scope\": \"[variables('mgScope')]\",\r\n
-      \       \"policyDefinitionId\": \"[concat(variables('mgScope'), '/providers/',
-      'Microsoft.Authorization/policyDefinitions/', 'policy2')]\"\r\n      }\r\n    },\r\n
-      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
-      \"sdktest-subnested\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n      \"location\":
-      \"West US\",\r\n      \"subscriptionId\": \"[parameters('nestedSubId')]\",\r\n
-      \     \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n\r\n
-      \         },\r\n          \"variables\": {\r\n\r\n          },\r\n          \"resources\":
-      [\r\n            {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
-      \             \"name\": \"[parameters('nestedRG')]\",\r\n              \"apiVersion\":
-      \"2018-05-01\",\r\n              \"location\": \"East US 2 EUAP\",\r\n              \"properties\":
-      {\r\n\r\n              }\r\n            },\r\n            {\r\n              \"type\":
-      \"Microsoft.Resources/deployments\",\r\n              \"name\": \"rg-nested\",\r\n
-      \             \"apiVersion\": \"2017-05-10\",\r\n              \"resourceGroup\":
-      \"[parameters('nestedRG')]\",\r\n              \"dependsOn\": [ \"[parameters('nestedRG')]\"
-      ],\r\n              \"properties\": {\r\n                \"template\": {\r\n
-      \                 \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \                 \"contentVersion\": \"1.0.0.0\",\r\n                  \"parameters\":
-      {\r\n\r\n                  },\r\n                  \"variables\": {\r\n\r\n
-      \                 },\r\n                  \"resources\": [\r\n                    {\r\n
-      \                     \"type\": \"Microsoft.Storage/storageAccounts\",\r\n                      \"name\":
-      \"[parameters('storageAccountName')]\",\r\n                      \"apiVersion\":
-      \"2015-06-15\",\r\n                      \"location\": \"East US\",\r\n                      \"properties\":
-      {\r\n                        \"accountType\": \"Standard_LRS\",\r\n                        \"supportsHttpsTrafficOnly\":
-      true\r\n                      }\r\n                    }\r\n                  ]\r\n
-      \               },\r\n                \"mode\": \"Incremental\"\r\n              }\r\n
-      \           }\r\n          ]\r\n        },\r\n        \"mode\": \"Incremental\"\r\n
-      \     }\r\n    }\r\n  ] // comment\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment mg validate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '3842'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --management-group-id --location --template-file --parameters --parameters
-        --parameters --parameters
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
-        server error. Diagnostic information: timestamp ''20201218T121806Z'', subscription
-        id '''', tracking id ''ce654930-f3e3-4ad5-9fdb-ad0a3fd9e43a'', request correlation
-        id ''ce654930-f3e3-4ad5-9fdb-ad0a3fd9e43a''."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '276'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 12:18:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"nestedsubId\":
-      {\"value\": \"a1bfa635-f2bf-42f1-86b5-848c674fc321az\"}, \"targetMG\": {\"value\":
-      \"azure-cli-management000002\"}, \"nestedRG\": {\"value\": \"azure-cli-sub-resource-group000003\"},
-      \"storageAccountName\": {\"value\": \"armbuilddemo000005\"}}, \"mode\": \"Incremental\",
-      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"targetMG\":
-      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"nestedsubId\": {\r\n      \"type\":
-      \"string\"\r\n    },\r\n    \"nestedRG\": {\r\n      \"type\": \"string\"\r\n
-      \   },\r\n    \"storageAccountName\": {\r\n      \"type\": \"string\"\r\n    }\r\n
-      \ },\r\n  \"variables\": {\r\n    \"mgScope\": \"[concat('/providers/Microsoft.Management/managementGroups/',
-      parameters('targetMG'))]\"\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyDefinitions\",\r\n      \"name\": \"policy2\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"properties\": {\r\n        \"policyType\":
-      \"Custom\",\r\n        \"parameters\": {\r\n\r\n        },\r\n        \"policyRule\":
-      {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n            \"equals\":
-      \"northeurope\"\r\n          },\r\n          \"then\": {\r\n            \"effect\":
-      \"deny\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyAssignments\",\r\n      \"name\": \"location-lock\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"dependsOn\": [\r\n        \"policy2\"\r\n
-      \     ],\r\n      \"properties\": {\r\n        \"scope\": \"[variables('mgScope')]\",\r\n
-      \       \"policyDefinitionId\": \"[concat(variables('mgScope'), '/providers/',
-      'Microsoft.Authorization/policyDefinitions/', 'policy2')]\"\r\n      }\r\n    },\r\n
-      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
-      \"sdktest-subnested\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n      \"location\":
-      \"West US\",\r\n      \"subscriptionId\": \"[parameters('nestedSubId')]\",\r\n
-      \     \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n\r\n
-      \         },\r\n          \"variables\": {\r\n\r\n          },\r\n          \"resources\":
-      [\r\n            {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
-      \             \"name\": \"[parameters('nestedRG')]\",\r\n              \"apiVersion\":
-      \"2018-05-01\",\r\n              \"location\": \"East US 2 EUAP\",\r\n              \"properties\":
-      {\r\n\r\n              }\r\n            },\r\n            {\r\n              \"type\":
-      \"Microsoft.Resources/deployments\",\r\n              \"name\": \"rg-nested\",\r\n
-      \             \"apiVersion\": \"2017-05-10\",\r\n              \"resourceGroup\":
-      \"[parameters('nestedRG')]\",\r\n              \"dependsOn\": [ \"[parameters('nestedRG')]\"
-      ],\r\n              \"properties\": {\r\n                \"template\": {\r\n
-      \                 \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \                 \"contentVersion\": \"1.0.0.0\",\r\n                  \"parameters\":
-      {\r\n\r\n                  },\r\n                  \"variables\": {\r\n\r\n
-      \                 },\r\n                  \"resources\": [\r\n                    {\r\n
-      \                     \"type\": \"Microsoft.Storage/storageAccounts\",\r\n                      \"name\":
-      \"[parameters('storageAccountName')]\",\r\n                      \"apiVersion\":
-      \"2015-06-15\",\r\n                      \"location\": \"East US\",\r\n                      \"properties\":
-      {\r\n                        \"accountType\": \"Standard_LRS\",\r\n                        \"supportsHttpsTrafficOnly\":
-      true\r\n                      }\r\n                    }\r\n                  ]\r\n
-      \               },\r\n                \"mode\": \"Incremental\"\r\n              }\r\n
-      \           }\r\n          ]\r\n        },\r\n        \"mode\": \"Incremental\"\r\n
-      \     }\r\n    }\r\n  ] // comment\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment mg validate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '3842'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --management-group-id --location --template-file --parameters --parameters
-        --parameters --parameters
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
-        server error. Diagnostic information: timestamp ''20201218T121806Z'', subscription
-        id '''', tracking id ''2bc38031-f8c4-4709-ac1d-fcbea2b79610'', request correlation
-        id ''2bc38031-f8c4-4709-ac1d-fcbea2b79610''."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '276'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 12:18:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"nestedsubId\":
-      {\"value\": \"a1bfa635-f2bf-42f1-86b5-848c674fc321az\"}, \"targetMG\": {\"value\":
-      \"azure-cli-management000002\"}, \"nestedRG\": {\"value\": \"azure-cli-sub-resource-group000003\"},
-      \"storageAccountName\": {\"value\": \"armbuilddemo000005\"}}, \"mode\": \"Incremental\",
-      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"targetMG\":
-      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"nestedsubId\": {\r\n      \"type\":
-      \"string\"\r\n    },\r\n    \"nestedRG\": {\r\n      \"type\": \"string\"\r\n
-      \   },\r\n    \"storageAccountName\": {\r\n      \"type\": \"string\"\r\n    }\r\n
-      \ },\r\n  \"variables\": {\r\n    \"mgScope\": \"[concat('/providers/Microsoft.Management/managementGroups/',
-      parameters('targetMG'))]\"\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyDefinitions\",\r\n      \"name\": \"policy2\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"properties\": {\r\n        \"policyType\":
-      \"Custom\",\r\n        \"parameters\": {\r\n\r\n        },\r\n        \"policyRule\":
-      {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n            \"equals\":
-      \"northeurope\"\r\n          },\r\n          \"then\": {\r\n            \"effect\":
-      \"deny\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyAssignments\",\r\n      \"name\": \"location-lock\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"dependsOn\": [\r\n        \"policy2\"\r\n
-      \     ],\r\n      \"properties\": {\r\n        \"scope\": \"[variables('mgScope')]\",\r\n
-      \       \"policyDefinitionId\": \"[concat(variables('mgScope'), '/providers/',
-      'Microsoft.Authorization/policyDefinitions/', 'policy2')]\"\r\n      }\r\n    },\r\n
-      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
-      \"sdktest-subnested\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n      \"location\":
-      \"West US\",\r\n      \"subscriptionId\": \"[parameters('nestedSubId')]\",\r\n
-      \     \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n\r\n
-      \         },\r\n          \"variables\": {\r\n\r\n          },\r\n          \"resources\":
-      [\r\n            {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
-      \             \"name\": \"[parameters('nestedRG')]\",\r\n              \"apiVersion\":
-      \"2018-05-01\",\r\n              \"location\": \"East US 2 EUAP\",\r\n              \"properties\":
-      {\r\n\r\n              }\r\n            },\r\n            {\r\n              \"type\":
-      \"Microsoft.Resources/deployments\",\r\n              \"name\": \"rg-nested\",\r\n
-      \             \"apiVersion\": \"2017-05-10\",\r\n              \"resourceGroup\":
-      \"[parameters('nestedRG')]\",\r\n              \"dependsOn\": [ \"[parameters('nestedRG')]\"
-      ],\r\n              \"properties\": {\r\n                \"template\": {\r\n
-      \                 \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \                 \"contentVersion\": \"1.0.0.0\",\r\n                  \"parameters\":
-      {\r\n\r\n                  },\r\n                  \"variables\": {\r\n\r\n
-      \                 },\r\n                  \"resources\": [\r\n                    {\r\n
-      \                     \"type\": \"Microsoft.Storage/storageAccounts\",\r\n                      \"name\":
-      \"[parameters('storageAccountName')]\",\r\n                      \"apiVersion\":
-      \"2015-06-15\",\r\n                      \"location\": \"East US\",\r\n                      \"properties\":
-      {\r\n                        \"accountType\": \"Standard_LRS\",\r\n                        \"supportsHttpsTrafficOnly\":
-      true\r\n                      }\r\n                    }\r\n                  ]\r\n
-      \               },\r\n                \"mode\": \"Incremental\"\r\n              }\r\n
-      \           }\r\n          ]\r\n        },\r\n        \"mode\": \"Incremental\"\r\n
-      \     }\r\n    }\r\n  ] // comment\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment mg validate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '3842'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --management-group-id --location --template-file --parameters --parameters
-        --parameters --parameters
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
-        server error. Diagnostic information: timestamp ''20201218T121808Z'', subscription
-        id '''', tracking id ''b123221c-6c51-4d47-80a9-ed122aa1c1b9'', request correlation
-        id ''b123221c-6c51-4d47-80a9-ed122aa1c1b9''."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '276'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 12:18:08 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"nestedsubId\":
-      {\"value\": \"a1bfa635-f2bf-42f1-86b5-848c674fc321az\"}, \"targetMG\": {\"value\":
-      \"azure-cli-management000002\"}, \"nestedRG\": {\"value\": \"azure-cli-sub-resource-group000003\"},
-      \"storageAccountName\": {\"value\": \"armbuilddemo000005\"}}, \"mode\": \"Incremental\",
-      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"targetMG\":
-      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"nestedsubId\": {\r\n      \"type\":
-      \"string\"\r\n    },\r\n    \"nestedRG\": {\r\n      \"type\": \"string\"\r\n
-      \   },\r\n    \"storageAccountName\": {\r\n      \"type\": \"string\"\r\n    }\r\n
-      \ },\r\n  \"variables\": {\r\n    \"mgScope\": \"[concat('/providers/Microsoft.Management/managementGroups/',
-      parameters('targetMG'))]\"\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyDefinitions\",\r\n      \"name\": \"policy2\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"properties\": {\r\n        \"policyType\":
-      \"Custom\",\r\n        \"parameters\": {\r\n\r\n        },\r\n        \"policyRule\":
-      {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n            \"equals\":
-      \"northeurope\"\r\n          },\r\n          \"then\": {\r\n            \"effect\":
-      \"deny\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyAssignments\",\r\n      \"name\": \"location-lock\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"dependsOn\": [\r\n        \"policy2\"\r\n
-      \     ],\r\n      \"properties\": {\r\n        \"scope\": \"[variables('mgScope')]\",\r\n
-      \       \"policyDefinitionId\": \"[concat(variables('mgScope'), '/providers/',
-      'Microsoft.Authorization/policyDefinitions/', 'policy2')]\"\r\n      }\r\n    },\r\n
-      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
-      \"sdktest-subnested\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n      \"location\":
-      \"West US\",\r\n      \"subscriptionId\": \"[parameters('nestedSubId')]\",\r\n
-      \     \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n\r\n
-      \         },\r\n          \"variables\": {\r\n\r\n          },\r\n          \"resources\":
-      [\r\n            {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
-      \             \"name\": \"[parameters('nestedRG')]\",\r\n              \"apiVersion\":
-      \"2018-05-01\",\r\n              \"location\": \"East US 2 EUAP\",\r\n              \"properties\":
-      {\r\n\r\n              }\r\n            },\r\n            {\r\n              \"type\":
-      \"Microsoft.Resources/deployments\",\r\n              \"name\": \"rg-nested\",\r\n
-      \             \"apiVersion\": \"2017-05-10\",\r\n              \"resourceGroup\":
-      \"[parameters('nestedRG')]\",\r\n              \"dependsOn\": [ \"[parameters('nestedRG')]\"
-      ],\r\n              \"properties\": {\r\n                \"template\": {\r\n
-      \                 \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \                 \"contentVersion\": \"1.0.0.0\",\r\n                  \"parameters\":
-      {\r\n\r\n                  },\r\n                  \"variables\": {\r\n\r\n
-      \                 },\r\n                  \"resources\": [\r\n                    {\r\n
-      \                     \"type\": \"Microsoft.Storage/storageAccounts\",\r\n                      \"name\":
-      \"[parameters('storageAccountName')]\",\r\n                      \"apiVersion\":
-      \"2015-06-15\",\r\n                      \"location\": \"East US\",\r\n                      \"properties\":
-      {\r\n                        \"accountType\": \"Standard_LRS\",\r\n                        \"supportsHttpsTrafficOnly\":
-      true\r\n                      }\r\n                    }\r\n                  ]\r\n
-      \               },\r\n                \"mode\": \"Incremental\"\r\n              }\r\n
-      \           }\r\n          ]\r\n        },\r\n        \"mode\": \"Incremental\"\r\n
-      \     }\r\n    }\r\n  ] // comment\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment mg validate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '3842'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --management-group-id --location --template-file --parameters --parameters
-        --parameters --parameters
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
-        server error. Diagnostic information: timestamp ''20201218T121812Z'', subscription
-        id '''', tracking id ''5bc8a0a6-582d-4982-8737-61ad93bed6f6'', request correlation
-        id ''5bc8a0a6-582d-4982-8737-61ad93bed6f6''."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '276'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 12:18:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
-    status:
-      code: 500
-      message: Internal Server Error
-- request:
-    body: "{\"location\": \"WestUS\", \"properties\": {\"parameters\": {\"nestedsubId\":
-      {\"value\": \"a1bfa635-f2bf-42f1-86b5-848c674fc321az\"}, \"targetMG\": {\"value\":
-      \"azure-cli-management000002\"}, \"nestedRG\": {\"value\": \"azure-cli-sub-resource-group000003\"},
-      \"storageAccountName\": {\"value\": \"armbuilddemo000005\"}}, \"mode\": \"Incremental\",
-      template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#\",\r\n
-      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"targetMG\":
-      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"nestedsubId\": {\r\n      \"type\":
-      \"string\"\r\n    },\r\n    \"nestedRG\": {\r\n      \"type\": \"string\"\r\n
-      \   },\r\n    \"storageAccountName\": {\r\n      \"type\": \"string\"\r\n    }\r\n
-      \ },\r\n  \"variables\": {\r\n    \"mgScope\": \"[concat('/providers/Microsoft.Management/managementGroups/',
-      parameters('targetMG'))]\"\r\n  },\r\n  \"resources\": [\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyDefinitions\",\r\n      \"name\": \"policy2\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"properties\": {\r\n        \"policyType\":
-      \"Custom\",\r\n        \"parameters\": {\r\n\r\n        },\r\n        \"policyRule\":
-      {\r\n          \"if\": {\r\n            \"field\": \"location\",\r\n            \"equals\":
-      \"northeurope\"\r\n          },\r\n          \"then\": {\r\n            \"effect\":
-      \"deny\"\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"type\":
-      \"Microsoft.Authorization/policyAssignments\",\r\n      \"name\": \"location-lock\",\r\n
-      \     \"apiVersion\": \"2016-12-01\",\r\n      \"dependsOn\": [\r\n        \"policy2\"\r\n
-      \     ],\r\n      \"properties\": {\r\n        \"scope\": \"[variables('mgScope')]\",\r\n
-      \       \"policyDefinitionId\": \"[concat(variables('mgScope'), '/providers/',
-      'Microsoft.Authorization/policyDefinitions/', 'policy2')]\"\r\n      }\r\n    },\r\n
-      \   {\r\n      \"type\": \"Microsoft.Resources/deployments\",\r\n      \"name\":
-      \"sdktest-subnested\",\r\n      \"apiVersion\": \"2018-05-01\",\r\n      \"location\":
-      \"West US\",\r\n      \"subscriptionId\": \"[parameters('nestedSubId')]\",\r\n
-      \     \"properties\": {\r\n        \"template\": {\r\n          \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n\r\n
-      \         },\r\n          \"variables\": {\r\n\r\n          },\r\n          \"resources\":
-      [\r\n            {\r\n              \"type\": \"Microsoft.Resources/resourceGroups\",\r\n
-      \             \"name\": \"[parameters('nestedRG')]\",\r\n              \"apiVersion\":
-      \"2018-05-01\",\r\n              \"location\": \"East US 2 EUAP\",\r\n              \"properties\":
-      {\r\n\r\n              }\r\n            },\r\n            {\r\n              \"type\":
-      \"Microsoft.Resources/deployments\",\r\n              \"name\": \"rg-nested\",\r\n
-      \             \"apiVersion\": \"2017-05-10\",\r\n              \"resourceGroup\":
-      \"[parameters('nestedRG')]\",\r\n              \"dependsOn\": [ \"[parameters('nestedRG')]\"
-      ],\r\n              \"properties\": {\r\n                \"template\": {\r\n
-      \                 \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \                 \"contentVersion\": \"1.0.0.0\",\r\n                  \"parameters\":
-      {\r\n\r\n                  },\r\n                  \"variables\": {\r\n\r\n
-      \                 },\r\n                  \"resources\": [\r\n                    {\r\n
-      \                     \"type\": \"Microsoft.Storage/storageAccounts\",\r\n                      \"name\":
-      \"[parameters('storageAccountName')]\",\r\n                      \"apiVersion\":
-      \"2015-06-15\",\r\n                      \"location\": \"East US\",\r\n                      \"properties\":
-      {\r\n                        \"accountType\": \"Standard_LRS\",\r\n                        \"supportsHttpsTrafficOnly\":
-      true\r\n                      }\r\n                    }\r\n                  ]\r\n
-      \               },\r\n                \"mode\": \"Incremental\"\r\n              }\r\n
-      \           }\r\n          ]\r\n        },\r\n        \"mode\": \"Incremental\"\r\n
-      \     }\r\n    }\r\n  ] // comment\r\n}}}"
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - deployment mg validate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '3842'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --management-group-id --location --template-file --parameters --parameters
-        --parameters --parameters
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/azure-cli-management000002/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
-  response:
-    body:
-      string: '{"error":{"code":"InternalServerError","message":"Encountered internal
-        server error. Diagnostic information: timestamp ''20201218T121819Z'', subscription
-        id '''', tracking id ''f52f898e-0116-420d-9e07-e1c803605a47'', request correlation
-        id ''f52f898e-0116-420d-9e07-e1c803605a47''."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '276'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 12:18:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-ms-ratelimit-remaining-tenant-writes:
-      - '1199'
-    status:
-      code: 500
-      message: Internal Server Error
+      code: 400
+      message: Bad Request
 version: 1
