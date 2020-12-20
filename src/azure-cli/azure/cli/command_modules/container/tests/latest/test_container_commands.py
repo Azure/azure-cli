@@ -227,7 +227,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         registry_username = 'clitestregistry1'
         registry_server = '{}.azurecr.io'.format(registry_username)
         image = '{}/nginx:latest'.format(registry_server)
-        password = 'g7evRSynCpF2TYGZmXm/TCdRs+xCWy0E'
+        password = '5+36OCtbIwfy8g5glC4bQQrFsfmMc3iD'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
