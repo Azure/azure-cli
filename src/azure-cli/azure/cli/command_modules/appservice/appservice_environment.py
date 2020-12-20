@@ -229,21 +229,21 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
         if not rt_found:
             logger.info('Ensure Route Table...')
             ase_route_table = RouteTable(location=location)
-            poller = network_client.route_tables.create_or_update(resource_group_name,
-                                                                  ase_route_table_name, ase_route_table)
+            poller = network_client.route_tables.begin_create_or_update(resource_group_name,
+                                                                        ase_route_table_name, ase_route_table)
             LongRunningOperation(cli_ctx)(poller)
 
             logger.info('Ensure Internet Route...')
             internet_route = Route(address_prefix='0.0.0.0/0', next_hop_type='Internet')
-            poller = network_client.routes.create_or_update(resource_group_name, ase_route_table_name,
-                                                            ase_route_name, internet_route)
+            poller = network_client.routes.begin_create_or_update(resource_group_name, ase_route_table_name,
+                                                                  ase_route_name, internet_route)
             LongRunningOperation(cli_ctx)(poller)
 
         rt = network_client.route_tables.get(resource_group_name, ase_route_table_name)
         if not subnet_obj.route_table or subnet_obj.route_table.id != rt.id:
             logger.info('Associate Route Table with Subnet...')
             subnet_obj.route_table = rt
-            poller = network_client.subnets.create_or_update(
+            poller = network_client.subnets.begin_create_or_update(
                 vnet_resource_group, vnet_name,
                 subnet_name, subnet_parameters=subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
@@ -277,7 +277,8 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
         if not nsg_found:
             logger.info('Ensure Network Security Group...')
             ase_nsg = NetworkSecurityGroup(location=location)
-            poller = network_client.network_security_groups.create_or_update(resource_group_name, ase_nsg_name, ase_nsg)
+            poller = network_client.network_security_groups.begin_create_or_update(resource_group_name,
+                                                                                   ase_nsg_name, ase_nsg)
             LongRunningOperation(cli_ctx)(poller)
 
             logger.info('Ensure Network Security Group Rules...')
@@ -334,7 +335,7 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
         if not subnet_obj.network_security_group or subnet_obj.network_security_group.id != nsg.id:
             logger.info('Associate Network Security Group with Subnet...')
             subnet_obj.network_security_group = NetworkSecurityGroup(id=nsg.id)
-            poller = network_client.subnets.create_or_update(
+            poller = network_client.subnets.begin_create_or_update(
                 vnet_resource_group, vnet_name,
                 subnet_name, subnet_parameters=subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
@@ -402,6 +403,6 @@ def _create_nsg_rule(cli_ctx, resource_group_name, network_security_group_name, 
                             name=security_rule_name)
 
     network_client = _get_network_client_factory(cli_ctx)
-    poller = network_client.security_rules.create_or_update(
+    poller = network_client.security_rules.begin_create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
     LongRunningOperation(cli_ctx)(poller)
