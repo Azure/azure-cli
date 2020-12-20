@@ -205,12 +205,18 @@ class IndeterminateProgressBar:
         self.cli_ctx = cli_ctx
         self.message = message
         self.start_time = datetime.datetime.utcnow()
+        self.hook = self.cli_ctx.get_progress_controller(
+            det=False,
+            spinner=humanfriendly.Spinner(  # pylint: disable=no-member
+                label='Running',
+                stream=sys.stderr,
+                hide_cursor=False))
 
     def update_progress(self):
-        self.cli_ctx.get_progress_controller().add(message=self.message)
+        self.hook.add(message=self.message)
 
     def end(self):
-        self.cli_ctx.get_progress_controller().end()
+        self.hook.end()
 
 
 class PercentageProgressBar:

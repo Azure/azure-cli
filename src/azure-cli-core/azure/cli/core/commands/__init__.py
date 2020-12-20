@@ -870,7 +870,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
-    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0,
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=500.0,
                  progress_bar=None):
 
         self.cli_ctx = cli_ctx
