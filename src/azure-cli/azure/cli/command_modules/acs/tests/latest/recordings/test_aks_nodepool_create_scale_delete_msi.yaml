@@ -651,8 +651,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
       code: 200
       message: OK
@@ -775,6 +773,10 @@ interactions:
       - nginx
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
@@ -806,6 +808,8 @@ interactions:
       string: "{\n  \"name\": \"05b1930e-49f5-c244-ab26-2aa52db00ffb\",\n  \"status\"\
         : \"InProgress\",\n  \"startTime\": \"2020-11-26T03:54:49.0256997Z\"\n }"
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/westus2/operations/e862890f-2df3-480e-a391-0a4d372a1887?api-version=2016-03-30
       cache-control:
       - no-cache
       content-length:

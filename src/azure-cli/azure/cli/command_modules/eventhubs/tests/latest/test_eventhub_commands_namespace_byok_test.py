@@ -31,7 +31,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
             'tags2': {'tag2=value2'},
             'sku': 'Standard',
             'tier': 'Standard',
-            'clusterarmid': '/subscriptions/326100e2-f69d-4268-8503-075374f62b6e/resourceGroups/prod-by3-533-rg/providers/Microsoft.EventHub/clusters/PMTestCluster',
+            'clusterarmid': '/subscriptions/6898adc8-5045-473d-a1bf-7012564f43cb/resourceGroups/prod-by3-533-rg/providers/Microsoft.EventHub/clusters/PMTestCluster',
             'authoname': self.create_random_name(prefix='cliAutho', length=20),
             'defaultauthorizationrule': 'RootManageSharedAccessKey',
             'accessrights': 'Send',
