@@ -3024,6 +3024,14 @@ examples:
     text: az network cross-region-lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
 """
 
+helps['network cross-region-lb address-pool delete'] = """
+type: command
+short-summary: Delete an address pool.
+examples:
+  - name: Delete an address pool.
+    text: az network cross-region-lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+"""
+
 helps['network cross-region-lb address-pool address'] = """
 type: group
 short-summary: Manage backend addresses of the cross-region load balance backend address pool.
