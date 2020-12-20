@@ -364,7 +364,7 @@ interactions:
       x-ms-arm-service-request-id:
       - 3620ebff-b99f-4da9-a9a0-bed0fe86eb4e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1191'
     status:
       code: 200
       message: OK
@@ -575,7 +575,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1197'
       x-powered-by:
       - ASP.NET
     status:
@@ -682,7 +682,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1190'
       x-powered-by:
       - ASP.NET
     status:
@@ -1016,7 +1016,7 @@ interactions:
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile><publishProfile profileName="webapp-privatelink-webapp000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-mwh-061.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-mwh-051.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="webapp-privatelink-webapp000002\$webapp-privatelink-webapp000002"
         userPWD="TqtFPheXHlst0tB7Qg2EWfNlkQ8PnN7rY0MwtCdhoZbQ3QJE0zPdzLRekopd" destinationAppUrl="http://webapp-privatelink-webapp000002.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
@@ -1032,7 +1032,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1875'
+      - '1294'
       content-type:
       - application/xml
       date:
@@ -1467,7 +1467,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1187'
       x-powered-by:
       - ASP.NET
     status:
@@ -2147,7 +2147,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '889'
+      - '900'
       content-type:
       - application/json
       date:
@@ -2177,15 +2177,261 @@ interactions:
     body: null
     headers:
       Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-11-30T19:03:23Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 19:08:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/webapp-privatelink-vnet000004/subnets/webapp-privatelink-subnet000005"},
+      "manualPrivateLinkServiceConnections": [{"properties": {"privateLinkServiceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-privatelink-webapp000002",
+      "groupIds": ["sites"]}, "name": "webapp-privatelink-endpointconn2000009"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '712'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"webapp-privatelink-endpoint2000008\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008\",\r\n
+        \ \"etag\": \"W/\\\"a52f5c00-a88c-41fd-992d-b5e712d1ab82\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"eee3dcf3-06c2-4b4d-b62e-58708ebb1076\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"webapp-privatelink-endpointconn2000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008/manualPrivateLinkServiceConnections/webapp-privatelink-endpointconn2000009\",\r\n
+        \       \"etag\": \"W/\\\"a52f5c00-a88c-41fd-992d-b5e712d1ab82\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-privatelink-webapp000002\",\r\n
+        \         \"groupIds\": [\r\n            \"sites\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
+        {\r\n            \"status\": \"Pending\",\r\n            \"description\":
+        \"Awaiting Approval\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/webapp-privatelink-vnet000004/subnets/webapp-privatelink-subnet000005\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/webapp-privatelink-endpoint2000008.nic.36a6c4cf-6871-4a86-a5d8-7674a7e6e718\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/9465ec73-c820-4772-b432-cd47328df799?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2473'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 19:09:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fc86731a-9f66-4291-a209-609b71fd9cc4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1184'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/9465ec73-c820-4772-b432-cd47328df799?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 19:09:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fdb50a88-4902-4006-aa32-accf388c75e8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-network/13.0.0 Azure-SDK-For-Python AZURECLI/2.15.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"webapp-privatelink-endpoint2000008\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008\",\r\n
+        \ \"etag\": \"W/\\\"5c7ba542-0955-4253-aadc-a6e2f00f4bce\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"eee3dcf3-06c2-4b4d-b62e-58708ebb1076\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"webapp-privatelink-endpointconn2000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008/manualPrivateLinkServiceConnections/webapp-privatelink-endpointconn2000009\",\r\n
+        \       \"etag\": \"W/\\\"5c7ba542-0955-4253-aadc-a6e2f00f4bce\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-privatelink-webapp000002\",\r\n
+        \         \"groupIds\": [\r\n            \"sites\"\r\n          ],\r\n          \"privateLinkServiceConnectionState\":
+        {\r\n            \"status\": \"Pending\",\r\n            \"description\":
+        \"\",\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n
+        \       \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/webapp-privatelink-vnet000004/subnets/webapp-privatelink-subnet000005\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/webapp-privatelink-endpoint2000008.nic.36a6c4cf-6871-4a86-a5d8-7674a7e6e718\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2457'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 30 Nov 2020 19:09:20 GMT
+      etag:
+      - W/"5c7ba542-0955-4253-aadc-a6e2f00f4bce"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 49080271-6811-4015-bac8-c070fc844561
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g --resource-name -n --type
+      - -g -n --type
       User-Agent:
       - python/3.8.6 (Linux-4.15.0-123-generic-x86_64-with-glibc2.27) AZURECLI/2.16.0
     method: GET
@@ -2197,7 +2443,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '889'
+      - '7967'
       content-type:
       - application/json
       date:
@@ -2231,7 +2477,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection reject
       Connection:
       - keep-alive
       ParameterSetName:
@@ -2247,7 +2493,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '889'
+      - '887'
       content-type:
       - application/json
       date:
@@ -2274,16 +2520,25 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-privatelink-webapp000002/privateEndpointConnections/webapp-privatelink-endpointconn2000009-1da45b26-9fd4-43e9-b64f-aadae2b50b47",
+      "name": "webapp-privatelink-endpointconn2000009-1da45b26-9fd4-43e9-b64f-aadae2b50b47",
+      "type": "Microsoft.Web/sites/privateEndpointConnections", "properties": {"provisioningState":
+      "Pending", "privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/webapp-privatelink-endpoint2000008"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": null,
+      "actionsRequired": "None"}, "ipAddresses": []}}'
     headers:
       Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection reject
       Connection:
       - keep-alive
+      Content-Length:
+      - '910'
+      Content-Type:
+      - application/json
       ParameterSetName:
       - -g --resource-name -n --type
       User-Agent:
@@ -2318,6 +2573,8 @@ interactions:
       - 4.0.30319
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1182'
       x-powered-by:
       - ASP.NET
     status:
@@ -2331,7 +2588,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection reject
       Connection:
       - keep-alive
       ParameterSetName:
@@ -2381,7 +2638,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection reject
       Connection:
       - keep-alive
       ParameterSetName:
@@ -2431,7 +2688,7 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network private-endpoint-connection approve
+      - network private-endpoint-connection reject
       Connection:
       - keep-alive
       ParameterSetName:
