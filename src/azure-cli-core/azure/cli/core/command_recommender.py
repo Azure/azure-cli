@@ -247,7 +247,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
 
             return [candidate['recommendation'] for candidate in candidates]
 
-        def replace_param_values(command):
+        def replace_param_values(command):  # pylint: disable=unused-variable
             """Replace the parameter values in a command with user's input values
 
             :param command: The command whose parameter value needs to be replaced
