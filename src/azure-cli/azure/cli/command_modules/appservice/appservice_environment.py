@@ -213,7 +213,7 @@ def _validate_subnet_empty(cli_ctx, subnet_id):
     subnet_name = subnet_id_parts['resource_name']
     network_client = _get_network_client_factory(cli_ctx)
     subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
-    if subnet_obj.resource_navigation_links:
+    if subnet_obj.resource_navigation_links or subnet_obj.service_association_links:
         raise CLIError('Subnet is not empty.')
 
 
