@@ -1991,7 +1991,7 @@ type: group
 short-summary: Manage the metadata for file in file system.
 """
 
-helps['storage fs metadata show'] = """
+helps['storage fs file metadata show'] = """
 type: command
 short-summary: Return all user-defined metadata for the specified file.
 examples:
