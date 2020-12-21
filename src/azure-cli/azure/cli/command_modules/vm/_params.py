@@ -640,7 +640,10 @@ def load_arguments(self, _):
     # region VM & VMSS Shared
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
-            c.argument('no_auto_upgrade', options_list=['--no-auto-upgrade-minor'], arg_type=get_three_state_flag(), help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
+            c.argument('no_auto_upgrade',
+                       options_list=['--no-auto-upgrade-minor', c.deprecate(target='--no-auto-upgrade', redirect='--no-auto-upgrade-minor')],
+                       arg_type=get_three_state_flag(),
+                       help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
         with self.argument_context('{} run-command'.format(scope)) as c:
             c.argument('command_id', completer=get_vm_run_command_completion_list, help="The command id. Use 'az {} run-command list' to get the list".format(scope))

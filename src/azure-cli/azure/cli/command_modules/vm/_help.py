@@ -1394,7 +1394,7 @@ examples:
   - name: Add an extension and enable automatic upgrade.
     text: |
         az vm extension set -n extName --publisher publisher --vm-name MyVM -g MyResourceGroup \\
-        --enable-automatic-upgrade true
+        --enable-auto-upgrade true
 parameters:
   - name: --name -n
     populator-commands:
@@ -2469,7 +2469,7 @@ examples:
   - name: Add an extension and enable automatic upgrade.
     text: >
         az vmss extension set -n extName --publisher publisher --vmss-name my-vmss -g my-group \\
-        --enable-automatic-upgrade true
+        --enable-auto-upgrade true
 """
 
 helps['vmss extension show'] = """
