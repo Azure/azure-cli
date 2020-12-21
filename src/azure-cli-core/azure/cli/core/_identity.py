@@ -412,7 +412,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                        "It contains login information of all logged-in users. Make sure you protect it safely.", path)
 
         cache = self._load_msal_cache()
-        cache._reload_if_necessary()
+        cache._reload_if_necessary()  # pylint: disable=protected-access
         with open(path, "w") as fd:
             fd.write(cache.serialize())
 
@@ -429,7 +429,7 @@ class AdalCredentialCache:
     """
 
     # TODO: Persist SP to encrypted cache
-    def __init__(self, async_persist=False, cli_ctx=None):
+    def __init__(self, async_persist=False):
 
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or

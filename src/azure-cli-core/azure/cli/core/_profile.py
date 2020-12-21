@@ -73,12 +73,13 @@ def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
 
 def _detect_adfs_authority(authority_url, tenant):
     """Prepare authority and tenant for Azure Identity with ADFS support.
-    If `authority_url` ends with '/adfs', `tenant` will be set to 'adfs'."""
+    If `authority_url` ends with '/adfs', `tenant` will be set to 'adfs'. For example:
+        'https://adfs.redmond.azurestack.corp.microsoft.com/adfs'
+        -> ('https://adfs.redmond.azurestack.corp.microsoft.com/', 'adfs')
+    """
     authority_url = authority_url.rstrip('/')
 
-    if authority_url.endswith('adfs'):
-        # 'https://adfs.redmond.azurestack.corp.microsoft.com/adfs' ->
-        #   ('https://adfs.redmond.azurestack.corp.microsoft.com', 'adfs')
+    if authority_url.endswith('/adfs'):
         authority_url = authority_url[:-len('/adfs')]
         # The custom tenant is discarded in ADFS environment
         tenant = 'adfs'
@@ -116,7 +117,7 @@ def _attach_token_tenant(subscription, tenant):
 class Profile:
 
     def __init__(self, cli_ctx=None, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
-                 async_persist=True, store_adal_cache=True):
+                 async_persist=True, store_adal_cache=False):
         """Class to manage CLI's accounts (profiles) and identities (credentials).
 
         :param cli_ctx:
@@ -141,9 +142,9 @@ class Profile:
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = None
         if store_adal_cache:
-            self._adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+            self._adal_cache = AdalCredentialCache()
 
-    # pylint: disable=too-many-branches,too-many-statements
+    # pylint: disable=too-many-branches,too-many-statements,too-many-locals
     def login(self,
               interactive,
               username,
@@ -531,7 +532,7 @@ class Profile:
             self._storage[_SUBSCRIPTIONS] = subscriptions
 
             # Always remove credential from the legacy cred cache, regardless of MSAL cache, to be deprecated
-            adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+            adal_cache = AdalCredentialCache()
             adal_cache.remove_cached_creds(user_or_sp)
 
             logger.warning('Account %s has been logged out from Azure CLI.', user_or_sp)
@@ -562,7 +563,7 @@ class Profile:
         self._storage[_SUBSCRIPTIONS] = []
 
         # Always remove credentials from the legacy cred cache, regardless of MSAL cache
-        adal_cache = AdalCredentialCache(cli_ctx=self.cli_ctx)
+        adal_cache = AdalCredentialCache()
         adal_cache.remove_all_cached_creds()
         logger.warning('All accounts were logged out.')
 
@@ -857,8 +858,8 @@ class Profile:
         return scopes
 
 
+# pylint: disable=no-method-argument,no-self-argument,too-few-public-methods
 class MsiAccountTypes:
-    # pylint: disable=no-method-argument,no-self-argument
     system_assigned = 'MSI'
     user_assigned_client_id = 'MSIClient'
     user_assigned_object_id = 'MSIObject'
@@ -909,6 +910,7 @@ class SubscriptionFinder:
         return result
 
     def find_using_common_tenant(self, username, credential=None):
+        # pylint: disable=too-many-statements
         import adal
         all_subscriptions = []
         empty_tenants = []

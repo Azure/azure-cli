@@ -34,6 +34,7 @@ class CredentialAdaptor:
 
     def _get_token(self, *scopes):
         external_tenant_tokens = []
+        # If scopes is not provided, use CLI-managed resource
         scopes = scopes or resource_to_scopes(self._resource)
         logger.debug("Retrieving token from MSAL for scopes %r", scopes)
         try:
@@ -85,14 +86,7 @@ class CredentialAdaptor:
 
     def get_token(self, *scopes):
         logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
-
-        # Deal with an old Track 2 SDK issue where the default credential_scopes is extended with
-        # custom credential_scopes. Instead, credential_scopes should be replaced by custom credential_scopes.
-        # https://github.com/Azure/azure-sdk-for-python/issues/12947
-        # We simply remove the first one if there are multiple scopes provided.
-        if len(scopes) > 1:
-            scopes = scopes[1:]
-
+        scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(*scopes)
         return token
 
@@ -101,3 +95,24 @@ class CredentialAdaptor:
         import socket
         logger.warning("A Cloud Shell credential problem occurred. When you report the issue with the error "
                        "below, please mention the hostname '%s'", socket.gethostname())
+
+
+def _normalize_scopes(scopes):
+    """Normalize scopes to workaround some SDK issues."""
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/239 don't maintain
+    # credential_scopes and call `get_token` with empty scopes.
+    # As a workaround, return None so that the CLI-managed resource is used.
+    if not scopes:
+        logger.debug("No scope is provided by the SDK, use the CLI-managed resource.")
+        return None
+
+    # Track 2 SDKs generated before https://github.com/Azure/autorest.python/pull/745 extend default
+    # credential_scopes with custom credential_scopes. Instead, credential_scopes should be replaced by
+    # custom credential_scopes. https://github.com/Azure/azure-sdk-for-python/issues/12947
+    # As a workaround, remove the first one if there are multiple scopes provided.
+    if len(scopes) > 1:
+        logger.debug("Multiple scopes are provided by the SDK, discarding the first one: %s", scopes[0])
+        return scopes[1:]
+
+    return scopes

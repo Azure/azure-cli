@@ -1841,6 +1841,7 @@ class TestProfile(unittest.TestCase):
 
         # With pytest, use -o log_cli=True to manually check the log
 
+
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
     def write(self, content):
@@ -1938,7 +1939,7 @@ class TestProfileUtils(unittest.TestCase):
 
 
 class TestUtils(unittest.TestCase):
-    def test_get_authority_and_tenant(self):
+    def test_detect_adfs_authority(self):
         # Public cloud
         # Default tenant
         self.assertEqual(_detect_adfs_authority('https://login.microsoftonline.com', None),
