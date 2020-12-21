@@ -623,6 +623,14 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
         # support autorest 3
         handler_args['polling'] = False
 
+    # Support track2 SDK.
+    # In track2 SDK, there is no parameter 'polling' in SDK, but just use '**kwargs'.
+    # So we check the name of the operation to see if it's a long running operation.
+    # The name of long running operation in SDK is like 'begin_xxx_xxx'.
+    op_name = handler.__name__
+    if op_name and op_name.startswith('begin_') and no_wait_enabled:
+        handler_args['polling'] = False
+
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
