@@ -181,6 +181,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('min_tls_version', options_list=['--min-tls-version', '--mintls'],
                    type=str, help='Specify the minimum TLS version to support for this hub. Can be set to'
                                   ' "1.2" to have clients that use a TLS version below 1.2 to be rejected.')
+        c.argument('tags', tags_type)
 
     for subgroup in ['consumer-group', 'policy', 'certificate', 'routing-endpoint', 'route']:
         with self.argument_context('iot hub {}'.format(subgroup)) as c:

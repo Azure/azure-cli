@@ -33,12 +33,14 @@ class IoTHubTest(ScenarioTest):
         # Test hub life cycle in free tier
         self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 4'.format(hub, rg), expect_failure=True)
-        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 2'.format(hub, rg),
+        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 2 --tags a=b c=d'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('name', hub),
                          self.check('sku.name', 'F1'),
                          self.check('properties.minTlsVersion', None),
-                         self.check('properties.eventHubEndpoints.events.partitionCount', '2')])
+                         self.check('properties.eventHubEndpoints.events.partitionCount', '2'),
+                         self.check('length(tags)', 2),
+                         self.check('tags', {'a': 'b', 'c': 'd'})])
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
         # Test 'az iot hub create'
@@ -86,7 +88,7 @@ class IoTHubTest(ScenarioTest):
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
-                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2}'
+                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2} --tags e=f g=h'
                                .format(hub, storageConnectionString, containerName)).get_output_in_json()
 
         assert updated_hub['properties']['eventHubEndpoints']['events']['partitionCount'] == 4
@@ -101,6 +103,7 @@ class IoTHubTest(ScenarioTest):
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
         assert updated_hub['properties']['storageEndpoints']['$default']['sasTtlAsIso8601'] == '3:00:00'
+        assert updated_hub['tags'] == {'e': 'f', 'g': 'h'}
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -404,7 +407,7 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'identity-test-hub-cli-1'
+        identity_hub = 'identity-test-hub-cli-2'
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
