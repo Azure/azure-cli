@@ -397,9 +397,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent Connected Registry.', required=False)
         c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
-        c.argument('fresh_install', options_list=['--fresh-install'], help='Creates a new password for the sync token.', required=False)
+        c.argument('cleanup', options_list=['--cleanup'], help='It will aslo delete the sync token and the scope map resources.', required=False)
         c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
-        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag())
+        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")

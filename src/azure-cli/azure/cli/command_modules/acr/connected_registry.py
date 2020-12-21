@@ -55,7 +55,7 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
                                   sync_message_ttl=None,
                                   sync_window=None,
                                   log_level=None,
-                                  sync_audit_logs_enabled=True):
+                                  sync_audit_logs_enabled=False):
 
     if bool(sync_token_name) == bool(repositories):
         raise CLIError("usage error: you need to provide either --sync-token-name or --repository, but not both.")
@@ -63,11 +63,10 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if not registry.data_endpoint_enabled:
-        logger.warning("Registry '%s' dedicated data endpoint is disabled. Enabling...", registry_name)
-        from .custom import acr_update_custom, acr_update_get, acr_update_set
-        acr_update_set(cmd, cf_acr_registries(cmd.cli_ctx), registry_name, resource_group_name,
-                       parameters=acr_update_custom(cmd, acr_update_get(cmd), data_endpoint_enabled=True))
-        logger.info("Registry '%s' dedicated data endpoint has been successfully enabled.", registry_name)
+        raise CLIError("Can't create the connected registry '{}' ".format(connected_registry_name,) +
+                       "because the cloud registry '{}' data endpoint is disabled. ".format(registry_name) +
+                       "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
+                       "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
 
     ErrorResponseException = cmd.get_models('ErrorResponseException')
     parent = None
@@ -201,24 +200,38 @@ def acr_connected_registry_delete(cmd,
                                   client,
                                   connected_registry_name,
                                   registry_name,
+                                  cleanup=False,
                                   yes=False,
                                   resource_group_name=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
-
     user_confirmation("Are you sure you want to delete the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
     try:
+        connected_registry = acr_connected_registry_show(
+            cmd, client, connected_registry_name, registry_name, resource_group_name)
         result = client.delete(resource_group_name, registry_name, connected_registry_name)
-        msg = "Connected registry successfully deleted. Please cleanup your sync tokens and scope maps. " + \
-              "Run the following commands for cleanup: \n\t" + \
-              "az acr token delete -n <sync token> -r {}\n\t".format(registry_name) + \
-              "az acr scope-map delete -n <sync scope map> -r {}\n".format(registry_name) + \
-              "Run the following command on all ascendency to remove the deleted registry gateway access: \n\t" + \
-              "az acr scope-map update -n <parent sync scope map> -r {} --remove-gateway {}".format(
-                  registry_name, " ".join([connected_registry_name] + DEFAULT_GATEWAY_SCOPE))
-        logger.warning(msg)
+        sync_token = get_token_from_id(cmd, connected_registry.parent.sync_properties.token_id)
+        sync_token_name = sync_token.name
+        sync_scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
+        if cleanup:
+            from .token import acr_token_delete
+            from .scope_map import acr_scope_map_delete
+            token_client = cf_acr_tokens(cmd.cli_ctx)
+            scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
+
+            acr_token_delete(cmd, token_client, registry_name, sync_token_name, yes, resource_group_name)
+            acr_scope_map_delete(cmd, scope_map_client, registry_name, sync_scope_map_name, yes, resource_group_name)
+        else:
+            msg = "Connected registry successfully deleted. Please cleanup your sync tokens and scope maps. " + \
+                "Run the following commands for cleanup: \n\t" + \
+                "az acr token delete -n {} -r {} --yes\n\t".format(sync_token_name, registry_name) + \
+                "az acr scope-map delete -n {} -r {} --yes\n".format(sync_scope_map_name, registry_name) + \
+                "Run the following command on all ascendency to remove the deleted registry gateway access: \n\t" + \
+                "az acr scope-map update -n <scope-map-name> -r {} --remove-gateway {} --yes".format(
+                    registry_name, " ".join([connected_registry_name] + DEFAULT_GATEWAY_SCOPE))
+            logger.warning(msg)
         return result
     except ValidationError as e:
         raise CLIError(e)
@@ -285,58 +298,6 @@ def acr_connected_registry_show(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     return client.get(resource_group_name, registry_name, connected_registry_name)
-
-
-def acr_connected_registry_install_info(cmd,
-                                        client,
-                                        connected_registry_name,
-                                        registry_name,
-                                        fresh_install=False,
-                                        resource_group_name=None):
-    registry, resource_group_name = validate_managed_registry(
-        cmd, registry_name, resource_group_name)
-    connected_registry = acr_connected_registry_show(
-        cmd, client, connected_registry_name, registry_name, resource_group_name)
-    connected_registry_login_server = connected_registry.login_server.host
-    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
-    parent_id = connected_registry.parent.id
-    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
-    if parent_id:
-        parent = parent_id.split('/connectedRegistry/')[1]
-        parent = acr_connected_registry_show(
-            cmd, client, parent, registry_name, resource_group_name)
-        parent_registry_endpoint = parent.login_server.host
-    else:
-        parent_registry_endpoint = registry.login_server
-
-    if fresh_install:
-        from ._client_factory import cf_acr_token_credentials
-        from .token import acr_token_credential_generate
-        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
-        poller = acr_token_credential_generate(
-            cmd, cred_client, registry_name, sync_token_name,
-            password1=True, password2=True, resource_group_name=resource_group_name)
-        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
-        sync_username = credentials.username
-        sync_password = {
-            "password1": credentials.passwords[0].value,
-            "password2": credentials.passwords[1].value
-        }
-        logger.warning('Please store your generated credentials safely.')
-    else:
-        sync_username = "<sync token username>"
-        sync_password = "<sync token password>"
-
-    return {
-        "ACR_REGISTRY_NAME": connected_registry_name,
-        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
-        "ACR_SYNC_TOKEN_NAME": sync_token_name,
-        "ACR_SYNC_TOKEN_USERNAME": sync_username,
-        "ACR_SYNC_TOKEN_PASSWORD": sync_password,
-        "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,
-        "ACR_PARENT_LOGIN_SERVER": parent_registry_endpoint,
-        "ACR_PARENT_PROTOCOL": "https"
-    }
 
 
 def acr_connected_registry_list_client_tokens(cmd,
@@ -409,86 +370,71 @@ def _get_descendancy(family_tree, parent_id):
             result.extend(descendancy)
     return result
 
-
-#TODO delete if not used
-def _verify_parent_permissions(cmd,
-                               registry_name,
-                               connected_registry_name,
-                               parent):
-    sync_token = get_token_from_id(cmd, parent.parent.sync_properties.token_id)
-    parent_sync_scope_map = get_scope_map_from_id(cmd, sync_token.scope_map_id)
-    parent_sync_actions = parent_sync_scope_map.actions
-    gateway_list = [[connected_registry_name] + DEFAULT_GATEWAY_SCOPE]
-    gateway_actions = parse_actions_from_gateways(gateway_list)
-
-    # TODO should I loop through all parents?
-    if not all(action in parent_sync_actions  for action in gateway_actions):
-        raise CLIError(
-            "Parent '{}' sync token '{}'. ".format(parent.name, sync_token.name) +
-            "Ensure the sync token has the following permissions: \n\t{}\n".format(gateway_actions) +
-            "Run the command: az acr scope-map update -n {} -r {} --add-gateway {}".format(
-                connected_registry_name, registry_name, gateway_list
-            ))
+# region connected-registry install subgroup
+def acr_connected_registry_install_info(cmd,
+                                        client,
+                                        connected_registry_name,
+                                        registry_name,
+                                        resource_group_name=None):
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, resource_group_name)
 
 
-#TODO delete if not used
-def _update_parent_sync_token(cmd,
-                              resource_group_name,
-                              registry_name,
-                              connected_registry_name,
-                              parent_sync_token_id):
-    from .scope_map import acr_scope_map_update
-    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
-    sync_token = get_token_from_id(cmd, parent_sync_token_id)
-    scope_map_name = sync_token.scope_map_id.split('/scopeMaps/')[1]
-    gateway_actions_list = [[connected_registry_name] + DEFAULT_GATEWAY_SCOPE]
-
-    acr_scope_map_update(cmd, scope_map_client,
-                         registry_name,
-                         scope_map_name,
-                         resource_group_name=resource_group_name,
-                         add_gateway=gateway_actions_list)
+def acr_connected_registry_install_renew_credentials(cmd,
+                                                     client,
+                                                     connected_registry_name,
+                                                     registry_name,
+                                                     resource_group_name=None):
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, resource_group_name)
 
 
-#TODO delete if not used
-def _update_sync_token_scope_map(cmd,
-                                 resource_group_name,
-                                 registry_name,
-                                 connected_registry_name,
-                                 sync_token_id,
-                                 mode,
-                                 add_repository=None,
-                                 remove_repository=None):
-    scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
-    sync_token = get_token_from_id(cmd, sync_token_id)
-    current_scope_map = get_scope_map_from_id(cmd, sync_token.scope_map_id)
-    current_actions = current_scope_map.actions
-    add_repo_set = set(add_repository) if add_repository else set()
-    remove_repo_set = set(remove_repository) if remove_repository else set()
-    duplicate_repos = set.intersection(add_repo_set, remove_repo_set)
-    if duplicate_repos:
-        errors = sorted(map(lambda action: action[action.find('/') + 1:], duplicate_repos))
-        raise CLIError(
-            'Update ambiguity. Duplicate repositories were provided with ' +
-            '--add-repository and --remove-repository arguments.\n{}'.format(errors))
+def _get_install_info(cmd,
+                      client,
+                      connected_registry_name,
+                      registry_name,
+                      regenerate_credentials,
+                      resource_group_name=None):
+    registry, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    connected_registry = acr_connected_registry_show(
+        cmd, client, connected_registry_name, registry_name, resource_group_name)
+    connected_registry_login_server = connected_registry.login_server.host
+    parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
+    parent_id = connected_registry.parent.id
+    sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
+    if parent_id:
+        parent = parent_id.split('/connectedRegistry/')[1]
+        parent = acr_connected_registry_show(
+            cmd, client, parent, registry_name, resource_group_name)
+        parent_registry_endpoint = parent.login_server.host
+    else:
+        parent_registry_endpoint = registry.login_server
 
-    repositories = parse_repositories_from_actions(current_actions)
-    repositories = list(set(repositories).union(add_repo_set).difference(remove_repo_set))
-    if not repositories:
-        raise CLIError("Update blocked: all repository would be removed from the connected" +
-                       "registry '{}'.The connected registry needs to ".format(connected_registry_name) +
-                       "have access to at least one repository")
-    repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
-    actions_list = [repo for repo in current_actions if repo.startswith(GATEWAY)]
-    actions_list += parse_actions_from_repositories(repository_actions_list)
+    if regenerate_credentials:
+        from ._client_factory import cf_acr_token_credentials
+        from .token import acr_token_credential_generate
+        cred_client = cf_acr_token_credentials(cmd.cli_ctx)
+        poller = acr_token_credential_generate(
+            cmd, cred_client, registry_name, sync_token_name,
+            password1=True, password2=True, resource_group_name=resource_group_name)
+        credentials = LongRunningOperation(cmd.cli_ctx)(poller)
+        sync_username = credentials.username
+        sync_password = {
+            "password1": credentials.passwords[0].value,
+            "password2": credentials.passwords[1].value
+        }
+        logger.warning('Please store your generated credentials safely.')
+    else:
+        sync_username = "<sync token username>"
+        sync_password = "<sync token password>"
 
-    try:
-        return scope_map_client.update(
-            resource_group_name,
-            registry_name,
-            current_scope_map.name,
-            current_scope_map.description,
-            actions_list
-        )
-    except ValidationError as e:
-        raise CLIError(e)
+    return {
+        "ACR_REGISTRY_NAME": connected_registry_name,
+        "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
+        "ACR_SYNC_TOKEN_NAME": sync_token_name,
+        "ACR_SYNC_TOKEN_USERNAME": sync_username,
+        "ACR_SYNC_TOKEN_PASSWORD": sync_password,
+        "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,
+        "ACR_PARENT_LOGIN_SERVER": parent_registry_endpoint,
+        "ACR_PARENT_PROTOCOL": "https"
+    }
+# endregion

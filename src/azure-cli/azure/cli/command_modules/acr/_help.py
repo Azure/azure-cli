@@ -1247,20 +1247,6 @@ examples:
             --name myconnectedregistry --yes
 """
 
-helps['acr connected-registry install-info'] = """
-type: command
-short-summary: Retrieves information required to activate a connected registry.
-examples:
-  - name: Prints the values requiered to activate a connected registry in json format
-    text: |
-        az acr connected-registry install --registry mycloudregistry 
-            --name myconnectedregistry 
-  - name: Prints the values in json format requiered to activate a connected registry and generates the sync token credentials.
-    text: |
-        az acr connected-registry install --registry mycloudregistry 
-            --name myconnectedregistry --fresh-install
-"""
-
 helps['acr connected-registry deactivate'] = """
 type: command
 short-summary: Deactivate a connected registry from Azure Container Registry.
@@ -1317,6 +1303,29 @@ examples:
     text: |
         az acr connected-registry update --registry mycloudregistry --name mymirroracr
             --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
+"""
+
+helps['acr connected-registry install'] = """
+type: group
+short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
+"""
+
+helps['acr connected-registry install info'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry.
+examples:
+  - name: Prints the values requiered to activate a connected registry in json format
+    text: >
+        az acr connected-registry install --registry mycloudregistry --name myconnectedregistry
+"""
+
+helps['acr connected-registry install renew-credentials'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+examples:
+  - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
+    text: >
+        az acr connected-registry install --registry mycloudregistry --name myconnectedregistry
 """
 # endregion
 

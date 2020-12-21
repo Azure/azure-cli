@@ -101,10 +101,9 @@ def connected_registry_list_output_format(result):
     family_tree = {}
     for reg in result:
         parent_id = _get_value(reg, 'parent', 'id')
-        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1] #TODO roy remove 
-        name = ' ' + _get_value(reg, 'name')
+        parent_name = '' if parent_id.isspace() else parent_id.split('/connectedRegistries/')[1]
         family_tree[_get_value(reg, 'id')] = {
-            "name": name,
+            "name": _get_value(reg, 'name'),
             "id": _get_value(reg, 'id'),
             "connectionState": _get_value(reg, 'connectionState'),
             "parent_name": parent_name,
@@ -130,15 +129,12 @@ def connected_registry_list_output_format(result):
     return _output_format(result_list_format, _connected_registry_list_format_group)
 
 
-def _recursive_format_list_acr_childs(family_tree, connected_registry_id, level=""):
+def _recursive_format_list_acr_childs(family_tree, connected_registry_id):
     connected_registry = family_tree[connected_registry_id]
     childs = connected_registry['childs']
-    if connected_registry['parent_id'] in family_tree:
-        level += "\t" #TODO roy remove if no tree view
-        connected_registry['name'] = level + connected_registry['name']
     result = [connected_registry]
     for child_id in childs:
-        result.extend(_recursive_format_list_acr_childs(family_tree, child_id, level))
+        result.extend(_recursive_format_list_acr_childs(family_tree, child_id))
     return result
 
 
@@ -301,7 +297,6 @@ def _connected_registry_format_group(item):
         ('CONNECTION STATE', _get_value(item, 'connectionState')),
         ('PARENT', parent_name),
         ('LOGIN SERVER', _get_value(item, 'loginServer', 'host')),
-        ('LAST ACTIVITY (UTC)', _get_value(item, 'lastActivityTime')),
         ('LAST SYNC (UTC)', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
         ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
         ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow'))
