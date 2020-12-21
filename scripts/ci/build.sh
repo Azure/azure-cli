@@ -38,7 +38,7 @@ function title {
 ##############################################
 # Update version strings
 title 'Determine version'
-. $script_dir/version.sh post1
+. $script_dir/version.sh $1
 # echo -n $version > ./artifacts/version
 
 ##############################################
@@ -86,7 +86,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0.post1"
+VERSION = "1.0.0.$version"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',

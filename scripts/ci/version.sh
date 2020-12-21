@@ -3,17 +3,13 @@
 # Update the version strings in the source code
 
 # Input:
-#   $1 - the version string, if omitted, use $TRAVIS_BUILD_NUMBER
+#   $1 - the version string, if omitted, use current time
 
 version=$1
 
 if [ -z $version ]; then
-    version=$TRAVIS_BUILD_NUMBER
-fi
-
-if [ -z $version ]; then
     echo 'Use utc timestamp as version'
-    version=`date -u '+%Y%m%d%H%M%S'`
+    version=dev`date -u '+%Y%m%d%H%M%S'`
 fi
 
 echo "Replace with version: $version"

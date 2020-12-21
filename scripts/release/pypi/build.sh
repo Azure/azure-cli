@@ -22,7 +22,7 @@ pip list
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
 echo $script_dir
 if [[ "$branch" != "release" ]]; then
-    . $script_dir/../../ci/version.sh post1
+    . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
 
 for setup_file in $(find src -name 'setup.py' | grep -v azure-cli-testsdk); do
