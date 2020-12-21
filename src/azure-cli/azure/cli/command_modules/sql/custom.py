@@ -1363,7 +1363,7 @@ def db_update(
     if _should_show_backup_storage_redundancy_warnings(location):
         if storage_account_type == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
-            
+
     #####
     # Set sku-related properties
     #####
