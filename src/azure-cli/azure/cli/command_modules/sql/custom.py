@@ -1363,6 +1363,7 @@ def db_update(
     if _should_show_backup_storage_redundancy_warnings(location):
         if storage_account_type == 'GRS':
             _backup_storage_redundancy_specify_geo_warning()
+    print(storage_account_type)
 
     #####
     # Set sku-related properties
@@ -1428,6 +1429,11 @@ def db_update(
 
     if read_replica_count is not None:
         instance.read_replica_count = read_replica_count
+
+    # Set storage_account_type even if storage_acount_type is None
+    # Otherwise, empty value defaults to current storage_account_type
+    # and will potentially conflict with a previously requested update
+    instance.storage_account_type = storage_account_type
 
     #####
     # Set other (serverless related) properties
