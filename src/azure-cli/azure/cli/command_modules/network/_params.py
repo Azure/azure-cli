@@ -1747,7 +1747,6 @@ def load_arguments(self, _):
         c.argument('status_code_ranges', help='Space-separated list of status codes in MIN-MAX or VAL format.', nargs='+', validator=validate_status_code_ranges)
 
     with self.argument_context('network traffic-manager profile update') as c:
-        c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('monitor_protocol', monitor_protocol_type, default=None)
 
     with self.argument_context('network traffic-manager profile check-dns') as c:
