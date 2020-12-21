@@ -3573,8 +3573,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     if not delegated:
         subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=subnetObj)
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet, subnet,
+                                                   subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
