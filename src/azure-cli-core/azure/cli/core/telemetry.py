@@ -77,7 +77,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
             AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
 
