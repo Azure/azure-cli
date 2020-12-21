@@ -61,6 +61,7 @@ def _explode_list_args(args):
     from azure.cli.core.commands.validators import IterateValue
     list_args = {argname: argvalue for argname, argvalue in vars(args).items()
                  if isinstance(argvalue, IterateValue)}
+    # test to modify core
     if not list_args:
         yield args
     else:
