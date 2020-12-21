@@ -5693,7 +5693,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
                                    profile_status=ProfileStatus.enabled.value,
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
     client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
@@ -5709,14 +5709,15 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                                    timeout_in_seconds=timeout,
                                                    tolerated_number_of_failures=max_failures,
                                                    custom_headers=monitor_custom_headers,
-                                                   expected_status_code_ranges=status_code_ranges))
+                                                   expected_status_code_ranges=status_code_ranges),
+                      max_return=max_return)
     return client.create_or_update(resource_group_name, traffic_manager_profile_name, profile)
 
 
 def update_traffic_manager_profile(instance, profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
     if tags is not None:
         instance.tags = tags
     if profile_status is not None:
@@ -5744,6 +5745,8 @@ def update_traffic_manager_profile(instance, profile_status=None, routing_method
         instance.monitor_config.custom_headers = monitor_custom_headers
     if status_code_ranges is not None:
         instance.monitor_config.expected_status_code_ranges = status_code_ranges
+    if max_return is not None:
+        instance.max_return = max_return
 
     # TODO: Remove workaround after https://github.com/Azure/azure-rest-api-specs/issues/1940 fixed
     for endpoint in instance.endpoints:
