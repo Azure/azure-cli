@@ -56,9 +56,10 @@ def delete_network_resource_property_entry(resource, prop):
         with cmd.update_context(item) as c:
             c.set_param(prop, keep_items)
         if no_wait:
-            sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item)
+            sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, resource_name, item)
         else:
-            result = sdk_no_wait(no_wait, client.create_or_update, resource_group_name, resource_name, item).result()
+            result = sdk_no_wait(no_wait, client.begin_create_or_update,
+                                 resource_group_name, resource_name, item).result()
             if next((x for x in getattr(result, prop) or [] if x.name.lower() == item_name.lower()), None):
                 raise CLIError("Failed to delete '{}' on '{}'".format(item_name, resource_name))
 

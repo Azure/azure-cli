@@ -155,7 +155,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     )
 
     with self.command_group('storage account encryption-scope', encryption_scope_sdk,
-                            custom_command_type=encryption_scope_custom_type, is_preview=True,
+                            custom_command_type=encryption_scope_custom_type,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
 
         g.custom_command('create', 'create_encryption_scope')

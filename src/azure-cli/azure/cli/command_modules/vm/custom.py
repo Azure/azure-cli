@@ -780,7 +780,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     )
                     upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
                     try:
-                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
+                        cached_put(cmd, client.begin_create_or_update, vnet, resource_group_name, vnet_name).result()
                     except Exception:
                         raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
                                        'prefix {}. It may be caused by name or address prefix conflict. Please specify '
@@ -1166,7 +1166,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
         NetworkSecurityGroup = \
             cmd.get_models('NetworkSecurityGroup', resource_type=ResourceType.MGMT_NETWORK)
         nsg = LongRunningOperation(cmd.cli_ctx, 'Creating network security group')(
-            network.network_security_groups.create_or_update(
+            network.network_security_groups.begin_create_or_update(
                 resource_group_name=resource_group_name,
                 network_security_group_name=network_security_group_name,
                 parameters=NetworkSecurityGroup(location=location)
@@ -1182,18 +1182,18 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
                         source_address_prefix='*', destination_address_prefix='*')
     nsg_name = nsg.name or os.path.split(nsg.id)[1]
     LongRunningOperation(cmd.cli_ctx, 'Adding security rule')(
-        network.security_rules.create_or_update(
+        network.security_rules.begin_create_or_update(
             resource_group_name, nsg_name, rule_name, rule)
     )
 
     # update the NIC or subnet if a new NSG was created
     if created_nsg and not apply_to_subnet:
         nic.network_security_group = nsg
-        LongRunningOperation(cmd.cli_ctx, 'Updating NIC')(network.network_interfaces.create_or_update(
+        LongRunningOperation(cmd.cli_ctx, 'Updating NIC')(network.network_interfaces.begin_create_or_update(
             resource_group_name, nic.name, nic))
     elif created_nsg and apply_to_subnet:
         subnet.network_security_group = nsg
-        LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(network.subnets.create_or_update(
+        LongRunningOperation(cmd.cli_ctx, 'Updating subnet')(network.subnets.begin_create_or_update(
             resource_group_name=resource_group_name,
             virtual_network_name=subnet_id['name'],
             subnet_name=subnet_id['child_name_1'],
