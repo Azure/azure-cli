@@ -899,7 +899,7 @@ def load_arguments(self, _):
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_three_state_flag())
         c.argument('idle_timeout', help='Idle timeout in minutes.', type=int)
         c.argument('protocol', help='Network transport protocol.', arg_type=get_enum_type(TransportProtocol))
-        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
+        c.argument('private_ip_address_version', min_api='2019-04-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list='--backend-pool-name', help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
@@ -1089,7 +1089,7 @@ def load_arguments(self, _):
         c.argument('enable_ip_forwarding', options_list='--ip-forwarding', help='Enable IP forwarding.', arg_type=get_three_state_flag())
 
     with self.argument_context('network nic create') as c:
-        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
+        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.I_PV4.value if IPVersion else '')
         c.argument('network_interface_name', nic_type, options_list=['--name', '-n'], id_part=None)
 
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
@@ -1924,7 +1924,8 @@ def load_arguments(self, _):
     with self.argument_context('network vpn-connection shared-key') as c:
         c.argument('connection_shared_key_name', options_list=['--name', '-n'], id_part='name')
         c.argument('virtual_network_gateway_connection_name', options_list='--connection-name', metavar='NAME', id_part='name')
-        c.argument('key_length', type=int)
+        c.argument('key_length', type=int, help='The virtual network connection reset shared key length, should between 1 and 128.')
+        c.argument('value', help='The virtual network connection shared key value.')
 
     with self.argument_context('network vrouter') as c:
         c.argument('virtual_router_name', options_list=['--name', '-n'], help='The name of the Virtual Router.')

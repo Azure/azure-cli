@@ -1506,6 +1506,8 @@ def create_service_principal_for_rbac(
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
 
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
+
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -1527,8 +1529,6 @@ def create_service_principal_for_rbac(
             "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
-
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 

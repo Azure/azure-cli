@@ -645,6 +645,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
+        from azure.core.exceptions import HttpResponseError
         import time
 
         context_copy = copy.copy(context)
@@ -695,7 +696,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                         custom_condition and bool(verify_property(instance, custom_condition)):
                     progress_indicator.end()
                     return None
-            except ClientException as ex:
+            except (ClientException, HttpResponseError) as ex:
                 progress_indicator.stop()
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
