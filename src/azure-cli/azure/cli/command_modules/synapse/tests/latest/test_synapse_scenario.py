@@ -378,7 +378,7 @@ class SynapseScenarioTests(ScenarioTest):
                      self.check('login', self.kwargs['user-email'])
                  ])
         # Test delete cmdlet
-        self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
         self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
 
     @record_only()
