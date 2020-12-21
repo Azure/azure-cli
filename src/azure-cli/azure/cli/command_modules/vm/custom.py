@@ -3272,8 +3272,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
         cred, _, _ = profile.get_login_credentials(resource=resource,
                                                    aux_subscriptions=aux_subscriptions)
-        _, _, _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
-        external_bearer_token = external_tokens[0][0] + ' ' + external_tokens[0][1]
+        _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
+        external_bearer_token = 'Bearer' + ' ' + external_tokens[0].token
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)

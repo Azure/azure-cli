@@ -112,7 +112,7 @@ short-summary: Export MSAL cache, by default to `~/.azure/msal.cache.snapshot.js
 long-summary: >
     The exported cache is unencrypted. It contains login information of all logged-in users. Make sure you protect
     it safely.
-    
+
     You can mount the exported MSAL cache to a container at `~/.IdentityService/msal.cache`, so that Azure CLI
     inside the container can automatically authenticate.
 examples:

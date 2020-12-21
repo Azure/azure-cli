@@ -3,14 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import requests
+from typing import Tuple, List
 
-from azure.cli.core.util import in_cloud_console
+import requests
 from azure.cli.core._identity import resource_to_scopes
+from azure.cli.core.util import in_cloud_console
+from azure.core.credentials import AccessToken
 from azure.core.exceptions import ClientAuthenticationError
 
-from knack.util import CLIError
 from knack.log import get_logger
+from knack.util import CLIError
+
 logger = get_logger(__name__)
 
 
@@ -85,10 +88,16 @@ class CredentialAdaptor:
         return session
 
     def get_token(self, *scopes):
+        # type: (*str) -> AccessToken
         logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
         scopes = _normalize_scopes(scopes)
         token, _ = self._get_token(scopes)
         return token
+
+    def get_all_tokens(self, *scopes):
+        # type: (*str) -> Tuple[AccessToken, List[AccessToken]]
+        # TODO: Track 2 SDK should support external credentials.
+        return self._get_token(scopes)
 
     @staticmethod
     def _log_hostname():

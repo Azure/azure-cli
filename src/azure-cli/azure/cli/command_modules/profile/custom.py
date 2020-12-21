@@ -206,7 +206,7 @@ def list_locations(cmd):
     return get_subscription_locations(cmd.cli_ctx)
 
 
-def export_msal_cache(cmd, path=None):
+def export_msal_cache(cmd, path=None):  # pylint: disable=unused-argument
     from azure.cli.core._identity import Identity
     identity = Identity()
     identity.serialize_token_cache(path)
