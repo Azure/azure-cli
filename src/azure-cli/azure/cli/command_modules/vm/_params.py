@@ -641,7 +641,7 @@ def load_arguments(self, _):
     for scope in ['vm', 'vmss']:
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade',
-                       options_list=['--no-auto-upgrade-minor', c.deprecate(target='--no-auto-upgrade', redirect='--no-auto-upgrade-minor')],
+                       options_list=['--no-auto-upgrade-mi', c.deprecate(target='--no-auto-upgrade', redirect='--no-auto-upgrade-mi')],
                        arg_type=get_three_state_flag(),
                        help='If set, the extension service will not automatically pick or upgrade to the latest minor version, even if the extension is redeployed.')
 
