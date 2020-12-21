@@ -32,7 +32,7 @@ class CredentialAdaptor:
         self._external_credentials = external_credentials
         self._resource = resource
 
-    def _get_token(self, *scopes):
+    def _get_token(self, scopes=None):
         external_tenant_tokens = []
         # If scopes is not provided, use CLI-managed resource
         scopes = scopes or resource_to_scopes(self._resource)
@@ -87,7 +87,7 @@ class CredentialAdaptor:
     def get_token(self, *scopes):
         logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
         scopes = _normalize_scopes(scopes)
-        token, _ = self._get_token(*scopes)
+        token, _ = self._get_token(scopes)
         return token
 
     @staticmethod

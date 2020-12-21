@@ -1207,7 +1207,7 @@ class TestProfile(unittest.TestCase):
         # action
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli.cloud.endpoints.active_directory_graph_resource_id)
-        _, _ = cred._get_token()
+        _, _ = cred.get_token()
         # verify
         get_token_mock.assert_called_once_with(mock.ANY, 'https://graph.windows.net//.default')
         self.assertEqual(tenant_id, self.tenant_id)
@@ -1226,7 +1226,7 @@ class TestProfile(unittest.TestCase):
         # action
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli.cloud.endpoints.active_directory_data_lake_resource_id)
-        _, _ = cred._get_token()
+        _, _ = cred.get_token()
         # verify
         get_token_mock.assert_called_once_with(mock.ANY, 'https://datalake.azure.net//.default')
         self.assertEqual(tenant_id, self.tenant_id)
