@@ -18,6 +18,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_sqlpool_transparent_data_encryptions_factory
     from ._client_factory import cf_synapse_client_sqlpool_security_alert_policies_factory
     from ._client_factory import cf_synapse_client_sqlpool_blob_auditing_policies_factory
+    from ._client_factory import cf_synapse_client_managed_identity_sqlcontrol_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -73,6 +74,10 @@ def load_command_table(self, _):
     synapse_cmk_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#KeysOperations.{}',
         client_factory=cf_synapse_client_cmk_factory)
+
+    synapse_managedidentitysqlcontrol_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#WorkspaceManagedIdentitySqlControlSettingsOperations.{}',
+        client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory)
 
     synapse_spark_session_sdk = CliCommandType(
         operations_tmpl='azure.synapse.spark.operations#SparkSessionOperations.{}',
@@ -224,6 +229,15 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
+
+    # Management Plane Commands --Managed-Identity
+    with self.command_group('synapse workspace managed-identity', command_type=synapse_managedidentitysqlcontrol_sdk,
+                        custom_command_type=get_custom_sdk('workspace', cf_synapse_client_managed_identity_sqlcontrol_factory),
+                        client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory) as g:
+        g.show_command('show-sql-access', 'get')
+        g.custom_command('grant-sql-access', 'grant_sql_access_to_managed_identity', supports_no_wait=True)
+        g.custom_command('revoke-sql-access', 'revoke_sql_access_to_managed_identity', supports_no_wait=True)
         g.wait_command('wait')
 
     # Data Plane Commands --Spark batch opertions

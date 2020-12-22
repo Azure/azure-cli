@@ -5,7 +5,8 @@
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
-    DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings
+    DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings, \
+    ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity
 
 
 # Synapse workspace
@@ -43,11 +44,15 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
 
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     allowed_aad_tenant_ids=None, disable_all_allowed_aad_tenant_ids=None, tags=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, disable_all_allowed_aad_tenant_ids=None, tags=None, key_name=None, key_identifier=None, no_wait=False):
+    if str(key_identifier).endswith('/'):
+        key_identifier = key_identifier[:-1]
+    workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
+    encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
     if disable_all_allowed_aad_tenant_ids is True:
         allowed_aad_tenant_ids = []
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None
-    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, managed_virtual_network_settings=updated_vnet_settings)
+    workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
 
 
@@ -75,3 +80,13 @@ def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_n
 
 def activate_workspace(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=True, key_name=key_name, key_vault_url=key_identifier)
+
+
+def grant_sql_access_to_managed_identity(cmd, client, resource_group_name, workspace_name, no_wait=False):
+    grant_sql_access_setting = ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity(desired_state="Enabled")
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, grant_sql_access_setting)
+
+
+def revoke_sql_access_to_managed_identity(cmd, client, resource_group_name, workspace_name, no_wait=False):
+    revoke_sql_access_setting = ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity(desired_state="Disabled")
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, revoke_sql_access_setting)

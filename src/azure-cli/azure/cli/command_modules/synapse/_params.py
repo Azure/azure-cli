@@ -57,6 +57,8 @@ def load_arguments(self, _):
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
             c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default.")
+            c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
+            c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace update') as c:
         c.argument('disable_all_allowed_aad_tenant_ids', options_list=['--disable-tenant-ids'], arg_type=get_three_state_flag(), help="Disable all approved Azure AD tenants which outbound data traffic allowed to.")
@@ -65,14 +67,12 @@ def load_arguments(self, _):
         c.argument("storage_account", validator=validate_storage_account,
                    help='The data lake storage account name or resource id.')
         c.argument('file_system', help='The file system of the data lake storage account.')
-        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
         c.argument('sql_admin_login_user', options_list=['--sql-admin-login-user', '-u'],
                    help='The sql administrator login user name.')
         c.argument('enable_managed_virtual_network', options_list=['--enable-managed-vnet',
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
-        c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace activate') as c:
         c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
@@ -315,6 +315,14 @@ def load_arguments(self, _):
     for scope in ['create']:
         with self.argument_context('synapse workspace key create') as c:
             c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+
+    # synapse workspace managed-identity
+    with self.argument_context('synapse workspace managed-identity') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    for scope in ['grant-sql-access', 'revoke-sql-access', ' show-sql-access']:
+        with self.argument_context('synapse workspace managed-identity ' + scope) as c:
+            c.argument('workspace_name', id_part='name', help='The workspace name.')
 
     # synapse spark job
     for scope in ['job', 'session', 'statement']:

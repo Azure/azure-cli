@@ -47,7 +47,7 @@ examples:
   - name: Activate workspace using customer-managed key after creating.
     text: |-
         az synapse workspace activate --key-name existedkey --name testsynapseworkspace \\
-        --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
 helps['synapse workspace list'] = """
@@ -482,7 +482,7 @@ examples:
   - name: Create a workspace's key.
     text: |-
         az synapse workspace key create --name newkey --workspace-name testsynapseworkspace \\
-        --resource-group rg --key-vault-url https://{keyvaultname}.vault.azure.net/keys/{keyname}
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
 helps['synapse workspace key delete'] = """
@@ -517,6 +517,41 @@ examples:
 helps['synapse workspace key wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a workspace key is met.
+"""
+
+helps['synapse workspace managed-identity show-sql-access'] = """
+type: command
+short-summary: Show workspace's sql-access state to managed-identity.
+examples:
+  - name: Show workspace's sql-access state to managed-identity.
+    text: |-
+        az synapse workspace managed-identity show-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity revoke-sql-access'] = """
+type: command
+short-summary: Revoke workspace's sql-access to managed-identity.
+examples:
+  - name: Revoke workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity revoke-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity grant-sql-access'] = """
+type: command
+short-summary: Grant workspace's sql-access to managed-identity.
+examples:
+  - name: Grant workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity grant-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of sql-access state to managed-identity is met.
 """
 
 helps['synapse workspace firewall-rule'] = """

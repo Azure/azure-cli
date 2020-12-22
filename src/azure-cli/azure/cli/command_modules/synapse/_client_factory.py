@@ -50,6 +50,10 @@ def cf_synapse_client_cmk_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).keys
 
 
+def cf_synapse_client_managed_identity_sqlcontrol_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).workspace_managed_identity_sql_control_settings
+
+
 def cf_synapse_client_operations_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).operations
 
