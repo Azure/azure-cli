@@ -78,9 +78,10 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
                 raise CLIError("The parent connected registry '{}' could not be found.".format(parent_name))
             raise CLIError(ex)
         if parent.mode.lower() != ConnectedRegistryModes.REGISTRY.value and parent.mode.lower() != mode.lower():
-            raise CLIError("Can't create the registry '{}' with mode '{}'".format(connected_registry_name, mode) +
-                           "when the connected registry parent '{}' mode is '{}'.".format(parent_name, parent.mode) +
-                           "For more information on connected registries, please visit https://aka.ms/acr/onprem.")
+            raise CLIError("Can't create the registry '{}' with mode '{}' ".format(connected_registry_name, mode) +
+                           "when the connected registry parent '{}' mode is '{}'. ".format(parent_name, parent.mode) +
+                           "For more information on connected registries " +
+                           "please visit https://aka.ms/acr/connected-registry.")
 
     if sync_token_name:
         sync_token_id = build_token_id(subscription_id, resource_group_name, registry_name, sync_token_name)
@@ -375,16 +376,20 @@ def acr_connected_registry_install_info(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
+                                        force_login_server=None,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name,
+                             False, force_login_server, resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
                                                      client,
                                                      connected_registry_name,
                                                      registry_name,
+                                                     force_login_server=None,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name,
+                             True, force_login_server, resource_group_name)
 
 
 def _get_install_info(cmd,
@@ -392,22 +397,36 @@ def _get_install_info(cmd,
                       connected_registry_name,
                       registry_name,
                       regenerate_credentials,
+                      new_login_server=None,
                       resource_group_name=None):
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
     connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
-    connected_registry_login_server = connected_registry.login_server.host
     parent_gateway_endpoint = connected_registry.parent.sync_properties.gateway_endpoint
     parent_id = connected_registry.parent.id
     sync_token_name = connected_registry.parent.sync_properties.token_id.split('/tokens/')[1]
     if parent_id:
-        parent = parent_id.split('/connectedRegistry/')[1]
+        parent = parent_id.split('/connectedRegistries/')[1]
         parent = acr_connected_registry_show(
             cmd, client, parent, registry_name, resource_group_name)
         parent_registry_endpoint = parent.login_server.host
     else:
         parent_registry_endpoint = registry.login_server
+
+    current_login_server = connected_registry.login_server.host
+    if new_login_server:
+        if current_login_server:
+            logger.warning('The connected registry already has a login server: \'%s\'.', current_login_server)
+        connected_registry_login_server = new_login_server
+    else:
+        if current_login_server:
+            connected_registry_login_server = current_login_server
+        else:
+            logger.warning("No login server value was provided nor retrieved from the connected registry. "
+                           "Use the argument '--login-server' to pass a value. For more information, "
+                           "please visit https://aka.ms/acr/connected-registry.")
+            connected_registry_login_server = "<connected registry login server>"
 
     if regenerate_credentials:
         from ._client_factory import cf_acr_token_credentials
