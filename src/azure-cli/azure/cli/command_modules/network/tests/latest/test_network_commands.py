@@ -2057,6 +2057,7 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_global_reach')
     def test_network_express_route_global_reach(self, resource_group):
         from azure.core.exceptions import HttpResponseError
@@ -2078,6 +2079,7 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
@@ -3495,7 +3497,7 @@ class NetworkVirtualRouter(ScenarioTest):
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
-    # @record_only()
+    @record_only()  # this feature need resource from service team for now.
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
     def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3962,6 +3964,18 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
+    @ResourceGroupPreparer('cli_test_traffic_manager2')
+    def test_network_traffic_manager2(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile2',
+            'dns': 'mytrafficmanager001100a2'
+        })
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
+
+        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
+                 checks=self.check('maxReturn', 4))
 
     @ResourceGroupPreparer('cli_test_traffic_manager_subnet')
     def test_network_traffic_manager_subnet_routing(self, resource_group):
