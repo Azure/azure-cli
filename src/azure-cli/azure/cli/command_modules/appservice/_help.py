@@ -53,7 +53,7 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
-        --hyper-v --sku P3V3
+        --hyper-v --sku P1V3
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
