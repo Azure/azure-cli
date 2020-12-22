@@ -1772,6 +1772,9 @@ examples:
     text: |
         az provider register --namespace 'Microsoft.PolicyInsights'
     crafted: true
+  - name: Register a provider from RPaaS.
+    text: |
+        az provider register -n 'Microsoft.Confluent' --accept-term
 """
 
 helps['provider unregister'] = """

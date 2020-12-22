@@ -1001,7 +1001,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, accept_term=None):
         if is_rpaas:
             if not accept_term:
                 from azure.cli.core.azclierror import RequiredArgumentMissingError
-                raise RequiredArgumentMissingError("--accept-term must be specified when registering an RP from RPaaS.")
+                raise RequiredArgumentMissingError("--accept-term must be specified when registering the {} RP from RPaaS.".format(namespace))
             wait = True
         r = rcf.providers.register(namespace)
     else:
