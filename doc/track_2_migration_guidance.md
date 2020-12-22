@@ -2,7 +2,18 @@
 
 Azure CLI is built upon Azure Python SDK. Recently Azure Python SDK announced next generation product. It is named Track 2 SDK. The old version of SDK is named Track 1. It claims that it has great advantages than Track 1 SDK. It is not compatible with Track 1 SDK. Azure CLI developers need to spend considerable time and do some work to migrate from Track 1 SDK to Track 2 SDK.
 
-This documentation summarizes typical issues and solutions when adopting Track 2 SDK in Azure CLI.
+This document summarizes typical issues and solutions when adopting Track 2 SDK in Azure CLI. Below is a list of typical issues.
+1. Long running operation function name change
+2. Property name change
+3. Class name change
+4. Error type change
+5. No enum type
+6. Class hierarchy change
+7. Obtaining Subscription
+8. Multi-API support
+9. Fixing mocked object
+10. Modifying patch_models.py to include missing packages
+11. Missing x-ms-authorization-auxiliary
 
 **Long running operation function name change**
 
@@ -38,9 +49,7 @@ VirtualMachineIdentityUserAssignedIdentitiesValue -> UserAssignedIdentitiesValue
 
 **Error type change**
 
-Examples:
-
-Pay attention to error type.
+Error type changes in Track2 SDK.
 
 Examples:
 
@@ -48,7 +57,7 @@ Examples:
 CloudError -> azure.core.exceptions.ResourceNotFoundError
 ```
 
-**No enum type now**
+**No enum type**
 
 Track 2 SDK removes enum type and adopts string type instead. It loses the validation on values. Anyway, do not use `obj.value` any longer. Just use `obj`.
 
@@ -62,9 +71,9 @@ In VMSS `begin_update_instances`, a new type `VirtualMachineScaleSetVMInstanceRe
 
 In DiskAccess `begin_create_or_update`, location and tags are moved to a nested structure `DiskAccess`, `disk_access = DiskAccess(location=location, tags=tags)`
 
-**Subscription**
+**Obtaining Subscription**
 
-There are various ways to obtain subscription ID. Some ways that work in Track 1 SDK do not work in Track 2 SDK.
+There are various ways to obtain subscription ID. Obtaining it from `client.config` does not work in Track 2 SDK any longer.
 
 Examples:
 
@@ -74,11 +83,11 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 subscription = get_subscription_id(cmd.cli_ctx)
 ```
 
-In this example, the reason is `config` is renamed to `_config` in Track 2 SDK.
+In this example, the reason that old one fails is that `config` is renamed to `_config` in Track 2 SDK.
 
 **Multi-API support**
 
-Remember to support multi-API. Sometimes it has multi-API error when Track 2 SDK is adopted. The reason is we don't run live test for all tests. So sometimes the code is wrong. It doesn't handle multi-API support well.
+Remember to support multi-API. It reveals multi-API error when Track 2 SDK is adopted if we don't run live test for all tests. Actually the original code is wrong. It doesn't handle multi-API support well.
 
 **Fixing mocked object**
 
@@ -92,7 +101,7 @@ It is only used in CI jobs. It patches some code to SDK. This file should be dep
 
 Cross tenant authentication support is missing in Azure CLI Core and Azure Core package. In request header, we use x-ms-authorization-auxiliary to pass auxiliary authorization token. Compute module is the first customer to have this requirement in Track 2 SDK. In azure/core/pipeline/policies/_authentication.py, there is a class BearerTokenCredentialPolicy. It simplifies bearer token authorization header configuration. However, auxiliary bearer token authorization is not supported in Azure Core policies [1] yet. The current solution is getting tokens manually, setting headers in client constructor or in operation call time manually. They said they will support this policy in the future. Azure CLI Core also needs an upgrade to provide better interfaces for Track 2 SDK users.
 
-You are welcome to contribute to this documentation if you have experience of Track 2 SDK.
+You are welcome to contribute to this document if you have experience of Track 2 SDK.
 
 **References**
 
