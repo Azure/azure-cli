@@ -45,18 +45,10 @@ helps['databoxedge device show'] = """
 helps['databoxedge device create'] = """
     type: command
     short-summary: "Create a Data Box Edge/Data Box Gateway resource."
-    parameters:
-      - name: --sku
-        short-summary: "The SKU type."
-        long-summary: |
-            Usage: --sku name=XX tier=XX
-
-            name: SKU name.
-            tier: The SKU tier. This is based on the SKU name.
     examples:
       - name: Create a Data Box Edge resource.
         text: |-
-               az databoxedge device create --location "eastus" --sku name="Edge" tier="Standard" --name \
+               az databoxedge device create --location "eastus" --sku "Edge" --name \
 "testedgedevice" --resource-group "GroupForEdgeAutomation"
 """
 

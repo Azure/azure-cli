@@ -13,6 +13,36 @@
 from azure.cli.core.util import sdk_no_wait
 
 
+def databoxedge_device_create(client,
+                              device_name,
+                              resource_group_name,
+                              location,
+                              tags=None,
+                              sku=None,
+                              etag=None,
+                              data_box_edge_device_status=None,
+                              description=None,
+                              model_description=None,
+                              friendly_name=None,
+                              no_wait=False):
+    data_box_edge_device = {}
+    data_box_edge_device['location'] = location
+    data_box_edge_device['tags'] = tags
+    data_box_edge_device['etag'] = etag
+    data_box_edge_device['data_box_edge_device_status'] = data_box_edge_device_status
+    data_box_edge_device['description'] = description
+    data_box_edge_device['model_description'] = model_description
+    data_box_edge_device['friendly_name'] = friendly_name
+    if sku:
+        data_box_edge_device['sku'] = {}
+        data_box_edge_device['sku']['name'] = sku
+    return sdk_no_wait(no_wait,
+                       client.create_or_update,
+                       device_name=device_name,
+                       resource_group_name=resource_group_name,
+                       data_box_edge_device=data_box_edge_device)
+
+
 def databoxedge_device_update(client,
                               device_name,
                               resource_group_name,

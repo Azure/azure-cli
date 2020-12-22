@@ -19,7 +19,7 @@ def step_device_create(test, rg, checks=None):
         checks = []
     test.cmd('az databoxedge device create '
              '--location "eastus" '
-             '--sku name="Edge" tier="Standard" '
+             '--sku "Edge" '
              '--name "{myDevice}" '
              '--resource-group "{rg}"',
              checks=checks)
