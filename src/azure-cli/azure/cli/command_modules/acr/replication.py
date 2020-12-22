@@ -43,7 +43,8 @@ def acr_replication_create(cmd,
     ReplicationType = cmd.get_models('Replication')
 
     replication_name = replication_name or normalized_location
-    replication_properties = ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled, zone_redundancy=zone_redundancy)
+    replication_properties = ReplicationType(
+        location=location, region_endpoint_enabled=region_endpoint_enabled, zone_redundancy=zone_redundancy)
 
     try:
         return client.create(

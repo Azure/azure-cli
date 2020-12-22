@@ -568,7 +568,6 @@ class AcrCommandsTests(ScenarioTest):
         result = self.cmd('acr private-endpoint-connection list -g {rg} -r {registry_name}').get_output_in_json()
         self.assertFalse(result)
 
-
     @ResourceGroupPreparer(location="eastus")
     def test_acr_with_zone_redundancy(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -583,7 +582,7 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('zoneRedundancy', 'Disabled')])
 
         result = self.cmd('acr create --name {registry_2} --resource-group {rg} --sku premium --zone-redundancy Enabled',
-                        checks=[self.check('zoneRedundancy', 'Enabled')]).get_output_in_json()
+                          checks=[self.check('zoneRedundancy', 'Enabled')]).get_output_in_json()
 
         self.kwargs["home_location"] = result["location"]
 
