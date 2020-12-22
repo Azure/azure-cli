@@ -13,5 +13,7 @@ from azure.cli.core.commands.parameters import get_enum_type
 
 def load_arguments(self, _):
     with self.argument_context('databoxedge device create') as c:
-        t_sku_name = self.get_models('SkuName')
+        t_sku_name, t_device_status = self.get_models('SkuName', 'DataBoxEdgeDeviceStatus')
         c.argument('sku', help='The SKU type.', arg_type=get_enum_type(t_sku_name))
+        c.argument('data_box_edge_device_status', options_list=['--status'], arg_type=get_enum_type(t_device_status),
+                   help='The status of the Data Box Edge/Gateway device.')
