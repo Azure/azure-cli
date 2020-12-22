@@ -233,8 +233,8 @@ def load_command_table(self, _):
 
     # Management Plane Commands --Managed-Identity
     with self.command_group('synapse workspace managed-identity', command_type=synapse_managedidentitysqlcontrol_sdk,
-                        custom_command_type=get_custom_sdk('workspace', cf_synapse_client_managed_identity_sqlcontrol_factory),
-                        client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory) as g:
+                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_managed_identity_sqlcontrol_factory),
+                            client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory) as g:
         g.show_command('show-sql-access', 'get')
         g.custom_command('grant-sql-access', 'grant_sql_access_to_managed_identity', supports_no_wait=True)
         g.custom_command('revoke-sql-access', 'revoke_sql_access_to_managed_identity', supports_no_wait=True)

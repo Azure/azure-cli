@@ -312,9 +312,8 @@ def load_arguments(self, _):
         with self.argument_context('synapse workspace key ' + scope) as c:
             c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
 
-    for scope in ['create']:
-        with self.argument_context('synapse workspace key create') as c:
-            c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+    with self.argument_context('synapse workspace key create') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
 
     # synapse workspace managed-identity
     with self.argument_context('synapse workspace managed-identity') as c:

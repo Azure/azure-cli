@@ -519,6 +519,11 @@ type: command
 short-summary: Place the CLI in a waiting state until a condition of a workspace key is met.
 """
 
+helps['synapse workspace managed-identity'] = """
+type: group
+short-summary:  Manage workspace's managed-identity.
+"""
+
 helps['synapse workspace managed-identity show-sql-access'] = """
 type: command
 short-summary: Show workspace's sql-access state to managed-identity.
