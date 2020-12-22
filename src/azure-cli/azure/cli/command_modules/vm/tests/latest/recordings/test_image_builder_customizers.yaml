@@ -1,51 +1,6 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - identity create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-18T14:28:22Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 14:28:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westus"}'
+    body: '{"location": "eastus"}'
     headers:
       Accept:
       - application/json
@@ -70,7 +25,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1?api-version=2015-08-31-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"westus","tags":{},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"d17a98b3-3a3f-4d58-835e-eba0cce8087f","clientId":"5c11b137-eaf5-4c1c-a996-034cc6f81b87","clientSecretUrl":"https://control-westus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1/credentials?tid=72f988bf-86f1-41af-91ab-2d7cd011db47&oid=d17a98b3-3a3f-4d58-835e-eba0cce8087f&aid=5c11b137-eaf5-4c1c-a996-034cc6f81b87"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1","name":"ide1","type":"Microsoft.ManagedIdentity/userAssignedIdentities","location":"eastus","tags":{},"properties":{"tenantId":"01a4073e-87c8-47cd-aafc-1439b4b5ea2c","principalId":"6271f266-c6a4-41bb-91d4-dd6d5794e1ba","clientId":"ac24b4bc-8aee-4f22-9565-37ec6089c537","clientSecretUrl":"https://control-eastus.identity.azure.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1/credentials?tid=01a4073e-87c8-47cd-aafc-1439b4b5ea2c&oid=6271f266-c6a4-41bb-91d4-dd6d5794e1ba&aid=ac24b4bc-8aee-4f22-9565-37ec6089c537"}}'
     headers:
       cache-control:
       - no-cache
@@ -79,7 +34,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:28:26 GMT
+      - Tue, 22 Dec 2020 01:07:38 GMT
       expires:
       - '-1'
       location:
@@ -91,7 +46,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -128,7 +83,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:29:13 GMT
+      - Tue, 22 Dec 2020 01:08:23 GMT
       expires:
       - '-1'
       pragma:
@@ -165,10 +120,10 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%275c11b137-eaf5-4c1c-a996-034cc6f81b87%27%29&api-version=1.6
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%27ac24b4bc-8aee-4f22-9565-37ec6089c537%27%29&api-version=1.6
   response:
     body:
-      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"d17a98b3-3a3f-4d58-835e-eba0cce8087f","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appId":"5c11b137-eaf5-4c1c-a996-034cc6f81b87","applicationTemplateId":null,"appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"ide1","errorUrl":null,"homepage":null,"informationalUrls":null,"keyCredentials":[{"customKeyIdentifier":"684BD52E6307A7F55723D372E78499E0E0C7B027","endDate":"2021-03-18T14:23:00Z","keyId":"73c8abf6-1da6-4cc1-ba31-cacb41e09fc6","startDate":"2020-12-18T14:23:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["5c11b137-eaf5-4c1c-a996-034cc6f81b87","https://identity.azure.net/tUqIpNpSDO9eMMWDf2YcNgs9iIq1nJRqjMV6qZRmG0U="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'
+      string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"6271f266-c6a4-41bb-91d4-dd6d5794e1ba","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":["isExplicit=True","/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1"],"appDisplayName":null,"appId":"ac24b4bc-8aee-4f22-9565-37ec6089c537","applicationTemplateId":null,"appOwnerTenantId":null,"appRoleAssignmentRequired":false,"appRoles":[],"displayName":"ide1","errorUrl":null,"homepage":null,"informationalUrls":null,"keyCredentials":[{"customKeyIdentifier":"CFFED53B4E4CFE4BDBFECE589243A509E4509747","endDate":"2021-03-22T01:02:00Z","keyId":"94a2fb66-0423-4341-aba7-f0a353a5eee1","startDate":"2020-12-22T01:02:00Z","type":"AsymmetricX509Cert","usage":"Verify","value":null}],"logoutUrl":null,"notificationEmailAddresses":[],"oauth2Permissions":[],"passwordCredentials":[],"preferredSingleSignOnMode":null,"preferredTokenSigningKeyEndDateTime":null,"preferredTokenSigningKeyThumbprint":null,"publisherName":null,"replyUrls":[],"samlMetadataUrl":null,"samlSingleSignOnSettings":null,"servicePrincipalNames":["ac24b4bc-8aee-4f22-9565-37ec6089c537","https://identity.azure.net/9KuPLP2HgBffAuPz/0e9wAPa3BuAVtu+bLOHvg5Dw68="],"servicePrincipalType":"ManagedIdentity","signInAudience":null,"tags":[],"tokenEncryptionKeyId":null}]}'
     headers:
       access-control-allow-origin:
       - '*'
@@ -181,19 +136,19 @@ interactions:
       dataserviceversion:
       - 3.0;
       date:
-      - Fri, 18 Dec 2020 14:29:14 GMT
+      - Tue, 22 Dec 2020 01:08:24 GMT
       duration:
-      - '447141'
+      - '975122'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - MqRBMru4FoRJMZUY7bOrxL6SSQSiTqF+/0EDRwavXMk=
+      - psE1e0eMCRsW8VuLfPbL8q2rg/AoaKNYa0VRdRKfMjg=
       ocp-aad-session-key:
-      - EX2nyRnAu3kegcfjMmth2KY8FVUXpSTKCXiLDjO3IQFs_PZWpyu7daOE9p12Iz04bRZ4eeAtWdbGGKIE1PcMIQIVBjL2ZnlxjWL_-Umo4o56928l9jYXHWex1WW6XizG.wLg4NjYRiy6lDaE7-Xv64M2aX7SjmOPQ9ydwpmIjF-0
+      - GpTeGj3zieR7a_8TQ5Z_r_52M5ZpzRIaXdeCj2MWEhoArx7mwvZLqHhfEe93GN4OKnpzofTbxErfM3jyChH1EuKj-cZR24ApzCTNeU5xPSQ-M_FVjr3muz3HVhGS0Kch.fvF1t246yjhw8VKAQF-nHcQuWugi9BgboqLMZnBOh4g
       pragma:
       - no-cache
       request-id:
-      - 5d692530-9155-4cb9-9886-2eba98187175
+      - 53843941-7913-4c74-a593-64409c30f2de
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
@@ -209,7 +164,7 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-      "principalId": "d17a98b3-3a3f-4d58-835e-eba0cce8087f"}}'
+      "principalId": "6271f266-c6a4-41bb-91d4-dd6d5794e1ba"}}'
     headers:
       Accept:
       - application/json
@@ -236,7 +191,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001?api-version=2020-04-01-preview
   response:
     body:
-      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"d17a98b3-3a3f-4d58-835e-eba0cce8087f","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","condition":null,"conditionVersion":null,"createdOn":"2020-12-18T14:29:15.0602730Z","updatedOn":"2020-12-18T14:29:15.1752341Z","createdBy":null,"updatedBy":"414d10da-615f-49a7-90a0-a7008fb31cd3","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
+      string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c","principalId":"6271f266-c6a4-41bb-91d4-dd6d5794e1ba","principalType":"ServicePrincipal","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","condition":null,"conditionVersion":null,"createdOn":"2020-12-22T01:08:25.6421465Z","updatedOn":"2020-12-22T01:08:26.0221718Z","createdBy":null,"updatedBy":"5310aa29-9a44-4cbc-adb3-6347a539537e","delegatedManagedIdentityResourceId":null,"description":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Authorization/roleAssignments/88888888-0000-0000-0000-000000000001","type":"Microsoft.Authorization/roleAssignments","name":"88888888-0000-0000-0000-000000000001"}'
     headers:
       cache-control:
       - no-cache
@@ -245,7 +200,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:29:14 GMT
+      - Tue, 22 Dec 2020 01:08:25 GMT
       expires:
       - '-1'
       pragma:
@@ -261,51 +216,6 @@ interactions:
     status:
       code: 201
       message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - image builder create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --scripts --image-source --managed-image-destinations --identity --defer
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001?api-version=2020-10-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001","name":"img_tmpl_customizers000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-18T14:28:22Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '428'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 14:29:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
 - request:
     body: null
     headers:
@@ -419,7 +329,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 14:29:16 GMT
+      - Tue, 22 Dec 2020 01:08:26 GMT
       expires:
       - '-1'
       pragma:
@@ -434,7 +344,467 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"source": {"type": "PlatformImage",
+    body: '{"location": "eastus", "tags": {}, "properties": {"source": {"type": "PlatformImage",
+      "publisher": "MicrosoftWindowsServer", "offer": "WindowsServer", "sku": "2019-Datacenter",
+      "version": "2019.0.20190214"}, "customize": [{"name": "testPsScript.ps1", "type":
+      "PowerShell", "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"},
+      {"name": "powershell_script", "type": "PowerShell", "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1",
+      "validExitCodes": [0, 1, 2]}, {"name": "powershell_script_inline", "type": "PowerShell",
+      "inline": ["mkdir c:\\buildActions", "echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"],
+      "validExitCodes": [12, 14, 16]}, {"name": "windows_restart_name", "type": "WindowsRestart",
+      "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt",
+      "restartTimeout": "5m"}, {"name": "file_customizer_name", "type": "File", "sourceUri":
+      "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+      "destination": "c:\\buildArtifacts\\index.html"}, {"name": "win_update_name",
+      "type": "WindowsUpdate", "searchCriteria": "IsInstalled=0", "filters": ["exclude:$_.Title
+      -like ''*Preview*''", "include:$true"], "updateLimit": 20}], "distribute": [{"runOutputName":
+      "img_1", "type": "ManagedImage", "imageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.Compute/images/img_1",
+      "location": "westus"}], "vmProfile": {}}, "identity": {"type": "UserAssigned",
+      "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1":
+      {}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - image builder update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1996'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01?api-version=2020-02-14
+  response:
+    body:
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.VirtualMachineImages''. See
+        https://aka.ms/rps-not-found for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.VirtualMachineImages","message":"The
+        subscription is not registered to use namespace ''Microsoft.VirtualMachineImages''.
+        See https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '481'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:08:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:08:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:08:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:08:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:09:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:09:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:09:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:09:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages","namespace":"Microsoft.VirtualMachineImages","authorizations":[{"applicationId":"cf32a0cc-373c-47c9-9156-0db11f6a6dfc","roleDefinitionId":"0ee55a0b-f45f-4392-92ec-e8bf1b4b5da5","managedByRoleDefinitionId":"9e3af657-a8ff-583c-a75c-2fe7c4bcb635"}],"resourceTypes":[{"resourceType":"imageTemplates","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"],"capabilities":"None"},{"resourceType":"imageTemplates/runOutputs","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","North Europe","West
+        Europe","South Central US"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"locations/operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview","2018-02-01-preview"]},{"resourceType":"operations","locations":["East
+        US","East US 2","West Central US","West US","West US 2","South Central US","North
+        Europe","West Europe"],"apiVersions":["2020-02-14","2019-05-01-preview","2019-02-01-preview"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1657'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 22 Dec 2020 01:09:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"source": {"type": "PlatformImage",
       "publisher": "MicrosoftWindowsServer", "offer": "WindowsServer", "sku": "2019-Datacenter",
       "version": "2019.0.20190214"}, "customize": [{"name": "testPsScript.ps1", "type":
       "PowerShell", "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"},
@@ -507,10 +877,10 @@ interactions:
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
         {}\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
-        \"location\": \"westus\",\n \"tags\": {}\n}"
+        \"location\": \"eastus\",\n \"tags\": {}\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/dfeb4a02-9ed8-46c7-b882-30383b309d40?api-version=2020-02-14
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/eastus/operations/7216aee4-a494-4a5a-970b-7ff837a27d5f?api-version=2020-02-14
       cache-control:
       - no-cache
       content-length:
@@ -518,7 +888,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Dec 2020 14:29:21 GMT
+      - Tue, 22 Dec 2020 01:09:42 GMT
       expires:
       - '-1'
       pragma:
@@ -530,7 +900,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -551,60 +921,12 @@ interactions:
       - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/dfeb4a02-9ed8-46c7-b882-30383b309d40?api-version=2020-02-14
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/eastus/operations/7216aee4-a494-4a5a-970b-7ff837a27d5f?api-version=2020-02-14
   response:
     body:
-      string: "{\n \"name\": \"DFEB4A02-9ED8-46C7-B882-30383B309D40\",\n \"status\":
-        \"InProgress\",\n \"startTime\": \"2020-12-18T14:29:21.4057948Z\"\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '122'
-      content-type:
-      - application/json
-      date:
-      - Fri, 18 Dec 2020 14:29:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - image builder update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-imagebuilder/0.4.0 Azure-SDK-For-Python AZURECLI/2.16.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.VirtualMachineImages/locations/westus/operations/dfeb4a02-9ed8-46c7-b882-30383b309d40?api-version=2020-02-14
-  response:
-    body:
-      string: "{\n \"name\": \"DFEB4A02-9ED8-46C7-B882-30383B309D40\",\n \"status\":
-        \"Succeeded\",\n \"startTime\": \"2020-12-18T14:29:21.4057948Z\",\n \"endTime\":
-        \"2020-12-18T14:29:54.2586838Z\"\n}"
+      string: "{\n \"name\": \"7216AEE4-A494-4A5A-970B-7FF837A27D5F\",\n \"status\":
+        \"Succeeded\",\n \"startTime\": \"2020-12-22T01:09:42.8400005Z\",\n \"endTime\":
+        \"2020-12-22T01:10:09.5047915Z\"\n}"
     headers:
       cache-control:
       - no-cache
@@ -613,7 +935,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Dec 2020 14:30:23 GMT
+      - Tue, 22 Dec 2020 01:10:14 GMT
       expires:
       - '-1'
       pragma:
@@ -683,10 +1005,10 @@ interactions:
         0,\n  \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0\n  }\n
         },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
-        {\n    \"principalId\": \"d17a98b3-3a3f-4d58-835e-eba0cce8087f\",\n    \"clientId\":
-        \"5c11b137-eaf5-4c1c-a996-034cc6f81b87\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
+        {\n    \"principalId\": \"6271f266-c6a4-41bb-91d4-dd6d5794e1ba\",\n    \"clientId\":
+        \"ac24b4bc-8aee-4f22-9565-37ec6089c537\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
-        \"location\": \"westus\",\n \"tags\": {}\n}"
+        \"location\": \"eastus\",\n \"tags\": {}\n}"
     headers:
       cache-control:
       - no-cache
@@ -695,7 +1017,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Dec 2020 14:30:23 GMT
+      - Tue, 22 Dec 2020 01:10:14 GMT
       expires:
       - '-1'
       pragma:
@@ -767,10 +1089,10 @@ interactions:
         0,\n  \"vmProfile\": {\n   \"vmSize\": \"\",\n   \"osDiskSizeGB\": 0\n  }\n
         },\n \"identity\": {\n  \"type\": \"UserAssigned\",\n  \"userAssignedIdentities\":
         {\n   \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/img_tmpl_customizers000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ide1\":
-        {\n    \"principalId\": \"d17a98b3-3a3f-4d58-835e-eba0cce8087f\",\n    \"clientId\":
-        \"5c11b137-eaf5-4c1c-a996-034cc6f81b87\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
+        {\n    \"principalId\": \"6271f266-c6a4-41bb-91d4-dd6d5794e1ba\",\n    \"clientId\":
+        \"ac24b4bc-8aee-4f22-9565-37ec6089c537\"\n   }\n  }\n },\n \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/img_tmpl_customizers000001/providers/Microsoft.VirtualMachineImages/imageTemplates/template01\",\n
         \"name\": \"template01\",\n \"type\": \"Microsoft.VirtualMachineImages/imageTemplates\",\n
-        \"location\": \"westus\",\n \"tags\": {}\n}"
+        \"location\": \"eastus\",\n \"tags\": {}\n}"
     headers:
       cache-control:
       - no-cache
@@ -779,7 +1101,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 18 Dec 2020 14:30:24 GMT
+      - Tue, 22 Dec 2020 01:10:14 GMT
       expires:
       - '-1'
       pragma:

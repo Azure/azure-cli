@@ -1,38 +1,24 @@
 interactions:
 - request:
-    body: "{\"properties\": {\"parameters\": {\"target_resource_name\": {\"value\":
-      \"clitestappconfig\"}}, \"mode\": \"Incremental\", template:{\r\n    \"$schema\":
-      \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
-      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n        \"target_resource_name\":
-      {\r\n            \"defaultValue\": \"ernestt-appconfig-privatelink\",\r\n            \"type\":
-      \"String\"\r\n        }\r\n    },\r\n    \"variables\": {},\r\n    \"resources\":
-      [\r\n        {\r\n            \"type\": \"Microsoft.AppConfiguration/configurationStores\",\r\n
-      \           \"apiVersion\": \"2020-06-01\",\r\n            \"name\": \"[parameters('target_resource_name')]\",\r\n
-      \           \"location\": \"westus\",\r\n            \"sku\": {\r\n                \"name\":
-      \"standard\"\r\n            },\r\n            \"properties\": {\r\n                \"encryption\":
-      {}\r\n            }\r\n        }\r\n    ]\r\n}}}"
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - deployment group create
+      - network application-gateway private-link add
       Connection:
       - keep-alive
-      Content-Length:
-      - '856'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - -g -p -f
+      - -g --gateway-name --name --frontend-ip --subnet --subnet-prefix
       User-Agent:
       - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/appconfiguration_configurationstores_template","name":"appconfiguration_configurationstores_template","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7483349641174567162","parameters":{"target_resource_name":{"type":"String","value":"clitestappconfig"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T09:47:27.1487095Z","duration":"PT0S","correlationId":"2c7ff3ed-5164-42ef-896a-2cf44b542bc5","providers":[{"namespace":"Microsoft.AppConfiguration","resourceTypes":[{"resourceType":"configurationStores","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/clitestappconfig"}]}}'
@@ -40,7 +26,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1043'
+      - '2487'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -49,6 +35,9 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -95,7 +84,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/appconfiguration_configurationstores_template","name":"appconfiguration_configurationstores_template","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7483349641174567162","parameters":{"target_resource_name":{"type":"String","value":"clitestappconfig"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-16T09:47:31.0068808Z","duration":"PT1.7520783S","correlationId":"3be34522-726f-43c2-a4e5-9e3e15ceccd2","providers":[{"namespace":"Microsoft.AppConfiguration","resourceTypes":[{"resourceType":"configurationStores","locations":["westus"]}]}],"dependencies":[]}}'
@@ -183,7 +172,7 @@ interactions:
       - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/appconfiguration_configurationstores_template","name":"appconfiguration_configurationstores_template","type":"Microsoft.Resources/deployments","properties":{"templateHash":"7483349641174567162","parameters":{"target_resource_name":{"type":"String","value":"clitestappconfig"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T09:47:54.5821541Z","duration":"PT25.3273516S","correlationId":"3be34522-726f-43c2-a4e5-9e3e15ceccd2","providers":[{"namespace":"Microsoft.AppConfiguration","resourceTypes":[{"resourceType":"configurationStores","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/clitestappconfig"}]}}'
@@ -228,7 +217,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T09:47:20Z"},"properties":{"provisioningState":"Succeeded"}}'
@@ -686,7 +675,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/clitestappconfig/privateLinkResources?api-version=2020-06-01
   response:
     body:
-      string: '{"value":[{"id":"subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/clitestappconfig/privateLinkResources/configurationStores","name":"configurationStores","type":"Microsoft.AppConfiguration/configurationStores/privateLinkResources","properties":{"groupId":"configurationStores","requiredMembers":["configurationStores"],"requiredZoneNames":["privatelink.azconfig.io"]}}],"nextLink":null}'
+      string: '{"value":[{"id":"subscriptions/a1bfa635-f2bf-42f1-86b5-848c674fc321/resourceGroups/clitest.rg000001/providers/Microsoft.AppConfiguration/configurationStores/clitestappconfig/privateLinkResources/configurationStores","name":"configurationStores","type":"Microsoft.AppConfiguration/configurationStores/privateLinkResources","properties":{"groupId":"configurationStores","requiredMembers":["configurationStores"],"requiredZoneNames":["privatelink.azconfig.io"]}}],"nextLink":null}'
     headers:
       cache-control:
       - no-cache
@@ -733,7 +722,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T09:47:20Z"},"properties":{"provisioningState":"Succeeded"}}'
@@ -1264,7 +1253,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '847'
+      - '843'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1311,7 +1300,7 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '847'
+      - '843'
       content-type:
       - application/json; charset=utf-8
       date:
