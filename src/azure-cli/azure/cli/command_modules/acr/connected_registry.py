@@ -9,17 +9,13 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from ._client_factory import cf_acr_registries, cf_acr_tokens, cf_acr_scope_maps
+from ._client_factory import cf_acr_tokens, cf_acr_scope_maps
 from ._utils import (
     get_registry_by_name,
     validate_managed_registry,
     user_confirmation,
     create_default_scope_map,
     get_token_from_id,
-    get_scope_map_from_id,
-    parse_actions_from_repositories,
-    parse_repositories_from_actions,
-    parse_actions_from_gateways,
     build_token_id
 )
 
@@ -376,20 +372,16 @@ def acr_connected_registry_install_info(cmd,
                                         client,
                                         connected_registry_name,
                                         registry_name,
-                                        force_login_server=None,
                                         resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name,
-                             False, force_login_server, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, False, resource_group_name)
 
 
 def acr_connected_registry_install_renew_credentials(cmd,
                                                      client,
                                                      connected_registry_name,
                                                      registry_name,
-                                                     force_login_server=None,
                                                      resource_group_name=None):
-    return _get_install_info(cmd, client, connected_registry_name, registry_name,
-                             True, force_login_server, resource_group_name)
+    return _get_install_info(cmd, client, connected_registry_name, registry_name, True, resource_group_name)
 
 
 def _get_install_info(cmd,
@@ -397,7 +389,6 @@ def _get_install_info(cmd,
                       connected_registry_name,
                       registry_name,
                       regenerate_credentials,
-                      new_login_server=None,
                       resource_group_name=None):
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
@@ -414,19 +405,12 @@ def _get_install_info(cmd,
     else:
         parent_registry_endpoint = registry.login_server
 
-    current_login_server = connected_registry.login_server.host
-    if new_login_server:
-        if current_login_server:
-            logger.warning('The connected registry already has a login server: \'%s\'.', current_login_server)
-        connected_registry_login_server = new_login_server
-    else:
-        if current_login_server:
-            connected_registry_login_server = current_login_server
-        else:
-            logger.warning("No login server value was provided nor retrieved from the connected registry. "
-                           "Use the argument '--login-server' to pass a value. For more information, "
-                           "please visit https://aka.ms/acr/connected-registry.")
-            connected_registry_login_server = "<connected registry login server>"
+    connected_registry_login_server = connected_registry.login_server.host
+    if not connected_registry_login_server:
+        logger.warning("No login server value was provided nor retrieved from the connected registry. "
+                       "Use the argument '--login-server' to pass a value. For more information, "
+                       "please visit https://aka.ms/acr/connected-registry.")
+        connected_registry_login_server = "<connected registry login server>"
 
     if regenerate_credentials:
         from ._client_factory import cf_acr_token_credentials
@@ -449,7 +433,6 @@ def _get_install_info(cmd,
     return {
         "ACR_REGISTRY_NAME": connected_registry_name,
         "ACR_REGISTRY_LOGIN_SERVER": connected_registry_login_server,
-        "ACR_SYNC_TOKEN_NAME": sync_token_name,
         "ACR_SYNC_TOKEN_USERNAME": sync_username,
         "ACR_SYNC_TOKEN_PASSWORD": sync_password,
         "ACR_PARENT_GATEWAY_ENDPOINT": parent_gateway_endpoint,

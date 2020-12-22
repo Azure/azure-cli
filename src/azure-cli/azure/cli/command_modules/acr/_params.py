@@ -400,7 +400,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('cleanup', options_list=['--cleanup'], help='It will aslo delete the sync token and the scope map resources.', required=False)
         c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
         c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
-        c.argument('force_login_server', options_list=['--login-server'], help='Forces on the information output the value of ACR_REGISTRY_LOGIN_SERVER. For more information connected registries login server, please visit https://aka.ms/acr/connected-registry.', required=False)
 
     with self.argument_context('acr connected-registry create') as c:
         c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
