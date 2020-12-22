@@ -497,28 +497,14 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    def test_acr_with_public_network_access_and_bypass(self, resource_group, resource_group_location):
+    def test_acr_with_public_network_access(self, resource_group, resource_group_location):
         self.kwargs.update({
             'registry_name': self.create_random_name('testreg', 20),
-            'registry_2_name': self.create_random_name('testreg2', 20)
         })
-
-        # test defaults
         self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
-                 checks=[self.check('publicNetworkAccess', 'Enabled'),
-                         self.check('networkRuleBypassOptions', 'AzureServices')])
-
-        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false --bypass None',
-                 checks=[self.check('publicNetworkAccess', 'Disabled'),
-                         self.check('networkRuleBypassOptions', 'None')])
-
-        self.cmd('acr update --name {registry_name} --resource-group {rg} --bypass AzureServices',
-                 checks=[self.check('publicNetworkAccess', 'Disabled'),
-                         self.check('networkRuleBypassOptions', 'AzureServices')])
-
-        self.cmd('acr create --name {registry_2_name} --resource-group {rg} --sku premium --public-network-enabled false --bypass None',
-                 checks=[self.check('publicNetworkAccess', 'Disabled'),
-                         self.check('networkRuleBypassOptions', 'None')])
+                 checks=self.check('publicNetworkAccess', 'Enabled'))
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
+                 checks=self.check('publicNetworkAccess', 'Disabled'))
 
     @ResourceGroupPreparer(location='centraluseuap')
     def test_acr_with_private_endpoint(self, resource_group):
