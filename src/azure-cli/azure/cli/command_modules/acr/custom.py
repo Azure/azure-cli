@@ -465,6 +465,9 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         registry.identity.type = (ResourceIdentityType.none
                                   if registry.identity.type == ResourceIdentityType.system_assigned
                                   else ResourceIdentityType.user_assigned)
+        # if we have no system assigned identitiy then set identity object to none
+        registry.identity.principal_id = None
+        registry.identity.tenant_id = None
 
     if remove_user_identities:
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -493,10 +496,6 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
             registry.identity.type = (ResourceIdentityType.none
                                       if registry.identity.type == ResourceIdentityType.user_assigned
                                       else ResourceIdentityType.system_assigned)
-
-    # if we have no assigned identities then set identity object to none
-    if registry.identity.type is None:
-        registry.identity = None
 
     # this method should be named create_or_update as it calls the PUT method
     return client.create(resource_group_name, registry_name, registry)
