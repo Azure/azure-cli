@@ -67,8 +67,6 @@ def _audit_policy_update(
         retention_days=None,
         audit_actions_and_groups=None,
         is_azure_monitor_target_enabled=None):
-    _validate_audit_policy_arguments(state, storage_account, storage_endpoint,
-                                     storage_account_access_key, retention_days)
 
     # Apply State
     if state is not None:
@@ -94,14 +92,6 @@ def _audit_policy_update(
                 "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
                 "FAILED_DATABASE_AUTHENTICATION_GROUP",
                 "BATCH_COMPLETED_GROUP"]
-
-
-def _validate_audit_policy_arguments(state=None, storage_account=None, storage_endpoint=None,
-                                     storage_account_access_key=None, retention_days=None):
-    blob_storage_arguments_provided = any(
-        [storage_account, storage_endpoint, storage_account_access_key, retention_days])
-    if not state and not blob_storage_arguments_provided:
-        raise CLIError('Either state or blob storage arguments are missing')
 
 
 def _audit_policy_update_apply_blob_storage_details(cmd, instance, retention_days, storage_account,

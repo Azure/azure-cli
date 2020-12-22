@@ -244,6 +244,11 @@ examples:
         --state Disabled
 """
 
+helps['synapse sql audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
+"""
+
 helps['synapse sql pool'] = """
 type: group
 short-summary: Manage SQL pools.
