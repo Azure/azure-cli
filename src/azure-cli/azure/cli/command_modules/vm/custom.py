@@ -871,18 +871,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    if ssh_key_name:
-        client = _compute_client_factory(cmd.cli_ctx)
-        # Use existing key name
-        if ssh_key_value is None:
-            # try:
-            ssh_key_resource = client.ssh_public_keys.get(resource_group_name, ssh_key_name)
-            # except HTTPResponseError:
-
-            ssh_key_value = ssh_key_resource.public_key
-            print(ssh_key_value)
-            exit(1)
-
+    print(ssh_key_value)
+    exit(1)
 
     vm_resource = build_vm_resource(
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,

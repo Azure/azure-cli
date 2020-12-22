@@ -1066,7 +1066,22 @@ def validate_ssh_key(namespace, cmd=None):
             namespace.ssh_key_value = [ssh_key_resource.public_key]
             logger.info('Get a key from --ssh-key-name successfully')
         elif namespace.ssh_key_value:
-            pass
+            parameters = {}
+            parameters['location'] = namespace.location
+            parameters['public_key'] = namespace.ssh_key_value
+            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
+                                          ssh_public_key_name=namespace.ssh_key_name,
+                                          parameters=parameters)
+            namespace.ssh_key_value = [namespace.ssh_key_value]
+        elif namespace.generate_ssh_keys:
+            parameters = {}
+            parameters['location'] = namespace.location
+            public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys)
+            parameters['public_key'] = public_key
+            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
+                                          ssh_public_key_name=namespace.ssh_key_name,
+                                          parameters=parameters)
+            namespace.ssh_key_value = [public_key]
     elif namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
             logger.warning("Ignoring --generate-ssh-keys as multiple ssh key values have been specified.")
