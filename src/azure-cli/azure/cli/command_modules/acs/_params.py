@@ -18,15 +18,16 @@ from ._completers import (
     get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_cluster_autoscaler_profile, validate_create_parameters, validate_kubectl_version, validate_kubelogin_version, validate_k8s_version, validate_linux_host_name,
-    validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_nodes_count,
+    validate_list_of_integers, validate_ssh_key, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
+    validate_priority, validate_eviction_policy, validate_spot_max_price,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
-    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels)
-from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
-
-aci_connector_os_type = ['Windows', 'Linux', 'Both']
-
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-for-aks-latest.tgz'
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels,
+    validate_ppg, validate_assign_identity, validate_max_surge)
+from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, \
+    CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, \
+    CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE, \
+    CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL
 
 orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
@@ -199,6 +200,7 @@ def load_arguments(self, _):
         c.argument('no_ssh_key', options_list=['--no-ssh-key', '-x'])
         c.argument('pod_cidr')
         c.argument('service_cidr')
+        c.argument('ppg', type=str, validator=validate_ppg)
         c.argument('vnet_subnet_id', type=str, validator=validate_vnet_subnet_id)
         c.argument('workspace_resource_id')
         c.argument('skip_subnet_role_assignment', action='store_true')
@@ -207,11 +209,20 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
+        c.argument('assign_identity', type=str, validator=validate_assign_identity)
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
         c.argument('windows_admin_username', options_list=['--windows-admin-username'])
         c.argument('windows_admin_password', options_list=['--windows-admin-password'])
+        c.argument('enable_ahub', options_list=['--enable-ahub'])
         c.argument('node_osdisk_diskencryptionset_id', type=str, options_list=['--node-osdisk-diskencryptionset-id', '-d'])
+        c.argument('aci_subnet_name')
+        c.argument('appgw_name', options_list=['--appgw-name'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_cidr', options_list=['--appgw-subnet-cidr'], arg_group='Application Gateway')
+        c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
+        c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -231,6 +242,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
+        c.argument('enable_ahub', options_list=['--enable-ahub'])
+        c.argument('disable_ahub', options_list=['--disable-ahub'])
 
     with self.argument_context('aks disable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
@@ -238,6 +251,11 @@ def load_arguments(self, _):
     with self.argument_context('aks enable-addons') as c:
         c.argument('addons', options_list=['--addons', '-a'])
         c.argument('subnet_name', options_list=['--subnet-name', '-s'], help='Name of an existing subnet to use with the virtual-node add-on.')
+        c.argument('appgw_name', options_list=['--appgw-name'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_cidr', options_list=['--appgw-subnet-cidr'], arg_group='Application Gateway')
+        c.argument('appgw_id', options_list=['--appgw-id'], arg_group='Application Gateway')
+        c.argument('appgw_subnet_id', options_list=['--appgw-subnet-id'], arg_group='Application Gateway')
+        c.argument('appgw_watch_namespace', options_list=['--appgw-watch-namespace'], arg_group='Application Gateway')
 
     with self.argument_context('aks get-credentials') as c:
         c.argument('admin', options_list=['--admin', '-a'], default=False)
@@ -250,27 +268,10 @@ def load_arguments(self, _):
         with self.argument_context('{} install-cli'.format(scope)) as c:
             c.argument('client_version', validator=validate_kubectl_version, help='Version of kubectl to install.')
             c.argument('install_location', default=_get_default_install_location('kubectl'), help='Path at which to install kubectl.')
+            c.argument('base_src_url', help='Base download source URL for kubectl releases.')
             c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
             c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin.')
-
-    with self.argument_context('aks install-connector') as c:
-        c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
-        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
-        c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', default='aci-connector', help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('image_tag', help='The image tag of the virtual kubelet')
-        c.argument('location', help='The location to create the ACI container groups')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
-        c.argument('service_principal',
-                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-
-    with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', default='aci-connector',
-                   help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('graceful', action='store_true',
-                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type),
-                   help='The OS type of the connector')
+            c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
@@ -304,10 +305,16 @@ def load_arguments(self, _):
             c.argument('os_type', type=str)
             c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
+            c.argument('priority', arg_type=get_enum_type([CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT]), validator=validate_priority)
+            c.argument('eviction_policy', arg_type=get_enum_type([CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]), validator=validate_eviction_policy)
+            c.argument('spot_max_price', type=float, validator=validate_spot_max_price)
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
             c.argument('mode', get_enum_type(nodepool_mode_type))
             c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+            c.argument('ppg', type=str, validator=validate_ppg)
+            c.argument('max_surge', type=str, validator=validate_max_surge)
+            c.argument('node_os_disk_type', arg_type=get_enum_type([CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]))
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -319,16 +326,7 @@ def load_arguments(self, _):
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
         c.argument('mode', get_enum_type(nodepool_mode_type))
-
-    with self.argument_context('aks upgrade-connector') as c:
-        c.argument('aci_resource_group')
-        c.argument('chart_url', default=aci_connector_chart_url)
-        c.argument('client_secret')
-        c.argument('connector_name', default='aci-connector', validator=validate_connector_name)
-        c.argument('image_tag')
-        c.argument('location')
-        c.argument('os_type', get_enum_type(aci_connector_os_type))
-        c.argument('service_principal')
+        c.argument('max_surge', type=str, validator=validate_max_surge)
 
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')

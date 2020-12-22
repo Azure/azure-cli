@@ -14,8 +14,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: GET
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:03:57 GMT
+      - Wed, 11 Nov 2020 03:35:25 GMT
       expires:
       - '-1'
       pragma:
@@ -60,15 +60,12 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T16:00:26.0332282Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T16:00:26.0332282Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-07-14T16:00:25.9551020Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","name":"hdicli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T03:34:05.3981252Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-11-11T03:34:05.3981252Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-11-11T03:34:05.3199704Z","primaryEndpoints":{"blob":"https://hdicli000002.blob.core.windows.net/","queue":"https://hdicli000002.queue.core.windows.net/","table":"https://hdicli000002.table.core.windows.net/","file":"https://hdicli000002.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
@@ -77,7 +74,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 14 Jul 2020 16:03:58 GMT
+      - Wed, 11 Nov 2020 03:35:27 GMT
       expires:
       - '-1'
       pragma:
@@ -112,12 +109,9 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-storage/11.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.14.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002/listKeys?api-version=2019-06-01&$expand=kerb
   response:
     body:
       string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
@@ -129,7 +123,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 14 Jul 2020 16:03:58 GMT
+      - Wed, 11 Nov 2020 03:35:27 GMT
       expires:
       - '-1'
       pragma:
@@ -145,22 +139,22 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11999'
+      - '11992'
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "eastus2", "properties": {"clusterVersion": "default",
-      "osType": "Linux", "clusterDefinition": {"kind": "spark", "configurations":
-      {"gateway": {"restAuthCredential.username": "admin", "restAuthCredential.isEnabled":
-      "true", "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
+    body: '{"location": "eastus2", "properties": {"clusterVersion": "default", "osType":
+      "Linux", "clusterDefinition": {"kind": "spark", "configurations": {"gateway":
+      {"restAuthCredential.username": "admin", "restAuthCredential.isEnabled": "true",
+      "restAuthCredential.password": "Password1!"}}}, "computeProfile": {"roles":
       [{"name": "headnode", "targetInstanceCount": 2, "hardwareProfile": {"vmSize":
       "large"}, "osProfile": {"linuxOperatingSystemProfile": {"username": "sshuser",
       "password": "Password1!"}}}, {"name": "workernode", "targetInstanceCount": 3,
       "hardwareProfile": {"vmSize": "large"}, "osProfile": {"linuxOperatingSystemProfile":
       {"username": "sshuser", "password": "Password1!"}}}]}, "storageProfile": {"storageaccounts":
       [{"name": "hdicli000002.blob.core.windows.net", "isDefault": true, "container":
-      "default", "key": "veryFakedStorageAccountKey=="}]}}}'''
+      "default", "key": "veryFakedStorageAccountKey==", "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002"}]}}}'
     headers:
       Accept:
       - application/json
@@ -171,15 +165,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '931'
+      - '1097'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: PUT
@@ -187,20 +181,20 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"041c18c0-8372-49f5-86f7-2513fdf2ec4c","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2006100202.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"655dde0ddd274f8db1fe71c844d82f7a","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-07-14T16:04:12","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+        US 2","etag":"d6bf1d8b-f82c-43f7-b715-445ce3f274a1","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"61b54e812ce54408973101234d2e7ef9","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"InProgress","clusterState":"Accepted","createdDate":"2020-11-11T03:35:42.713","quotaInfo":{"coresUsed":20},"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '1483'
+      - '1740'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:04:14 GMT
+      - Wed, 11 Nov 2020 03:35:43 GMT
       etag:
-      - '"041c18c0-8372-49f5-86f7-2513fdf2ec4c"'
+      - '"d6bf1d8b-f82c-43f7-b715-445ce3f274a1"'
       expires:
       - '-1'
       pragma:
@@ -214,11 +208,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-hdi-clusteruri:
-      - https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/hdicli-sugjo/providers/Microsoft.HDInsight/clusters/hdicli-l3eyckylv?api-version=2018-06-01-preview
+      - https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/hdicli-dfdrn/providers/Microsoft.HDInsight/clusters/hdicli-rukgpatvg?api-version=2018-06-01-preview
       x-ms-hdi-served-by:
       - global
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1178'
+      - '1176'
     status:
       code: 200
       message: OK
@@ -237,8 +231,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -252,7 +246,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:04:46 GMT
+      - Wed, 11 Nov 2020 03:36:16 GMT
       expires:
       - '-1'
       pragma:
@@ -285,8 +279,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -300,7 +294,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:05:16 GMT
+      - Wed, 11 Nov 2020 03:36:46 GMT
       expires:
       - '-1'
       pragma:
@@ -333,8 +327,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -348,7 +342,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:05:47 GMT
+      - Wed, 11 Nov 2020 03:37:18 GMT
       expires:
       - '-1'
       pragma:
@@ -381,8 +375,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -396,7 +390,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:06:17 GMT
+      - Wed, 11 Nov 2020 03:41:02 GMT
       expires:
       - '-1'
       pragma:
@@ -429,8 +423,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -444,7 +438,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:06:48 GMT
+      - Wed, 11 Nov 2020 03:41:33 GMT
       expires:
       - '-1'
       pragma:
@@ -477,8 +471,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -492,7 +486,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:07:20 GMT
+      - Wed, 11 Nov 2020 03:42:03 GMT
       expires:
       - '-1'
       pragma:
@@ -525,8 +519,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -540,7 +534,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:07:51 GMT
+      - Wed, 11 Nov 2020 03:42:34 GMT
       expires:
       - '-1'
       pragma:
@@ -573,8 +567,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -588,7 +582,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:08:21 GMT
+      - Wed, 11 Nov 2020 03:43:05 GMT
       expires:
       - '-1'
       pragma:
@@ -621,8 +615,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -636,7 +630,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:08:52 GMT
+      - Wed, 11 Nov 2020 03:43:36 GMT
       expires:
       - '-1'
       pragma:
@@ -669,8 +663,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -684,7 +678,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:09:22 GMT
+      - Wed, 11 Nov 2020 03:44:06 GMT
       expires:
       - '-1'
       pragma:
@@ -717,8 +711,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -732,7 +726,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:09:53 GMT
+      - Wed, 11 Nov 2020 03:44:36 GMT
       expires:
       - '-1'
       pragma:
@@ -765,8 +759,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -780,7 +774,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:10:24 GMT
+      - Wed, 11 Nov 2020 03:45:08 GMT
       expires:
       - '-1'
       pragma:
@@ -813,8 +807,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -828,7 +822,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:10:54 GMT
+      - Wed, 11 Nov 2020 03:45:39 GMT
       expires:
       - '-1'
       pragma:
@@ -861,8 +855,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -876,7 +870,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:11:24 GMT
+      - Wed, 11 Nov 2020 03:46:09 GMT
       expires:
       - '-1'
       pragma:
@@ -909,8 +903,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -924,7 +918,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:11:56 GMT
+      - Wed, 11 Nov 2020 03:46:39 GMT
       expires:
       - '-1'
       pragma:
@@ -957,8 +951,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -972,7 +966,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:12:27 GMT
+      - Wed, 11 Nov 2020 03:47:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1005,8 +999,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1020,7 +1014,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:12:57 GMT
+      - Wed, 11 Nov 2020 03:47:41 GMT
       expires:
       - '-1'
       pragma:
@@ -1053,8 +1047,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1068,7 +1062,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:13:28 GMT
+      - Wed, 11 Nov 2020 03:48:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1101,8 +1095,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1116,7 +1110,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:13:59 GMT
+      - Wed, 11 Nov 2020 03:48:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1149,8 +1143,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1164,7 +1158,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:14:30 GMT
+      - Wed, 11 Nov 2020 03:49:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1197,8 +1191,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1212,7 +1206,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:15:01 GMT
+      - Wed, 11 Nov 2020 03:49:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1245,8 +1239,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1260,7 +1254,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:15:31 GMT
+      - Wed, 11 Nov 2020 03:50:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1293,8 +1287,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1308,7 +1302,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:16:02 GMT
+      - Wed, 11 Nov 2020 03:50:49 GMT
       expires:
       - '-1'
       pragma:
@@ -1341,200 +1335,8 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 16:16:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --cluster-configurations
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 16:17:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --cluster-configurations
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 16:17:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --cluster-configurations
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
-  response:
-    body:
-      string: '{"status":"InProgress"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '23'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 16:18:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-hdi-served-by:
-      - global
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - hdinsight create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
-        --cluster-configurations
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003/azureasyncoperations/create?api-version=2018-06-01-preview
   response:
@@ -1548,7 +1350,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:18:36 GMT
+      - Wed, 11 Nov 2020 03:51:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1581,23 +1383,23 @@ interactions:
       - -n -g -l -p -t --no-validation-timeout --storage-account --storage-container
         --cluster-configurations
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003?api-version=2018-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"041c18c0-8372-49f5-86f7-2513fdf2ec4c","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3025-2","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2006100202.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"655dde0ddd274f8db1fe71c844d82f7a","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_A2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-07-14T16:04:12","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+        US 2","etag":"d6bf1d8b-f82c-43f7-b715-445ce3f274a1","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3026-7","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"61b54e812ce54408973101234d2e7ef9","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T03:35:42.713","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1895'
+      - '2152'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:18:36 GMT
+      - Wed, 11 Nov 2020 03:51:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1629,8 +1431,8 @@ interactions:
       ParameterSetName:
       - -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-hdinsight/1.5.1
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-hdinsight/1.7.0 Azure-SDK-For-Python AZURECLI/2.14.0
       accept-language:
       - en-US
     method: GET
@@ -1638,16 +1440,16 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.HDInsight/clusters/hdicli-000003","name":"hdicli-000003","type":"Microsoft.HDInsight/clusters","location":"East
-        US 2","etag":"041c18c0-8372-49f5-86f7-2513fdf2ec4c","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3025-2","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2006100202.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"655dde0ddd274f8db1fe71c844d82f7a","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_A2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-07-14T16:04:12","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":null,"msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"m_Item1":"default","m_Item2":""}}}'
+        US 2","etag":"d6bf1d8b-f82c-43f7-b715-445ce3f274a1","tags":null,"properties":{"clusterVersion":"3.6.1000.67","clusterHdpVersion":"2.6.5.3026-7","osType":"Linux","clusterDefinition":{"blueprint":"https://blueprints.azurehdinsight.net/spark-3.6.1000.67.2009301626.json","kind":"spark","componentVersion":{"spark":"2.3"}},"clusterId":"61b54e812ce54408973101234d2e7ef9","computeProfile":{"roles":[{"name":"headnode","targetInstanceCount":2,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"workernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a4_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false},{"name":"zookeepernode","targetInstanceCount":3,"hardwareProfile":{"vmSize":"standard_a2_v2"},"osProfile":{"linuxOperatingSystemProfile":{"username":"sshuser"}},"encryptDataDisks":false}]},"provisioningState":"Succeeded","clusterState":"Running","createdDate":"2020-11-11T03:35:42.713","quotaInfo":{"coresUsed":20},"connectivityEndpoints":[{"name":"SSH","protocol":"TCP","location":"hdicli-000003-ssh.azurehdinsight.net","port":22},{"name":"HTTPS","protocol":"TCP","location":"hdicli-000003.azurehdinsight.net","port":443}],"tier":"standard","encryptionInTransitProperties":{"isEncryptionInTransitEnabled":false},"storageProfile":{"storageaccounts":[{"name":"hdicli000002.blob.core.windows.net","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/hdicli-000001/providers/Microsoft.Storage/storageAccounts/hdicli000002","msiResourceId":null,"key":null,"fileSystem":null,"container":"default","saskey":null,"isDefault":true,"fileshare":null}]},"excludedServicesConfig":{"excludedServicesConfigId":"default","excludedServicesList":""},"computeIsolationProperties":{"enableComputeIsolation":false,"hostSku":null}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1895'
+      - '2152'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 16:18:38 GMT
+      - Wed, 11 Nov 2020 03:51:22 GMT
       expires:
       - '-1'
       pragma:

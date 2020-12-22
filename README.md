@@ -105,6 +105,14 @@ Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/e
 
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
 
+## Data Collection
+
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft's privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+### Telemetry Configuration
+
+Telemetry collection is on by default. To opt out, please run `az config set core.collect_telemetry=no` to turn it off.
+
 ## Reporting issues and feedback
 
 If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.
@@ -120,12 +128,6 @@ See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for avai
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
-```
-
-For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
-For example:
-```bash
-$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
 ```
 
 ### Edge builds

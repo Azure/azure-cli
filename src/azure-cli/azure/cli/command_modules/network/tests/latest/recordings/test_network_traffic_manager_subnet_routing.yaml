@@ -20,15 +20,15 @@ interactions:
       ParameterSetName:
       - -n -g --routing-method --unique-dns-name --custom-headers --status-code-ranges
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
     headers:
       cache-control:
       - private
@@ -37,7 +37,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:20 GMT
+      - Wed, 16 Dec 2020 08:01:46 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -67,15 +67,15 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_traffic_manager_subnet000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-14T14:48:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001","name":"cli_test_traffic_manager_subnet000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T08:01:36Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -84,7 +84,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:20 GMT
+      - Wed, 16 Dec 2020 08:01:47 GMT
       expires:
       - '-1'
       pragma:
@@ -114,40 +114,38 @@ interactions:
       Content-Length:
       - '198'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"57a16647-559a-4d5c-be51-28c5d634b0e3\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"78f50817-aefd-47ff-bc8e-fe9d18a1583b\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"5beb8479-26f9-419d-b822-b3208392f4af\",\r\n    \"publicIPAddressVersion\":
+        \   \"resourceGuid\": \"d543ffc0-ffdf-4d71-bdac-82e4ebfbe780\",\r\n    \"publicIPAddressVersion\":
         \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
         \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
         \   \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d5d4c350-28f1-4719-bc4f-21b10b46e4fd?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/67ab3e56-3adf-41c1-ac18-134f8c4a2343?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '798'
+      - '823'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:26 GMT
+      - Wed, 16 Dec 2020 08:01:56 GMT
       expires:
       - '-1'
       pragma:
@@ -160,9 +158,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9523def6-627b-47e0-8032-e1aee8091969
+      - 1a1b01e2-b683-4b0f-ae73-e1c04e846446
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -170,7 +168,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -180,10 +178,9 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d5d4c350-28f1-4719-bc4f-21b10b46e4fd?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/67ab3e56-3adf-41c1-ac18-134f8c4a2343?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -195,7 +192,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:29 GMT
+      - Wed, 16 Dec 2020 08:01:58 GMT
       expires:
       - '-1'
       pragma:
@@ -212,7 +209,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2e71597f-896f-4c3a-b3ee-17b32c101871
+      - 89f8f6ae-d725-4bed-84d4-0aadaad4ea8b
     status:
       code: 200
       message: OK
@@ -220,7 +217,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -230,32 +227,32 @@ interactions:
       ParameterSetName:
       - -g -n --dns-name --query
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"980dd719-62c1-4aa5-80d0-6fff84b292f1\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"7a106172-500d-4534-8d67-8b4ec9cdf3f2\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"5beb8479-26f9-419d-b822-b3208392f4af\",\r\n    \"publicIPAddressVersion\":
+        \   \"resourceGuid\": \"d543ffc0-ffdf-4d71-bdac-82e4ebfbe780\",\r\n    \"publicIPAddressVersion\":
         \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"dnsSettings\": {\r\n      \"domainNameLabel\": \"testpip000003\",\r\n
         \     \"fqdn\": \"testpip000003.westus.cloudapp.azure.com\"\r\n    },\r\n
         \   \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
-        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+        \ \"sku\": {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '799'
+      - '824'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:29 GMT
+      - Wed, 16 Dec 2020 08:01:58 GMT
       etag:
-      - W/"980dd719-62c1-4aa5-80d0-6fff84b292f1"
+      - W/"7a106172-500d-4534-8d67-8b4ec9cdf3f2"
       expires:
       - '-1'
       pragma:
@@ -272,7 +269,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 12d8955b-4d7d-4983-8c1b-b4ea94755c27
+      - 1adcd2ba-03c0-4a82-8ff9-ae8f99677033
     status:
       code: 200
       message: OK
@@ -290,15 +287,15 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"bar"}],"expectedStatusCodeRanges":[{"min":200,"max":202}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
     headers:
       cache-control:
       - private
@@ -307,7 +304,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:30 GMT
+      - Wed, 16 Dec 2020 08:02:01 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -328,7 +325,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1",
       "name": "tm1", "type": "Microsoft.Network/trafficManagerProfiles", "tags": {},
       "location": "global", "properties": {"profileStatus": "Enabled", "trafficRoutingMethod":
       "Subnet", "dnsConfig": {"relativeName": "testtm000002", "ttl": 30}, "monitorConfig":
@@ -336,7 +333,7 @@ interactions:
       "/", "intervalInSeconds": 30, "timeoutInSeconds": 10, "toleratedNumberOfFailures":
       3, "customHeaders": [{"name": "foo", "value": "doo"}, {"name": "test", "value":
       "best"}], "expectedStatusCodeRanges": [{"min": 200, "max": 204}]}, "endpoints":
-      [], "trafficViewEnrollmentStatus": "Disabled"}}'''
+      [], "trafficViewEnrollmentStatus": "Disabled"}}'
     headers:
       Accept:
       - application/json
@@ -353,15 +350,15 @@ interactions:
       ParameterSetName:
       - -n -g --status-code-ranges --custom-headers
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"doo"},{"name":"test","value":"best"}],"expectedStatusCodeRanges":[{"min":200,"max":204}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"doo"},{"name":"test","value":"best"}],"expectedStatusCodeRanges":[{"min":200,"max":204}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
     headers:
       cache-control:
       - private
@@ -370,7 +367,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:46 GMT
+      - Wed, 16 Dec 2020 08:02:05 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -404,15 +401,15 @@ interactions:
       ParameterSetName:
       - -n --profile-name -g --type --target-resource-id --subnets --custom-headers
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"doo"},{"name":"test","value":"best"}],"expectedStatusCodeRanges":[{"min":200,"max":204}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1","name":"tm1","type":"Microsoft.Network\/trafficManagerProfiles","location":"global","tags":{},"properties":{"profileStatus":"Enabled","trafficRoutingMethod":"Subnet","dnsConfig":{"relativeName":"testtm000002","fqdn":"testtm000002.trafficmanager.net","ttl":30},"monitorConfig":{"profileMonitorStatus":"Inactive","protocol":"HTTP","port":80,"path":"\/","intervalInSeconds":30,"toleratedNumberOfFailures":3,"timeoutInSeconds":10,"customHeaders":[{"name":"foo","value":"doo"},{"name":"test","value":"best"}],"expectedStatusCodeRanges":[{"min":200,"max":204}]},"endpoints":[],"trafficViewEnrollmentStatus":"Disabled"}}'
     headers:
       cache-control:
       - private
@@ -421,7 +418,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:47 GMT
+      - Wed, 16 Dec 2020 08:02:08 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -442,9 +439,9 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
+    body: '{"properties": {"targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
       "subnets": [{"first": "10.0.0.0"}], "customHeaders": [{"name": "test", "value":
-      "best"}]}}'''
+      "best"}]}}'
     headers:
       Accept:
       - application/json
@@ -461,25 +458,25 @@ interactions:
       ParameterSetName:
       - -n --profile-name -g --type --target-resource-id --subnets --custom-headers
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}]}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
+        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}],"NestedProfile":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '815'
+      - '836'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:48 GMT
+      - Wed, 16 Dec 2020 08:02:12 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -489,7 +486,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1193'
       x-powered-by:
       - ASP.NET
     status:
@@ -509,25 +506,25 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}]}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
+        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0"}],"NestedProfile":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '815'
+      - '836'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:49 GMT
+      - Wed, 16 Dec 2020 08:02:14 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -546,13 +543,13 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
       "name": "ep1", "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
       "properties": {"targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
       "target": "testpip000003.westus.cloudapp.azure.com", "endpointStatus": "Enabled",
       "weight": 1, "priority": 1, "endpointLocation": "West US", "endpointMonitorStatus":
       "CheckingEndpoint", "subnets": [{"first": "10.0.0.0", "scope": 24}], "customHeaders":
-      [{"name": "test", "value": "best"}]}}'''
+      [{"name": "test", "value": "best"}]}}'
     headers:
       Accept:
       - application/json
@@ -569,25 +566,25 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}]}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
+        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}],"NestedProfile":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '826'
+      - '847'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:50 GMT
+      - Wed, 16 Dec 2020 08:02:18 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -597,7 +594,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1170'
+      - '1192'
       x-powered-by:
       - ASP.NET
     status:
@@ -617,25 +614,25 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}]}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
+        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","scope":24}],"NestedProfile":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '826'
+      - '847'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:51 GMT
+      - Wed, 16 Dec 2020 08:02:21 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -654,13 +651,13 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficManagerProfiles/tm1/azureEndpoints/ep1",
       "name": "ep1", "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
       "properties": {"targetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/publicIPAddresses/ip1",
       "target": "testpip000003.westus.cloudapp.azure.com", "endpointStatus": "Enabled",
       "weight": 1, "priority": 1, "endpointLocation": "West US", "endpointMonitorStatus":
       "CheckingEndpoint", "subnets": [{"first": "10.0.0.0", "last": "11.0.0.0"}],
-      "customHeaders": [{"name": "test", "value": "best"}]}}'''
+      "customHeaders": [{"name": "test", "value": "best"}]}}'
     headers:
       Accept:
       - application/json
@@ -677,25 +674,25 @@ interactions:
       ParameterSetName:
       - -n --type --profile-name -g --subnets
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-trafficmanager/0.51.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-trafficmanager/0.51.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_traffic_manager_subnet000001/providers/Microsoft.Network/trafficmanagerprofiles/tm1/azureEndpoints/ep1?api-version=2018-04-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
-        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","last":"11.0.0.0"}]}}'
+      string: '{"id":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/trafficManagerProfiles\/tm1\/azureEndpoints\/ep1","name":"ep1","type":"Microsoft.Network\/trafficManagerProfiles\/azureEndpoints","properties":{"endpointStatus":"Enabled","endpointMonitorStatus":"CheckingEndpoint","targetResourceId":"\/subscriptions\/00000000-0000-0000-0000-000000000000\/resourceGroups\/cli_test_traffic_manager_subnet000001\/providers\/Microsoft.Network\/publicIPAddresses\/ip1","target":"testpip000003.westus.cloudapp.azure.com","weight":1,"priority":1,"endpointLocation":"West
+        US","customHeaders":[{"name":"test","value":"best"}],"subnets":[{"first":"10.0.0.0","last":"11.0.0.0"}],"NestedProfile":null}}'
     headers:
       cache-control:
       - private
       content-length:
-      - '833'
+      - '854'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 14:48:53 GMT
+      - Wed, 16 Dec 2020 08:02:22 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -705,7 +702,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1175'
+      - '1188'
       x-powered-by:
       - ASP.NET
     status:

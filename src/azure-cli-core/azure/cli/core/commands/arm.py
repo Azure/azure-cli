@@ -296,7 +296,7 @@ def register_ids_argument(cli_ctx):
                 if not isinstance(json_vals, list):
                     json_vals = [json_vals]
                 for json_val in json_vals:
-                    if 'id' in json_val:
+                    if isinstance(json_val, dict) and 'id' in json_val:
                         full_id_list += [json_val['id']]
             except ValueError:
                 # supports piping of --ids to the command when using TSV. Requires use of --query
@@ -645,6 +645,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
     def handler(args):
         from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
+        from azure.core.exceptions import HttpResponseError
         import time
 
         context_copy = copy.copy(context)
@@ -695,7 +696,7 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                         custom_condition and bool(verify_property(instance, custom_condition)):
                     progress_indicator.end()
                     return None
-            except ClientException as ex:
+            except (ClientException, HttpResponseError) as ex:
                 progress_indicator.stop()
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
@@ -762,8 +763,11 @@ def show_exception_handler(ex):
     if getattr(getattr(ex, 'response', ex), 'status_code', None) == 404:
         import sys
         from azure.cli.core.azlogging import CommandLoggerContext
+        from azure.cli.core.azclierror import ResourceNotFoundError
         with CommandLoggerContext(logger):
-            logger.error(getattr(ex, 'message', ex))
+            az_error = ResourceNotFoundError(getattr(ex, 'message', ex))
+            az_error.print_error()
+            az_error.send_telemetry()
             sys.exit(3)
     raise ex
 

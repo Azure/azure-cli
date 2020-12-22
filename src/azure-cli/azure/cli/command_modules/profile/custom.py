@@ -52,11 +52,15 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    if not show_auth_for_sdk:
-        return profile.get_subscription(subscription)
 
-    # sdk-auth file should be in json format all the time, hence the print
-    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+    if show_auth_for_sdk:
+        from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING_MESSAGE
+        logger.warning(CREDENTIAL_WARNING_MESSAGE)
+        # sdk-auth file should be in json format all the time, hence the print
+        print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+        return
+
+    return profile.get_subscription(subscription)
 
 
 def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
@@ -78,9 +82,8 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
     # Unify to ISO `expiresOn`, like "2020-06-30 06:14:41"
     if 'expires_on' in token_entry:
-        from datetime import datetime
         # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
-        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']))\
+        token_entry['expiresOn'] = _fromtimestamp(int(token_entry['expires_on']))\
             .strftime("%Y-%m-%d %H:%M:%S.%f")
 
     result = {
@@ -175,7 +178,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError(err)
     except requests.exceptions.SSLError as err:
         from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
+        raise CLIError(SSLERROR_TEMPLATE + " Error detail: {}".format(str(err)))
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
     all_subscriptions = list(subscriptions)
@@ -230,3 +233,13 @@ def check_cli(cmd):
         print('CLI self-test completed: OK')
     else:
         raise CLIError(exceptions)
+
+
+def _fromtimestamp(t):
+    # datetime.datetime can't be patched:
+    #   TypeError: can't set attributes of built-in/extension type 'datetime.datetime'
+    # So we wrap datetime.datetime.fromtimestamp with this function.
+    # https://docs.python.org/3/library/unittest.mock-examples.html#partial-mocking
+    # https://williambert.online/2011/07/how-to-unit-testing-in-django-with-mocking-and-patching/
+    from datetime import datetime
+    return datetime.fromtimestamp(t)

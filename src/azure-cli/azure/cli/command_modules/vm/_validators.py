@@ -6,6 +6,7 @@
 # pylint:disable=too-many-lines
 
 import os
+
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -21,6 +22,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -462,7 +464,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
             image_info = compute_client.images.get(res['resource_group'], res['name'])
-            namespace.os_type = image_info.storage_profile.os_disk.os_type.value
+            namespace.os_type = image_info.storage_profile.os_disk.os_type
             image_data_disks = image_info.storage_profile.data_disks or []
             image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
 
@@ -470,7 +472,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
                                                            gallery_name=res['name'],
                                                            gallery_image_name=res['child_name_1'])
-            namespace.os_type = image_info.os_type.value
+            namespace.os_type = image_info.os_type
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 image_version_infos = compute_client.gallery_image_versions.list_by_gallery_image(
@@ -545,7 +547,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
 
         account = next(
             (a for a in storage_client.list_by_resource_group(namespace.resource_group_name)
-             if a.sku.tier.value == sku_tier and a.location == namespace.location), None)
+             if a.sku.tier == sku_tier and a.location == namespace.location), None)
 
         if account:
             # 3 - nothing specified - find viable storage account in target resource group
@@ -1034,18 +1036,19 @@ def _validate_admin_password(password, os_type):
     is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
-    if len(password) not in range(min_length, max_length + 1):
-        raise CLIError('The password length must be between {} and {}'.format(min_length,
-                                                                              max_length))
+
     contains_lower = re.findall('[a-z]+', password)
     contains_upper = re.findall('[A-Z]+', password)
     contains_digit = re.findall('[0-9]+', password)
     contains_special_char = re.findall(r'[ `~!@#$%^&*()=+_\[\]{}\|;:.\/\'\",<>?]+', password)
     count = len([x for x in [contains_lower, contains_upper,
                              contains_digit, contains_special_char] if x])
+
     # pylint: disable=line-too-long
-    if count < 3:
-        raise CLIError('Password must have the 3 of the following: 1 lower case character, 1 upper case character, 1 number and 1 special character')
+    error_msg = ("The password length must be between {} and {}. Password must have the 3 of the following: "
+                 "1 lower case character, 1 upper case character, 1 number and 1 special character.").format(min_length, max_length)
+    if len(password) not in range(min_length, max_length + 1) or count < 3:
+        raise CLIError(error_msg)
 
 
 def validate_ssh_key(namespace):
@@ -1204,9 +1207,9 @@ def _validate_vmss_single_placement_group(namespace):
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
+    from azure.core.exceptions import HttpResponseError
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
 
     if namespace.load_balancer and namespace.application_gateway:
@@ -1241,7 +1244,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
-            except CloudError:
+            except HttpResponseError:
                 namespace.app_gateway_type = 'new'
                 logger.debug("application gateway '%s' not found. It will be created.", namespace.application_gateway)
         elif namespace.application_gateway == '':
@@ -1320,11 +1323,11 @@ def get_network_client(cli_ctx):
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     network_client = get_network_client(cli_ctx)
     try:
         return network_client.load_balancers.get(resource_group_name, lb_name)
-    except CloudError:
+    except HttpResponseError:
         return None
 
 
@@ -1482,7 +1485,6 @@ def process_disk_or_snapshot_create_namespace(cmd, namespace):
 
 def process_image_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
     source_from_vm = False
     try:
@@ -1494,12 +1496,12 @@ def process_image_create_namespace(cmd, namespace):
             compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
             vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
             source_from_vm = True
-    except CloudError:
+    except ResourceNotFoundError:
         pass
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type.value
+        namespace.os_type = vm_info.storage_profile.os_disk.os_type
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
@@ -1525,7 +1527,6 @@ def process_image_create_namespace(cmd, namespace):
 
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
-    from msrestazure.azure_exceptions import CloudError
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
@@ -1541,7 +1542,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
         try:
             info = compute_client.snapshots.get(resource_group_name, source)
             source_snapshot = info.id
-        except CloudError:
+        except ResourceNotFoundError:
             info = compute_client.disks.get(resource_group_name, source)
             source_disk = info.id
 

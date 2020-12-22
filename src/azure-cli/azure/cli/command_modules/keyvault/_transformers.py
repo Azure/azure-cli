@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from collections.abc import Iterable
-from ._validators import KeyEncryptionDataType
+from azure.cli.command_modules.keyvault._validators import KeyEncryptionDataType
 
 
 def multi_transformers(*transformers):
@@ -14,8 +14,20 @@ def multi_transformers(*transformers):
     return _multi_transformers
 
 
+def keep_max_results(output, **command_args):
+    maxresults = command_args.get('maxresults', None)
+    if maxresults:
+        return [_ for _ in output][:maxresults]
+    return output
+
+
 def filter_out_managed_resources(output, **command_args):  # pylint: disable=unused-argument
-    return [_ for _ in output if not getattr(_, 'managed')] if output else output
+    is_kv_transform = command_args.get('kv_transform')
+    if is_kv_transform:
+        if command_args.get('include_managed'):
+            return output
+        return [_ for _ in output if not getattr(_, 'managed')] if output else output
+    return output
 
 
 def _extract_subresource_name_from_single_output(output, id_parameter):

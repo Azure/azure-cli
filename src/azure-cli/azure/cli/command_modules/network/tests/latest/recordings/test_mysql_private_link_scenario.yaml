@@ -1,8 +1,47 @@
 interactions:
 - request:
-    body: '{"sku": {"name": "GP_Gen5_2"}, "properties": {"storageProfile": {"storageAutogrow":
-      "Enabled"}, "createMode": "Default", "administratorLogin": "cloudsa", "administratorLoginPassword":
-      "SecretPassword123"}, "location": "eastus"}'
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 16 Dec 2020 09:15:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: '{"name": "azuredbclitest000002", "type": "Microsoft.DBforMySQL/servers"}'
     headers:
       Accept:
       - application/json
@@ -13,36 +52,93 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '227'
+      - '115'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForMySQL/checkNameAvailability?api-version=2017-12-01
   response:
     body:
-      string: '{"operation":"UpsertElasticServer","startTime":"2020-06-15T02:43:51.997Z"}'
+      string: '{"nameAvailable":true,"message":""}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/4c229f5f-5bb5-4d31-aa14-80fa6844a22b?api-version=2017-12-01
       cache-control:
       - no-cache
       content-length:
-      - '74'
+      - '35'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:43:52 GMT
+      - Wed, 16 Dec 2020 09:15:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "GP_Gen5_2"}, "properties": {"storageProfile": {"storageMB":
+      51200, "storageAutogrow": "Enabled"}, "createMode": "Default", "administratorLogin":
+      "cloudsa", "administratorLoginPassword": "SecretPassword123"}, "location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '247'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"operation":"UpsertElasticServer","startTime":"2020-12-16T09:16:03.43Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/azureAsyncOperation/883897bf-95ff-4b03-bfda-6790f6e55333?api-version=2017-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '73'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:16:03 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus/operationResults/4c229f5f-5bb5-4d31-aa14-80fa6844a22b?api-version=2017-12-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/operationResults/883897bf-95ff-4b03-bfda-6790f6e55333?api-version=2017-12-01
       pragma:
       - no-cache
       server:
@@ -70,107 +166,13 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/4c229f5f-5bb5-4d31-aa14-80fa6844a22b?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/azureAsyncOperation/883897bf-95ff-4b03-bfda-6790f6e55333?api-version=2017-12-01
   response:
     body:
-      string: '{"name":"4c229f5f-5bb5-4d31-aa14-80fa6844a22b","status":"InProgress","startTime":"2020-06-15T02:43:51.997Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:44:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/4c229f5f-5bb5-4d31-aa14-80fa6844a22b?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"4c229f5f-5bb5-4d31-aa14-80fa6844a22b","status":"InProgress","startTime":"2020-06-15T02:43:51.997Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '108'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:45:54 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - mysql server create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -l -g -n -u -p --sku-name
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/4c229f5f-5bb5-4d31-aa14-80fa6844a22b?api-version=2017-12-01
-  response:
-    body:
-      string: '{"name":"4c229f5f-5bb5-4d31-aa14-80fa6844a22b","status":"Succeeded","startTime":"2020-06-15T02:43:51.997Z"}'
+      string: '{"name":"883897bf-95ff-4b03-bfda-6790f6e55333","status":"InProgress","startTime":"2020-12-16T09:16:03.43Z"}'
     headers:
       cache-control:
       - no-cache
@@ -179,7 +181,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:46:56 GMT
+      - Wed, 16 Dec 2020 09:17:07 GMT
       expires:
       - '-1'
       pragma:
@@ -211,22 +213,265 @@ interactions:
       ParameterSetName:
       - -l -g -n -u -p --sku-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/azureAsyncOperation/883897bf-95ff-4b03-bfda-6790f6e55333?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"name":"883897bf-95ff-4b03-bfda-6790f6e55333","status":"Succeeded","startTime":"2020-12-16T09:16:03.43Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1114'
+      - '106'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:46:56 GMT
+      - Wed, 16 Dec 2020 09:18:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1115'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:18:09 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002/databases/defaultdb?api-version=2017-12-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The requested resource
+        of type ''Microsoft.DBforMySQL/servers/databases'' with name ''defaultdb''
+        was not found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '158'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:18:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"properties": {"charset": "utf8"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '35'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002/databases/defaultdb?api-version=2017-12-01
+  response:
+    body:
+      string: '{"operation":"UpsertElasticServerDatabase","startTime":"2020-12-16T09:18:14.363Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/azureAsyncOperation/05935715-bf8a-47db-bee3-3fad0b4330f6?api-version=2017-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '82'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:18:14 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/operationResults/05935715-bf8a-47db-bee3-3fad0b4330f6?api-version=2017-12-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1190'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/westus/azureAsyncOperation/05935715-bf8a-47db-bee3-3fad0b4330f6?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"05935715-bf8a-47db-bee3-3fad0b4330f6","status":"Succeeded","startTime":"2020-12-16T09:18:14.363Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:18:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - mysql server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002/databases/defaultdb?api-version=2017-12-01
+  response:
+    body:
+      string: '{"properties":{"charset":"latin1","collation":"latin1_swedish_ci"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/databases/defaultdb","name":"defaultdb","type":"Microsoft.DBforMySQL/servers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 09:18:32 GMT
       expires:
       - '-1'
       pragma:
@@ -258,7 +503,7 @@ interactions:
       ParameterSetName:
       - -g --name --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
   response:
@@ -272,7 +517,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:46:58 GMT
+      - Wed, 16 Dec 2020 09:18:34 GMT
       expires:
       - '-1'
       pragma:
@@ -292,8 +537,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
-      "10.0.0.0/24"}, "name": "cli-subnet-000004"}]}}'
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "cli-subnet-000004",
+      "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -306,40 +551,36 @@ interactions:
       Content-Length:
       - '222'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\"\
-        ,\r\n  \"etag\": \"W/\\\"1cf3e272-b0d8-4657-9de8-552e2feb15e2\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"d42fbf1a-4e4f-487a-a04b-5e619fb5ba35\"\
-        ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
-        10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
-        : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        ,\r\n        \"etag\": \"W/\\\"1cf3e272-b0d8-4657-9de8-552e2feb15e2\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
-        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n  \
-        \        \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
-        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
-        : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"2e413f3e-aeb0-4056-bc98-f51b393eeee4\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"57fad267-91bc-4348-b559-d4927bd1dec5\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"2e413f3e-aeb0-4056-bc98-f51b393eeee4\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/35f26949-4f8f-430e-ac33-5fbb6c83c3bb?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83792f14-57d8-40b3-a441-eb3e312c933b?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -347,7 +588,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:04 GMT
+      - Wed, 16 Dec 2020 09:18:42 GMT
       expires:
       - '-1'
       pragma:
@@ -360,9 +601,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e20131cb-0746-4a8d-be0e-d21a0fbcc53d
+      - 6774fd5f-1118-4ec7-a820-d884b0556438
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1181'
+      - '1190'
     status:
       code: 201
       message: Created
@@ -370,7 +611,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -380,10 +621,9 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/35f26949-4f8f-430e-ac33-5fbb6c83c3bb?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83792f14-57d8-40b3-a441-eb3e312c933b?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -395,7 +635,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:08 GMT
+      - Wed, 16 Dec 2020 09:18:46 GMT
       expires:
       - '-1'
       pragma:
@@ -412,7 +652,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b74feb0d-27bc-48bb-92f5-823f9b3fbd68
+      - cab979d0-0936-48c4-b90b-54a8f5a28fce
     status:
       code: 200
       message: OK
@@ -420,7 +660,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -430,29 +670,27 @@ interactions:
       ParameterSetName:
       - -n -g -l --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\"\
-        ,\r\n  \"etag\": \"W/\\\"870a3c9a-9bcd-403f-ad5a-0866328e78b8\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"d42fbf1a-4e4f-487a-a04b-5e619fb5ba35\"\
-        ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
-        10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
-        : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        ,\r\n        \"etag\": \"W/\\\"870a3c9a-9bcd-403f-ad5a-0866328e78b8\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
-        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n  \
-        \        \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
-        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
-        : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"b60f3575-61cd-41db-bcb4-54b03663dcb2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"57fad267-91bc-4348-b559-d4927bd1dec5\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"b60f3575-61cd-41db-bcb4-54b03663dcb2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -461,9 +699,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:08 GMT
+      - Wed, 16 Dec 2020 09:18:47 GMT
       etag:
-      - W/"870a3c9a-9bcd-403f-ad5a-0866328e78b8"
+      - W/"b60f3575-61cd-41db-bcb4-54b03663dcb2"
       expires:
       - '-1'
       pragma:
@@ -480,7 +718,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3bb708ee-3ae9-4471-883f-bbe72a06d4d4
+      - b28f455b-9687-4cd2-8efe-1814c2eaba03
     status:
       code: 200
       message: OK
@@ -498,20 +736,17 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        ,\r\n  \"etag\": \"W/\\\"870a3c9a-9bcd-403f-ad5a-0866328e78b8\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        addressPrefix\": \"10.0.0.0/24\",\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\"\
-        : \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\
-        \n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"b60f3575-61cd-41db-bcb4-54b03663dcb2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -520,9 +755,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:09 GMT
+      - Wed, 16 Dec 2020 09:18:49 GMT
       etag:
-      - W/"870a3c9a-9bcd-403f-ad5a-0866328e78b8"
+      - W/"b60f3575-61cd-41db-bcb4-54b03663dcb2"
       expires:
       - '-1'
       pragma:
@@ -539,14 +774,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fae97831-d039-46b3-8bc5-289c10e2ef41
+      - f319b755-169e-4f22-9fb2-e34613ff2cf1
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
-      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
-      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "cli-subnet-000004"}'''
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "name": "cli-subnet-000004", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -559,27 +795,24 @@ interactions:
       Content-Length:
       - '451'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        ,\r\n  \"etag\": \"W/\\\"2c59c6fa-c3b5-44b7-b317-1d8e8e44443d\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
-        addressPrefix\": \"10.0.0.0/24\",\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\"\
-        : \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\
-        \n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"546128cc-7655-4a1d-9a54-7b9418ec28be\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a259513-db22-4c1c-96fa-363aac4e973a?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab6b713f-b410-4ab0-ac8c-1723a75dd585?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -587,7 +820,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:10 GMT
+      - Wed, 16 Dec 2020 09:18:51 GMT
       expires:
       - '-1'
       pragma:
@@ -604,9 +837,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5e2b421b-3c7e-48dd-8f50-4a03689742f8
+      - 7df9016d-299a-4376-9d35-46ce5ecff62e
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1188'
     status:
       code: 200
       message: OK
@@ -614,7 +847,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -624,10 +857,9 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5a259513-db22-4c1c-96fa-363aac4e973a?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab6b713f-b410-4ab0-ac8c-1723a75dd585?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -639,7 +871,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:14 GMT
+      - Wed, 16 Dec 2020 09:18:55 GMT
       expires:
       - '-1'
       pragma:
@@ -656,7 +888,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 00ee05a0-c9d6-4d4f-b3ca-ab4b2974524d
+      - 151849a7-1378-4f04-b82c-625aed368d58
     status:
       code: 200
       message: OK
@@ -664,7 +896,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -674,18 +906,17 @@ interactions:
       ParameterSetName:
       - -n --vnet-name -g --disable-private-endpoint-network-policies
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        ,\r\n  \"etag\": \"W/\\\"fb46b100-be43-4527-827e-797772e8bb4b\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
-        addressPrefix\": \"10.0.0.0/24\",\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\"\
-        : \"Disabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\
-        \n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"39cf5ce2-3893-488a-bd3c-20ad35b7c802\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -694,9 +925,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:14 GMT
+      - Wed, 16 Dec 2020 09:18:56 GMT
       etag:
-      - W/"fb46b100-be43-4527-827e-797772e8bb4b"
+      - W/"39cf5ce2-3893-488a-bd3c-20ad35b7c802"
       expires:
       - '-1'
       pragma:
@@ -713,7 +944,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 88589e15-dba8-49e5-814f-6e0f40be3158
+      - 745f3d92-40b3-4aaa-9d81-cbf04e118348
     status:
       code: 200
       message: OK
@@ -731,24 +962,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1114'
+      - '1115'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:16 GMT
+      - Wed, 16 Dec 2020 09:18:59 GMT
       expires:
       - '-1'
       pragma:
@@ -780,7 +1011,7 @@ interactions:
       ParameterSetName:
       - -g -n --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
   response:
@@ -794,7 +1025,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:18 GMT
+      - Wed, 16 Dec 2020 09:19:01 GMT
       expires:
       - '-1'
       pragma:
@@ -813,9 +1044,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "privateLinkServiceConnections": [{"properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
-      "groupIds": ["mysqlServer"]}, "name": "cli-pec-000008"}]}}\'''''
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "privateLinkServiceConnections": [{"name": "cli-pec-000008", "properties": {"privateLinkServiceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
+      "groupIds": ["mysqlServer"]}}]}}'
     headers:
       Accept:
       - application/json
@@ -828,44 +1060,38 @@ interactions:
       Content-Length:
       - '695'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\
-        ,\r\n  \"etag\": \"W/\\\"2ee290f8-7d2f-496f-b63b-89bb6a214d80\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"dc8f5819-d398-456d-ac9a-37ffaf44f883\",\r\n \
-        \   \"privateLinkServiceConnections\": [\r\n      {\r\n        \"name\": \"\
-        cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\"\
-        ,\r\n        \"etag\": \"W/\\\"2ee290f8-7d2f-496f-b63b-89bb6a214d80\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Approved\",\r\n            \"description\": \"\",\r\n   \
-        \         \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n \
-        \       \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\
-        \n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.bde7132a-4c51-4776-8629-ac38078f277d\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"84775d3c-28b3-46b4-baed-fd5d378110b3\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"669af1d7-056d-41a9-8f85-a87ed3fd8d6f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
+        \       \"etag\": \"W/\\\"84775d3c-28b3-46b4-baed-fd5d378110b3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2cb22fbc-bc3e-4080-a466-dc5a87bd6c90\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e83b0ceb-7f65-4523-98e4-5829325fc0ab?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c8532c65-649d-4a0a-ae53-902da2995e6f?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -873,7 +1099,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:25 GMT
+      - Wed, 16 Dec 2020 09:19:11 GMT
       expires:
       - '-1'
       pragma:
@@ -886,7 +1112,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cd1310b6-00f5-47a9-bb73-60180c0aa478
+      - 6a630325-4286-4e07-b2a9-053f75adfa9d
       x-ms-ratelimit-remaining-subscription-writes:
       - '1188'
     status:
@@ -896,7 +1122,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -907,112 +1133,9 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e83b0ceb-7f65-4523-98e4-5829325fc0ab?api-version=2020-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:47:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - de3e7d3c-9fd7-44f1-84c2-fb29b13c889a
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e83b0ceb-7f65-4523-98e4-5829325fc0ab?api-version=2020-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:47:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 447f4863-6079-4369-9a29-ffc3cc14eb4a
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e83b0ceb-7f65-4523-98e4-5829325fc0ab?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c8532c65-649d-4a0a-ae53-902da2995e6f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1024,7 +1147,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:57 GMT
+      - Wed, 16 Dec 2020 09:19:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1041,7 +1164,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0fd64ab9-4c7e-4eea-ac10-85656c9a2e7b
+      - 7ec66017-7cf4-47a0-a4fe-30efb9ef0ed2
     status:
       code: 200
       message: OK
@@ -1049,7 +1172,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1060,35 +1183,30 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\"\
-        ,\r\n  \"etag\": \"W/\\\"98644eec-5fa0-4e73-9fd0-2c7ea01abad4\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"dc8f5819-d398-456d-ac9a-37ffaf44f883\",\r\n \
-        \   \"privateLinkServiceConnections\": [\r\n      {\r\n        \"name\": \"\
-        cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\"\
-        ,\r\n        \"etag\": \"W/\\\"98644eec-5fa0-4e73-9fd0-2c7ea01abad4\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Approved\",\r\n            \"description\": \"Auto-approved\"\
-        ,\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\
-        \n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.bde7132a-4c51-4776-8629-ac38078f277d\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n      \
-        \  \"fqdn\": \"azuredbclitest000002.mysql.database.azure.com\",\r\n      \
-        \  \"ipAddresses\": [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n\
-        \    ]\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"1723de10-7507-422c-9a2e-1e58cf72e575\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"669af1d7-056d-41a9-8f85-a87ed3fd8d6f\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
+        \       \"etag\": \"W/\\\"1723de10-7507-422c-9a2e-1e58cf72e575\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto-approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.2cb22fbc-bc3e-4080-a466-dc5a87bd6c90\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"azuredbclitest000002.mysql.database.azure.com\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1097,9 +1215,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:57 GMT
+      - Wed, 16 Dec 2020 09:19:23 GMT
       etag:
-      - W/"98644eec-5fa0-4e73-9fd0-2c7ea01abad4"
+      - W/"1723de10-7507-422c-9a2e-1e58cf72e575"
       expires:
       - '-1'
       pragma:
@@ -1116,7 +1234,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 81172489-f44e-46f6-9b69-86cb7e373978
+      - be55fe82-5e6d-43dd-bf05-e39bf92d46ee
     status:
       code: 200
       message: OK
@@ -1134,24 +1252,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1908'
+      - '1854'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:59 GMT
+      - Wed, 16 Dec 2020 09:19:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1183,21 +1301,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","name":"cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","name":"cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '930'
+      - '875'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:47:59 GMT
+      - Wed, 16 Dec 2020 09:19:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1229,21 +1347,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","name":"cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","name":"cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '930'
+      - '875'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:01 GMT
+      - Wed, 16 Dec 2020 09:19:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1262,11 +1380,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031",
-      "name": "cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a",
+      "name": "cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1277,15 +1395,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -1298,7 +1416,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:03 GMT
+      - Wed, 16 Dec 2020 09:19:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1310,7 +1428,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1188'
     status:
       code: 400
       message: Bad Request
@@ -1328,21 +1446,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","name":"cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","name":"cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '930'
+      - '875'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:04 GMT
+      - Wed, 16 Dec 2020 09:19:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1361,11 +1479,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
       are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031",
-      "name": "cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a",
+      "name": "cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1376,15 +1494,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -1397,7 +1515,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:06 GMT
+      - Wed, 16 Dec 2020 09:19:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1409,7 +1527,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1180'
+      - '1186'
     status:
       code: 400
       message: Bad Request
@@ -1429,15 +1547,15 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-a3e01163-7da3-4db8-a951-985806446031?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-178ec668-8295-4fc0-a7e0-7904face8b1a?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-06-15T02:48:07.043Z"}'
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-12-16T09:19:41.387Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/73f75d40-1eb6-4401-aa3d-43cafcc76daf?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionAzureAsyncOperation/b9c17cc3-cfb5-48b6-957c-af1e2d38f94f?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1445,11 +1563,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:07 GMT
+      - Wed, 16 Dec 2020 09:19:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionOperationResults/73f75d40-1eb6-4401-aa3d-43cafcc76daf?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionOperationResults/b9c17cc3-cfb5-48b6-957c-af1e2d38f94f?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -1464,10 +1582,10 @@ interactions:
       code: 202
       message: Accepted
 - request:
-    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "manualPrivateLinkServiceConnections": [{"properties": {"privateLinkServiceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
-      "groupIds": ["mysqlServer"]}, "name": "cli-pec-000009"}]}}\'''''
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000009", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
+      "groupIds": ["mysqlServer"]}}]}}'
     headers:
       Accept:
       - application/json
@@ -1480,44 +1598,38 @@ interactions:
       Content-Length:
       - '701'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\"\
-        ,\r\n  \"etag\": \"W/\\\"d8b7784b-f6d6-4652-b76e-c085af7e3691\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"da15cbfb-802f-4603-8b3e-862cad03ec94\",\r\n \
-        \   \"privateLinkServiceConnections\": [],\r\n    \"manualPrivateLinkServiceConnections\"\
-        : [\r\n      {\r\n        \"name\": \"cli-pec-000009\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\"\
-        ,\r\n        \"etag\": \"W/\\\"d8b7784b-f6d6-4652-b76e-c085af7e3691\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Pending\",\r\n            \"description\": \"Awaiting Approval\"\
-        ,\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.d21ad471-58b0-4ae0-af10-5633b097d288\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
+        \ \"etag\": \"W/\\\"8659f2b2-441c-4270-a9a1-3a0a592ee93e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"0f4fb14a-456d-4f28-ae27-50aa74a4babe\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
+        \       \"etag\": \"W/\\\"8659f2b2-441c-4270-a9a1-3a0a592ee93e\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.5fbf38d0-68cf-48c2-b1b4-010188f9edef\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b9509920-64d0-48a7-9fec-9b445e273a77?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/288744a7-307b-4d44-8c8e-6693fb4e2d11?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1525,7 +1637,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:15 GMT
+      - Wed, 16 Dec 2020 09:19:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1538,9 +1650,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2bb3a210-2791-4637-838c-fa5b3d1031e1
+      - eaeac496-22a2-4038-928c-068c64d78712
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1188'
+      - '1190'
     status:
       code: 201
       message: Created
@@ -1548,7 +1660,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1559,112 +1671,9 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b9509920-64d0-48a7-9fec-9b445e273a77?api-version=2020-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:48:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - dce6fbc4-cf75-4fb6-a6b0-39f29521131b
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b9509920-64d0-48a7-9fec-9b445e273a77?api-version=2020-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:48:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - c6740aa3-dae2-48cd-806b-f9e87bed7b1e
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b9509920-64d0-48a7-9fec-9b445e273a77?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/288744a7-307b-4d44-8c8e-6693fb4e2d11?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1676,7 +1685,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:46 GMT
+      - Wed, 16 Dec 2020 09:20:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1693,7 +1702,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1641f9c0-b851-474e-bfdd-da5bb9fe141b
+      - ab7b6870-418f-49f7-b430-57d58207322b
     status:
       code: 200
       message: OK
@@ -1701,7 +1710,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1712,32 +1721,28 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\"\
-        ,\r\n  \"etag\": \"W/\\\"5eb441d5-cf8f-4ee8-8d16-2b7f26538247\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"da15cbfb-802f-4603-8b3e-862cad03ec94\",\r\n \
-        \   \"privateLinkServiceConnections\": [],\r\n    \"manualPrivateLinkServiceConnections\"\
-        : [\r\n      {\r\n        \"name\": \"cli-pec-000009\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\"\
-        ,\r\n        \"etag\": \"W/\\\"5eb441d5-cf8f-4ee8-8d16-2b7f26538247\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Pending\",\r\n            \"description\": \"\",\r\n    \
-        \        \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n  \
-        \      \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.d21ad471-58b0-4ae0-af10-5633b097d288\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
+        \ \"etag\": \"W/\\\"190258e7-26fa-45a2-9ca8-e5d1486e8136\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"0f4fb14a-456d-4f28-ae27-50aa74a4babe\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
+        \       \"etag\": \"W/\\\"190258e7-26fa-45a2-9ca8-e5d1486e8136\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.5fbf38d0-68cf-48c2-b1b4-010188f9edef\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1746,9 +1751,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:46 GMT
+      - Wed, 16 Dec 2020 09:20:03 GMT
       etag:
-      - W/"5eb441d5-cf8f-4ee8-8d16-2b7f26538247"
+      - W/"190258e7-26fa-45a2-9ca8-e5d1486e8136"
       expires:
       - '-1'
       pragma:
@@ -1765,7 +1770,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fe01ee76-ca69-4caf-876e-ece2adb99618
+      - 33fcf7df-9717-412a-be39-c53987efa88a
     status:
       code: 200
       message: OK
@@ -1783,24 +1788,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1894'
+      - '1840'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:48 GMT
+      - Wed, 16 Dec 2020 09:20:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1832,21 +1837,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","name":"cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","name":"cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '861'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:49 GMT
+      - Wed, 16 Dec 2020 09:20:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1878,21 +1883,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","name":"cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","name":"cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '861'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:50 GMT
+      - Wed, 16 Dec 2020 09:20:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1911,11 +1916,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc",
-      "name": "cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67",
+      "name": "cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -1926,21 +1931,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"ApproveElasticServerPrivateEndpointConnection","startTime":"2020-06-15T02:48:51.863Z"}'
+      string: '{"operation":"ApproveElasticServerPrivateEndpointConnection","startTime":"2020-12-16T09:20:15.857Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/4d4ef5e0-4fc6-4459-9993-aae4213872a1?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionAzureAsyncOperation/d831a15c-c41c-4180-8cb1-c2283afb5d10?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1948,11 +1953,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:48:52 GMT
+      - Wed, 16 Dec 2020 09:20:16 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionOperationResults/4d4ef5e0-4fc6-4459-9993-aae4213872a1?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionOperationResults/d831a15c-c41c-4180-8cb1-c2283afb5d10?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -1962,7 +1967,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1188'
+      - '1192'
     status:
       code: 202
       message: Accepted
@@ -1980,69 +1985,22 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Approving"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","name":"cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","name":"cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '938'
+      - '879'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint-connection approve
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --resource-name -g --name --description --type
-      User-Agent:
-      - AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
-  response:
-    body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","name":"cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '934'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:49:13 GMT
+      - Wed, 16 Dec 2020 09:20:29 GMT
       expires:
       - '-1'
       pragma:
@@ -2074,22 +2032,22 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
-        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","name":"cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","name":"cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '934'
+      - '879'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:14 GMT
+      - Wed, 16 Dec 2020 09:20:32 GMT
       expires:
       - '-1'
       pragma:
@@ -2108,11 +2066,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
       are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc",
-      "name": "cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67",
+      "name": "cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -2123,15 +2081,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -2144,7 +2102,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:15 GMT
+      - Wed, 16 Dec 2020 09:20:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2156,7 +2114,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1191'
     status:
       code: 400
       message: Bad Request
@@ -2176,15 +2134,15 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-5f6893ac-1a08-435e-80df-e4f2c36ffdbc?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-debb2ebc-13b8-4e8f-82ce-692140422a67?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-06-15T02:49:17.823Z"}'
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-12-16T09:20:37.747Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/90735fd8-fc92-41f5-aed0-4e5dfecc60ba?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionAzureAsyncOperation/cd35dfbc-6f74-4941-b647-3d85df9dc521?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2192,11 +2150,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:18 GMT
+      - Wed, 16 Dec 2020 09:20:38 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionOperationResults/90735fd8-fc92-41f5-aed0-4e5dfecc60ba?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionOperationResults/cd35dfbc-6f74-4941-b647-3d85df9dc521?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -2206,15 +2164,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14997'
     status:
       code: 202
       message: Accepted
 - request:
-    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
-      "manualPrivateLinkServiceConnections": [{"properties": {"privateLinkServiceId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
-      "groupIds": ["mysqlServer"]}, "name": "cli-pec-000010"}]}}\'''''
+    body: '{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "manualPrivateLinkServiceConnections": [{"name": "cli-pec-000010", "properties":
+      {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002",
+      "groupIds": ["mysqlServer"]}}]}}'
     headers:
       Accept:
       - application/json
@@ -2227,44 +2185,38 @@ interactions:
       Content-Length:
       - '701'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\"\
-        ,\r\n  \"etag\": \"W/\\\"427c199d-9e5f-4438-a421-5b6f805aaf16\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"6b4a9498-56dc-4e24-9d69-e903402bb293\",\r\n \
-        \   \"privateLinkServiceConnections\": [],\r\n    \"manualPrivateLinkServiceConnections\"\
-        : [\r\n      {\r\n        \"name\": \"cli-pec-000010\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\"\
-        ,\r\n        \"etag\": \"W/\\\"427c199d-9e5f-4438-a421-5b6f805aaf16\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Pending\",\r\n            \"description\": \"Awaiting Approval\"\
-        ,\r\n            \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.882b9077-efdc-4dd5-9fe3-13d103d7a82c\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"47ef98ce-877e-44a0-b9e0-226eb620988d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"3ab58420-5f4d-4599-a5aa-848113146731\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"47ef98ce-877e-44a0-b9e0-226eb620988d\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.f35bac43-b688-4e35-a87a-d5d63a9f6588\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4c47e698-8d96-44d6-888b-ece73345d3fc?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3a5ff30c-90fc-4dba-9d79-279790245912?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -2272,7 +2224,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:24 GMT
+      - Wed, 16 Dec 2020 09:20:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2285,9 +2237,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e92c18f7-3d6e-41dc-b088-46152f78ad2f
+      - c99409cb-427d-4b12-9e56-59e5fd0e87f5
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1185'
     status:
       code: 201
       message: Created
@@ -2295,7 +2247,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2306,61 +2258,9 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4c47e698-8d96-44d6-888b-ece73345d3fc?api-version=2020-05-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 15 Jun 2020 02:49:35 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - f51e5c31-6910-4ed5-a886-e5af19fca4f5
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-endpoint create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
-        --group-id --manual-request
-      User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4c47e698-8d96-44d6-888b-ece73345d3fc?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3a5ff30c-90fc-4dba-9d79-279790245912?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2372,7 +2272,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:45 GMT
+      - Wed, 16 Dec 2020 09:20:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2389,7 +2289,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0ff80683-218e-480b-999b-095f6ea1c420
+      - a329c63f-b846-4576-9f05-cd584b3540bd
     status:
       code: 200
       message: OK
@@ -2397,7 +2297,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2408,32 +2308,28 @@ interactions:
       - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
         --group-id --manual-request
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-network/10.2.0 Azure-SDK-For-Python AZURECLI/2.7.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\"\
-        ,\r\n  \"etag\": \"W/\\\"085a7162-c6de-4080-b4c8-4e53d857cec3\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"\
-        westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"6b4a9498-56dc-4e24-9d69-e903402bb293\",\r\n \
-        \   \"privateLinkServiceConnections\": [],\r\n    \"manualPrivateLinkServiceConnections\"\
-        : [\r\n      {\r\n        \"name\": \"cli-pec-000010\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\"\
-        ,\r\n        \"etag\": \"W/\\\"085a7162-c6de-4080-b4c8-4e53d857cec3\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\"\
-        ,\r\n          \"groupIds\": [\r\n            \"mysqlServer\"\r\n        \
-        \  ],\r\n          \"privateLinkServiceConnectionState\": {\r\n          \
-        \  \"status\": \"Pending\",\r\n            \"description\": \"\",\r\n    \
-        \        \"actionsRequired\": \"None\"\r\n          }\r\n        },\r\n  \
-        \      \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\
-        \r\n      }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\
-        \r\n    },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"\
-        /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.882b9077-efdc-4dd5-9fe3-13d103d7a82c\"\
-        \r\n      }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"c5f8e986-8d5f-440a-aed0-e0a952bbe611\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"3ab58420-5f4d-4599-a5aa-848113146731\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"c5f8e986-8d5f-440a-aed0-e0a952bbe611\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"mysqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.f35bac43-b688-4e35-a87a-d5d63a9f6588\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2442,9 +2338,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:46 GMT
+      - Wed, 16 Dec 2020 09:20:56 GMT
       etag:
-      - W/"085a7162-c6de-4080-b4c8-4e53d857cec3"
+      - W/"c5f8e986-8d5f-440a-aed0-e0a952bbe611"
       expires:
       - '-1'
       pragma:
@@ -2461,7 +2357,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4d4f47cd-18af-4b31-9db8-309e3d4cb328
+      - d87d1883-b85d-424d-a604-ab5995d8b5c6
     status:
       code: 200
       message: OK
@@ -2479,24 +2375,24 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.16
-        msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2017-12-01 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForMySQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1894'
+      - '1840'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:48 GMT
+      - Wed, 16 Dec 2020 09:20:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2528,21 +2424,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","name":"cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","name":"cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '861'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:49 GMT
+      - Wed, 16 Dec 2020 09:21:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2574,21 +2470,21 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","name":"cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","name":"cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '916'
+      - '861'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:50 GMT
+      - Wed, 16 Dec 2020 09:21:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2607,11 +2503,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},
       "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
       are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68",
-      "name": "cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17",
+      "name": "cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -2622,21 +2518,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"RejectElasticServerPrivateEndpointConnection","startTime":"2020-06-15T02:49:52.187Z"}'
+      string: '{"operation":"RejectElasticServerPrivateEndpointConnection","startTime":"2020-12-16T09:21:07.143Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/db1178de-052c-46d0-9e24-9addce8c7d36?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionAzureAsyncOperation/01643741-40b5-4544-8972-a2b99892d5a7?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2644,11 +2540,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:49:53 GMT
+      - Wed, 16 Dec 2020 09:21:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionOperationResults/db1178de-052c-46d0-9e24-9addce8c7d36?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionOperationResults/01643741-40b5-4544-8972-a2b99892d5a7?api-version=2018-06-01
       pragma:
       - no-cache
       server:
@@ -2658,7 +2554,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1188'
     status:
       code: 202
       message: Accepted
@@ -2676,22 +2572,22 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","name":"cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","name":"cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '934'
+      - '879'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:50:03 GMT
+      - Wed, 16 Dec 2020 09:21:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2723,22 +2619,22 @@ interactions:
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","name":"cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","name":"cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","type":"Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '934'
+      - '879'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:50:04 GMT
+      - Wed, 16 Dec 2020 09:21:23 GMT
       expires:
       - '-1'
       pragma:
@@ -2757,11 +2653,11 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},
       "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
       are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68",
-      "name": "cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}\'''''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17",
+      "name": "cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17", "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections"}'
     headers:
       Accept:
       - '*/*'
@@ -2772,15 +2668,15 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '952'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-name -g --name --description --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
       string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
@@ -2793,7 +2689,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:50:05 GMT
+      - Wed, 16 Dec 2020 09:21:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2805,7 +2701,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1185'
+      - '1188'
     status:
       code: 400
       message: Bad Request
@@ -2823,22 +2719,22 @@ interactions:
       ParameterSetName:
       - --name -g --type
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002?api-version=2017-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-06-15T02:53:52.293+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
-        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":51200,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"5.7","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.mysql.database.azure.com","earliestRestoreDate":"2020-12-16T09:26:03.727+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforMySQL/servers"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1912'
+      - '1858'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:50:06 GMT
+      - Wed, 16 Dec 2020 09:21:28 GMT
       expires:
       - '-1'
       pragma:
@@ -2872,15 +2768,15 @@ interactions:
       ParameterSetName:
       - --id -y
       User-Agent:
-      - AZURECLI/2.7.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) AZURECLI/2.16.0
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-06a4355c-f995-4e9a-bd6c-0c2aea840c68?api-version=2018-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-42f7e286-ee23-4187-a624-2d83a451bc17?api-version=2018-06-01
   response:
     body:
-      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-06-15T02:50:07.687Z"}'
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-12-16T09:21:31.837Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/e1863b89-3be4-40df-8f13-ef01672ed52b?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionAzureAsyncOperation/af83d847-b539-4250-962b-590c37316a13?api-version=2018-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2888,11 +2784,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 15 Jun 2020 02:50:08 GMT
+      - Wed, 16 Dec 2020 09:21:32 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/eastus/privateEndpointConnectionOperationResults/e1863b89-3be4-40df-8f13-ef01672ed52b?api-version=2018-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforMySQL/locations/westus/privateEndpointConnectionOperationResults/af83d847-b539-4250-962b-590c37316a13?api-version=2018-06-01
       pragma:
       - no-cache
       server:

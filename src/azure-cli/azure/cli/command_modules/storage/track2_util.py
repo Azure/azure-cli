@@ -58,3 +58,25 @@ def underline_to_hump(underline_str):
     import re
     sub = re.sub(r'(_\w)', lambda x: x.group(1)[1].upper(), underline_str)
     return sub
+
+
+def list_generator(pages, num_results):
+    result = []
+
+    # get first page items
+    page = list(next(pages))
+    result += page
+
+    while True:
+        if not pages.continuation_token:
+            break
+
+        # handle num results
+        if num_results is not None:
+            if num_results == len(result):
+                break
+
+        page = list(next(pages))
+        result += page
+
+    return result

@@ -13,15 +13,15 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001","name":"cli_nic_convenience_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-07-14T13:42:31Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001","name":"cli_nic_convenience_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T07:53:28Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:42:33 GMT
+      - Wed, 16 Dec 2020 07:53:34 GMT
       expires:
       - '-1'
       pragma:
@@ -109,20 +109,19 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:42:34 GMT
+      - Wed, 16 Dec 2020 07:53:36 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Tue, 14 Jul 2020 13:47:34 GMT
+      - Wed, 16 Dec 2020 07:58:36 GMT
       source-age:
-      - '255'
+      - '277'
       strict-transport-security:
       - max-age=31536000
       vary:
       - Authorization,Accept-Encoding, Accept-Encoding
       via:
-      - 1.1 varnish (Varnish/6.0)
-      - 1.1 varnish
+      - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
       - HIT, HIT
       x-cache-hits:
@@ -130,15 +129,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 1f7c43fd9ceca77833c2bca49b90fadec62fe0b6
+      - a32df610426660d684bc96ef07cfa8d4e5afa60e
       x-frame-options:
       - deny
       x-github-request-id:
-      - 4842:2558:3A3240:3EA7B2:5F0DAC5D
+      - ED04:601E:7444A:8AD7A:5FD9B1AA
       x-served-by:
-      - cache-sin18028-SIN
+      - cache-sin18032-SIN
       x-timer:
-      - S1594734155.726679,VS0,VE242
+      - S1608105216.060394,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -148,7 +147,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -158,10 +157,7 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks?api-version=2018-01-01
   response:
@@ -175,7 +171,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:42:34 GMT
+      - Wed, 16 Dec 2020 07:53:37 GMT
       expires:
       - '-1'
       pragma:
@@ -190,7 +186,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
       [{"name": "conveniencevm1VNET", "type": "Microsoft.Network/virtualNetworks",
@@ -217,8 +213,8 @@ interactions:
       "ReadWrite", "managedDisk": {"storageAccountType": null}}, "imageReference":
       {"publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
       "latest"}}, "osProfile": {"computerName": "conveniencevm1", "adminUsername":
-      "myusername", "adminPassword": "[parameters(\''adminPassword\'')]"}}}], "outputs":
-      {}}, "parameters": {"adminPassword": {"value": "aBcD1234!@#$"}}, "mode": "Incremental"}}'''
+      "myusername", "adminPassword": "[parameters(''adminPassword'')]"}}}], "outputs":
+      {}}, "parameters": {"adminPassword": {"value": "aBcD1234!@#$"}}, "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -235,18 +231,18 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_UggApfpwvfRwH7w1RKc6WHcgSEZ44HNY","name":"vm_deploy_UggApfpwvfRwH7w1RKc6WHcgSEZ44HNY","type":"Microsoft.Resources/deployments","properties":{"templateHash":"653602803141592235","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-14T13:42:39.4381663Z","duration":"PT2.5182494S","correlationId":"8a238f09-7e8e-4a29-8209-e621db0a6209","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_HKZiVcaZLCRecsLBQRoEkQCsGrIloCz7","name":"vm_deploy_HKZiVcaZLCRecsLBQRoEkQCsGrIloCz7","type":"Microsoft.Resources/deployments","properties":{"templateHash":"129639012819645101","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-16T07:53:42.4905531Z","duration":"PT2.2954745S","correlationId":"d6454124-1c31-47b4-8985-0f42cbe5be1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_UggApfpwvfRwH7w1RKc6WHcgSEZ44HNY/operationStatuses/08586068727285577204?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_HKZiVcaZLCRecsLBQRoEkQCsGrIloCz7/operationStatuses/08585935016652825544?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -254,7 +250,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:42:40 GMT
+      - Wed, 16 Dec 2020 07:53:43 GMT
       expires:
       - '-1'
       pragma:
@@ -264,7 +260,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1175'
+      - '1187'
     status:
       code: 201
       message: Created
@@ -282,10 +278,10 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586068727285577204?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585935016652825544?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -297,7 +293,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:43:10 GMT
+      - Wed, 16 Dec 2020 07:54:14 GMT
       expires:
       - '-1'
       pragma:
@@ -325,53 +321,10 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586068727285577204?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 14 Jul 2020 13:43:41 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586068727285577204?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585935016652825544?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -383,7 +336,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:11 GMT
+      - Wed, 16 Dec 2020 07:54:45 GMT
       expires:
       - '-1'
       pragma:
@@ -411,22 +364,22 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_UggApfpwvfRwH7w1RKc6WHcgSEZ44HNY","name":"vm_deploy_UggApfpwvfRwH7w1RKc6WHcgSEZ44HNY","type":"Microsoft.Resources/deployments","properties":{"templateHash":"653602803141592235","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-14T13:43:41.9812833Z","duration":"PT1M5.0613664S","correlationId":"8a238f09-7e8e-4a29-8209-e621db0a6209","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Resources/deployments/vm_deploy_HKZiVcaZLCRecsLBQRoEkQCsGrIloCz7","name":"vm_deploy_HKZiVcaZLCRecsLBQRoEkQCsGrIloCz7","type":"Microsoft.Resources/deployments","properties":{"templateHash":"129639012819645101","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T07:54:26.8754189Z","duration":"PT46.6803403S","correlationId":"d6454124-1c31-47b4-8985-0f42cbe5be1b","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"conveniencevm1VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"conveniencevm1PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"conveniencevm1VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"conveniencevm1"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/virtualNetworks/conveniencevm1VNET"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '4033'
+      - '4032'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:12 GMT
+      - Wed, 16 Dec 2020 07:54:46 GMT
       expires:
       - '-1'
       pragma:
@@ -454,48 +407,46 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c6242913-213f-41aa-b443-5ef5e2fa9163\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b8176d2a-ac91-4aff-b8b3-ca9a462fd780\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007081\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_b595a089f5d24479b928cb7f1cbe0e3b\",\r\n
+        \"18.04.202012111\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_4b21b4385f024b1e88e70093c5f73dc3\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_NIC_CONVENIENCE_TEST643PRVMJCODYK5DHV7KTJWOHNYW345HQFWH3VA7D33AJS5XLHOO/providers/Microsoft.Compute/disks/conveniencevm1_disk1_b595a089f5d24479b928cb7f1cbe0e3b\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_4b21b4385f024b1e88e70093c5f73dc3\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"conveniencevm1\",\r\n
         \     \"adminUsername\": \"myusername\",\r\n      \"linuxConfiguration\":
         {\r\n        \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
-        true\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
+        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\r\n
+        \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
         \"conveniencevm1\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\":
-        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.49.2\",\r\n
+        \"18.04\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.53\",\r\n
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-07-14T13:44:11+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"conveniencevm1_disk1_b595a089f5d24479b928cb7f1cbe0e3b\",\r\n
+        \"2020-12-16T07:54:45+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"conveniencevm1_disk1_4b21b4385f024b1e88e70093c5f73dc3\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-07-14T13:43:20.0890017+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-12-16T07:54:12.997598+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2020-07-14T13:43:40.2766077+00:00\"\r\n
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded/osProvisioningInProgress\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"OS provisioning
+        in progress\",\r\n          \"time\": \"2020-12-16T07:54:25.4986112+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -503,11 +454,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3263'
+      - '3369'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:13 GMT
+      - Wed, 16 Dec 2020 07:54:48 GMT
       expires:
       - '-1'
       pragma:
@@ -524,7 +475,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3982,Microsoft.Compute/LowCostGet30Min;31882
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31993
     status:
       code: 200
       message: OK
@@ -532,7 +483,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -542,21 +493,18 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\",\r\n
-        \ \"etag\": \"W/\\\"cbb5e538-aa73-4c58-9616-78222833e60b\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"7fcf31b4-fc5f-4025-a113-86c6457937f5\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"84131ec5-5003-49c5-8821-c772f0dab48a\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"1239a263-7fd4-4a6b-865b-d693669ac729\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigconveniencevm1\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/ipConfigurations/ipconfigconveniencevm1\",\r\n
-        \       \"etag\": \"W/\\\"cbb5e538-aa73-4c58-9616-78222833e60b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"7fcf31b4-fc5f-4025-a113-86c6457937f5\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -565,8 +513,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"o1yfvka4va2erays0uxppffm0g.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-22-48-04-95-B0\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"wtsulauyk22upirvfg50m4uw0h.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-02-AE-8F\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkSecurityGroups/conveniencevm1NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -580,9 +528,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:14 GMT
+      - Wed, 16 Dec 2020 07:54:49 GMT
       etag:
-      - W/"cbb5e538-aa73-4c58-9616-78222833e60b"
+      - W/"7fcf31b4-fc5f-4025-a113-86c6457937f5"
       expires:
       - '-1'
       pragma:
@@ -599,7 +547,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0c84b116-d26a-4a0d-aec5-5ebd5db83772
+      - 1afe02e2-751e-4aad-88ce-754219759d06
     status:
       code: 200
       message: OK
@@ -607,7 +555,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - application/json, text/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -617,19 +565,16 @@ interactions:
       ParameterSetName:
       - -g -n --image --admin-username --admin-password --authentication-type --nsg-rule
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/publicIPAddresses/conveniencevm1PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"35a3819c-e1b2-435b-a377-ea7202428f8b\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"9670be44-c9e4-4071-9e19-b9d4a4fd075e\\\"\",\r\n  \"location\":
         \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"7864893f-b5a8-450c-95ea-d6d6216e2543\",\r\n
-        \   \"ipAddress\": \"13.91.5.91\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"cfc8f472-0e34-4fb2-bbfe-cf8aa097cebe\",\r\n
+        \   \"ipAddress\": \"23.100.36.125\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/ipConfigurations/ipconfigconveniencevm1\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -638,13 +583,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1038'
+      - '1041'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:14 GMT
+      - Wed, 16 Dec 2020 07:54:50 GMT
       etag:
-      - W/"35a3819c-e1b2-435b-a377-ea7202428f8b"
+      - W/"9670be44-c9e4-4071-9e19-b9d4a4fd075e"
       expires:
       - '-1'
       pragma:
@@ -661,7 +606,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f935045b-b1f5-4493-8ffa-e5ccca203bc1
+      - 874ce00f-1165-4e4f-91ac-ab39d451c7ca
     status:
       code: 200
       message: OK
@@ -679,31 +624,29 @@ interactions:
       ParameterSetName:
       - -g -n --query
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-compute/13.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"conveniencevm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/virtualMachines/conveniencevm1\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c6242913-213f-41aa-b443-5ef5e2fa9163\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"b8176d2a-ac91-4aff-b8b3-ca9a462fd780\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
-        \"18.04.202007081\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_b595a089f5d24479b928cb7f1cbe0e3b\",\r\n
+        \"18.04.202012111\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"conveniencevm1_disk1_4b21b4385f024b1e88e70093c5f73dc3\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_NIC_CONVENIENCE_TEST643PRVMJCODYK5DHV7KTJWOHNYW345HQFWH3VA7D33AJS5XLHOO/providers/Microsoft.Compute/disks/conveniencevm1_disk1_b595a089f5d24479b928cb7f1cbe0e3b\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Compute/disks/conveniencevm1_disk1_4b21b4385f024b1e88e70093c5f73dc3\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"conveniencevm1\",\r\n
         \     \"adminUsername\": \"myusername\",\r\n      \"linuxConfiguration\":
         {\r\n        \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
-        true\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
+        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\r\n
+        \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"
@@ -711,11 +654,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1950'
+      - '2029'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:14 GMT
+      - Wed, 16 Dec 2020 07:54:52 GMT
       expires:
       - '-1'
       pragma:
@@ -732,7 +675,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3981,Microsoft.Compute/LowCostGet30Min;31881
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31992
     status:
       code: 200
       message: OK
@@ -752,12 +695,9 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveNetworkSecurityGroups?api-version=2020-07-01
   response:
     body:
       string: 'null'
@@ -769,11 +709,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:16 GMT
+      - Wed, 16 Dec 2020 07:54:54 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e7a2e5d0-bf75-47eb-a188-c7979b5f01ca?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/438b65c9-2fe1-40ff-bda9-fc59ac07caf5?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -784,9 +724,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8edf386b-23bd-49b4-80f4-a43304ce446c
+      - 1821d41d-d468-4d69-9afc-36421ef565cc
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -794,7 +734,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -804,10 +744,9 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e7a2e5d0-bf75-47eb-a188-c7979b5f01ca?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/438b65c9-2fe1-40ff-bda9-fc59ac07caf5?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"networkSecurityGroup\": {\r\n
@@ -1051,11 +990,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:27 GMT
+      - Wed, 16 Dec 2020 07:55:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/e7a2e5d0-bf75-47eb-a188-c7979b5f01ca?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/438b65c9-2fe1-40ff-bda9-fc59ac07caf5?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -1070,7 +1009,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8edf386b-23bd-49b4-80f4-a43304ce446c
+      - 1821d41d-d468-4d69-9afc-36421ef565cc
     status:
       code: 200
       message: OK
@@ -1090,12 +1029,9 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_nic_convenience_test000001/providers/Microsoft.Network/networkInterfaces/conveniencevm1VMNic/effectiveRouteTable?api-version=2020-07-01
   response:
     body:
       string: 'null'
@@ -1107,11 +1043,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:28 GMT
+      - Wed, 16 Dec 2020 07:55:08 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/47c1875f-dfe1-4ff6-9428-60fef75d3764?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/edb6d2e4-c896-4c9a-a039-492025079d9d?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -1122,9 +1058,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 64891e04-a7ae-4d01-b59d-4c1e08390ef2
+      - b7bf5a5d-96cf-4c68-8a30-70f22cc7d603
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -1132,7 +1068,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1142,10 +1078,9 @@ interactions:
       ParameterSetName:
       - --ids
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/11.0.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/47c1875f-dfe1-4ff6-9428-60fef75d3764?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/edb6d2e4-c896-4c9a-a039-492025079d9d?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"disableBgpRoutePropagation\":
@@ -1189,11 +1124,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 13:44:40 GMT
+      - Wed, 16 Dec 2020 07:55:18 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/47c1875f-dfe1-4ff6-9428-60fef75d3764?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/edb6d2e4-c896-4c9a-a039-492025079d9d?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -1208,7 +1143,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 64891e04-a7ae-4d01-b59d-4c1e08390ef2
+      - b7bf5a5d-96cf-4c68-8a30-70f22cc7d603
     status:
       code: 200
       message: OK

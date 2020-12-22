@@ -266,9 +266,9 @@ class ManagedApplicationPreparer(AbstractPreparer, SingleValueReplacer):
 
 # pylint: disable=too-many-instance-attributes
 class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix='clitest.vn',
+    def __init__(self, name_prefix='clitest.vn', location='westus',
                  parameter_name='virtual_network',
-                 resource_group_parameter_name=None,
+                 resource_group_parameter_name='resource_group',
                  resource_group_key=KEY_RESOURCE_GROUP,
                  dev_setting_name='AZURE_CLI_TEST_DEV_VIRTUAL_NETWORK_NAME',
                  random_name_length=24, key=KEY_VIRTUAL_NETWORK):
@@ -278,6 +278,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         super(VirtualNetworkPreparer, self).__init__(
             name_prefix, random_name_length)
         self.cli_ctx = get_dummy_cli()
+        self.location = location
         self.parameter_name = parameter_name
         self.key = key
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -295,17 +296,22 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value)
                          for key, value in tags.items()])
-        template = 'az network vnet create --resource-group {} --name {} --subnet-name default --tag ' + tags
-        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), name))
+        template = 'az network vnet create --resource-group {} --location {} --name {} --subnet-name default --tag ' + tags
+        self.live_only_execute(self.cli_ctx, template.format(self._get_resource_group(**kwargs), self.location, name))
 
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
-            self.live_only_execute(
-                self.cli_ctx,
-                'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+            from msrestazure.azure_exceptions import CloudError
+            try:
+                self.live_only_execute(
+                    self.cli_ctx,
+                    'az network vnet delete --name {} --resource-group {}'.format(name, self._get_resource_group(**kwargs)))
+            except CloudError:
+                # deletion of vnet may fail as service could create subresources like IPConfig. We could rely on the deletion of resource group to delete the vnet.
+                pass
 
     def _get_resource_group(self, **kwargs):
         try:

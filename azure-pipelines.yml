@@ -23,7 +23,7 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
-        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix:; then
           echo "Hotfix PR should target release branch."
           exit 1
         fi
@@ -122,7 +122,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3'
     inputs:
-      versionSpec: 3.x
+      versionSpec: 3.8
 
   - task: BatchScript@1
     inputs:
@@ -284,6 +284,7 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/pypi/build.sh
+      arguments: $(System.PullRequest.TargetBranch)
 
 
   - task: PublishPipelineArtifact@0
@@ -361,7 +362,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip tox
+    - bash: pip install --upgrade pip==20.2.4 tox
       displayName: 'Install pip and tox'
     - bash: ./scripts/ci/unittest.sh
       displayName: 'Run Unit Test'
@@ -387,7 +388,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip wheel
+    - bash: pip install --upgrade pip==20.2.4 wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
@@ -408,6 +409,23 @@ jobs:
       parameters:
         pythonVersion: '$(python.version)'
         profile: 'latest'
+
+- job: AutomationTest20200901
+  displayName: Automation Test (Profile 2020-09-01)
+  timeoutInMinutes: 120
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2020-09-01-hybrid'
 
 - job: AutomationTest20190301
   displayName: Automation Test (Profile 2019-03-01)
@@ -443,27 +461,10 @@ jobs:
         pythonVersion: '$(python.version)'
         profile: '2018-03-01-hybrid'
 
-- job: AutomationTest20170309
-  displayName: Automation Test (Profile 2017-03-09)
-  timeoutInMinutes: 120
-  pool:
-    vmImage: 'ubuntu-16.04'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python38:
-        python.version: '3.8'
-  steps:
-    - template: .azure-pipelines/templates/automation_test.yml
-      parameters:
-        pythonVersion: '$(python.version)'
-        profile: '2017-03-09-profile'
-
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 10
+  timeoutInMinutes: 20
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -476,7 +477,7 @@ jobs:
       displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-    - bash: pip install --upgrade pip wheel
+    - bash: pip install --upgrade pip==20.2.4 wheel
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_extensions.sh
       displayName: 'Load extensions'
@@ -566,9 +567,6 @@ jobs:
 
       echo == Run Self-Test ==
       az self-test
-
-      echo == Audit azure-cli.rb formula ==
-      brew audit --strict $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
 
     displayName: 'Bash Script'
 
@@ -674,12 +672,12 @@ jobs:
       Bionic:
         deb_system: ubuntu
         distro: bionic
-      Eoan:
-        deb_system: ubuntu
-        distro: eoan
       Focal:
         deb_system: ubuntu
         distro: focal
+      Groovy:
+        deb_system: ubuntu
+        distro: groovy
       Jessie:
         deb_system: debian
         distro: jessie
@@ -688,7 +686,7 @@ jobs:
         distro: stretch
       Buster:
         deb_system: debian
-        distro: buster 
+        distro: buster
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -719,30 +717,12 @@ jobs:
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   strategy:
     matrix:
-      Xenial:
-        deb_system: ubuntu
-        distro: xenial
-      Trusty:
-        deb_system: ubuntu
-        distro: trusty
-      Bionic:
-        deb_system: ubuntu
-        distro: bionic
-      Eoan:
-        deb_system: ubuntu
-        distro: eoan
       Focal:
         deb_system: ubuntu
         distro: focal
-      Jessie:
-        deb_system: debian
-        distro: jessie
-      Stretch:
-        deb_system: debian
-        distro: stretch
       Buster:
         deb_system: debian
-        distro: buster      
+        distro: buster
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -863,7 +843,7 @@ jobs:
       displayName: 'Use Python 3.6'
       inputs:
         versionSpec: 3.6
-    - bash: pip install --upgrade pip wheel
+    - bash: pip install --upgrade pip==20.2.4 wheel
       displayName: "Install pip and wheel"
     - bash: ./scripts/ci/test_ref_doc.sh
       displayName: "Verify Sphinx Document Generator"

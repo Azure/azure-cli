@@ -13,9 +13,10 @@ import mock
 import unittest
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from ..util import retry
 
 
 class RoleScenarioTest(ScenarioTest):
@@ -121,7 +122,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-new-kv')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -156,7 +157,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
+    @KeyVaultPreparer(name_prefix='test-rbac-exist-kv')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -182,7 +183,11 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
                 self.cmd('ad sp create-for-rbac -n {display_name} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
             self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
-            self.cmd('ad app delete --id {sp}')
+            try:
+                self.cmd('ad app delete --id {sp}')
+            except:
+                # Mute the exception, otherwise the exception thrown in the `try` clause will be hidden
+                pass
 
         # test with cert that has too short a validity
         try:
@@ -191,12 +196,14 @@ class RbacSPKeyVaultScenarioTest(ScenarioTest):
                 self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {display_name2}')
             self.cmd('ad sp credential reset -n {sp2} --keyvault {kv} --cert {cert}')
         finally:
-            self.cmd('ad app delete --id {sp2}')
+            try:
+                self.cmd('ad app delete --id {sp2}')
+            except:
+                pass
 
 
 class RoleCreateScenarioTest(RoleScenarioTest):
 
-    @record_only()  # workaround https://github.com/Azure/azure-cli/issues/3187
     @AllowLargeResponse()
     def test_role_create_scenario(self):
         subscription_id = self.get_subscription_id()
@@ -230,28 +237,26 @@ class RoleCreateScenarioTest(RoleScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+
         # a few 'sleep' here to handle server replicate latency. It is no-op under playback
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role definition create --role-definition {template}', checks=[
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
-            time.sleep(180)
-            role = self.cmd('role definition list -n {role}',
-                            checks=self.check('[0].roleName', '{role}')).get_output_in_json()
+
+            role = retry(lambda: self.cmd('role definition list -n {role}',
+                                          checks=self.check('[0].roleName', '{role}'))).get_output_in_json()
+
             # verify we can update
             role[0]['permissions'][0]['actions'].append('Microsoft.Support/*')
             with open(temp_file, 'w') as f:
                 json.dump(role[0], f)
-            self.cmd('role definition update --role-definition {template}',
-                     checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*'))
-            time.sleep(30)
 
-            self.cmd('role definition delete -n {role}',
-                     checks=self.is_empty())
-            time.sleep(240)
-            self.cmd('role definition list -n {role}',
-                     checks=self.is_empty())
+            retry(lambda: self.cmd('role definition update --role-definition {template}',
+                                   checks=self.check('permissions[0].actions[-1]', 'Microsoft.Support/*')))
+            retry(lambda: self.cmd('role definition delete -n {role}', checks=self.is_empty()))
+            retry(lambda: self.cmd('role definition list -n {role}', checks=self.is_empty()))
 
 
 class RoleAssignmentScenarioTest(RoleScenarioTest):
@@ -339,11 +344,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment delete --assignee {upn} --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
-                    self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
-                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
-
-                # test role assignment on empty scope
                 with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
@@ -370,6 +370,79 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 1))
                 self.cmd('role assignment delete -g {rg}')
                 self.cmd('role assignment list -g {rg}', checks=self.check("length([])", 0))
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
+    def test_role_assignment_create_update(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            user = self.create_random_name('testuser', 15)
+            self.kwargs.update({
+                'upn': user + '@azuresdkteam.onmicrosoft.com',
+                'rg': resource_group,
+                'description': "Role assignment foo to check on bar",
+                'condition': "@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:Name] stringEquals 'foo'",
+                'condition_version': "2.0"
+            })
+
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}').get_output_in_json()
+            self.kwargs['object_id'] = result['objectId']
+            try:
+                # Test create role assignment with description, condition and condition_version
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         # Include double quotes to tell shlex to treat arguments as a whole
+                         '--description "{description}" '
+                         '--condition "{condition}" --condition-version {condition_version}',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "{condition_version}")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test create role assignment with description, condition. condition_version defaults to 2.0
+                self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                         '--description "{description}" '
+                         '--condition "{condition}"',
+                         checks=[
+                             self.check("description", "{description}"),
+                             self.check("condition", "{condition}"),
+                             self.check("conditionVersion", "2.0")
+                         ])
+                self.cmd('role assignment delete -g {rg}')
+
+                # Test error is raised if condition-version is set but condition is not
+                with self.assertRaisesRegex(CLIError, "--condition must be set"):
+                    self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                             '--condition-version {condition_version}')
+
+                # Update
+                output = self.cmd('role assignment create --assignee-object-id {object_id} --assignee-principal-type User --role reader -g {rg} '
+                                  '--description "{description}" '
+                                  '--condition "{condition}" --condition-version {condition_version}').get_output_in_json()
+
+                updated_description = "Some updated description."
+                output['description'] = updated_description
+                import shlex
+                from ..util import escape_apply_kwargs
+                # The json contains both single (in description) and double quotes, use shlex to quote and escape it,
+                # then escape it again before being passed to self.cmd
+                output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+
+                self.cmd("role assignment update --role-assignment {}".format(output_json),
+                         checks=[self.check("description", updated_description)])
+
+                with self.assertRaisesRegex(CLIError, "cannot be downgraded"):
+                    output['conditionVersion'] = '1.0'
+                    output_json = escape_apply_kwargs(shlex.quote(json.dumps(output)))
+                    self.cmd("role assignment update --role-assignment {}".format(output_json))
+
+                self.cmd('role assignment delete -g {rg}')
+
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
@@ -413,6 +486,18 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
+    def test_role_assignment_empty_string_args(self):
+        expected_msg = "{} can't be an empty string"
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--assignee")):
+            self.cmd('role assignment delete --assignee ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--scope")):
+            self.cmd('role assignment delete --scope ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--role")):
+            self.cmd('role assignment delete --role ""')
+        with self.assertRaisesRegex(CLIError, expected_msg.format("--resource-group")):
+            self.cmd('role assignment delete --resource-group ""')
+
+    @unittest.skip("Known service random 403 issue")
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
     @AllowLargeResponse()
     def test_role_assignment_mgmt_grp(self, resource_group):
@@ -475,26 +560,28 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 
                 if self.is_live or self.in_recording:
                     now = datetime.datetime.utcnow()
-                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
-                                                             now.minute, now.second)
-                    time.sleep(120)
-                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
+                    start = now - datetime.timedelta(minutes=1)
+                    end = now + datetime.timedelta(minutes=1)
+                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(start.year, start.month, start.day, start.hour,
+                                                             start.minute, start.second)
+                    end_time = '{}-{}-{}T{}:{}:{}Z'.format(end.year, end.month, end.day, end.hour,
+                                                           end.minute, end.second)
+
                 else:
                     # figure out the right time stamps from the recording file
                     r = next(r for r in self.cassette.requests if r.method == 'GET' and 'providers/microsoft.insights/eventtypes/management/' in r.uri)
-                    try:
-                        from urllib.parse import parse_qs, urlparse
-                    except ImportError:
-                        from urlparse import urlparse, parse_qs
+                    from urllib.parse import parse_qs, urlparse
                     query_parts = parse_qs(urlparse(r.uri).query)['$filter'][0].split()
                     start_index, end_index = [i + 2 for (i, j) in enumerate(query_parts) if j == 'eventTimestamp']
                     start_time, end_time = query_parts[start_index], query_parts[end_index]
 
+                # Change log is not immediately available. Retry until success.
+                def check_changelogs():
                     result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
                                       start_time, end_time)).get_output_in_json()
-
-                self.assertTrue([x for x in result if (resource_group in x['scope'] and
-                                                       x['principalName'] == self.kwargs['upn'])])
+                    self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                           x['principalName'] == self.kwargs['upn'])])
+                retry(check_changelogs, sleep_duration=60, max_retry=15)
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 

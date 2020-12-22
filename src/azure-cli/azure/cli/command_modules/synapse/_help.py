@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
 from knack.help_files import helps
 
@@ -169,7 +170,7 @@ short-summary: Create a SQL pool.
 examples:
   - name: Create a SQL pool.
     text: |-
-        az synapse sql pool create --name sqlpoolcli1 --performance-level "DW1000c" \\
+        az synapse sql pool create --name sqlpool --performance-level "DW1000c" \\
         --workspace-name testsynapseworkspace --resource-group rg
 """
 
@@ -179,7 +180,7 @@ short-summary: Get a SQL pool.
 examples:
   - name: Get a SQL pool.
     text: |-
-        az synapse sql pool show --name sqlpoolcli1 --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool list'] = """
@@ -197,7 +198,7 @@ short-summary: Update a SQL pool.
 examples:
   - name: Update a SQL pool.
     text: |-
-        az synapse sql pool update --name sqlpoolcli1 --workspace-name testsynapseworkspace --resource-group rg \\
+        az synapse sql pool update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
         --tags key1=value1
 """
 
@@ -207,7 +208,7 @@ short-summary: Pause a SQL pool.
 examples:
   - name: Pause a SQL pool.
     text: |-
-        az synapse sql pool pause --name sqlpoolcli1 --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool pause --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool resume'] = """
@@ -216,7 +217,7 @@ short-summary: Resume a SQL pool.
 examples:
   - name: Resume a SQL pool.
     text: |-
-        az synapse sql pool resume --name sqlpoolcli1 --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool resume --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool delete'] = """
@@ -225,12 +226,232 @@ short-summary: Delete a SQL pool.
 examples:
   - name: Delete a SQL pool.
     text: |-
-        az synapse sql pool delete --name sqlpoolcli1 --workspace-name testsynapseworkspace --resource-group rg
+        az synapse sql pool delete --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql pool restore'] = """
+type: command
+short-summary: Create a new SQL pool by restoring from a backup.
+examples:
+  - name: Create a new SQL pool by restoring an existing SQL pool's restore point.
+    text: |-
+        az synapse sql pool restore --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --dest-name newsqlpool --time 2020-11-25T02:47:37
+"""
+
+helps['synapse sql pool show-connection-string'] = """
+type: command
+short-summary: Generate a connection string to a SQL pool.
+examples:
+  - name: Generate connection string for ado.net
+    text: |-
+        az synapse sql pool show-connection-string --name sqlpool --workspace-name testsynapseworkspace -c ado.net
+"""
+
+helps['synapse sql pool list-deleted'] = """
+type: command
+short-summary: List all deleted SQL pools.
+examples:
+  - name: List deleted SQL pools.
+    text: |-
+        az synapse sql pool list-deleted --workspace-name testsynapseworkspace --resource-group rg
 """
 
 helps['synapse sql pool wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of a SQL pool is met.
+"""
+
+helps['synapse sql pool classification'] = """
+type: group
+short-summary: Manage sensitivity classifications.
+"""
+
+helps['synapse sql pool classification create'] = """
+type: command
+short-summary: Create a column's sensitivity classification.
+examples:
+  - name: Create sensitivity classification for a given column.
+    text: |-
+        az synapse sql pool classification create --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg --schema dbo --table mytable --column mycolumn \\
+        --information-type Name --label "Confidential - GDPR"
+"""
+
+helps['synapse sql pool classification update'] = """
+type: command
+short-summary: Update a column's sensitivity classification.
+examples:
+  - name: Update sensitivity classification for a given column.
+    text: |-
+        az synapse sql pool classification update --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg --schema dbo --table mytable --column mycolumn \\
+        --information-type Name --label "Confidential - GDPR"
+"""
+
+helps['synapse sql pool classification list'] = """
+type: command
+short-summary: Get the sensitivity classifications of a given SQL pool.
+examples:
+  - name: List the sensitivity classification of a given SQL pool.
+    text: |-
+        az synapse sql pool classification list --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql pool classification show'] = """
+type: command
+short-summary: Get the sensitivity classification of a given column.
+examples:
+  - name: Get the sensitivity classification of a given column.
+    text: |-
+        az synapse sql pool classification show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --schema dbo --table mytable --column mycolumn
+"""
+
+helps['synapse sql pool classification delete'] = """
+type: command
+short-summary: Delete the sensitivity classification of a given column.
+examples:
+  - name: Delete the sensitivity classification of a given column.
+    text: |-
+        az synapse sql pool classification delete --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --schema dbo --table mytable --column mycolumn
+"""
+
+helps['synapse sql pool classification recommendation'] = """
+type: group
+short-summary: Manage sensitivity classification recommendations.
+"""
+
+helps['synapse sql pool classification recommendation list'] = """
+type: command
+short-summary: List the recommended sensitivity classifications of a given SQL pool.
+examples:
+  - name: List the recommended sensitivity classifications of a given SQL pool.
+    text: |-
+        az synapse sql pool classification recommendation list --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse sql pool classification recommendation enable'] = """
+type: command
+short-summary: Enable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
+examples:
+  - name: Enable sensitivity recommendations for a given column.
+    text: |-
+        az synapse sql pool classification recommendation enable --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg --schema dbo --table mytable --column mycolumn
+"""
+
+helps['synapse sql pool classification recommendation disable'] = """
+type: command
+short-summary: Disable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
+examples:
+  - name: Disable sensitivity recommendations for a given column.
+    text: |-
+        az synapse sql pool classification recommendation disable --name sqlpool --workspace-name testsynapseworkspace \\
+        --resource-group rg --schema dbo --table mytable --column mycolumn
+"""
+
+helps['synapse sql pool tde'] = """
+type: group
+short-summary: Manage a SQL pool's transparent data encryption.
+"""
+
+helps['synapse sql pool tde set'] = """
+type: command
+short-summary: Set a SQL pool's transparent data encryption configuration.
+examples:
+  - name: Set a SQL pool's transparent data encryption configuration. (autogenerated)
+    text: |-
+        az synapse sql pool tde set --name sqlpool --workspace-name testsynapseworkspace --resource-group rg --status Enabled
+"""
+
+helps['synapse sql pool tde show'] = """
+type: command
+short-summary: Get a SQL pool's transparent data encryption configuration.
+examples:
+  - name: Get a SQL pool's transparent data encryption configuration. (autogenerated)
+    text: |-
+        az synapse sql pool tde show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql pool threat-policy'] = """
+type: group
+short-summary: Manage a SQL pool's threat detection policies.
+"""
+
+helps['synapse sql pool threat-policy show'] = """
+type: command
+short-summary: Get a SQL pool's threat detection policy.
+examples:
+  - name: Get a SQL pool's threat detection policy.
+    text: |-
+        az synapse sql pool threat-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql pool threat-policy update'] = """
+type: command
+short-summary: Update a SQL pool's threat detection policy.
+long-summary: If the policy is being enabled, storage_account or both storage_endpoint and storage_account_access_key must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |-
+        az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-account mystorageaccount
+  - name: Enable by storage endpoint and key.
+    text: |-
+        az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+  - name: Disable a subset of alert types.
+    text: |-
+        az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --disabled-alerts Sql_Injection_Vulnerability Access_Anomaly
+  - name: Configure email recipients for a policy.
+    text: |-
+        az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --email-addresses me@examlee.com you@example.com --email-account-admins true
+  - name: Disable a threat policy.
+    text: |-
+        az synapse sql pool threat-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Disabled
+"""
+
+helps['synapse sql pool audit-policy'] = """
+type: group
+short-summary: Manage a SQL pool's auditing policy.
+"""
+
+helps['synapse sql pool audit-policy show'] = """
+type: command
+short-summary: Get a SQL pool's auditing policy.
+examples:
+  - name: Get a SQL pool's auditing policy.
+    text: |-
+        az synapse sql pool audit-policy show --name sqlpool --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql pool audit-policy update'] = """
+type: command
+short-summary: Update a SQL pool's auditing policy.
+long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |-
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-account mystorageaccount
+  - name: Enable by storage endpoint and key.
+    text: |-
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+  - name: Set the list of audit actions.
+    text: |
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
+  - name: Disable an auditing policy.
+    text: |-
+        az synapse sql pool audit-policy update --name sqlpool --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Disabled
 """
 
 helps['synapse workspace firewall-rule'] = """
@@ -479,7 +700,7 @@ examples:
   - name: Create a role assignment using user principal name.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
-        --role "Sql Admin" --assignee username@consoso.com
+        --role "Sql Admin" --assignee username@contoso.com
   - name: Create a role assignment using objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment create --workspace-name testsynapseworkspace \\
@@ -505,7 +726,7 @@ examples:
   - name: Delete role assignments by user principal name.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
-        --assignee username@consoso.com
+        --assignee username@contoso.com
   - name: Delete role assignments by objectId of the User, Group or Service Principal.
     text: |-
         az synapse role assignment delete --workspace-name testsynapseworkspace \\
@@ -538,4 +759,490 @@ examples:
     text: |-
         az synapse role definition show --workspace-name testsynapseworkspace \\
         --role 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse linked-service'] = """
+type: group
+short-summary: Manage Synapse's linked services.
+"""
+
+helps['synapse linked-service create'] = """
+type: command
+short-summary: Create a linked service.
+examples:
+  - name: Create a linked service.
+    text: |-
+        az synapse linked-service create --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
+helps['synapse linked-service set'] = """
+type: command
+short-summary: Set an exist linked service.
+examples:
+  - name: Set an exist linked service.
+    text: |-
+        az synapse linked-service set --workspace-name testsynapseworkspace \\
+          --name testlinkedservice --file @path/linkedservice.json
+"""
+
+helps['synapse linked-service show'] = """
+type: command
+short-summary: Get a linked service.
+examples:
+  - name: Get a linked service.
+    text: |-
+        az synapse linked-service show --workspace-name testsynapseworkspace \\
+          --name testlinkedservice
+"""
+
+helps['synapse linked-service list'] = """
+type: command
+short-summary: List linked services.
+examples:
+  - name: List linked services.
+    text: |-
+        az synapse linked-service list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse linked-service delete'] = """
+type: command
+short-summary: Delete a linked service.
+examples:
+  - name: Delete a linked service.
+    text: |-
+        az synapse linked-service delete --workspace-name testsynapseworkspace \\
+          --name testlinkedservice
+"""
+
+helps['synapse dataset'] = """
+type: group
+short-summary: Manage Synapse's datasets.
+"""
+
+helps['synapse dataset create'] = """
+type: command
+short-summary: Create a dataset.
+examples:
+  - name: Create a dataset.
+    text: |-
+        az synapse dataset create --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
+helps['synapse dataset set'] = """
+type: command
+short-summary: Set an exist dataset.
+examples:
+  - name: Set an exist dataset.
+    text: |-
+        az synapse dataset set --workspace-name testsynapseworkspace \\
+          --name testdataset --file @path/dataset.json
+"""
+
+helps['synapse dataset show'] = """
+type: command
+short-summary: Get a dataset.
+examples:
+  - name: Get a dataset.
+    text: |-
+        az synapse dataset show --workspace-name testsynapseworkspace \\
+          --name testdataset
+"""
+
+helps['synapse dataset list'] = """
+type: command
+short-summary: List datasets.
+examples:
+  - name: List datasets.
+    text: |-
+        az synapse dataset list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse dataset delete'] = """
+type: command
+short-summary: Delete a dataset.
+examples:
+  - name: Delete a dataset.
+    text: |-
+        az synapse dataset delete --workspace-name testsynapseworkspace \\
+          --name testdataset
+"""
+
+helps['synapse pipeline'] = """
+type: group
+short-summary: Manage Synapse's pipelines.
+"""
+
+helps['synapse pipeline create'] = """
+type: command
+short-summary: Create a pipeline.
+examples:
+  - name: Create a pipeline.
+    text: |-
+        az synapse pipeline create --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
+helps['synapse pipeline set'] = """
+type: command
+short-summary: Set an exist pipeline.
+examples:
+  - name: Set an exist pipeline.
+    text: |-
+        az synapse pipeline set --workspace-name testsynapseworkspace \\
+          --name testpipeline --file @path/pipeline.json
+"""
+
+helps['synapse pipeline show'] = """
+type: command
+short-summary: Get a pipeline.
+examples:
+  - name: Get a pipeline.
+    text: |-
+        az synapse pipeline show --workspace-name testsynapseworkspace \\
+          --name testpipeline
+"""
+
+helps['synapse pipeline list'] = """
+type: command
+short-summary: List pipelines.
+examples:
+  - name: List pipelines.
+    text: |-
+        az synapse pipeline list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse pipeline delete'] = """
+type: command
+short-summary: Delete a pipeline.
+examples:
+  - name: Delete a pipeline.
+    text: |-
+        az synapse pipeline delete --workspace-name testsynapseworkspace \\
+          --name testpipeline
+"""
+
+helps['synapse pipeline create-run'] = """
+type: command
+short-summary: Creates a run of a pipeline.
+examples:
+  - name: Pipelines_CreateRun
+    text: |-
+        az synapse pipeline create-run --workspace-name testsynapseworkspace --name "myPipeline" \\
+          --parameters "{\\"OutputBlobNameList\\":[\\"exampleoutput.csv\\"]}"
+"""
+
+helps['synapse pipeline-run'] = """
+type: group
+short-summary: Manage Synapse's pipeline run.
+"""
+
+helps['synapse pipeline-run show'] = """
+type: command
+short-summary: Get a pipeline run by its run ID.
+examples:
+  - name: Get a pipeline run by its run ID.
+    text: |-
+        az synapse pipeline-run show --workspace-name testsynapseworkspace \\
+          --run-id "2f7fdb90-5df1-4b8e-ac2f-064cfa58202b"
+"""
+
+helps['synapse pipeline-run cancel'] = """
+type: command
+short-summary: Cancel a pipeline run by its run ID.
+examples:
+  - name: Cancel a pipeline run by its run ID.
+    text: |-
+        az synapse pipeline-run cancel --workspace-name testsynapseworkspace \\
+          --run-id "16ac5348-ff82-4f95-a80d-638c1d47b721"
+"""
+
+helps['synapse pipeline-run query-by-workspace'] = """
+type: command
+short-summary: Query pipeline runs in the workspace based on input filter conditions.
+examples:
+  - name: Query pipeline runs in the workspace based on input filter conditions.
+    text: |-
+        az synapse pipeline-run query-by-workspace --workspace-name testsynapseworkspace --filters \\
+          operand="PipelineName" operator="Equals" values="testpipeline" --last-updated-after "2020-09-03T00:36:44.3345758Z" \\
+          --last-updated-before "2020-09-03T00:49:48.3686473Z"
+"""
+
+helps['synapse activity-run'] = """
+type: group
+short-summary: synapse activity-run
+"""
+
+helps['synapse activity-run query-by-pipeline-run'] = """
+type: command
+short-summary: Query activity runs based on input filter conditions.
+examples:
+  - name: Query activity runs based on input filter conditions.
+    text: |-
+        az synapse activity-run query-by-pipeline-run --workspace-name testsynapseworkspace \\
+          --last-updated-after "2020-09-03T00:36:44.3345758Z" --last-updated-before "2020-09-03T00:49:48.3686473Z" \\
+          --name testpipeline --run-id "53eeed66-ec46-11ea-8bd5-448500a5b1ac"
+"""
+
+helps['synapse trigger'] = """
+type: group
+short-summary: Manage Synapse's triggers.
+"""
+
+helps['synapse trigger create'] = """
+type: command
+short-summary: Create a trigger.
+examples:
+  - name: Create a trigger.
+    text: |-
+        az synapse trigger create --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
+helps['synapse trigger set'] = """
+type: command
+short-summary: Set an exist trigger.
+examples:
+  - name: Set an exist trigger.
+    text: |-
+        az synapse trigger set --workspace-name testsynapseworkspace \\
+          --name testtrigger --file @path/trigger.json
+"""
+
+helps['synapse trigger show'] = """
+type: command
+short-summary: Get a trigger.
+examples:
+  - name: Get a trigger.
+    text: |-
+        az synapse trigger show --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger list'] = """
+type: command
+short-summary: List triggers.
+examples:
+  - name: List triggers.
+    text: |-
+        az synapse trigger list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse trigger delete'] = """
+type: command
+short-summary: Delete a trigger.
+examples:
+  - name: Delete a trigger.
+    text: |-
+        az synapse trigger delete --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger subscribe-to-event'] = """
+type: command
+short-summary: Subscribe event trigger to events.
+examples:
+  - name: Subscribe event trigger to events.
+    text: |-
+        az synapse trigger subscribe-to-event --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger get-event-subscription-status'] = """
+type: command
+short-summary: Get a trigger's event subscription status.
+examples:
+  - name:  Get a trigger's event subscription status.
+    text: |-
+        az synapse trigger get-event-subscription-status --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger unsubscribe-from-event'] = """
+type: command
+short-summary: Unsubscribe event trigger from events.
+examples:
+  - name: Unsubscribe event trigger from events.
+    text: |-
+        az synapse trigger unsubscribe-from-event --workspace-name testsynapseworkspace \\
+          --name eventtrigger
+"""
+
+helps['synapse trigger start'] = """
+type: command
+short-summary: Starts a trigger.
+examples:
+  - name: Starts a trigger.
+    text: |-
+        az synapse trigger start --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger stop'] = """
+type: command
+short-summary: Stops a trigger.
+examples:
+  - name: Stops a trigger.
+    text: |-
+        az synapse trigger stop --workspace-name testsynapseworkspace \\
+          --name testtrigger
+"""
+
+helps['synapse trigger-run'] = """
+    type: group
+    short-summary: synapse trigger-run
+"""
+
+helps['synapse trigger-run rerun'] = """
+type: command
+short-summary: Rerun single trigger instance by runId.
+examples:
+  - name: Rerun single trigger instance by runId.
+    text: |-
+        az synapse trigger-run rerun --workspace-name testsynapseworkspace \\
+          --name testtrigger --run-id 08586024068106001417583731803CU31
+"""
+
+helps['synapse trigger-run query-by-workspace'] = """
+type: command
+short-summary: Query trigger runs in the workspace based on input filter conditions.
+examples:
+  - name: Query trigger runs in the workspace based on input filter conditions.
+    text: |-
+        az synapse trigger-run query-by-workspace --workspace-name testsynapseworkspace --filters \\
+          operand="TriggerName" operator="Equals" values="testtrigger" --last-updated-after "2020-09-03T00:36:44.3345758Z" \\
+          --last-updated-before "2020-09-03T00:49:48.3686473Z"
+"""
+
+helps['synapse data-flow'] = """
+type: group
+short-summary: Manage Synapse's data flows.
+"""
+
+helps['synapse data-flow create'] = """
+type: command
+short-summary: Create a data flow.
+examples:
+  - name: Create a data flow.
+    text: |-
+        az synapse data-flow create --workspace-name testsynapseworkspace \\
+          --name testdataflow --file @path/dataflow.json
+"""
+
+helps['synapse data-flow set'] = """
+type: command
+short-summary: Set an exist data flow.
+examples:
+  - name: Set an exist data flow.
+    text: |-
+        az synapse data-flow set --workspace-name testsynapseworkspace \\
+          --name testdataflow --file @path/dataflow.json
+"""
+
+helps['synapse data-flow show'] = """
+type: command
+short-summary: Get a data flow.
+examples:
+  - name: Get a data flow.
+    text: |-
+        az synapse data-flow show --workspace-name testsynapseworkspace \\
+          --name testdataflow
+"""
+
+helps['synapse data-flow list'] = """
+type: command
+short-summary: List data flows.
+examples:
+  - name: List data flows.
+    text: |-
+        az synapse data-flow list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse data-flow delete'] = """
+type: command
+short-summary: Delete a data flow.
+examples:
+  - name: Delete a data flow.
+    text: |-
+        az synapse data-flow delete --workspace-name testsynapseworkspace \\
+          --name testdataflow
+"""
+
+helps['synapse notebook'] = """
+type: group
+short-summary: Manage Synapse's notebooks.
+"""
+
+helps['synapse notebook create'] = """
+type: command
+short-summary: Create a notebook.
+examples:
+  - name: Create a notebook.
+    text: |-
+        az synapse notebook create --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook set'] = """
+type: command
+short-summary: Set an exist notebook.
+examples:
+  - name: Set an exist notebook.
+    text: |-
+        az synapse notebook set --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook import'] = """
+type: command
+short-summary: Import a notebook.
+examples:
+  - name: Import a notebook.
+    text: |-
+        az synapse notebook import --workspace-name testsynapseworkspace \\
+          --name testnotebook --file @path/notebook.json
+"""
+
+helps['synapse notebook show'] = """
+type: command
+short-summary: Get a notebook.
+examples:
+  - name: Get a notebook.
+    text: |-
+        az synapse notebook show --workspace-name testsynapseworkspace \\
+          --name testnotebook
+"""
+
+helps['synapse notebook list'] = """
+type: command
+short-summary: List notebooks.
+examples:
+  - name: List notebooks.
+    text: |-
+        az synapse notebook list --workspace-name testsynapseworkspace
+"""
+
+helps['synapse notebook export'] = """
+type: command
+short-summary: Export notebooks.
+examples:
+  - name: Export a notebook.
+    text: |-
+        az synapse notebook export --workspace-name testsynapseworkspace \\
+          --name testnotebook --output-folder C:/output
+  - name: Export all notebooks under a workspace.
+    text: |-
+        az synapse notebook export --workspace-name testsynapseworkspace \\
+          --output-folder C:/output
+"""
+
+helps['synapse notebook delete'] = """
+type: command
+short-summary: Delete a notebook.
+examples:
+  - name: Delete a notebook.
+    text: |-
+        az synapse notebook delete --workspace-name testsynapseworkspace \\
+          --name testnotebook
 """
