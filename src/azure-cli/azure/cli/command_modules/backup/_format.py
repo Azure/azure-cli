@@ -45,8 +45,10 @@ def transform_job(result):
     columns.append(('Item Name', result['properties']['entityFriendlyName']))
     columns.append(('Backup Management Type', result['properties']['backupManagementType']))
     columns.append(('Start Time UTC', result['properties']['startTime']))
-    columns.append(('Duration', "0:00:00.000000"))
-    columns[6] = ('Duration', result['properties']['duration'])
+    duration = "0:00:00.000000"
+    if result['properties']['duration'] is not None:
+        duration = result['properties']['duration']
+    columns.append(('Duration', duration))
 
     return OrderedDict(columns)
 
