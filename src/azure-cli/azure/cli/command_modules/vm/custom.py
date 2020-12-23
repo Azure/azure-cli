@@ -871,8 +871,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    print(ssh_key_value)
-    exit(1)
+    # print(ssh_key_value)
+    # exit(1)
 
     vm_resource = build_vm_resource(
         cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,

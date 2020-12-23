@@ -1058,7 +1058,7 @@ def validate_ssh_key(namespace, cmd=None):
     if namespace.ssh_key_name:
         # --ssh-key-name
         if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
-            # name must exist
+            # Use existing key, key must exist
             try:
                 ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
             except HttpResponseError:
@@ -1068,11 +1068,10 @@ def validate_ssh_key(namespace, cmd=None):
         elif namespace.ssh_key_value:
             parameters = {}
             parameters['location'] = namespace.location
-            parameters['public_key'] = namespace.ssh_key_value
+            parameters['public_key'] = namespace.ssh_key_value[0]
             client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
                                           ssh_public_key_name=namespace.ssh_key_name,
                                           parameters=parameters)
-            namespace.ssh_key_value = [namespace.ssh_key_value]
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location
