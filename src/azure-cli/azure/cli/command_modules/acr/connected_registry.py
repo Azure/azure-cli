@@ -61,7 +61,7 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
     if not registry.data_endpoint_enabled:
-        raise CLIError("Can't create the connected registry '{}' ".format(connected_registry_name,) +
+        raise CLIError("Can't create the connected registry '{}' ".format(connected_registry_name) +
                        "because the cloud registry '{}' data endpoint is disabled. ".format(registry_name) +
                        "Enabling the data endpoint might affect your firewall rules.\nTo enable data endpoint run:" +
                        "\n\taz acr update -n {} --data-endpoint-enabled true".format(registry_name))
