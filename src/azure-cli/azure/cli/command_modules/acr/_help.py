@@ -1243,11 +1243,11 @@ short-summary: Delete a connected registry from Azure Container Registry.
 examples:
   - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry' and skip verification.
     text: |
-        az acr connected-registry delete --registry mycloudregistry 
+        az acr connected-registry delete --registry mycloudregistry
             --name myconnectedregistry --yes
   - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry' and skip verification.
     text: |
-        az acr connected-registry delete --registry mycloudregistry 
+        az acr connected-registry delete --registry mycloudregistry
             --name myconnectedregistry --cleanup --yes
 """
 
@@ -1257,7 +1257,7 @@ short-summary: Deactivate a connected registry from Azure Container Registry.
 examples:
   - name: Deactivate a connected registry 'myconnectedregistry' and skip verification.
     text: |
-        az acr connected-registry deactivate --registry mycloudregistry 
+        az acr connected-registry deactivate --registry mycloudregistry
             --name myconnectedregistry --yes
 """
 

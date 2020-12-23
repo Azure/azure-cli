@@ -19,9 +19,11 @@ from ._utils import (
     build_token_id
 )
 
+
 class ConnectedRegistryModes(Enum):
     MIRROR = 'mirror'
     REGISTRY = 'registry'
+
 
 DEFAULT_GATEWAY_SCOPE = ['config/read', 'config/write', 'message/read', 'message/write']
 REPO_SCOPES_BY_MODE = {
@@ -37,7 +39,7 @@ GATEWAY = "gateway/"
 logger = get_logger(__name__)
 
 
-def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-many-statements
+def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-many-statements
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -121,7 +123,7 @@ def acr_connected_registry_create(cmd, # pylint: disable=too-many-locals, too-ma
         raise CLIError(e)
 
 
-def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-many-statements
+def acr_connected_registry_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
                                   client,
                                   registry_name,
                                   connected_registry_name,
@@ -169,7 +171,7 @@ def acr_connected_registry_update(cmd, # pylint: disable=too-many-locals, too-ma
     client_token_list = list(client_token_set) if client_token_set != current_client_token_set else None
 
     ConnectedRegistryUpdateParameters, SyncUpdateProperties, LoggingProperties = cmd.get_models(
-                'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
+        'ConnectedRegistryUpdateParameters', 'SyncUpdateProperties', 'LoggingProperties')
     connected_registry_update_parameters = ConnectedRegistryUpdateParameters(
         sync_properties=SyncUpdateProperties(
             token_id=current_connected_registry.parent.sync_properties.token_id,
@@ -264,8 +266,8 @@ def acr_connected_registry_list(cmd,
     result = []
     if no_children:
         if parent:
-            result = [registry for registry in connected_registry_list \
-                if registry.parent.id is not None and registry.parent.id.endswith(parent)]
+            result = [registry for registry in connected_registry_list
+                      if registry.parent.id is not None and registry.parent.id.endswith(parent)]
         else:
             result = [registry for registry in connected_registry_list if not registry.parent.id]
     elif parent:
@@ -366,6 +368,7 @@ def _get_descendancy(family_tree, parent_id):
         if descendancy:
             result.extend(descendancy)
     return result
+
 
 # region connected-registry install subgroup
 def acr_connected_registry_install_info(cmd,

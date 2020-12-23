@@ -10,6 +10,7 @@ from ._utils import (
     parse_scope_map_actions
 )
 
+
 class RepoScopeMapActions(Enum):
     CONTENT_DELETE = 'content/delete'
     CONTENT_READ = 'content/read'

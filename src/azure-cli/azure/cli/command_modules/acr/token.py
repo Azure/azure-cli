@@ -11,6 +11,7 @@ SCOPE_MAPS = 'scopeMaps'
 TOKENS = 'tokens'
 DEFAULT_SCOPE_MAP_NAME = '{}-scope-map'
 
+
 def acr_token_create(cmd,
                      client,
                      registry_name,

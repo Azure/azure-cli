@@ -467,7 +467,7 @@ def parse_repositories_from_actions(actions):
         if action.startswith(REPOSITORY):
             for rule in valid_actions:
                 if action.endswith(rule):
-                    repo = action[len(REPOSITORY):-len(rule)-1]
+                    repo = action[len(REPOSITORY):-len(rule) - 1]
                     repositories.append(repo)
     return list(set(repositories))
 
@@ -530,7 +530,7 @@ def create_default_scope_map(cmd,
 
 def build_token_id(subscription_id, resource_group_name, registry_name, token_name):
     return "/subscriptions/{}/resourceGroups/{}".format(subscription_id, resource_group_name) + \
-            "/providers/Microsoft.ContainerRegistry/registries/{}/tokens/{}".format(registry_name, token_name)
+        "/providers/Microsoft.ContainerRegistry/registries/{}/tokens/{}".format(registry_name, token_name)
 
 
 def get_token_from_id(cmd, token_id):
@@ -538,7 +538,7 @@ def get_token_from_id(cmd, token_id):
     from .token import acr_token_show
     token_client = cf_acr_tokens(cmd.cli_ctx)
     # SCOPE MAP ID example
-    #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/tokens/<9>'
+    # /subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/tokens/<9>'
     token_info = token_id.lstrip('/').split('/')
     if len(token_info) != 10:
         raise CLIError("Not valid scope map id: {}".format(token_id))
@@ -553,7 +553,7 @@ def get_scope_map_from_id(cmd, scope_map_id):
     from .scope_map import acr_scope_map_show
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
     # SCOPE MAP ID example
-    #/subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/scopeMaps/<9>'
+    # /subscriptions/<1>/resourceGroups/<3>/providers/Microsoft.ContainerRegistry/registries/<7>/scopeMaps/<9>'
     scope_info = scope_map_id.lstrip('/').split('/')
     if len(scope_info) != 10:
         raise CLIError("Not valid scope map id: {}".format(scope_map_id))
