@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
+import mock
+
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
 from .recording_processors import KeyReplacer
@@ -402,7 +404,7 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'identity-test-hub-cli'
+        identity_hub = 'identity-test-hub-cli-1'
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
@@ -410,18 +412,33 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         endpoint_name = 'Event1'
         endpoint_type = 'EventHub'
-        eventhub_endpoint_uri = 'eh://test'
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
-        entity_path = 'entity'
+
+        identity_storage_role = 'Storage Blob Data Contributor'
+        storage_account_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
 
         # identity hub creation
         import os
         templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir, 'templates', 'identity.json')
         self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'
                  .format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
-        self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
-                 self.check('properties.minTlsVersion', '1.2'),
-                 self.check('identity.type', 'SystemAssigned')])
+        hub_props = self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
+            self.check('properties.minTlsVersion', '1.2'),
+            self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+
+        hub_object_id = hub_props['identity']['principalId']
+        assert hub_object_id
+
+        # Add RBAC role for hub to storage container
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd('az role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'
+                                       .format(identity_storage_role, hub_object_id, storage_account_id)).get_output_in_json()
+
+        assert role_assignment['principalId'] == hub_object_id
+
+        # Allow time for RBAC
+        from time import sleep
+        sleep(30)
 
         # Test 'az iot hub update' with Identity-based fileUpload
         updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3} --fn true --fnt 32 --fnd 80 --rd 4 '
@@ -430,6 +447,10 @@ class IoTHubTest(ScenarioTest):
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         # TODO - implement file upload container URI instead of connectionString once implemented in service
+
+        eh_info = self._create_eventhub_and_link_identity(rg, hub_object_id)
+        eventhub_endpoint_uri = eh_info[0]
+        entity_path = eh_info[1]
 
         # Test 'az iot hub routing-endpoint create' with Identity-based event hub endpoint
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} --auth-type {6} --endpoint-uri {7} --entity-path {8}'
@@ -544,3 +565,22 @@ class IoTHubTest(ScenarioTest):
         output = self.cmd('storage account show-connection-string --resource-group {0} --name {1}'
                           .format(rg, storage_name))
         return output.get_output_in_json()['connectionString']
+
+    def _create_eventhub_and_link_identity(self, rg, hub_object_id):
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
+        role = 'Azure Event Hubs Data Sender'
+
+        self.cmd('eventhubs namespace create --resource-group {0} --name {1}'
+                 .format(rg, ehNamespace))
+
+        eh = self.cmd('eventhubs eventhub create --resource-group {0} --namespace-name {1} --name {2}'
+                      .format(rg, ehNamespace, eventHub)).get_output_in_json()
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(role, hub_object_id, eh['id']))
+
+        # RBAC propogation
+        from time import sleep
+        sleep(30)
+
+        return ['sb://{0}.servicebus.windows.net'.format(ehNamespace), eventHub]

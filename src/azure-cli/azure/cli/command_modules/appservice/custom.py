@@ -44,7 +44,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
-from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
 
@@ -2384,6 +2384,11 @@ def list_ssl_certs(cmd, resource_group_name):
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
+def show_ssl_cert(cmd, resource_group_name, certificate_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.certificates.get(resource_group_name, certificate_name)
+
+
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
@@ -2465,8 +2470,31 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
-    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
-                                                certificate_envelope=easy_cert_def)
+
+    # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
+    try:
+        return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                    certificate_envelope=easy_cert_def)
+    except DefaultErrorResponseException as ex:
+        poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
+        if ex.response.status_code == 202 and poll_url:
+            r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+
+            while r.status_code != 200 and time.time() < poll_timeout:
+                time.sleep(5)
+                r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
+
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    return r.text
+            logger.warning("Managed Certificate creation in progress. Please use the command "
+                           "'az webapp config ssl show -g %s --certificate-name %s' "
+                           " to view your certificate once it is created", resource_group_name, hostname)
+            return
+        raise CLIError(ex)
 
 
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
@@ -3545,8 +3573,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     if not delegated:
         subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=subnetObj)
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet, subnet,
+                                                   subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -4050,7 +4078,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+        if binding_name.lower() == hostname and (hostname_binding.host_name_type == 'Verified' or
+                                                 hostname_binding.host_name_type == 'Managed'):
             verified_hostname_found = True
 
     return verified_hostname_found

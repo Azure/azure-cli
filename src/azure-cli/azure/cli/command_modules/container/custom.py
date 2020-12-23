@@ -294,7 +294,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         if not subnet.delegations:
             logger.info('Adding ACI delegation to the existing subnet.')
             subnet.delegations = [aci_delegation]
-            subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+            subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
                 if delegation.service_name != aci_delegation_service_name:
@@ -313,11 +313,11 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
             logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
-            ncf.virtual_networks.create_or_update(resource_group_name,
-                                                  vnet_name,
-                                                  VirtualNetwork(name=vnet_name,
-                                                                 location=location,
-                                                                 address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
+            ncf.virtual_networks.begin_create_or_update(resource_group_name,
+                                                        vnet_name,
+                                                        VirtualNetwork(name=vnet_name,
+                                                                       location=location,
+                                                                       address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,
             location=location,
@@ -325,7 +325,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
             delegations=[aci_delegation])
 
         logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
-        subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+        subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
                                                                                                     'ContainerNetworkInterfaceConfiguration',

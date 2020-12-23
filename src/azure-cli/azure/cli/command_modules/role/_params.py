@@ -186,7 +186,7 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
-        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass graph permission issues. "
+        c.argument('assignee_object_id', help="Use this parameter instead of '--assignee' to bypass Graph API invocation in case of insufficient privileges. "
                    "This parameter only works with object ids for users, groups, service principals, and "
                    "managed identities. For managed identities use the principal id. For service principals, "
                    "use the object id and not the app id.")
