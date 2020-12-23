@@ -46,8 +46,8 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
                 if not subnet_result.delegations:
                     logger.info('Adding "%s" delegation to the existing subnet.', )
                     subnet_result.delegations = [delegation]
-                    subnet_result = nw_client.subnets.create_or_update(resource_group, vnet_name, subnet_name,
-                                                                       subnet_result).result()
+                    subnet_result = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
+                                                                             subnet_result).result()
                 else:
                     for delgtn in subnet_result.delegations:
                         if delgtn.service_name != delegation_service_name:
@@ -129,8 +129,8 @@ def _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegati
             if not subnet_result.delegations:
                 logger.info('Adding "%s" delegation to the existing subnet.', )
                 subnet_result.delegations = [delegation]
-                subnet_result = nw_client.subnets.create_or_update(resource_group_name, vnet, subnet,
-                                                                   subnet_result).result()
+                subnet_result = nw_client.subnets.begin_create_or_update(resource_group_name, vnet, subnet,
+                                                                         subnet_result).result()
             else:
                 for delgtn in subnet_result.delegations:
                     if delgtn.service_name != delegation_service_name:
@@ -167,13 +167,11 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
         if not vnet_exist:
             logger.info('The Vnet does not exist. Creating new vnet "%s" in resource group "%s"',
                         vnet_name, resource_group)
-            nw_client.virtual_networks.create_or_update(resource_group,
-                                                        vnet_name,
-                                                        VirtualNetwork(name=vnet_name,
-                                                                       location=location,
-                                                                       address_space=AddressSpace(
-                                                                           address_prefixes=[
-                                                                               vnet_address_pref])))
+            nw_client.virtual_networks.begin_create_or_update(resource_group,
+                                                              vnet_name,
+                                                              VirtualNetwork(name=vnet_name,
+                                                                             location=location,
+                                                                             address_space=AddressSpace(address_prefixes=[vnet_address_pref])))
         subnet_result = Subnet(
             name=subnet_name,
             location=location,
@@ -181,8 +179,7 @@ def _create_vnet_subnet_delegation(nw_client, resource_group, vnet_name, subnet_
             delegations=[delegation])
 
         logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        return nw_client.subnets.create_or_update(resource_group, vnet_name, subnet_name,
-                                                  subnet_result).result()
+        return nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name, subnet_result).result()
     except CloudError as err:
         if err.error.error == 'NetcfgInvalidSubnet':
             raise CLIError('Cannot add the subnet {} to the vnet {}.The subnet address space exceeds'
@@ -208,16 +205,15 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
     vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername[6:])
 
     logger.warning('Creating new vnet "%s" in resource group "%s"...', vnet_name, resource_group_name)
-    client.virtual_networks.create_or_update(resource_group_name, vnet_name,
-                                             VirtualNetwork(name=vnet_name, location=location,
-                                                            address_space=AddressSpace(
-                                                                address_prefixes=[vnet_address_prefix])))
+    client.virtual_networks.begin_create_or_update(resource_group_name, vnet_name,
+                                                   VirtualNetwork(name=vnet_name, location=location,
+                                                                  address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
     subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
 
     logger.warning('Creating new subnet "%s" in resource group "%s" and delegating it to "%s"...', subnet_name,
                    resource_group_name, delegation_service_name)
-    subnet = client.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+    subnet = client.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
     return subnet.id
 
 
