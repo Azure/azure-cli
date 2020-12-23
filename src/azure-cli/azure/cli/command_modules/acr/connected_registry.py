@@ -257,7 +257,7 @@ def acr_connected_registry_deactivate(cmd,
 def acr_connected_registry_list(cmd,
                                 client,
                                 registry_name,
-                                parent=None,
+                                parent_name=None,
                                 no_children=False,
                                 resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
@@ -265,19 +265,19 @@ def acr_connected_registry_list(cmd,
     connected_registry_list = list(client.list(resource_group_name, registry_name))
     result = []
     if no_children:
-        if parent:
+        if parent_name:
             result = [registry for registry in connected_registry_list
-                      if registry.parent.id is not None and registry.parent.id.endswith(parent)]
+                      if registry.parent.id is not None and registry.parent.id.endswith(parent_name)]
         else:
             result = [registry for registry in connected_registry_list if not registry.parent.id]
-    elif parent:
+    elif parent_name:
         family_tree = {}
         for registry in connected_registry_list:
             family_tree[registry.id] = {
                 "registry": registry,
                 "childs": []
             }
-            if registry.name == parent:
+            if registry.name == parent_name:
                 root_parent_id = registry.id
         for registry in connected_registry_list:
             parent_id = registry.parent.id
