@@ -70,12 +70,12 @@ class TestStyle(unittest.TestCase):
              (Style.PRIMARY, ' "val2'), (Style.PRIMARY, ' val3"'), (Style.ACTION, ' --arg4'), (Style.PRIMARY, ' val4')]
         ]
 
-        for cmd_ind, command in enumerate(raw_commands):
+        for cmd_index, command in enumerate(raw_commands):
             styled_command = highlight_command(command)
-            expected_style = expected[cmd_ind]
+            expected_style = expected[cmd_index]
 
-            for tpl_ind, style_tuple in enumerate(styled_command):
-                expected_tuple = expected_style[tpl_ind]
+            for tpl_index, style_tuple in enumerate(styled_command):
+                expected_tuple = expected_style[tpl_index]
                 self.assertEqual(style_tuple[0], expected_tuple[0])
                 self.assertEqual(style_tuple[1], expected_tuple[1])
 
