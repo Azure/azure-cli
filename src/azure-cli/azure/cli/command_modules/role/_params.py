@@ -204,8 +204,8 @@ def load_arguments(self, _):
     with self.argument_context('role assignment create') as c:
         # PrincipalType = self.get_models('PrincipalType', resource_type=ResourceType.MGMT_AUTHORIZATION)
 
-        # A temporary fix for https://github.com/Azure/azure-cli/issues/11594.
-        # As only `User', 'Group' or 'ServicePrincipal' are allowed values, the REST spec contains invalid values
+        # A temporary fix for https://github.com/Azure/azure-cli/issues/11594
+        # As only 'User', 'Group' or 'ServicePrincipal' are allowed values, the REST spec contains invalid values
         # (like MSI) which are used only internally by the service. So hide them.
         # https://github.com/Azure/azure-rest-api-specs/blob/962013a1cf9bf5b87e3aad75a14c7dd620acda62/specification/authorization/resource-manager/Microsoft.Authorization/preview/2020-04-01-preview/authorization-RoleAssignmentsCalls.json#L508-L522
         from enum import Enum
