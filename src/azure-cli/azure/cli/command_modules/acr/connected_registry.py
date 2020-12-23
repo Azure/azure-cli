@@ -328,7 +328,7 @@ def _create_sync_token(cmd,
     if not any(option for option in ConnectedRegistryModes if option.value == mode):
         raise CLIError("usage error: --mode supports only 'registry' and 'mirror' values.")
     repository_actions_list = [[repo] + REPO_SCOPES_BY_MODE[mode] for repo in repositories]
-    gateway_actions_list = [[connected_registry_name] + DEFAULT_GATEWAY_SCOPE]
+    gateway_actions_list = [[connected_registry_name.lower()] + DEFAULT_GATEWAY_SCOPE]
     try:
         message = "Created by connected registry sync token: {}"
         sync_scope_map_name = SYNC_SCOPE_MAP_NAME.format(connected_registry_name)

@@ -471,41 +471,29 @@ def parse_repositories_from_actions(actions):
                     repositories.append(repo)
     return list(set(repositories))
 
-def parse_actions_from_repositories(repository_actions_list):
-    if not repository_actions_list:
-        return []
-    from .scope_map import RepoScopeMapActions
-    valid_actions = {action.value for action in RepoScopeMapActions}
-    actions = []
-    for rule in repository_actions_list:
-        repository = rule[0]
-        if len(rule) < 2:
-            raise CLIError('At least one action must be specified with the repository {}.'.format(repository))
-        for action in rule[1:]:
-            action = action.lower()
-            if action not in valid_actions:
-                raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
-            actions.append('{}/{}/{}'.format('repositories', repository, action))
 
+def parse_scope_map_actions(repository_actions_list, gateway_actions_list):
+    from .scope_map import RepoScopeMapActions, GatewayScopeMapActions
+    valid_actions = {action.value for action in RepoScopeMapActions}
+    actions = _parse_scope_map_actions(repository_actions_list, valid_actions, 'repositories')
+    valid_actions = {action.value for action in GatewayScopeMapActions}
+    actions.extend(_parse_scope_map_actions(gateway_actions_list, valid_actions, 'gateway'))
     return actions
 
 
-def parse_actions_from_gateways(gateway_actions_list):
-    if not gateway_actions_list:
+def _parse_scope_map_actions(actions_list, valid_actions, action_prefix):
+    if not actions_list:
         return []
-    from .scope_map import GatewayScopeMapActions
-    valid_actions = {action.value for action in GatewayScopeMapActions}
     actions = []
-    for rule in gateway_actions_list:
-        gateway = rule[0]
+    for rule in actions_list:
+        resource = rule[0]
         if len(rule) < 2:
-            raise CLIError('At least one action must be specified with the gateway {}.'.format(gateway))
+            raise CLIError('At least one action must be specified with "{}".'.format(resource))
         for action in rule[1:]:
             action = action.lower()
             if action not in valid_actions:
                 raise CLIError('Invalid action "{}" provided. \nValid actions are {}.'.format(action, valid_actions))
-            actions.append('{}/{}/{}'.format('gateway', gateway, action))
-
+            actions.append('{}/{}/{}'.format(action_prefix, resource, action))
     return actions
 
 
@@ -519,8 +507,7 @@ def create_default_scope_map(cmd,
                              force=False):
     from ._client_factory import cf_acr_scope_maps
     scope_map_client = cf_acr_scope_maps(cmd.cli_ctx)
-    actions = parse_actions_from_repositories(repositories)
-    actions.extend(parse_actions_from_gateways(gateways))
+    actions = parse_scope_map_actions(repositories, gateways)
     try:
         existing_scope_map = scope_map_client.get(resource_group_name, registry_name, scope_map_name)
         # for command idempotency, if the actions are the same, we accept it
@@ -534,7 +521,7 @@ def create_default_scope_map(cmd,
                            .format(registry_name, scope_map_name))
     except CloudError:
         pass
-    logger.warning('Creating a scope map "%s" for provided permissions.', scope_map_name)
+    logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
     poller = scope_map_client.create(resource_group_name, registry_name, scope_map_name,
                                      actions, scope_map_description)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
