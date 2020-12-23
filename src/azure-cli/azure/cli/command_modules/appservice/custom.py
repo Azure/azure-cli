@@ -46,7 +46,8 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
+                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError)
 
 from .tunnel import TunnelServer
 
@@ -3752,9 +3753,9 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             try:
                 response_content = json.loads(ex.response._content.decode('utf-8'))  # pylint: disable=protected-access
             except Exception:
-                raise CLIError(ex)
-            raise CLIError(response_content['error']['message'])
-        raise CLIError(ex)
+                raise CLIInternalError(ex)
+            raise UnclassifiedUserFault(response_content['error']['message'])
+        raise AzureResponseError(ex)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
