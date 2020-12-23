@@ -39,6 +39,9 @@ helps['sshkey create'] = """
         text: |-
                az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resource-group \
 "myResourceGroup" --name "mySshPublicKeyName"
+      - name: Create a new SSH public key resource with auto-generated value.
+        text: |-
+               az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName"
 """
 
 helps['sshkey update'] = """
@@ -49,15 +52,4 @@ helps['sshkey update'] = """
 helps['sshkey delete'] = """
     type: command
     short-summary: "Delete an SSH public key."
-"""
-
-helps['sshkey generate'] = """
-    type: command
-    short-summary: "Generate and return a public/private key pair and populates the SSH public key resource with the \
-public key. The length of the key will be 3072 bits. This operation can only be performed once per SSH public key \
-resource."
-    examples:
-      - name: Generate an SSH key pair.
-        text: |-
-               az sshkey generate --resource-group "myResourceGroup" --name "mySshPublicKeyName"
 """
