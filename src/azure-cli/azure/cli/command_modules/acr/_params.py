@@ -395,30 +395,30 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr connected-registry') as c:
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the connected registry. Name must be between 5 to 40 character long, start with a letter and contain only alphanumeric characters (including ‘_’ or ‘-’). Name must be unique under the Cloud ACR hierarchy.', required=True)
-        c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent Connected Registry.', required=False)
+        c.argument('parent', options_list=['--parent', '-p'], help='The name of the parent connected registry.', required=False)
         c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
-        c.argument('cleanup', options_list=['--cleanup'], help='It will aslo delete the sync token and the scope map resources.', required=False)
-        c.argument('no_children', options_list=['--no-children'], help='Used to remove all children from the list.', required=False, action='store_true')
-        c.argument('sync_audit_logs_enabled', options_list=['--sync-audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
+        c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.', required=False)
+        c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
+        c.argument('sync_audit_logs_enabled', options_list=['--audit-logs-enabled'], help='Indicates whether audit log synchronization is enabled. It is enabled by default.', required=False, arg_type=get_three_state_flag(), deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('acr connected-registry create') as c:
-        c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
+        c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False, default="Information")
         c.argument('mode', options_list=['--mode', '-m'], help='Can be one of the two operating modes: registry or mirror(pull-only mode).', required=False, default="registry")
         c.argument('client_token_list', options_list=['--client-tokens'], nargs='+', help='Specifies the client access to the repositories in the connected registry. It can be in the format [TOKEN_NAME01] [TOKEN_NAME02]...', required=False)
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Required parameter if --sync-schedule is present. Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False, default="* * * * *")
-        c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
+        c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
 
     with self.argument_context('acr connected-registry update') as c:
-        c.argument('log_level', options_list=['--log-level'], help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False)
+        c.argument('log_level', help='Sets the log level for logging on the instance. Accepted log levels are Debug, Information, Warning, Error, and None.', required=False)
         c.argument('add_client_token_list', options_list=['--add-client-tokens'], nargs='*', required=False,
                    help='Client tokens to be added. Use the format "--add-client-tokens [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
         c.argument('remove_client_token_list', options_list=['--remove-client-tokens'], nargs='*', required=False,
                    help='Client tokens to be removed. Use the format "--remove-client-tokens [TOKEN_ID1 TOKEN_ID2 ...]" per token id.')
         c.argument('sync_window', options_list=['--sync-window', '-w'], help='Used to determine the schedule duration. Uses ISO 8601 duration format.', required=False)
         c.argument('sync_schedule', options_list=['--sync-schedule', '-s'], help='Optional parameter to define the sync schedule. Uses cron expression to determine the schedule. If not specified, the instance is considered always online and attempts to sync every minute.', required=False)
-        c.argument('sync_message_ttl', options_list=['--sync-message-ttl'], help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
+        c.argument('sync_message_ttl', help='Determines how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False)
 
 
 def _get_helm_default_install_location():

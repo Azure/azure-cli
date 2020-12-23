@@ -246,7 +246,7 @@ def acr_connected_registry_deactivate(cmd,
         cmd, registry_name, resource_group_name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    user_confirmation("Are you sure you want to deactivate the Connected Registry '{}' in '{}'?".format(
+    user_confirmation("Are you sure you want to deactivate the connected registry '{}' in '{}'?".format(
         connected_registry_name, registry_name), yes)
     return client.deactivate(subscription_id=subscription_id,
                              resource_group_name=resource_group_name,
@@ -408,12 +408,8 @@ def _get_install_info(cmd,
     else:
         parent_registry_endpoint = registry.login_server
 
-    connected_registry_login_server = connected_registry.login_server.host
-    if not connected_registry_login_server:
-        logger.warning("No login server value was provided nor retrieved from the connected registry. "
-                       "Use the argument '--login-server' to pass a value. For more information, "
-                       "please visit https://aka.ms/acr/connected-registry.")
-        connected_registry_login_server = "<connected registry login server>"
+    connected_registry_login_server = "<connected registry login server. " + \
+        "More info at https://aka.ms/acr/connected-registry>"
 
     if regenerate_credentials:
         from ._client_factory import cf_acr_token_credentials
@@ -430,7 +426,7 @@ def _get_install_info(cmd,
         }
         logger.warning('Please store your generated credentials safely.')
     else:
-        sync_username = "<sync token username>"
+        sync_username = sync_token_name
         sync_password = "<sync token password>"
 
     return {
