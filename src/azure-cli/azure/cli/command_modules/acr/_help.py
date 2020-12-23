@@ -988,9 +988,9 @@ examples:
     text: >
         az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
   - name: Create a token without credentials and with all gateway permissions.
-    text: >
-        az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
-            --gateway registry config/read config/write message/read message/write
+    text: |
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read
+          --gateway registry config/read config/write message/read message/write --no-passwords
   - name: Create a token in disabled status.
     text: >
         az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
@@ -1229,11 +1229,11 @@ examples:
     text: |
         az acr connected-registry create --registry mycloudregistry --mode mirror
             --parent myconnectedregistry --name mymirroracr --sync-token mySyncTokenName
-  - name: Create a mirror connected registry with client tokens and audit logs disabled, that syncs every day at midninght and sync window of 4 hours.
+  - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create --registry mycloudregistry --mode mirror
             --parent myconnectedregistry --name mymirroracr --repository app/mycomponent
-            --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
+            --sync-schedule "0 12 * * *" --sync-window PT4H
             --client-tokens myTokenName1 myTokenName2
 """
 
@@ -1245,6 +1245,10 @@ examples:
     text: |
         az acr connected-registry delete --registry mycloudregistry 
             --name myconnectedregistry --yes
+  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry' and skip verification.
+    text: |
+        az acr connected-registry delete --registry mycloudregistry 
+            --name myconnectedregistry --cleanup --yes
 """
 
 helps['acr connected-registry deactivate'] = """
@@ -1299,10 +1303,10 @@ examples:
         az acr connected-registry update --registry mycloudregistry --name myconnectedregistry
             --remove-client-tokens myTokenName1 --add-client-tokens myTokenName2 myTokenName3
 
-  - name: Update the sync and window time, and disable audit logs of a connected registry.
+  - name: Update the sync and window time of a connected registry.
     text: |
         az acr connected-registry update --registry mycloudregistry --name mymirroracr
-            --sync-schedule "0 12 * * *" --sync-window PT4H --sync-audit-logs-enabled false
+            --sync-schedule "0 12 * * *" --sync-window PT4H
 """
 
 helps['acr connected-registry install'] = """
