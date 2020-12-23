@@ -159,6 +159,96 @@ type: group
 short-summary: Manage SQL pools.
 """
 
+helps['synapse sql ad-admin'] = """
+type: group
+short-summary: Manage SQL Active Directory administrator.
+"""
+
+helps['synapse sql ad-admin show'] = """
+type: command
+short-summary: Get the SQL Azure Active Directory administrator.
+examples:
+  - name: Get the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin show --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql ad-admin create'] = """
+type: command
+short-summary: Create the SQL Azure Active Directory administrator.
+examples:
+  - name: Create the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin create --workspace-name testsynapseworkspace --resource-group rg \\
+        --display-name youraccount@yourdomain --object-id 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse sql ad-admin update'] = """
+type: command
+short-summary: Update the SQL Azure Active Directory administrator.
+examples:
+  - name: Update the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin update --workspace-name testsynapseworkspace --resource-group rg \\
+        --display-name youraccount@yourdomain --object-id 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse sql ad-admin delete'] = """
+type: command
+short-summary: Delete the SQL Azure Active Directory administrator.
+examples:
+  - name: Delete the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin delete --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql ad-admin wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
+"""
+
+helps['synapse sql audit-policy'] = """
+type: group
+short-summary: Manage SQL auditing policy.
+"""
+
+helps['synapse sql audit-policy show'] = """
+type: command
+short-summary: Get a SQL's auditing policy.
+examples:
+  - name: Get a SQL's auditing policy.
+    text: |-
+        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql audit-policy update'] = """
+type: command
+short-summary: Update a SQL's auditing policy.
+long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-account mystorageaccount
+  - name: Enable by storage endpoint and key.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+  - name: Set the list of audit actions.
+    text: |
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
+  - name: Disable an auditing policy.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Disabled
+"""
+
+helps['synapse sql audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
+"""
+
 helps['synapse sql pool'] = """
 type: group
 short-summary: Manage SQL pools.
@@ -467,6 +557,16 @@ examples:
     text: |-
         az synapse workspace firewall-rule create --name allowAll --workspace-name testsynapseworkspace \\
         --resource-group rg --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255
+"""
+
+helps['synapse workspace firewall-rule update'] = """
+type: command
+short-summary: Update a firewall rule.
+examples:
+  - name: Update a firewall rule.
+    text: |-
+        az synapse workspace firewall-rule update --name allowAll --workspace-name testsynapseworkspace \\
+        --resource-group rg --start-ip-address 172.0.0.0
 """
 
 helps['synapse workspace firewall-rule show'] = """
