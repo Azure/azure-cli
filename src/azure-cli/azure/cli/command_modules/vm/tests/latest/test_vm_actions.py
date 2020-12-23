@@ -62,6 +62,7 @@ class TestActions(unittest.TestCase):
         os.remove(private_key_file)
 
         args = mock.MagicMock()
+        args.ssh_key_name = None
         args.ssh_key_value = [public_key_file]
         args.generate_ssh_keys = True
 
@@ -77,6 +78,7 @@ class TestActions(unittest.TestCase):
         # for convinience we will reuse the generated file in the previous step
         args2 = mock.MagicMock()
         args2.ssh_key_value = [generated_public_key_string]
+        args2.ssh_key_name = None
         args2.generate_ssh_keys = False
         validate_ssh_key(args2)
         # we didn't regenerate
@@ -87,6 +89,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
+        args3.ssh_key_name = None
         args3.ssh_key_value = [public_key_file2]
         args3.generate_ssh_keys = False
         with self.assertRaises(CLIError):
@@ -97,6 +100,7 @@ class TestActions(unittest.TestCase):
         os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
+        args4.ssh_key_name = None
         args4.ssh_key_value = [public_key_file4]
         args4.generate_ssh_keys = True
         validate_ssh_key(args4)

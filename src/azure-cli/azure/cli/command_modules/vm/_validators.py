@@ -1054,8 +1054,8 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace, cmd=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if namespace.ssh_key_name:
+    if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
+        client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
         if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
             # Use existing key, key must exist
@@ -1452,7 +1452,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_create_public_ip(cmd, namespace)
     _validate_vmss_create_nsg(cmd, namespace)
     _validate_vm_vmss_accelerated_networking(cmd.cli_ctx, namespace)
-    _validate_vm_vmss_create_auth(namespace)
+    _validate_vm_vmss_create_auth(namespace, cmd)
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
