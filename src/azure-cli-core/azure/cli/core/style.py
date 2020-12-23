@@ -72,3 +72,30 @@ def format_styled_text(styled_text):
     # Reset control sequence
     formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)
+
+
+def highlight_command(raw_command):
+    """highlight a command to make it colored.
+
+    :param raw_command: The command that needs to be colored
+    :type raw_command: str
+    :return: The styled command text
+    :type: list
+    """
+
+    styled_command = []
+    argument_begins = False
+
+    for index, arg in enumerate(raw_command.split()):
+        spaced_arg = ' {}'.format(arg) if index > 0 else arg
+        style = Style.PRIMARY
+
+        if arg.startswith('-') and '=' not in arg:
+            style = Style.ACTION
+            argument_begins = True
+        elif not argument_begins and '=' not in arg:
+            style = Style.ACTION
+
+        styled_command.append((style, spaced_arg))
+
+    return styled_command
