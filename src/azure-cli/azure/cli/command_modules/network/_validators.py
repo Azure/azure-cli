@@ -246,9 +246,9 @@ def validate_ssl_cert(namespace):
         if namespace.key_vault_secret_id:
             return
         # cert supplied -- use HTTPS
-        if not all(params):
+        if not namespace.cert_data:
             raise CLIError(
-                None, 'To use SSL certificate, you must specify both the filename and password')
+                None, 'To use SSL certificate, you must specify both the filename')
 
         # extract the certificate data from the provided file
         namespace.cert_data = read_base_64_file(namespace.cert_data)

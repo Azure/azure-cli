@@ -546,7 +546,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  '--sku Standard_v2 --public-ip-address {ip} '
                  '--identity {one_off_identity} ')
         self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
-            self.check('identity.type', 'UserAssigned')
+            self.check('identity.type', 'userAssigned')
         ])
 
         # remove one_off_identity
@@ -557,10 +557,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway identity assign '
                  '-g {rg} --gateway-name {gw} --identity {access_identity}',
                  checks=[
-                     self.check('identity.type', 'UserAssigned')
+                     self.check('identity.type', 'userAssigned')
                  ])
         self.cmd('network application-gateway identity show -g {rg} --gateway-name {gw}', checks=[
-            self.check('type', 'UserAssigned')
+            self.check('type', 'userAssigned')
         ])
 
         self.cmd('network application-gateway ssl-cert create '
@@ -2057,9 +2057,10 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_global_reach')
     def test_network_express_route_global_reach(self, resource_group):
-
+        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
             'er1': 'er1',
             'er2': 'er2',
@@ -2073,11 +2074,12 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(CLIError, 'is Not Provisioned'):
+        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
@@ -2788,7 +2790,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
     def test_network_nic_app_gateway(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import HttpResponseError
         import json
 
         self.kwargs.update({
@@ -2831,7 +2833,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
-        with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
+        with self.assertRaisesRegexp(HttpResponseError, 'not supported for secondary IpConfigurations'):
             self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
@@ -3495,7 +3497,7 @@ class NetworkVirtualRouter(ScenarioTest):
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
-    # @record_only()
+    @record_only()  # this feature need resource from service team for now.
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
     def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3962,6 +3964,18 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
+    @ResourceGroupPreparer('cli_test_traffic_manager2')
+    def test_network_traffic_manager2(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile2',
+            'dns': 'mytrafficmanager001100a2'
+        })
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
+
+        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
+                 checks=self.check('maxReturn', 4))
 
     @ResourceGroupPreparer('cli_test_traffic_manager_subnet')
     def test_network_traffic_manager_subnet_routing(self, resource_group):
