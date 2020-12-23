@@ -322,6 +322,7 @@ class Profile:
         return deepcopy(consolidated)
 
     def login_with_environment_credential(self, find_subscriptions=True):
+        # pylint: disable=protected-access
         identity = Identity()
 
         tenant_id = os.environ.get('AZURE_TENANT_ID')
@@ -331,11 +332,11 @@ class Profile:
         credential = identity.get_environment_credential()
 
         authentication_record = None
-        if username:
+        if credential._credential.__class__.__name__ == 'UsernamePasswordCredential':
             user_type = _USER
             # For user account, credential._credential is a UsernamePasswordCredential.
             # Login the user so that MSAL has it in cache.
-            authentication_record = credential._credential.authenticate()  # pylint: disable=protected-access
+            authentication_record = credential._credential.authenticate()
         else:
             user_type = _SERVICE_PRINCIPAL
 

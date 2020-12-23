@@ -10,6 +10,17 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['login'] = """
 type: command
 short-summary: Log in to Azure.
+long-summary: >-
+    By default, this command logs in with a user account. To login with a service principal, specify --service-principal.
+
+
+    For user login, CLI will try to launch a web browser to log in interactively. If a web browser is not available,
+    CLI will fallback to device code login.
+
+
+    To retrieve the login credential from environment variables (EnvironmentCredential), specify --environment.
+    For details on using EnvironmentCredential, see
+    https://docs.microsoft.com/python/api/overview/azure/identity-readme#environment-variables
 examples:
     - name: Log in interactively.
       text: az login
@@ -23,20 +34,23 @@ examples:
       text: az login --identity
     - name: Log in using a VM's user-assigned managed identity. Client or object ids of the service identity also work.
       text: az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-    - name: Log in using EnvironmentCredential and a service principal.
+    - name: Log in with a service principal using EnvironmentCredential.
       text: |-
         # Bash script
         export AZURE_TENANT_ID='<tenant ID>'
         export AZURE_CLIENT_ID='<service principal appId>'
-        export AZURE_CLIENT_SECRET='<service principal secret>'
+        # With secret
+        export AZURE_CLIENT_SECRET='<secret>'
+        # Or with certificate
+        # export AZURE_CLIENT_CERTIFICATE_PATH='<path to a PEM-encoded certificate file>'
         az login --environment
-    - name: Log in using EnvironmentCredential and a user account.
+    - name: Log in with a user account using EnvironmentCredential.
       text: |-
         # Bash script
         # AZURE_CLIENT_ID defaults to Azure CLI's client ID
         # export AZURE_CLIENT_ID='04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-        export AZURE_USERNAME='<tenant ID>'
-        export AZURE_PASSWORD='<service principal appId>'
+        export AZURE_USERNAME='<username>'
+        export AZURE_PASSWORD='<password>'
         az login --environment
 """
 
