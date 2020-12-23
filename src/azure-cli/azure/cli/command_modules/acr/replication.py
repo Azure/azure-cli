@@ -30,6 +30,7 @@ def acr_replication_create(cmd,
                            resource_group_name=None,
                            replication_name=None,
                            region_endpoint_enabled=None,
+                           zone_redundancy=None,
                            tags=None):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
@@ -42,13 +43,15 @@ def acr_replication_create(cmd,
     ReplicationType = cmd.get_models('Replication')
 
     replication_name = replication_name or normalized_location
+    replication_properties = ReplicationType(
+        location=location, region_endpoint_enabled=region_endpoint_enabled, zone_redundancy=zone_redundancy)
 
     try:
         return client.create(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
             replication_name=replication_name,
-            replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
+            replication=replication_properties,
             tags=tags
         )
     except ValidationError as e:
