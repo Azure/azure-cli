@@ -15,12 +15,13 @@ def list_workspaces(cmd, client, resource_group_name=None):
 
 
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
-                     sql_admin_login_user, sql_admin_login_password, location, enable_managed_virtual_network=None,
+                     sql_admin_login_user, sql_admin_login_password, location=None, enable_managed_virtual_network=None,
                      tags=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
     default_data_lake_storage = DataLakeStorageAccountDetails(account_url=account_url, filesystem=file_system)
+
     workspace_info = Workspace(
         identity=identity,
         default_data_lake_storage=default_data_lake_storage,
@@ -53,5 +54,16 @@ def custom_check_name_availability(cmd, client, name):
 
 def create_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address, end_ip_address,
                          no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, rule_name,
+                       start_ip_address=start_ip_address, end_ip_address=end_ip_address)
+
+
+def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_name, start_ip_address=None,
+                         end_ip_address=None,
+                         no_wait=False):
+    firewall = client.get(resource_group_name, workspace_name, rule_name)
+
+    start_ip_address = start_ip_address or firewall.start_ip_address
+    end_ip_address = end_ip_address or firewall.end_ip_address
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, rule_name,
                        start_ip_address=start_ip_address, end_ip_address=end_ip_address)

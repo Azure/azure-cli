@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands import CliCommandType
+from ._validators import validate_audit_policy_arguments
 
 
 # pylint: disable=line-too-long, too-many-statements, too-many-locals
@@ -17,6 +18,8 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_sqlpool_transparent_data_encryptions_factory
     from ._client_factory import cf_synapse_client_sqlpool_security_alert_policies_factory
     from ._client_factory import cf_synapse_client_sqlpool_blob_auditing_policies_factory
+    from ._client_factory import cf_synapse_client_workspace_aad_admins_factory
+    from ._client_factory import cf_synapse_client_sqlserver_blob_auditing_policies_factory
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
@@ -35,6 +38,10 @@ def load_command_table(self, _):
     synapse_bigdatapool_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#BigDataPoolsOperations.{}',
         client_factory=cf_synapse_client_bigdatapool_factory)
+
+    synapse_workspace_aad_admin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#WorkspaceAadAdminsOperations.{}'
+    )
 
     synapse_sqlpool_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#SqlPoolsOperations.{}',
@@ -55,7 +62,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.synapse.operations#SqlPoolTransparentDataEncryptionsOperations.{}',
         client_factory=cf_synapse_client_sqlpool_transparent_data_encryptions_factory)
 
-    # Threat Policy operation
+    # Threat policy operation
     synapse_sqlpool_security_alert_policies_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#SqlPoolSecurityAlertPoliciesOperations.{}',
         client_factory=cf_synapse_client_sqlpool_security_alert_policies_factory)
@@ -64,6 +71,11 @@ def load_command_table(self, _):
     synapse_sqlpool_blob_auditing_policies_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#SqlPoolBlobAuditingPoliciesOperations.{}',
         client_factory=cf_synapse_client_sqlpool_blob_auditing_policies_factory)
+
+    # Workspace managed sql server audit policy operation
+    synapse_workspace_managed_sqlserver_blob_auditing_policies_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#WorkspaceManagedSqlServerBlobAuditingPoliciesOperations.{}',
+        client_factory=cf_synapse_client_sqlserver_blob_auditing_policies_factory)
 
     synapse_firewallrules_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
@@ -198,7 +210,31 @@ def load_command_table(self, _):
                                                                cf_synapse_client_sqlpool_blob_auditing_policies_factory),
                             client_factory=cf_synapse_client_sqlpool_blob_auditing_policies_factory) as g:
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='sqlpool_blob_auditing_policy_update')
+        g.generic_update_command('update', custom_func_name='sqlpool_blob_auditing_policy_update',
+                                 validator=validate_audit_policy_arguments)
+
+    # Management Plane Commands --Sql Ad-Admin
+    with self.command_group('synapse sql ad-admin', command_type=synapse_workspace_aad_admin_sdk,
+                            custom_command_type=get_custom_sdk('workspacesqlaadadmin',
+                                                               cf_synapse_client_workspace_aad_admins_factory),
+                            client_factory=cf_synapse_client_workspace_aad_admins_factory) as g:
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_workspace_sql_aad_admin', supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_workspace_sql_aad_admin',
+                                 setter_arg_name='aad_admin_info', supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
+
+    # Management Plane Commands --Sql audit-policy
+    with self.command_group('synapse sql audit-policy',
+                            command_type=synapse_workspace_managed_sqlserver_blob_auditing_policies_sdk,
+                            custom_command_type=get_custom_sdk('sqlpoolblobauditingpolicy',
+                                                               cf_synapse_client_sqlserver_blob_auditing_policies_factory),
+                            client_factory=cf_synapse_client_sqlserver_blob_auditing_policies_factory) as g:
+        g.show_command('show', 'get')
+        g.generic_update_command('update', custom_func_name='sqlserver_blob_auditing_policy_update',
+                                 supports_no_wait=True, validator=validate_audit_policy_arguments)
+        g.wait_command('wait')
 
     # Management Plane Commands --FirewallRule
     with self.command_group('synapse workspace firewall-rule', command_type=synapse_firewallrules_sdk,
@@ -207,6 +243,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_workspace')
         g.show_command('show', 'get')
         g.custom_command('create', 'create_firewall_rule', supports_no_wait=True)
+        g.custom_command('update', 'update_firewall_rule', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
