@@ -647,9 +647,9 @@ class ProviderRegistrationTest(ScenarioTest):
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
-            with self.assertRaisesRegexp(CLIError, '--accept-term must be specified'):
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
                 self.cmd('provider register -n {prov}')
-            self.cmd('provider register -n {prov} --accept-term')
+            self.cmd('provider register -n {prov} --accept-terms')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
             self.cmd('provider unregister -n {prov}')
@@ -659,9 +659,9 @@ class ProviderRegistrationTest(ScenarioTest):
             self.cmd('provider unregister -n {prov}')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
-            with self.assertRaisesRegexp(CLIError, '--accept-term must be specified'):
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
                 self.cmd('provider register -n {prov}')
-            self.cmd('provider register -n {prov} --accept-term')
+            self.cmd('provider register -n {prov} --accept-terms')
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
