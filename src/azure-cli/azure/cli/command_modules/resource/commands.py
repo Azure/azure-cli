@@ -216,7 +216,6 @@ def load_command_table(self, _):
         g.custom_command('unregister', 'unregister_provider')
         g.custom_command('operation list', 'list_provider_operations')
         g.custom_show_command('operation show', 'show_provider_operations')
-        g.custom_command('register-mg', 'register_management_group')
 
     # Resource feature commands
     with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,

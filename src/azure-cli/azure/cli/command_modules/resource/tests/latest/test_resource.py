@@ -651,7 +651,7 @@ class ProviderMGRegistrationTest(ScenarioTest):
 
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         assert result['registrationState'] == 'Unregistered'
-        self.cmd('provider register-mg --namespace {prov} --management-group-id {mg}')
+        self.cmd('provider register --namespace {prov} --mg {mg}')
         result = self.cmd('provider show -n {prov}').get_output_in_json()
         self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 

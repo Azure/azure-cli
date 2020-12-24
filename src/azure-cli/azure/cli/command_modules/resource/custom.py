@@ -960,13 +960,13 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, mg=False, mgID=None):
+def _update_provider(cli_ctx, namespace, registering, wait, mgID=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
-    if not mg and registering:
+    if mgID is None and registering:
         r = rcf.providers.register(namespace)
-    elif mg and registering:
+    elif mgID and registering:
         r = rcf.providers.register_at_management_group_scope(namespace, mgID)
     else:
         r = rcf.providers.unregister(namespace)
@@ -1941,16 +1941,12 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait)
+def register_provider(cmd, resource_provider_namespace, mg=None, wait=False):
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, mgID=mg, wait=wait)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
-
-
-def register_management_group(cmd, resource_provider_namespace, management_group_id, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mg=True, mgID=management_group_id)
 
 
 def list_provider_operations(cmd):
