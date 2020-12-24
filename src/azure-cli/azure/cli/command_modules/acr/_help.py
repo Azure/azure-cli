@@ -1223,17 +1223,16 @@ short-summary: Create a connected registry for an Azure Container Registry.
 examples:
   - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
     text: |
-        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
             --repository "app/hello-world service/mycomponent"
   - name: Create a mirror connected registry with only read permissions and pass the sync token
     text: |
-        az acr connected-registry create --registry mycloudregistry --mode mirror
-            --parent myconnectedregistry --name mymirroracr --sync-token mySyncTokenName
+        az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
+            --mode mirror --parent myconnectedregistry --sync-token mySyncTokenName
   - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
-        az acr connected-registry create --registry mycloudregistry --mode mirror
-            --parent myconnectedregistry --name mymirroracr --repository app/mycomponent
-            --sync-schedule "0 12 * * *" --sync-window PT4H
+        az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
+            -t app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 
@@ -1241,24 +1240,21 @@ helps['acr connected-registry delete'] = """
 type: command
 short-summary: Delete a connected registry from Azure Container Registry.
 examples:
-  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry' and skip verification.
-    text: |
-        az acr connected-registry delete --registry mycloudregistry
-            --name myconnectedregistry --yes
-  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry' and skip verification.
-    text: |
-        az acr connected-registry delete --registry mycloudregistry
-            --name myconnectedregistry --cleanup --yes
+  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
+  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
 """
 
 helps['acr connected-registry deactivate'] = """
 type: command
 short-summary: Deactivate a connected registry from Azure Container Registry.
 examples:
-  - name: Deactivate a connected registry 'myconnectedregistry' and skip verification.
-    text: |
-        az acr connected-registry deactivate --registry mycloudregistry
-            --name myconnectedregistry --yes
+  - name: Deactivate a connected registry 'myconnectedregistry'.
+    text: >
+        az acr connected-registry deactivate -r mycloudregistry -n myconnectedregistry
 """
 
 helps['acr connected-registry list'] = """
@@ -1273,7 +1269,7 @@ examples:
         az acr connected-registry list --registry mycloudregistry --no-children --output table
   - name: Lists all the offspring of 'myconnectedregistry' in expanded form inside a table.
     text: >
-        az acr connected-registry list --registry mycloudregistry --parent myconnectedregistry --output table
+        az acr connected-registry list -r mycloudregistry -p myconnectedregistry --output table
 """
 
 helps['acr connected-registry list-client-tokens'] = """
@@ -1282,7 +1278,7 @@ short-summary: Lists all the client tokens associated to a specific connected re
 examples:
   - name: Lists all client tokens of 'mymirroracr'.
     text: >
-        az acr connected-registry list-client-tokens --registry mycloudregistry --name mymirroracr
+        az acr connected-registry list-client-tokens -r mycloudregistry -n mymirroracr -o table
 """
 
 helps['acr connected-registry show'] = """
@@ -1290,7 +1286,7 @@ type: command
 short-summary: Show connected registry details.
 examples:
   - name: Show all the details of the 'mymirroracr' registry in table form.
-    text: |
+    text: >
         az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
 """
 
@@ -1300,12 +1296,12 @@ short-summary: Update a connected registry for an Azure Container Registry.
 examples:
   - name: Update the connected registry client Tokens.
     text: |
-        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
             --remove-client-tokens myTokenName1 --add-client-tokens myTokenName2 myTokenName3
 
   - name: Update the sync and window time of a connected registry.
     text: |
-        az acr connected-registry update --registry mycloudregistry --name mymirroracr
+        az acr connected-registry update --registry mycloudregistry --name mymirroracr \\
             --sync-schedule "0 12 * * *" --sync-window PT4H
 """
 
@@ -1320,7 +1316,7 @@ short-summary: Retrieves information required to activate a connected registry.
 examples:
   - name: Prints the values requiered to activate a connected registry in json format
     text: >
-        az acr connected-registry install --registry mycloudregistry --name myconnectedregistry
+        az acr connected-registry install info --registry mycloudregistry --name myconnectedregistry
 """
 
 helps['acr connected-registry install renew-credentials'] = """
@@ -1329,7 +1325,7 @@ short-summary: Retrieves information required to activate a connected registry, 
 examples:
   - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
     text: >
-        az acr connected-registry install --registry mycloudregistry --name myconnectedregistry
+        az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry
 """
 # endregion
 

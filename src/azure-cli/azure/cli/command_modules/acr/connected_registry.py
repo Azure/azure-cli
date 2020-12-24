@@ -308,10 +308,11 @@ def acr_connected_registry_list_client_tokens(cmd,
         cmd, registry_name, resource_group_name)
     current_connected_registry = acr_connected_registry_show(
         cmd, client, connected_registry_name, registry_name, resource_group_name)
-    if current_connected_registry.client_token_ids is None:
-        raise CLIError("No client tokens found: You can update your connected registry to add client tokens.")
 
     result = []
+    if current_connected_registry.client_token_ids is None:
+        return result
+
     for token_id in current_connected_registry.client_token_ids:
         token = get_token_from_id(cmd, token_id)
         result.append(token)
