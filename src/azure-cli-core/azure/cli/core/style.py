@@ -75,7 +75,14 @@ def format_styled_text(styled_text):
 
 
 def highlight_command(raw_command):
-    """highlight a command to make it colored.
+    """Highlight a command to make it colored.
+
+    The highlighting rules after the command is splitted into args:
+        1. Args starting with '-' are regarded as parameter names, and they are with the ACTION style.
+        2. Args before the first parameter name are regarded as command name (or positional argument),
+        and they are with the ACTION style.
+        3. Args between the parameter names are regarded as parameter values, and they are with the PRIMARY style.
+        4. Args containing '=' are regarded as parameter name-value pairs, and they are with the PRIMARY style.
 
     :param raw_command: The command that needs to be colored
     :type raw_command: str
