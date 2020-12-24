@@ -14,9 +14,9 @@ steps:
       source env/bin/activate
 
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
-        azdev test --series --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }}
+        azdev test --series --no-exitfirst --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci --profile ${{ parameters.profile }}
       else
-        azdev test --series --profile ${{ parameters.profile }}
+        azdev test --series --no-exitfirst --profile ${{ parameters.profile }}
       fi
     displayName: "Test on Profile ${{ parameters.profile }}"
     env:

@@ -2,12 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=too-many-statements, line-too-long
+# pylint: disable=too-many-statements, line-too-long, too-many-branches
 from knack.arguments import CLIArgumentType
 from argcomplete import FilesCompleter
 from azure.mgmt.synapse.models import TransparentDataEncryptionStatus, SecurityAlertPolicyState, BlobAuditingPolicyState
 from azure.cli.core.commands.parameters import name_type, tags_type, get_three_state_flag, get_enum_type, \
-    get_resource_name_completion_list
+    get_resource_name_completion_list, get_location_type
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.util import get_json_object, shell_safe_json_parse
 from ._validators import validate_storage_account, validate_statement_language
 from ._completers import get_role_definition_name_completion_list
@@ -64,6 +65,7 @@ def load_arguments(self, _):
         c.argument('disable_all_allowed_aad_tenant_ids', options_list=['--disable-tenant-ids'], arg_type=get_three_state_flag(), help="Disable all approved Azure AD tenants which outbound data traffic allowed to.")
 
     with self.argument_context('synapse workspace create') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument("storage_account", validator=validate_storage_account,
                    help='The data lake storage account name or resource id.')
         c.argument('file_system', help='The file system of the data lake storage account.')
@@ -242,6 +244,7 @@ def load_arguments(self, _):
                    help='Threat detection policy state',
                    arg_type=get_enum_type(SecurityAlertPolicyState))
         c.argument('retention_days',
+                   type=int,
                    arg_group=policy_arg_group,
                    help='The number of days to retain threat detection logs.')
         c.argument('disabled_alerts',
@@ -261,29 +264,45 @@ def load_arguments(self, _):
     with self.argument_context('synapse sql pool audit-policy') as c:
         c.argument('sql_pool_name', arg_type=name_type, id_part='child_name_1', help='The SQL pool name.')
 
-    with self.argument_context('synapse sql pool audit-policy update') as c:
-        _configure_security_or_audit_policy_storage_params(c)
-        c.argument('storage_account_subscription_id', arg_group=storage_arg_group,
-                   options_list=['--storage-subscription'],
-                   help='The subscription id of storage account')
-        c.argument('is_storage_secondary_key_in_use', arg_group=storage_arg_group,
-                   arg_type=get_three_state_flag(), options_list=['--use-secondary-key'],
-                   help='Indicates whether using the secondary storeage key or not')
-        c.argument('is_azure_monitor_target_enabled', options_list=['--enable-azure-monitor'],
-                   help='Whether enabling azure monitor target or not.',
-                   arg_type=get_three_state_flag())
-        c.argument('state',
-                   arg_group=policy_arg_group,
-                   help='Auditing policy state',
-                   arg_type=get_enum_type(BlobAuditingPolicyState))
-        c.argument('audit_actions_and_groups',
-                   options_list=['--actions'],
-                   arg_group=policy_arg_group,
-                   help='List of actions and action groups to audit.',
-                   nargs='+')
-        c.argument('retention_days',
-                   arg_group=policy_arg_group,
-                   help='The number of days to retain audit logs.')
+    for scope in ['synapse sql pool audit-policy', 'synapse sql audit-policy']:
+        with self.argument_context(scope + ' update') as c:
+            _configure_security_or_audit_policy_storage_params(c)
+            c.argument('storage_account_subscription_id', arg_group=storage_arg_group,
+                       options_list=['--storage-subscription'],
+                       help='The subscription id of storage account')
+            c.argument('is_storage_secondary_key_in_use', arg_group=storage_arg_group,
+                       arg_type=get_three_state_flag(), options_list=['--use-secondary-key'],
+                       help='Indicates whether using the secondary storeage key or not')
+            c.argument('is_azure_monitor_target_enabled', options_list=['--enable-azure-monitor'],
+                       help='Whether enabling azure monitor target or not.',
+                       arg_type=get_three_state_flag())
+            c.argument('state',
+                       arg_group=policy_arg_group,
+                       help='Auditing policy state',
+                       arg_type=get_enum_type(BlobAuditingPolicyState))
+            c.argument('audit_actions_and_groups',
+                       options_list=['--actions'],
+                       arg_group=policy_arg_group,
+                       help='List of actions and action groups to audit.',
+                       nargs='+')
+            c.argument('retention_days',
+                       type=int,
+                       arg_group=policy_arg_group,
+                       help='The number of days to retain audit logs.')
+
+    with self.argument_context('synapse sql audit-policy update') as c:
+        c.argument('queue_delay_milliseconds', type=int,
+                   options_list=['--queue-delay-time', '--queue-delay-milliseconds'],
+                   help='The amount of time in milliseconds that can elapse before audit actions are forced to be processed')
+
+    with self.argument_context('synapse sql ad-admin') as c:
+        c.argument('workspace_name', help='The workspace name.')
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse sql ad-admin ' + scope) as c:
+            c.argument('login_name', options_list=['--display-name', '-u'],
+                       help='Display name of the Azure AD administrator user or group.')
+            c.argument('object_id', options_list=['--object-id', '-i'],
+                       help='The unique ID of the Azure AD administrator.')
 
     # synapse workspace firewall-rule
     with self.argument_context('synapse workspace firewall-rule') as c:
@@ -292,14 +311,15 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace firewall-rule list') as c:
         c.argument('workspace_name', id_part=None, help='The workspace name.')
 
-    for scope in ['show', 'create', 'delete']:
+    for scope in ['show', 'create', 'update', 'delete']:
         with self.argument_context('synapse workspace firewall-rule ' + scope) as c:
             c.argument('rule_name', arg_type=name_type, id_part='child_name_1', help='The IP firewall rule name')
 
-    with self.argument_context('synapse workspace firewall-rule create') as c:
-        c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
-        c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
-                                          'Must be greater than or equal to startIpAddress.')
+    for scope in ['create', 'update']:
+        with self.argument_context('synapse workspace firewall-rule ' + scope) as c:
+            c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
+            c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
+                                              'Must be greater than or equal to startIpAddress.')
 
     # synapse workspace key
     with self.argument_context('synapse workspace key') as c:
@@ -612,3 +632,50 @@ def load_arguments(self, _):
     with self.argument_context('synapse notebook delete') as c:
         c.argument('workspace_name', arg_type=workspace_name_arg_type)
         c.argument('notebook_name', arg_type=name_type, help='The notebook name.')
+
+    # synapse integration runtime
+    with self.argument_context('synapse integration-runtime') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
+
+    for scope in ['list', 'list-auth-key', 'wait']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part=None)
+
+    for scope in ['list-auth-key', 'wait']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part=None)
+
+    for scope in ['show', 'create', 'delete', 'wait', 'update', 'upgrade', 'regenerate-auth-key', 'get-monitoring-data', 'sync-credentials', 'get-connection-info', 'get-status']:
+        with self.argument_context('synapse integration-runtime ' + scope) as c:
+            c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
+
+    with self.argument_context('synapse integration-runtime create') as c:
+        c.argument('integration_runtime_type', options_list=['--type'], arg_type=get_enum_type(['Managed', 'SelfHosted']), help='The integration runtime type.')
+        c.argument('description', help='The integration runtime description.')
+        c.argument('if_match', help='ETag of the integration runtime entity. Should only be specified for update, for '
+                   'which it should match existing entity or can be * for unconditional update.')
+        # Managed
+        c.argument('location', arg_group='Managed', help='The integration runtime location.')
+        c.argument('compute_type', arg_group='Managed', arg_type=get_enum_type(['General', 'MemoryOptimized', 'ComputeOptimized']),
+                   help='Compute type of the data flow cluster which will execute data flow job.')
+        c.argument('core_count', arg_group='Managed', help='Core count of the data flow cluster which will execute data flow job.')
+        c.argument('time_to_live', arg_group='Managed', help='Time to live (in minutes) setting of the data flow cluster which will execute data flow job.')
+
+    with self.argument_context('synapse integration-runtime update') as c:
+        c.argument('auto_update', arg_type=get_enum_type(['On', 'Off']), help='Enable or disable the self-hosted integration runtime auto-update.')
+        c.argument('update_delay_offset', help='The time of the day for the self-hosted integration runtime auto-update.')
+
+    with self.argument_context('synapse integration-runtime regenerate-auth-key') as c:
+        c.argument('key_name', arg_type=get_enum_type(['authKey1', 'authKey2']), help='The name of the authentication key to regenerate.')
+
+    with self.argument_context('synapse integration-runtime-node') as c:
+        c.argument('workspace_name', arg_type=workspace_name_arg_type, id_part='name')
+        c.argument('integration_runtime_name', arg_type=name_type, help='The integration runtime name.', id_part='child_name_1')
+
+    for scope in ['show', 'update', 'delete', 'get-ip-address']:
+        with self.argument_context('synapse integration-runtime-node ' + scope) as c:
+            c.argument('node_name', help='The integration runtime node name.')
+
+    with self.argument_context('synapse integration-runtime-node update') as c:
+        c.argument('concurrent_jobs_limit', options_list=['--concurrent-jobs'], help='The number of concurrent jobs permitted to '
+                   'run on the integration runtime node. Values between 1 and maxConcurrentJobs are allowed.')

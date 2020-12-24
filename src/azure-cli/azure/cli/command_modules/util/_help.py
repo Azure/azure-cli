@@ -45,3 +45,13 @@ helps['upgrade'] = """
 type: command
 short-summary: Upgrade Azure CLI and extensions
 """
+
+helps['demo'] = """
+type: group
+short-summary: Demos for designing, developing and demonstrating Azure CLI.
+"""
+
+helps['demo style'] = """
+type: command
+short-summary: A demo showing supported text styles.
+"""
