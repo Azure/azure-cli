@@ -33,6 +33,9 @@ class Style(str, Enum):
     WARNING = "warning"
 
 
+# Theme that doesn't contain any style
+THEME_NONE = {}
+
 # Theme to be used on a dark-themed terminal
 THEME_DARK = {
     # Style to ANSI escape sequence mapping
@@ -71,10 +74,7 @@ def print_styled_text(*styled_text_objects, file=None, **kwargs):
     """
     Print styled text.
 
-    :param styled_text_objects: The input text objects. Each object can be in these formats:
-        - text
-        - (style, text)
-        - [(style, text), ...]
+    :param styled_text_objects: The input text objects. See format_styled_text for formats of each object.
     :param file: The file to print the styled text. The default target is sys.stderr.
     """
     formatted_list = [format_styled_text(obj) for obj in styled_text_objects]
@@ -82,27 +82,32 @@ def print_styled_text(*styled_text_objects, file=None, **kwargs):
     print(*formatted_list, file=file or sys.stderr, **kwargs)
 
 
-def format_styled_text(styled_text, theme=None, enable_color=None):
-    """Format styled text.
-    Color is turned on by default. To turn off color for all invocations of this function, set
-    `format_styled_text.enable_color = False`. To turn off color only for one invocation, set parameter
-    `enable_color=False`.
+def format_styled_text(styled_text, theme=None):
+    """Format styled text. Dark theme used by default. Available themes are 'dark', 'light', 'none'.
 
-    :param styled_text: See print_styled_text for detail.
-    :param theme: The theme used to format text. Cant be 'light', 'dark' or the theme dict.
-    :param enable_color: Whether color should be enabled. If not provided, the function attribute `enable_color`
-     will be honored.
+    To change theme for all invocations of this function, set `format_styled_text.theme`.
+    To change theme for one invocation, set parameter `theme`.
+
+    :param styled_text: Can be in these formats:
+        - text
+        - (style, text)
+        - [(style, text), ...]
+    :param theme: The theme used to format text. Can be theme name or dict.
     """
-    if enable_color is None:
-        enable_color = getattr(format_styled_text, "enable_color", True)
     if theme is None:
         theme = getattr(format_styled_text, "theme", THEME_DARK)
 
     # Convert str to the theme dict
-    if theme == 'dark':
-        theme = THEME_DARK
-    if theme == 'light':
-        theme = THEME_LIGHT
+    if isinstance(theme, str):
+        if theme.lower() == 'none':
+            theme = THEME_NONE
+        elif theme.lower() == 'dark':
+            theme = THEME_DARK
+        elif theme.lower() == 'light':
+            theme = THEME_LIGHT
+        else:
+            from azure.cli.core.azclierror import CLIInternalError
+            raise CLIInternalError("Invalid theme. Supported themes: none, dark, light")
 
     # Cache the value of is_legacy_powershell
     if not hasattr(format_styled_text, "_is_legacy_powershell"):
@@ -128,24 +133,23 @@ def format_styled_text(styled_text, theme=None, enable_color=None):
             from azure.cli.core.azclierror import CLIInternalError
             raise CLIInternalError("Invalid styled text. It should be a list of 2-element tuples.")
 
-        style = text[0]
-        # Check if the specified style is defined
-        if style not in theme:
-            from azure.cli.core.azclierror import CLIInternalError
-            raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+        style, raw_text = text
 
-        escape_seq = theme[text[0]]
-        # Replace blue in powershell.exe
-        if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
-            escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
-
-        if enable_color:
-            formatted_parts.append(escape_seq + text[1])
+        if theme is THEME_NONE:
+            formatted_parts.append(raw_text)
         else:
-            formatted_parts.append(text[1])
+            try:
+                escape_seq = theme[style]
+            except KeyError:
+                from azure.cli.core.azclierror import CLIInternalError
+                raise CLIInternalError("Invalid style. Only use pre-defined style in Style enum.")
+            # Replace blue in powershell.exe
+            if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
+                escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
+            formatted_parts.append(escape_seq + raw_text)
 
     # Reset control sequence
-    if enable_color:
+    if theme is not THEME_NONE:
         formatted_parts.append(Fore.RESET)
     return ''.join(formatted_parts)
 

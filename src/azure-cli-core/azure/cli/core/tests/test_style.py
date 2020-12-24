@@ -61,7 +61,7 @@ class TestStyle(unittest.TestCase):
         with self.assertRaisesRegex(CLIInternalError, "Invalid styled text."):
             format_styled_text(["dummy text"])
 
-    def test_format_styled_text_enable_color(self):
+    def test_format_styled_text_theme(self):
         from azure.cli.core.style import Style, format_styled_text
         styled_text = [
             (Style.PRIMARY, "White: Primary text color\n"),
@@ -74,22 +74,22 @@ class TestStyle(unittest.TestCase):
         self.assertEqual(formatted, excepted)
 
         # Color is turned off via param
-        formatted = format_styled_text(styled_text, enable_color=False)
+        formatted = format_styled_text(styled_text, theme='none')
         excepted_plaintext = ("White: Primary text color\n"
                               "Bright Black: Secondary text color\n")
         self.assertEqual(formatted, excepted_plaintext)
 
         # Color is turned off via function attribute
-        format_styled_text.enable_color = False
+        format_styled_text.theme = 'none'
         formatted = format_styled_text(styled_text)
         self.assertEqual(formatted, excepted_plaintext)
 
         # Function attribute is overridden by param
-        format_styled_text.enable_color = True
-        formatted = format_styled_text(styled_text, enable_color=False)
+        format_styled_text.theme = 'dark'
+        formatted = format_styled_text(styled_text, theme='none')
         self.assertEqual(formatted, excepted_plaintext)
 
-        delattr(format_styled_text, "enable_color")
+        delattr(format_styled_text, "theme")
 
     @mock.patch("builtins.print")
     @mock.patch("azure.cli.core.style.format_styled_text")

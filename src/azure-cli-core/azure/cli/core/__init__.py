@@ -81,7 +81,8 @@ class AzCli(CLI):
 
         self.progress_controller = None
 
-        format_styled_text.enable_color = self.enable_color
+        if not self.enable_color:
+            format_styled_text.theme = 'none'
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
