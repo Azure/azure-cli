@@ -246,12 +246,12 @@ def _build_identities_info(identities):
 
 
 def _get_resource(client, resource_group_name, *subresources):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         resource = client.get(resource_group_name, *subresources)
         return resource
-    except CloudError as ex:
-        if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
             return None
         raise
 
