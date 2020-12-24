@@ -318,9 +318,8 @@ class AzCliCommandParser(CLICommandParser):
                 return None
         return EXT_CMD_TREE
 
-    def _get_all_extensions(self, cmd_chain, exts):
-        """Find all the extension names in cmd_chain (dict of extension command subtree) and store
-        in exts.
+    def _get_all_extensions(self, cmd_chain, ext_set=None):
+        """Find all the extension names in cmd_chain (dict of extension command subtree).
         An example of cmd_chain may look like (a command sub tree of the 'aks' command group):
         {
             "create": "aks-preview",
@@ -330,13 +329,15 @@ class AzCliCommandParser(CLICommandParser):
             },
             "use-dev-spaces": "dev-spaces"
         }
-        Then the resulting exts is {'aks-preview', 'deploy-to-azure', 'dev-spaces'}
+        Then the resulting ext_set is {'aks-preview', 'deploy-to-azure', 'dev-spaces'}
         """
+        ext_set = set() if ext_set is None else ext_set
         for key in cmd_chain:
             if isinstance(cmd_chain[key], str):
-                exts.add(cmd_chain[key])
+                ext_set.add(cmd_chain[key])
             else:
-                self._get_all_extensions(cmd_chain[key], exts)
+                self._get_all_extensions(cmd_chain[key], ext_set)
+        return ext_set
 
     def _search_in_extension_commands(self, command_str):
         """Search the command in an extension commands dict which mimics a prefix tree.
@@ -367,8 +368,7 @@ class AzCliCommandParser(CLICommandParser):
             except KeyError:
                 return None
         # command_str is prefix of one or more complete commands.
-        all_exts = set()
-        self._get_all_extensions(cmd_chain, all_exts)
+        all_exts = self._get_all_extensions(cmd_chain)
         return list(all_exts) if all_exts else None
 
     def _get_extension_use_dynamic_install_config(self):
