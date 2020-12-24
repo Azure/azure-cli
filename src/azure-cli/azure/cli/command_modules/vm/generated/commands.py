@@ -10,15 +10,16 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 
-from azure.cli.core.commands import CliCommandType
+# from azure.cli.core.commands import CliCommandType
 
 
 def load_command_table(self, _):
+    pass
 
-    from ..generated._client_factory import cf_ssh_public_key
-    vm_ssh_public_key = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
-        client_factory=cf_ssh_public_key)
+    # from ..generated._client_factory import cf_ssh_public_key
+    # vm_ssh_public_key = CliCommandType(
+    #     operations_tmpl='azure.mgmt.compute.operations._ssh_public_keys_operations#SshPublicKeysOperations.{}',
+    #     client_factory=cf_ssh_public_key)
     # with self.command_group('vm ssh-public-key', vm_ssh_public_key, client_factory=cf_ssh_public_key) as g:
     #     g.custom_command('list', 'vm_ssh_public_key_list')
     #     g.custom_show_command('show', 'vm_ssh_public_key_show')
@@ -26,6 +27,6 @@ def load_command_table(self, _):
     #     g.custom_command('update', 'vm_ssh_public_key_update')
     #     g.custom_command('delete', 'vm_ssh_public_key_delete', confirmation=True)
     #     g.custom_command('generate-key-pair', 'vm_ssh_public_key_generate_key_pair')
-
-    with self.command_group('vm', is_experimental=True):
-        pass
+    #
+    # with self.command_group('vm', is_experimental=True):
+    #     pass

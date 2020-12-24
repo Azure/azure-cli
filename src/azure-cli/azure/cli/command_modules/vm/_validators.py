@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._vm_utils import (
     check_existence, get_target_network_api, get_storage_blob_uri, list_sku_info)
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
-from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version
@@ -1054,6 +1054,7 @@ def _validate_admin_password(password, os_type):
 
 
 def validate_ssh_key(namespace, cmd=None):
+    from azure.core.exceptions import HttpResponseError
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
         client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
