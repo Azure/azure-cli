@@ -104,8 +104,12 @@ def format_styled_text(styled_text, theme=None, enable_color=None):
     if theme == 'light':
         theme = THEME_LIGHT
 
-    from azure.cli.core.util import get_parent_proc_name
-    is_powershell = get_parent_proc_name() == "powershell.exe"
+    # Cache the value of is_legacy_powershell
+    if not hasattr(format_styled_text, "_is_legacy_powershell"):
+        from azure.cli.core.util import get_parent_proc_name
+        is_legacy_powershell = not is_modern_terminal() and get_parent_proc_name() == "powershell.exe"
+        setattr(format_styled_text, "_is_legacy_powershell", is_legacy_powershell)
+    is_legacy_powershell = getattr(format_styled_text, "_is_legacy_powershell")
 
     # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/printing_text.html#style-text-tuples
     formatted_parts = []
@@ -132,7 +136,7 @@ def format_styled_text(styled_text, theme=None, enable_color=None):
 
         escape_seq = theme[text[0]]
         # Replace blue in powershell.exe
-        if is_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
+        if is_legacy_powershell and escape_seq in POWERSHELL_COLOR_REPLACEMENT:
             escape_seq = POWERSHELL_COLOR_REPLACEMENT[escape_seq]
 
         if enable_color:
