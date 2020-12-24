@@ -83,7 +83,7 @@ def update_firewall_rule(cmd, client, resource_group_name, workspace_name, rule_
     start_ip_address = start_ip_address or firewall.start_ip_address
     end_ip_address = end_ip_address or firewall.end_ip_address
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, rule_name,
-                       start_ip_address=start_ip_address, end_ip_address=end_ip_address) 
+                       start_ip_address=start_ip_address, end_ip_address=end_ip_address)
 
 
 def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
