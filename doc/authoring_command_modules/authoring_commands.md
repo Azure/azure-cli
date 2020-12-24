@@ -847,7 +847,7 @@ AZURE_API_PROFILES = {
     ResourceType.MGMT_MYSERVICE: '2019-03-01' # the supported API version on that profile
     ...
   },
-  '2019-03-01-hybrid': {
+  '2020-09-01-hybrid': {
     ResourceType.MGMT_MYSERVICE: '2018-08-01' # different API version for this profile
     ...
   },

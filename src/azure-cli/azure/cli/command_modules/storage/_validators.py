@@ -37,12 +37,11 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
-    scf.config.enable_http_logger = False
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
-        return scf.storage_accounts.list_keys(rg, account_name).key1
+        return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
-    return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):
@@ -584,6 +583,8 @@ def validate_included_datasets(cmd, namespace):
 
 
 def get_include_help_string(include_list):
+    if include_list is None:
+        return ''
     item = []
     for include in include_list:
         if include.value == 'uncommittedblobs':
@@ -626,6 +627,8 @@ def validate_key_name(namespace):
         namespace.key_name = namespace.key_type + key_options[namespace.key_name]
     else:
         namespace.key_name = storage_account_key_options[namespace.key_name]
+    if hasattr(namespace, 'key_type'):
+        del namespace.key_type
 
 
 def validate_metadata(namespace):
@@ -1246,13 +1249,14 @@ def validate_delete_retention_days(namespace):
 
 
 def validate_file_delete_retention_days(namespace):
+    from azure.cli.core.azclierror import ValidationError
     if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
-        raise ValueError(
+        raise ValidationError(
             "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
             "is set to true")
 
     if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
-        raise ValueError(
+        raise ValidationError(
             "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
 
 
@@ -1552,3 +1556,13 @@ def add_acl_progress_hook(namespace):
         failed_entries.append(acl_changes.batch_failures)
 
     namespace.progress_hook = progress_callback
+
+
+def get_not_none_validator(attribute_name):
+    def validate_not_none(cmd, namespace):
+        attribute = getattr(namespace, attribute_name, None)
+        options_list = cmd.arguments[attribute_name].type.settings.get('options_list')
+        if attribute in (None, ''):
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
+    return validate_not_none

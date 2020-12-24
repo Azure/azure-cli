@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from knack.util import CLIError
 from msrestazure.tools import is_valid_resource_id
 
 
@@ -42,3 +43,11 @@ def validate_statement_language(namespace):
         'sql': 'sql'
     }
     namespace.language = statement_language.get(namespace.language.lower())
+
+
+def validate_audit_policy_arguments(namespace):
+    blob_storage_arguments_provided = any(
+        [namespace.storage_account, namespace.storage_endpoint, namespace.storage_account_access_key,
+         namespace.retention_days])
+    if not namespace.state and not blob_storage_arguments_provided:
+        raise CLIError('Either state or blob storage arguments are missing')

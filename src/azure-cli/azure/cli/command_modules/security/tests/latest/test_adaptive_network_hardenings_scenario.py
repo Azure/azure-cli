@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class SecurityCenterAdaptiveNetworkHardeningsTests(ScenarioTest):
 
+    @record_only()  # This test relies on existing resource
     @AllowLargeResponse()
     def test_adaptive_network_hardenings(self):
 
