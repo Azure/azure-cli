@@ -284,6 +284,7 @@ jobs:
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/pypi/build.sh
+      arguments: $(System.PullRequest.TargetBranch)
 
 
   - task: PublishPipelineArtifact@0
@@ -463,7 +464,7 @@ jobs:
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   condition: succeeded()
-  timeoutInMinutes: 10
+  timeoutInMinutes: 20
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -671,9 +672,6 @@ jobs:
       Bionic:
         deb_system: ubuntu
         distro: bionic
-      Eoan:
-        deb_system: ubuntu
-        distro: eoan
       Focal:
         deb_system: ubuntu
         distro: focal

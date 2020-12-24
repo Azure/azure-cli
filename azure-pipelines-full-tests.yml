@@ -48,6 +48,7 @@ jobs:
         inputs:
           targetType: 'filePath'
           filePath: scripts/release/pypi/build.sh
+          arguments: $(System.PullRequest.TargetBranch)
 
       - task: PublishPipelineArtifact@0
         displayName: 'Publish Artifact: pypi'

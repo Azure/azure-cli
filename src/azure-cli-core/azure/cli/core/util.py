@@ -173,12 +173,12 @@ def extract_http_operation_error(ex):
         if isinstance(response, str):
             error = response
         else:
-            error = response['error']
+            error = response.get('error', response.get('Error', None))
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            status_code = error.get('code', 'Unknown Code')
-            message = error.get('message', ex)
+            status_code = error.get('code', error.get('Code', 'Unknown Code'))
+            message = error.get('message', error.get('Message', ex))
             error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
@@ -621,6 +621,14 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
         handler_args['raw'] = True
     if 'polling' in h_args and no_wait_enabled:
         # support autorest 3
+        handler_args['polling'] = False
+
+    # Support track2 SDK.
+    # In track2 SDK, there is no parameter 'polling' in SDK, but just use '**kwargs'.
+    # So we check the name of the operation to see if it's a long running operation.
+    # The name of long running operation in SDK is like 'begin_xxx_xxx'.
+    op_name = handler.__name__
+    if op_name and op_name.startswith('begin_') and no_wait_enabled:
         handler_args['polling'] = False
 
 

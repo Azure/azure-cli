@@ -1207,9 +1207,9 @@ def _validate_vmss_single_placement_group(namespace):
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
-    from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
+    from azure.core.exceptions import HttpResponseError
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
 
     if namespace.load_balancer and namespace.application_gateway:
@@ -1244,7 +1244,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.backend_pool_name = namespace.backend_pool_name or \
                     _get_default_address_pool(cmd.cli_ctx, rg, ag_name, 'application_gateways')
                 logger.debug("using specified existing application gateway '%s'", namespace.application_gateway)
-            except CloudError:
+            except HttpResponseError:
                 namespace.app_gateway_type = 'new'
                 logger.debug("application gateway '%s' not found. It will be created.", namespace.application_gateway)
         elif namespace.application_gateway == '':
@@ -1323,11 +1323,11 @@ def get_network_client(cli_ctx):
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     network_client = get_network_client(cli_ctx)
     try:
         return network_client.load_balancers.get(resource_group_name, lb_name)
-    except CloudError:
+    except HttpResponseError:
         return None
 
 

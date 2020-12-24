@@ -39,6 +39,11 @@ CREDENTIAL_WARNING_MESSAGE = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+ROLE_ASSIGNMENT_CREATE_WARNING = (
+    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
+    "If needed, use the --role argument to explicitly create a role assignment."
+)
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -1401,7 +1406,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1483,8 +1488,11 @@ def create_service_principal_for_rbac(
 
     # retry while server replication is done
     if not skip_assignment:
+        if not role:
+            role = "Contributor"
+            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
-            logger.warning('Creating a role assignment under the scope of "%s"', scope)
+            logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1505,6 +1513,8 @@ def create_service_principal_for_rbac(
                             logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1527,8 +1537,6 @@ def create_service_principal_for_rbac(
             "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
-
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 
