@@ -14,7 +14,6 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
 from msrestazure.tools import parse_resource_id
 from msrestazure.tools import resource_id
@@ -91,6 +90,7 @@ def validate_pull_secret(namespace):
 
 def validate_subnet(key):
     def _validate_subnet(cmd, namespace):
+        from azure.core.exceptions import HttpResponseError
         subnet = getattr(namespace, key)
 
         if not is_valid_resource_id(subnet):
@@ -134,7 +134,7 @@ def validate_subnet(key):
         try:
             client.subnets.get(parts['resource_group'],
                                parts['name'], parts['child_name_1'])
-        except CloudError as err:
+        except HttpResponseError as err:
             raise CLIInternalError(err.message)
 
     return _validate_subnet
