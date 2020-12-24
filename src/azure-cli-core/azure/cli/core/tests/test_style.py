@@ -16,8 +16,8 @@ class TestStyle(unittest.TestCase):
     def test_format_styled_text(self):
         # Test list input
         styled_text = [
-            (Style.PRIMARY, "Bright White: Primary text color\n"),
-            (Style.SECONDARY, "White: Secondary text color\n"),
+            (Style.PRIMARY, "White: Primary text color\n"),
+            (Style.SECONDARY, "Bright Black: Secondary text color\n"),
             (Style.IMPORTANT, "Bright Magenta: Important text color\n"),
             (Style.ACTION, "Bright Blue: Commands, parameters, and system inputs\n"),
             (Style.HYPERLINK, "Bright Cyan: Hyperlink\n"),
@@ -26,8 +26,8 @@ class TestStyle(unittest.TestCase):
             (Style.WARNING, "Bright Yellow: Warning message indicator\n"),
         ]
         formatted = format_styled_text(styled_text)
-        excepted = """\x1b[97mBright White: Primary text color
-\x1b[90mWhite: Secondary text color
+        excepted = """\x1b[39mWhite: Primary text color
+\x1b[90mBright Black: Secondary text color
 \x1b[95mBright Magenta: Important text color
 \x1b[94mBright Blue: Commands, parameters, and system inputs
 \x1b[96mBright Cyan: Hyperlink
@@ -40,13 +40,13 @@ class TestStyle(unittest.TestCase):
         # Test str input
         styled_text = "Primary text color"
         formatted = format_styled_text(styled_text)
-        excepted = "\x1b[97mPrimary text color\x1b[39m"
+        excepted = "\x1b[39mPrimary text color\x1b[39m"
         self.assertEqual(formatted, excepted)
 
         # Test tuple input
         styled_text = (Style.PRIMARY, "Primary text color")
         formatted = format_styled_text(styled_text)
-        excepted = "\x1b[97mPrimary text color\x1b[39m"
+        excepted = "\x1b[39mPrimary text color\x1b[39m"
         self.assertEqual(formatted, excepted)
 
     def test_format_styled_text_on_error(self):
@@ -64,19 +64,19 @@ class TestStyle(unittest.TestCase):
     def test_format_styled_text_enable_color(self):
         from azure.cli.core.style import Style, format_styled_text
         styled_text = [
-            (Style.PRIMARY, "Bright White: Primary text color\n"),
-            (Style.SECONDARY, "White: Secondary text color\n"),
+            (Style.PRIMARY, "White: Primary text color\n"),
+            (Style.SECONDARY, "Bright Black: Secondary text color\n"),
         ]
         formatted = format_styled_text(styled_text)
-        excepted = """\x1b[97mBright White: Primary text color
-\x1b[90mWhite: Secondary text color
+        excepted = """\x1b[39mWhite: Primary text color
+\x1b[90mBright Black: Secondary text color
 \x1b[39m"""
         self.assertEqual(formatted, excepted)
 
         # Color is turned off via param
         formatted = format_styled_text(styled_text, enable_color=False)
-        excepted_plaintext = ("Bright White: Primary text color\n"
-                              "White: Secondary text color\n")
+        excepted_plaintext = ("White: Primary text color\n"
+                              "Bright Black: Secondary text color\n")
         self.assertEqual(formatted, excepted_plaintext)
 
         # Color is turned off via function attribute

@@ -194,7 +194,8 @@ def demo_style(cmd, no_color=None, theme=None):  # pylint: disable=unused-argume
         (Style.PRIMARY, placeholder.format("White", "Primary text color")),
         (Style.SECONDARY, placeholder.format("Bright Black", "Secondary text color")),
         (Style.IMPORTANT, placeholder.format("Bright/Dark Magent", "Important text color")),
-        (Style.ACTION, placeholder.format("Bright/Dark Blue", "Commands, parameters, and system inputs. (White in legacy powershell terminal.)")),
+        (Style.ACTION, placeholder.format(
+            "Bright/Dark Blue", "Commands, parameters, and system inputs. (White in legacy powershell terminal.)")),
         (Style.HYPERLINK, placeholder.format("Bright/Dark Cyan", "Hyperlink")),
         (Style.ERROR, placeholder.format("Bright/Dark Red", "Error message indicator")),
         (Style.SUCCESS, placeholder.format("Bright/Dark Green", "Success message indicator")),
