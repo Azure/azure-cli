@@ -29,6 +29,8 @@ Release History
 
 * `az ts`:  Add support for --tags (#16149)
 * `az ts`: Support deleting a single version (#16295)
+* `az provider register`: Add --accept-terms for registering RPaaS (#16194)
+* Fix parsing JSON files with multi-line strings (#15502)
 
 **ARO**
 
@@ -81,11 +83,6 @@ Release History
 **Profile**
 
 * Fix "missing secret or certificate in order to authenticate through a service principal" (#16219)
-
-**Resource**
-
-* `az provider register`: Add --accept-terms for registering RPaaS (#16194)
-* Fix parsing JSON files with multi-line strings (#15502)
 
 **Role**
 
