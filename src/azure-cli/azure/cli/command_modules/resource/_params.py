@@ -137,6 +137,7 @@ def load_arguments(self, _):
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('provider register') as c:
+        c.argument('mg', arg_type=management_group_id_type, help="The management group id to register.", required=False, options_list=['--mg'])
         c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
         c.argument('wait', action='store_true', help='wait for the registration to finish')
 

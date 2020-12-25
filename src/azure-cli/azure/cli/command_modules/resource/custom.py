@@ -1018,7 +1018,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, mgID=None, accept_te
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
-        if is_rpaas and registering:
+        if is_rpaas and registering and mgID is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
             send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
@@ -1992,7 +1992,7 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, wait=False, mg=None, accept_terms=None):
+def register_provider(cmd, resource_provider_namespace, mg=None, wait=False, accept_terms=None):
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mgID=mg, accept_terms=accept_terms)
 
 
