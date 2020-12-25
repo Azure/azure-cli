@@ -42,7 +42,7 @@ instance_ids -> vm_instance_i_ds
 diskMbpsReadWrite -> diskMBpsReadWrite
 ```
 
-Some changes are unnecessary, even wrong in English. I opened an [issue](https://github.com/Azure/autorest.python/issues/850) to track this problem.
+Some changes are unnecessary, even wrong in English. I opened [Azure/autorest.python#850](https://github.com/Azure/autorest.python/issues/850) to track this problem.
 
 ### Class name change
 
@@ -113,4 +113,3 @@ You are welcome to contribute to this document if you have experience of Track 2
 **References**
 
 [1] https://github.com/Azure/azure-sdk-for-python/blob/master/sdk/core/azure-core/CLIENT_LIBRARY_DEVELOPER.md#available-policies
-
