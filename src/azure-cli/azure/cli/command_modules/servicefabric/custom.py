@@ -810,10 +810,10 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
 
     if address_prefix is None:
         raise CLIError("Failed to generate the address prefix")
-    poller = network_client.subnets.create_or_update(resource_group_name,
-                                                     virtual_network.name,
-                                                     subnet_name,
-                                                     Subnet(address_prefix=address_prefix))
+    poller = network_client.subnets.begin_create_or_update(resource_group_name,
+                                                           virtual_network.name,
+                                                           subnet_name,
+                                                           Subnet(address_prefix=address_prefix))
 
     subnet = LongRunningOperation(cli_ctx)(poller)
 
@@ -825,11 +825,11 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                   node_type_name.lower(), index)
     if len(lb_name) >= 24:
         lb_name = '{}{}'.format(lb_name[0:21], index)
-    poller = network_client.public_ip_addresses.create_or_update(resource_group_name,
-                                                                 public_address_name,
-                                                                 PublicIPAddress(public_ip_allocation_method='Dynamic',
-                                                                                 location=location,
-                                                                                 dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
+    poller = network_client.public_ip_addresses.begin_create_or_update(resource_group_name,
+                                                                       public_address_name,
+                                                                       PublicIPAddress(public_ip_allocation_method='Dynamic',
+                                                                                       location=location,
+                                                                                       dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
 
     publicIp = LongRunningOperation(cli_ctx)(poller)
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -906,7 +906,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                        frontend_port_range_start=DEFAULT_FRONTEND_PORT_RANGE_START,
                                                                        frontend_port_range_end=DEFAULT_FRONTEND_PORT_RANGE_END)])
 
-    poller = network_client.load_balancers.create_or_update(
+    poller = network_client.load_balancers.begin_create_or_update(
         resource_group_name, lb_name, new_load_balancer)
     LongRunningOperation(cli_ctx)(poller)
 

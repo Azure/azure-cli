@@ -8,6 +8,7 @@ import zipfile
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.util import get_file_json
 from azure.mgmt.web.models import SkuDescription
 
 from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION_DEFAULT,
@@ -15,7 +16,7 @@ from ._constants import (NETCORE_VERSION_DEFAULT, NETCORE_VERSIONS, NODE_VERSION
                          ASPDOTNET_VERSION_DEFAULT, DOTNET_VERSIONS, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, PYTHON_VERSION_DEFAULT, LINUX_SKU_DEFAULT, OS_DEFAULT,
                          NODE_VERSION_NEWER, DOTNET_RUNTIME_NAME, DOTNET_VERSION_DEFAULT,
-                         DOTNET_TARGET_FRAMEWORK_STRING)
+                         DOTNET_TARGET_FRAMEWORK_STRING, GENERATE_RANDOM_APP_NAMES)
 
 logger = get_logger(__name__)
 
@@ -431,3 +432,30 @@ def should_create_new_app(cmd, rg_name, app_name):  # this is currently referenc
         if item.name.lower() == app_name.lower():
             return False
     return True
+
+
+def generate_default_app_name(cmd):
+    def generate_name(cmd):
+        import uuid
+        from random import choice
+
+        noun = choice(get_file_json(GENERATE_RANDOM_APP_NAMES)['APP_NAME_NOUNS'])
+        adjective = choice(get_file_json(GENERATE_RANDOM_APP_NAMES)['APP_NAME_ADJECTIVES'])
+        random_uuid = str(uuid.uuid4().hex)
+
+        name = '{}-{}-{}'.format(adjective, noun, random_uuid)
+        name_available = get_site_availability(cmd, name).name_available
+
+        if name_available:
+            return name
+        return ""
+
+    retry_times = 5
+    generated_name = generate_name(cmd)
+    while not generated_name and retry_times > 0:
+        retry_times -= 1
+        generated_name = generate_name(cmd)
+
+    if not generated_name:
+        raise CLIError("Unable to generate a default name for webapp. Please specify webapp name using --name flag")
+    return generated_name
