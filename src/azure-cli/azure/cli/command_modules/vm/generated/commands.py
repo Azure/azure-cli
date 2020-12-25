@@ -13,7 +13,7 @@
 # from azure.cli.core.commands import CliCommandType
 
 
-def load_command_table(self, _):
+def load_command_table(_):
     pass
 
     # from ..generated._client_factory import cf_ssh_public_key

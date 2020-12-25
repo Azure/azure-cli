@@ -7,8 +7,6 @@
 
 import os
 
-from azure.cli.core.azclierror import ValidationError
-
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -17,6 +15,7 @@ except ImportError:
 from knack.log import get_logger
 from knack.util import CLIError
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import (hash_string, DISALLOWED_USER_NAMES, get_default_admin_username)
