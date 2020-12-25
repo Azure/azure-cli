@@ -78,7 +78,7 @@ In VMSS `begin_update_instances`, a new type `VirtualMachineScaleSetVMInstanceRe
 
 In DiskAccess `begin_create_or_update`, location and tags are moved to a nested structure `DiskAccess`, `disk_access = DiskAccess(location=location, tags=tags)`
 
-### Obtaining Subscription
+### Obtaining subscription
 
 There are various ways to obtain subscription ID. Obtaining it from `client.config` does not work in Track 2 SDK any longer.
 
