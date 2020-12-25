@@ -1790,7 +1790,7 @@ examples:
         az provider register -n 'Microsoft.Confluent' --accept-terms
   - name: Register a management group.
     text: |
-        az provider register --namespace Microsoft.Automation --mg mgID      
+        az provider register --namespace Microsoft.Automation --mg mgID
 """
 
 helps['provider unregister'] = """
