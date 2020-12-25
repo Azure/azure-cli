@@ -3,6 +3,130 @@
 Release History
 ===============
 
+2.17.0
+++++++
+
+**ACR**
+
+* Bump api version. support zone redundancy (#15975)
+
+**ACR connected-registry**
+
+* `az acr connected-registry`: New feature for on-prem Azure Container Registry (#16238)
+
+**ACR scope-map**
+
+* `az acr scope-map update`: --add and --remove are deprecated, they are renamed to --add-repo --remove-repo (#16238)
+* `az acr scope-map create/update`: Add support to handle Gateway actions. (#16238)
+
+**ACR Token**
+
+* `az acr token create`: support added for gateway actions (#16238)
+
+**AKS**
+
+* fix: add arguments removed by a previous PR (#16080)
+
+**AKS **
+
+* `az aks get-credentials`: Clarify documentation for get-credentials (#16011)
+
+**App Service**
+
+* Allow customer to create Python 3.9 function app (#16296)
+* Fixes #14583: az webapp up should generate default name if name isn't provided (#16267)
+* Bugfix: Better error handling when trying to create duplicate ASP in diff location (#16143)
+
+**ARM**
+
+* `az ts`:  Add support for --tags (#16149)
+* `az ts `: supports deleting a single version (#16295)
+
+**ARO**
+
+* `az aro delete`: Add RBAC validation on cluster deletion (#16101)
+* `az aro update`: Add RBAC validation on cluster update (#16213)
+* Ensure worker_profile is not None before getting the subnets from (#16309)
+
+**Backup**
+
+* `az backup job list`: Solved -o table bug and added backup_management_type as command input (#16304)
+
+**Batch**
+
+* Upgrades data plane to [azure batch 10.0.0](https://pypi.org/project/azure-batch/10.0.0/) (#16156)
+* [BREAKING CHANGE] az batch job task-counts: Change the output from a JSON object returning task counts to a complex JSON object that includes task counts (`taskCounts`) as well as task slot counts (`taskSlotCounts`). (#16156)
+
+**Compute**
+
+* New license type RHEL_ELS_6 (#16012)
+* Adopt track2 SDK, azure-mgmt-compute==18.0.0 (#15750)
+
+**Container**
+
+* Fix misspelling in `az container create` CLI example text. (#16252)
+
+**DataBoxEdge**
+
+* new command module: support for data-box-edge devices and management (#16193)
+
+**IoT**
+
+* Updated device key generation (#16129)
+* Update identity-enabled hub tests to fix endpoint RBAC issues (#16128)
+
+**Key Vault**
+
+* `az keyvault key import`: support `--kty` for importing BYOK keys (#16223)
+
+**Monitor**
+
+* `az monitor metrics alert create`: improve error message to give more actionable insight (#16255)
+
+**Network**
+
+* `az network private-endpoint create`: add more declaration of '--subnet' and '--private-connection-resource-id' (#16174)
+* Change validator of application-gateway ssl-cert create (#16256)
+* Migrate network to track2 SDK (#16245)
+* Bugfix for "az network traffic-manager profile create" when using "--routing-method MultiValue" (#16300)
+
+**Profile**
+
+* Fix "missing secret or certificate in order to authenticate through a service principal" (#16219)
+
+**Resource**
+
+* `az provider register`: Add --accept-terms for registering RPaaS (#16194)
+
+**resource**
+
+* Fix parsing JSON files with multi-line strings (#15502)
+
+**Role**
+
+* `az ad sp create-for-rbac`: Deprecate creating Contributor role assignment by default (#16081)
+
+**Security**
+
+* - Add secure score commands (#16198)
+* Fix update alert command and support new value (#16291)
+
+**SQL**
+
+* `az sql dw update`: do not accept backup-storage-redundancy argument (#16326)
+* `az sql db update`: update backup storage redundancy as requested from command (#16326)
+
+**Storage**
+
+* Fix issue #15965: Clarify how to remove multiple legal hold tags with `az storage container legal-hold [clear|set]` (#16167)
+* `az storage account encryption-scope`: GA support (#16270)
+* Fix issue #9959: Trying to download a snapshot version of a file share fails with ResourceNotFound (#16275)
+
+**Synapse**
+
+* 1. Add new cmdlets az synapse sql ad-admin show, create, update, delete (#16241)
+* Add integration runtime related cmdlets (#15498)
+
 2.16.0
 ++++++
 
