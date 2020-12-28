@@ -775,6 +775,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # create a temp directory and unzip the code to this folder
         import zipfile
         import tempfile
+        import time
         temp_dir = tempfile.mkdtemp()
         zip_ref = zipfile.ZipFile(zip_file_name, 'r')
         zip_ref.extractall(temp_dir)
@@ -809,6 +810,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         # test changing runtime to newer version
+        time.sleep(30)
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|12-lts" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['name'] == full_result['name'])
@@ -820,6 +822,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         # test changing runtime to older version
+        time.sleep(30)
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node|10.14" --sku "S1"'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['name'] == full_result['name'])
@@ -828,6 +831,69 @@ class WebAppUpE2ETests(ScenarioTest):
         self.cmd('webapp config show', checks=[
             JMESPathCheck('linuxFxVersion', "NODE|10.14"),
             JMESPathCheck('tags.cli', 'None')
+        ])
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
+    def test_webapp_up_generate_default_name(self, resource_group):
+        plan = self.create_random_name('up-nodeplan', 24)
+        zip_file_name = os.path.join(TEST_DIR, 'node-Express-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'myExpressApp')
+        os.chdir(up_working_dir)
+
+        # test dryrun operation
+        result = self.cmd(
+            'webapp up --dryrun').get_output_in_json()
+        self.assertTrue(result['sku'].lower() == 'premiumv2')
+        self.assertTrue(result['src_path'].replace(
+            os.sep + os.sep, os.sep), up_working_dir)
+        self.assertTrue(result['runtime_version'] == 'node|10.14')
+        self.assertTrue(result['os'].lower() == 'linux')
+
+        # test the full E2E operation works
+        self.cmd(
+            'webapp up -g {} --plan {}'.format(resource_group, plan)).get_output_in_json()
+
+        # Verify app is created
+        # since we set local context, -n and -g are no longer required
+        self.cmd('webapp show', checks=[
+            JMESPathCheck('httpsOnly', True),
+            JMESPathCheck('kind', 'app,linux'),
+            JMESPathCheck('resourceGroup', resource_group)
+        ])
+
+        self.cmd('webapp config show', checks=[
+            JMESPathCheck('linuxFxVersion', 'NODE|10.14'),
+            JMESPathCheck('tags.cli', 'None'),
+        ])
+
+        self.cmd('webapp config appsettings list', checks=[
+            JMESPathCheck('[0].name', 'SCM_DO_BUILD_DURING_DEPLOYMENT'),
+            JMESPathCheck('[0].value', 'True')
+        ])
+
+        self.cmd('appservice plan show', checks=[
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('name', plan),
+            JMESPathCheck('sku.tier', 'PremiumV2'),
+            JMESPathCheck('sku.name', 'P1v2')
         ])
 
         # cleanup

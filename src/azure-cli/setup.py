@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.16.0"
+VERSION = "2.17.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -53,7 +53,7 @@ DEPENDENCIES = [
     'antlr4-python3-runtime~=4.7.2',
     'azure-appconfiguration~=1.1.1',
     'azure-batch~=10.0.0',
-    'azure-cli-core=={}.*'.format(VERSION),
+    'azure-cli-core=={}.*'.format(".".join(VERSION.split(".")[:3])),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-datalake-store~=0.0.49',
     'azure-functions-devops-build~=0.0.22',
@@ -74,9 +74,10 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=18.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry==3.0.0rc15',
+    'azure-mgmt-containerregistry==3.0.0rc16',
     'azure-mgmt-cosmosdb~=1.0.0',
     'azure-mgmt-containerservice~=9.4.0',
+    'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -101,7 +102,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.11.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.14.0',
-    'azure-mgmt-network~=13.0.0',
+    'azure-mgmt-network~=17.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=3.1.0rc1',

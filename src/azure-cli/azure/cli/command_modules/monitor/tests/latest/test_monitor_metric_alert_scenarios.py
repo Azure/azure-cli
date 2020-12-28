@@ -265,6 +265,42 @@ class MonitorTests(ScenarioTest):
             self.check('length(scopes)', 2),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert')
+    @VMPreparer(parameter_name='vm1')
+    def test_dynamic_metric_alert_basic(self, resource_group, vm1):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines'),
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} --action {ag1} --condition "avg Percentage CPU > dynamic low 2 of 4 since 2020-11-01T16:00:00.000Z" --description "High CPU"',
+            checks=[
+                self.check('description', 'High CPU'),
+                self.check('severity', 2),
+                self.check('autoMitigate', None),
+                self.check('windowSize', '0:05:00'),
+                self.check('evaluationFrequency', '0:01:00'),
+                self.check('length(scopes)', 1),
+                self.check('criteria.allOf[0].alertSensitivity', 'Low'),
+                self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
+                self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
+                self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
+                self.check('criteria.allOf[0].operator', 'GreaterThan'),
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+            ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert_v2')
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')

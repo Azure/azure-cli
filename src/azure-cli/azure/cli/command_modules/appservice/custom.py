@@ -46,7 +46,8 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
     ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.core.azclierror import ResourceNotFoundError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
+                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError)
 
 from .tunnel import TunnelServer
 
@@ -58,7 +59,7 @@ from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
-                           detect_os_form_src, get_current_stack_from_runtime)
+                           detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
                          NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
@@ -3573,8 +3574,8 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     if not delegated:
         subnetObj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/serverFarms")]
-        vnet_client.subnets.create_or_update(vnet_resource_group, vnet, subnet,
-                                             subnet_parameters=subnetObj)
+        vnet_client.subnets.begin_create_or_update(vnet_resource_group, vnet, subnet,
+                                                   subnet_parameters=subnetObj)
 
     id_subnet = vnet_client.subnets.get(vnet_resource_group, vnet, subnet)
     subnet_resource_id = id_subnet.id
@@ -3618,8 +3619,11 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
     return client.web_apps.list_triggered_web_job_history(resource_group_name, name, webjob_name)
 
 
-def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
+def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False):
+    if not name:
+        name = generate_default_app_name(cmd)
+
     import os
     AppServicePlan = cmd.get_models('AppServicePlan')
     src_dir = os.getcwd()
@@ -3737,12 +3741,21 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
         logger.warning("Creating Resource group '%s' ...", rg_name)
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
-        # create ASP
-        logger.warning("Creating AppServicePlan '%s' ...", plan)
+    # create ASP
+    logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
-    create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=loc)
+    try:
+        create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
+                                number_of_workers=1 if _is_linux else None, location=loc)
+    except Exception as ex:
+        if ex.response.status_code == 409:  # catch 409 conflict when trying to create existing ASP in diff location
+            try:
+                response_content = json.loads(ex.response._content.decode('utf-8'))  # pylint: disable=protected-access
+            except Exception:
+                raise CLIInternalError(ex)
+            raise UnclassifiedUserFault(response_content['error']['message'])
+        raise AzureResponseError(ex)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
