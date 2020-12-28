@@ -857,9 +857,15 @@ def get_default_cli():
 
 def _configure_knack():
     """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
     from knack.util import status_tag_messages
     ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
     # Override the preview message
     status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
     # Override the experimental message
     status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append("azure")
