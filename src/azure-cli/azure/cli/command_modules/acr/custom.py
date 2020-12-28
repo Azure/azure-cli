@@ -40,11 +40,12 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None,
                workspace=None,
                identity=None,
                key_encryption_key=None,
-               public_network_enabled=None):
+               public_network_enabled=None,
+               zone_redundancy=None,
+               tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -53,7 +54,8 @@ def acr_create(cmd,
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
+                        zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
@@ -463,6 +465,9 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         registry.identity.type = (ResourceIdentityType.none
                                   if registry.identity.type == ResourceIdentityType.system_assigned
                                   else ResourceIdentityType.user_assigned)
+        # if we have no system assigned identitiy then set identity object to none
+        registry.identity.principal_id = None
+        registry.identity.tenant_id = None
 
     if remove_user_identities:
         subscription_id = get_subscription_id(cmd.cli_ctx)

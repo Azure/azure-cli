@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
-      false, "publicNetworkAccess": "Enabled"}}'
+      false, "publicNetworkAccess": "Enabled", "networkRuleBypassOptions": "AzureServices"}}'
     headers:
       Accept:
       - application/json
@@ -12,30 +12,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '127'
+      - '172'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:16:57 GMT
+      - Tue, 22 Dec 2020 21:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +51,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -69,24 +69,24 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:16:58 GMT
+      - Tue, 22 Dec 2020 21:37:25 GMT
       expires:
       - '-1'
       pragma:
@@ -114,24 +114,24 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:16:59 GMT
+      - Tue, 22 Dec 2020 21:37:26 GMT
       expires:
       - '-1'
       pragma:
@@ -167,26 +167,26 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:01.0065501+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-12-18T05:17:01.7518921Z"},"regionEndpointEnabled":true}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:29.0097793+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-12-22T21:37:30.199673Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4018da69-40f0-11eb-b0f9-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-e1c0195e-449d-11eb-8d54-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '732'
+      - '759'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:02 GMT
+      - Tue, 22 Dec 2020 21:37:30 GMT
       expires:
       - '-1'
       pragma:
@@ -216,16 +216,16 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4018da69-40f0-11eb-b0f9-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-e1c0195e-449d-11eb-8d54-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4018da69-40f0-11eb-b0f9-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-e1c0195e-449d-11eb-8d54-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -233,7 +233,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:12 GMT
+      - Tue, 22 Dec 2020 21:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -265,22 +265,22 @@ interactions:
       ParameterSetName:
       - -n -r -l
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:01.0065501+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Syncing","timestamp":"2020-12-18T05:17:10.6662324Z"},"regionEndpointEnabled":true}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:29.0097793+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Syncing","timestamp":"2020-12-22T21:37:37.8212278Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '759'
+      - '787'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:12 GMT
+      - Tue, 22 Dec 2020 21:37:41 GMT
       expires:
       - '-1'
       pragma:
@@ -312,24 +312,24 @@ interactions:
       ParameterSetName:
       - -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:13 GMT
+      - Tue, 22 Dec 2020 21:37:42 GMT
       expires:
       - '-1'
       pragma:
@@ -357,24 +357,24 @@ interactions:
       ParameterSetName:
       - -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:14 GMT
+      - Tue, 22 Dec 2020 21:37:43 GMT
       expires:
       - '-1'
       pragma:
@@ -406,24 +406,24 @@ interactions:
       ParameterSetName:
       - -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:01.0065501+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:17:14.2630934Z"},"regionEndpointEnabled":true}},{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/westus","name":"westus","location":"westus","tags":{},"systemData":{"createdBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","createdByType":"Application","createdAt":"2020-12-18T05:17:06.8390725+00:00","lastModifiedBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","lastModifiedByType":"Application","lastModifiedAt":"2020-12-18T05:17:06.8390725+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:17:06.2373871Z"},"regionEndpointEnabled":true}}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:29.0097793+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:37:41.8939079Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}},{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/westus","name":"westus","location":"westus","tags":{},"systemData":{"createdBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","createdByType":"Application","createdAt":"2020-12-22T21:37:34.4644185+00:00","lastModifiedBy":"6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26","lastModifiedByType":"Application","lastModifiedAt":"2020-12-22T21:37:34.4644185+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:37:33.9217022Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1560'
+      - '1616'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:14 GMT
+      - Tue, 22 Dec 2020 21:37:44 GMT
       expires:
       - '-1'
       pragma:
@@ -455,24 +455,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:15 GMT
+      - Tue, 22 Dec 2020 21:37:43 GMT
       expires:
       - '-1'
       pragma:
@@ -500,24 +500,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:16 GMT
+      - Tue, 22 Dec 2020 21:37:45 GMT
       expires:
       - '-1'
       pragma:
@@ -549,24 +549,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:01.0065501+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:17:14.2630934Z"},"regionEndpointEnabled":true}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:29.0097793+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:37:41.8939079Z"},"regionEndpointEnabled":true,"zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '757'
+      - '785'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:17 GMT
+      - Tue, 22 Dec 2020 21:37:45 GMT
       expires:
       - '-1'
       pragma:
@@ -598,24 +598,24 @@ interactions:
       ParameterSetName:
       - -n -r --tags --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:17 GMT
+      - Tue, 22 Dec 2020 21:37:46 GMT
       expires:
       - '-1'
       pragma:
@@ -647,26 +647,26 @@ interactions:
       ParameterSetName:
       - -n -r --tags --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:18.4185394+00:00"},"properties":{"provisioningState":"Updating","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:17:14.2630934Z"},"regionEndpointEnabled":false}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:46.6791408+00:00"},"properties":{"provisioningState":"Updating","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:37:41.8939079Z"},"regionEndpointEnabled":false,"zoneRedundancy":"Disabled"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-ed8be6a6-449d-11eb-926b-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '770'
+      - '798'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:18 GMT
+      - Tue, 22 Dec 2020 21:37:48 GMT
       expires:
       - '-1'
       pragma:
@@ -678,7 +678,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -696,114 +696,16 @@ interactions:
       ParameterSetName:
       - -n -r --tags --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"status":"Updating"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 05:17:29 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr replication update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"status":"Updating"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 18 Dec 2020 05:17:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr replication update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tags --region-endpoint-enabled
-      User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-ed8be6a6-449d-11eb-926b-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-4b955a0c-40f0-11eb-8da5-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-ed8be6a6-449d-11eb-926b-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -811,7 +713,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:49 GMT
+      - Tue, 22 Dec 2020 21:37:57 GMT
       expires:
       - '-1'
       pragma:
@@ -843,22 +745,22 @@ interactions:
       ParameterSetName:
       - -n -r --tags --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:17:01.0065501+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:17:18.4185394+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:17:18.8665498Z"},"regionEndpointEnabled":false}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{"key":"value"},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:29.0097793+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:46.6791408+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:37:47.1006828Z"},"regionEndpointEnabled":false,"zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '771'
+      - '799'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:49 GMT
+      - Tue, 22 Dec 2020 21:37:57 GMT
       expires:
       - '-1'
       pragma:
@@ -890,24 +792,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:50 GMT
+      - Tue, 22 Dec 2020 21:37:58 GMT
       expires:
       - '-1'
       pragma:
@@ -935,24 +837,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:51 GMT
+      - Tue, 22 Dec 2020 21:37:59 GMT
       expires:
       - '-1'
       pragma:
@@ -986,12 +888,12 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
       string: 'null'
@@ -1003,11 +905,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:17:51 GMT
+      - Tue, 22 Dec 2020 21:38:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-5f6e5d95-40f0-11eb-a301-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-f536bf6e-449d-11eb-af8c-88e9fe656bb4?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -1035,10 +937,10 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-5f6e5d95-40f0-11eb-a301-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-f536bf6e-449d-11eb-af8c-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: ''
@@ -1048,7 +950,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Dec 2020 05:18:02 GMT
+      - Tue, 22 Dec 2020 21:38:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1076,24 +978,24 @@ interactions:
       ParameterSetName:
       - -n -r -l --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:04 GMT
+      - Tue, 22 Dec 2020 21:38:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1121,24 +1023,24 @@ interactions:
       ParameterSetName:
       - -n -r -l --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:05 GMT
+      - Tue, 22 Dec 2020 21:38:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1174,26 +1076,26 @@ interactions:
       ParameterSetName:
       - -n -r -l --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:18:06.5406309+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:18:06.5406309+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-12-18T05:18:07.3022576Z"},"regionEndpointEnabled":false}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:38:14.5649777+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:38:14.5649777+00:00"},"properties":{"provisioningState":"Creating","status":{"timestamp":"2020-12-22T21:38:15.412596Z"},"regionEndpointEnabled":false,"zoneRedundancy":"Disabled"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-67684353-40f0-11eb-a937-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-fd0eb7b4-449d-11eb-8e2d-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
-      - '733'
+      - '760'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:07 GMT
+      - Tue, 22 Dec 2020 21:38:15 GMT
       expires:
       - '-1'
       pragma:
@@ -1223,16 +1125,16 @@ interactions:
       ParameterSetName:
       - -n -r -l --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-67684353-40f0-11eb-a937-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-fd0eb7b4-449d-11eb-8e2d-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-67684353-40f0-11eb-a937-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus/operationStatuses/replications-fd0eb7b4-449d-11eb-8e2d-88e9fe656bb4?api-version=2020-11-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -1240,7 +1142,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:17 GMT
+      - Tue, 22 Dec 2020 21:38:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1272,22 +1174,22 @@ interactions:
       ParameterSetName:
       - -n -r -l --region-endpoint-enabled
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:18:06.5406309+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:18:06.5406309+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-18T05:18:13.6961404Z"},"regionEndpointEnabled":false}}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/replications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus","name":"centralus","location":"centralus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:38:14.5649777+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:38:14.5649777+00:00"},"properties":{"provisioningState":"Succeeded","status":{"displayStatus":"Ready","timestamp":"2020-12-22T21:38:20.4717661Z"},"regionEndpointEnabled":false,"zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '758'
+      - '786'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:17 GMT
+      - Tue, 22 Dec 2020 21:38:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1319,24 +1221,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2020-10-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgrg2yyfmvhv5qjzmyzhdjtruvpy3bivyp3vx3sfafarkqzfe676gwktximdbketxgf/providers/Microsoft.ContainerRegistry/registries/cliregg67x2rw5zhcpgi","name":"cliregg67x2rw5zhcpgi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.498262Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.498262Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278Z","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.ContainerRegistry/registries/whatIfContainer","name":"whatIfContainer","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"eastus","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg2lp6xetj5hxnyxhrxm6567tctnyeot3unr7h6o5b23n5vks4gpngq2dmud4zsykin/providers/Microsoft.ContainerRegistry/registries/testregawdmsysb2nz7g","name":"testregawdmsysb2nz7g","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T18:54:48.5455748Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T18:28:49.6015895Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5aog35r7j6tmjp27y2ncz6ichsyauwr4hoz66olcgnpz64svqrp4mtkk5anyh52mh/providers/Microsoft.ContainerRegistry/registries/clireg25lwdnz2ajac6f","name":"clireg25lwdnz2ajac6f","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Standard","tier":"Standard"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3368354Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3368354Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg5fk3fbtclodws5ly3nntmznlspejfzuj6zppar5ymy3jniod3ias2skjhnvkbcgd2/providers/Microsoft.ContainerRegistry/registries/cliregwzzbfdxcczwn23","name":"cliregwzzbfdxcczwn23","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:23.7132486Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:23.7132486Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgbwdbjz6wapneibmxapyqbpjcwskxhd6hdwb7fxucsxwlieaa47gsjkgophk4gqdth/providers/Microsoft.ContainerRegistry/registries/testregyhhzomlbiiobqhljbm","name":"testregyhhzomlbiiobqhljbm","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:58:13.182583Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:58:13.182583Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgjaqvnb4tuhpzftnaz3fgqnkyjgxh7b4mx466q33hri4hhmrobjw7esg2vsebx3m5s/providers/Microsoft.ContainerRegistry/registries/testregxmrsaxtqf7bex","name":"testregxmrsaxtqf7bex","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:57.5098397Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:57.5098397Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnjcxorot32tl2y7g6v55v3tba73ih3ykfpy7wp4t4egj4jcaz42kcg4bry5ma4gdk/providers/Microsoft.ContainerRegistry/registries/testreggepzse3ycdofj6em2h","name":"testreggepzse3ycdofj6em2h","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-03T21:45:10.3814195Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-03T21:45:10.3814195Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpecxlhum4bl5kong3ietn5jkcd2akw33rmvxha4amos2ljpm7f74bgdo4p2ous3jb/providers/Microsoft.ContainerRegistry/registries/clireghtitbma6cergdo","name":"clireghtitbma6cergdo","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-17T19:01:45.9414106Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-17T19:01:45.9414106Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestanonpull","name":"ovatestanonpull","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestnonzr","name":"ovatestnonzr","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:57:26.2727349Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:57:26.2727349Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovaTestRegistry","name":"ovaTestRegistry","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/ovatestzoneredundant","name":"ovatestzoneredundant","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-30T06:56:13.7634117Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-30T06:56:13.7634117Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus","name":"tosinazenabledeus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:05:33.2257591Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:05.2281678Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledeus2","name":"tosinazenabledeus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:11:32.5032182Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:11:32.5032182Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test/providers/Microsoft.ContainerRegistry/registries/tosinazenabledwus2","name":"tosinazenabledwus2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"westus2","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-08T03:14:47.2890873Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-08T03:14:47.2890873Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosincanaryregcus","name":"tosincanaryregcus","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap","name":"tosintestazenabledcuseuap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:15.5448469Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:38.9749709Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledcuseuap2","name":"tosintestazenabledcuseuap2","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"centraluseuap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:35:47.0583837Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:35:47.0583837Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ova-test-canary/providers/Microsoft.ContainerRegistry/registries/tosintestazenabledeus2euap","name":"tosintestazenabledeus2euap","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-11-19T02:31:19.1210816Z","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-11-19T02:31:19.1210816Z"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg-2/providers/Microsoft.ContainerRegistry/registries/tosintestazenabled111220","name":"tosintestazenabled111220","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{},"systemData":{"createdBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","createdByType":"Application","createdAt":"2020-11-13T01:04:01.4344554Z","lastModifiedBy":"823c2ce1-e27b-4c37-9b6c-078a21dfe04d","lastModifiedByType":"Application","lastModifiedAt":"2020-11-13T01:08:16.2067421Z"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1530'
+      - '10781'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:18 GMT
+      - Tue, 22 Dec 2020 21:38:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1364,24 +1266,24 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1270'
+      - '1298'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:19 GMT
+      - Tue, 22 Dec 2020 21:38:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1415,12 +1317,12 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/replications/centralus?api-version=2020-11-01-preview
   response:
     body:
       string: 'null'
@@ -1432,11 +1334,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:20 GMT
+      - Tue, 22 Dec 2020 21:38:28 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-706a15cc-40f0-11eb-986b-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-063ddfe8-449e-11eb-98e2-88e9fe656bb4?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -1464,10 +1366,10 @@ interactions:
       ParameterSetName:
       - -n -r
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-706a15cc-40f0-11eb-986b-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/centralus/operationResults/replications-063ddfe8-449e-11eb-98e2-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: ''
@@ -1477,7 +1379,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Dec 2020 05:18:30 GMT
+      - Tue, 22 Dec 2020 21:38:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1507,28 +1409,28 @@ interactions:
       ParameterSetName:
       - -n -g -y
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"daetienn@microsoft.com","createdByType":"User","createdAt":"2020-12-18T05:16:56.1162278+00:00","lastModifiedBy":"daetienn@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-18T05:16:56.1162278+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-18T05:16:56.1162278Z","provisioningState":"Deleting","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-18T05:16:57.4127933+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:37:24.0049994+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:37:24.0049994+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:37:24.0049994Z","provisioningState":"Deleting","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:37:25.3696543+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1269'
+      - '1297'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 18 Dec 2020 05:18:37 GMT
+      - Tue, 22 Dec 2020 21:38:46 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-78477060-40f0-11eb-abd9-c03eba45757e?api-version=2019-12-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-0e484c02-449e-11eb-957d-88e9fe656bb4?api-version=2020-11-01-preview
       pragma:
       - no-cache
       server:
@@ -1556,10 +1458,10 @@ interactions:
       ParameterSetName:
       - -n -g -y
       User-Agent:
-      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-containerregistry/3.0.0rc15 Azure-SDK-For-Python AZURECLI/2.16.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-78477060-40f0-11eb-abd9-c03eba45757e?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerRegistry/locations/westus/operationResults/registries-0e484c02-449e-11eb-957d-88e9fe656bb4?api-version=2020-11-01-preview
   response:
     body:
       string: ''
@@ -1569,7 +1471,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 18 Dec 2020 05:18:47 GMT
+      - Tue, 22 Dec 2020 21:38:57 GMT
       expires:
       - '-1'
       pragma:

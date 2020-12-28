@@ -173,12 +173,12 @@ def extract_http_operation_error(ex):
         if isinstance(response, str):
             error = response
         else:
-            error = response['error']
+            error = response.get('error', response.get('Error', None))
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            status_code = error.get('code', 'Unknown Code')
-            message = error.get('message', ex)
+            status_code = error.get('code', error.get('Code', 'Unknown Code'))
+            message = error.get('message', error.get('Message', ex))
             error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error

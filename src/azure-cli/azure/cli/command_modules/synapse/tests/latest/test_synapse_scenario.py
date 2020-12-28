@@ -259,8 +259,9 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
         # classification update
-        self.cmd('az synapse sql pool classification show --name {sql-pool} --workspace-name {workspace} '
-                 '--resource-group {rg} --schema {schema} --table {table} --column {column}')
+        self.cmd('az synapse sql pool classification update --name {sql-pool} --workspace-name {workspace} '
+                 '--resource-group {rg} --schema {schema} --table {table} --column {column} '
+                 '--label {label} --information-type {information-type}')
 
         # classification delete
         self.cmd('az synapse sql pool classification delete --name {sql-pool} --workspace-name {workspace} '
@@ -333,17 +334,105 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
             'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',  # self.create_random_name(prefix='testsqlpool', length=15),
-            'storage-account': 'zzystorageforsynapse'
+            'sql-pool': 'sqlpoolcli1',
+            'storage-account': 'teststorageforsynapse'
         })
 
-        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+        # test show command
+        self.cmd('az synapse sql pool audit-policy show '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
 
+        # test validator
+        self.cmd('az synapse sql pool audit-policy update '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
+
+        # test for updating state from Disabled to Enabled with storage and retention days
+        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
+                 '--retention-days 7 --name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
         self.cmd('az synapse sql pool audit-policy show '
                  '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Enabled')
+                 ])
+
+        # test for updating state from Enabled to Disabled
+        self.cmd('az synapse sql pool audit-policy update --state Disabled '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql pool audit-policy show '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
+
+    @record_only()
+    def test_sql_aad_admin(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspace',
+            'rg': 'rg',
+            'user-name': 'fakeuser',
+            'object-id': '00000000-0000-0000-0000-000000000000',
+            'user-email': 'fakeuser@fakedomain.com'
+        })
+        # Test create cmdlet
+        self.cmd('az synapse sql ad-admin create --workspace-name {workspace} --resource-group {rg} '
+                 '--display-name {user-name} --object-id {object-id}',
+                 checks=[
+                     self.check('login', self.kwargs['user-name'])
+                 ])
+
+        # Test show cmdlet
+        self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('login', self.kwargs['user-name']),
+                     self.check('name', 'activeDirectory')
+                 ])
+
+        # Test update cmdlet
+        self.cmd('az synapse sql ad-admin update --workspace-name {workspace} --resource-group {rg} '
+                 '--display-name {user-email}',
+                 checks=[
+                     self.check('login', self.kwargs['user-email'])
+                 ])
+        # Test delete cmdlet
+        self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
+        self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
+
+    @record_only()
+    def test_sql_audit_policy(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspace',
+            'rg': 'rg',
+            'storage-account': 'teststorageforsynapse'
+        })
+        # test show command
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
+
+        # test validator of this command
+        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg}',
+                 expect_failure=True)
+
+        # test for updating state from Disabled to Enabled with storage and retention days
+        self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
+                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Enabled')
+                 ])
+
+        # test for updating state from Enabled to Disabled
+        self.cmd('az synapse sql audit-policy update --state Disabled '
+                 '--workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
                  ])
 
     @record_only()
@@ -354,7 +443,8 @@ class SynapseScenarioTests(ScenarioTest):
             'rg': 'rg',
             'ruleName': self.create_random_name(prefix='rule', length=8),
             'startIpAddress': "0.0.0.0",
-            'endIpAddress': "255.255.255.255"
+            'endIpAddress': "255.255.255.255",
+            'secondIpAddress': "192.0.0.1"
         })
 
         # create a firewall rule
@@ -373,6 +463,16 @@ class SynapseScenarioTests(ScenarioTest):
             '--resource-group {rg}',
             checks=[
                 self.check('name', self.kwargs['ruleName']),
+                self.check('type', 'Microsoft.Synapse/workspaces/firewallRules'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+        # update a firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule update --name {ruleName} --workspace-name {workspace} '
+            '--resource-group {rg} --start-ip-address {secondIpAddress}',
+            checks=[
+                self.check('name', self.kwargs['ruleName']),
+                self.check('startIpAddress', self.kwargs['secondIpAddress']),
                 self.check('type', 'Microsoft.Synapse/workspaces/firewallRules'),
                 self.check('provisioningState', 'Succeeded')
             ])
