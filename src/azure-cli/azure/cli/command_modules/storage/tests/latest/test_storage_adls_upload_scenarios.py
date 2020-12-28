@@ -19,7 +19,6 @@ class StorageADLSUploadLiveTests(LiveScenarioTest):
     def test_storage_file_upload_2G_file(self, resource_group, storage_account):
         file_size_kb = 2 * 1024 * 1024
         file_system = self.create_random_name(prefix='cont', length=24)
-        local_dir = self.create_temp_dir()
         local_file = self.create_temp_file(file_size_kb, full_random=True)
         file_name = self.create_random_name(prefix='adls', length=24)
         account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
@@ -39,4 +38,4 @@ class StorageADLSUploadLiveTests(LiveScenarioTest):
                  checks=JMESPathCheck('exists', True))
 
         self.cmd('storage fs file show -p {} -f {}'.format(file_name, file_system),
-                 checks=[JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+                 checks=[JMESPathCheck('size', file_size_kb * 1024)])

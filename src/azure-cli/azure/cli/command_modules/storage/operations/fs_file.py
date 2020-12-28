@@ -125,7 +125,8 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
         try:
             count = os.path.getsize(local_path)
             with open(local_path, 'rb') as stream:
-                return client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+                response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+            return response
         except HttpResponseError as ex:
             StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
@@ -136,4 +137,5 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
             raise ex
     count = os.path.getsize(local_path)
     with open(local_path, 'rb') as stream:
-        return client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+        response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+    return response
