@@ -15,7 +15,7 @@ Logging for Azure CLI
 
 - Level: Based on the verbosity option given by users, the logging levels for root and CLI parent loggers are:
 
-              'azure' parent               Root
+               CLI Parent                  Root
             Console     File        Console     File
 omitted     Warning     Debug       Critical    Debug
 --verbose   Info        Debug       Critical    Debug
@@ -53,6 +53,9 @@ class AzCliLogging(CLILogging):
         super(AzCliLogging, self).configure(args)
         from knack.log import CliLogLevel
         if self.log_level == CliLogLevel.DEBUG:
+            # As azure.core.pipeline.policies.http_logging_policy is a redacted version of
+            # azure.core.pipeline.policies._universal, disable azure.core.pipeline.policies.http_logging_policy
+            # when debug log is shown.
             logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
 
     def get_command_log_dir(self):
