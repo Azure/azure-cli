@@ -776,8 +776,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # update api-server-authorized-ip-ranges is not supported
-        with self.assertRaises(CLIError) as err:
-            self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
+        # with self.assertRaises(CLIError) as err:
+        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
 
         # scale up
         self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
@@ -2936,8 +2936,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # update api-server-authorized-ip-ranges is not supported
-        with self.assertRaises(CLIError) as err:
-            self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
+        # with self.assertRaises(CLIError) as err:
+        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
 
         # scale up
         self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
