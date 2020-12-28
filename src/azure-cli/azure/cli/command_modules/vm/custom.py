@@ -3253,7 +3253,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
                          os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
-                         target_region_encryption=None):
+                         target_region_encryption=None, vhd=None, vhd_storage_account=None):
     # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -3317,6 +3317,16 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
                                                              lun=data_snapshot_luns[i]))
+        # from vhd
+        if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
+            # TODO: parameter validation
+            if vhd and vhd_storage_account:
+                if not is_valid_resource_id(vhd_storage_account):
+                    vhd_storage_account = resource_id(
+                        subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                        namespace='Microsoft.Storage', type='storageAccounts', name=vhd_storage_account)
+                source = GalleryArtifactVersionSource(id=vhd_storage_account, uri=vhd)
+
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),

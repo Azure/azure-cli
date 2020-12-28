@@ -145,7 +145,7 @@ AZURE_API_PROFILES = {
             'snapshots': '2020-05-01',
             'galleries': '2019-12-01',
             'gallery_images': '2020-09-30',
-            'gallery_image_versions': '2019-12-01',
+            'gallery_image_versions': '2020-09-30',
             'virtual_machine_scale_sets': '2020-06-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
