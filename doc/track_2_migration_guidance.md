@@ -10,17 +10,17 @@ Example PRs:
 
 Below is a list of typical issues.
 
-1. Long running operation function name change
-2. Property name change
-3. Class name change
-4. Error type change
-5. No enum type
-6. Class hierarchy change
-7. Obtaining Subscription
-8. Multi-API support
-9. Fixing mocked object
-10. Modifying patch_models.py to include missing packages
-11. Missing x-ms-authorization-auxiliary
+1. [Long running operation function name change](#long-running-operation-function-name-change)
+2. [Property name change](#property-name-change)
+3. [Class name change](#class-name-change)
+4. [Error type change](#error-type-change)
+5. [No enum type](#no-enum-type)
+6. [Class hierarchy change](#class-hierarchy-change)
+7. [Obtaining Subscription](#obtaining-subscription)
+8. [Multi-API support](#multi-api-support)
+9. [Fixing mocked object](#fixing-mocked-object)
+10. [Modifying patch_models.py to include missing packages](#modifying-patch_modelspy-to-include-missing-packages)
+11. [Missing x-ms-authorization-auxiliary](#missing-external-tenant-authentication-support)
 
 ### Long running operation function name change
 
