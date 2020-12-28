@@ -1346,3 +1346,177 @@ examples:
         az synapse notebook delete --workspace-name testsynapseworkspace \\
           --name testnotebook
 """
+
+helps['synapse integration-runtime'] = """
+type: group
+short-summary: Manage Synapse's integration runtimes.
+"""
+
+helps['synapse integration-runtime create'] = """
+type: command
+short-summary: Create an integration runtime.
+examples:
+  - name: Create an integration runtime.
+    text: |-
+        az synapse integration-runtime create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime --type Managed
+"""
+
+helps['synapse integration-runtime update'] = """
+type: command
+short-summary: Update an integration runtime.
+examples:
+  - name: Update an integration runtime.
+    text: |-
+        az synapse integration-runtime update --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime --auto-update On --update-delay-offset '\"PT03H\"'
+"""
+
+helps['synapse integration-runtime show'] = """
+type: command
+short-summary: Get an integration runtime.
+examples:
+  - name: Get an integration runtime.
+    text: |-
+        az synapse integration-runtime show --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime list'] = """
+type: command
+short-summary: List integration runtimes.
+examples:
+  - name: List integration runtimes.
+    text: |-
+        az synapse integration-runtime list --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse integration-runtime delete'] = """
+type: command
+short-summary: Delete an integration runtime.
+examples:
+  - name: Delete an integration runtime.
+    text: |-
+        az synapse integration-runtime delete --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a integration runtime is met.
+"""
+
+helps['synapse integration-runtime upgrade'] = """
+type: command
+short-summary: Upgrade self-hosted integration runtime.
+examples:
+  - name: Upgrade self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime upgrade --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime list-auth-key'] = """
+type: command
+short-summary: Get keys for a self-hosted integration runtime.
+examples:
+  - name: Get keys for a self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime list-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime regenerate-auth-key'] = """
+type: command
+short-summary: Regenerate self-hosted integration runtime key.
+examples:
+  - name: Regenerate self-hosted integration runtime key.
+    text: |-
+        az synapse integration-runtime regenerate-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --key-name authKey1
+"""
+
+helps['synapse integration-runtime get-monitoring-data'] = """
+type: command
+short-summary: Get metric data for a self-hosted integration runtime.
+examples:
+  - name: Get metric data for a self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime get-monitoring-data --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime sync-credentials'] = """
+type: command
+short-summary: Synchronize credentials among integration runtime nodes.
+examples:
+  - name: Synchronize credentials among integration runtime nodes.
+    text: |-
+        az synapse integration-runtime sync-credentials --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-connection-info'] = """
+type: command
+short-summary: Get the integration runtime connection infomation.
+examples:
+  - name: Get the integration runtime connection infomation.
+    text: |-
+        az synapse integration-runtime get-connection-info --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-status'] = """
+type: command
+short-summary: Gets detailed status information for an integration runtime.
+examples:
+  - name: Gets detailed status information for an integration runtime.
+    text: |-
+        az synapse integration-runtime get-status --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime-node'] = """
+type: group
+short-summary: Manage Synapse's self-hosted integration runtime nodes.
+"""
+
+helps['synapse integration-runtime-node show'] = """
+type: command
+short-summary: Get self-hosted integration runtime node information.
+examples:
+  - name: Get self-hosted integration runtime node information.
+    text: |-
+        az synapse integration-runtime-node show --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node update'] = """
+type: command
+short-summary: Update self-hosted integration runtime node.
+examples:
+  - name: Update self-hosted integration runtime node.
+    text: |-
+        az synapse integration-runtime-node update --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node delete'] = """
+type: command
+short-summary: Remove a self-hosted integration runtime node.
+examples:
+  - name: Remove a self-hosted integration runtime node.
+    text: |-
+        az synapse integration-runtime-node delete --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node get-ip-address'] = """
+type: command
+short-summary: Get self-hosted integration runtime node ip.
+examples:
+  - name: Get self-hosted integration runtime node ip.
+    text: |-
+        az synapse integration-runtime-node get-ip-address --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
