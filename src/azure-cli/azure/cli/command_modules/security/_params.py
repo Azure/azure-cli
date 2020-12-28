@@ -25,6 +25,18 @@ alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STAT
 # Atp
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
 
+# Sql Vulnerability Assessment
+sqlva_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='TODO')
+sqlva_workspace_id_arg_type = CLIArgumentType(options_list=('--workspace-id'), metavar='WORKSPACEID', help='TODO')
+sqlva_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), metavar='SERVERNAME', help='TODO')
+sqlva_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='TODO')
+sqlva_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='TODO')
+sqlva_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='TODO')
+sqlva_baseline_arg_type = CLIArgumentType(options_list=('--baseline'), metavar='BASELINE', help='TODO')
+sqlva_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='TODO')
+sqlva_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='TODO')
+sqlva_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='VMUUID', help='TODO')
+
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
 
@@ -78,6 +90,7 @@ adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group
 def load_arguments(self, _):
     for scope in ['alert',
                   'atp',
+                  'sqlva',
                   'task',
                   'setting',
                   'contact',
@@ -120,6 +133,27 @@ def load_arguments(self, _):
             c.argument(
                 'storage_account_name',
                 arg_type=storage_account_arg_type)
+            c.argument(
+                'vm_resource_id',
+                arg_type=sqlva_vm_resource_id_arg_type)
+            c.argument(
+                'workspace_id',
+                arg_type=sqlva_workspace_id_arg_type)
+            c.argument(
+                'server_name',
+                arg_type=sqlva_server_name_arg_type)
+            c.argument(
+                'database_name',
+                arg_type=sqlva_database_name_arg_type)
+            c.argument(
+                'vm_name',
+                arg_type=sqlva_vm_name_arg_type)
+            c.argument(
+                'agent_id',
+                arg_type=sqlva_agent_id_arg_type)
+            c.argument(
+                'vm_uuid',
+                arg_type=sqlva_vm_uuid_arg_type)
 
     for scope in ['regulatory-compliance-controls']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -153,6 +187,23 @@ def load_arguments(self, _):
     for scope in ['atp storage update']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('is_enabled', help='Enable or disable Advanced Threat Protection for a received storage account.', arg_type=get_three_state_flag())
+
+    for scope in ['sqlva scans show',
+                  'sqlva results']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('scan_id', arg_type=sqlva_scan_id_arg_type)
+
+    for scope in ['sqlva results show',
+                  'sqlva baseline show',
+                  'sqlva baseline delete',
+                  'sqlva baseline update']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('rule_id', arg_type=sqlva_rule_id_arg_type)
+
+    for scope in ['sqlva baseline update',
+                  'sqlva baseline set']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('baseline', arg_type=sqlva_baseline_arg_type)
 
     for scope in ['contact create']:
         with self.argument_context('security {}'.format(scope)) as c:

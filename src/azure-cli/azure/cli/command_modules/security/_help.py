@@ -90,6 +90,134 @@ examples:
         az security atp storage update --resource-group MyResourceGroup --storage-account MyStorageAccount --is-enabled false
 """
 
+helps['security sqlva'] = """
+type: group
+short-summary: View Sql Vulnerability Assessment scan results and manage baseline.
+"""
+
+helps['security sqlva scans'] = """
+type: group
+short-summary: TODO.
+"""
+
+helps['security sqlva scans show'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva scans list'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva results'] = """
+type: group
+short-summary: TODO.
+"""
+
+helps['security sqlva results show'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva results list'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva baseline'] = """
+type: group
+short-summary: TODO.
+"""
+
+helps['security sqlva baseline show'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva baseline list'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva baseline delete'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva baseline update'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
+helps['security sqlva baseline set'] = """
+type: group
+short-summary: TODO.
+examples:
+  - name: TODO.
+    text: >
+        az TODO
+  - name: TODO.
+    text: >
+        az TODO
+"""
+
 helps['security auto-provisioning-setting'] = """
 type: group
 short-summary: View your auto provisioning settings.

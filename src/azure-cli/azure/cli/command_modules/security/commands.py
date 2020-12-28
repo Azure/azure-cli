@@ -17,6 +17,9 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_topology,
                               cf_security_workspace_settings,
                               cf_security_advanced_threat_protection,
+                              cf_sql_vulnerability_assessment_scans,
+                              cf_sql_vulnerability_assessment_results,
+                              cf_sql_vulnerability_assessment_baseline,
                               cf_security_assessment,
                               cf_security_assessment_metadata,
                               cf_security_sub_assessment,
@@ -147,6 +150,21 @@ def load_command_table(self, _):
         client_factory=cf_security_advanced_threat_protection
     )
 
+    security_sql_vulnerability_assessment_scans_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SqlVulnerabilityAssessmentScansOperations.{}',
+        client_factory=cf_sql_vulnerability_assessment_scans
+    )
+
+    security_sql_vulnerability_assessment_results_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SqlVulnerabilityAssessmentScanResultsOperations.{}',
+        client_factory=cf_sql_vulnerability_assessment_results
+    )
+
+    security_sql_vulnerability_assessment_baseline_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SqlVulnerabilityAssessmentBaselineRulesOperations.{}',
+        client_factory=cf_sql_vulnerability_assessment_baseline
+    )
+
     security_assessment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AssessmentsOperations.{}',
         client_factory=cf_security_assessment
@@ -246,6 +264,27 @@ def load_command_table(self, _):
                             client_factory=cf_security_advanced_threat_protection) as g:
         g.custom_show_command('show', 'get_atp_setting')
         g.custom_command('update', 'update_atp_setting')
+
+    with self.command_group('security sqlva scans',
+                            security_sql_vulnerability_assessment_scans_sdk,
+                            client_factory=cf_sql_vulnerability_assessment_scans) as g:
+        g.custom_show_command('show', 'get_sqlva_scan')
+        g.custom_command('list', 'list_sqlva_scans')
+
+    with self.command_group('security sqlva results',
+                            security_sql_vulnerability_assessment_results_sdk,
+                            client_factory=cf_sql_vulnerability_assessment_results) as g:
+        g.custom_show_command('show', 'get_sqlva_result')
+        g.custom_command('list', 'list_sqlva_results')
+
+    with self.command_group('security sqlva baseline',
+                            security_sql_vulnerability_assessment_baseline_sdk,
+                            client_factory=cf_sql_vulnerability_assessment_baseline) as g:
+        g.custom_show_command('show', 'get_sqlva_baseline')
+        g.custom_command('list', 'list_sqlva_baseline')
+        g.custom_command('delete', 'delete_sqlva_baseline')
+        g.custom_command('update', 'update_sqlva_baseline')
+        g.custom_command('set', 'set_sqlva_baseline')
 
     with self.command_group('security alert',
                             security_alerts_sdk,
