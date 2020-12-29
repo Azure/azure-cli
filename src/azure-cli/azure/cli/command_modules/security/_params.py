@@ -14,6 +14,7 @@ from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
+import argparse
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -26,6 +27,7 @@ alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STAT
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
 
 # Sql Vulnerability Assessment
+
 sqlva_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
 sqlva_workspace_id_arg_type = CLIArgumentType(options_list=('--workspace-id'), metavar='WORKSPACEID', help='The ID of the workspace connected to the scanned machine')
 sqlva_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), metavar='SERVERNAME', help='The name of the scanned server')

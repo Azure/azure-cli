@@ -13,7 +13,6 @@ from azure.mgmt.security.models import (SecurityContact,
                                         UpdateIotSecuritySolutionData)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
-from knack.util import CLIError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -392,16 +391,18 @@ def delete_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, dat
     return client.delete(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
-def update_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline, vm_name=None, agent_id=None, vm_uuid=None):
+def update_sqlva_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     if baseline == "latest":
         return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, latest_scan = True)
     else:
-        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, results = baseline)
+        baseline_list = list()
+        print(baseline)
+        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, results = baseline_list)
 
 
-def set_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline, vm_name=None, agent_id=None, vm_uuid=None):
+def set_sqlva_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, baseline, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     if baseline == "latest":
@@ -418,7 +419,9 @@ def _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_
         combined_vm_name = f'{vm_name}_{agent_id}_{vm_uuid}'
         return f'{vm_resource_id}/onPremiseMachines/{combined_vm_name}/sqlServers/{server_name}/databases/{database_name}'
     else:
-        raise CLIError('Options "--vm-name", "--agent-id", "--vm-uuid" should either be provided all at once, or neither provided. Use these options for On-Premise resources only. For more information run last command with -h option')
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        error_msg = 'Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types'
+        raise MutuallyExclusiveArgumentError(error_msg)
 
 
 def _get_sqlva_api_version():
