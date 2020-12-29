@@ -26,16 +26,17 @@ alert_status_arg_type = CLIArgumentType(options_list=('--status'), metavar='STAT
 storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME', help='Name of an existing storage account.')
 
 # Sql Vulnerability Assessment
-sqlva_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='TODO')
-sqlva_workspace_id_arg_type = CLIArgumentType(options_list=('--workspace-id'), metavar='WORKSPACEID', help='TODO')
-sqlva_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), metavar='SERVERNAME', help='TODO')
-sqlva_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='TODO')
-sqlva_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='TODO')
-sqlva_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='TODO')
-sqlva_baseline_arg_type = CLIArgumentType(options_list=('--baseline'), metavar='BASELINE', help='TODO')
-sqlva_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='TODO')
-sqlva_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='TODO')
-sqlva_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='VMUUID', help='TODO')
+sqlva_vm_resource_id_arg_type = CLIArgumentType(options_list=('--vm-resource-id'), metavar='VMRESOURCEID', help='Resource ID of the scanned machine. For On-Premise machines, please provide your workspace resource ID')
+sqlva_workspace_id_arg_type = CLIArgumentType(options_list=('--workspace-id'), metavar='WORKSPACEID', help='The ID of the workspace connected to the scanned machine')
+sqlva_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), metavar='SERVERNAME', help='The name of the scanned server')
+sqlva_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='The name of the scanned database')
+sqlva_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='The ID of the scan')
+sqlva_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='The ID of the scanned rule. Format: "VAXXXX", where XXXX indicates the number of the rule')
+sqlva_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline'), metavar='BASELINE', help='Use keyword "latest" to set baseline upon latest scan results. Otherwise, provide TODO')
+sqlva_baseline_multiple_arg_type = CLIArgumentType(options_list=('--baseline'), metavar='BASELINE', help='Use keyword "latest" to set baseline upon latest scan results. Otherwise, provide TODO')
+sqlva_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='Provide the name of the machine, for On-Premise resources only')
+sqlva_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='Provide the ID of the agent on the scanned machine, for On-Premise resources only')
+sqlva_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='VMUUID', help='Provide the UUID of the scanned machine, for On-Premise resources only')
 
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
@@ -200,10 +201,13 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('rule_id', arg_type=sqlva_rule_id_arg_type)
 
-    for scope in ['sqlva baseline update',
-                  'sqlva baseline set']:
+    for scope in ['sqlva baseline update']:
         with self.argument_context('security {}'.format(scope)) as c:
-            c.argument('baseline', arg_type=sqlva_baseline_arg_type)
+            c.argument('baseline', arg_type=sqlva_baseline_single_arg_type)
+
+    for scope in ['sqlva baseline set']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument('baseline', arg_type=sqlva_baseline_multiple_arg_type)
 
     for scope in ['contact create']:
         with self.argument_context('security {}'.format(scope)) as c:

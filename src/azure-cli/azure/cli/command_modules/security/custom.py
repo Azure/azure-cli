@@ -13,6 +13,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         UpdateIotSecuritySolutionData)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from knack.util import CLIError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -352,83 +353,61 @@ def _construct_resource_id(client, resource_group_name, storage_account_name):
 def get_sqlva_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.get(scan_id, workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.get(scan_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def list_sqlva_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.list(workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.list(workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def get_sqlva_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.get(scan_id, rule_id, workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.get(scan_id, rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def list_sqlva_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.list(scan_id, workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.list(scan_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def get_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.get(rule_id, workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.get(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def list_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.list(workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.list(workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def delete_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
-    return client.delete(rule_id, workspace_id, sqlva_api_version, sqlva_resource_id)
+    return client.delete(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
 
 
 def update_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
     if baseline == "latest":
-        print("latest baseline")
-        return client.create_or_update(rule_id, workspace_id, sqlva_api_version, sqlva_resource_id, latest_scan = True)
+        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, latest_scan = True)
     else:
-        print("not latest baseline")
-        return client.create_or_update(rule_id, workspace_id, sqlva_api_version, sqlva_resource_id, results = baseline)
+        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, results = baseline)
 
 
 def set_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline, vm_name=None, agent_id=None, vm_uuid=None):
 
     sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    print("resource id: " + sqlva_resource_id)
-    sqlva_api_version = _get_sqlva_api_version()
     if baseline == "latest":
-        print("latest baseline")
-        return client.add(workspace_id, sqlva_api_version, sqlva_resource_id, latest_scan = True)
+        return client.add(workspace_id, sqlva_api_version, _get_sqlva_api_version(), latest_scan = True)
     else:
-        print("not latest baseline")
-        return client.add(workspace_id, sqlva_api_version, sqlva_resource_id, results = baseline)
+        return client.add(workspace_id, sqlva_api_version, _get_sqlva_api_version(), results = baseline)
 
 
 def _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
@@ -439,7 +418,7 @@ def _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_
         combined_vm_name = f'{vm_name}_{agent_id}_{vm_uuid}'
         return f'{vm_resource_id}/onPremiseMachines/{combined_vm_name}/sqlServers/{server_name}/databases/{database_name}'
     else:
-        raise CLIError('TODO')
+        raise CLIError('Options "--vm-name", "--agent-id", "--vm-uuid" should either be provided all at once, or neither provided. Use these options for On-Premise resources only. For more information run last command with -h option')
 
 
 def _get_sqlva_api_version():
