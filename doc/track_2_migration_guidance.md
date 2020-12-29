@@ -110,6 +110,6 @@ External tenant authentication support is missing in Azure CLI Core and Azure Co
 
 You are welcome to contribute to this document if you have experience of Track 2 SDK.
 
-**References**
+### References
 
 [1] https://github.com/Azure/azure-sdk-for-python/blob/master/sdk/core/azure-core/CLIENT_LIBRARY_DEVELOPER.md#available-policies
