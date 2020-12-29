@@ -861,9 +861,9 @@ def _configure_knack():
     # Customize status tag messages.
     from knack.util import status_tag_messages
     ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
-    # Override the preview message
+    # Override the preview message.
     status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
-    # Override the experimental message
+    # Override the experimental message.
     status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
 
     # Allow logs from 'azure' logger to be displayed.
