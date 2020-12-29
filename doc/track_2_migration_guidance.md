@@ -5,8 +5,8 @@ Azure CLI is built upon Azure Python SDK. Recently Azure Python SDK announced ne
 This document summarizes typical issues and solutions when adopting Track 2 SDK in Azure CLI.
 
 Example PRs:
-1. [Compute PR](https://github.com/Azure/azure-cli/pull/15750)
-2. [Network PR](https://github.com/Azure/azure-cli/pull/16245)
+1. [Compute PR #15750](https://github.com/Azure/azure-cli/pull/15750)
+2. [Network PR #16245](https://github.com/Azure/azure-cli/pull/16245)
 
 Below is a list of typical issues.
 
