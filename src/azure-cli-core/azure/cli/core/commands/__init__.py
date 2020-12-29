@@ -776,7 +776,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 preview_kwargs['object_type'] = 'command'
                 del preview_kwargs['_get_tag']
                 del preview_kwargs['_get_message']
-                previews.append(ImplicitPreviewItem(cli_ctx=self.cli_ctx,**preview_kwargs))
+                previews.append(ImplicitPreviewItem(cli_ctx=self.cli_ctx, **preview_kwargs))
 
         experimentals = [] + getattr(parsed_args, '_argument_experimentals', [])
         if cmd.experimental_info:
