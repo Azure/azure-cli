@@ -51,6 +51,7 @@ def load_arguments(self, _):
                                                     help="a template file path in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], is_preview=True, min_api='2019-06-01', help="The template spec resource id.")
+    deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], is_preview=True, help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -261,6 +262,7 @@ def load_arguments(self, _):
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
         c.argument('template_spec', arg_type=deployment_template_spec_type)
+        c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
