@@ -3,8 +3,14 @@
 Release History
 ===============
 
+2.17.1
+++++++
+
+**RDBMS**
+
 2.17.0
 ++++++
+* Hotfix: `az mysql create`: fix for bad parameter name 'serv_name' to 'service_name'
 
 **ACR**
 
