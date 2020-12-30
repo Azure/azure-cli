@@ -231,7 +231,7 @@ class PercentageProgressBar:
                 message=self.message, value=current, total_val=self.total)
         else:
             self.cli_ctx.get_progress_controller(det=True).add(
-                message=self.message, value=current, total_val=current+0.1)
+                message=self.message, value=current, total_val=current + 0.1)
 
     def end(self):
         self.cli_ctx.get_progress_controller(det=True).end(value=self.total, total_val=self.total)
@@ -265,8 +265,8 @@ class SpinnerProgressBar:
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
-                label='Running', stream=sys.stderr,
-                hide_cursor=False)
+            label='Running', stream=sys.stderr,
+            hide_cursor=False)
 
     def update_progress(self):
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add()

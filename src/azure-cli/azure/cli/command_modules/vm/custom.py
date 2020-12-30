@@ -935,7 +935,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         # creates the VM deployment
         if no_wait:
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, deployment)
-        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(client.create_or_update(resource_group_name, deployment_name, deployment))
+        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(
+            client.create_or_update(resource_group_name, deployment_name, deployment))
     else:
         if validate:
             return client.validate(resource_group_name, deployment_name, properties)
@@ -943,7 +944,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         # creates the VM deployment
         if no_wait:
             return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
-        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(client.create_or_update(resource_group_name, deployment_name, properties))
+        LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(
+            client.create_or_update(resource_group_name, deployment_name, properties))
 
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:

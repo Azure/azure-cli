@@ -992,7 +992,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.progress_bar.end()
-        #self.cli_ctx.get_progress_controller().end()
+        # self.cli_ctx.get_progress_controller().end()
 
         return result
 
