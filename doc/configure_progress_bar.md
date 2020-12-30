@@ -24,7 +24,7 @@ az network lb create -g mygroup -n mylb --sku Basic
 
 ## Indeterminate Progress Bar
 ### Pong like progress bar
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+![Alt Text](https://microsoft-my.sharepoint.com/personal/zuh_microsoft_com/Documents/Projects/Azure%20CLI/Progress%20Bar/Running_pong.gif)
 
 Try:
 ```
