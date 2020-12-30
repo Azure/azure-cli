@@ -259,7 +259,8 @@ class TimingProgressBar:
                 hide_cursor=False, timer=humanfriendly.Timer())
 
     def update_progress(self):
-        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add()
+        self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).add(
+            message='This operation usually takes {} seconds'.format(self.total))
 
     def end(self):
         self.cli_ctx.get_progress_controller(det=False, spinner=self.spinner).end()
