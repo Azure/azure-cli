@@ -32,10 +32,11 @@ class ProgressViewBase:
 
 class ProgressReporter:
     """ generic progress reporter """
-    def __init__(self, message='', value=None, total_value=None):
+    def __init__(self, message='', value=None, total_value=None, length=None):
         self.message = message
         self.value = value
         self.total_val = total_value
+        self.length = length
         self.closed = False
 
     def add(self, **kwargs):
@@ -46,17 +47,19 @@ class ProgressReporter:
         message = kwargs.get('message', self.message)
         total_val = kwargs.get('total_val', self.total_val)
         value = kwargs.get('value', self.value)
+        length = kwargs.get('length', self.length)
         if value and total_val:
             assert 0 <= value <= total_val
             self.closed = value == total_val
         self.total_val = total_val
         self.value = value
         self.message = message
+        self.length = length
 
     def report(self):
         """ report the progress """
         percent = self.value / self.total_val if self.value is not None and self.total_val else None
-        return {'message': self.message, 'percent': percent, 'value': self.value}
+        return {'message': self.message, 'percent': percent, 'value': self.value, 'length': self.length}
 
 
 class ProgressHook:
@@ -145,17 +148,15 @@ def _format_value(msg, percent):
 
 
 # TODO: cooperate with Indeterminate progress bar
-def _format_progress(msg, current):
-    space = 5
+def _format_progress(msg, current, total):
     speed = 3
-    if space * speed + len(msg) + 1 >= BAR_LEN:
+    if total * speed + len(msg) + 1 >= BAR_LEN:
         raise ValueError("message is too long.")
 
     message = '\r{} |'.format(msg)
 
     # Adjust the message
-    current = current % space
-    message += (' ' * current * speed + '.' + ' ' * (space - current - 1) * speed)
+    message += (' ' * current * speed + '.' + ' ' * (total - current - 1) * speed)
 
     message += '|'
 
@@ -175,13 +176,14 @@ class DeterminateStandardOut(ProgressViewBase):
         percent = args.get('percent', None)
         message = args.get('message', '')
         value = args.get('value', None)
+        length = args.get('length', None)
         if percent is not None:
             progress = _format_value(message, percent)
         else:
             if value == "Finished":
                 progress = "\rFinished!".ljust(BAR_LEN)
             else:
-                progress = _format_progress(message, value)
+                progress = _format_progress(message, value, length)
 
         self.out.write(progress)
 
@@ -286,11 +288,23 @@ class InfiniteProgressBar:
     """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
-        self.current = 0
+        self.current = 3
+        self.length = 6
+        self.flag = True
 
     def update_progress(self):
-        self.current += 1
-        self.cli_ctx.get_progress_controller(det=True).add(message="Running", value=self.current)
+        if self.flag and (self.current < self.length or self.current < 0):
+            self.current += 1
+        if not self.flag and (self.current < self.length or self.current < 0):
+            self.current -= 1
+
+        if self.current == self.length - 1:
+            self.flag = False
+        if self.current == 0:
+            self.flag = True
+
+        self.cli_ctx.get_progress_controller(det=True).add(message="Running", value=self.current,
+                                                           length=self.length)
 
     def end(self):
         self.cli_ctx.get_progress_controller(det=True).end(value="Finished")
