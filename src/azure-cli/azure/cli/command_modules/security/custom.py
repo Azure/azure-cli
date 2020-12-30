@@ -13,6 +13,7 @@ from azure.mgmt.security.models import (SecurityContact,
                                         UpdateIotSecuritySolutionData)
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -349,82 +350,81 @@ def _construct_resource_id(client, resource_group_name, storage_account_name):
 # --------------------------------------------------------------------------------------------
 
 
-def get_sqlva_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
+def get_va_sql_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.get(scan_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
-
-
-def list_sqlva_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
-
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.list(workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
-def get_sqlva_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+def list_va_sql_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.get(scan_id, rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
-
-
-def list_sqlva_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
-
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.list(scan_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
-def get_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+def get_va_sql_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.get(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
-
-
-def list_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
-
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.list(workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(scan_id, rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
-def delete_sqlva_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+def list_va_sql_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    return client.delete(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
-def update_sqlva_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline, vm_name=None, agent_id=None, vm_uuid=None):
+def get_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    if baseline == "latest":
-        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, latest_scan = True)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.get(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+def list_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    return client.delete(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
+
+
+def update_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest == True and baseline is None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
+    elif baseline_latest == False and baseline is not None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results = baseline)
     else:
-        baseline_list = list()
-        print(baseline)
-        return client.create_or_update(rule_id, workspace_id, _get_sqlva_api_version(), sqlva_resource_id, results = baseline_list)
+        raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
-def set_sqlva_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, baseline, vm_name=None, agent_id=None, vm_uuid=None):
+def set_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
-    sqlva_resource_id = _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    if baseline == "latest":
-        return client.add(workspace_id, sqlva_api_version, _get_sqlva_api_version(), latest_scan = True)
+    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    if baseline_latest == True and baseline is None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
+    elif baseline_latest == False and baseline is not None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results = baseline)
     else:
-        return client.add(workspace_id, sqlva_api_version, _get_sqlva_api_version(), results = baseline)
+        raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
-def _construct_sqlva_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
+def _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
 
     if vm_name == None and agent_id == None and vm_uuid == None:
         return f'{vm_resource_id}/sqlServers/{server_name}/databases/{database_name}'
     elif vm_name != None and agent_id != None and vm_uuid != None:
-        combined_vm_name = f'{vm_name}_{agent_id}_{vm_uuid}'
-        return f'{vm_resource_id}/onPremiseMachines/{combined_vm_name}/sqlServers/{server_name}/databases/{database_name}'
+        return f'{vm_resource_id}/onPremiseMachines/{vm_name}_{agent_id}_{vm_uuid}/sqlServers/{server_name}/databases/{database_name}'
     else:
-        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-        error_msg = 'Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types'
-        raise MutuallyExclusiveArgumentError(error_msg)
+        raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
 
 
-def _get_sqlva_api_version():
+def _get_va_sql_api_version():
 
     return "2020-07-01-preview"
 
