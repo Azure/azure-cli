@@ -528,6 +528,12 @@ examples:
   - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
         az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
+  - name: Create a scope map that allows all repository actions for `test`, and all gateway actions for `connectedRegistry`.
+    text: >
+        az acr scope-map create -n MyScopeMap -r MyRegistry --description "Sample scope map."
+          --repository test content/delete content/read content/write metadata/read metadata/write
+          --gateway connectedRegistry config/read config/write message/read message/write
+
 """
 
 helps['acr scope-map delete'] = """
@@ -561,9 +567,9 @@ helps['acr scope-map update'] = """
 type: command
 short-summary: Update a scope map for an Azure Container Registry.
 examples:
-  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
+  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and message/write action for `connectedRegistry`.
     text: >
-        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world metadata/read content/read --remove hello-world-again metadata/write
+        az acr scope-map update -n MyScopeMap -r MyRegistry --remove-repo hello-world metadata/read content/read --remove-gateway connectedRegistry message/write
 """
 
 helps['acr show'] = """
@@ -981,9 +987,10 @@ examples:
   - name: Create a token which has read permissions on hello-world repository.
     text: >
         az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
-  - name: Create a token without credentials.
-    text: >
-        az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
+  - name: Create a token without credentials and with all gateway permissions.
+    text: |
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read
+          --gateway registry config/read config/write message/read message/write --no-passwords
   - name: Create a token in disabled status.
     text: >
         az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
@@ -1203,6 +1210,124 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+
+# region connected-registry
+helps['acr connected-registry'] = """
+type: group
+short-summary: Manage connected registry resources with Azure Container Registries.
+"""
+
+helps['acr connected-registry create'] = """
+type: command
+short-summary: Create a connected registry for an Azure Container Registry.
+examples:
+  - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --repository "app/hello-world service/mycomponent"
+  - name: Create a mirror connected registry with only read permissions and pass the sync token
+    text: |
+        az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
+            --mode mirror --parent myconnectedregistry --sync-token mySyncTokenName
+  - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
+    text: |
+        az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
+            -t app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
+            --client-tokens myTokenName1 myTokenName2
+"""
+
+helps['acr connected-registry delete'] = """
+type: command
+short-summary: Delete a connected registry from Azure Container Registry.
+examples:
+  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
+  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
+"""
+
+helps['acr connected-registry deactivate'] = """
+type: command
+short-summary: Deactivate a connected registry from Azure Container Registry.
+examples:
+  - name: Deactivate a connected registry 'myconnectedregistry'.
+    text: >
+        az acr connected-registry deactivate -r mycloudregistry -n myconnectedregistry
+"""
+
+helps['acr connected-registry list'] = """
+type: command
+short-summary: Lists all the connected registries under the current parent registry.
+examples:
+  - name: Lists all the connected registries of 'mycloudregistry' in table format.
+    text: >
+        az acr connected-registry list --registry mycloudregistry --output table
+  - name: Lists only the inmediate children of 'mycloudregistry' in expanded form in a table.
+    text: >
+        az acr connected-registry list --registry mycloudregistry --no-children --output table
+  - name: Lists all the offspring of 'myconnectedregistry' in expanded form inside a table.
+    text: >
+        az acr connected-registry list -r mycloudregistry -p myconnectedregistry --output table
+"""
+
+helps['acr connected-registry list-client-tokens'] = """
+type: command
+short-summary: Lists all the client tokens associated to a specific connected registries.
+examples:
+  - name: Lists all client tokens of 'mymirroracr'.
+    text: >
+        az acr connected-registry list-client-tokens -r mycloudregistry -n mymirroracr -o table
+"""
+
+helps['acr connected-registry show'] = """
+type: command
+short-summary: Show connected registry details.
+examples:
+  - name: Show all the details of the 'mymirroracr' registry in table form.
+    text: >
+        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
+"""
+
+helps['acr connected-registry update'] = """
+type: command
+short-summary: Update a connected registry for an Azure Container Registry.
+examples:
+  - name: Update the connected registry client Tokens.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --remove-client-tokens myTokenName1 --add-client-tokens myTokenName2 myTokenName3
+
+  - name: Update the sync and window time of a connected registry.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name mymirroracr \\
+            --sync-schedule "0 12 * * *" --sync-window PT4H
+"""
+
+helps['acr connected-registry install'] = """
+type: group
+short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
+"""
+
+helps['acr connected-registry install info'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry.
+examples:
+  - name: Prints the values requiered to activate a connected registry in json format
+    text: >
+        az acr connected-registry install info --registry mycloudregistry --name myconnectedregistry
+"""
+
+helps['acr connected-registry install renew-credentials'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+examples:
+  - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
+    text: >
+        az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry
+"""
+# endregion
 
 # region private-endpoint-connection
 # be careful to keep long-summary consistent in this region
