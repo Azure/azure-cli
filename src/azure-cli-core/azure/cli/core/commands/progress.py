@@ -139,7 +139,7 @@ def _format_value(msg, percent):
     completed = int(bar_len * percent)
 
     message = '\r{}['.format(msg)
-    message += ('#' * completed).ljust(bar_len)
+    message += ('.' * completed).ljust(bar_len)
     message += ']  {:.4%}'.format(percent)
     return message
 
