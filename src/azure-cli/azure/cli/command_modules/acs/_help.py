@@ -308,7 +308,7 @@ parameters:
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.

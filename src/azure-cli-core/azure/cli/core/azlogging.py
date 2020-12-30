@@ -49,6 +49,15 @@ class AzCliLogging(CLILogging):
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
         self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
 
+    def configure(self, args):
+        super(AzCliLogging, self).configure(args)
+        from knack.log import CliLogLevel
+        if self.log_level == CliLogLevel.DEBUG:
+            # As azure.core.pipeline.policies.http_logging_policy is a redacted version of
+            # azure.core.pipeline.policies._universal, disable azure.core.pipeline.policies.http_logging_policy
+            # when debug log is shown.
+            logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
+
     def get_command_log_dir(self):
         return self.command_log_dir
 

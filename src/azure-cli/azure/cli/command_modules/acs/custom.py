@@ -3572,7 +3572,7 @@ def _ensure_service_principal(cli_ctx,
 
 
 def _create_client_secret():
-    # Add a special character to satsify AAD SP secret requirements
+    # Add a special character to satisfy AAD SP secret requirements
     special_char = '$'
     client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8') + special_char
     return client_secret
