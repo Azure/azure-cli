@@ -114,6 +114,9 @@ def render(data, container, container_url, testdata, USER_REPO, USER_BRANCH, COM
     <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EZGC9LwrN3RAscVS5ylG4HMBX9h7W0ZSA7CDrhXN5Lvx6g?e=V8HUmd>User Manual of Live Test Pipeline</a>
     (Please read it)
     <br>
+    <a href=https://microsoft-my.sharepoint.com/:w:/p/fey/EcgPLHSkef9Mi14Rjx79N9sBvyVDO4b_V97BMcoI1HTq-A?e=Ioap3B>Upgrading API Versions in Azure CLI Live Test Pipeline</a>
+    (Advanced feature)
+    <br>
     <a href=https://msit.powerbi.com/groups/8de24d49-e97c-4672-9bfc-45fee0ec58f7/reports/65dfcfce-5d59-4dc9-8bc5-3726443c8fe1/ReportSection>Power BI Report</a>
     (History data, beautiful charts and tables)
     </p>
