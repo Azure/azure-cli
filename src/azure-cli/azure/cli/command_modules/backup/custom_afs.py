@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-import azure.cli.command_modules.backup.custom_help as helper
 from datetime import datetime, timedelta
+import azure.cli.command_modules.backup.custom_help as helper
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
