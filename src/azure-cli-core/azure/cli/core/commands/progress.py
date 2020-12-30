@@ -259,9 +259,6 @@ class TimingProgressBar:
 
 class SpinnerProgressBar:
     """ Define progress bar update view """
-    """
-     - It may take 40 seconds (21 seconds) ..
-    """
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
