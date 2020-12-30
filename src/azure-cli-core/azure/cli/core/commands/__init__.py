@@ -29,7 +29,7 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.commands.progress import IndeterminateProgressBar
+from azure.cli.core.commands.progress import IndeterminateProgressBar, TimingProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -880,6 +880,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
         self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+        if isinstance(self.progress_bar, TimingProgressBar):
+            self.poller_done_interval_ms = 1000.0
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
