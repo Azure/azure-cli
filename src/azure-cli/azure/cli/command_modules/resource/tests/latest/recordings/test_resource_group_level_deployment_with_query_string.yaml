@@ -1,0 +1,650 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Storage/storageAccounts/testquerystrrg000002/listKeys?api-version=2019-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:43:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrrg000002.blob.core.windows.net/querystr000003?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      etag:
+      - '"0x8D8AD144F34210B"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n      \"projectName\":
+      {\r\n        \"type\": \"string\",\r\n        \"minLength\": 3,\r\n        \"maxLength\":
+      11,\r\n        \"metadata\": {\r\n          \"description\": \"Specify a project
+      name that is used to generate resource names.\"\r\n        }\r\n      },\r\n
+      \     \"location\": {\r\n        \"type\": \"string\",\r\n        \"defaultValue\":
+      \"[resourceGroup().location]\",\r\n        \"metadata\": {\r\n          \"description\":
+      \"Specify a location for the resources.\"\r\n        }\r\n      },\r\n      \"linuxFxVersion\":
+      {\r\n        \"type\": \"string\",\r\n        \"defaultValue\": \"php|7.0\",\r\n
+      \       \"metadata\": {\r\n          \"description\": \"The Runtime stack of
+      current web app\"\r\n        }\r\n      }\r\n    },\r\n    \"variables\": {\r\n
+      \     \"storageAccountName\": \"[concat(parameters('projectName'), 'store')]\",\r\n
+      \     \"webAppName\": \"[concat(parameters('projectName'), 'WebApp')]\",\r\n
+      \     \"appServicePlanName\": \"[concat(parameters('projectName'), 'Plan')]\"\r\n
+      \   },\r\n    \"resources\": [\r\n      {\r\n        \"name\": \"storage_account_linked_template\",\r\n
+      \       \"type\": \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\":
+      \"2020-10-01\",\r\n        \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n
+      \         \"templateLink\": {\r\n            \"relativePath\":\"storage_account_linked_template.json\",\r\n
+      \           \"contentVersion\":\"1.0.0.0\"\r\n          },\r\n          \"parameters\":
+      {\r\n            \"storageAccountName\": {\r\n              \"value\": \"[variables('storageAccountName')]\"\r\n
+      \           },\r\n            \"location\": {\r\n              \"value\": \"[parameters('location')]\"\r\n
+      \           }\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"type\":
+      \"Microsoft.Web/serverfarms\",\r\n        \"apiVersion\": \"2016-09-01\",\r\n
+      \       \"name\": \"[variables('appServicePlanName')]\",\r\n        \"location\":
+      \"[parameters('location')]\",\r\n        \"sku\": {\r\n          \"name\": \"B1\",\r\n
+      \         \"tier\": \"Basic\",\r\n          \"size\": \"B1\",\r\n          \"family\":
+      \"B\",\r\n          \"capacity\": 1\r\n        },\r\n        \"kind\": \"linux\",\r\n
+      \       \"properties\": {\r\n          \"perSiteScaling\": false,\r\n          \"reserved\":
+      true,\r\n          \"targetWorkerCount\": 0,\r\n          \"targetWorkerSizeId\":
+      0\r\n        }\r\n      },\r\n      {\r\n        \"type\": \"Microsoft.Web/sites\",\r\n
+      \       \"apiVersion\": \"2018-11-01\",\r\n        \"name\": \"[variables('webAppName')]\",\r\n
+      \       \"location\": \"[parameters('location')]\",\r\n        \"dependsOn\":
+      [\r\n          \"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]\"\r\n
+      \       ],\r\n        \"kind\": \"app\",\r\n        \"properties\": {\r\n          \"serverFarmId\":
+      \"[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]\",\r\n
+      \         \"siteConfig\": {\r\n            \"linuxFxVersion\": \"[parameters('linuxFxVersion')]\"\r\n
+      \         }\r\n        }\r\n      }\r\n    ],\r\n    \"outputs\": {\r\n      \"storageEndpoint\":
+      {\r\n        \"type\": \"object\",\r\n        \"value\": \"[reference('storage_account_linked_template').outputs.storageEndpoint.value]\"\r\n
+      \     }\r\n    }\r\n  }"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3052'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:43:22 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - VQUPypKSao3G+iR9gVTJjQ==
+      date:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      etag:
+      - '"0x8D8AD144F9EB9C2"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n      \"storageAccountName\":
+      {\r\n        \"type\": \"string\",\r\n        \"metadata\": {\r\n          \"description\":
+      \"Specify the storage account name.\"\r\n        }\r\n      },\r\n      \"location\":
+      {\r\n        \"type\": \"string\",\r\n        \"metadata\": {\r\n          \"description\":
+      \"Specify a location for the resources.\"\r\n        }\r\n      },\r\n      \"storageSKU\":
+      {\r\n        \"type\": \"string\",\r\n        \"defaultValue\": \"Standard_LRS\",\r\n
+      \       \"allowedValues\": [\r\n          \"Standard_LRS\",\r\n          \"Standard_GRS\",\r\n
+      \         \"Standard_RAGRS\",\r\n          \"Standard_ZRS\",\r\n          \"Premium_LRS\",\r\n
+      \         \"Premium_ZRS\",\r\n          \"Standard_GZRS\",\r\n          \"Standard_RAGZRS\"\r\n
+      \       ],\r\n        \"metadata\": {\r\n          \"description\": \"Specify
+      the storage account type.\"\r\n        }\r\n      }\r\n    },\r\n    \"resources\":
+      [\r\n      {\r\n        \"type\": \"Microsoft.Storage/storageAccounts\",\r\n
+      \       \"apiVersion\": \"2019-04-01\",\r\n        \"name\": \"[parameters('storageAccountName')]\",\r\n
+      \       \"location\": \"[parameters('location')]\",\r\n        \"sku\": {\r\n
+      \         \"name\": \"[parameters('storageSKU')]\"\r\n        },\r\n        \"kind\":
+      \"StorageV2\",\r\n        \"properties\": {\r\n          \"supportsHttpsTrafficOnly\":
+      true\r\n        }\r\n      }\r\n    ],\r\n    \"outputs\": {\r\n      \"storageEndpoint\":
+      {\r\n        \"type\": \"object\",\r\n        \"value\": \"[reference(parameters('storageAccountName')).primaryEndpoints]\"\r\n
+      \     }\r\n    }\r\n  }"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1546'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:43:22 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrrg000002.blob.core.windows.net/querystr000003/storage_account_linked_template.json
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - czlxM4sLRGghvAPDI7a7/w==
+      date:
+      - Wed, 30 Dec 2020 22:43:22 GMT
+      etag:
+      - '"0x8D8AD145006B63D"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:43:22 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - testquerystrrgk5jelan5nu.blob.core.windows.net
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate?se=2020-12-31T10%3A43Z&sp=rw&sv=2018-11-09&sr=c&sig=y%2Ft0ajMkEvrH%2F6xkCLrAVvf1H%2Fo3DpPG0vvFDK8Qa60%3D
+  response:
+    body:
+      string: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n      \"projectName\":
+        {\r\n        \"type\": \"string\",\r\n        \"minLength\": 3,\r\n        \"maxLength\":
+        11,\r\n        \"metadata\": {\r\n          \"description\": \"Specify a project
+        name that is used to generate resource names.\"\r\n        }\r\n      },\r\n
+        \     \"location\": {\r\n        \"type\": \"string\",\r\n        \"defaultValue\":
+        \"[resourceGroup().location]\",\r\n        \"metadata\": {\r\n          \"description\":
+        \"Specify a location for the resources.\"\r\n        }\r\n      },\r\n      \"linuxFxVersion\":
+        {\r\n        \"type\": \"string\",\r\n        \"defaultValue\": \"php|7.0\",\r\n
+        \       \"metadata\": {\r\n          \"description\": \"The Runtime stack
+        of current web app\"\r\n        }\r\n      }\r\n    },\r\n    \"variables\":
+        {\r\n      \"storageAccountName\": \"[concat(parameters('projectName'), 'store')]\",\r\n
+        \     \"webAppName\": \"[concat(parameters('projectName'), 'WebApp')]\",\r\n
+        \     \"appServicePlanName\": \"[concat(parameters('projectName'), 'Plan')]\"\r\n
+        \   },\r\n    \"resources\": [\r\n      {\r\n        \"name\": \"storage_account_linked_template\",\r\n
+        \       \"type\": \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\":
+        \"2020-10-01\",\r\n        \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n
+        \         \"templateLink\": {\r\n            \"relativePath\":\"storage_account_linked_template.json\",\r\n
+        \           \"contentVersion\":\"1.0.0.0\"\r\n          },\r\n          \"parameters\":
+        {\r\n            \"storageAccountName\": {\r\n              \"value\": \"[variables('storageAccountName')]\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"value\":
+        \"[parameters('location')]\"\r\n            }\r\n          }\r\n        }\r\n
+        \     },\r\n      {\r\n        \"type\": \"Microsoft.Web/serverfarms\",\r\n
+        \       \"apiVersion\": \"2016-09-01\",\r\n        \"name\": \"[variables('appServicePlanName')]\",\r\n
+        \       \"location\": \"[parameters('location')]\",\r\n        \"sku\": {\r\n
+        \         \"name\": \"B1\",\r\n          \"tier\": \"Basic\",\r\n          \"size\":
+        \"B1\",\r\n          \"family\": \"B\",\r\n          \"capacity\": 1\r\n        },\r\n
+        \       \"kind\": \"linux\",\r\n        \"properties\": {\r\n          \"perSiteScaling\":
+        false,\r\n          \"reserved\": true,\r\n          \"targetWorkerCount\":
+        0,\r\n          \"targetWorkerSizeId\": 0\r\n        }\r\n      },\r\n      {\r\n
+        \       \"type\": \"Microsoft.Web/sites\",\r\n        \"apiVersion\": \"2018-11-01\",\r\n
+        \       \"name\": \"[variables('webAppName')]\",\r\n        \"location\":
+        \"[parameters('location')]\",\r\n        \"dependsOn\": [\r\n          \"[resourceId('Microsoft.Web/serverfarms',
+        variables('appServicePlanName'))]\"\r\n        ],\r\n        \"kind\": \"app\",\r\n
+        \       \"properties\": {\r\n          \"serverFarmId\": \"[resourceId('Microsoft.Web/serverfarms',
+        variables('appServicePlanName'))]\",\r\n          \"siteConfig\": {\r\n            \"linuxFxVersion\":
+        \"[parameters('linuxFxVersion')]\"\r\n          }\r\n        }\r\n      }\r\n
+        \   ],\r\n    \"outputs\": {\r\n      \"storageEndpoint\": {\r\n        \"type\":
+        \"object\",\r\n        \"value\": \"[reference('storage_account_linked_template').outputs.storageEndpoint.value]\"\r\n
+        \     }\r\n    }\r\n  }"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - close
+      content-length:
+      - '3052'
+      content-md5:
+      - VQUPypKSao3G+iR9gVTJjQ==
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:43:22 GMT
+      etag:
+      - '"0x8D8AD144F9EB9C2"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"uri": "https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A43Z&sp=rw&sv=2018-11-09&sr=c&sig=y/t0ajMkEvrH/6xkCLrAVvf1H/o3DpPG0vvFDK8Qa60%3D"},
+      "parameters": {"projectName": {"value": "qsproject"}}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '328'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"18319955264823322140","parameters":{"projectName":{"type":"String","value":"qsproject"},"location":{"type":"String","value":"eastus"},"linuxFxVersion":{"type":"String","value":"php|7.0"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:43:24.8439754Z","duration":"PT0S","correlationId":"f908acb3-0ae3-4760-8d5b-93395daa84a5","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["eastus"]},{"resourceType":"sites","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan","resourceType":"Microsoft.Web/serverfarms","resourceName":"qsprojectPlan"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp","resourceType":"Microsoft.Web/sites","resourceName":"qsprojectWebApp"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/storage_account_linked_template"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Storage/storageAccounts/qsprojectstore"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2501'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:43:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - testquerystrrgk5jelan5nu.blob.core.windows.net
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate?se=2020-12-31T10%3A43Z&sp=rw&sv=2018-11-09&sr=c&sig=y%2Ft0ajMkEvrH%2F6xkCLrAVvf1H%2Fo3DpPG0vvFDK8Qa60%3D
+  response:
+    body:
+      string: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+        \   \"contentVersion\": \"1.0.0.0\",\r\n    \"parameters\": {\r\n      \"projectName\":
+        {\r\n        \"type\": \"string\",\r\n        \"minLength\": 3,\r\n        \"maxLength\":
+        11,\r\n        \"metadata\": {\r\n          \"description\": \"Specify a project
+        name that is used to generate resource names.\"\r\n        }\r\n      },\r\n
+        \     \"location\": {\r\n        \"type\": \"string\",\r\n        \"defaultValue\":
+        \"[resourceGroup().location]\",\r\n        \"metadata\": {\r\n          \"description\":
+        \"Specify a location for the resources.\"\r\n        }\r\n      },\r\n      \"linuxFxVersion\":
+        {\r\n        \"type\": \"string\",\r\n        \"defaultValue\": \"php|7.0\",\r\n
+        \       \"metadata\": {\r\n          \"description\": \"The Runtime stack
+        of current web app\"\r\n        }\r\n      }\r\n    },\r\n    \"variables\":
+        {\r\n      \"storageAccountName\": \"[concat(parameters('projectName'), 'store')]\",\r\n
+        \     \"webAppName\": \"[concat(parameters('projectName'), 'WebApp')]\",\r\n
+        \     \"appServicePlanName\": \"[concat(parameters('projectName'), 'Plan')]\"\r\n
+        \   },\r\n    \"resources\": [\r\n      {\r\n        \"name\": \"storage_account_linked_template\",\r\n
+        \       \"type\": \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\":
+        \"2020-10-01\",\r\n        \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n
+        \         \"templateLink\": {\r\n            \"relativePath\":\"storage_account_linked_template.json\",\r\n
+        \           \"contentVersion\":\"1.0.0.0\"\r\n          },\r\n          \"parameters\":
+        {\r\n            \"storageAccountName\": {\r\n              \"value\": \"[variables('storageAccountName')]\"\r\n
+        \           },\r\n            \"location\": {\r\n              \"value\":
+        \"[parameters('location')]\"\r\n            }\r\n          }\r\n        }\r\n
+        \     },\r\n      {\r\n        \"type\": \"Microsoft.Web/serverfarms\",\r\n
+        \       \"apiVersion\": \"2016-09-01\",\r\n        \"name\": \"[variables('appServicePlanName')]\",\r\n
+        \       \"location\": \"[parameters('location')]\",\r\n        \"sku\": {\r\n
+        \         \"name\": \"B1\",\r\n          \"tier\": \"Basic\",\r\n          \"size\":
+        \"B1\",\r\n          \"family\": \"B\",\r\n          \"capacity\": 1\r\n        },\r\n
+        \       \"kind\": \"linux\",\r\n        \"properties\": {\r\n          \"perSiteScaling\":
+        false,\r\n          \"reserved\": true,\r\n          \"targetWorkerCount\":
+        0,\r\n          \"targetWorkerSizeId\": 0\r\n        }\r\n      },\r\n      {\r\n
+        \       \"type\": \"Microsoft.Web/sites\",\r\n        \"apiVersion\": \"2018-11-01\",\r\n
+        \       \"name\": \"[variables('webAppName')]\",\r\n        \"location\":
+        \"[parameters('location')]\",\r\n        \"dependsOn\": [\r\n          \"[resourceId('Microsoft.Web/serverfarms',
+        variables('appServicePlanName'))]\"\r\n        ],\r\n        \"kind\": \"app\",\r\n
+        \       \"properties\": {\r\n          \"serverFarmId\": \"[resourceId('Microsoft.Web/serverfarms',
+        variables('appServicePlanName'))]\",\r\n          \"siteConfig\": {\r\n            \"linuxFxVersion\":
+        \"[parameters('linuxFxVersion')]\"\r\n          }\r\n        }\r\n      }\r\n
+        \   ],\r\n    \"outputs\": {\r\n      \"storageEndpoint\": {\r\n        \"type\":
+        \"object\",\r\n        \"value\": \"[reference('storage_account_linked_template').outputs.storageEndpoint.value]\"\r\n
+        \     }\r\n    }\r\n  }"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - close
+      content-length:
+      - '3052'
+      content-md5:
+      - VQUPypKSao3G+iR9gVTJjQ==
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:43:25 GMT
+      etag:
+      - '"0x8D8AD144F9EB9C2"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Wed, 30 Dec 2020 22:43:21 GMT
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"uri": "https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A43Z&sp=rw&sv=2018-11-09&sr=c&sig=y/t0ajMkEvrH/6xkCLrAVvf1H/o3DpPG0vvFDK8Qa60%3D"},
+      "parameters": {"projectName": {"value": "qsproject"}}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '328'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"18319955264823322140","parameters":{"projectName":{"type":"String","value":"qsproject"},"location":{"type":"String","value":"eastus"},"linuxFxVersion":{"type":"String","value":"php|7.0"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:43:27.8071166Z","duration":"PT0S","correlationId":"8459f2ae-1711-4dc6-a9bd-a9a63cf33b97","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["eastus"]},{"resourceType":"sites","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan","resourceType":"Microsoft.Web/serverfarms","resourceName":"qsprojectPlan"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp","resourceType":"Microsoft.Web/sites","resourceName":"qsprojectWebApp"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/storage_account_linked_template"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Storage/storageAccounts/qsprojectstore"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2501'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:43:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"templateLink": {"uri": "https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A43Z&sp=rw&sv=2018-11-09&sr=c&sig=y/t0ajMkEvrH/6xkCLrAVvf1H/o3DpPG0vvFDK8Qa60%3D"},
+      "parameters": {"projectName": {"value": "qsproject"}}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '328'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"18319955264823322140","parameters":{"projectName":{"type":"String","value":"qsproject"},"location":{"type":"String","value":"eastus"},"linuxFxVersion":{"type":"String","value":"php|7.0"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-30T22:43:29.8814264Z","duration":"PT0.5462304S","correlationId":"983ed1f5-164a-40f4-8fae-9e85eb21ad83","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["eastus"]},{"resourceType":"sites","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan","resourceType":"Microsoft.Web/serverfarms","resourceName":"qsprojectPlan"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp","resourceType":"Microsoft.Web/sites","resourceName":"qsprojectWebApp"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mainTemplate/operationStatuses/08585922386761424331?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1648'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:43:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922386761424331?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:44:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","properties":{"templateLink":{"uri":"https://testquerystrrg000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"18319955264823322140","parameters":{"projectName":{"type":"String","value":"qsproject"},"location":{"type":"String","value":"eastus"},"linuxFxVersion":{"type":"String","value":"php|7.0"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:43:58.5860525Z","duration":"PT29.2508565S","correlationId":"983ed1f5-164a-40f4-8fae-9e85eb21ad83","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":[null]}]},{"namespace":"Microsoft.Web","resourceTypes":[{"resourceType":"serverfarms","locations":["eastus"]},{"resourceType":"sites","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan","resourceType":"Microsoft.Web/serverfarms","resourceName":"qsprojectPlan"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp","resourceType":"Microsoft.Web/sites","resourceName":"qsprojectWebApp"}],"outputs":{"storageEndpoint":{"type":"Object","value":{"dfs":"https://qsprojectstore.dfs.core.windows.net/","web":"https://qsprojectstore.z13.web.core.windows.net/","blob":"https://qsprojectstore.blob.core.windows.net/","queue":"https://qsprojectstore.queue.core.windows.net/","table":"https://qsprojectstore.table.core.windows.net/","file":"https://qsprojectstore.file.core.windows.net/"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Storage/storageAccounts/qsprojectstore"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/serverfarms/qsprojectPlan"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_rg000001/providers/Microsoft.Web/sites/qsprojectWebApp"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2673'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:44:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

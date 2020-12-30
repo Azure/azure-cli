@@ -32,13 +32,13 @@
     },
     "resources": [
       {
-        "name": "storageAccountLinkedTemplate",
+        "name": "storage_account_linked_template",
         "type": "Microsoft.Resources/deployments",
         "apiVersion": "2020-10-01",
         "properties": {
           "mode": "Incremental",
           "templateLink": {
-            "relativePath":"storageAccountLinkedTemplate.json",
+            "relativePath":"storage_account_linked_template.json",
             "contentVersion":"1.0.0.0"
           },
           "parameters": {
@@ -91,7 +91,7 @@
     "outputs": {
       "storageEndpoint": {
         "type": "object",
-        "value": "[reference('storageAccountLinkedTemplate').outputs.storageEndpoint.value]"
+        "value": "[reference('storage_account_linked_template').outputs.storageEndpoint.value]"
       }
     }
   }

@@ -1,0 +1,1097 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Storage/storageAccounts/testquerystrsub000002/listKeys?api-version=2019-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:47:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003?restype=container
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 30 Dec 2020 22:47:32 GMT
+      etag:
+      - '"0x8D8AD14E560F1AC"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+      \   \"contentVersion\": \"1.0.0.0\",\r\n    /*\r\n    comment\r\n    */\r\n
+      \   \"parameters\": {\r\n      \"rgName\": {\r\n        \"type\": \"string\"\r\n
+      \     },\r\n      \"rgLocation\": {\r\n        \"type\": \"string\"\r\n      },\r\n
+      \     \"keyVaultName\": {\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n
+      \   \"variables\": {},\r\n    \"resources\": [\r\n      {\r\n        \"type\":
+      \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\": \"2020-10-01\",\r\n
+      \       \"name\": \"deploymentRg\",\r\n        \"location\": \"[parameters('rgLocation')]\",\r\n
+      \       \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n          \"templateLink\":
+      {\r\n            \"relativePath\":\"create_resource_group.json\",\r\n            \"contentVersion\":\"1.0.0.0\"\r\n
+      \         },\r\n          \"parameters\": {\r\n              \"rgName\":{\"value\":
+      \"[parameters('rgName')]\"},\r\n              \"rgLocation\":{\"value\": \"[parameters('rgLocation')]\"}\r\n
+      \         }\r\n        }\r\n      },\r\n      {\r\n        \"type\": \"Microsoft.Resources/deployments\",\r\n
+      \       \"apiVersion\": \"2020-10-01\",\r\n        \"name\": \"keyVaultAndSecret\",\r\n
+      \       \"resourceGroup\": \"[parameters('rgName')]\",\r\n        \"dependsOn\":
+      [\r\n          \"deploymentRg\"\r\n        ],\r\n        \"properties\": {\r\n
+      \         \"mode\": \"Incremental\",\r\n          \"templateLink\": {\r\n            \"relativePath\":\"create_key_vault_with_secret.json\",\r\n
+      \           \"contentVersion\":\"1.0.0.0\"\r\n          },\r\n          \"parameters\":
+      {\r\n              \"keyVaultName\":{\"value\": \"[parameters('keyVaultName')]\"}\r\n
+      \         }\r\n        }\r\n      }\r\n    ],\r\n    \"outputs\": {}\r\n  }\r\n
+      \ "
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1617'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:47:34 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - ESI4/sm+hg9k+mvH7VYWfQ==
+      date:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      etag:
+      - '"0x8D8AD14E5C6A7ED"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"rgName\":
+      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"rgLocation\": {\r\n      \"type\":
+      \"string\"\r\n    }\r\n  },\r\n  \"variables\": {},\r\n  \"resources\": [\r\n
+      \   {\r\n      \"type\": \"Microsoft.Resources/resourceGroups\",\r\n      \"apiVersion\":
+      \"2019-10-01\",\r\n      \"name\": \"[parameters('rgName')]\",\r\n      \"location\":
+      \"[parameters('rgLocation')]\",\r\n      \"properties\": {}\r\n    }\r\n  ],\r\n
+      \ \"outputs\": {}\r\n}"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '548'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:47:34 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/create_resource_group.json
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - q0QoqV+aLrcgJo+23Dnp8A==
+      date:
+      - Wed, 30 Dec 2020 22:47:34 GMT
+      etag:
+      - '"0x8D8AD14E6677190"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:34 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"keyVaultName\":
+      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"location\": {\r\n      \"type\":
+      \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\"\r\n    },\r\n
+      \   \"skuName\": {\r\n      \"type\": \"string\",\r\n      \"defaultValue\":
+      \"standard\"\r\n    },\r\n    \"tenantId\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"[subscription().tenantId]\"\r\n    },\r\n    \"aadObjectId\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+      \   }\r\n  },\r\n  \"variables\": {},\r\n  \"resources\": [\r\n    {\r\n      \"type\":
+      \"Microsoft.KeyVault/vaults\",\r\n      \"name\": \"[parameters('keyVaultName')]\",\r\n
+      \     \"apiVersion\": \"2018-02-14\",\r\n      \"location\": \"[parameters('location')]\",\r\n
+      \     \"properties\": {\r\n        \"tenantId\": \"[parameters('tenantId')]\",\r\n
+      \       \"accessPolicies\": [\r\n          {\r\n            \"tenantId\": \"[parameters('tenantId')]\",\r\n
+      \           \"objectId\": \"[parameters('aadObjectId')]\",\r\n            \"permissions\":
+      {\r\n              \"keys\": [\r\n                \"encrypt\",\r\n                \"decrypt\",\r\n
+      \               \"wrapKey\",\r\n                \"unwrapKey\",\r\n                \"sign\",\r\n
+      \               \"verify\",\r\n                \"get\",\r\n                \"list\",\r\n
+      \               \"create\",\r\n                \"update\",\r\n                \"import\",\r\n
+      \               \"delete\",\r\n                \"backup\",\r\n                \"restore\",\r\n
+      \               \"recover\",\r\n                \"purge\"\r\n              ],\r\n
+      \             \"secrets\": [\r\n                \"get\",\r\n                \"list\",\r\n
+      \               \"set\",\r\n                \"delete\",\r\n                \"backup\",\r\n
+      \               \"restore\",\r\n                \"recover\",\r\n                \"purge\"\r\n
+      \             ],\r\n              \"certificates\": [\r\n                \"get\",\r\n
+      \               \"list\",\r\n                \"delete\",\r\n                \"create\",\r\n
+      \               \"import\",\r\n                \"update\",\r\n                \"managecontacts\",\r\n
+      \               \"getissuers\",\r\n                \"listissuers\",\r\n                \"setissuers\",\r\n
+      \               \"deleteissuers\",\r\n                \"manageissuers\",\r\n
+      \               \"recover\",\r\n                \"purge\"\r\n              ]\r\n
+      \           }\r\n          }\r\n        ],\r\n        \"sku\": {\r\n          \"name\":
+      \"[parameters('skuName')]\",\r\n          \"family\": \"A\"\r\n        },\r\n
+      \       \"networkAcls\": {\r\n            \"defaultAction\": \"Allow\",\r\n
+      \           \"bypass\": \"AzureServices\"\r\n        }\r\n      }\r\n    },\r\n
+      \ ],\r\n  \"outputs\": {}\r\n}"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2573'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:47:35 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/create_key_vault.json
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - BZblUurzeqGHqM4yg+f4rw==
+      date:
+      - Wed, 30 Dec 2020 22:47:34 GMT
+      etag:
+      - '"0x8D8AD14E6DCB6AA"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:35 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: "{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"contentVersion\": \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"keyVaultName\":
+      {\r\n      \"type\": \"string\"\r\n    },\r\n    \"location\": {\r\n      \"type\":
+      \"string\",\r\n      \"defaultValue\": \"[resourceGroup().location]\"\r\n    },\r\n
+      \   \"skuName\": {\r\n      \"type\": \"string\",\r\n      \"defaultValue\":
+      \"standard\"\r\n    },\r\n    \"tenantId\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"[subscription().tenantId]\"\r\n    },\r\n    \"aadObjectId\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"177f56a0-9e41-4008-a321-d3676aae9c69\"\r\n
+      \   }\r\n  },\r\n  \"variables\": {},\r\n  \"resources\": [\r\n    {\r\n      \"type\":
+      \"Microsoft.Resources/deployments\",\r\n      \"apiVersion\": \"2020-10-01\",\r\n
+      \     \"name\": \"keyVault\",\r\n      \"properties\": {\r\n        \"mode\":
+      \"Incremental\",\r\n        \"templateLink\": {\r\n          \"relativePath\":\"create_key_vault.json\",\r\n
+      \         \"contentVersion\":\"1.0.0.0\"\r\n        },\r\n        \"parameters\":
+      {\r\n            \"keyVaultName\":{\"value\": \"[parameters('keyVaultName')]\"},\r\n
+      \           \"location\":{\"value\": \"[parameters('location')]\"},\r\n            \"skuName\":{\"value\":
+      \"[parameters('skuName')]\"},\r\n            \"tenantId\":{\"value\": \"[parameters('tenantId')]\"},\r\n
+      \           \"aadObjectId\":{\"value\": \"[parameters('aadObjectId')]\"},\r\n
+      \       }\r\n      }\r\n    },\r\n    {\r\n      \"type\": \"Microsoft.KeyVault/vaults/secrets\",\r\n
+      \     \"apiVersion\": \"2018-02-14\",\r\n      \"name\": \"mySecret\",\r\n      \"name\":
+      \"[concat(parameters('keyVaultName'), '/mySecret')]\",\r\n      \"location\":
+      \"[parameters('location')]\",\r\n      \"dependsOn\": [\r\n        \"keyVault\"\r\n
+      \     ],\r\n      \"properties\": {\r\n        \"value\": \"mySecretValue\"\r\n
+      \     }\r\n    }\r\n  ],\r\n  \"outputs\": {}\r\n}"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1725'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.8.3; Windows 10) AZURECLI/2.17.0
+      x-ms-blob-content-type:
+      - application/json
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-date:
+      - Wed, 30 Dec 2020 22:47:36 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: PUT
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/create_key_vault_with_secret.json
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      content-md5:
+      - SKa5VBIWB5JD9lyukiJKiw==
+      date:
+      - Wed, 30 Dec 2020 22:47:36 GMT
+      etag:
+      - '"0x8D8AD14E78F5E13"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:36 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-request-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container generate-sas
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --account-name --name --permissions --expiry --https-only -o
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/storageAccounts?api-version=2019-06-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/cd2zky4hqprtqazscripts","name":"cd2zky4hqprtqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T23:38:56.0153662Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T23:38:56.0153662Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T23:38:55.9372995Z","primaryEndpoints":{"dfs":"https://cd2zky4hqprtqazscripts.dfs.core.windows.net/","web":"https://cd2zky4hqprtqazscripts.z13.web.core.windows.net/","blob":"https://cd2zky4hqprtqazscripts.blob.core.windows.net/","queue":"https://cd2zky4hqprtqazscripts.queue.core.windows.net/","table":"https://cd2zky4hqprtqazscripts.table.core.windows.net/","file":"https://cd2zky4hqprtqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/fiyvqecwxzhoeazscripts","name":"fiyvqecwxzhoeazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:02:55.0118805Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:02:55.0118805Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T21:02:54.9493943Z","primaryEndpoints":{"dfs":"https://fiyvqecwxzhoeazscripts.dfs.core.windows.net/","web":"https://fiyvqecwxzhoeazscripts.z13.web.core.windows.net/","blob":"https://fiyvqecwxzhoeazscripts.blob.core.windows.net/","queue":"https://fiyvqecwxzhoeazscripts.queue.core.windows.net/","table":"https://fiyvqecwxzhoeazscripts.table.core.windows.net/","file":"https://fiyvqecwxzhoeazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/k22wclrgt5jvsazscripts","name":"k22wclrgt5jvsazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T20:59:13.0717595Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T20:59:13.0717595Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T20:59:12.9936090Z","primaryEndpoints":{"dfs":"https://k22wclrgt5jvsazscripts.dfs.core.windows.net/","web":"https://k22wclrgt5jvsazscripts.z13.web.core.windows.net/","blob":"https://k22wclrgt5jvsazscripts.blob.core.windows.net/","queue":"https://k22wclrgt5jvsazscripts.queue.core.windows.net/","table":"https://k22wclrgt5jvsazscripts.table.core.windows.net/","file":"https://k22wclrgt5jvsazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/k3a2yb5gt77eqazscripts","name":"k3a2yb5gt77eqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:05:09.4694619Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:05:09.4694619Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T21:05:09.3757042Z","primaryEndpoints":{"dfs":"https://k3a2yb5gt77eqazscripts.dfs.core.windows.net/","web":"https://k3a2yb5gt77eqazscripts.z13.web.core.windows.net/","blob":"https://k3a2yb5gt77eqazscripts.blob.core.windows.net/","queue":"https://k3a2yb5gt77eqazscripts.queue.core.windows.net/","table":"https://k3a2yb5gt77eqazscripts.table.core.windows.net/","file":"https://k3a2yb5gt77eqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/lff5jayqeemiwazscripts","name":"lff5jayqeemiwazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:38:49.5175169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:38:49.5175169Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:38:49.4237645Z","primaryEndpoints":{"dfs":"https://lff5jayqeemiwazscripts.dfs.core.windows.net/","web":"https://lff5jayqeemiwazscripts.z13.web.core.windows.net/","blob":"https://lff5jayqeemiwazscripts.blob.core.windows.net/","queue":"https://lff5jayqeemiwazscripts.queue.core.windows.net/","table":"https://lff5jayqeemiwazscripts.table.core.windows.net/","file":"https://lff5jayqeemiwazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/newquerystringtest1675","name":"newquerystringtest1675","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-29T17:35:56.3010786Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-29T17:35:56.3010786Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-29T17:35:56.2073543Z","primaryEndpoints":{"dfs":"https://newquerystringtest1675.dfs.core.windows.net/","web":"https://newquerystringtest1675.z13.web.core.windows.net/","blob":"https://newquerystringtest1675.blob.core.windows.net/","queue":"https://newquerystringtest1675.queue.core.windows.net/","table":"https://newquerystringtest1675.table.core.windows.net/","file":"https://newquerystringtest1675.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OuldKVRG/providers/Microsoft.Storage/storageAccounts/ouldkvrgdiag","name":"ouldkvrgdiag","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-27T22:10:49.6924558Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-27T22:10:49.6924558Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-09-27T22:10:49.6143508Z","primaryEndpoints":{"blob":"https://ouldkvrgdiag.blob.core.windows.net/","queue":"https://ouldkvrgdiag.queue.core.windows.net/","table":"https://ouldkvrgdiag.table.core.windows.net/","file":"https://ouldkvrgdiag.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps8973/providers/Microsoft.Storage/storageAccounts/ps1305","name":"ps1305","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:38:07.6760407Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:38:07.6760407Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-05-14T21:38:07.5979258Z","primaryEndpoints":{"blob":"https://ps1305.blob.core.windows.net/","queue":"https://ps1305.queue.core.windows.net/","table":"https://ps1305.table.core.windows.net/","file":"https://ps1305.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps7370/providers/Microsoft.Storage/storageAccounts/ps8157","name":"ps8157","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:40:09.3713967Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:40:09.3713967Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-05-14T21:40:09.2932086Z","primaryEndpoints":{"blob":"https://ps8157.blob.core.windows.net/","queue":"https://ps8157.queue.core.windows.net/","table":"https://ps8157.table.core.windows.net/","file":"https://ps8157.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/pu4tt6iq7w6y4azscripts","name":"pu4tt6iq7w6y4azscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:36:05.1574351Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:36:05.1574351Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:36:05.0636947Z","primaryEndpoints":{"dfs":"https://pu4tt6iq7w6y4azscripts.dfs.core.windows.net/","web":"https://pu4tt6iq7w6y4azscripts.z13.web.core.windows.net/","blob":"https://pu4tt6iq7w6y4azscripts.blob.core.windows.net/","queue":"https://pu4tt6iq7w6y4azscripts.queue.core.windows.net/","table":"https://pu4tt6iq7w6y4azscripts.table.core.windows.net/","file":"https://pu4tt6iq7w6y4azscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/s52mrqm3f4alqazscripts","name":"s52mrqm3f4alqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:10:24.1199711Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:10:24.1199711Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:10:24.0261417Z","primaryEndpoints":{"dfs":"https://s52mrqm3f4alqazscripts.dfs.core.windows.net/","web":"https://s52mrqm3f4alqazscripts.z13.web.core.windows.net/","blob":"https://s52mrqm3f4alqazscripts.blob.core.windows.net/","queue":"https://s52mrqm3f4alqazscripts.queue.core.windows.net/","table":"https://s52mrqm3f4alqazscripts.table.core.windows.net/","file":"https://s52mrqm3f4alqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-001/providers/Microsoft.Storage/storageAccounts/tagsa060120","name":"tagsa060120","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:52:07.5401797Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:52:07.5401797Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-12-01T23:52:07.4151388Z","primaryEndpoints":{"blob":"https://tagsa060120.blob.core.windows.net/","queue":"https://tagsa060120.queue.core.windows.net/","table":"https://tagsa060120.table.core.windows.net/","file":"https://tagsa060120.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-001/providers/Microsoft.Storage/storageAccounts/tagsa1","name":"tagsa1","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:46:55.5232804Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:46:55.5232804Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-12-01T23:46:55.3983021Z","primaryEndpoints":{"blob":"https://tagsa1.blob.core.windows.net/","queue":"https://tagsa1.queue.core.windows.net/","table":"https://tagsa1.table.core.windows.net/","file":"https://tagsa1.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/testquerystrrgd7sbsebf","name":"testquerystrrgd7sbsebf","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T21:59:44.6267473Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T21:59:44.6267473Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-30T21:59:44.5173806Z","primaryEndpoints":{"dfs":"https://testquerystrrgd7sbsebf.dfs.core.windows.net/","web":"https://testquerystrrgd7sbsebf.z13.web.core.windows.net/","blob":"https://testquerystrrgd7sbsebf.blob.core.windows.net/","queue":"https://testquerystrrgd7sbsebf.queue.core.windows.net/","table":"https://testquerystrrgd7sbsebf.table.core.windows.net/","file":"https://testquerystrrgd7sbsebf.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Storage/storageAccounts/testquerystrsub000002","name":"testquerystrsub000002","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T22:47:11.5594035Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T22:47:11.5594035Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-30T22:47:11.4500296Z","primaryEndpoints":{"dfs":"https://testquerystrsub000002.dfs.core.windows.net/","web":"https://testquerystrsub000002.z13.web.core.windows.net/","blob":"https://testquerystrsub000002.blob.core.windows.net/","queue":"https://testquerystrsub000002.queue.core.windows.net/","table":"https://testquerystrsub000002.table.core.windows.net/","file":"https://testquerystrsub000002.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/zsgfl3y54h4roazscripts","name":"zsgfl3y54h4roazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:23:30.9993819Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:23:30.9993819Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:23:30.9212598Z","primaryEndpoints":{"dfs":"https://zsgfl3y54h4roazscripts.dfs.core.windows.net/","web":"https://zsgfl3y54h4roazscripts.z13.web.core.windows.net/","blob":"https://zsgfl3y54h4roazscripts.blob.core.windows.net/","queue":"https://zsgfl3y54h4roazscripts.queue.core.windows.net/","table":"https://zsgfl3y54h4roazscripts.table.core.windows.net/","file":"https://zsgfl3y54h4roazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OuldKVRG/providers/Microsoft.Storage/storageAccounts/ouldkvrgdiag631","name":"ouldkvrgdiag631","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-30T01:08:40.7742533Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-30T01:08:40.7742533Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-09-30T01:08:40.7273869Z","primaryEndpoints":{"blob":"https://ouldkvrgdiag631.blob.core.windows.net/","queue":"https://ouldkvrgdiag631.queue.core.windows.net/","table":"https://ouldkvrgdiag631.table.core.windows.net/","file":"https://ouldkvrgdiag631.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Ds-TestRg/providers/Microsoft.Storage/storageAccounts/rcp5ijt67ibzystandardsa","name":"rcp5ijt67ibzystandardsa","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-11T20:29:42.1186517Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-11T20:29:42.1186517Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-06-11T20:29:42.0248552Z","primaryEndpoints":{"dfs":"https://rcp5ijt67ibzystandardsa.dfs.core.windows.net/","web":"https://rcp5ijt67ibzystandardsa.z20.web.core.windows.net/","blob":"https://rcp5ijt67ibzystandardsa.blob.core.windows.net/","queue":"https://rcp5ijt67ibzystandardsa.queue.core.windows.net/","table":"https://rcp5ijt67ibzystandardsa.table.core.windows.net/","file":"https://rcp5ijt67ibzystandardsa.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Ds-TestRg/providers/Microsoft.Storage/storageAccounts/ngnd5lro6s4hwazscripts","name":"ngnd5lro6s4hwazscripts","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-27T20:05:24.1443076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-27T20:05:24.1443076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-08-27T20:05:24.0818298Z","primaryEndpoints":{"dfs":"https://ngnd5lro6s4hwazscripts.dfs.core.windows.net/","web":"https://ngnd5lro6s4hwazscripts.z22.web.core.windows.net/","blob":"https://ngnd5lro6s4hwazscripts.blob.core.windows.net/","queue":"https://ngnd5lro6s4hwazscripts.queue.core.windows.net/","table":"https://ngnd5lro6s4hwazscripts.table.core.windows.net/","file":"https://ngnd5lro6s4hwazscripts.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/querystringtesting","name":"querystringtesting","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-19T00:45:37.1313339Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-19T00:45:37.1313339Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-19T00:45:37.0375921Z","primaryEndpoints":{"dfs":"https://querystringtesting.dfs.core.windows.net/","web":"https://querystringtesting.z22.web.core.windows.net/","blob":"https://querystringtesting.blob.core.windows.net/","queue":"https://querystringtesting.queue.core.windows.net/","table":"https://querystringtesting.table.core.windows.net/","file":"https://querystringtesting.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://querystringtesting-secondary.dfs.core.windows.net/","web":"https://querystringtesting-secondary.z22.web.core.windows.net/","blob":"https://querystringtesting-secondary.blob.core.windows.net/","queue":"https://querystringtesting-secondary.queue.core.windows.net/","table":"https://querystringtesting-secondary.table.core.windows.net/"}}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/storageRG_Test/providers/Microsoft.Storage/storageAccounts/storageppbkfmj6idhfi","name":"storageppbkfmj6idhfi","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"azureFilesIdentityBasedAuthentication":{"directoryServiceOptions":"None"},"largeFileSharesState":"Disabled","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-26T19:31:40.0851913Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-26T19:31:40.0851913Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2019-09-26T19:31:40.0227316Z","primaryEndpoints":{"dfs":"https://storageppbkfmj6idhfi.dfs.core.windows.net/","web":"https://storageppbkfmj6idhfi.z22.web.core.windows.net/","blob":"https://storageppbkfmj6idhfi.blob.core.windows.net/","queue":"https://storageppbkfmj6idhfi.queue.core.windows.net/","table":"https://storageppbkfmj6idhfi.table.core.windows.net/","file":"https://storageppbkfmj6idhfi.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_ahmlsnzmqqi4feknaaclodu5_f35334ee-45ca-41b9-8197-7ee302270558/providers/Microsoft.Storage/storageAccounts/uuwkruo7izzc3woweye3pu2m","name":"uuwkruo7izzc3woweye3pu2m","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{"createdby":"azureimagebuilder","magicvalue":"0d819542a3774a2a8709401a7cd09eb8"},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T14:28:07.8959825Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T14:28:07.8959825Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-18T14:28:07.8022250Z","primaryEndpoints":{"dfs":"https://uuwkruo7izzc3woweye3pu2m.dfs.core.windows.net/","web":"https://uuwkruo7izzc3woweye3pu2m.z22.web.core.windows.net/","blob":"https://uuwkruo7izzc3woweye3pu2m.blob.core.windows.net/","queue":"https://uuwkruo7izzc3woweye3pu2m.queue.core.windows.net/","table":"https://uuwkruo7izzc3woweye3pu2m.table.core.windows.net/","file":"https://uuwkruo7izzc3woweye3pu2m.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_customizersvuy6z4jsk24rkl5uyddf_0a917524-46b5-4144-8dd2-6fcca0a178dc/providers/Microsoft.Storage/storageAccounts/2xyif5ke0trpdj1gwj6njiib","name":"2xyif5ke0trpdj1gwj6njiib","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"createdby":"azureimagebuilder","magicvalue":"0d819542a3774a2a8709401a7cd09eb8"},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-21T19:41:34.2371826Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-21T19:41:34.2371826Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-21T19:41:34.1590468Z","primaryEndpoints":{"dfs":"https://2xyif5ke0trpdj1gwj6njiib.dfs.core.windows.net/","web":"https://2xyif5ke0trpdj1gwj6njiib.z5.web.core.windows.net/","blob":"https://2xyif5ke0trpdj1gwj6njiib.blob.core.windows.net/","queue":"https://2xyif5ke0trpdj1gwj6njiib.queue.core.windows.net/","table":"https://2xyif5ke0trpdj1gwj6njiib.table.core.windows.net/","file":"https://2xyif5ke0trpdj1gwj6njiib.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/0924917e-8d29-4d74-924e-3445a1087486/providers/Microsoft.Storage/storageAccounts/store6btd3ei6sqhcs","name":"store6btd3ei6sqhcs","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-09T00:14:52.9109348Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-09T00:14:52.9109348Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-09T00:14:52.8484136Z","primaryEndpoints":{"dfs":"https://store6btd3ei6sqhcs.dfs.core.windows.net/","web":"https://store6btd3ei6sqhcs.z5.web.core.windows.net/","blob":"https://store6btd3ei6sqhcs.blob.core.windows.net/","queue":"https://store6btd3ei6sqhcs.queue.core.windows.net/","table":"https://store6btd3ei6sqhcs.table.core.windows.net/","file":"https://store6btd3ei6sqhcs.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/8663c347-6f8d-40ba-8efa-751f4c7a6616/providers/Microsoft.Storage/storageAccounts/store6hxbah355sekm","name":"store6hxbah355sekm","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:40:25.5414749Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:40:25.5414749Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-08T23:40:25.4633403Z","primaryEndpoints":{"dfs":"https://store6hxbah355sekm.dfs.core.windows.net/","web":"https://store6hxbah355sekm.z5.web.core.windows.net/","blob":"https://store6hxbah355sekm.blob.core.windows.net/","queue":"https://store6hxbah355sekm.queue.core.windows.net/","table":"https://store6hxbah355sekm.table.core.windows.net/","file":"https://store6hxbah355sekm.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/919f9b58-7a4d-48b6-b3e4-39729ef7dae5/providers/Microsoft.Storage/storageAccounts/storedydxa7ddiy7pu","name":"storedydxa7ddiy7pu","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:35:27.2123365Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:35:27.2123365Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-08T23:35:27.1497456Z","primaryEndpoints":{"dfs":"https://storedydxa7ddiy7pu.dfs.core.windows.net/","web":"https://storedydxa7ddiy7pu.z5.web.core.windows.net/","blob":"https://storedydxa7ddiy7pu.blob.core.windows.net/","queue":"https://storedydxa7ddiy7pu.queue.core.windows.net/","table":"https://storedydxa7ddiy7pu.table.core.windows.net/","file":"https://storedydxa7ddiy7pu.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shenglol-ps-test-01/providers/Microsoft.Storage/storageAccounts/testwhatifdelta","name":"testwhatifdelta","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-23T20:41:30.4179299Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-23T20:41:30.4179299Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Cool","provisioningState":"Succeeded","creationTime":"2020-06-23T20:41:30.3397952Z","primaryEndpoints":{"dfs":"https://testwhatifdelta.dfs.core.windows.net/","web":"https://testwhatifdelta.z5.web.core.windows.net/","blob":"https://testwhatifdelta.blob.core.windows.net/","queue":"https://testwhatifdelta.queue.core.windows.net/","table":"https://testwhatifdelta.table.core.windows.net/","file":"https://testwhatifdelta.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shenglol-what-if-usage/providers/Microsoft.Storage/storageAccounts/whatifusagestorage","name":"whatifusagestorage","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-30T19:08:04.2656695Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-30T19:08:04.2656695Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Cool","provisioningState":"Succeeded","creationTime":"2020-06-30T19:08:04.1875312Z","primaryEndpoints":{"dfs":"https://whatifusagestorage.dfs.core.windows.net/","web":"https://whatifusagestorage.z5.web.core.windows.net/","blob":"https://whatifusagestorage.blob.core.windows.net/","queue":"https://whatifusagestorage.queue.core.windows.net/","table":"https://whatifusagestorage.table.core.windows.net/","file":"https://whatifusagestorage.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available","secondaryLocation":"westcentralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://whatifusagestorage-secondary.dfs.core.windows.net/","web":"https://whatifusagestorage-secondary.z5.web.core.windows.net/","blob":"https://whatifusagestorage-secondary.blob.core.windows.net/","queue":"https://whatifusagestorage-secondary.queue.core.windows.net/","table":"https://whatifusagestorage-secondary.table.core.windows.net/"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '37605'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:47:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 36bf32cb-7fff-4b2b-92ed-2455c9b061a2
+      - b143270d-aac9-443a-838c-ad21ea877fcb
+      - 9d74993d-4568-4947-92b6-9f4cdde82cce
+      - 317e577c-4d1e-4a66-9263-6fa5f0605780
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage container generate-sas
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --account-name --name --permissions --expiry --https-only -o
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Storage/storageAccounts/testquerystrsub000002/listKeys?api-version=2019-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:47:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob url
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -c -n --account-name
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/storageAccounts?api-version=2019-06-01
+  response:
+    body:
+      string: '{"value":[{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/cd2zky4hqprtqazscripts","name":"cd2zky4hqprtqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T23:38:56.0153662Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T23:38:56.0153662Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T23:38:55.9372995Z","primaryEndpoints":{"dfs":"https://cd2zky4hqprtqazscripts.dfs.core.windows.net/","web":"https://cd2zky4hqprtqazscripts.z13.web.core.windows.net/","blob":"https://cd2zky4hqprtqazscripts.blob.core.windows.net/","queue":"https://cd2zky4hqprtqazscripts.queue.core.windows.net/","table":"https://cd2zky4hqprtqazscripts.table.core.windows.net/","file":"https://cd2zky4hqprtqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/fiyvqecwxzhoeazscripts","name":"fiyvqecwxzhoeazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:02:55.0118805Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:02:55.0118805Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T21:02:54.9493943Z","primaryEndpoints":{"dfs":"https://fiyvqecwxzhoeazscripts.dfs.core.windows.net/","web":"https://fiyvqecwxzhoeazscripts.z13.web.core.windows.net/","blob":"https://fiyvqecwxzhoeazscripts.blob.core.windows.net/","queue":"https://fiyvqecwxzhoeazscripts.queue.core.windows.net/","table":"https://fiyvqecwxzhoeazscripts.table.core.windows.net/","file":"https://fiyvqecwxzhoeazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/k22wclrgt5jvsazscripts","name":"k22wclrgt5jvsazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T20:59:13.0717595Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T20:59:13.0717595Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T20:59:12.9936090Z","primaryEndpoints":{"dfs":"https://k22wclrgt5jvsazscripts.dfs.core.windows.net/","web":"https://k22wclrgt5jvsazscripts.z13.web.core.windows.net/","blob":"https://k22wclrgt5jvsazscripts.blob.core.windows.net/","queue":"https://k22wclrgt5jvsazscripts.queue.core.windows.net/","table":"https://k22wclrgt5jvsazscripts.table.core.windows.net/","file":"https://k22wclrgt5jvsazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/k3a2yb5gt77eqazscripts","name":"k3a2yb5gt77eqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:05:09.4694619Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-13T21:05:09.4694619Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-13T21:05:09.3757042Z","primaryEndpoints":{"dfs":"https://k3a2yb5gt77eqazscripts.dfs.core.windows.net/","web":"https://k3a2yb5gt77eqazscripts.z13.web.core.windows.net/","blob":"https://k3a2yb5gt77eqazscripts.blob.core.windows.net/","queue":"https://k3a2yb5gt77eqazscripts.queue.core.windows.net/","table":"https://k3a2yb5gt77eqazscripts.table.core.windows.net/","file":"https://k3a2yb5gt77eqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/lff5jayqeemiwazscripts","name":"lff5jayqeemiwazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:38:49.5175169Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:38:49.5175169Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:38:49.4237645Z","primaryEndpoints":{"dfs":"https://lff5jayqeemiwazscripts.dfs.core.windows.net/","web":"https://lff5jayqeemiwazscripts.z13.web.core.windows.net/","blob":"https://lff5jayqeemiwazscripts.blob.core.windows.net/","queue":"https://lff5jayqeemiwazscripts.queue.core.windows.net/","table":"https://lff5jayqeemiwazscripts.table.core.windows.net/","file":"https://lff5jayqeemiwazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/newquerystringtest1675","name":"newquerystringtest1675","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-29T17:35:56.3010786Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-29T17:35:56.3010786Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-29T17:35:56.2073543Z","primaryEndpoints":{"dfs":"https://newquerystringtest1675.dfs.core.windows.net/","web":"https://newquerystringtest1675.z13.web.core.windows.net/","blob":"https://newquerystringtest1675.blob.core.windows.net/","queue":"https://newquerystringtest1675.queue.core.windows.net/","table":"https://newquerystringtest1675.table.core.windows.net/","file":"https://newquerystringtest1675.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OuldKVRG/providers/Microsoft.Storage/storageAccounts/ouldkvrgdiag","name":"ouldkvrgdiag","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-27T22:10:49.6924558Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-27T22:10:49.6924558Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-09-27T22:10:49.6143508Z","primaryEndpoints":{"blob":"https://ouldkvrgdiag.blob.core.windows.net/","queue":"https://ouldkvrgdiag.queue.core.windows.net/","table":"https://ouldkvrgdiag.table.core.windows.net/","file":"https://ouldkvrgdiag.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps8973/providers/Microsoft.Storage/storageAccounts/ps1305","name":"ps1305","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:38:07.6760407Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:38:07.6760407Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-05-14T21:38:07.5979258Z","primaryEndpoints":{"blob":"https://ps1305.blob.core.windows.net/","queue":"https://ps1305.queue.core.windows.net/","table":"https://ps1305.table.core.windows.net/","file":"https://ps1305.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps7370/providers/Microsoft.Storage/storageAccounts/ps8157","name":"ps8157","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:40:09.3713967Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-14T21:40:09.3713967Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-05-14T21:40:09.2932086Z","primaryEndpoints":{"blob":"https://ps8157.blob.core.windows.net/","queue":"https://ps8157.queue.core.windows.net/","table":"https://ps8157.table.core.windows.net/","file":"https://ps8157.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/pu4tt6iq7w6y4azscripts","name":"pu4tt6iq7w6y4azscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:36:05.1574351Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:36:05.1574351Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:36:05.0636947Z","primaryEndpoints":{"dfs":"https://pu4tt6iq7w6y4azscripts.dfs.core.windows.net/","web":"https://pu4tt6iq7w6y4azscripts.z13.web.core.windows.net/","blob":"https://pu4tt6iq7w6y4azscripts.blob.core.windows.net/","queue":"https://pu4tt6iq7w6y4azscripts.queue.core.windows.net/","table":"https://pu4tt6iq7w6y4azscripts.table.core.windows.net/","file":"https://pu4tt6iq7w6y4azscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/s52mrqm3f4alqazscripts","name":"s52mrqm3f4alqazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:10:24.1199711Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:10:24.1199711Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:10:24.0261417Z","primaryEndpoints":{"dfs":"https://s52mrqm3f4alqazscripts.dfs.core.windows.net/","web":"https://s52mrqm3f4alqazscripts.z13.web.core.windows.net/","blob":"https://s52mrqm3f4alqazscripts.blob.core.windows.net/","queue":"https://s52mrqm3f4alqazscripts.queue.core.windows.net/","table":"https://s52mrqm3f4alqazscripts.table.core.windows.net/","file":"https://s52mrqm3f4alqazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-001/providers/Microsoft.Storage/storageAccounts/tagsa060120","name":"tagsa060120","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:52:07.5401797Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:52:07.5401797Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-12-01T23:52:07.4151388Z","primaryEndpoints":{"blob":"https://tagsa060120.blob.core.windows.net/","queue":"https://tagsa060120.queue.core.windows.net/","table":"https://tagsa060120.table.core.windows.net/","file":"https://tagsa060120.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-001/providers/Microsoft.Storage/storageAccounts/tagsa1","name":"tagsa1","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:46:55.5232804Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-01T23:46:55.5232804Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2020-12-01T23:46:55.3983021Z","primaryEndpoints":{"blob":"https://tagsa1.blob.core.windows.net/","queue":"https://tagsa1.queue.core.windows.net/","table":"https://tagsa1.table.core.windows.net/","file":"https://tagsa1.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/testquerystrrgd7sbsebf","name":"testquerystrrgd7sbsebf","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T21:59:44.6267473Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T21:59:44.6267473Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-30T21:59:44.5173806Z","primaryEndpoints":{"dfs":"https://testquerystrrgd7sbsebf.dfs.core.windows.net/","web":"https://testquerystrrgd7sbsebf.z13.web.core.windows.net/","blob":"https://testquerystrrgd7sbsebf.blob.core.windows.net/","queue":"https://testquerystrrgd7sbsebf.queue.core.windows.net/","table":"https://testquerystrrgd7sbsebf.table.core.windows.net/","file":"https://testquerystrrgd7sbsebf.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Storage/storageAccounts/testquerystrsub000002","name":"testquerystrsub000002","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T22:47:11.5594035Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-30T22:47:11.5594035Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-30T22:47:11.4500296Z","primaryEndpoints":{"dfs":"https://testquerystrsub000002.dfs.core.windows.net/","web":"https://testquerystrsub000002.z13.web.core.windows.net/","blob":"https://testquerystrsub000002.blob.core.windows.net/","queue":"https://testquerystrsub000002.queue.core.windows.net/","table":"https://testquerystrsub000002.table.core.windows.net/","file":"https://testquerystrsub000002.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Gokul-TestRG4/providers/Microsoft.Storage/storageAccounts/zsgfl3y54h4roazscripts","name":"zsgfl3y54h4roazscripts","type":"Microsoft.Storage/storageAccounts","location":"eastus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:23:30.9993819Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-07-14T20:23:30.9993819Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-07-14T20:23:30.9212598Z","primaryEndpoints":{"dfs":"https://zsgfl3y54h4roazscripts.dfs.core.windows.net/","web":"https://zsgfl3y54h4roazscripts.z13.web.core.windows.net/","blob":"https://zsgfl3y54h4roazscripts.blob.core.windows.net/","queue":"https://zsgfl3y54h4roazscripts.queue.core.windows.net/","table":"https://zsgfl3y54h4roazscripts.table.core.windows.net/","file":"https://zsgfl3y54h4roazscripts.file.core.windows.net/"},"primaryLocation":"eastus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/OuldKVRG/providers/Microsoft.Storage/storageAccounts/ouldkvrgdiag631","name":"ouldkvrgdiag631","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-30T01:08:40.7742533Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-30T01:08:40.7742533Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-09-30T01:08:40.7273869Z","primaryEndpoints":{"blob":"https://ouldkvrgdiag631.blob.core.windows.net/","queue":"https://ouldkvrgdiag631.queue.core.windows.net/","table":"https://ouldkvrgdiag631.table.core.windows.net/","file":"https://ouldkvrgdiag631.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Ds-TestRg/providers/Microsoft.Storage/storageAccounts/rcp5ijt67ibzystandardsa","name":"rcp5ijt67ibzystandardsa","type":"Microsoft.Storage/storageAccounts","location":"eastus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-11T20:29:42.1186517Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-11T20:29:42.1186517Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-06-11T20:29:42.0248552Z","primaryEndpoints":{"dfs":"https://rcp5ijt67ibzystandardsa.dfs.core.windows.net/","web":"https://rcp5ijt67ibzystandardsa.z20.web.core.windows.net/","blob":"https://rcp5ijt67ibzystandardsa.blob.core.windows.net/","queue":"https://rcp5ijt67ibzystandardsa.queue.core.windows.net/","table":"https://rcp5ijt67ibzystandardsa.table.core.windows.net/","file":"https://rcp5ijt67ibzystandardsa.file.core.windows.net/"},"primaryLocation":"eastus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Ds-TestRg/providers/Microsoft.Storage/storageAccounts/ngnd5lro6s4hwazscripts","name":"ngnd5lro6s4hwazscripts","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-27T20:05:24.1443076Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-08-27T20:05:24.1443076Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-08-27T20:05:24.0818298Z","primaryEndpoints":{"dfs":"https://ngnd5lro6s4hwazscripts.dfs.core.windows.net/","web":"https://ngnd5lro6s4hwazscripts.z22.web.core.windows.net/","blob":"https://ngnd5lro6s4hwazscripts.blob.core.windows.net/","queue":"https://ngnd5lro6s4hwazscripts.queue.core.windows.net/","table":"https://ngnd5lro6s4hwazscripts.table.core.windows.net/","file":"https://ngnd5lro6s4hwazscripts.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TemplateSpecsCLI/providers/Microsoft.Storage/storageAccounts/querystringtesting","name":"querystringtesting","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","allowBlobPublicAccess":true,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-19T00:45:37.1313339Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-19T00:45:37.1313339Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-19T00:45:37.0375921Z","primaryEndpoints":{"dfs":"https://querystringtesting.dfs.core.windows.net/","web":"https://querystringtesting.z22.web.core.windows.net/","blob":"https://querystringtesting.blob.core.windows.net/","queue":"https://querystringtesting.queue.core.windows.net/","table":"https://querystringtesting.table.core.windows.net/","file":"https://querystringtesting.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://querystringtesting-secondary.dfs.core.windows.net/","web":"https://querystringtesting-secondary.z22.web.core.windows.net/","blob":"https://querystringtesting-secondary.blob.core.windows.net/","queue":"https://querystringtesting-secondary.queue.core.windows.net/","table":"https://querystringtesting-secondary.table.core.windows.net/"}}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/storageRG_Test/providers/Microsoft.Storage/storageAccounts/storageppbkfmj6idhfi","name":"storageppbkfmj6idhfi","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"azureFilesIdentityBasedAuthentication":{"directoryServiceOptions":"None"},"largeFileSharesState":"Disabled","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-26T19:31:40.0851913Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-09-26T19:31:40.0851913Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2019-09-26T19:31:40.0227316Z","primaryEndpoints":{"dfs":"https://storageppbkfmj6idhfi.dfs.core.windows.net/","web":"https://storageppbkfmj6idhfi.z22.web.core.windows.net/","blob":"https://storageppbkfmj6idhfi.blob.core.windows.net/","queue":"https://storageppbkfmj6idhfi.queue.core.windows.net/","table":"https://storageppbkfmj6idhfi.table.core.windows.net/","file":"https://storageppbkfmj6idhfi.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_cancel_ahmlsnzmqqi4feknaaclodu5_f35334ee-45ca-41b9-8197-7ee302270558/providers/Microsoft.Storage/storageAccounts/uuwkruo7izzc3woweye3pu2m","name":"uuwkruo7izzc3woweye3pu2m","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{"createdby":"azureimagebuilder","magicvalue":"0d819542a3774a2a8709401a7cd09eb8"},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T14:28:07.8959825Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-18T14:28:07.8959825Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-18T14:28:07.8022250Z","primaryEndpoints":{"dfs":"https://uuwkruo7izzc3woweye3pu2m.dfs.core.windows.net/","web":"https://uuwkruo7izzc3woweye3pu2m.z22.web.core.windows.net/","blob":"https://uuwkruo7izzc3woweye3pu2m.blob.core.windows.net/","queue":"https://uuwkruo7izzc3woweye3pu2m.queue.core.windows.net/","table":"https://uuwkruo7izzc3woweye3pu2m.table.core.windows.net/","file":"https://uuwkruo7izzc3woweye3pu2m.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IT_img_tmpl_customizersvuy6z4jsk24rkl5uyddf_0a917524-46b5-4144-8dd2-6fcca0a178dc/providers/Microsoft.Storage/storageAccounts/2xyif5ke0trpdj1gwj6njiib","name":"2xyif5ke0trpdj1gwj6njiib","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"createdby":"azureimagebuilder","magicvalue":"0d819542a3774a2a8709401a7cd09eb8"},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_2","networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-21T19:41:34.2371826Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-12-21T19:41:34.2371826Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-12-21T19:41:34.1590468Z","primaryEndpoints":{"dfs":"https://2xyif5ke0trpdj1gwj6njiib.dfs.core.windows.net/","web":"https://2xyif5ke0trpdj1gwj6njiib.z5.web.core.windows.net/","blob":"https://2xyif5ke0trpdj1gwj6njiib.blob.core.windows.net/","queue":"https://2xyif5ke0trpdj1gwj6njiib.queue.core.windows.net/","table":"https://2xyif5ke0trpdj1gwj6njiib.table.core.windows.net/","file":"https://2xyif5ke0trpdj1gwj6njiib.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/0924917e-8d29-4d74-924e-3445a1087486/providers/Microsoft.Storage/storageAccounts/store6btd3ei6sqhcs","name":"store6btd3ei6sqhcs","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-09T00:14:52.9109348Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-09T00:14:52.9109348Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-09T00:14:52.8484136Z","primaryEndpoints":{"dfs":"https://store6btd3ei6sqhcs.dfs.core.windows.net/","web":"https://store6btd3ei6sqhcs.z5.web.core.windows.net/","blob":"https://store6btd3ei6sqhcs.blob.core.windows.net/","queue":"https://store6btd3ei6sqhcs.queue.core.windows.net/","table":"https://store6btd3ei6sqhcs.table.core.windows.net/","file":"https://store6btd3ei6sqhcs.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/8663c347-6f8d-40ba-8efa-751f4c7a6616/providers/Microsoft.Storage/storageAccounts/store6hxbah355sekm","name":"store6hxbah355sekm","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:40:25.5414749Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:40:25.5414749Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-08T23:40:25.4633403Z","primaryEndpoints":{"dfs":"https://store6hxbah355sekm.dfs.core.windows.net/","web":"https://store6hxbah355sekm.z5.web.core.windows.net/","blob":"https://store6hxbah355sekm.blob.core.windows.net/","queue":"https://store6hxbah355sekm.queue.core.windows.net/","table":"https://store6hxbah355sekm.table.core.windows.net/","file":"https://store6hxbah355sekm.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/919f9b58-7a4d-48b6-b3e4-39729ef7dae5/providers/Microsoft.Storage/storageAccounts/storedydxa7ddiy7pu","name":"storedydxa7ddiy7pu","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{"Blah":"Tataaaa","tag1":"tag2","TagAlong":"TagOver","tagname":"tagvalue"},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:35:27.2123365Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-04-08T23:35:27.2123365Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-04-08T23:35:27.1497456Z","primaryEndpoints":{"dfs":"https://storedydxa7ddiy7pu.dfs.core.windows.net/","web":"https://storedydxa7ddiy7pu.z5.web.core.windows.net/","blob":"https://storedydxa7ddiy7pu.blob.core.windows.net/","queue":"https://storedydxa7ddiy7pu.queue.core.windows.net/","table":"https://storedydxa7ddiy7pu.table.core.windows.net/","file":"https://storedydxa7ddiy7pu.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shenglol-ps-test-01/providers/Microsoft.Storage/storageAccounts/testwhatifdelta","name":"testwhatifdelta","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-23T20:41:30.4179299Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-23T20:41:30.4179299Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Cool","provisioningState":"Succeeded","creationTime":"2020-06-23T20:41:30.3397952Z","primaryEndpoints":{"dfs":"https://testwhatifdelta.dfs.core.windows.net/","web":"https://testwhatifdelta.z5.web.core.windows.net/","blob":"https://testwhatifdelta.blob.core.windows.net/","queue":"https://testwhatifdelta.queue.core.windows.net/","table":"https://testwhatifdelta.table.core.windows.net/","file":"https://testwhatifdelta.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available"}},{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/shenglol-what-if-usage/providers/Microsoft.Storage/storageAccounts/whatifusagestorage","name":"whatifusagestorage","type":"Microsoft.Storage/storageAccounts","location":"westus2","tags":{},"properties":{"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-30T19:08:04.2656695Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-06-30T19:08:04.2656695Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Cool","provisioningState":"Succeeded","creationTime":"2020-06-30T19:08:04.1875312Z","primaryEndpoints":{"dfs":"https://whatifusagestorage.dfs.core.windows.net/","web":"https://whatifusagestorage.z5.web.core.windows.net/","blob":"https://whatifusagestorage.blob.core.windows.net/","queue":"https://whatifusagestorage.queue.core.windows.net/","table":"https://whatifusagestorage.table.core.windows.net/","file":"https://whatifusagestorage.file.core.windows.net/"},"primaryLocation":"westus2","statusOfPrimary":"available","secondaryLocation":"westcentralus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://whatifusagestorage-secondary.dfs.core.windows.net/","web":"https://whatifusagestorage-secondary.z5.web.core.windows.net/","blob":"https://whatifusagestorage-secondary.blob.core.windows.net/","queue":"https://whatifusagestorage-secondary.queue.core.windows.net/","table":"https://whatifusagestorage-secondary.table.core.windows.net/"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '37605'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:47:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 245d82e8-a871-43a9-a04a-f1360ff4b91f
+      - 0eb4e718-1442-409e-be81-73b60270c824
+      - 809b2aec-e4d5-49df-80aa-e071b8df7638
+      - 4251422d-e210-4deb-803d-13e13a1713a6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage blob url
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -c -n --account-name
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-storage/16.0.0 Python/3.8.3 (Windows-10-10.0.19041-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Storage/storageAccounts/testquerystrsub000002/listKeys?api-version=2019-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '288'
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:47:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - testquerystrsub7wxmqlwxr.blob.core.windows.net
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate?se=2020-12-31T10%3A47Z&sp=rwdl&spr=https&sv=2018-11-09&sr=c&sig=vl3WZnZCxUpKyMpjKDtKWnVsG0CPqstHdLgzNDRxSnc%3D
+  response:
+    body:
+      string: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \   \"contentVersion\": \"1.0.0.0\",\r\n    /*\r\n    comment\r\n    */\r\n
+        \   \"parameters\": {\r\n      \"rgName\": {\r\n        \"type\": \"string\"\r\n
+        \     },\r\n      \"rgLocation\": {\r\n        \"type\": \"string\"\r\n      },\r\n
+        \     \"keyVaultName\": {\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n
+        \   \"variables\": {},\r\n    \"resources\": [\r\n      {\r\n        \"type\":
+        \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\": \"2020-10-01\",\r\n
+        \       \"name\": \"deploymentRg\",\r\n        \"location\": \"[parameters('rgLocation')]\",\r\n
+        \       \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n          \"templateLink\":
+        {\r\n            \"relativePath\":\"create_resource_group.json\",\r\n            \"contentVersion\":\"1.0.0.0\"\r\n
+        \         },\r\n          \"parameters\": {\r\n              \"rgName\":{\"value\":
+        \"[parameters('rgName')]\"},\r\n              \"rgLocation\":{\"value\": \"[parameters('rgLocation')]\"}\r\n
+        \         }\r\n        }\r\n      },\r\n      {\r\n        \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \       \"apiVersion\": \"2020-10-01\",\r\n        \"name\": \"keyVaultAndSecret\",\r\n
+        \       \"resourceGroup\": \"[parameters('rgName')]\",\r\n        \"dependsOn\":
+        [\r\n          \"deploymentRg\"\r\n        ],\r\n        \"properties\": {\r\n
+        \         \"mode\": \"Incremental\",\r\n          \"templateLink\": {\r\n
+        \           \"relativePath\":\"create_key_vault_with_secret.json\",\r\n            \"contentVersion\":\"1.0.0.0\"\r\n
+        \         },\r\n          \"parameters\": {\r\n              \"keyVaultName\":{\"value\":
+        \"[parameters('keyVaultName')]\"}\r\n          }\r\n        }\r\n      }\r\n
+        \   ],\r\n    \"outputs\": {}\r\n  }\r\n  "
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - close
+      content-length:
+      - '1617'
+      content-md5:
+      - ESI4/sm+hg9k+mvH7VYWfQ==
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:47:40 GMT
+      etag:
+      - '"0x8D8AD14E5C6A7ED"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"templateLink": {"uri": "https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A47Z&sp=rwdl&spr=https&sv=2018-11-09&sr=c&sig=vl3WZnZCxUpKyMpjKDtKWnVsG0CPqstHdLgzNDRxSnc%3D"},
+      "parameters": {"keyVaultName": {"value": "querystrKV000004"}, "rgName": {"value":
+      "cli_test_query_str_sub000001"}, "rgLocation": {"value": "eastus"}}, "mode":
+      "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '509'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","location":"eastus","properties":{"templateLink":{"uri":"https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"1542923846996549396","parameters":{"rgName":{"type":"String","value":"cli_test_query_str_sub000001"},"rgLocation":{"type":"String","value":"eastus"},"keyVaultName":{"type":"String","value":"querystrKV000004"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:47:43.2087439Z","duration":"PT0S","correlationId":"2dcddd8d-61b7-41e4-9008-c4fdc724e745","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["eastus",null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg","resourceType":"Microsoft.Resources/deployments","resourceName":"deploymentRg"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret","resourceType":"Microsoft.Resources/deployments","resourceName":"keyVaultAndSecret"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVault"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004/secrets/mySecret"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2590'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:47:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Connection:
+      - close
+      Host:
+      - testquerystrsub7wxmqlwxr.blob.core.windows.net
+      User-Agent:
+      - Python-urllib/3.8
+    method: GET
+    uri: https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate?se=2020-12-31T10%3A47Z&sp=rwdl&spr=https&sv=2018-11-09&sr=c&sig=vl3WZnZCxUpKyMpjKDtKWnVsG0CPqstHdLgzNDRxSnc%3D
+  response:
+    body:
+      string: "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
+        \   \"contentVersion\": \"1.0.0.0\",\r\n    /*\r\n    comment\r\n    */\r\n
+        \   \"parameters\": {\r\n      \"rgName\": {\r\n        \"type\": \"string\"\r\n
+        \     },\r\n      \"rgLocation\": {\r\n        \"type\": \"string\"\r\n      },\r\n
+        \     \"keyVaultName\": {\r\n        \"type\": \"string\"\r\n      }\r\n    },\r\n
+        \   \"variables\": {},\r\n    \"resources\": [\r\n      {\r\n        \"type\":
+        \"Microsoft.Resources/deployments\",\r\n        \"apiVersion\": \"2020-10-01\",\r\n
+        \       \"name\": \"deploymentRg\",\r\n        \"location\": \"[parameters('rgLocation')]\",\r\n
+        \       \"properties\": {\r\n          \"mode\": \"Incremental\",\r\n          \"templateLink\":
+        {\r\n            \"relativePath\":\"create_resource_group.json\",\r\n            \"contentVersion\":\"1.0.0.0\"\r\n
+        \         },\r\n          \"parameters\": {\r\n              \"rgName\":{\"value\":
+        \"[parameters('rgName')]\"},\r\n              \"rgLocation\":{\"value\": \"[parameters('rgLocation')]\"}\r\n
+        \         }\r\n        }\r\n      },\r\n      {\r\n        \"type\": \"Microsoft.Resources/deployments\",\r\n
+        \       \"apiVersion\": \"2020-10-01\",\r\n        \"name\": \"keyVaultAndSecret\",\r\n
+        \       \"resourceGroup\": \"[parameters('rgName')]\",\r\n        \"dependsOn\":
+        [\r\n          \"deploymentRg\"\r\n        ],\r\n        \"properties\": {\r\n
+        \         \"mode\": \"Incremental\",\r\n          \"templateLink\": {\r\n
+        \           \"relativePath\":\"create_key_vault_with_secret.json\",\r\n            \"contentVersion\":\"1.0.0.0\"\r\n
+        \         },\r\n          \"parameters\": {\r\n              \"keyVaultName\":{\"value\":
+        \"[parameters('keyVaultName')]\"}\r\n          }\r\n        }\r\n      }\r\n
+        \   ],\r\n    \"outputs\": {}\r\n  }\r\n  "
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - close
+      content-length:
+      - '1617'
+      content-md5:
+      - ESI4/sm+hg9k+mvH7VYWfQ==
+      content-type:
+      - application/json
+      date:
+      - Wed, 30 Dec 2020 22:47:44 GMT
+      etag:
+      - '"0x8D8AD14E5C6A7ED"'
+      last-modified:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-blob-type:
+      - BlockBlob
+      x-ms-creation-time:
+      - Wed, 30 Dec 2020 22:47:33 GMT
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-server-encrypted:
+      - 'true'
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"templateLink": {"uri": "https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A47Z&sp=rwdl&spr=https&sv=2018-11-09&sr=c&sig=vl3WZnZCxUpKyMpjKDtKWnVsG0CPqstHdLgzNDRxSnc%3D"},
+      "parameters": {"keyVaultName": {"value": "querystrKV000004"}, "rgName": {"value":
+      "cli_test_query_str_sub000001"}, "rgLocation": {"value": "eastus"}}, "mode":
+      "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '509'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","location":"eastus","properties":{"templateLink":{"uri":"https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"1542923846996549396","parameters":{"rgName":{"type":"String","value":"cli_test_query_str_sub000001"},"rgLocation":{"type":"String","value":"eastus"},"keyVaultName":{"type":"String","value":"querystrKV000004"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:47:46.2473861Z","duration":"PT0S","correlationId":"688521e2-b943-42b6-be05-8dacc16c77cb","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["eastus",null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg","resourceType":"Microsoft.Resources/deployments","resourceName":"deploymentRg"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret","resourceType":"Microsoft.Resources/deployments","resourceName":"keyVaultAndSecret"}],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVault"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004/secrets/mySecret"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2590'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:47:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "properties": {"templateLink": {"uri": "https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate",
+      "queryString": "se=2020-12-31T10%3A47Z&sp=rwdl&spr=https&sv=2018-11-09&sr=c&sig=vl3WZnZCxUpKyMpjKDtKWnVsG0CPqstHdLgzNDRxSnc%3D"},
+      "parameters": {"keyVaultName": {"value": "querystrKV000004"}, "rgName": {"value":
+      "cli_test_query_str_sub000001"}, "rgLocation": {"value": "eastus"}}, "mode":
+      "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '509'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","location":"eastus","properties":{"templateLink":{"uri":"https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"1542923846996549396","parameters":{"rgName":{"type":"String","value":"cli_test_query_str_sub000001"},"rgLocation":{"type":"String","value":"eastus"},"keyVaultName":{"type":"String","value":"querystrKV000004"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-30T22:47:48.4371878Z","duration":"PT0.7179346S","correlationId":"836441b8-81a9-4a37-9982-6c68ca5202f3","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["eastus",null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg","resourceType":"Microsoft.Resources/deployments","resourceName":"deploymentRg"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret","resourceType":"Microsoft.Resources/deployments","resourceName":"keyVaultAndSecret"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mainTemplate/operationStatuses/08585922384177583602?api-version=2020-10-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:47:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922384177583602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:48:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922384177583602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:48:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922384177583602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:49:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922384177583602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:49:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585922384177583602?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:50:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment sub create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --template-uri --query-string --parameters
+      User-Agent:
+      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/mainTemplate","name":"mainTemplate","type":"Microsoft.Resources/deployments","location":"eastus","properties":{"templateLink":{"uri":"https://testquerystrsub000002.blob.core.windows.net/querystr000003/mainTemplate","contentVersion":"1.0.0.0"},"templateHash":"1542923846996549396","parameters":{"rgName":{"type":"String","value":"cli_test_query_str_sub000001"},"rgLocation":{"type":"String","value":"eastus"},"keyVaultName":{"type":"String","value":"querystrKV000004"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-30T22:49:59.947204Z","duration":"PT2M12.2279508S","correlationId":"836441b8-81a9-4a37-9982-6c68ca5202f3","providers":[{"namespace":"Microsoft.Resources","resourceTypes":[{"resourceType":"deployments","locations":["eastus",null]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/deploymentRg","resourceType":"Microsoft.Resources/deployments","resourceName":"deploymentRg"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.Resources/deployments/keyVaultAndSecret","resourceType":"Microsoft.Resources/deployments","resourceName":"keyVaultAndSecret"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_query_str_sub000001/providers/Microsoft.KeyVault/vaults/querystrKV000004/secrets/mySecret"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2079'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 30 Dec 2020 22:50:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

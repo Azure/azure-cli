@@ -773,16 +773,16 @@ class TemplateSpecsTest(ScenarioTest):
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
+            files = ['create_key_vault.json', 'create_key_vault_with_secret.json', 'create_resource_group.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
 
         result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" -d {display_name} --description {description} --version-description {version_description}', checks=[
             self.check('artifacts.length([])', 3),
-            self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-            self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-            self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
+            self.check_pattern('artifacts[0].path', 'artifacts.create_resource_group.json'),
+            self.check_pattern('artifacts[1].path', 'artifacts.create_key_vault.json'),
+            self.check_pattern('artifacts[2].path', 'artifacts.create_key_vault_with_secret.json')
         ]).get_output_in_json()
 
         self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -f "{tf}" --yes', checks=[
@@ -830,7 +830,7 @@ class TemplateSpecsTest(ScenarioTest):
 
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
+            files = ['create_key_vault.json', 'create_key_vault_with_secret.json', 'create_resource_group.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
@@ -838,9 +838,9 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts update -g {rg} -n {template_spec_name} -v 1.0 -f "{tf1}" --yes', checks=[
                  self.check('description', self.kwargs['version_description'].replace('"', '')),
                  self.check('artifacts.length([])', 3),
-                 self.check_pattern('artifacts[0].path', 'artifacts.createResourceGroup.json'),
-                 self.check_pattern('artifacts[1].path', 'artifacts.createKeyVault.json'),
-                 self.check_pattern('artifacts[2].path', 'artifacts.createKeyVaultWithSecret.json')
+                 self.check_pattern('artifacts[0].path', 'artifacts.create_resource_group.json'),
+                 self.check_pattern('artifacts[1].path', 'artifacts.create_key_vault.json'),
+                 self.check_pattern('artifacts[2].path', 'artifacts.create_key_vault_with_secret.json')
                  ])
 
         # clean up
@@ -974,7 +974,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         })
         path = os.path.join(curr_dir, 'artifacts')
         if not os.path.exists(path):
-            files = ['createKeyVault.json', 'createKeyVaultWithSecret.json', 'createResourceGroup.json']
+            files = ['create_key_vault.json', 'create_key_vault_with_secret.json', 'create_resource_group.json']
             os.makedirs(path)
             for f in files:
                 shutil.copy(os.path.join(curr_dir, f), path)
@@ -988,9 +988,9 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         output_path = self.cmd('ts export -g {rg} --name {template_spec_name} --version 1.0 --output-folder {output_folder}').get_output_in_json()
 
         template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
-        artifactFile = os.path.join(output_path, 'artifacts' + os.sep + 'createResourceGroup.json')
-        artifactFile1 = os.path.join(output_path, 'artifacts' + os.sep + 'createKeyVault.json')
-        artifactFile2 = os.path.join(output_path, 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
+        artifactFile = os.path.join(output_path, 'artifacts' + os.sep + 'create_resource_group.json')
+        artifactFile1 = os.path.join(output_path, 'artifacts' + os.sep + 'create_key_vault.json')
+        artifactFile2 = os.path.join(output_path, 'artifacts' + os.sep + 'create_key_vault_with_secret.json')
 
         self.assertTrue(os.path.isfile(template_file))
         self.assertTrue(os.path.isfile(artifactFile))
@@ -1001,9 +1001,9 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         output_path2 = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder2}').get_output_in_json()
 
         _template_file = os.path.join(output_path2, (self.kwargs['template_spec_name'] + '.json'))
-        _artifactFile = os.path.join(output_path2, 'artifacts' + os.sep + 'createResourceGroup.json')
-        _artifactFile1 = os.path.join(output_path2, 'artifacts' + os.sep + 'createKeyVault.json')
-        _artifactFile2 = os.path.join(output_path2, 'artifacts' + os.sep + 'createKeyVaultWithSecret.json')
+        _artifactFile = os.path.join(output_path2, 'artifacts' + os.sep + 'create_resource_group.json')
+        _artifactFile1 = os.path.join(output_path2, 'artifacts' + os.sep + 'create_key_vault.json')
+        _artifactFile2 = os.path.join(output_path2, 'artifacts' + os.sep + 'create_key_vault_with_secret.json')
 
         self.assertTrue(os.path.isfile(_template_file))
         self.assertTrue(os.path.isfile(_artifactFile))
@@ -1020,7 +1020,7 @@ class DeploymentTestsWithQueryString(ScenarioTest):
         container_name = self.create_random_name('querystr', 20)
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'resource_group_level_linked_template.json')
-        linked_template = os.path.join(curr_dir, 'storageAccountLinkedTemplate.json')
+        linked_template = os.path.join(curr_dir, 'storage_account_linked_template.json')
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -1030,24 +1030,21 @@ class DeploymentTestsWithQueryString(ScenarioTest):
             'linked_tf': linked_template
         })
 
-        self.cmd('storage account update -g {resource_group} --name {storage_account} --default-action Allow')
-        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {rg} --query "[0].value"').output)
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
 
         self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
 
         self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
-        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n storageAccountLinkedTemplate --account-name {storage_account} --account-key {storage_key}')
-        self.cmd('storage blob exists -c {container_name} -n storageAccountLinkedTemplate --account-name {storage_account} --account-key {storage_key}', 
-            self.check('exists', True))
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n storage_account_linked_template.json --account-name {storage_account} --account-key {storage_key}')
 
         from datetime import datetime, timedelta
         self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs['sas_token'] = self.cmd(
-            'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions dlrw --expiry {expiry} --https-only -otsv').output.strip()
+            'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions rw --expiry {expiry}  -otsv').output.strip()
 
         self.kwargs['blob_url'] = self.cmd(
-            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account}').output.strip()
+            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account} --account-key {storage_key}').output.strip()
 
         self.cmd('deployment group validate -g {resource_group} --template-uri {blob_url} --query-string "{sas_token}" --parameters projectName=qsproject', checks=[
             self.check('properties.provisioningState', 'Succeeded')
@@ -1064,9 +1061,9 @@ class DeploymentTestsWithQueryString(ScenarioTest):
         container_name = self.create_random_name('querystr', 20)
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         tf = os.path.join(curr_dir, 'subscription_level_linked_template.json')
-        linked_tf = os.path.join(curr_dir, 'createResourceGroup.json')
-        linked_tf1 = os.path.join(curr_dir, 'createKeyVault.json')
-        linked_tf2 = os.path.join(curr_dir, 'createKeyVaultWithSecret.json')
+        linked_tf = os.path.join(curr_dir, 'create_resource_group.json')
+        linked_tf1 = os.path.join(curr_dir, 'create_key_vault.json')
+        linked_tf2 = os.path.join(curr_dir, 'create_key_vault_with_secret.json')
 
         self.kwargs.update({
             'resource_group': resource_group,
@@ -1078,16 +1075,15 @@ class DeploymentTestsWithQueryString(ScenarioTest):
             'linked_tf1': linked_tf1,
             'linked_tf2': linked_tf2
         })
-        self.cmd('storage account update -g {resource_group} --name {storage_account} --default-action Allow')
 
-        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {rg} --query "[0].value"').output)
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
 
         self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
 
         self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
-        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n createResourceGroup --account-name {storage_account} --account-key {storage_key}')
-        self.cmd('storage blob upload -c {container_name} -f "{linked_tf1}" -n createKeyVault --account-name {storage_account} --account-key {storage_key}')
-        self.cmd('storage blob upload -c {container_name} -f "{linked_tf2}" -n createKeyVaultWithSecret --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n create_resource_group.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf1}" -n create_key_vault.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf2}" -n create_key_vault_with_secret.json --account-name {storage_account} --account-key {storage_key}')
 
         from datetime import datetime, timedelta
         self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
