@@ -2,6 +2,30 @@ Progress Bar for Long Running Operation
 ==========================================
 
 ## How to try
+### Install pricate package
+There are two ways to install the private package:
+1. Using msi (Windows platform)
+    - Click the [link](https://zuhdefault.blob.core.windows.net/cliext/Microsoft%20Azure%20CLI20201230141142.msi) 
+    to download the msi
+    - Find the msi file and install it. You may see the following page during installation, which is because that 
+    current msi hasn't been code signed. 
+    ![](assets/unsigned_msi_install1.png)
+    Please click **More info** and you will see the following information and click **Run anyway** to continue:
+    ![](assets/unsigned_msi_install2.png)
+
+2. Using pip (All platform including Windows, Linux, Mac)
+    - `pip install https://zuhdefault.blob.core.windows.net/cliext/azure_cli-2.17.0.post20201230141142-py3-none-any.whl`
+    - `pip install https://zuhdefault.blob.core.windows.net/cliext/azure_cli_core-2.17.0.post20201230141142-py3-none-any.whl`
+    
+    After installation, run `az --version` and you can see the following information:
+    ```
+    ❯ az --version
+    azure-cli                2.17.0.post20201230141142
+    
+    core                     2.17.0.post20201230141142
+    telemetry                          1.0.6
+    ```
+
 ### Prepare resource group
 `az group create -n mygroup -l eastus`
 
