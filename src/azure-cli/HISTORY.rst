@@ -2977,6 +2977,10 @@ Added Cluster commands and trusted_service_access_enabled parameter for Networkr
 * storage blob generate-sas: User delegation SAS token support with --as-user
 * storage container generate-sas: User delegation SAS token support with --as-user
 
+**Security**
+
+* Added new commands group `az security va` and sub groups `az security va scans` `az security va results` `az security va baseline`
+
 2.0.67
 ++++++
 * Introduced a new [Preview] status to tag to more clearly communicate to customers
