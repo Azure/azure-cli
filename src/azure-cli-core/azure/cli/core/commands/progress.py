@@ -175,7 +175,7 @@ class DeterminateStandardOut(ProgressViewBase):
         percent = args.get('percent', None)
         message = args.get('message', '')
         value = args.get('value', None)
-        if percent:
+        if percent is not None:
             progress = _format_value(message, percent)
         else:
             if value == "Finished":
