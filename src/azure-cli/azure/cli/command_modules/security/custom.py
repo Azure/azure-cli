@@ -352,49 +352,49 @@ def _construct_resource_id(client, resource_group_name, storage_account_name):
 
 def get_va_sql_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def list_va_sql_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def get_va_sql_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(scan_id, rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def list_va_sql_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def get_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def list_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.delete(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
 def update_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     if baseline_latest == True and baseline is None:
         return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
     elif baseline_latest == False and baseline is not None:
@@ -405,7 +405,7 @@ def update_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_nam
 
 def set_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
-    va_sql_resource_id = _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
+    va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     if baseline_latest == True and baseline is None:
         return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
     elif baseline_latest == False and baseline is not None:
@@ -414,7 +414,7 @@ def set_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, 
         raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
-def _construct_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
+def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
 
     if vm_name == None and agent_id == None and vm_uuid == None:
         return f'{vm_resource_id}/sqlServers/{server_name}/databases/{database_name}'

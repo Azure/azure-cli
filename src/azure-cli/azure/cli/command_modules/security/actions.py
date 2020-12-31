@@ -9,16 +9,6 @@ from collections import defaultdict
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
-# pylint: disable=protected-access
-class AppendBaselineLines(argparse._AppendAction):
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        try:
-            super(AppendBaselineLines, self).__call__(parser, namespace, values, option_string)
-        except ValueError:
-            raise CLIError("Unexpected error")
-
-
 class _AppendToDictionaryAction(argparse.Action):
 
     def __init__(self,
@@ -52,7 +42,6 @@ class _AppendToDictionaryAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         items = getattr(namespace, self.dest, None)
-        items = _copy_items_to_dict(items)
         key = values[0]
         value = values[1]
         if key in items:
@@ -61,14 +50,6 @@ class _AppendToDictionaryAction(argparse.Action):
             items[key] = list()
             items[key].append(value)
         setattr(namespace, self.dest, items)
-
-
-def _copy_items_to_dict(items):
-    if items is None:
-        return dict()
-    if type(items) is dict:
-        return items
-    raise CLIInternalError("Unexpected error")
 
 
 # pylint: disable=protected-access
