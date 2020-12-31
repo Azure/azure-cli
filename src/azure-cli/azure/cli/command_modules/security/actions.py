@@ -42,6 +42,8 @@ class _AppendToDictionaryAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         items = getattr(namespace, self.dest, None)
+        if items is None:
+            items = dict()
         key = values[0]
         value = values[1]
         if key in items:
