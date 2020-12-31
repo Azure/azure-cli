@@ -63,20 +63,18 @@ def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     return profile.get_subscription(subscription)
 
 
-def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
+def get_access_token(cmd, subscription=None, resource=None, scopes=None, resource_type=None, tenant=None):
     """
-    get AAD token to access to a specified resource
-    :param resource: Azure resource endpoints. Default to Azure Resource Manager
-    :param resource-type: Name of Azure resource endpoints. Can be used instead of resource.
+    get AAD token to access to a specified resource.
     Use 'az cloud show' command for other Azure resources
     """
-    if resource is None and resource_type is not None:
+    if resource is None and resource_type:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
         resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
-    else:
-        resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, tenant=tenant)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
+                                                        tenant=tenant)
 
     token_entry = creds[2]
     # MSIAuthentication's token entry has `expires_on`, while ADAL's token entry has `expiresOn`
@@ -105,17 +103,17 @@ def set_active_subscription(cmd, subscription):
     profile.set_active_subscription(subscription)
 
 
-def account_clear(cmd):
+def account_clear(cmd, clear_credential=False):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    profile.logout_all()
+    profile.logout_all(clear_credential)
 
 
-# pylint: disable=inconsistent-return-statements
+# pylint: disable=inconsistent-return-statements, too-many-branches
 def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
-          identity=False, use_device_code=False, use_cert_sn_issuer=None):
+          identity=False, use_device_code=False, use_cert_sn_issuer=None, tenant_access=False, environment=False):
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
@@ -125,6 +123,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if any([password, service_principal, username, identity, use_device_code]) and environment:
+        raise CLIError("usage error: '--environment' is not applicable with other arguments")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
@@ -136,8 +136,8 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if identity:
         if in_cloud_console():
-            return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(username, allow_no_subscriptions)
+            return profile.login_in_cloud_shell()
+        return profile.login_with_managed_identity(username, allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
@@ -150,8 +150,11 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     else:
         interactive = True
 
+    if environment:
+        return profile.login_with_environment_credential(find_subscriptions=not tenant_access)
+
     try:
-        subscriptions = profile.find_subscriptions_on_login(
+        subscriptions = profile.login(
             interactive,
             username,
             password,
@@ -159,7 +162,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
             tenant,
             use_device_code=use_device_code,
             allow_no_subscriptions=allow_no_subscriptions,
-            use_cert_sn_issuer=use_cert_sn_issuer)
+            use_cert_sn_issuer=use_cert_sn_issuer, find_subscriptions=not tenant_access)
     except AdalError as err:
         # try polish unfriendly server errors
         if username:
@@ -187,7 +190,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     return all_subscriptions
 
 
-def logout(cmd, username=None):
+def logout(cmd, username=None, clear_credential=False):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
@@ -195,12 +198,18 @@ def logout(cmd, username=None):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
         username = profile.get_current_account_user()
-    profile.logout(username)
+    profile.logout(username, clear_credential)
 
 
 def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
     return get_subscription_locations(cmd.cli_ctx)
+
+
+def export_msal_cache(cmd, path=None):  # pylint: disable=unused-argument
+    from azure.cli.core._identity import Identity
+    identity = Identity()
+    identity.serialize_token_cache(path)
 
 
 def check_cli(cmd):

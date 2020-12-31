@@ -103,7 +103,7 @@ def create_keyvault_data_plane_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return 'Bearer', Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0].get_token(), None
 
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     return KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
