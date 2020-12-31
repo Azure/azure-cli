@@ -11,9 +11,9 @@ from azure.mgmt.security.models import (SecurityContact,
                                         AssessmentStatus,
                                         IoTSecuritySolutionModel,
                                         UpdateIotSecuritySolutionData)
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from msrestazure.tools import resource_id
 from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 # --------------------------------------------------------------------------------------------
 # Security Tasks
@@ -392,36 +392,34 @@ def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, da
     return client.delete(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
-def update_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    if baseline_latest == True and baseline is None:
-        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
-    elif baseline_latest == False and baseline is not None:
-        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results = baseline)
-    else:
-        raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+    if baseline_latest is True and baseline is None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan=True)
+    if baseline_latest is False and baseline is not None:
+        return client.create_or_update(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results=baseline)
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
-def set_va_sql_baseline(cmd, client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
+def set_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
-    if baseline_latest == True and baseline is None:
-        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan = True)
-    elif baseline_latest == False and baseline is not None:
-        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results = baseline)
-    else:
-        raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
+    if baseline_latest is True and baseline is None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, latest_scan=True)
+    if baseline_latest is False and baseline is not None:
+        return client.add(workspace_id, _get_va_sql_api_version(), va_sql_resource_id, results=baseline)
+    raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
 def _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid):
 
-    if vm_name == None and agent_id == None and vm_uuid == None:
+    if vm_name is None and agent_id is None and vm_uuid is None:
         return f'{vm_resource_id}/sqlServers/{server_name}/databases/{database_name}'
-    elif vm_name != None and agent_id != None and vm_uuid != None:
-        return f'{vm_resource_id}/onPremiseMachines/{vm_name}_{agent_id}_{vm_uuid}/sqlServers/{server_name}/databases/{database_name}'
-    else:
-        raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
+    if vm_name is not None and agent_id is not None and vm_uuid is not None:
+        vm_identifier = f'{vm_name}_{agent_id}_{vm_uuid}'
+        return f'{vm_resource_id}/onPremiseMachines/{vm_identifier}/sqlServers/{server_name}/databases/{database_name}'
+    raise MutuallyExclusiveArgumentError('Please specify all of (--vm-name, --agent-id, --vm-uuid) for On-Premise resources, or none, other resource types')
 
 
 def _get_va_sql_api_version():

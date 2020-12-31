@@ -5,6 +5,7 @@
 # pylint: disable=protected-access
 
 import argparse
+from argparse import OPTIONAL
 from collections import defaultdict
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -57,8 +58,27 @@ class _AppendToDictionaryAction(argparse.Action):
 # pylint: disable=protected-access
 class AppendBaselines(_AppendToDictionaryAction):
 
-    def __init__(self, option_strings, dest, nargs=None, const=None, default=None, type=None, choices=None, required=False, help=None, metavar=None):
-        super(AppendBaselines, self).__init__(option_strings, dest, nargs, const, default, type, choices, required, help, metavar)
+    def __init__(self,
+                 option_strings,
+                 dest, nargs=None,
+                 const=None,
+                 default=None,
+                 type=None,
+                 choices=None,
+                 required=False,
+                 help=None,
+                 metavar=None):
+        super(AppendBaselines, self).__init__(
+            option_strings,
+            dest,
+            nargs,
+            const,
+            default,
+            type,
+            choices,
+            required,
+            help,
+            metavar)
 
     def __call__(self, parser, namespace, values, option_string=None):
         try:
