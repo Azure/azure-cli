@@ -5,13 +5,38 @@ Progress Bar for Long Running Operation
 ### Install pricate package
 There are two ways to install the private package:
 1. Using msi (Windows platform)
+    - Run `az --version` to check if there is existing azure cli installed.
+      If yes and python location is not `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe`,
+      uninstall existing one and continue the following installation.
     - Click the [link](https://zuhdefault.blob.core.windows.net/cliext/Microsoft%20Azure%20CLI20201230141142.msi) 
     to download the msi
     - Find the msi file and install it. You may see the following page during installation, which is because that 
     current msi hasn't been code signed. 
-    ![](assets/unsigned_msi_install1.png)
-    Please click **More info** and you will see the following information and click **Run anyway** to continue:
-    ![](assets/unsigned_msi_install2.png)
+    
+        <img src="assets/unsigned_msi_install1.png" alt="smiley" height="380" width="370">
+    
+        ![](assets/unsigned_msi_install1.png){:height="50%" width="50%"}
+        Please click **More info** and you will see the following information:
+        
+        ![](assets/unsigned_msi_install2.png)
+        Click **Run anyway** to continue.
+        
+        You may be asked to allow the app because it is unknown publisher as shown below. Please click **Yes**
+        to continue.
+        ![](assets/user_account_control.png)
+        
+    When you finish the installation, run `az --version` and you could see the following information:
+    
+    ```                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    > az --version                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    azure-cli                         2.17.0
+    
+    core                              2.17.0
+    telemetry                          1.0.6
+ 
+    Python location 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe'
+    ``` 
+    Note: Please make sure your python location is `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe` 
 
 2. Using pip (All platform including Windows, Linux, Mac)
     - `pip install https://zuhdefault.blob.core.windows.net/cliext/azure_cli-2.17.0.post20201230141142-py3-none-any.whl`
@@ -25,6 +50,7 @@ There are two ways to install the private package:
     core                     2.17.0.post20201230141142
     telemetry                          1.0.6
     ```
+    Note: Please make sure the version for `azure-cli` and `core` is 2.17.0.post20201230141142.
 
 ### Prepare resource group
 `az group create -n mygroup -l eastus`
