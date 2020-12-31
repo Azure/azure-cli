@@ -13,12 +13,12 @@ There are two ways to install the private package:
     - Find the msi file and install it. You may see the following page during installation, which is because that 
     current msi hasn't been code signed. 
     
-        <img src="assets/unsigned_msi_install1.png" alt="smiley" height="380" width="370">
+        <img src="assets/unsigned_msi_install1.png" alt="unsigned_msi_install1" height="450" width="500">
     
-        ![](assets/unsigned_msi_install1.png){:height="50%" width="50%"}
         Please click **More info** and you will see the following information:
         
-        ![](assets/unsigned_msi_install2.png)
+        <img src="assets/unsigned_msi_install2.png" alt="unsigned_msi_install2" height="450" width="500">
+
         Click **Run anyway** to continue.
         
         You may be asked to allow the app because it is unknown publisher as shown below. Please click **Yes**
