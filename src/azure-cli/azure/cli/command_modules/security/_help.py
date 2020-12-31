@@ -101,7 +101,7 @@ short-summary: View Sql Vulnerability Assessment scan summaries.
 """
 
 helps['security va sql scans show'] = """
-type: group
+type: command
 short-summary: View Sql Vulnerability Assessment scan summaries.
 examples:
   - name: View Sql Vulnerability Assessment scan summary on an Azure virtual machine.
@@ -113,7 +113,7 @@ examples:
 """
 
 helps['security va sql scans list'] = """
-type: group
+type: command
 short-summary: List all Sql Vulnerability Assessment scan summaries.
 examples:
   - name: List all Sql Vulnerability Assessment scan summaries on an Azure virtual machine.
@@ -130,7 +130,7 @@ short-summary: View Sql Vulnerability Assessment scan results.
 """
 
 helps['security va sql results show'] = """
-type: group
+type: command
 short-summary: View Sql Vulnerability Assessment scan results.
 examples:
   - name: View Sql Vulnerability Assessment scan results on an Azure virtual machine.
@@ -142,7 +142,7 @@ examples:
 """
 
 helps['security va sql results list'] = """
-type: group
+type: command
 short-summary: View all Sql Vulnerability Assessment scan results.
 examples:
   - name: View all Sql Vulnerability Assessment scan results on an Azure virtual machine.
@@ -159,7 +159,7 @@ short-summary: View and manage Sql Vulnerability Assessment baseline.
 """
 
 helps['security va sql baseline show'] = """
-type: group
+type: command
 short-summary: View Sql Vulnerability Assessment rule baseline.
 examples:
   - name: View Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
@@ -171,7 +171,7 @@ examples:
 """
 
 helps['security va sql baseline list'] = """
-type: group
+type: command
 short-summary: View Sql Vulnerability Assessment baseline for all rules.
 examples:
   - name: View Sql Vulnerability Assessment baseline for all rules on an Azure virtual machine.
@@ -183,7 +183,7 @@ examples:
 """
 
 helps['security va sql baseline delete'] = """
-type: group
+type: command
 short-summary: Delete Sql Vulnerability Assessment rule baseline.
 examples:
   - name: Delete Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
@@ -195,7 +195,7 @@ examples:
 """
 
 helps['security va sql baseline update'] = """
-type: group
+type: command
 short-summary: Update Sql Vulnerability Assessment rule baseline. Replaces the current rule baseline.
 examples:
   - name: Update Sql Vulnerability Assessment rule baseline on an Azure virtual machine. Replaces the current rule baseline with latest scan results.
@@ -213,7 +213,7 @@ examples:
 """
 
 helps['security va sql baseline set'] = """
-type: group
+type: command
 short-summary: Sets Sql Vulnerability Assessment baseline. Replaces the current baseline.
 examples:
   - name: Sets Sql Vulnerability Assessment baseline on an Azure virtual machine. Replaces the current baseline with latest scan results.
