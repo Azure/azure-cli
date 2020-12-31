@@ -909,7 +909,8 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
             .assert_with_checks(JMESPathCheck('name', b))
 
         self.cmd('storage account revoke-delegation-keys -n {account} -g {rg}')
-        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+        time.sleep(60)  # By-design, it takes some time for RBAC system propagated with graph object change
 
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}', expect_failure=True)
 
