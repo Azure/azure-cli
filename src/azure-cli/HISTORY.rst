@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.17.1
+++++++
+
+**RDBMS**
+
+* Hotfix: `az mysql create`: Revert incorrect parameter name 'serv_name' to 'service_name'
+
 2.17.0
 ++++++
 
