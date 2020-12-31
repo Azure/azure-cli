@@ -254,7 +254,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
         enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
-        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None):
+        encryption_at_host=None, dedicated_host_group=None, enable_auto_update=None, patch_mode=None,
+        platform_fault_domain=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -458,6 +459,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
     if encryption_at_host is not None:
         vm_properties['securityProfile'] = {'encryptionAtHost': encryption_at_host}
+
+    if platform_fault_domain is not None:
+        vm_properties['platformFaultDomain'] = platform_fault_domain
 
     vm = {
         'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
