@@ -5,7 +5,7 @@ Release History
 
 2.17.1
 ++++++
-* Minor fixes
+* No changes
 
 2.17.0
 ++++++
