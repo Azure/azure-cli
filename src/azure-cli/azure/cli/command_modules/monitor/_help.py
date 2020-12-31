@@ -1334,9 +1334,6 @@ short-summary: Create a data export rule for a given workspace.
 examples:
   - name: Create a data export rule for a given workspace.
     text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable -t {table_name}
-  - name: Create a data export rule for a given workspace with all tables.
-    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --enable --all
-
 """
 
 helps['monitor log-analytics workspace data-export update'] = """
@@ -1344,7 +1341,7 @@ type: command
 short-summary: Update a data export rule for a given workspace.
 examples:
   - name: Update a data export rule for a given workspace.
-    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --all --enable false
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} -t {table_name} --enable false
 """
 
 helps['monitor log-analytics workspace data-export list'] = """

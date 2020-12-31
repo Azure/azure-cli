@@ -442,8 +442,6 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace data-export') as c:
         c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('enable_all_tables', options_list=['--all', '--export-all-tables'], arg_type=get_three_state_flag(),
-                   help="All workspace's tables are exported when this is enabled.")
         c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
                    help='An array of tables to export. if --export-all-tables is true, this argument should not be provided.')
         c.argument('destination', validator=process_workspace_data_export_destination,
