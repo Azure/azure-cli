@@ -1,6 +1,51 @@
 interactions:
 - request:
-    body: '{"location": "westus2", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --subnet-name
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001","name":"test_network_bastion_host000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T08:12:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 08:12:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "AzureBastionSubnet",
       "properties": {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
@@ -13,27 +58,27 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '217'
+      - '216'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"a6a65a32-c7e5-4d5a-97c4-78e261517391\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"etag\": \"W/\\\"2ca7854f-8f1f-44cf-9cd3-feec0705d615\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"110b9bf9-7b3e-4795-bd27-c8c89606b793\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"69e3555f-2be9-463e-b38e-b5d91c4efeea\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet\",\r\n
-        \       \"etag\": \"W/\\\"a6a65a32-c7e5-4d5a-97c4-78e261517391\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2ca7854f-8f1f-44cf-9cd3-feec0705d615\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -44,15 +89,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/846d27ab-b708-4457-895f-6f5fe3c2da14?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83cf3422-6afc-4649-b9c8-95a08fab8e60?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '1457'
+      - '1456'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:04 GMT
+      - Wed, 16 Dec 2020 08:12:15 GMT
       expires:
       - '-1'
       pragma:
@@ -65,9 +110,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6b9f99a5-fea5-4f3d-85d3-caec912d1cd2
+      - 83f79384-4a73-4d1e-81b1-061ec432bdf8
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1187'
     status:
       code: 201
       message: Created
@@ -85,9 +130,9 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/846d27ab-b708-4457-895f-6f5fe3c2da14?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/83cf3422-6afc-4649-b9c8-95a08fab8e60?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -99,7 +144,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:07 GMT
+      - Wed, 16 Dec 2020 08:12:18 GMT
       expires:
       - '-1'
       pragma:
@@ -116,7 +161,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 044ab0ac-2be3-4ba8-9519-343a1bd2bf34
+      - e43f8d97-4e79-4970-b0e1-ea2238f2668b
     status:
       code: 200
       message: OK
@@ -134,21 +179,21 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"6fd1d176-f61d-4b41-867c-c341106c307b\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"etag\": \"W/\\\"411266a2-c52b-48cf-90c2-5d1695cf5e71\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"110b9bf9-7b3e-4795-bd27-c8c89606b793\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"69e3555f-2be9-463e-b38e-b5d91c4efeea\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet\",\r\n
-        \       \"etag\": \"W/\\\"6fd1d176-f61d-4b41-867c-c341106c307b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"411266a2-c52b-48cf-90c2-5d1695cf5e71\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -159,13 +204,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1459'
+      - '1458'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:07 GMT
+      - Wed, 16 Dec 2020 08:12:19 GMT
       etag:
-      - W/"6fd1d176-f61d-4b41-867c-c341106c307b"
+      - W/"411266a2-c52b-48cf-90c2-5d1695cf5e71"
       expires:
       - '-1'
       pragma:
@@ -182,7 +227,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - dc8b7107-ae99-46bf-8002-4d7d977f509c
+      - 6d9621d1-a2f2-48aa-89cb-76089e358a11
     status:
       code: 200
       message: OK
@@ -200,21 +245,21 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"6fd1d176-f61d-4b41-867c-c341106c307b\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"etag\": \"W/\\\"411266a2-c52b-48cf-90c2-5d1695cf5e71\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"110b9bf9-7b3e-4795-bd27-c8c89606b793\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"69e3555f-2be9-463e-b38e-b5d91c4efeea\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet\",\r\n
-        \       \"etag\": \"W/\\\"6fd1d176-f61d-4b41-867c-c341106c307b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"411266a2-c52b-48cf-90c2-5d1695cf5e71\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -225,13 +270,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1459'
+      - '1458'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:08 GMT
+      - Wed, 16 Dec 2020 08:12:21 GMT
       etag:
-      - W/"6fd1d176-f61d-4b41-867c-c341106c307b"
+      - W/"411266a2-c52b-48cf-90c2-5d1695cf5e71"
       expires:
       - '-1'
       pragma:
@@ -248,13 +293,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 237ec32e-fdf3-43d4-8a92-5f64286dc51e
+      - 9494a8d8-7806-4a21-a2ed-56a3eb19b7f7
     status:
       code: 200
       message: OK
 - request:
     body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet",
-      "location": "westus2", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      "location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
       ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet",
       "name": "AzureBastionSubnet", "properties": {"addressPrefix": "10.0.0.0/24",
       "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
@@ -271,34 +316,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '934'
+      - '933'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"d6c56cba-54e6-4ae2-b482-c80db5fdf25e\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"etag\": \"W/\\\"984ab564-3ee0-4979-810b-f96ed1c40cd8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"110b9bf9-7b3e-4795-bd27-c8c89606b793\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"69e3555f-2be9-463e-b38e-b5d91c4efeea\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet\",\r\n
-        \       \"etag\": \"W/\\\"d6c56cba-54e6-4ae2-b482-c80db5fdf25e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"984ab564-3ee0-4979-810b-f96ed1c40cd8\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"vmSubnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/vmSubnet\",\r\n
-        \       \"etag\": \"W/\\\"d6c56cba-54e6-4ae2-b482-c80db5fdf25e\\\"\",\r\n
+        \       \"etag\": \"W/\\\"984ab564-3ee0-4979-810b-f96ed1c40cd8\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -307,15 +352,15 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/fd80fae6-c387-4980-ae1c-368eccad497a?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b7dc9266-466f-4561-8eb1-d9a6bfd321c5?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '2124'
+      - '2123'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:09 GMT
+      - Wed, 16 Dec 2020 08:12:23 GMT
       expires:
       - '-1'
       pragma:
@@ -332,9 +377,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cac395ab-abf9-4c9a-8909-4621547e9a8f
+      - 770802ed-f9d8-4ccd-8ffa-8a25ae5d42a8
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1189'
     status:
       code: 200
       message: OK
@@ -352,9 +397,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/fd80fae6-c387-4980-ae1c-368eccad497a?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b7dc9266-466f-4561-8eb1-d9a6bfd321c5?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -366,7 +411,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:12 GMT
+      - Wed, 16 Dec 2020 08:12:27 GMT
       expires:
       - '-1'
       pragma:
@@ -383,7 +428,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0b5bbc95-599a-48c7-a76a-eb951a9e426f
+      - f306f378-8199-4f55-a5a5-0f425b509b2f
     status:
       code: 200
       message: OK
@@ -401,28 +446,28 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --address-prefixes
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"vnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet\",\r\n
-        \ \"etag\": \"W/\\\"36d00f7b-1595-42ed-bcb0-fa9271d6d8da\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"etag\": \"W/\\\"a651c291-dbcd-4bd7-87ae-88e575639b4d\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"110b9bf9-7b3e-4795-bd27-c8c89606b793\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"69e3555f-2be9-463e-b38e-b5d91c4efeea\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"AzureBastionSubnet\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet\",\r\n
-        \       \"etag\": \"W/\\\"36d00f7b-1595-42ed-bcb0-fa9271d6d8da\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a651c291-dbcd-4bd7-87ae-88e575639b4d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
         \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
         \     },\r\n      {\r\n        \"name\": \"vmSubnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/vmSubnet\",\r\n
-        \       \"etag\": \"W/\\\"36d00f7b-1595-42ed-bcb0-fa9271d6d8da\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a651c291-dbcd-4bd7-87ae-88e575639b4d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.2.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -433,13 +478,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2127'
+      - '2126'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:12 GMT
+      - Wed, 16 Dec 2020 08:12:28 GMT
       etag:
-      - W/"36d00f7b-1595-42ed-bcb0-fa9271d6d8da"
+      - W/"a651c291-dbcd-4bd7-87ae-88e575639b4d"
       expires:
       - '-1'
       pragma:
@@ -456,12 +501,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - cfa82408-c916-4be8-9ae9-b8f2679d394c
+      - 94c2dd66-cf23-4d98-be0f-01a284d0873a
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "sku": {"name": "Standard"}, "properties": {"publicIPAllocationMethod":
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network public-ip create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001","name":"test_network_bastion_host000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T08:12:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 08:12:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {"publicIPAllocationMethod":
       "Static", "publicIPAddressVersion": "IPv4", "idleTimeoutInMinutes": 4}}'
     headers:
       Accept:
@@ -473,21 +563,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '167'
+      - '166'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"5ad7dd42-a731-4288-8b9f-c0c014462e0d\\\"\",\r\n  \"location\":
-        \"westus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"4596a2d2-6703-4bcd-8042-86518a03af42\",\r\n    \"publicIPAddressVersion\":
+        \ \"etag\": \"W/\\\"40d7503d-27fa-4789-9008-7333c5926132\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"21f26484-98d5-485d-b00d-ce8aede3371c\",\r\n    \"publicIPAddressVersion\":
         \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Static\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": []\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \ \"sku\": {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n
@@ -496,15 +586,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/1bad1894-dc33-4c00-b78a-cd2bf67b8f26?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7d9a65ab-6903-4a2f-aea1-f554da75e018?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '681'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:14 GMT
+      - Wed, 16 Dec 2020 08:12:37 GMT
       expires:
       - '-1'
       pragma:
@@ -517,9 +607,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 14bfba9c-b1df-4f5f-91e9-f28803dc870f
+      - e26ba60f-3a22-4e09-a988-2fbe3911c68c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1189'
     status:
       code: 201
       message: Created
@@ -537,58 +627,9 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/1bad1894-dc33-4c00-b78a-cd2bf67b8f26?api-version=2020-07-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 01 Jan 2021 00:14:15 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 52ea6a22-df45-4e1b-95e8-1db31619cc69
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network public-ip create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku
-      User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/1bad1894-dc33-4c00-b78a-cd2bf67b8f26?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7d9a65ab-6903-4a2f-aea1-f554da75e018?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -600,7 +641,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:17 GMT
+      - Wed, 16 Dec 2020 08:12:39 GMT
       expires:
       - '-1'
       pragma:
@@ -617,7 +658,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1a4d3c77-e7a6-4a2a-a377-96374883f34f
+      - 059cf6b3-2cf1-4625-bb66-daeeb1f1e596
     status:
       code: 200
       message: OK
@@ -635,16 +676,16 @@ interactions:
       ParameterSetName:
       - -g -n --sku
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/ip1?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"ip1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/ip1\",\r\n
-        \ \"etag\": \"W/\\\"68e6a154-b021-4b64-b3f6-9aa2a8c9ddd3\\\"\",\r\n  \"location\":
-        \"westus2\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"4596a2d2-6703-4bcd-8042-86518a03af42\",\r\n    \"ipAddress\":
-        \"20.69.114.15\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
+        \ \"etag\": \"W/\\\"b031555b-8d5b-43de-b021-1178ea04683c\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"21f26484-98d5-485d-b00d-ce8aede3371c\",\r\n    \"ipAddress\":
+        \"13.83.244.209\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": []\r\n
         \ },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n  \"sku\":
         {\r\n    \"name\": \"Standard\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
@@ -656,9 +697,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:17 GMT
+      - Wed, 16 Dec 2020 08:12:40 GMT
       etag:
-      - W/"68e6a154-b021-4b64-b3f6-9aa2a8c9ddd3"
+      - W/"b031555b-8d5b-43de-b021-1178ea04683c"
       expires:
       - '-1'
       pragma:
@@ -675,7 +716,53 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8c1cbee6-f9d9-4bbe-b7cf-13e66f1e2608
+      - a383504d-0d0a-4c3d-afda-e3174d60b00d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
+        --nsg-rule
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001","name":"test_network_bastion_host000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T08:12:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 08:12:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK
@@ -744,35 +831,35 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:19 GMT
+      - Wed, 16 Dec 2020 08:12:45 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Fri, 01 Jan 2021 00:19:19 GMT
+      - Wed, 16 Dec 2020 08:17:45 GMT
       source-age:
-      - '269'
+      - '191'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding
+      - Authorization,Accept-Encoding, Accept-Encoding
       via:
       - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
       - HIT, HIT
       x-cache-hits:
-      - 1, 1
+      - 1, 2
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - a670b0b1f8133e9344f47af4ce6697161381fb77
+      - 17682b1bf6733336b174e63bcfefe9d257fb2ecd
       x-frame-options:
       - deny
       x-github-request-id:
-      - 487A:597D:8F95:AB18:5FEE68F4
+      - ED04:601E:7444A:8AD7A:5FD9B1AA
       x-served-by:
-      - cache-mia11377-MIA
+      - cache-sin18033-SIN
       x-timer:
-      - S1609460059.030349,VS0,VE0
+      - S1608106366.757526,VS0,VE0
       x-xss-protection:
       - 1; mode=block
     status:
@@ -793,12 +880,12 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network?api-version=2020-06-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network","namespace":"Microsoft.Network","authorizations":[{"applicationId":"2cf9eb86-36b5-49dc-86ae-9a63135dfa8c","roleDefinitionId":"13ba9ab4-19f0-4804-adc4-14ece36cc7a1"},{"applicationId":"7c33bfcb-8d33-48d6-8e60-dc6404003489","roleDefinitionId":"ad6261e4-fa9a-4642-aa5f-104f1b67e9e3"},{"applicationId":"1e3e4475-288f-4018-a376-df66fd7fac5f","roleDefinitionId":"1d538b69-3d87-4e56-8ff8-25786fd48261"},{"applicationId":"a0be0c72-870e-46f0-9c49-c98333a996f7","roleDefinitionId":"7ce22727-ffce-45a9-930c-ddb2e56fa131"},{"applicationId":"486c78bf-a0f7-45f1-92fd-37215929e116","roleDefinitionId":"98a9e526-0a60-4c1f-a33a-ae46e1f8dc0d"},{"applicationId":"19947cfd-0303-466c-ac3c-fcc19a7a1570","roleDefinitionId":"d813ab6c-bfb7-413e-9462-005b21f0ce09"},{"applicationId":"341b7f3d-69b3-47f9-9ce7-5b7f4945fdbd","roleDefinitionId":"8141843c-c51c-4c1e-a5bf-0d351594b86c"},{"applicationId":"328fd23b-de6e-462c-9433-e207470a5727","roleDefinitionId":"79e29e06-4056-41e5-a6b2-959f1f47747e"},{"applicationId":"6d057c82-a784-47ae-8d12-ca7b38cf06b4","roleDefinitionId":"c27dd31e-c1e5-4ab0-93e1-a12ba34f182e"},{"applicationId":"b4ca0290-4e73-4e31-ade0-c82ecfaabf6a","roleDefinitionId":"18363e25-ff21-4159-ae8d-7dfecb5bd001"}],"resourceTypes":[{"resourceType":"virtualNetworks","locations":["West
@@ -817,14 +904,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -834,14 +921,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"customIpPrefixes","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -851,14 +938,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01"],"defaultApiVersion":"2020-06-01","zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkInterfaces","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -940,14 +1027,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
         CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"ddosCustomPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -1021,14 +1108,14 @@ interactions:
         US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
         Central","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -1351,14 +1438,14 @@ interactions:
         Central","Australia Central","Japan West","Japan East","Korea Central","Korea
         South","South Africa North","UAE North","Switzerland North","Germany West
         Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2020-08-01","2020-07-01","2020-06-01","2020-05-01","2020-04-01","2020-03-01","2020-01-01","2019-12-01","2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2020-03-01","zoneMappings":[{"location":"East
-        US 2","zones":["2","1","3"]},{"location":"Central US","zones":["2","1","3"]},{"location":"West
-        Europe","zones":["2","1","3"]},{"location":"East US 2 EUAP","zones":["2","1","3"]},{"location":"Central
-        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","1","3"]},{"location":"Southeast
-        Asia","zones":["2","1","3"]},{"location":"West US 2","zones":["2","1","3"]},{"location":"North
-        Europe","zones":["2","1","3"]},{"location":"East US","zones":["2","1","3"]},{"location":"UK
-        South","zones":["2","1","3"]},{"location":"Japan East","zones":["2","1","3"]},{"location":"Australia
-        East","zones":["2","1","3"]},{"location":"South Africa North","zones":[]},{"location":"South
-        Central US","zones":[]},{"location":"Canada Central","zones":["2","1","3"]},{"location":"Germany
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":["2","3","1"]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":["2","3","1"]},{"location":"Germany
         West Central","zones":[]},{"location":"Brazil South","zones":[]}],"capabilities":"SupportsTags,
         SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":["West
         US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
@@ -1490,7 +1577,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:18 GMT
+      - Wed, 16 Dec 2020 08:12:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1519,8 +1606,8 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -1528,7 +1615,7 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vmSubnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/vmSubnet\",\r\n
-        \ \"etag\": \"W/\\\"36d00f7b-1595-42ed-bcb0-fa9271d6d8da\\\"\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"a651c291-dbcd-4bd7-87ae-88e575639b4d\\\"\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.2.0/24\",\r\n
         \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
         \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
@@ -1541,9 +1628,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:20 GMT
+      - Wed, 16 Dec 2020 08:12:49 GMT
       etag:
-      - W/"36d00f7b-1595-42ed-bcb0-fa9271d6d8da"
+      - W/"a651c291-dbcd-4bd7-87ae-88e575639b4d"
       expires:
       - '-1'
       pragma:
@@ -1560,7 +1647,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5beb46cb-2b0e-4a08-b9fa-4976d165d6c3
+      - 89eb8d6f-42e3-4a48-8c95-39005eb30d1b
     status:
       code: 200
       message: OK
@@ -1569,18 +1656,18 @@ interactions:
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
       [{"type": "Microsoft.Network/networkSecurityGroups", "name": "clivmNSG", "apiVersion":
-      "2015-06-15", "location": "westus2", "tags": {}, "dependsOn": []}, {"apiVersion":
+      "2015-06-15", "location": "westus", "tags": {}, "dependsOn": []}, {"apiVersion":
       "2018-01-01", "type": "Microsoft.Network/publicIPAddresses", "name": "clivmPublicIP",
-      "location": "westus2", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
+      "location": "westus", "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod":
       null}}, {"apiVersion": "2015-06-15", "type": "Microsoft.Network/networkInterfaces",
-      "name": "clivmVMNic", "location": "westus2", "tags": {}, "dependsOn": ["Microsoft.Network/networkSecurityGroups/clivmNSG",
+      "name": "clivmVMNic", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkSecurityGroups/clivmNSG",
       "Microsoft.Network/publicIpAddresses/clivmPublicIP"], "properties": {"ipConfigurations":
       [{"name": "ipconfigclivm", "properties": {"privateIPAllocationMethod": "Dynamic",
       "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/vmSubnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG"}}},
       {"apiVersion": "2020-06-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "clivm", "location": "westus2", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/clivmVMNic"],
+      "clivm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/clivmVMNic"],
       "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
       {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic"}]},
       "storageProfile": {"osDisk": {"createOption": "fromImage", "name": null, "caching":
@@ -1599,33 +1686,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2719'
+      - '2715'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_2nYo1uYNAeZvRAjMGoUFSjiSSQFf7Z79","name":"vm_deploy_2nYo1uYNAeZvRAjMGoUFSjiSSQFf7Z79","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1494661900479298374","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-01-01T00:14:22.4885679Z","duration":"PT0.9013398S","correlationId":"e1563b08-dd91-4275-9c07-59f58356849d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clivmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clivm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_0TO8tbspxKXxaBALGLCXOYjYLURa67w0","name":"vm_deploy_0TO8tbspxKXxaBALGLCXOYjYLURa67w0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1233637893496734163","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-16T08:12:55.8062429Z","duration":"PT2.4985903S","correlationId":"414d48d9-b1ee-4b1b-862a-f3e56879d835","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clivmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clivm"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_2nYo1uYNAeZvRAjMGoUFSjiSSQFf7Z79/operationStatuses/08585921468238903987?api-version=2020-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_0TO8tbspxKXxaBALGLCXOYjYLURa67w0/operationStatuses/08585935005121699760?api-version=2020-10-01
       cache-control:
       - no-cache
       content-length:
-      - '2467'
+      - '2463'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:22 GMT
+      - Wed, 16 Dec 2020 08:12:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1635,7 +1722,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1190'
     status:
       code: 201
       message: Created
@@ -1654,10 +1741,54 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585921468238903987?api-version=2020-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585935005121699760?api-version=2020-10-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 08:13:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
+        --nsg-rule
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585935005121699760?api-version=2020-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1669,7 +1800,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:53 GMT
+      - Wed, 16 Dec 2020 08:14:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1698,22 +1829,22 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - python/3.8.7 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_2nYo1uYNAeZvRAjMGoUFSjiSSQFf7Z79","name":"vm_deploy_2nYo1uYNAeZvRAjMGoUFSjiSSQFf7Z79","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1494661900479298374","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2021-01-01T00:14:50.3911519Z","duration":"PT28.8039238S","correlationId":"e1563b08-dd91-4275-9c07-59f58356849d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus2"]},{"resourceType":"publicIPAddresses","locations":["westus2"]},{"resourceType":"networkInterfaces","locations":["westus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clivmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clivm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Resources/deployments/vm_deploy_0TO8tbspxKXxaBALGLCXOYjYLURa67w0","name":"vm_deploy_0TO8tbspxKXxaBALGLCXOYjYLURa67w0","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1233637893496734163","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T08:13:39.0773981Z","duration":"PT45.7697455S","correlationId":"414d48d9-b1ee-4b1b-862a-f3e56879d835","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"clivmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"clivmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"clivm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3336'
+      - '3332'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:53 GMT
+      - Wed, 16 Dec 2020 08:14:03 GMT
       expires:
       - '-1'
       pragma:
@@ -1742,23 +1873,23 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"clivm\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/virtualMachines/clivm\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"54061860-2561-49ec-a9e7-d4b7dcde74f5\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"e7b19d8a-32a6-4e8c-95d0-873544693c2b\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
         \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
         \"18.04.202012111\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
-        \"Linux\",\r\n        \"name\": \"clivm_disk1_91825b06246e44bd858e58a11c03ee27\",\r\n
+        \"Linux\",\r\n        \"name\": \"clivm_disk1_2565a7f0950f4c1a9ea1dcf0afb824db\",\r\n
         \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
         \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
-        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/disks/clivm_disk1_91825b06246e44bd858e58a11c03ee27\"\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Compute/disks/clivm_disk1_2565a7f0950f4c1a9ea1dcf0afb824db\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"clivm\",\r\n
         \     \"adminUsername\": \"testadmin\",\r\n      \"linuxConfiguration\": {\r\n
@@ -1767,21 +1898,21 @@ interactions:
         \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
-        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
-        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
-        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
-        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
-        populated.\",\r\n            \"time\": \"2021-01-01T00:14:54+00:00\"\r\n          }\r\n
-        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
-        \"clivm_disk1_91825b06246e44bd858e58a11c03ee27\",\r\n          \"statuses\":
-        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
+        \"clivm\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\": \"18.04\",\r\n
+        \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.53\",\r\n        \"statuses\":
+        [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
+        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
+        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
+        \"2020-12-16T08:14:02+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"clivm_disk1_2565a7f0950f4c1a9ea1dcf0afb824db\",\r\n
+        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2021-01-01T00:14:34.933451+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-12-16T08:13:27.1299989+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded/osProvisioningInProgress\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"OS provisioning
-        in progress\",\r\n          \"time\": \"2021-01-01T00:14:49.6363522+00:00\"\r\n
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2020-12-16T08:13:37.3644357+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -1789,11 +1920,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3209'
+      - '3267'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:54 GMT
+      - Wed, 16 Dec 2020 08:14:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1810,7 +1941,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31985
+      - Microsoft.Compute/LowCostGet3Min;3994,Microsoft.Compute/LowCostGet30Min;31967
     status:
       code: 200
       message: OK
@@ -1829,18 +1960,18 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"clivmVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic\",\r\n
-        \ \"etag\": \"W/\\\"b02645a7-9c07-4ea0-8353-f697f02ea62b\\\"\",\r\n  \"location\":
-        \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"15f192aa-58f8-4c41-af39-bacb5f1c0b8a\",\r\n
+        \ \"etag\": \"W/\\\"27a98b6c-4b46-4d32-9d9a-8e205a6bf425\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"d89c9a90-7a95-4077-b4b4-1158edc85b1d\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigclivm\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic/ipConfigurations/ipconfigclivm\",\r\n
-        \       \"etag\": \"W/\\\"b02645a7-9c07-4ea0-8353-f697f02ea62b\\\"\",\r\n
+        \       \"etag\": \"W/\\\"27a98b6c-4b46-4d32-9d9a-8e205a6bf425\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.2.4\",\r\n          \"privateIPAllocationMethod\":
@@ -1849,8 +1980,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"5gnqwej4pokuppjhzdejmbvxsd.xx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-C3-04-36\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"l3k4g0pjfm5enm2owxmrytx43c.dx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-04-F9-34\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkSecurityGroups/clivmNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -1860,13 +1991,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '2581'
+      - '2580'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:55 GMT
+      - Wed, 16 Dec 2020 08:14:08 GMT
       etag:
-      - W/"b02645a7-9c07-4ea0-8353-f697f02ea62b"
+      - W/"27a98b6c-4b46-4d32-9d9a-8e205a6bf425"
       expires:
       - '-1'
       pragma:
@@ -1883,7 +2014,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 633f13c2-aeda-4307-a6bc-bf69d216cfc3
+      - 2dcb7fb6-f8c6-4af4-9075-dc6674ea2691
     status:
       code: 200
       message: OK
@@ -1902,16 +2033,16 @@ interactions:
       - -g -n --image --vnet-name --subnet --admin-password --admin-username --authentication-type
         --nsg-rule
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP?api-version=2018-01-01
   response:
     body:
       string: "{\r\n  \"name\": \"clivmPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/clivmPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"9b648aac-0be8-4d8b-8493-c0670462c17c\\\"\",\r\n  \"location\":
-        \"westus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"1235c9fa-aa83-4d49-a438-7fb243626d4f\",\r\n
-        \   \"ipAddress\": \"51.143.14.70\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \ \"etag\": \"W/\\\"f7d2c473-336b-4e2a-80f7-6622b147ca40\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"90c369f5-41d7-4302-a844-e9ba335b2abd\",\r\n
+        \   \"ipAddress\": \"104.42.29.10\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/networkInterfaces/clivmVMNic/ipConfigurations/ipconfigclivm\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -1920,13 +2051,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1005'
+      - '1004'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:55 GMT
+      - Wed, 16 Dec 2020 08:14:09 GMT
       etag:
-      - W/"9b648aac-0be8-4d8b-8493-c0670462c17c"
+      - W/"f7d2c473-336b-4e2a-80f7-6622b147ca40"
       expires:
       - '-1'
       pragma:
@@ -1943,12 +2074,57 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0c8086c1-5d8e-4f31-8cdf-48204da362ed
+      - e0f99546-5c7c-4782-8734-bd6b04eda563
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus2", "properties": {"ipConfigurations": [{"name": "bastion_ip_config",
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network bastion create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --public-ip-address
+      User-Agent:
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_network_bastion_host000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001","name":"test_network_bastion_host000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T08:12:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 16 Dec 2020 08:14:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"ipConfigurations": [{"name": "bastion_ip_config",
       "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/virtualNetworks/vnet/subnets/AzureBastionSubnet"},
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/publicIPAddresses/ip1"}}}]}}'
     headers:
@@ -1961,24 +2137,24 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '571'
+      - '570'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clibastion\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion\",\r\n
-        \ \"etag\": \"W/\\\"60899420-133b-476b-9073-0f0e8f2022e4\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus2\",\r\n  \"properties\":
+        \ \"etag\": \"W/\\\"0aecf82d-22f6-4257-b871-20657eb5b7d8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus\",\r\n  \"properties\":
         {\r\n    \"provisioningState\": \"Updating\",\r\n    \"scaleUnits\": 2,\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"bastion_ip_config\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion/bastionHostIpConfigurations/bastion_ip_config\",\r\n
-        \       \"etag\": \"W/\\\"60899420-133b-476b-9073-0f0e8f2022e4\\\"\",\r\n
+        \       \"etag\": \"W/\\\"0aecf82d-22f6-4257-b871-20657eb5b7d8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
@@ -1990,15 +2166,15 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '1640'
+      - '1639'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:14:57 GMT
+      - Wed, 16 Dec 2020 08:14:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2011,9 +2187,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 570f9b6e-9c53-40ef-8eaa-5856c01f2157
+      - 485153c4-0e96-4c96-b3c0-6ea27e65be82
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1193'
     status:
       code: 201
       message: Created
@@ -2031,9 +2207,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2045,7 +2221,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:15:08 GMT
+      - Wed, 16 Dec 2020 08:14:30 GMT
       expires:
       - '-1'
       pragma:
@@ -2062,7 +2238,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fc2b9e42-357f-4c32-8c2e-ebfb177d025f
+      - 8f72e074-b98b-4dc8-a66d-698420bd4540
     status:
       code: 200
       message: OK
@@ -2080,9 +2256,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2094,7 +2270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:15:18 GMT
+      - Wed, 16 Dec 2020 08:14:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2111,7 +2287,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a8b59351-b1de-44b3-ad27-f5127454f5fe
+      - 1ede82e4-b7f2-4f3a-b362-e3d44dd587ff
     status:
       code: 200
       message: OK
@@ -2129,9 +2305,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2143,7 +2319,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:15:38 GMT
+      - Wed, 16 Dec 2020 08:15:01 GMT
       expires:
       - '-1'
       pragma:
@@ -2160,7 +2336,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 59173119-8c1d-4e85-a442-e0768342b47e
+      - aea2978f-6ae2-40b2-b2f2-eff62ac237e6
     status:
       code: 200
       message: OK
@@ -2178,9 +2354,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2192,7 +2368,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:15:58 GMT
+      - Wed, 16 Dec 2020 08:15:22 GMT
       expires:
       - '-1'
       pragma:
@@ -2209,7 +2385,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 23f84ed7-8500-4a01-b948-30d76ee62ded
+      - f64760d5-15ec-4ec5-8203-0a5d5fc9391f
     status:
       code: 200
       message: OK
@@ -2227,9 +2403,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2241,7 +2417,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:16:38 GMT
+      - Wed, 16 Dec 2020 08:16:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2258,7 +2434,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 01e8c47f-20f5-4d09-ba22-384b70c49ed0
+      - 869e0a42-94d3-4f11-b09e-fd8f5ddaacf9
     status:
       code: 200
       message: OK
@@ -2276,9 +2452,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2290,7 +2466,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:17:19 GMT
+      - Wed, 16 Dec 2020 08:16:44 GMT
       expires:
       - '-1'
       pragma:
@@ -2307,7 +2483,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 45ab57ca-4cae-431d-92e6-bdda723da8bf
+      - 8a5b4085-9965-4850-b12e-18e2f35fd3fc
     status:
       code: 200
       message: OK
@@ -2325,9 +2501,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2339,7 +2515,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:18:38 GMT
+      - Wed, 16 Dec 2020 08:18:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2356,7 +2532,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a37d266e-2919-462b-97fe-93e9e4f2bf03
+      - 5bf37d63-34d3-4db1-8cdc-a7acf4c21ce8
     status:
       code: 200
       message: OK
@@ -2374,58 +2550,9 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '30'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 01 Jan 2021 00:21:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 5cae1129-5b4e-41ce-a4f4-84a4de12c0e0
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network bastion create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --vnet-name --public-ip-address
-      User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/3b390413-82d4-4e8f-bbc3-ec614ae6bcd5?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d6e87b0d-2b08-4a45-bb10-7ca127b4b96f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2437,7 +2564,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:22:59 GMT
+      - Wed, 16 Dec 2020 08:20:47 GMT
       expires:
       - '-1'
       pragma:
@@ -2454,7 +2581,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f889dfb5-e7c9-48cd-ac81-04453bd4dadf
+      - b7de08ee-4a25-41e4-986e-2bb78fcee256
     status:
       code: 200
       message: OK
@@ -2472,18 +2599,18 @@ interactions:
       ParameterSetName:
       - -g -n --vnet-name --public-ip-address
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clibastion\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion\",\r\n
-        \ \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus2\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"dnsName\": \"bst-fff66fc9-2dd1-4574-8dda-2f4b11041972.bastion.azure.com\",\r\n
+        \ \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"dnsName\": \"bst-21dbe4e1-e23c-462a-aeb4-c2db9916754b.bastion.azure.com\",\r\n
         \   \"scaleUnits\": 2,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\":
         \"bastion_ip_config\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion/bastionHostIpConfigurations/bastion_ip_config\",\r\n
-        \       \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
@@ -2495,13 +2622,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1720'
+      - '1719'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:00 GMT
+      - Wed, 16 Dec 2020 08:20:48 GMT
       etag:
-      - W/"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed"
+      - W/"b01fb771-d798-4c83-8df9-ecb2c585fcc8"
       expires:
       - '-1'
       pragma:
@@ -2518,7 +2645,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fae6f730-eec1-42ad-bb02-7e938e95ad4b
+      - 7de8ce52-a669-4586-8c3a-d60208f76d0b
     status:
       code: 200
       message: OK
@@ -2534,20 +2661,20 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/bastionHosts?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"clibastion\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion\",\r\n
-        \     \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n      \"type\":
-        \"Microsoft.Network/bastionHosts\",\r\n      \"location\": \"westus2\",\r\n
+        \     \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n      \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n      \"location\": \"westus\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
-        \       \"dnsName\": \"bst-fff66fc9-2dd1-4574-8dda-2f4b11041972.bastion.azure.com\",\r\n
+        \       \"dnsName\": \"bst-21dbe4e1-e23c-462a-aeb4-c2db9916754b.bastion.azure.com\",\r\n
         \       \"scaleUnits\": 2,\r\n        \"ipConfigurations\": [\r\n          {\r\n
         \           \"name\": \"bastion_ip_config\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion/bastionHostIpConfigurations/bastion_ip_config\",\r\n
-        \           \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n
+        \           \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"privateIPAllocationMethod\": \"Dynamic\",\r\n              \"publicIPAddress\":
@@ -2560,11 +2687,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1869'
+      - '1868'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:00 GMT
+      - Wed, 16 Dec 2020 08:20:50 GMT
       expires:
       - '-1'
       pragma:
@@ -2581,7 +2708,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7e2945e7-90cb-4e23-bcc6-82428bfce972
+      - e07fabba-07a9-4e3a-938b-8ec4efffa692
     status:
       code: 200
       message: OK
@@ -2599,20 +2726,20 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"clibastion\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion\",\r\n
-        \     \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n      \"type\":
-        \"Microsoft.Network/bastionHosts\",\r\n      \"location\": \"westus2\",\r\n
+        \     \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n      \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n      \"location\": \"westus\",\r\n
         \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
-        \       \"dnsName\": \"bst-fff66fc9-2dd1-4574-8dda-2f4b11041972.bastion.azure.com\",\r\n
+        \       \"dnsName\": \"bst-21dbe4e1-e23c-462a-aeb4-c2db9916754b.bastion.azure.com\",\r\n
         \       \"scaleUnits\": 2,\r\n        \"ipConfigurations\": [\r\n          {\r\n
         \           \"name\": \"bastion_ip_config\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion/bastionHostIpConfigurations/bastion_ip_config\",\r\n
-        \           \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n
+        \           \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n
         \           \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"privateIPAllocationMethod\": \"Dynamic\",\r\n              \"publicIPAddress\":
@@ -2625,11 +2752,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1869'
+      - '1868'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:01 GMT
+      - Wed, 16 Dec 2020 08:20:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2646,7 +2773,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 7b2bd612-791d-40d1-9b9b-73f646698bb1
+      - c51f65fa-3b4d-41cd-9cd4-908e69b6aa43
     status:
       code: 200
       message: OK
@@ -2664,18 +2791,18 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"name\": \"clibastion\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion\",\r\n
-        \ \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus2\",\r\n  \"properties\":
-        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"dnsName\": \"bst-fff66fc9-2dd1-4574-8dda-2f4b11041972.bastion.azure.com\",\r\n
+        \ \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/bastionHosts\",\r\n  \"location\": \"westus\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"dnsName\": \"bst-21dbe4e1-e23c-462a-aeb4-c2db9916754b.bastion.azure.com\",\r\n
         \   \"scaleUnits\": 2,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\":
         \"bastion_ip_config\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion/bastionHostIpConfigurations/bastion_ip_config\",\r\n
-        \       \"etag\": \"W/\\\"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed\\\"\",\r\n
+        \       \"etag\": \"W/\\\"b01fb771-d798-4c83-8df9-ecb2c585fcc8\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/bastionHosts/bastionHostIpConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
@@ -2687,13 +2814,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1720'
+      - '1719'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:02 GMT
+      - Wed, 16 Dec 2020 08:20:56 GMT
       etag:
-      - W/"e659d1e6-466d-49e1-a2a3-9cfd990ff2ed"
+      - W/"b01fb771-d798-4c83-8df9-ecb2c585fcc8"
       expires:
       - '-1'
       pragma:
@@ -2710,7 +2837,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 444bde0f-c2cd-45e1-9ba2-f05d84c5da42
+      - b13301e5-0a7c-441d-a5c4-d7f790d672e8
     status:
       code: 200
       message: OK
@@ -2730,7 +2857,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_network_bastion_host000001/providers/Microsoft.Network/bastionHosts/clibastion?api-version=2020-07-01
   response:
@@ -2740,17 +2867,17 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Fri, 01 Jan 2021 00:23:02 GMT
+      - Wed, 16 Dec 2020 08:20:58 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operationResults/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
       pragma:
       - no-cache
       server:
@@ -2761,9 +2888,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0b55e41d-5f86-46a1-8570-bb5902a029d2
+      - 65e38b37-37e6-4a41-9be9-864a3b35e519
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 202
       message: Accepted
@@ -2781,9 +2908,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2795,7 +2922,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:13 GMT
+      - Wed, 16 Dec 2020 08:21:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2812,7 +2939,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - eb53f37a-033a-453d-aa74-557924b67147
+      - 012a2c55-3ae6-4888-9085-5b6a1cfe70af
     status:
       code: 200
       message: OK
@@ -2830,9 +2957,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2844,7 +2971,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:23 GMT
+      - Wed, 16 Dec 2020 08:21:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2861,7 +2988,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6c9a47ef-fd2c-44c8-a404-5d5310be433e
+      - c91e6443-3fac-42f3-8ec2-0a16aa02fde7
     status:
       code: 200
       message: OK
@@ -2879,9 +3006,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2893,7 +3020,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:23:44 GMT
+      - Wed, 16 Dec 2020 08:21:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2910,7 +3037,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 89039cb3-821a-4c90-9bb7-7a81ed341a3c
+      - 91878df9-5da4-41a7-b743-815ca108647f
     status:
       code: 200
       message: OK
@@ -2928,9 +3055,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2942,7 +3069,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:24:04 GMT
+      - Wed, 16 Dec 2020 08:22:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2959,7 +3086,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a2ff9099-db86-4d52-9262-2fb5b7180785
+      - 7c92dd87-b2ab-4ab7-ac8b-9f0dcb16d661
     status:
       code: 200
       message: OK
@@ -2977,9 +3104,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -2991,7 +3118,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:24:44 GMT
+      - Wed, 16 Dec 2020 08:22:42 GMT
       expires:
       - '-1'
       pragma:
@@ -3008,7 +3135,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a03187e6-bba2-42be-acea-89641f5f5589
+      - 7da7277b-9140-43e4-86cc-09fe3aaa1ee2
     status:
       code: 200
       message: OK
@@ -3026,9 +3153,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3040,7 +3167,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:25:24 GMT
+      - Wed, 16 Dec 2020 08:23:24 GMT
       expires:
       - '-1'
       pragma:
@@ -3057,7 +3184,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 963a1de7-d67d-410e-bbe3-674b75ff3f8f
+      - aa3834c8-e92a-45ad-8e36-ff86f13e0a42
     status:
       code: 200
       message: OK
@@ -3075,9 +3202,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"InProgress\"\r\n}"
@@ -3089,7 +3216,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:26:44 GMT
+      - Wed, 16 Dec 2020 08:24:44 GMT
       expires:
       - '-1'
       pragma:
@@ -3106,7 +3233,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9113b5b9-7f89-4a57-ade0-44f868846932
+      - 40210b51-ce01-4679-a75f-bc540ee2c9cf
     status:
       code: 200
       message: OK
@@ -3124,9 +3251,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.8.7 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d86929d7-6958-436e-8384-03ce68a2a874?api-version=2020-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0a305dae-44bb-42bc-a369-e885ed2186b2?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -3138,7 +3265,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 Jan 2021 00:29:24 GMT
+      - Wed, 16 Dec 2020 08:27:26 GMT
       expires:
       - '-1'
       pragma:
@@ -3155,7 +3282,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2caf6d6f-3e68-478c-a430-53cbb80e247e
+      - 6f1ad949-2484-449d-b200-c48ed8849580
     status:
       code: 200
       message: OK
