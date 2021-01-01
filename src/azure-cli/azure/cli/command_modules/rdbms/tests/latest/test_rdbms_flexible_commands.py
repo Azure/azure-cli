@@ -481,8 +481,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -547,7 +547,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         elif database_engine == 'mysql':
             location = self.mysql_location
 
-        server = 'testvnetserver1' + database_engine
+        server = 'testvnetserver10' + database_engine
 
         # Scenario : Provision a server with supplied Subnet ID that exists, where the subnet is not delegated
 
@@ -687,7 +687,6 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         # flexible-servers
         servers = ['testvnetserver5' + database_engine, 'testvnetserver6' + database_engine]
-
         # Case 1 : Provision a server with supplied Vname and subnet name that exists.
 
         # create vnet and subnet. When vnet name is supplied, the subnet created will be given the default name.
