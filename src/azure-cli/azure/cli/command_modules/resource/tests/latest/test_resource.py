@@ -1012,7 +1012,7 @@ class TemplateSpecsExportTest(LiveScenarioTest):
 
 
 
-class DeploymentTestsWithQueryString(ScenarioTest):
+class DeploymentTestsWithQueryString(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
     @StorageAccountPreparer(name_prefix='testquerystrrg', location='eastus', kind='StorageV2')
     def test_resource_group_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
