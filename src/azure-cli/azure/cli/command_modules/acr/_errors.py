@@ -142,5 +142,5 @@ UNEXPECTED_ERROR = ErrorClass(
 
 CMK_MANAGED_IDENTITY_ERROR = ErrorClass(
     "CMK_ERROR",
-    "The identity used for registry '{}' encryption doesn't exists."
+    "The identity used for registry '{}' encryption doesn't exist."
 )
