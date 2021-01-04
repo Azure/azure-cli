@@ -864,7 +864,7 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
     template_content = None
 
     if query_string and not template_uri:
-        raise IncorrectUsageError('must provide --template-uri if --query-string is specified')
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
     if template_uri:
         if query_string:
