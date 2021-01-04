@@ -1951,22 +1951,25 @@ short-summary: >
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
-        az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+        az webapp up --dryrun
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
+        az webapp up
+  - name: Create a web app with a specified name
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
+        az webapp up -n MyUniqueAppName
+  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
+    text: >
+        az webapp up -l locationName
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
-        az webapp up -n MyUniqueAppName --logs
+        az webapp up --logs
   - name: Create a web app and deploy as a static HTML app.
     text: >
-        az webapp up -n MyUniqueAppName --html
+        az webapp up --html
 """
 
 helps['webapp update'] = """

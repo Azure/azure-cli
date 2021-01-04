@@ -279,11 +279,14 @@ jobs:
       versionSpec: 3.7
 
 
-  - task: Bash@3
+  - script: |
+      if [[ "$(Build.Reason)" == "PullRequest" ]]; then
+        branch=$(System.PullRequest.TargetBranch)
+      else
+        branch=$(Build.SourceBranchName)
+      fi
+      scripts/release/pypi/build.sh $branch
     displayName: 'Run Wheel Build Script'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/pypi/build.sh
 
 
   - task: PublishPipelineArtifact@0
@@ -328,17 +331,17 @@ jobs:
        echo "== Testing pip install on Python 3.6 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.6 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.7 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.7 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
        echo "== Testing pip install on Python 3.8 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION.* && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
