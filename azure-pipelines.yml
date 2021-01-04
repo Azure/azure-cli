@@ -576,7 +576,8 @@ jobs:
   displayName: Test Homebrew Package
   timeoutInMinutes: 180
   dependsOn: BuildHomebrewFormula
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  condition: false
   pool:
     vmImage: 'macOS-10.14'
   steps:
