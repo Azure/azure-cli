@@ -2439,6 +2439,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     else:
         ascs = client.app_service_certificate_orders.list()
 
+    kv_secret_name = None
     for asc in ascs:
         if asc.name == key_vault_certificate_name:
             kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
