@@ -15,7 +15,7 @@ from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
-from .actions import AppendBaselines
+from .actions import AppendBaselines, AppendBaseline
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -34,7 +34,7 @@ va_sql_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), me
 va_sql_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='The name of the scanned database')
 va_sql_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='The ID of the scan')
 va_sql_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='The ID of the scanned rule. Format: "VAXXXX", where XXXX indicates the number of the rule')
-va_sql_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline with two records: --baseline line1_w1 line1_w2 line1_w3 --baseline line2_w1 line2_w2 line2_w3', action=argparse._AppendAction, nargs='+')
+va_sql_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline with two records: --baseline line1_w1 line1_w2 line1_w3 --baseline line2_w1 line2_w2 line2_w3', action=AppendBaseline, nargs='+') 
 va_sql_baseline_multiple_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline for two rules: --baseline rule=VA1111 line1_w1 line1_w2 --baseline rule=VA2222 line1_w1 line1_w2 line1_w3 --baseline rule=VA1111 line2_w1 line2_w2', action=AppendBaselines, nargs='+')
 va_sql_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='Provide the name of the machine, for On-Premise resources only')
 va_sql_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='Provide the ID of the agent on the scanned machine, for On-Premise resources only')
