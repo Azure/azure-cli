@@ -7,6 +7,7 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 
+import argparse
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
 from knack.arguments import CLIArgumentType
@@ -15,7 +16,6 @@ from ._validators import (validate_alert_status,
                           validate_pricing_tier,
                           validate_assessment_status_code)
 from .actions import AppendBaselines
-import argparse
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')

@@ -6,8 +6,7 @@
 
 import argparse
 from argparse import OPTIONAL
-from collections import defaultdict
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, CLIInternalError
 
 
 class _AppendToDictionaryAction(argparse.Action):

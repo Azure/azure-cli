@@ -350,48 +350,56 @@ def _construct_resource_id(client, resource_group_name, storage_account_name):
 # --------------------------------------------------------------------------------------------
 
 
+# pylint: disable=line-too-long
 def get_va_sql_scan(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def list_va_sql_scans(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def get_va_sql_result(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(scan_id, rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def list_va_sql_results(client, vm_resource_id, workspace_id, server_name, database_name, scan_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(scan_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def get_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.get(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def list_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.list(workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def delete_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
     return client.delete(rule_id, workspace_id, _get_va_sql_api_version(), va_sql_resource_id)
 
 
+# pylint: disable=line-too-long
 def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, rule_id, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
@@ -402,6 +410,7 @@ def update_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, da
     raise MutuallyExclusiveArgumentError("Baseline can be set upon either provided baseline or latest results")
 
 
+# pylint: disable=line-too-long
 def set_va_sql_baseline(client, vm_resource_id, workspace_id, server_name, database_name, baseline=None, baseline_latest=False, vm_name=None, agent_id=None, vm_uuid=None):
 
     va_sql_resource_id = _get_va_sql_resource_id(vm_resource_id, server_name, database_name, vm_name, agent_id, vm_uuid)
