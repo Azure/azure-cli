@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.16.0"
+__version__ = "2.17.0"
 
 import os
 import sys
@@ -83,6 +83,8 @@ class AzCli(CLI):
 
         if not self.enable_color:
             format_styled_text.theme = 'none'
+
+        _configure_knack()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -856,3 +858,19 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
+
+
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append("azure")

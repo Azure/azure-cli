@@ -501,15 +501,15 @@ def read_file_content(file_path, allow_binary=False):
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
-def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
+def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True):
     """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
     JSON strings in CMD shell are not received in main's argv. This allows the user to specify
     the alternative notation, which does not have this problem (but is technically not JSON). """
     try:
         if not preserve_order:
-            return json.loads(json_or_dict_string)
+            return json.loads(json_or_dict_string, strict=strict)
         from collections import OrderedDict
-        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict)
+        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict, strict=strict)
     except ValueError as json_ex:
         try:
             import ast
