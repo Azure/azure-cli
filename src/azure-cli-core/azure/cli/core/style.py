@@ -72,7 +72,8 @@ POWERSHELL_COLOR_REPLACEMENT = {
 
 def print_styled_text(*styled_text_objects, file=None, **kwargs):
     """
-    Print styled text.
+    Print styled text. This function wraps the built-in function `print`, additional arguments can be sent
+    via keyword arguments.
 
     :param styled_text_objects: The input text objects. See format_styled_text for formats of each object.
     :param file: The file to print the styled text. The default target is sys.stderr.
