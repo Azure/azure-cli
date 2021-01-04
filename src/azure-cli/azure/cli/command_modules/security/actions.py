@@ -9,6 +9,7 @@ from argparse import OPTIONAL
 from azure.cli.core.azclierror import InvalidArgumentValueError, CLIInternalError
 
 
+# pylint: disable=too-few-public-methods
 class _AppendToDictionaryAction(argparse.Action):
 
     def __init__(self,
@@ -17,10 +18,10 @@ class _AppendToDictionaryAction(argparse.Action):
                  nargs=None,
                  const=None,
                  default=None,
-                 type=None,
+                 type=None,  # pylint: disable=W0622
                  choices=None,
                  required=False,
-                 help=None,
+                 help=None,  # pylint: disable=W0622
                  metavar=None):
         if nargs == 0:
             raise ValueError('nargs for append actions must be > 0; if arg '
@@ -54,62 +55,18 @@ class _AppendToDictionaryAction(argparse.Action):
         setattr(namespace, self.dest, items)
 
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, too-few-public-methods
 class AppendBaseline(argparse._AppendAction):
-
-    def __init__(self,
-                 option_strings,
-                 dest, nargs=None,
-                 const=None,
-                 default=None,
-                 type=None,
-                 choices=None,
-                 required=False,
-                 help=None,
-                 metavar=None):
-        super(AppendBaseline, self).__init__(
-            option_strings,
-            dest,
-            nargs,
-            const,
-            default,
-            type,
-            choices,
-            required,
-            help,
-            metavar)
 
     def __call__(self, parser, namespace, values, option_string=None):
         try:
-            super(AppendBaselines, self).__call__(parser, namespace, values, option_string)
+            super(AppendBaseline, self).__call__(parser, namespace, values, option_string)
         except ValueError:
             raise CLIInternalError("Unexpected error")
 
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, too-few-public-methods
 class AppendBaselines(_AppendToDictionaryAction):
-
-    def __init__(self,
-                 option_strings,
-                 dest, nargs=None,
-                 const=None,
-                 default=None,
-                 type=None,
-                 choices=None,
-                 required=False,
-                 help=None,
-                 metavar=None):
-        super(AppendBaselines, self).__init__(
-            option_strings,
-            dest,
-            nargs,
-            const,
-            default,
-            type,
-            choices,
-            required,
-            help,
-            metavar)
 
     def __call__(self, parser, namespace, values, option_string=None):
         try:

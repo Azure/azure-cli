@@ -7,7 +7,6 @@
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 
-import argparse
 from azure.cli.core.commands.parameters import (get_three_state_flag,
                                                 resource_group_name_type)
 from knack.arguments import CLIArgumentType
@@ -34,7 +33,7 @@ va_sql_server_name_arg_type = CLIArgumentType(options_list=('--server-name'), me
 va_sql_database_name_arg_type = CLIArgumentType(options_list=('--database-name'), metavar='DATABASENAME', help='The name of the scanned database')
 va_sql_scan_id_arg_type = CLIArgumentType(options_list=('--scan-id'), metavar='SCANID', help='The ID of the scan')
 va_sql_rule_id_arg_type = CLIArgumentType(options_list=('--rule-id'), metavar='RULEID', help='The ID of the scanned rule. Format: "VAXXXX", where XXXX indicates the number of the rule')
-va_sql_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline with two records: --baseline line1_w1 line1_w2 line1_w3 --baseline line2_w1 line2_w2 line2_w3', action=AppendBaseline, nargs='+') 
+va_sql_baseline_single_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline with two records: --baseline line1_w1 line1_w2 line1_w3 --baseline line2_w1 line2_w2 line2_w3', action=AppendBaseline, nargs='+')
 va_sql_baseline_multiple_arg_type = CLIArgumentType(options_list=('--baseline', '-b'), metavar='BASELINE', help='Baseline records to be set. The following example will set a baseline for two rules: --baseline rule=VA1111 line1_w1 line1_w2 --baseline rule=VA2222 line1_w1 line1_w2 line1_w3 --baseline rule=VA1111 line2_w1 line2_w2', action=AppendBaselines, nargs='+')
 va_sql_vm_name_arg_type = CLIArgumentType(options_list=('--vm-name'), metavar='VMNAME', help='Provide the name of the machine, for On-Premise resources only')
 va_sql_agent_id_arg_type = CLIArgumentType(options_list=('--agent-id'), metavar='AGENTID', help='Provide the ID of the agent on the scanned machine, for On-Premise resources only')
@@ -90,6 +89,7 @@ adaptive_network_hardenings_resource_adaptive_network_hardenings_resource_name =
 adaptive_application_controls_group_name = CLIArgumentType(option_list=('--group-name'), metave='GROUPNAME', help='Name of an application control VM/server group')
 
 
+# pylint: disable=too-many-branches
 def load_arguments(self, _):
     for scope in ['alert',
                   'atp',
