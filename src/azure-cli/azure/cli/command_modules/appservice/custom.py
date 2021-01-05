@@ -2199,6 +2199,7 @@ def list_slots(cmd, resource_group_name, webapp):
 
 def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
+    # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
     isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
     # converstion from string to Boolean
     isPreserveVnet = bool(isPreserveVnet == 'true')
