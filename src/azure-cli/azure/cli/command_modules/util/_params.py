@@ -7,6 +7,7 @@
 # pylint: disable=line-too-long
 def load_arguments(self, _):
     from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
+    from azure.cli.core.style import Theme
 
     with self.argument_context('rest') as c:
         c.argument('method', options_list=['--method', '-m'],
@@ -39,5 +40,4 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for checking release notes.')
 
     with self.argument_context('demo style') as c:
-        c.argument('no_color', arg_type=get_three_state_flag(), help='Disable color.', default=False)
-        c.argument('theme', arg_type=get_enum_type(['none', 'dark', 'light']), help='The theme to format styled text.', default='dark')
+        c.argument('theme', arg_type=get_enum_type(Theme), help='The theme to format styled text.', default='dark')

@@ -8,7 +8,7 @@ import sys
 import unittest
 from unittest import mock
 
-from azure.cli.core.style import Style, format_styled_text, print_styled_text, _is_modern_terminal
+from azure.cli.core.style import Style, Theme, format_styled_text, print_styled_text, _is_modern_terminal
 
 
 class TestStyle(unittest.TestCase):
@@ -87,6 +87,10 @@ class TestStyle(unittest.TestCase):
         # Function attribute is overridden by param
         format_styled_text.theme = 'dark'
         formatted = format_styled_text(styled_text, theme='none')
+        self.assertEqual(formatted, excepted_plaintext)
+
+        # Specify theme with Enum
+        formatted = format_styled_text(styled_text, theme=Theme.NONE)
         self.assertEqual(formatted, excepted_plaintext)
 
         delattr(format_styled_text, "theme")

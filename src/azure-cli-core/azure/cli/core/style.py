@@ -63,6 +63,19 @@ THEME_LIGHT = {
     Style.WARNING: Fore.YELLOW,
 }
 
+
+class Theme(str, Enum):
+    DARK = 'dark'
+    LIGHT = 'light'
+    NONE = 'none'
+
+
+THEME_DEFINITIONS = {
+    Theme.NONE: THEME_NONE,
+    Theme.DARK: THEME_DARK,
+    Theme.LIGHT: THEME_LIGHT
+}
+
 # Blue and bright blue is not visible under the default theme of powershell.exe
 POWERSHELL_COLOR_REPLACEMENT = {
     Fore.BLUE: Fore.RESET,
@@ -93,20 +106,16 @@ def format_styled_text(styled_text, theme=None):
         - text
         - (style, text)
         - [(style, text), ...]
-    :param theme: The theme used to format text. Can be theme name or dict.
+    :param theme: The theme used to format text. Can be theme name str, `Theme` Enum or dict.
     """
     if theme is None:
         theme = getattr(format_styled_text, "theme", THEME_DARK)
 
     # Convert str to the theme dict
     if isinstance(theme, str):
-        if theme.lower() == 'none':
-            theme = THEME_NONE
-        elif theme.lower() == 'dark':
-            theme = THEME_DARK
-        elif theme.lower() == 'light':
-            theme = THEME_LIGHT
-        else:
+        try:
+            theme = THEME_DEFINITIONS[theme]
+        except KeyError:
             from azure.cli.core.azclierror import CLIInternalError
             raise CLIInternalError("Invalid theme. Supported themes: none, dark, light")
 
