@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.17.0"
+VERSION = "2.17.10"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -131,7 +131,6 @@ DEPENDENCIES = [
     'azure-synapse-accesscontrol~=0.2.0',
     'azure-synapse-artifacts~=0.3.0',
     'azure-synapse-spark~=0.2.0',
-    'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
     'pytz==2019.1',

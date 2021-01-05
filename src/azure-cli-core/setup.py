@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.17.0"
+VERSION = "2.17.10"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -43,7 +43,6 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'adal~=1.2.3',
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'colorama~=0.4.1',
@@ -54,7 +53,7 @@ DEPENDENCIES = [
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
-    'PyJWT',
+    'PyJWT==1.7.1',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.22',
     'six~=1.12',
