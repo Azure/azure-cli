@@ -1320,11 +1320,11 @@ examples:
 
 helps['webapp config ssl import'] = """
 type: command
-short-summary: Import an SSL certificate to a web app from Key Vault.
+short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
