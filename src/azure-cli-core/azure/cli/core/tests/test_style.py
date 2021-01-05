@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import sys
 import unittest
 from unittest import mock
@@ -12,6 +11,14 @@ from azure.cli.core.style import Style, Theme, format_styled_text, print_styled_
 
 
 class TestStyle(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            # Clear `theme` attribute that may be set by other tests.
+            delattr(format_styled_text, 'theme')
+        except AttributeError:
+            pass
 
     def test_format_styled_text(self):
         # Test list input
@@ -53,7 +60,7 @@ class TestStyle(unittest.TestCase):
         # Test invalid style
         from azure.cli.core.azclierror import CLIInternalError
         with self.assertRaisesRegex(CLIInternalError, "Invalid style."):
-            format_styled_text([("invalid_style", "dummy text",)])
+            format_styled_text([("invalid_style", "dummy text")])
 
         # Test invalid styled style
         with self.assertRaisesRegex(CLIInternalError, "Invalid styled text."):
