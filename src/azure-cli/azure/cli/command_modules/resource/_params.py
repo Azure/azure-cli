@@ -137,6 +137,7 @@ def load_arguments(self, _):
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
 
     with self.argument_context('provider register') as c:
+        c.argument('accept_terms', action='store_true', is_preview=True, help="Accept market place terms and RP terms for RPaaS. Required when registering RPs from RPaaS, such as 'Microsoft.Confluent' and 'Microsoft.Datadog'.")
         c.argument('wait', action='store_true', help='wait for the registration to finish')
 
     with self.argument_context('provider unregister') as c:
@@ -540,6 +541,7 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tags', tags_type)
         c.argument('no_prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
 
     with self.argument_context('ts update') as c:
@@ -549,6 +551,7 @@ def load_arguments(self, _):
         c.argument('display_name', arg_type=ts_display_name_type)
         c.argument('description', arg_type=ts_description_type)
         c.argument('version_description', arg_type=ts_version_description_type)
+        c.argument('tags', tags_type)
 
     with self.argument_context('ts show') as c:
         c.argument('template_spec', arg_type=deployment_template_spec_type)

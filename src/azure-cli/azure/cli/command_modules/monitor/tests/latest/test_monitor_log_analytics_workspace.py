@@ -163,14 +163,14 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'azurewatson')
+                     self.check('name', 'customlogs')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage add '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_2} {sa_id_3}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_2} {sa_id_3}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
                      self.check('storageAccountIds[1]', '{sa_id_2}'),
@@ -178,14 +178,14 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage remove '
-                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
+                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_2}'),
                      self.check('storageAccountIds[1]', '{sa_id_3}')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage show '
-                 '--type AzureWatson -g {rg} -n {name}',
+                 '--type CustomLogs -g {rg} -n {name}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_2}'),
                      self.check('storageAccountIds[1]', '{sa_id_3}')
@@ -198,10 +198,10 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
-                 '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1} {sa_id_4}',
+                 '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('storageAccountIds[1]', '{sa_id_4}')
+                     self.check('name', 'azurewatson')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage list '
@@ -211,7 +211,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage delete '
-                 '--type CustomLogs -g {rg} -n {name} -y')
+                 '--type AzureWatson -g {rg} -n {name} -y')
 
         self.cmd('monitor log-analytics workspace linked-storage list '
                  '-g {rg} -n {name}',
@@ -419,7 +419,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the number of allowed export rules in your workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
@@ -429,7 +429,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the allowed export rules for the provided table'):
+        with self.assertRaisesRegexp(HttpOperationError, 'You have exceeded the number of allowed export rules in your workspace'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
@@ -451,7 +451,7 @@ class TestLogProfileScenarios(ScenarioTest):
         })
         self.cmd(
             'monitor log-analytics workspace data-export update -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
-            '--destination {namespace_id} --all --enable true',
+            '--destination {namespace_id} --enable true -t Usage Alert',
             checks=[
             ])
 
@@ -461,7 +461,7 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd(
             'monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name} '
-            '--destination {eventhub_id} --all --enable false',
+            '--destination {eventhub_id} --enable false -t {table_name}',
             checks=[
             ])
 

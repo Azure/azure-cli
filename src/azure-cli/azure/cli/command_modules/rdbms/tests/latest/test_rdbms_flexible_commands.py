@@ -65,8 +65,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -89,14 +89,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             version = '12'
             storage_size = 128
             location = self.postgres_location
-            location_result = 'East US'
         elif database_engine == 'mysql':
             tier = 'Burstable'
             sku_name = 'Standard_B1ms'
             storage_size = 10
             version = '5.7'
             location = self.mysql_location
-            location_result = 'West US 2'
+        location_result = 'Southeast Asia'
 
         # flexible-server create with user input
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -112,8 +111,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {}'
-                 .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
+                 .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
@@ -127,9 +126,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2ds_v4 --public-access none'
                      .format(resource_group, location))
 
-        show_output = self.cmd('{} flexible-server show -g {} -n {}'
-                               .format(database_engine, resource_group, server_name), checks=list_checks).get_output_in_json()
-        self.assertIn('subnetArmResourceId', show_output["delegatedSubnetArguments"])
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=list_checks)
 
         if database_engine == 'mysql':
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
@@ -202,8 +200,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -315,8 +313,8 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -397,7 +395,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    mysql_location = 'westus2'
+    mysql_location = 'southeastasia'
 
     @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
@@ -794,8 +792,8 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -829,14 +827,14 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, servers[0], 'all'),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAll_'),
-                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[0], database_engine))])
+                         StringContainCheck(servers[0])])
 
         # Case 2 : Provision a server with public access allowing all azure services
         self.cmd('{} flexible-server create -g {} -n {} --public-access {}'
                  .format(database_engine, resource_group, servers[1], '0.0.0.0'),
                  checks=[JMESPathCheck('resourceGroup', resource_group), JMESPathCheck('skuname', sku_name),
                          StringContainCheck('AllowAllAzureServicesAndResourcesWithinAzureIps_'),
-                         JMESPathCheck('host', '{}.{}.database.azure.com'.format(servers[1], database_engine))])
+                         StringContainCheck(servers[1])])
 
         # delete all servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[0]),
@@ -848,8 +846,8 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
-    postgres_location = 'eastus'
-    mysql_location = 'westus2'
+    postgres_location = 'southeastasia'
+    mysql_location = 'southeastasia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -862,6 +860,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self._test_flexible_server_local_context('mysql', resource_group)
 
     def _test_flexible_server_local_context(self, database_engine, resource_group):
+        self.cmd('config param-persist on')
         from knack.util import CLIError
         if database_engine == 'mysql':
             location = self.mysql_location
@@ -873,7 +872,7 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
         self.cli_ctx.local_context.set(['all'], 'location', location)
 
-        self.cmd('{} flexible-server create -n {}'.format(database_engine, server_name))
+        self.cmd('{} flexible-server create -n {} --public-access none'.format(database_engine, server_name))
 
         self.cmd('{} flexible-server show'.format(database_engine))
 
@@ -893,3 +892,4 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('{} flexible-server list-skus'.format(database_engine))
 
         self.cmd('{} flexible-server delete --yes'.format(database_engine))
+        self.cmd('config param-persist off')

@@ -46,7 +46,7 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
 
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
 from ._client_factory import resource_service_factory
-from ._utils import open_certificate, generateKey
+from ._utils import open_certificate, generate_key
 
 
 logger = get_logger(__name__)
@@ -635,9 +635,9 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     requested_policy = [p for p in policies if p.key_name.lower() == policy_name.lower()]
     if regenerate_key == RenewKeyType.Primary.value:
-        requested_policy[0].primary_key = generateKey()
+        requested_policy[0].primary_key = generate_key()
     if regenerate_key == RenewKeyType.Secondary.value:
-        requested_policy[0].secondary_key = generateKey()
+        requested_policy[0].secondary_key = generate_key()
     if regenerate_key == RenewKeyType.Swap.value:
         temp = requested_policy[0].primary_key
         requested_policy[0].primary_key = requested_policy[0].secondary_key

@@ -14,14 +14,14 @@ interactions:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-09-03T03:23:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-18T03:28:48Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:23:50 GMT
+      - Wed, 18 Nov 2020 03:28:53 GMT
       expires:
       - '-1'
       pragma:
@@ -46,8 +46,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "eastus", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "zones":
-      ["2"], "properties": {"hyperVGeneration": "V1", "creationData": {"createOption":
-      "Empty"}, "diskSizeGB": 4, "diskIOPSReadWrite": 500, "diskMBpsReadWrite": 8}}'
+      ["2"], "properties": {"creationData": {"createOption": "Empty"}, "diskSizeGB":
+      4, "diskIOPSReadWrite": 500, "diskMBpsReadWrite": 8}}'
     headers:
       Accept:
       - application/json
@@ -58,43 +58,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '235'
+      - '209'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d1?api-version=2020-06-30
   response:
     body:
       string: "{\r\n  \"name\": \"d1\",\r\n  \"location\": \"eastus\",\r\n  \"tags\":
         {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n    \"name\":
-        \"UltraSSD_LRS\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\":
-        \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n
-        \   },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 500,\r\n    \"diskMBpsReadWrite\":
-        8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
-        13,\r\n    \"provisioningState\": \"Updating\",\r\n    \"isArmResource\":
-        true\r\n  }\r\n}"
+        \"UltraSSD_LRS\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n
+        \     \"createOption\": \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n
+        \   \"diskIOPSReadWrite\": 500,\r\n    \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\":
+        false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\": 13,\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"isArmResource\": true\r\n
+        \ }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/cebee6e5-bdfe-412b-9942-2d4e2477843d?api-version=2020-06-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/6cf8dcea-e029-4b11-89f2-0fe2870c7abd?api-version=2020-06-30
       cache-control:
       - no-cache
       content-length:
-      - '483'
+      - '452'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:23:57 GMT
+      - Wed, 18 Nov 2020 03:28:59 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/cebee6e5-bdfe-412b-9942-2d4e2477843d?monitor=true&api-version=2020-06-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/6cf8dcea-e029-4b11-89f2-0fe2870c7abd?monitor=true&api-version=2020-06-30
       pragma:
       - no-cache
       server:
@@ -107,7 +104,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7999
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1195'
     status:
       code: 202
       message: Accepted
@@ -115,7 +112,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -125,38 +122,37 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/cebee6e5-bdfe-412b-9942-2d4e2477843d?api-version=2020-06-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/6cf8dcea-e029-4b11-89f2-0fe2870c7abd?api-version=2020-06-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:23:57.9952342+00:00\",\r\n  \"endTime\":
-        \"2020-09-03T03:23:58.2920781+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2020-11-18T03:28:59.4240576+00:00\",\r\n  \"endTime\":
+        \"2020-11-18T03:28:59.8615595+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"d1\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d1\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\",\r\n      \"logicalSectorSize\": 4096\r\n    },\r\n    \"diskSizeGB\":
-        4,\r\n    \"diskIOPSReadWrite\": 500,\r\n    \"diskMBpsReadWrite\": 8,\r\n
-        \   \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
-        13,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"maxShares\": 1,\r\n    \"timeCreated\": \"2020-09-03T03:23:57.9952342+00:00\",\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"41d79304-ef2c-4404-888f-06f7276eb25f\",\r\n
+        {\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\",\r\n      \"logicalSectorSize\":
+        4096\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 500,\r\n
+        \   \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
+        100,\r\n    \"diskMBpsReadOnly\": 13,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2020-11-18T03:28:59.4396865+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"c9416291-145f-4724-8090-cf90fb15d5b8\",\r\n
         \   \"networkAccessPolicy\": \"AllowAll\"\r\n  }\r\n}\r\n  },\r\n  \"name\":
-        \"cebee6e5-bdfe-412b-9942-2d4e2477843d\"\r\n}"
+        \"6cf8dcea-e029-4b11-89f2-0fe2870c7abd\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1286'
+      - '1255'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:00 GMT
+      - Wed, 18 Nov 2020 03:29:01 GMT
       expires:
       - '-1'
       pragma:
@@ -181,7 +177,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -191,8 +187,7 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku --disk-iops-read-write --disk-mbps-read-write --zone
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d1?api-version=2020-06-30
   response:
@@ -201,24 +196,24 @@ interactions:
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\",\r\n      \"logicalSectorSize\": 4096\r\n    },\r\n    \"diskSizeGB\":
-        4,\r\n    \"diskIOPSReadWrite\": 500,\r\n    \"diskMBpsReadWrite\": 8,\r\n
-        \   \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
-        13,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"maxShares\": 1,\r\n    \"timeCreated\": \"2020-09-03T03:23:57.9952342+00:00\",\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"41d79304-ef2c-4404-888f-06f7276eb25f\",\r\n
+        {\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\",\r\n      \"logicalSectorSize\":
+        4096\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 500,\r\n
+        \   \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
+        100,\r\n    \"diskMBpsReadOnly\": 13,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2020-11-18T03:28:59.4396865+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"c9416291-145f-4724-8090-cf90fb15d5b8\",\r\n
         \   \"networkAccessPolicy\": \"AllowAll\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '1030'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:00 GMT
+      - Wed, 18 Nov 2020 03:29:01 GMT
       expires:
       - '-1'
       pragma:
@@ -253,10 +248,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d1?api-version=2020-06-30
   response:
@@ -265,24 +257,24 @@ interactions:
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n  \"sku\": {\r\n
         \   \"name\": \"UltraSSD_LRS\",\r\n    \"tier\": \"Ultra\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\",\r\n      \"logicalSectorSize\": 4096\r\n    },\r\n    \"diskSizeGB\":
-        4,\r\n    \"diskIOPSReadWrite\": 500,\r\n    \"diskMBpsReadWrite\": 8,\r\n
-        \   \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
-        13,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"maxShares\": 1,\r\n    \"timeCreated\": \"2020-09-03T03:23:57.9952342+00:00\",\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"41d79304-ef2c-4404-888f-06f7276eb25f\",\r\n
+        {\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\",\r\n      \"logicalSectorSize\":
+        4096\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 500,\r\n
+        \   \"diskMBpsReadWrite\": 8,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
+        100,\r\n    \"diskMBpsReadOnly\": 13,\r\n    \"encryption\": {\r\n      \"type\":
+        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
+        \   \"timeCreated\": \"2020-11-18T03:28:59.4396865+00:00\",\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
+        4294967296,\r\n    \"uniqueId\": \"c9416291-145f-4724-8090-cf90fb15d5b8\",\r\n
         \   \"networkAccessPolicy\": \"AllowAll\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '1030'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:01 GMT
+      - Wed, 18 Nov 2020 03:29:03 GMT
       expires:
       - '-1'
       pragma:
@@ -318,14 +310,14 @@ interactions:
       - -g -n --size-gb --sku
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-09-03T03:23:47Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","date":"2020-11-18T03:28:48Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -334,7 +326,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:01 GMT
+      - Wed, 18 Nov 2020 03:29:03 GMT
       expires:
       - '-1'
       pragma:
@@ -350,8 +342,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "eastus", "tags": {}, "sku": {"name": "UltraSSD_LRS"}, "properties":
-      {"hyperVGeneration": "V1", "creationData": {"createOption": "Empty"}, "diskSizeGB":
-      4}}'
+      {"creationData": {"createOption": "Empty"}, "diskSizeGB": 4}}'
     headers:
       Accept:
       - application/json
@@ -362,42 +353,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '169'
+      - '143'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d2?api-version=2020-06-30
   response:
     body:
       string: "{\r\n  \"name\": \"d2\",\r\n  \"location\": \"eastus\",\r\n  \"tags\":
         {},\r\n  \"sku\": {\r\n    \"name\": \"UltraSSD_LRS\"\r\n  },\r\n  \"properties\":
-        {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\":
-        \"Empty\"\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\":
-        100,\r\n    \"diskMBpsReadWrite\": 13,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        100,\r\n    \"diskMBpsReadOnly\": 13,\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"isArmResource\": true\r\n  }\r\n}"
+        {\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n    },\r\n
+        \   \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 100,\r\n    \"diskMBpsReadWrite\":
+        13,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
+        13,\r\n    \"provisioningState\": \"Updating\",\r\n    \"isArmResource\":
+        true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9?api-version=2020-06-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/d01f94fd-76e6-4f27-87a3-15c71fc996e5?api-version=2020-06-30
       cache-control:
       - no-cache
       content-length:
-      - '455'
+      - '424'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:09 GMT
+      - Wed, 18 Nov 2020 03:29:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9?monitor=true&api-version=2020-06-30
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/d01f94fd-76e6-4f27-87a3-15c71fc996e5?monitor=true&api-version=2020-06-30
       pragma:
       - no-cache
       server:
@@ -410,7 +398,7 @@ interactions:
       x-ms-ratelimit-remaining-resource:
       - Microsoft.Compute/CreateUpdateDisks3Min;998,Microsoft.Compute/CreateUpdateDisks30Min;7998
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -418,7 +406,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -428,23 +416,36 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9?api-version=2020-06-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/d01f94fd-76e6-4f27-87a3-15c71fc996e5?api-version=2020-06-30
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:24:10.3243655+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-11-18T03:29:13.0351331+00:00\",\r\n  \"endTime\":
+        \"2020-11-18T03:29:13.8944922+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"d2\",\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d2\",\r\n
+        \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"UltraSSD_LRS\",\r\n    \"tier\":
+        \"Ultra\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"Empty\",\r\n      \"logicalSectorSize\": 4096\r\n    },\r\n    \"diskSizeGB\":
+        4,\r\n    \"diskIOPSReadWrite\": 100,\r\n    \"diskMBpsReadWrite\": 13,\r\n
+        \   \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
+        13,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"maxShares\": 1,\r\n    \"timeCreated\": \"2020-11-18T03:29:13.0351331+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"a880bcd7-802c-4758-9e55-94fa1602d9ed\",\r\n
+        \   \"networkAccessPolicy\": \"AllowAll\"\r\n  }\r\n}\r\n  },\r\n  \"name\":
+        \"d01f94fd-76e6-4f27-87a3-15c71fc996e5\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '134'
+      - '1227'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:12 GMT
+      - Wed, 18 Nov 2020 03:29:15 GMT
       expires:
       - '-1'
       pragma:
@@ -469,7 +470,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -479,112 +480,7 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9?api-version=2020-06-30
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:24:10.3243655+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '134'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 03 Sep 2020 03:24:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49995,Microsoft.Compute/GetOperation30Min;399995
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --size-gb --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/DiskOperations/24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9?api-version=2020-06-30
-  response:
-    body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:24:10.3243655+00:00\",\r\n  \"endTime\":
-        \"2020-09-03T03:24:37.6384038+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"properties\": {\r\n    \"output\": {\"name\":\"d2\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d2\",\"type\":\"Microsoft.Compute/disks\",\"location\":\"eastus\",\"tags\":{},\"sku\":{\"name\":\"UltraSSD_LRS\",\"tier\":\"Ultra\"},\"properties\":{\"hyperVGeneration\":\"V1\",\"creationData\":{\"createOption\":\"Empty\",\"logicalSectorSize\":4096},\"diskSizeGB\":4,\"diskIOPSReadWrite\":100,\"diskMBpsReadWrite\":13,\"readOnly\":false,\"diskIOPSReadOnly\":100,\"diskMBpsReadOnly\":13,\"encryption\":{\"type\":\"EncryptionAtRestWithPlatformKey\"},\"maxShares\":1,\"timeCreated\":\"2020-09-03T03:24:10.3243655+00:00\",\"provisioningState\":\"Succeeded\",\"diskState\":\"Unattached\",\"diskSizeBytes\":4294967296,\"uniqueId\":\"0a38ae82-0c30-40fe-8b45-1ed149ad1c0d\",\"networkAccessPolicy\":\"AllowAll\"}}\r\n
-        \ },\r\n  \"name\": \"24d9f8d9-bc37-4c6e-8cdd-a3858b80efd9\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1048'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 03 Sep 2020 03:24:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49992,Microsoft.Compute/GetOperation30Min;399992
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - disk create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --size-gb --sku
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d2?api-version=2020-06-30
   response:
@@ -592,25 +488,24 @@ interactions:
       string: "{\r\n  \"name\": \"d2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d2\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus\",\r\n
         \ \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"UltraSSD_LRS\",\r\n    \"tier\":
-        \"Ultra\"\r\n  },\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n
-        \   \"creationData\": {\r\n      \"createOption\": \"Empty\",\r\n      \"logicalSectorSize\":
-        4096\r\n    },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 100,\r\n
-        \   \"diskMBpsReadWrite\": 13,\r\n    \"readOnly\": false,\r\n    \"diskIOPSReadOnly\":
-        100,\r\n    \"diskMBpsReadOnly\": 13,\r\n    \"encryption\": {\r\n      \"type\":
-        \"EncryptionAtRestWithPlatformKey\"\r\n    },\r\n    \"maxShares\": 1,\r\n
-        \   \"timeCreated\": \"2020-09-03T03:24:10.3243655+00:00\",\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n    \"diskSizeBytes\":
-        4294967296,\r\n    \"uniqueId\": \"0a38ae82-0c30-40fe-8b45-1ed149ad1c0d\",\r\n
+        \"Ultra\"\r\n  },\r\n  \"properties\": {\r\n    \"creationData\": {\r\n      \"createOption\":
+        \"Empty\",\r\n      \"logicalSectorSize\": 4096\r\n    },\r\n    \"diskSizeGB\":
+        4,\r\n    \"diskIOPSReadWrite\": 100,\r\n    \"diskMBpsReadWrite\": 13,\r\n
+        \   \"readOnly\": false,\r\n    \"diskIOPSReadOnly\": 100,\r\n    \"diskMBpsReadOnly\":
+        13,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
+        \   },\r\n    \"maxShares\": 1,\r\n    \"timeCreated\": \"2020-11-18T03:29:13.0351331+00:00\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
+        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"a880bcd7-802c-4758-9e55-94fa1602d9ed\",\r\n
         \   \"networkAccessPolicy\": \"AllowAll\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1033'
+      - '1002'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:54 GMT
+      - Wed, 18 Nov 2020 03:29:15 GMT
       expires:
       - '-1'
       pragma:
@@ -627,7 +522,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4994,Microsoft.Compute/LowCostGet30Min;39994
+      - Microsoft.Compute/LowCostGet3Min;4995,Microsoft.Compute/LowCostGet30Min;39995
     status:
       code: 200
       message: OK
@@ -696,36 +591,35 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:55 GMT
+      - Wed, 18 Nov 2020 03:29:16 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Thu, 03 Sep 2020 03:29:55 GMT
+      - Wed, 18 Nov 2020 03:34:16 GMT
       source-age:
-      - '207'
+      - '0'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding, Accept-Encoding
+      - Authorization,Accept-Encoding
       via:
-      - 1.1 varnish (Varnish/6.0)
-      - 1.1 varnish
+      - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
       - HIT, HIT
       x-cache-hits:
-      - 1, 2
+      - 1, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - ef839a1d5ba79e3b82aedcf766d90bb93b3a2f09
+      - 5800a448acae0703cb229c36f703d66bb216000c
       x-frame-options:
       - deny
       x-github-request-id:
-      - E10E:43C9:1AF8DA:1DC618:5F505049
+      - 4734:444A:358A5F:3E5C2F:5FB47DA9
       x-served-by:
-      - cache-sin18033-SIN
+      - cache-sin18028-SIN
       x-timer:
-      - S1599103495.375752,VS0,VE0
+      - S1605670157.655566,VS0,VE319
       x-xss-protection:
       - 1; mode=block
     status:
@@ -747,7 +641,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -763,7 +657,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:24:55 GMT
+      - Wed, 18 Nov 2020 03:29:16 GMT
       expires:
       - '-1'
       pragma:
@@ -827,17 +721,17 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_DCUidUzs9bRPoJOND08LgxU4kYD6L5Op","name":"vm_deploy_DCUidUzs9bRPoJOND08LgxU4kYD6L5Op","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13332367828686722027","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-09-03T03:25:00.6125646Z","duration":"PT2.9831965S","correlationId":"9f71a23e-6a4d-437c-b09d-469d8596c5ff","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassdPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_tgxqybPniBeW4MZeTntOkeFdKYRhHDlb","name":"vm_deploy_tgxqybPniBeW4MZeTntOkeFdKYRhHDlb","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12006704435334298582","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-11-18T03:29:22.1070421Z","duration":"PT2.7915256S","correlationId":"36eb5549-7ee0-495a-aec8-94b26d365d37","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassdPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_DCUidUzs9bRPoJOND08LgxU4kYD6L5Op/operationStatuses/08586025033878482686?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_tgxqybPniBeW4MZeTntOkeFdKYRhHDlb/operationStatuses/08585959367261621177?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -845,7 +739,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:25:02 GMT
+      - Wed, 18 Nov 2020 03:29:23 GMT
       expires:
       - '-1'
       pragma:
@@ -855,7 +749,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -875,9 +769,9 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025033878482686?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585959367261621177?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -889,7 +783,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:25:32 GMT
+      - Wed, 18 Nov 2020 03:29:54 GMT
       expires:
       - '-1'
       pragma:
@@ -919,9 +813,9 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025033878482686?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585959367261621177?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -933,7 +827,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:03 GMT
+      - Wed, 18 Nov 2020 03:30:24 GMT
       expires:
       - '-1'
       pragma:
@@ -963,9 +857,9 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025033878482686?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585959367261621177?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -977,7 +871,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:34 GMT
+      - Wed, 18 Nov 2020 03:30:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1007,12 +901,12 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_DCUidUzs9bRPoJOND08LgxU4kYD6L5Op","name":"vm_deploy_DCUidUzs9bRPoJOND08LgxU4kYD6L5Op","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13332367828686722027","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-09-03T03:26:12.9405466Z","duration":"PT1M15.3111785S","correlationId":"9f71a23e-6a4d-437c-b09d-469d8596c5ff","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassdPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_tgxqybPniBeW4MZeTntOkeFdKYRhHDlb","name":"vm_deploy_tgxqybPniBeW4MZeTntOkeFdKYRhHDlb","type":"Microsoft.Resources/deployments","properties":{"templateHash":"12006704435334298582","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-11-18T03:30:30.9581433Z","duration":"PT1M11.6426268S","correlationId":"36eb5549-7ee0-495a-aec8-94b26d365d37","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-ultrassdVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassdPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassdVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -1021,7 +915,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:34 GMT
+      - Wed, 18 Nov 2020 03:30:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1050,32 +944,29 @@ interactions:
       - -g -n --admin-username --size --admin-password --image --storage-sku --data-disk-sizes-gb
         --zone --location --nsg-rule
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1086,24 +977,24 @@ interactions:
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic\"}]},\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
         \"vm-ultrassd\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\":
-        \"10.5\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n
+        \"10.6\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-09-03T03:26:30+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n
+        \"2020-11-18T03:30:58+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-09-03T03:25:28.2873783+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
         \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
-        \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n          \"statuses\":
+        \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-09-03T03:25:28.2873783+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2020-09-03T03:26:11.2406063+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2020-11-18T03:30:28.3238579+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
@@ -1111,11 +1002,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '4369'
+      - '4367'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:36 GMT
+      - Wed, 18 Nov 2020 03:30:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1132,7 +1023,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31996
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31973
     status:
       code: 200
       message: OK
@@ -1152,7 +1043,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -1160,12 +1051,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassdVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic\",\r\n
-        \ \"etag\": \"W/\\\"a4113987-3dbc-4589-b1e3-dba3516e0a4f\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"04ac5ce0-6164-49ec-80ae-b88f0a982218\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"004c9e54-87c6-4451-a51d-9f0f49d056d5\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"3b24ba0d-601a-44c8-bc5d-709aa395dc43\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-ultrassd\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic/ipConfigurations/ipconfigvm-ultrassd\",\r\n
-        \       \"etag\": \"W/\\\"a4113987-3dbc-4589-b1e3-dba3516e0a4f\\\"\",\r\n
+        \       \"etag\": \"W/\\\"04ac5ce0-6164-49ec-80ae-b88f0a982218\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -1174,8 +1065,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"i1ycr20lwnpuxdwzz5nxljckkd.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-8B-2B-32\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"ghebnsevz10etl20bu0yb3zk0e.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-22-48-1D-19-82\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassdNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -1189,9 +1080,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:37 GMT
+      - Wed, 18 Nov 2020 03:30:58 GMT
       etag:
-      - W/"a4113987-3dbc-4589-b1e3-dba3516e0a4f"
+      - W/"04ac5ce0-6164-49ec-80ae-b88f0a982218"
       expires:
       - '-1'
       pragma:
@@ -1208,7 +1099,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e7e95424-0994-439b-ae1a-a5e326d5fa24
+      - ec9cbdf7-86d7-4b43-b2b6-f7d714c467f5
     status:
       code: 200
       message: OK
@@ -1228,7 +1119,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -1236,10 +1127,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassdPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassdPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"c42f1f54-cb4e-4749-9972-0d90e61d3830\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"e36a03bc-f59f-4ce6-bd35-c48e8d40d69a\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"b7b9ca1d-4478-49f9-9cc4-cc174fe938be\",\r\n    \"ipAddress\": \"20.51.208.87\",\r\n
+        \"a46a1c7f-cafb-4213-89d5-e3f9bedf46e4\",\r\n    \"ipAddress\": \"52.146.14.142\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
         \   \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic/ipConfigurations/ipconfigvm-ultrassd\"\r\n
@@ -1249,13 +1140,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1059'
+      - '1060'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:37 GMT
+      - Wed, 18 Nov 2020 03:30:59 GMT
       etag:
-      - W/"c42f1f54-cb4e-4749-9972-0d90e61d3830"
+      - W/"e36a03bc-f59f-4ce6-bd35-c48e8d40d69a"
       expires:
       - '-1'
       pragma:
@@ -1272,7 +1163,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a3dfb25d-6e84-42ca-936b-743e1db34feb
+      - 04364186-2d52-430e-b9fe-4ba46fa68496
     status:
       code: 200
       message: OK
@@ -1290,32 +1181,29 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1324,17 +1212,38 @@ interactions:
         \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n
-        \ ]\r\n}"
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
+        \"vm-ultrassd\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\":
+        \"10.6\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n
+        \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
+        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
+        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
+        \"2020-11-18T03:30:58+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n
+        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
+        \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
+        \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2020-11-18T03:30:28.3238579+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2695'
+      - '4367'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:37 GMT
+      - Wed, 18 Nov 2020 03:31:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1351,28 +1260,26 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31995
+      - Microsoft.Compute/LowCostGet3Min;3995,Microsoft.Compute/LowCostGet30Min;31972
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
-      "Standard_D2s_v3"}, "storageProfile": {"imageReference": {"publisher": "Debian",
-      "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk": {"osType":
-      "Linux", "name": "vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b", "caching":
+    body: '{"location": "eastus", "tags": {}, "zones": ["2"], "properties": {"hardwareProfile":
+      {"vmSize": "Standard_D2s_v3"}, "storageProfile": {"osDisk": {"osType": "Linux",
+      "name": "vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb", "caching":
       "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk": {"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b",
-      "storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun": 0, "name": "vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb",
+      "storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun": 0, "name": "vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303",
       "caching": "None", "createOption": "Empty", "diskSizeGB": 4, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303",
       "storageAccountType": "UltraSSD_LRS"}, "toBeDetached": false}, {"lun": 1, "name":
       "d3", "createOption": "Empty", "diskSizeGB": 5, "managedDisk": {"storageAccountType":
       "UltraSSD_LRS"}}]}, "additionalCapabilities": {"ultraSSDEnabled": true}, "osProfile":
       {"computerName": "vm-ultrassd", "adminUsername": "admin123", "linuxConfiguration":
       {"disablePasswordAuthentication": false, "provisionVMAgent": true}, "secrets":
       [], "allowExtensionOperations": true, "requireGuestProvisionSignal": true},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"}]}},
-      "zones": ["2"]}'
+      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -1383,38 +1290,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1848'
+      - '1749'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
@@ -1433,7 +1337,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/9088329e-b3bd-4be0-9d4b-d381c3a60ad8?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/23e517c3-cf9f-4f4e-8e98-0c24bda70265?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1441,7 +1345,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:26:42 GMT
+      - Wed, 18 Nov 2020 03:31:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1458,9 +1362,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;741,Microsoft.Compute/PutVM30Min;3716
+      - Microsoft.Compute/PutVM3Min;742,Microsoft.Compute/PutVM30Min;3716
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -1468,7 +1372,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1478,15 +1382,14 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/9088329e-b3bd-4be0-9d4b-d381c3a60ad8?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/23e517c3-cf9f-4f4e-8e98-0c24bda70265?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:26:39.9437697+00:00\",\r\n  \"endTime\":
-        \"2020-09-03T03:26:51.8812704+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"9088329e-b3bd-4be0-9d4b-d381c3a60ad8\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-11-18T03:31:03.6834144+00:00\",\r\n  \"endTime\":
+        \"2020-11-18T03:31:11.9959702+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"23e517c3-cf9f-4f4e-8e98-0c24bda70265\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1495,7 +1398,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:13 GMT
+      - Wed, 18 Nov 2020 03:31:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1512,7 +1415,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29955
     status:
       code: 200
       message: OK
@@ -1520,7 +1423,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1530,35 +1433,34 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3\"\r\n
+        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1577,7 +1479,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:13 GMT
+      - Wed, 18 Nov 2020 03:31:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1594,7 +1496,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3992,Microsoft.Compute/LowCostGet30Min;31992
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31968
     status:
       code: 200
       message: OK
@@ -1612,37 +1514,34 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3\"\r\n
+        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1651,17 +1550,43 @@ interactions:
         \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n
-        \ ]\r\n}"
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
+        \"vm-ultrassd\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\":
+        \"10.6\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n
+        \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
+        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
+        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
+        \"2020-11-18T03:31:38+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n
+        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
+        \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
+        \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:29:49.057964+00:00\"\r\n
+        \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
+        \"d3\",\r\n          \"statuses\": [\r\n            {\r\n              \"code\":
+        \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\n
+        \             \"displayStatus\": \"Provisioning succeeded\",\r\n              \"time\":
+        \"2020-11-18T03:31:05.7771867+00:00\"\r\n            }\r\n          ]\r\n
+        \       }\r\n      ],\r\n      \"hyperVGeneration\": \"V1\",\r\n      \"statuses\":
+        [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2020-11-18T03:31:11.9803232+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '3185'
+      - '5176'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:14 GMT
+      - Wed, 18 Nov 2020 03:31:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1678,31 +1603,29 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31991
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31967
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
-      "Standard_D2s_v3"}, "storageProfile": {"imageReference": {"publisher": "Debian",
-      "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk": {"osType":
-      "Linux", "name": "vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b", "caching":
+    body: '{"location": "eastus", "tags": {}, "zones": ["2"], "properties": {"hardwareProfile":
+      {"vmSize": "Standard_D2s_v3"}, "storageProfile": {"osDisk": {"osType": "Linux",
+      "name": "vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb", "caching":
       "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk": {"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b",
-      "storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun": 0, "name": "vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb",
+      "storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun": 0, "name": "vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303",
       "caching": "None", "createOption": "Empty", "diskSizeGB": 4, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303",
       "storageAccountType": "UltraSSD_LRS"}, "toBeDetached": false}, {"lun": 1, "name":
       "d3", "caching": "None", "createOption": "Empty", "diskSizeGB": 5, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3",
       "storageAccountType": "UltraSSD_LRS"}, "toBeDetached": false}, {"lun": 2, "createOption":
       "Attach", "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d1"}}]},
       "additionalCapabilities": {"ultraSSDEnabled": true}, "osProfile": {"computerName":
       "vm-ultrassd", "adminUsername": "admin123", "linuxConfiguration": {"disablePasswordAuthentication":
       false, "provisionVMAgent": true}, "secrets": [], "allowExtensionOperations":
       true, "requireGuestProvisionSignal": true}, "networkProfile": {"networkInterfaces":
-      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"}]}},
-      "zones": ["2"]}'
+      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -1713,43 +1636,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2323'
+      - '2224'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3\"\r\n
+        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -1769,7 +1689,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/ba219000-6891-4af1-ba2f-4f533079e1e9?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/26019a7b-e9c7-4a62-9759-b60441e48e6b?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1777,7 +1697,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:22 GMT
+      - Wed, 18 Nov 2020 03:31:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1794,9 +1714,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;740,Microsoft.Compute/PutVM30Min;3715
+      - Microsoft.Compute/PutVM3Min;741,Microsoft.Compute/PutVM30Min;3715
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1804,7 +1724,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1814,24 +1734,23 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/ba219000-6891-4af1-ba2f-4f533079e1e9?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/26019a7b-e9c7-4a62-9759-b60441e48e6b?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:27:18.11562+00:00\",\r\n  \"endTime\":
-        \"2020-09-03T03:27:30.3656452+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"ba219000-6891-4af1-ba2f-4f533079e1e9\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-11-18T03:31:43.902388+00:00\",\r\n  \"endTime\":
+        \"2020-11-18T03:31:51.5743023+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"26019a7b-e9c7-4a62-9759-b60441e48e6b\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '182'
+      - '183'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:52 GMT
+      - Wed, 18 Nov 2020 03:32:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1848,7 +1767,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29994
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29953
     status:
       code: 200
       message: OK
@@ -1856,7 +1775,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1866,35 +1785,34 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3\"\r\n
+        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -1918,7 +1836,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:52 GMT
+      - Wed, 18 Nov 2020 03:32:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1935,7 +1853,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31988
+      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31964
     status:
       code: 200
       message: OK
@@ -1953,37 +1871,34 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"c0ddccae-882a-4555-a81b-07ad9d4e26af\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"518c0d2f-abcf-4df9-b64a-c4f24fb033dd\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\",\r\n        \"createOption\":
+        \"vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_574cfeb3001b4253ac9571341aaa924b\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_OsDisk_1_6fb65a0764104d53a007e9d3b54f97cb\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_4d3180ba2a934b4caa89357f0efebe2e\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd_disk2_b4b7f7cbbe81450daff6b359c4961303\"\r\n
         \         },\r\n          \"diskSizeGB\": 4,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d3\"\r\n
+        \"UltraSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -2007,7 +1922,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:53 GMT
+      - Wed, 18 Nov 2020 03:32:20 GMT
       expires:
       - '-1'
       pragma:
@@ -2024,7 +1939,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31987
+      - Microsoft.Compute/LowCostGet3Min;3986,Microsoft.Compute/LowCostGet30Min;31963
     status:
       code: 200
       message: OK
@@ -2093,20 +2008,19 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:55 GMT
+      - Wed, 18 Nov 2020 03:32:21 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Thu, 03 Sep 2020 03:32:55 GMT
+      - Wed, 18 Nov 2020 03:37:21 GMT
       source-age:
-      - '237'
+      - '185'
       strict-transport-security:
       - max-age=31536000
       vary:
-      - Authorization,Accept-Encoding, Accept-Encoding
+      - Authorization,Accept-Encoding
       via:
-      - 1.1 varnish (Varnish/6.0)
-      - 1.1 varnish
+      - 1.1 varnish (Varnish/6.0), 1.1 varnish
       x-cache:
       - HIT, HIT
       x-cache-hits:
@@ -2114,15 +2028,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - aedf23cacaf291dcb0c307badca23d803d4bd67e
+      - 0feddb326adacb3f7725f56ed9e29d4901d9fa8b
       x-frame-options:
       - deny
       x-github-request-id:
-      - E10E:43C9:1AF8DA:1DC618:5F505049
+      - 4734:444A:358A5F:3E5C2F:5FB47DA9
       x-served-by:
-      - cache-sin18039-SIN
+      - cache-sin18021-SIN
       x-timer:
-      - S1599103675.013292,VS0,VE1
+      - S1605670342.592146,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -2144,7 +2058,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -2153,14 +2067,14 @@ interactions:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-ultrassdVNET\",\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET\",\r\n
-        \     \"etag\": \"W/\\\"4483ff3f-48fb-47eb-aadd-551ffd707e23\\\"\",\r\n      \"type\":
+        \     \"etag\": \"W/\\\"2b0c26e5-c574-440f-ab8b-f5f7e47e1338\\\"\",\r\n      \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n      \"location\": \"eastus\",\r\n
         \     \"tags\": {},\r\n      \"properties\": {\r\n        \"provisioningState\":
-        \"Succeeded\",\r\n        \"resourceGuid\": \"f328f046-b34b-4b5f-8ed9-cfdb75a44a53\",\r\n
+        \"Succeeded\",\r\n        \"resourceGuid\": \"c816c831-ce95-49f4-af9a-0d3580f72ad4\",\r\n
         \       \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n            \"10.0.0.0/16\"\r\n
         \         ]\r\n        },\r\n        \"subnets\": [\r\n          {\r\n            \"name\":
         \"vm-ultrassdSubnet\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-ultrassdVNET/subnets/vm-ultrassdSubnet\",\r\n
-        \           \"etag\": \"W/\\\"4483ff3f-48fb-47eb-aadd-551ffd707e23\\\"\",\r\n
+        \           \"etag\": \"W/\\\"2b0c26e5-c574-440f-ab8b-f5f7e47e1338\\\"\",\r\n
         \           \"properties\": {\r\n              \"provisioningState\": \"Succeeded\",\r\n
         \             \"addressPrefix\": \"10.0.0.0/24\",\r\n              \"ipConfigurations\":
         [\r\n                {\r\n                  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassdVMNic/ipConfigurations/ipconfigvm-ultrassd\"\r\n
@@ -2176,7 +2090,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:27:54 GMT
+      - Wed, 18 Nov 2020 03:32:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2193,7 +2107,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0231ab2d-7bf2-455f-bf86-d90c136abe8a
+      - 73c06838-7b37-4593-841b-d672062848bd
     status:
       code: 200
       message: OK
@@ -2242,25 +2156,25 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_8Tn7eSKBuUjUPUv9F8rCYC063msxDBlU","name":"vm_deploy_8Tn7eSKBuUjUPUv9F8rCYC063msxDBlU","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5290580718394197517","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-09-03T03:28:01.2843444Z","duration":"PT2.800892S","correlationId":"03eefc56-7025-4c71-9360-9b9b412274a7","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassd2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd2"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_3W7AQqJNQD2JAMqnReHQIVk9dLuBU9hL","name":"vm_deploy_3W7AQqJNQD2JAMqnReHQIVk9dLuBU9hL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5136062578010204736","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-11-18T03:32:27.24525Z","duration":"PT2.9968722S","correlationId":"6f198d01-a4a8-468f-85b4-4da8da3690ee","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassd2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd2"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_8Tn7eSKBuUjUPUv9F8rCYC063msxDBlU/operationStatuses/08586025032069941939?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_3W7AQqJNQD2JAMqnReHQIVk9dLuBU9hL/operationStatuses/08585959365412292493?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '2532'
+      - '2531'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:28:02 GMT
+      - Wed, 18 Nov 2020 03:32:28 GMT
       expires:
       - '-1'
       pragma:
@@ -2290,9 +2204,9 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025032069941939?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585959365412292493?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -2304,7 +2218,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:28:34 GMT
+      - Wed, 18 Nov 2020 03:32:59 GMT
       expires:
       - '-1'
       pragma:
@@ -2334,53 +2248,9 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025032069941939?api-version=2020-06-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 03 Sep 2020 03:29:04 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --admin-username --admin-password --image --size --ultra-ssd-enabled
-        --zone --location --nsg-rule
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586025032069941939?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585959365412292493?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -2392,7 +2262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:35 GMT
+      - Wed, 18 Nov 2020 03:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -2422,12 +2292,12 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.15.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_8Tn7eSKBuUjUPUv9F8rCYC063msxDBlU","name":"vm_deploy_8Tn7eSKBuUjUPUv9F8rCYC063msxDBlU","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5290580718394197517","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-09-03T03:29:19.750489Z","duration":"PT1M21.2670366S","correlationId":"03eefc56-7025-4c71-9360-9b9b412274a7","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassd2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_3W7AQqJNQD2JAMqnReHQIVk9dLuBU9hL","name":"vm_deploy_3W7AQqJNQD2JAMqnReHQIVk9dLuBU9hL","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5136062578010204736","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-11-18T03:33:29.6449931Z","duration":"PT1M5.3966153S","correlationId":"6f198d01-a4a8-468f-85b4-4da8da3690ee","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-ultrassd2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-ultrassd2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-ultrassd2"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -2436,7 +2306,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:35 GMT
+      - Wed, 18 Nov 2020 03:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -2465,27 +2335,24 @@ interactions:
       - -g -n --admin-username --admin-password --image --size --ultra-ssd-enabled
         --zone --location --nsg-rule
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3a64c40a-5db2-403d-93fc-02c3989dac42\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"13666b16-4d6f-446c-a25b-cbc71b1f3579\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n        \"createOption\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-ultrassd2\",\r\n
         \     \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\": {\r\n
@@ -2494,21 +2361,21 @@ interactions:
         \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
-        \"vm-ultrassd2\",\r\n      \"osName\": \"debian\",\r\n      \"osVersion\":
-        \"10.5\",\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n
-        \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
-        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
-        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-09-03T03:29:34+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n
-        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
+        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
+        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
+        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
+        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
+        populated.\",\r\n            \"time\": \"2020-11-18T03:33:32+00:00\"\r\n          }\r\n
+        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-09-03T03:28:28.7562657+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:32:52.8090831+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2020-09-03T03:29:18.8968855+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2020-11-18T03:33:28.0748663+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
@@ -2516,11 +2383,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '3417'
+      - '3323'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:36 GMT
+      - Wed, 18 Nov 2020 03:33:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2537,7 +2404,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31983
+      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31960
     status:
       code: 200
       message: OK
@@ -2557,7 +2424,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -2565,12 +2432,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2VMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic\",\r\n
-        \ \"etag\": \"W/\\\"cdc1e7de-e84e-4d7b-9ff0-a1d1e3a8fb7c\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"bc070ef8-df21-4a0f-8156-e3d8fef1749d\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"4f4bb26c-bcaa-4f86-977a-0621065684cb\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"1abc9514-57f4-4bb9-90bd-ad9757bc4c79\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-ultrassd2\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic/ipConfigurations/ipconfigvm-ultrassd2\",\r\n
-        \       \"etag\": \"W/\\\"cdc1e7de-e84e-4d7b-9ff0-a1d1e3a8fb7c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"bc070ef8-df21-4a0f-8156-e3d8fef1749d\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.5\",\r\n          \"privateIPAllocationMethod\":
@@ -2579,8 +2446,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"i1ycr20lwnpuxdwzz5nxljckkd.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-8C-57-99\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"ghebnsevz10etl20bu0yb3zk0e.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-8B-DB-FA\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-ultrassd2NSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -2594,9 +2461,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:36 GMT
+      - Wed, 18 Nov 2020 03:33:32 GMT
       etag:
-      - W/"cdc1e7de-e84e-4d7b-9ff0-a1d1e3a8fb7c"
+      - W/"bc070ef8-df21-4a0f-8156-e3d8fef1749d"
       expires:
       - '-1'
       pragma:
@@ -2613,7 +2480,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - a46f7e65-7c4a-41a2-9195-f4ad42a6a024
+      - db3ead3e-da00-40e2-803e-8e3e457e6657
     status:
       code: 200
       message: OK
@@ -2633,7 +2500,7 @@ interactions:
         --zone --location --nsg-rule
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+        azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
@@ -2641,10 +2508,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2PublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-ultrassd2PublicIP\",\r\n
-        \ \"etag\": \"W/\\\"4008001e-d106-485d-bc87-7ceb12573fd2\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"cbb5a4f3-0ca7-4471-813a-1e6a00e61ee5\\\"\",\r\n  \"location\":
         \"eastus\",\r\n  \"tags\": {},\r\n  \"zones\": [\r\n    \"2\"\r\n  ],\r\n
         \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
-        \"8c85c973-b117-45d0-9c1b-625414421423\",\r\n    \"ipAddress\": \"20.51.208.183\",\r\n
+        \"951a6724-e68c-4334-87ab-63e10b81b84e\",\r\n    \"ipAddress\": \"20.51.217.207\",\r\n
         \   \"publicIPAddressVersion\": \"IPv4\",\r\n    \"publicIPAllocationMethod\":
         \"Static\",\r\n    \"idleTimeoutInMinutes\": 4,\r\n    \"ipTags\": [],\r\n
         \   \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic/ipConfigurations/ipconfigvm-ultrassd2\"\r\n
@@ -2658,9 +2525,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:37 GMT
+      - Wed, 18 Nov 2020 03:33:32 GMT
       etag:
-      - W/"4008001e-d106-485d-bc87-7ceb12573fd2"
+      - W/"cbb5a4f3-0ca7-4471-813a-1e6a00e61ee5"
       expires:
       - '-1'
       pragma:
@@ -2677,7 +2544,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f2ca3797-bb7b-486f-85aa-f4cabc309897
+      - 11768038-aab3-41e6-bc1a-c15568705f64
     status:
       code: 200
       message: OK
@@ -2695,27 +2562,24 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?$expand=instanceView&api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3a64c40a-5db2-403d-93fc-02c3989dac42\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"13666b16-4d6f-446c-a25b-cbc71b1f3579\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n        \"createOption\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-ultrassd2\",\r\n
         \     \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\": {\r\n
@@ -2724,17 +2588,33 @@ interactions:
         \       }\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
         true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
         {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic\"}]},\r\n
-        \   \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n
-        \ ]\r\n}"
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"vmAgent\":
+        {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n        \"statuses\": [\r\n
+        \         {\r\n            \"code\": \"ProvisioningState/Unavailable\",\r\n
+        \           \"level\": \"Warning\",\r\n            \"displayStatus\": \"Not
+        Ready\",\r\n            \"message\": \"VM status blob is found but not yet
+        populated.\",\r\n            \"time\": \"2020-11-18T03:33:33+00:00\"\r\n          }\r\n
+        \       ]\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n          \"statuses\":
+        [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-11-18T03:32:52.8090831+00:00\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2020-11-18T03:33:28.0748663+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  },\r\n  \"zones\": [\r\n    \"2\"\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2108'
+      - '3323'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:37 GMT
+      - Wed, 18 Nov 2020 03:33:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2751,25 +2631,23 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31982
+      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31958
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "eastus", "tags": {}, "properties": {"hardwareProfile": {"vmSize":
-      "Standard_D2s_v3"}, "storageProfile": {"imageReference": {"publisher": "Debian",
-      "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk": {"osType":
-      "Linux", "name": "vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353", "caching":
+    body: '{"location": "eastus", "tags": {}, "zones": ["2"], "properties": {"hardwareProfile":
+      {"vmSize": "Standard_D2s_v3"}, "storageProfile": {"osDisk": {"osType": "Linux",
+      "name": "vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37", "caching":
       "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk": {"id":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353",
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37",
       "storageAccountType": "Premium_LRS"}}, "dataDisks": [{"lun": 0, "name": "d4",
       "createOption": "Empty", "diskSizeGB": 5, "managedDisk": {"storageAccountType":
       "UltraSSD_LRS"}}]}, "additionalCapabilities": {"ultraSSDEnabled": true}, "osProfile":
       {"computerName": "vm-ultrassd2", "adminUsername": "admin123", "linuxConfiguration":
       {"disablePasswordAuthentication": false, "provisionVMAgent": true}, "secrets":
       [], "allowExtensionOperations": true, "requireGuestProvisionSignal": true},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic"}]}},
-      "zones": ["2"]}'
+      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-ultrassd2VMNic"}]}}}'
     headers:
       Accept:
       - application/json
@@ -2780,33 +2658,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1402'
+      - '1303'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3a64c40a-5db2-403d-93fc-02c3989dac42\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"13666b16-4d6f-446c-a25b-cbc71b1f3579\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n        \"createOption\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d4\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
@@ -2825,7 +2700,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/f0aa551d-6a37-4635-acad-82c0ac3a0c50?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/30f6d3ea-be6e-460e-864e-3e362b9505a9?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -2833,7 +2708,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:29:43 GMT
+      - Wed, 18 Nov 2020 03:33:41 GMT
       expires:
       - '-1'
       pragma:
@@ -2850,7 +2725,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;740,Microsoft.Compute/PutVM30Min;3713
+      - Microsoft.Compute/PutVM3Min;739,Microsoft.Compute/PutVM30Min;3712
       x-ms-ratelimit-remaining-subscription-writes:
       - '1194'
     status:
@@ -2860,7 +2735,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2870,15 +2745,14 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/f0aa551d-6a37-4635-acad-82c0ac3a0c50?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/operations/30f6d3ea-be6e-460e-864e-3e362b9505a9?api-version=2020-06-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-09-03T03:29:40.0688792+00:00\",\r\n  \"endTime\":
-        \"2020-09-03T03:29:48.3657404+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"f0aa551d-6a37-4635-acad-82c0ac3a0c50\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-11-18T03:33:35.7311978+00:00\",\r\n  \"endTime\":
+        \"2020-11-18T03:33:44.3249736+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"30f6d3ea-be6e-460e-864e-3e362b9505a9\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2887,7 +2761,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:30:14 GMT
+      - Wed, 18 Nov 2020 03:34:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2904,7 +2778,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29990
+      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29949
     status:
       code: 200
       message: OK
@@ -2912,7 +2786,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2922,30 +2796,29 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3a64c40a-5db2-403d-93fc-02c3989dac42\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"13666b16-4d6f-446c-a25b-cbc71b1f3579\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n        \"createOption\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d4\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d4\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d4\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd2\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -2964,7 +2837,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:30:14 GMT
+      - Wed, 18 Nov 2020 03:34:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2981,7 +2854,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31979
+      - Microsoft.Compute/LowCostGet3Min;3985,Microsoft.Compute/LowCostGet30Min;31954
     status:
       code: 200
       message: OK
@@ -2999,32 +2872,29 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-compute/13.0.0 Azure-SDK-For-Python AZURECLI/2.11.1
-      accept-language:
-      - en-US
+      - AZURECLI/2.15.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2?api-version=2020-06-01
   response:
     body:
       string: "{\r\n  \"name\": \"vm-ultrassd2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-ultrassd2\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3a64c40a-5db2-403d-93fc-02c3989dac42\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"13666b16-4d6f-446c-a25b-cbc71b1f3579\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
         \   \"additionalCapabilities\": {\r\n      \"ultraSSDEnabled\": true\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
-        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200803.347\"\r\n
+        \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20201023.432\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\",\r\n        \"createOption\":
+        \"vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_e691a99ab753427798d429c675e23353\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/vm-ultrassd2_OsDisk_1_f17cf79d713a40f5abf1875105a48b37\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
         [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"d4\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"UltraSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKRFWTYMATBDG72ST5BKOGUTDEGBCNJ5UY44BSFIEIFDBLGP2NHBSLASCHCU7/providers/Microsoft.Compute/disks/d4\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d4\"\r\n
         \         },\r\n          \"diskSizeGB\": 5,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-ultrassd2\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -3043,7 +2913,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 03 Sep 2020 03:30:16 GMT
+      - Wed, 18 Nov 2020 03:34:13 GMT
       expires:
       - '-1'
       pragma:
@@ -3060,7 +2930,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31978
+      - Microsoft.Compute/LowCostGet3Min;3984,Microsoft.Compute/LowCostGet30Min;31953
     status:
       code: 200
       message: OK

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 from .scenario_mixin import CdnScenarioMixin
 
 from azure.mgmt.cdn.models import SkuName
@@ -70,6 +70,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
+    @record_only()  # This test relies on existing resources in a specific subscription
     @ResourceGroupPreparer()
     def test_private_link(self, resource_group):
         profile_name = 'profile123'

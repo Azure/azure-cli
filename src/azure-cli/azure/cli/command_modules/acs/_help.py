@@ -308,7 +308,7 @@ parameters:
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -593,10 +593,12 @@ examples:
 helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
+long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
 parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
+    long-summary: "On clusters with Azure Active Directory integration, this bypasses normal Azure AD authentication and can be used if you're permanently blocked by not having access to a valid Azure AD group with access to your cluster. Requires 'Azure Kubernetes Service Cluster Admin' role."
   - name: --file -f
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
