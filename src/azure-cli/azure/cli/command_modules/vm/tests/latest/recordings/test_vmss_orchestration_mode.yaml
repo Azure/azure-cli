@@ -1,0 +1,299 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.19 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001","name":"cli_test_vmss_orchestration_mode_000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-01-05T05:23:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:23:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "centraluseuap", "tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ppg create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '41'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-compute/18.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Compute/proximityPlacementGroups/ppg1?api-version=2020-06-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"ppg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Compute/proximityPlacementGroups/ppg1\",\r\n
+        \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
+        \"centraluseuap\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
+        \"Standard\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '411'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:23:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/PutDeletePPG3Min;99,Microsoft.Compute/PutDeletePPG30Min;499
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --orchestration-mode --single-placement-group --ppg --platform-fault-domain-count
+        --generate-ssh-keys
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.19 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001","name":"cli_test_vmss_orchestration_mode_000001","type":"Microsoft.Resources/resourceGroups","location":"centraluseuap","tags":{"product":"azurecli","cause":"automation","date":"2021-01-05T05:23:11Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:23:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"type": "Microsoft.Compute/virtualMachineScaleSets", "name": "vmss1", "location":
+      "centraluseuap", "tags": null, "apiVersion": "2020-06-01", "properties": {"singlePlacementGroup":
+      false, "provisioningState": 0, "platformFaultDomainCount": 3, "proximityPlacementGroup":
+      {"id": "ppg1"}}}], "outputs": {"VMSS": {"type": "object", "value": "[reference(resourceId(''Microsoft.Compute/virtualMachineScaleSets'',
+      ''vmss1''),providers(''Microsoft.Compute'', ''virtualMachineScaleSets'').apiVersions[0])]"}}},
+      "parameters": {}, "mode": "Incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '736'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --orchestration-mode --single-placement-group --ppg --platform-fault-domain-count
+        --generate-ssh-keys
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.19 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_DKSYrLZRjm5ZWzI7EqXMyIMRv1RbnuOa","name":"vmss_deploy_DKSYrLZRjm5ZWzI7EqXMyIMRv1RbnuOa","type":"Microsoft.Resources/deployments","properties":{"templateHash":"66597909038876640","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2021-01-05T05:23:32.2272312Z","duration":"PT2.6672744S","correlationId":"8f8a0a46-d5e7-49fd-97bc-0247b0704b53","providers":[{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["centraluseuap"]}]}],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/vmss_deploy_DKSYrLZRjm5ZWzI7EqXMyIMRv1RbnuOa/operationStatuses/08585917826759176641?api-version=2020-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '732'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:23:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --orchestration-mode --single-placement-group --ppg --platform-fault-domain-count
+        --generate-ssh-keys
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.19 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585917826759176641?api-version=2020-06-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:24:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --orchestration-mode --single-placement-group --ppg --platform-fault-domain-count
+        --generate-ssh-keys
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.19 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vmss_orchestration_mode_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585917826759176641?api-version=2020-06-01
+  response:
+    body:
+      string: '{"status":"Failed","error":{"code":"DeploymentFailed","message":"At
+        least one resource deployment operation failed. Please list deployment operations
+        for details. Please see https://aka.ms/DeployOperations for usage details.","details":[{"code":"BadRequest","message":"{\r\n  \"error\":
+        {\r\n    \"code\": \"InvalidParameter\",\r\n    \"message\": \"The value ''False''
+        of parameter ''singlePlacementGroup'' is not allowed. Allowed values are:
+        True.\"\r\n  }\r\n}"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '464'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 05 Jan 2021 05:24:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1
