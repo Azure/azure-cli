@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.17.10"
+VERSION = "2.17.11"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.

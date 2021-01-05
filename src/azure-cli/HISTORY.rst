@@ -3,10 +3,17 @@
 Release History
 ===============
 
-2.17.10
+2.17.11
 +++++++
 
 * Migrate the authentication library from ADAL to MSAL.
+
+2.17.1
+++++++
+
+**RDBMS**
+
+* Hotfix: `az mysql create`: Revert incorrect parameter name 'serv_name' to 'service_name'
 
 2.17.0
 ++++++
