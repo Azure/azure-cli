@@ -984,13 +984,14 @@ examples:
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/quick-create-cli.'
 parameters:
   - name: --image
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
-        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". 
+        For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
