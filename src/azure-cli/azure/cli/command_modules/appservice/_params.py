@@ -389,6 +389,8 @@ def load_arguments(self, _):
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
         c.argument('disable', help='disable auto swap', action='store_true')
         c.argument('target_slot', help="target slot to swap, default to 'production'")
+        c.argument('preserve_vnet', help="preserve Virtual Network to the slot during swap, default to 'true'",
+                   arg_type=get_three_state_flag(return_label=True))
     with self.argument_context('webapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
