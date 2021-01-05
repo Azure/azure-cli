@@ -3230,7 +3230,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_vgeneration=hyper_v_generation, features=feature_list)
+                         hyper_v_generation=hyper_v_generation, features=feature_list)
     return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
