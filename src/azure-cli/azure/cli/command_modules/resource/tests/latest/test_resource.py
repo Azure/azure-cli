@@ -642,6 +642,29 @@ class ProviderRegistrationTest(ScenarioTest):
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
+    def test_provider_registration_rpaas(self):
+        self.kwargs.update({'prov': 'Microsoft.Confluent'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
+                self.cmd('provider register -n {prov}')
+            self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+        else:
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
+                self.cmd('provider register -n {prov}')
+            self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+
 
 class ProviderOperationTest(ScenarioTest):
 
@@ -861,14 +884,16 @@ class TemplateSpecsTest(ScenarioTest):
                           checks=self.check('name', '1.0')).get_output_in_json()
 
         self.kwargs['template_spec_version_id'] = result['id']
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
 
         self.cmd('ts show --template-spec {template_spec_version_id}')
         self.cmd('ts show --template-spec {template_spec_id}')
 
         self.cmd('ts delete --template-spec {template_spec_version_id} --yes')
         self.cmd('ts list -g {rg}',
-                 checks=self.check("length([?id=='{template_spec_version_id}'])", 0))
+                 checks=[
+                     self.check("length([?id=='{template_spec_id}'])", 1),
+                     self.check("length([?id=='{template_spec_version_id}'])", 0)])
 
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
         self.cmd('ts list -g {rg}',
@@ -1106,6 +1131,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'tf_multiline': os.path.join(curr_dir, 'simple_deploy_multiline.json').replace('\\', '\\\\'),
             'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
@@ -1123,6 +1149,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf_multiline}" --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
         with self.assertRaises(CLIError) as err:
             self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
@@ -1136,6 +1166,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf_multiline}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 

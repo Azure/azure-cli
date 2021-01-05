@@ -610,14 +610,16 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
 
-def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):
+def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None,
+              backup_management_type=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
     filter_string = _get_filter_string({
         'status': status,
         'operation': operation,
         'startTime': query_start_date,
-        'endTime': query_end_date})
+        'endTime': query_end_date,
+        'backupManagementType': backup_management_type})
 
     return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
 
