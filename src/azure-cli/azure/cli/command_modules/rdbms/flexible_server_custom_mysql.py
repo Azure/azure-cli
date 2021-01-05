@@ -133,6 +133,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
 
     except Exception as ex:  # pylint: disable=broad-except
         logger.error(ex)
+        raise CLIError(ex)
 
 
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):
@@ -277,6 +278,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
                 local_context_file.remove_option('mysql flexible-server', 'server_name')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
+            raise CLIError(ex)
     return result
 
 

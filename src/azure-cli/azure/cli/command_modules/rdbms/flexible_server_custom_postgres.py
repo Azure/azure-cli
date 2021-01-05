@@ -131,6 +131,7 @@ def flexible_server_create(cmd, client,
                               subnet_id)
     except Exception as ex:  # pylint: disable=broad-except
         logger.error(ex)
+        raise CLIError(ex)
 
 
 def flexible_server_restore(cmd, client,
@@ -266,6 +267,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
                 local_context_file.remove_option('postgres flexible-server', 'administrator_login')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
+            raise CLIError(ex)
     return result
 
 
