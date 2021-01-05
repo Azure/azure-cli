@@ -245,6 +245,11 @@ def flexible_server_update_custom_func(cmd, instance,
 
 
 def server_delete_func(cmd, client, resource_group_name=None, server_name=None, yes=None):
+    if resource_group_name is None:
+        raise CLIError('Please specify the name of resource group.')
+    if server_name is None:
+        raise CLIError('Please specify the name of server you want to delete.')
+    
     confirm = yes
     result = None
     if not yes:
