@@ -4024,12 +4024,18 @@ def _start_ssh_session(hostname, port, username, password):
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
-        raise CLIError('webapp ssh is only supported on linux and mac')
+        webapp = show_webapp(cmd, resource_group_name, name, slot)
+        is_linux = webapp.reserved
+        if not is_linux:
+            raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+        open_page_in_browser(scm_url + '/webssh/host')
+    else:
+        config = get_site_configs(cmd, resource_group_name, name, slot)
+        if config.remote_debugging_enabled:
+            raise ValidationError('Remote debugging is enabled, please disable')
+        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
