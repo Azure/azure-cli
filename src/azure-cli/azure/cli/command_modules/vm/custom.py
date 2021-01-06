@@ -3276,7 +3276,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         if external_tokens:
             external_token = external_tokens[0]
             if len(external_token) >= 2:
-                external_bearer_token = external_token[0] + ' ' + external_tokens[1]
+                external_bearer_token = external_token[0] + ' ' + external_token[1]
             else:
                 logger.warning('Getting external tokens failed.')
         else:
