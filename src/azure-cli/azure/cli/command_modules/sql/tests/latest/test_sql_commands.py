@@ -3464,7 +3464,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
-        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtest/providers/Microsoft.Network/virtualNetworks/vnet-portaltestfmw/subnets/ManagedInstance'
+        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtest/providers/Microsoft.Network/virtualNetworks/vnet-fmwnopolicy/subnets/ManagedInstance'
         license_type = 'LicenseIncluded'
         loc = 'eastus2euap'
         v_cores = 8
@@ -3482,7 +3482,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tag2 = "tagName2=tagValue2"
         backup_storage_redundancy = "Local"
         backup_storage_redundancy_internal = "LRS"
-
         user = admin_login
 
         # test create sql managed_instance
@@ -3508,8 +3507,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
 
-        maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_Mon_Fri_10PM_6AM'
-        short_maintenance_config_id = 'MI_Mon_Fri_10PM_6AM'
+        maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_2'
+        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtest/providers/Microsoft.Network/virtualNetworks/vnet-fmwm2/subnets/ManagedInstance'
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
 
         # test create sql managed_instance with FMW
@@ -3529,7 +3528,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('proxyOverride', proxy_override),
                      JMESPathCheck('publicDataEndpointEnabled', 'True'),
                      JMESPathCheck('timezoneId', timezone_id),
-                     JMESPathCheck('maintenanceConfigurationId', short_maintenance_config_id)]).get_output_in_json()
+                     JMESPathCheck('maintenanceConfigurationId', maintenance_configuration_id)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
