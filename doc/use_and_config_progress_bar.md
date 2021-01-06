@@ -40,6 +40,14 @@ There are two ways to install the private package:
 
 2. Using pip (All platform including Windows, Linux, Mac)
     - `pip install https://zuhdefault.blob.core.windows.net/cliext/azure_cli-2.17.0.post20201230141142-py3-none-any.whl`
+    You would see the following information:
+    ```
+    Collecting azure-cli==2.17.0.post20201230141142 from https://zuhdefault.blob.core.windows.net/cliext/azure_cli-2.17.0.post20201230141142-py3-none-any.whl
+      Using cached https://zuhdefault.blob.core.windows.net/cliext/azure_cli-2.17.0.post20201230141142-py3-none-any.whl
+    ...
+    Successfully installed azure-batch-10.0.0 azure-cli-2.17.0.post20201230141142 azure-mgmt-appconfiguration-1.0.1 azure-mgmt-compute-18.0.0 azure-mgmt-containerregistry-3.0.0rc16 azure-mgmt-network-17.0.0 azure-mgmt-security-0.6.0
+    ```
+    
     - `pip install https://zuhdefault.blob.core.windows.net/cliext/azure_cli_core-2.17.0.post20201230141142-py3-none-any.whl`
     
     After installation, run `az --version` and you can see the following information:
