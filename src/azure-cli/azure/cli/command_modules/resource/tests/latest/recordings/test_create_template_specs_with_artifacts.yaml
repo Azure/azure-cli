@@ -32,7 +32,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:22 GMT
+      - Wed, 06 Jan 2021 20:25:46 GMT
       expires:
       - '-1'
       pragma:
@@ -79,7 +79,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:22 GMT
+      - Wed, 06 Jan 2021 20:25:47 GMT
       expires:
       - '-1'
       pragma:
@@ -122,9 +122,9 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
         {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:01:24.8309562Z\",\r\n    \"lastModifiedBy\":
+        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:25:48.7250375Z\",\r\n    \"lastModifiedBy\":
         \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-01-06T20:01:24.8309562Z\"\r\n  },\r\n  \"properties\": {\r\n    \"displayName\":
+        \"2021-01-06T20:25:48.7250375Z\"\r\n  },\r\n  \"properties\": {\r\n    \"displayName\":
         \"create-spec000003\",\r\n    \"description\": \"AzCLI test root template
         spec\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-create-template-spec000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-create-template-spec000002\"\r\n}"
@@ -136,7 +136,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:24 GMT
+      - Wed, 06 Jan 2021 20:25:49 GMT
       expires:
       - '-1'
       pragma:
@@ -197,12 +197,12 @@ interactions:
       of root template spec", "template": {"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"rgName": {"type": "string"}, "rgLocation":
       {"type": "string"}, "keyVaultName": {"type": "string"}}, "variables": {}, "resources":
-      [{"type": "Microsoft.Resources/deployments", "apiVersion": "2019-10-01", "name":
+      [{"type": "Microsoft.Resources/deployments", "apiVersion": "2020-10-01", "name":
       "deploymentRg", "location": "[parameters(''rgLocation'')]", "properties": {"mode":
       "Incremental", "templateLink": {"relativePath": "artifacts/create_resource_group.json",
       "contentVersion": "1.0.0.0"}, "parameters": {"rgName": {"value": "[parameters(''rgName'')]"},
       "rgLocation": {"value": "[parameters(''rgLocation'')]"}}}}, {"type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-10-01", "name": "keyVaultAndSecret", "resourceGroup": "[parameters(''rgName'')]",
+      "apiVersion": "2020-10-01", "name": "keyVaultAndSecret", "resourceGroup": "[parameters(''rgName'')]",
       "dependsOn": ["deploymentRg"], "properties": {"mode": "Incremental", "templateLink":
       {"relativePath": "artifacts/create_key_vault_with_secret.json", "contentVersion":
       "1.0.0.0"}, "parameters": {"keyVaultName": {"value": "[parameters(''keyVaultName'')]"}}}}],
@@ -233,9 +233,9 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
         {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:01:25.9842698Z\",\r\n    \"lastModifiedBy\":
+        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:25:49.8301002Z\",\r\n    \"lastModifiedBy\":
         \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-01-06T20:01:25.9842698Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        \"2021-01-06T20:25:49.8301002Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
         [\r\n      {\r\n        \"template\": {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
         \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
         \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
@@ -332,7 +332,7 @@ interactions:
         {\r\n          \"type\": \"string\"\r\n        },\r\n        \"keyVaultName\":
         {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"variables\":
         {},\r\n      \"resources\": [\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
-        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
+        \         \"apiVersion\": \"2020-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
         \         \"location\": \"[parameters('rgLocation')]\",\r\n          \"properties\":
         {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
         {\r\n              \"relativePath\": \"artifacts/create_resource_group.json\",\r\n
@@ -341,7 +341,7 @@ interactions:
         \             },\r\n              \"rgLocation\": {\r\n                \"value\":
         \"[parameters('rgLocation')]\"\r\n              }\r\n            }\r\n          }\r\n
         \       },\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
-        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
+        \         \"apiVersion\": \"2020-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
         \         \"resourceGroup\": \"[parameters('rgName')]\",\r\n          \"dependsOn\":
         [\r\n            \"deploymentRg\"\r\n          ],\r\n          \"properties\":
         {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
@@ -360,7 +360,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:25 GMT
+      - Wed, 06 Jan 2021 20:25:50 GMT
       expires:
       - '-1'
       pragma:
@@ -400,9 +400,9 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
         {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:01:24.8309562Z\",\r\n    \"lastModifiedBy\":
+        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:25:48.7250375Z\",\r\n    \"lastModifiedBy\":
         \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-01-06T20:01:25.9842698Z\"\r\n  },\r\n  \"properties\": {\r\n    \"displayName\":
+        \"2021-01-06T20:25:49.8301002Z\"\r\n  },\r\n  \"properties\": {\r\n    \"displayName\":
         \"create-spec000003\",\r\n    \"description\": \"AzCLI test root template
         spec\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs000001/providers/Microsoft.Resources/templateSpecs/cli-test-create-template-spec000002\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-create-template-spec000002\"\r\n}"
@@ -414,7 +414,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:26 GMT
+      - Wed, 06 Jan 2021 20:25:49 GMT
       expires:
       - '-1'
       pragma:
@@ -476,12 +476,12 @@ interactions:
       {"value": "mySecretValue"}}], "outputs": {}}}], "template": {"$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"rgName": {"type": "string"}, "rgLocation":
       {"type": "string"}, "keyVaultName": {"type": "string"}}, "variables": {}, "resources":
-      [{"type": "Microsoft.Resources/deployments", "apiVersion": "2019-10-01", "name":
+      [{"type": "Microsoft.Resources/deployments", "apiVersion": "2020-10-01", "name":
       "deploymentRg", "location": "[parameters(''rgLocation'')]", "properties": {"mode":
       "Incremental", "templateLink": {"relativePath": "artifacts/create_resource_group.json",
       "contentVersion": "1.0.0.0"}, "parameters": {"rgName": {"value": "[parameters(''rgName'')]"},
       "rgLocation": {"value": "[parameters(''rgLocation'')]"}}}}, {"type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-10-01", "name": "keyVaultAndSecret", "resourceGroup": "[parameters(''rgName'')]",
+      "apiVersion": "2020-10-01", "name": "keyVaultAndSecret", "resourceGroup": "[parameters(''rgName'')]",
       "dependsOn": ["deploymentRg"], "properties": {"mode": "Incremental", "templateLink":
       {"relativePath": "artifacts/create_key_vault_with_secret.json", "contentVersion":
       "1.0.0.0"}, "parameters": {"keyVaultName": {"value": "[parameters(''keyVaultName'')]"}}}}],
@@ -512,9 +512,9 @@ interactions:
     body:
       string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
         {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
-        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:01:25.9842698Z\",\r\n    \"lastModifiedBy\":
+        \"User\",\r\n    \"createdAt\": \"2021-01-06T20:25:49.8301002Z\",\r\n    \"lastModifiedBy\":
         \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
-        \"2021-01-06T20:01:26.9960203Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        \"2021-01-06T20:25:51.0008946Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
         [\r\n      {\r\n        \"template\": {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#\",\r\n
         \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
         \           \"rgName\": {\r\n              \"type\": \"string\"\r\n            },\r\n
@@ -610,7 +610,7 @@ interactions:
         {\r\n          \"type\": \"string\"\r\n        },\r\n        \"keyVaultName\":
         {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"variables\":
         {},\r\n      \"resources\": [\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
-        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
+        \         \"apiVersion\": \"2020-10-01\",\r\n          \"name\": \"deploymentRg\",\r\n
         \         \"location\": \"[parameters('rgLocation')]\",\r\n          \"properties\":
         {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
         {\r\n              \"relativePath\": \"artifacts/create_resource_group.json\",\r\n
@@ -619,7 +619,7 @@ interactions:
         \             },\r\n              \"rgLocation\": {\r\n                \"value\":
         \"[parameters('rgLocation')]\"\r\n              }\r\n            }\r\n          }\r\n
         \       },\r\n        {\r\n          \"type\": \"Microsoft.Resources/deployments\",\r\n
-        \         \"apiVersion\": \"2019-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
+        \         \"apiVersion\": \"2020-10-01\",\r\n          \"name\": \"keyVaultAndSecret\",\r\n
         \         \"resourceGroup\": \"[parameters('rgName')]\",\r\n          \"dependsOn\":
         [\r\n            \"deploymentRg\"\r\n          ],\r\n          \"properties\":
         {\r\n            \"mode\": \"Incremental\",\r\n            \"templateLink\":
@@ -638,7 +638,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 06 Jan 2021 20:01:27 GMT
+      - Wed, 06 Jan 2021 20:25:50 GMT
       expires:
       - '-1'
       pragma:
@@ -685,7 +685,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 06 Jan 2021 20:01:30 GMT
+      - Wed, 06 Jan 2021 20:25:53 GMT
       expires:
       - '-1'
       pragma:
