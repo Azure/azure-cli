@@ -52,7 +52,7 @@ def load_arguments(self, _):
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
-                                           help="name of the web app. You can configure the default using `az configure --defaults web=<name>`",
+                                           help="name of the web app. If left unspecified, a name will be randomly generated. You can configure the default using `az configure --defaults web=<name>`",
                                            local_context_attribute=LocalContextAttribute(name='web_name', actions=[
                                                LocalContextAction.GET]))
     functionapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME',
