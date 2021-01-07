@@ -770,9 +770,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('sig create -g {rg} --gallery-name {g1}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1 --features "IsSecureBootSupported=false IsMeasuredBootSupported=false" --hyper-v-generation V2', checks=[
             self.check('features[0].name', 'IsSecureBootSupported'),
-            self.check('features[0].value', 'false'),
+            self.check('features[0].value', 'false', False),
             self.check('features[1].name', 'IsMeasuredBootSupported'),
-            self.check('features[1].value', 'false'),
+            self.check('features[1].value', 'false', False),
         ])
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
         self.cmd('snapshot create -g {rg} -n s1 --source disk')
@@ -4659,14 +4659,14 @@ class DiskAccessTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('disk show -g {rg} -n {disk}', checks=[
             self.check('name', '{disk}'),
-            self.check('diskAccessId', disk_access_id),
+            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot} --size-gb 10 --network-access-policy AllowPrivate --disk-access {diskaccess}')
         self.cmd('snapshot show -g {rg} -n {snapshot}', checks=[
             self.check('name', '{snapshot}'),
-            self.check('diskAccessId', disk_access_id),
+            self.check('diskAccessId', disk_access_id, False),
             self.check('networkAccessPolicy', 'AllowPrivate')
         ])
 
