@@ -13,7 +13,7 @@ Here is a list of known CLI features that are not supported in airgapped clouds:
 * Some links in help messages or error messages cannot be accessible.
 
 ## Install Azure CLI
-We are working on solutions to make the installation and upgrade of Azure CLI easier in airgapped clouds. Before that is ready, you need to download the Azure CLI package with public internet access, copy it to the airgapped cloud environment and then install it locally in the airgapped cloud. You can view all released versions in [Releases](https://github.com/Azure/azure-cli/releases).
+We are working on solutions to make the installation and upgrade of Azure CLI easier in airgapped clouds. Before that is ready, you need to download the Azure CLI package with public internet access, copy it to the airgapped cloud environment and then install it locally in the airgapped cloud. You can view all released versions in [Releases](https://github.com/Azure/azure-cli/releases). The top one is the latest release, such as `Azure CLI 2.15.1`.
 
 Package | Download Address | Install Command
 --- | --- | ---
@@ -22,7 +22,7 @@ RPM | https://packages.microsoft.com/yumrepos/azure-cli/ | rpm -ivh --nodeps azu
 MSI | https://azurecliprod.blob.core.windows.net/msi/azure-cli-<version\>.msi | Start-Process msiexec.exe -Wait -ArgumentList '/I azure-cli-<version\>.msi'  
 
 **Note**:
-1. Replace `<version>` with the actual CLI version you need to use. On Ubuntu/Debian, replace `<distro>` with the result of the `lsb_release -cs` command.
+1. Replace `<version>` with the actual CLI version you need to use, such as `2.15.1`. On Ubuntu/Debian, replace `<distro>` with the result of the `lsb_release -cs` command, such as `bionic`.
 2. The CLI RPM package depends on a `python3` package and you'll need to install it separately while DEB and MSI packages already have a bundled Python in them.
 
 If you need to install and use Azure CLI in your pipeline, you could upload the Azure CLI package in a storage account that is accessible in the airgapped cloud, then you can download the package from the storage account and install it in your pipeline scripts. For instance, an Azure CLI deb package can be downloaded and installed with the following command:
@@ -62,6 +62,7 @@ on Linux shells or
 $Env:ARM_CLOUD_METADATA_URL = "https://example.url.com/metadata/endpoints?api-version=2019-05-01"
 ```
 on Windows Powershell.
+The content of the metadata URL should be similar to that of the public cloud metadata URL: https://management.azure.com/metadata/endpoints?api-version=2019-05-01.
 
 Then CLI will load the available clouds and the corresponding cloud endpoints from the URL. The first cloud in the available cloud list will be set as the active cloud by default if the public `AzureCloud` is (most likely) not available.
 
