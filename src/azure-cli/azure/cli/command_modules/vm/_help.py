@@ -990,8 +990,7 @@ parameters:
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
-        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". 
-        For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
