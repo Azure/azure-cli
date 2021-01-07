@@ -110,13 +110,8 @@ class TunnelServer:
 
             auth_token = self._get_auth_token()
 
-            headers = {
-                'X-Node-Id': self.node_id
-            }
-
-            host = 'wss://{}/webtunnel/{}'.format(self.bastion.dns_name, auth_token)
+            host = 'wss://{}/webtunnel/{}?X-Node-Id={}'.format(self.bastion.dns_name, auth_token, self.node_id)
             self.ws = create_connection(host,
-                                        header=headers,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
                                         sslopt={'cert_reqs': ssl.CERT_NONE},
                                         enable_multithread=True)
@@ -147,9 +142,10 @@ class TunnelServer:
                     client.send(response)
                     logger.info('Done sending to debugger, index: %s', index)
                 else:
+                    logger.info('Websocket close, index: %s', index)
                     break
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warn(ex)
+            logger.info(ex)
         finally:
             logger.info('Client disconnected!, index: %s', index)
             client.close()
@@ -168,10 +164,10 @@ class TunnelServer:
                     ws_socket.send_binary(responseData)
                     logger.info('Done sending to websocket, index: %s', index)
                 else:
+                    logger.info('Client close, index: %s', index)
                     break
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warn(ex)
-            logger.warning("Connection Timed Out")
+            logger.info(ex)
         finally:
             logger.info('Client disconnected %s', index)
             client.close()

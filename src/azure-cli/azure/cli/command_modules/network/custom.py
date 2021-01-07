@@ -28,7 +28,6 @@ from .tunnel import TunnelServer
 
 import threading
 import time
-import paramiko
 import sys
 import os
 import platform
@@ -6913,12 +6912,6 @@ def list_bastion_host(cmd, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
 
-
-def getdns_bastion_host(cmd, resource_group_name, name):
-    client = network_client_factory(cmd.cli_ctx).bastion_hosts
-    bastion = client.get(resource_group_name, name)
-    return bastion.dns_name
-
 SSH_EXTENSION_NAME = 'ssh'
 SSH_EXTENSION_MODULE = 'azext_ssh.custom'
 SSH_EXTENSION_VERSION = '0.1.3'
@@ -6962,6 +6955,24 @@ def _get_ssh_path(ssh_command="ssh"):
 
     return ssh_path
 
+def _get_rdp_path(rdp_command="mstsc"):
+    rdp_path = rdp_command
+
+    if platform.system() == 'Windows':
+        arch_data = platform.architecture()
+        sys_path = 'System32'
+        system_root = os.environ['SystemRoot']
+        system32_path = os.path.join(system_root, sys_path)
+        rdp_path = os.path.join(system32_path, (rdp_command + ".exe"))
+        logger.debug("Platform architecture: %s", str(arch_data))
+        logger.debug("System Root: %s", system_root)
+        logger.debug("Attempting to run rdp from path %s", rdp_path)
+
+        if not os.path.isfile(rdp_path):
+            raise util.CLIError("Could not find " + rdp_command + ".exe. Is the rdp client installed?")
+
+    return rdp_path
+
 
 def _get_host(username, ip):
     return username + "@" + ip
@@ -6995,19 +7006,32 @@ def ssh_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=
     command = command + _build_args(cert_file, private_key_file)
     command = command + ["-p", str(tunnel_server.local_port)]
     command = command + ['-o', "StrictHostKeyChecking=no", '-o', "UserKnownHostsFile=/dev/null"]
+    command = command + ['-o', "LogLevel=Error"]
     logger.debug("Running ssh command %s", ' '.join(command))
+    subprocess.call(command, shell=platform.system() == 'Windows')
+
+def rdp_bastion_host(cmd, resource_group_name, name, resource_id, resource_port=None):
+    if not resource_port:
+        resource_port = 3389
+
+    parsed_id = parse_resource_id(resource_id)
+    tunnel_server = get_tunnel(cmd, resource_group_name, name, resource_id, resource_port)
+    t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
+    t.daemon = True
+    t.start()
+    
+    command = [_get_rdp_path(), "/v:localhost:{0}".format(tunnel_server.local_port)]
+    logger.debug("Running rdp command %s", ' '.join(command))
     subprocess.call(command, shell=platform.system() == 'Windows')
 
 def get_tunnel(cmd, resource_group_name, name, resource_id, resource_port, port=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
-
     bastion = client.get(resource_group_name, name)
 
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
 
     tunnel_server = TunnelServer(cmd.cli_ctx, 'localhost', port, bastion, resource_id, resource_port)
-
     return tunnel_server
 
 
@@ -7018,11 +7042,9 @@ def create_bastion_tunnel(cmd, resource_group_name, name, resource_id, resource_
     t.daemon = True
     t.start()
 
-    # logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
-
-    # logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
-   
-    # logger.warning('Ctrl + C to close')
+    logger.warning('Opening tunnel on port: %s', tunnel_server.local_port)
+    logger.warning('Tunnel is ready, connect on port %s', tunnel_server.local_port)
+    logger.warning('Ctrl + C to close')
 
     if timeout:
         time.sleep(int(timeout))
