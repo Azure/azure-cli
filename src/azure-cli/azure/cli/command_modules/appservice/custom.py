@@ -4035,7 +4035,8 @@ def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=Non
         config = get_site_configs(cmd, resource_group_name, name, slot)
         if config.remote_debugging_enabled:
             raise ValidationError('Remote debugging is enabled, please disable')
-        create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
+        create_tunnel_and_session(
+            cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(
