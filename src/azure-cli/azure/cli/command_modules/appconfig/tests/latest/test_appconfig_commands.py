@@ -1985,6 +1985,7 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
     @live_only()
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_aad_auth(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='AadTest', length=15)

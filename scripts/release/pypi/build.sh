@@ -12,6 +12,7 @@ set -ev
 cd $BUILD_SOURCESDIRECTORY
 
 branch=$1
+echo "Branch $branch"
 
 echo "Search setup files from `pwd`."
 python --version
@@ -20,8 +21,8 @@ pip install -U pip setuptools wheel
 pip list
 
 script_dir=`cd $(dirname $BASH_SOURCE[0]); pwd`
-echo $script_dir
-if [[ "$branch" != "release" ]]; then
+
+if [[ "$branch" == "dev" ]]; then
     . $script_dir/../../ci/version.sh post`date -u '+%Y%m%d%H%M%S'`
 fi
 

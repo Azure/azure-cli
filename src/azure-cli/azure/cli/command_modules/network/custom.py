@@ -6667,7 +6667,7 @@ def create_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError:
+    except HttpResponseError:
         msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
                                                                                       resource_group_name)
         raise CLIError(msg)
@@ -6728,7 +6728,7 @@ def list_virtual_router_peering(cmd, resource_group_name, virtual_router_name):
         try:
             vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
             vhub_client.get(resource_group_name, virtual_hub_name)
-        except CloudError:
+        except HttpResponseError:
             msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
                                                                                           resource_group_name)
             raise CLIError(msg)
@@ -6743,7 +6743,7 @@ def list_virtual_router_peering(cmd, resource_group_name, virtual_router_name):
     try:
         vhub_bgp_conn_client = network_client_factory(cmd.cli_ctx).virtual_hub_bgp_connections
         vhub_bgp_connections = list(vhub_bgp_conn_client.list(resource_group_name, virtual_hub_name))
-    except CloudError:
+    except HttpResponseError:
         vhub_bgp_connections = []
 
     return list(vrouter_peerings) + list(vhub_bgp_connections)
@@ -6767,7 +6767,7 @@ def show_virtual_router_peering(cmd, resource_group_name, virtual_router_name, p
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError:
+    except HttpResponseError:
         msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
                                                                                       resource_group_name)
         raise CLIError(msg)
@@ -6777,6 +6777,7 @@ def show_virtual_router_peering(cmd, resource_group_name, virtual_router_name, p
 
 
 def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name, peering_name):
+    from azure.core.exceptions import HttpResponseError
     try:
         vrouter_client = network_client_factory(cmd.cli_ctx).virtual_routers
         vrouter_client.get(resource_group_name, virtual_router_name)
@@ -6793,7 +6794,7 @@ def delete_virtual_router_peering(cmd, resource_group_name, virtual_router_name,
     try:
         vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
         vhub_client.get(resource_group_name, virtual_hub_name)
-    except CloudError:
+    except HttpResponseError:
         msg = 'The VirtualRouter "{}" under resource group "{}" was not found'.format(virtual_hub_name,
                                                                                       resource_group_name)
         raise CLIError(msg)

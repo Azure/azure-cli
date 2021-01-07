@@ -173,12 +173,12 @@ def extract_http_operation_error(ex):
         if isinstance(response, str):
             error = response
         else:
-            error = response['error']
+            error = response.get('error', response.get('Error', None))
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            status_code = error.get('code', 'Unknown Code')
-            message = error.get('message', ex)
+            status_code = error.get('code', error.get('Code', 'Unknown Code'))
+            message = error.get('message', error.get('Message', ex))
             error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
@@ -501,15 +501,15 @@ def read_file_content(file_path, allow_binary=False):
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
-def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
+def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True):
     """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
     JSON strings in CMD shell are not received in main's argv. This allows the user to specify
     the alternative notation, which does not have this problem (but is technically not JSON). """
     try:
         if not preserve_order:
-            return json.loads(json_or_dict_string)
+            return json.loads(json_or_dict_string, strict=strict)
         from collections import OrderedDict
-        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict)
+        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict, strict=strict)
     except ValueError as json_ex:
         try:
             import ast
