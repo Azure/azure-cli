@@ -754,6 +754,9 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+
         # clean up
         self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
