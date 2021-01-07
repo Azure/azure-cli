@@ -2198,19 +2198,23 @@ def list_slots(cmd, resource_group_name, webapp):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
+def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
+    # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
+    isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
+    # converstion from string to Boolean
+    isPreserveVnet = bool(isPreserveVnet == 'true')
     if action == 'swap':
         poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, (target_slot or 'production'), True)
+                                                slot, (target_slot or 'production'), isPreserveVnet)
         return poller
     if action == 'preview':
         if target_slot is None:
             result = client.web_apps.apply_slot_config_to_production(resource_group_name,
-                                                                     webapp, slot, True)
+                                                                     webapp, slot, isPreserveVnet)
         else:
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, target_slot, True)
+                                                                   slot, target_slot, isPreserveVnet)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
