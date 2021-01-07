@@ -396,7 +396,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r'], help='The login server of the Cloud ACR registry. Must be the FQDN to support also Azure Stack.', required=True)
         c.argument('connected_registry_name', options_list=['--name', '-n'], help='Name for the connected registry. Name must be between 5 to 40 character long, start with a letter and contain only alphanumeric characters (including ‘_’ or ‘-’). Name must be unique under the Cloud ACR hierarchy.', required=True)
         c.argument('parent_name', options_list=['--parent', '-p'], help='The name of the parent connected registry.', required=False)
-        c.argument('repositories', options_list=['--repository', '-t'], nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
+        c.argument('repositories', nargs='+', help='Specifies the repositories that need to be sync to the connected registry. It can be in the format [REPO01] [REPO02]...', required=False)
         c.argument('sync_token_name', options_list=['--sync-token'], help='Specifies the sync token used to synchronize the connected registry with its parent. It most have only repo permissions and at least the actions required for its mode. It can include access for multiple repositories.', required=False)
         c.argument('cleanup', help='It will aslo delete the sync token and the scope map resources.', required=False)
         c.argument('no_children', help='Used to remove all children from the list.', required=False, action='store_true')
