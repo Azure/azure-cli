@@ -17,6 +17,7 @@ sqlvm_max_length = 15
 la_workspace_name_prefix = 'laworkspace'
 la_workspace_max_length = 15
 
+
 class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=sqlvm_name_prefix, location='eastus2euap',
                  vm_user='admin123', vm_password='SecretPassword123', parameter_name='sqlvm',
@@ -37,11 +38,13 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
+        return
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             execute(DummyCli(), 'az vm delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
+        return 'clitest'
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
@@ -67,12 +70,14 @@ class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
+        return
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             template = ('az monitor log-analytics workspace delete -g {} -n {} --yes')
             execute(DummyCli(), template.format(group, name))
 
     def _get_resource_group(self, **kwargs):
+        return 'clitest'
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
