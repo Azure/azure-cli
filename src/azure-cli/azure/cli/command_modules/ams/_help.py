@@ -47,6 +47,21 @@ helps['ams account check-name'] = """
     short-summary: Checks whether the Media Service resource name is available.
 """
 
+helps['ams account encryption'] = """
+    type: group
+    short-summary: Manage encryption for an Azure Media Services account.
+"""
+
+helps['ams account encryption show'] = """
+    type: group
+    short-summary: Show the details of encryption settings for an Azure Media Services account.
+"""
+
+helps['ams account encryption set'] = """
+    type: group
+    short-summary: Set the encryption settings for an Azure Media Services account.
+"""
+
 helps['ams account storage'] = """
     type: group
     short-summary: Manage storage for an Azure Media Services account.

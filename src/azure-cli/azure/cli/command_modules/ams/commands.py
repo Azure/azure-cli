@@ -65,6 +65,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('set', 'set_mru',
                          custom_command_type=get_custom_sdk('mru', None))
 
+    with self.command_group('ams account encryption', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_show_command('show', 'get_encryption',
+                                custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
+        g.custom_command('set', 'set_encryption',
+                            custom_command_type=get_custom_sdk('encryption', get_mediaservices_client))
+
     with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
         g.custom_show_command('show', 'get_transform',
                               custom_command_type=get_custom_sdk('transform', get_transforms_client))

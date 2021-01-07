@@ -94,6 +94,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('xml', action='store_true', help='Enables xml output format.')
         c.argument('years', help='Number of years for which the secret will be valid. Default: 1 year.', type=int, default=None)
 
+    with self.argument_context('ams account encryption') as c:
+        c.argument('account_name', account_name_arg_type)
+        c.argument('key_source', help='The encryption key source (provider). Allowed values: SystemKey, CustomerKey.')
+        c.argument('key_vault_id', help='The Uri of the KeyVault.')
+        c.argument('key_version', help='The version of KeyVault key.')
+
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('transform_name', name_arg_type, id_part='child_name_1',
