@@ -953,7 +953,7 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
 
-        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
+        self.cmd('ts create -g {rg} -n {template_spec_name} --yes')
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
 
         # clean up
