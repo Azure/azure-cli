@@ -264,7 +264,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
 
     confirm = yes
     result = None  # default return value
-    
+
     if not yes:
         confirm = user_confirmation(
             "Are you sure you want to delete the server '{0}' in resource group '{1}'".format(server_name,
@@ -276,6 +276,9 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
             if cmd.cli_ctx.local_context.is_on:
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('mysql flexible-server', 'server_name')
+                local_context_file.remove_option('mysql flexible-server', 'administrator_login')
+                local_context_file.remove_option('mysql flexible-server', 'database_name')
+
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
             raise CLIError(ex)

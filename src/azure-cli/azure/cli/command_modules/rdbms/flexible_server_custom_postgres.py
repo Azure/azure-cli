@@ -250,7 +250,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
         raise CLIError('Please specify the name of resource group.')
     if server_name is None:
         raise CLIError('Please specify the name of server you want to delete.')
-    
+
     confirm = yes
     result = None
     if not yes:
@@ -265,6 +265,7 @@ def server_delete_func(cmd, client, resource_group_name=None, server_name=None, 
                 local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
                 local_context_file.remove_option('postgres flexible-server', 'server_name')
                 local_context_file.remove_option('postgres flexible-server', 'administrator_login')
+                local_context_file.remove_option('postgres flexible-server', 'database_name')
         except Exception as ex:  # pylint: disable=broad-except
             logger.error(ex)
             raise CLIError(ex)

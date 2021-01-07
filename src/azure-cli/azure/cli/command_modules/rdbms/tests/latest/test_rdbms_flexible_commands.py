@@ -860,11 +860,10 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
 
 
-'''
 class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
+    postgres_location = 'eastus2euap'
+    mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -891,23 +890,22 @@ class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
 
         self.cmd('{} flexible-server create -n {} --public-access none'.format(database_engine, server_name))
 
-        self.cmd('{} flexible-server show'.format(database_engine))
+        local_context_info = self.cmd('config param-persist show').get_output_in_json()
 
-        self.cmd('{} flexible-server update --backup-retention {}'
-                 .format(database_engine, 10))
+        self.cmd('{} flexible-server show'.format(database_engine),
+                 checks=[JMESPathCheck('resourceGroup', local_context_info['all']['resource_group_name']),
+                         JMESPathCheck('location', 'East US 2 EUAP'),
+                         JMESPathCheck('name', local_context_info[database_engine + ' flexible-server']['server_name']),
+                         JMESPathCheck('administratorLogin', local_context_info[database_engine + ' flexible-server']['administrator_login'])])
 
-        self.cmd('{} flexible-server stop'.format(database_engine))
-
-        self.cmd('{} flexible-server start'.format(database_engine))
-
-        self.cmd('{} flexible-server restart'.format(database_engine))
-
-        self.cmd('{} flexible-server list'.format(database_engine))
-
-        self.cmd('{} flexible-server show-connection-string'.format(database_engine))
+        self.cmd('{} flexible-server show-connection-string'.format(database_engine),
+                 checks=[StringContainCheck(local_context_info[database_engine + ' flexible-server']['administrator_login'])]).get_output_in_json()
 
         self.cmd('{} flexible-server list-skus'.format(database_engine))
 
         self.cmd('{} flexible-server delete --yes'.format(database_engine))
-        self.cmd('config param-persist off')
-'''
+
+        delete_local_context_info = self.cmd('config param-persist show').get_output_in_json()
+        self.assertNotIn(database_engine + ' flexible-server', delete_local_context_info)
+        self.assertNotIn(local_context_info[database_engine + ' flexible-server']['server_name'], delete_local_context_info)
+        self.assertNotIn(local_context_info[database_engine + ' flexible-server']['administrator_login'], delete_local_context_info)
