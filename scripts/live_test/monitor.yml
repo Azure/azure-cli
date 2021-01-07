@@ -1,0 +1,18 @@
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+jobs:
+- job: Monitor
+  displayName: Monitor
+  pool:
+    vmImage: 'Ubuntu-18.04'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        python /home/vsts/work/1/s/scripts/live_test/monitor.py
