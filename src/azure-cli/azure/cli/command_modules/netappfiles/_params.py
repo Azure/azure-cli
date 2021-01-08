@@ -31,6 +31,10 @@ def load_arguments(self, _):
     with self.argument_context('netappfiles account list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
+    with self.argument_context('netappfiles account ad') as c:
+        c.argument('backup_operators', arg_type=tags_type)
+        c.argument('security_operators', arg_type=tags_type)
+
     with self.argument_context('netappfiles account ad list') as c:
         c.argument('account_name', help='The name of the ANF account', id_part=None)
 
@@ -80,6 +84,8 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('backup_enabled', arg_type=get_three_state_flag(), id_part=None)
         c.argument('policy_enforced', arg_type=get_three_state_flag(), id_part=None)
         c.argument('kerberos-enabled', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('smb-encryption', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('smb-continuously-available', arg_type=get_three_state_flag(), id_part=None)
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)
