@@ -568,6 +568,36 @@ class AcrCommandsTests(ScenarioTest):
         result = self.cmd('acr private-endpoint-connection list -g {rg} -r {registry_name}').get_output_in_json()
         self.assertFalse(result)
 
+    @ResourceGroupPreparer(location="eastus")
+    def test_acr_with_zone_redundancy(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_1': self.create_random_name('testreg', 20),
+            'registry_2': self.create_random_name('testreg2', 20),
+            'location_2': 'eastus2',
+            'location_3': 'westus2'
+        })
+
+        # test defaults
+        self.cmd('acr create --name {registry_1} --resource-group {rg} --sku premium',
+                 checks=[self.check('zoneRedundancy', 'Disabled')])
+
+        result = self.cmd('acr create --name {registry_2} --resource-group {rg} --sku premium --zone-redundancy Enabled',
+                          checks=[self.check('zoneRedundancy', 'Enabled')]).get_output_in_json()
+
+        self.kwargs["home_location"] = result["location"]
+
+        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
+                 checks=[self.check('zoneRedundancy', 'Enabled')])
+
+        self.cmd('acr replication create --registry {registry_1}  -g {rg} --location {location_2} --zone-redundancy Enabled',
+                 checks=[self.check('zoneRedundancy', 'Enabled')])
+
+        self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_2}',
+                 checks=[self.check('zoneRedundancy', 'Disabled')])
+
+        self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_3} --zone-redundancy Disabled',
+                 checks=[self.check('zoneRedundancy', 'Disabled')])
+
     def assertUserIdentitiesExpected(self, query_identities, result):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
         self.assertEqual(len(result['userAssignedIdentities']), len(query_identities))

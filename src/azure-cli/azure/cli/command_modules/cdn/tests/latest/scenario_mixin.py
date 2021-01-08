@@ -164,7 +164,38 @@ class CdnScenarioMixin:
                                                                              profile_name)
         return self.cmd(command, checks)
 
+    def origin_create_cmd(self, group, origin_name, endpoint_name, profile_name, host_name, http_port=None,
+                          https_port=None, origin_host_header=None, disabled=False, weight=None, priority=None,
+                          private_link_id=None, private_link_location=None, private_link_message=None, tags=None,
+                          checks=None):
+
+        cmd = f'cdn origin create -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+              f'-n {origin_name} --host-name={host_name}'
+
+        if http_port:
+            cmd += f' --http-port={http_port}'
+        if https_port:
+            cmd += f' --https-port={https_port}'
+        if private_link_id:
+            cmd += f' --private-link-resource-id={private_link_id}'
+        if private_link_location:
+            cmd += f' --private-link-location={private_link_location}'
+        if private_link_message:
+            cmd += f' \'--private-link-approval-message={private_link_message}\''
+        if origin_host_header:
+            cmd += f' --origin-host-header={origin_host_header}'
+        if disabled:
+            cmd += ' --disabled'
+        if weight:
+            cmd += f' --weight={weight}'
+        if priority:
+            cmd += f' --priority={priority}'
+        if tags:
+            cmd = add_tags(cmd, tags)
+        return self.cmd(cmd, checks)
+
     def origin_update_cmd(self, group, origin_name, endpoint_name, profile_name, http_port='80', https_port='443',
+                          origin_host_header=None, disabled=False, weight=None, priority=None,
                           private_link_id=None, private_link_location=None, private_link_message=None, tags=None,
                           checks=None):
 
@@ -176,10 +207,23 @@ class CdnScenarioMixin:
         if private_link_location:
             cmd += f' --private-link-location={private_link_location}'
         if private_link_message:
-            cmd += f' \'--private-link-approval-message={private_link_message}\''
+            cmd += f" '--private-link-approval-message={private_link_message}'"
+        if origin_host_header:
+            cmd += f' --origin-host-header={origin_host_header}'
+        if disabled:
+            cmd += ' --disabled'
+        if weight:
+            cmd += f' --weight={weight}'
+        if priority:
+            cmd += f' --priority={priority}'
         if tags:
             cmd = add_tags(cmd, tags)
         return self.cmd(cmd, checks)
+
+    def origin_delete_cmd(self, group, origin_name, endpoint_name, profile_name, checks=None):
+        command = f'cdn origin delete -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+                  f'--name {origin_name} --yes'
+        return self.cmd(command, checks)
 
     def origin_list_cmd(self, group, endpoint_name, profile_name, checks=None):
         msg = 'cdn origin list -g {} --endpoint-name {} --profile-name {}'
@@ -194,6 +238,79 @@ class CdnScenarioMixin:
                              name,
                              endpoint_name,
                              profile_name)
+        return self.cmd(command, checks)
+
+    def origin_group_create_cmd(self, group, origin_group_name, endpoint_name, profile_name, origins,
+                                probe_method=None, response_error_detection_error_types=None,
+                                probe_path=None, probe_protocol=None, probe_interval=None,
+                                response_error_detection_failover_threshold=None,
+                                response_error_detection_status_code_ranges=None,
+                                tags=None, checks=None):
+
+        cmd = f'cdn origin-group create -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+              f'-n {origin_group_name} --origins={origins}'
+
+        if probe_method:
+            cmd += f' --probe-method={probe_method}'
+        if response_error_detection_error_types:
+            cmd += f' --error-types={response_error_detection_error_types}'
+        if response_error_detection_failover_threshold:
+            cmd += f' --failover-threshold={response_error_detection_failover_threshold}'
+        if response_error_detection_status_code_ranges:
+            cmd += f' --status-code-ranges={response_error_detection_status_code_ranges}'
+        if probe_path:
+            cmd += f' \'--probe-path={probe_path}\''
+        if probe_protocol:
+            cmd += f' --probe-protocol={probe_protocol}'
+        if probe_interval:
+            cmd += f' --probe-interval={probe_interval}'
+        if tags:
+            cmd = add_tags(cmd, tags)
+        return self.cmd(cmd, checks)
+
+    def origin_group_update_cmd(self, group, origin_group_name, endpoint_name, profile_name, origins,
+                                probe_method=None,
+                                probe_path=None,
+                                probe_interval=None,
+                                probe_protocol=None,
+                                error_types=None,
+                                failover_threshold=None,
+                                status_code_ranges=None,
+                                tags=None, checks=None):
+
+        cmd = f'cdn origin-group update -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+              f'-n {origin_group_name} --origins={origins}'
+
+        if probe_method:
+            cmd += f' --probe-method={probe_method}'
+        if probe_path:
+            cmd += f' --probe-path={probe_path}'
+        if probe_interval:
+            cmd += f' --probe-interval={probe_interval}'
+        if probe_protocol:
+            cmd += f' --probe-protocol={probe_protocol}'
+        if error_types:
+            cmd += f' --response-error-detection-error-types={error_types}'
+        if failover_threshold:
+            cmd += f' --response-error-detection-failover-threshold={failover_threshold}'
+        if status_code_ranges:
+            cmd += f' --response-error-detection-status-code-ranges={status_code_ranges}'
+        if tags:
+            cmd = add_tags(cmd, tags)
+        return self.cmd(cmd, checks)
+
+    def origin_group_delete_cmd(self, group, origin_group_name, endpoint_name, profile_name, checks=None):
+        command = f'cdn origin-group delete -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name} ' \
+                  f'--name {origin_group_name} --yes'
+        return self.cmd(command, checks)
+
+    def origin_group_list_cmd(self, group, endpoint_name, profile_name, checks=None):
+        command = f'cdn origin-group list -g {group} --endpoint-name {endpoint_name} --profile-name {profile_name}'
+        return self.cmd(command, checks)
+
+    def origin_group_show_cmd(self, group, name, endpoint_name, profile_name, checks=None):
+        command = f'cdn origin-group show -g {group} -n {name} --endpoint-name {endpoint_name} ' \
+                  f'--profile-name {profile_name}'
         return self.cmd(command, checks)
 
     def custom_domain_show_cmd(self, group, profile_name, endpoint_name, name, checks=None):
@@ -273,7 +390,7 @@ class CdnScenarioMixin:
         test_dir = path.dirname(path.realpath(__file__))
         default_cert_policy = path.join(test_dir, "byoc_cert_policy.json")
 
-        self.cmd(f'keyvault create --location westus2 --name {key_vault_name} -g {group_name}')
+        self.cmd(f'keyvault create --location centralus --name {key_vault_name} -g {group_name}')
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
                         f'-n {cert_name} --policy "@{default_cert_policy}"')
 
@@ -282,3 +399,6 @@ class CdnScenarioMixin:
 
     def is_playback_mode(self):
         return self.get_subscription_id() == '00000000-0000-0000-0000-000000000000'
+
+    def resource_id_prefix(self, resource_group):
+        return f'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Cdn'

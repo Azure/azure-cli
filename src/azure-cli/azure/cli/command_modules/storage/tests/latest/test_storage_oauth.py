@@ -57,9 +57,6 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage queue exists -n {queue} --account-name {account}', checks=[
             JMESPathCheck('exists', True)])
 
-        res = self.oauth_cmd('storage queue list --account-name {account}').get_output_in_json()
-        self.assertIn(self.kwargs.get('queue'), [x['name'] for x in res], 'The newly created queue is not listed.')
-
         self.oauth_cmd('storage queue metadata show -n {queue} --account-name {account}', checks=[
             JMESPathCheck('a', 'b'),
             JMESPathCheck('c', 'd')

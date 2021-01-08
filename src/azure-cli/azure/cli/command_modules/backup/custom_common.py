@@ -8,10 +8,19 @@ import azure.cli.command_modules.backup.custom_help as custom_help
 from azure.cli.command_modules.backup._client_factory import backup_protected_items_cf, \
     protection_containers_cf, protected_items_cf
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 # pylint: disable=import-error
 
 fabric_name = "Azure"
 # pylint: disable=unused-argument
+
+# Mapping of workload type
+workload_type_map = {'MSSQL': 'SQLDataBase',
+                     'SAPHANA': 'SAPHanaDatabase',
+                     'SQLDataBase': 'SQLDataBase',
+                     'SAPHanaDatabase': 'SAPHanaDatabase',
+                     'VM': 'VM',
+                     'AzureFileShare': 'AzureFileShare'}
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
@@ -32,6 +41,7 @@ def show_policy(client, resource_group_name, vault_name, name):
 
 
 def list_policies(client, resource_group_name, vault_name, workload_type=None, backup_management_type=None):
+    workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': backup_management_type,
         'workloadType': workload_type})
@@ -60,6 +70,7 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
                container_type=None):
+    workload_type = _check_map(workload_type, workload_type_map)
     filter_string = custom_help.get_filter_string({
         'backupManagementType': container_type,
         'itemType': workload_type})
@@ -100,6 +111,7 @@ def delete_policy(client, resource_group_name, vault_name, name):
 
 
 def new_policy(client, resource_group_name, vault_name, policy, policy_name, container_type, workload_type):
+    workload_type = _check_map(workload_type, workload_type_map)
     policy_object = custom_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = container_type
     policy_object.properties.workload_type = workload_type
@@ -134,3 +146,15 @@ def _is_container_name_match(item, container_name):
     if item.properties.container_name.lower() == name.lower():
         return True
     return False
+
+
+def _check_map(item_type, item_type_map):
+    if item_type is None:
+        return None
+    if item_type_map.get(item_type) is not None:
+        return item_type_map[item_type]
+    error_text = "{} is an invalid argument.".format(item_type)
+    recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+    az_error = InvalidArgumentValueError(error_text)
+    az_error.set_recommendation(recommendation_text)
+    raise az_error

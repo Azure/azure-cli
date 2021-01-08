@@ -55,16 +55,13 @@ def main():
     testdata = test_data.TestData(ARTIFACT_DIR)
     testdata.collect()
 
-    # Send email
+    # Generate index.html, send email
     try:
-        send_email(container, testdata)
-    except Exception:
-        print(traceback.format_exc())
-
-    # Generate index.html
-    try:
+        # Generate index.html
         container_url = 'https://clitestresultstac.blob.core.windows.net/' + container
-        generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE)
+        html_content = generate_index.generate(container, container_url, testdata, USER_REPO, USER_BRANCH, COMMIT_ID, USER_LIVE, USER_TARGET)
+        # Send email
+        send_email(html_content)
     except Exception:
         print(traceback.format_exc())
 
@@ -99,8 +96,8 @@ def upload_files(container):
     print('Enter upload_files()')
 
     # Create container
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'
-    os.popen(cmd.format(container, ACCOUNT_KEY))
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'.format(container, ACCOUNT_KEY)
+    os.system(cmd)
 
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):
@@ -162,16 +159,33 @@ def write_db(container, testdata):
     fail = testdata.total[2]
     rate = testdata.total[3]
     detail = str(testdata.modules)
-    container = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
-    d = datetime.datetime.now()
-    date = d.strftime('%Y%m%d')
-    time = d.strftime('%H%M%S')
-    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container, date, time)
+    container_url = 'https://clitestresultstac.blob.core.windows.net/{}/index.html'.format(container)
+    terms = container.split('-')
+    date = terms[0]
+    time = terms[1]
+    data = (repr, repo, branch, commit, target, live, user, pass0, fail, rate, detail, container_url, date, time)
+    print(sql)
     print(data)
     cursor.execute(sql, data)
 
     # Make sure data is committed to the database
     cnx.commit()
+
+    # Insert into t2
+    sql = 'SELECT id FROM t1 WHERE repr = %s'
+    cursor.execute(sql, (repr,))
+    id0 = None
+    for value in cursor:
+        id0 = value[0]
+    if id0:
+        for module, passed, failed, rate in testdata.modules:
+            sql = 'INSERT INTO t2 (module, pass, fail, rate, ref_id) VALUES (%s, %s, %s, %s, %s)'
+            data = (module, passed, failed, rate, id0)
+            print(sql)
+            print(data)
+            cursor.execute(sql, data)
+        cnx.commit()
+
     # Close
     cursor.close()
     cnx.close()
@@ -179,7 +193,7 @@ def write_db(container, testdata):
     print('Exit write_db()')
 
 
-def send_email(container, testdata):
+def send_email(html_content):
     print('Enter send_email()')
 
     from sendgrid import SendGridAPIClient
@@ -202,7 +216,7 @@ def send_email(container, testdata):
         "content": [
             {
                 "type": "text/html",
-                "value": get_content(container, testdata)
+                "value": html_content
             }
         ]
     }
@@ -210,7 +224,7 @@ def send_email(container, testdata):
         data['personalizations'][0]['to'].append({'email': REQUESTED_FOR_EMAIL})
     if USER_TARGET == '' and USER_REPO == 'https://github.com/Azure/azure-cli.git' and USER_BRANCH == 'dev' and USER_LIVE == '--live' and REQUESTED_FOR_EMAIL == '':
         data['personalizations'][0]['to'].append({'email': 'AzPyCLI@microsoft.com'})
-    print(data)
+    # print(data)
 
     sendgrid_key = sys.argv[1]
     sg = SendGridAPIClient(sendgrid_key)

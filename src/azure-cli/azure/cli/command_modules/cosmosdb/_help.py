@@ -350,7 +350,7 @@ short-summary: Update an Gremlin graph under an Azure Cosmos DB Gremlin database
 
 helps['cosmosdb keys'] = """
 type: group
-short-summary: Manage Azure Comsos DB keys.
+short-summary: Manage Azure Cosmos DB keys.
 """
 
 helps['cosmosdb keys list'] = """
@@ -513,57 +513,57 @@ short-summary: Migrate the throughput of the MongoDB database between autoscale 
 
 helps['cosmosdb network-rule'] = """
 type: group
-short-summary: Manage Azure Comsos DB network rules.
+short-summary: Manage Azure Cosmos DB network rules.
 """
 
 helps['cosmosdb private-endpoint-connection'] = """
 type: group
-short-summary: Manage Azure Comsos DB private endpoint connections.
+short-summary: Manage Azure Cosmos DB private endpoint connections.
 """
 
 helps['cosmosdb private-endpoint-connection approve'] = """
 type: command
-short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
+short-summary: Approve the specified private endpoint connection associated with Azure Cosmos DB.
 examples:
-  - name: Approve the specified private endpoint connection associated with Azure Comsos DB.
+  - name: Approve the specified private endpoint connection associated with Azure Cosmos DB.
     text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Approved"
 """
 
 helps['cosmosdb private-endpoint-connection delete'] = """
 type: command
-short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
+short-summary: Delete the specified private endpoint connection associated with Azure Cosmos DB.
 examples:
-  - name: Delete the specified private endpoint connection associated with Azure Comsos DB.
+  - name: Delete the specified private endpoint connection associated with Azure Cosmos DB.
     text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
 
 """
 
 helps['cosmosdb private-endpoint-connection reject'] = """
 type: command
-short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
+short-summary: Reject the specified private endpoint connection associated with Azure Cosmos DB.
 examples:
-  - name: Reject the specified private endpoint connection associated with Azure Comsos DB.
+  - name: Reject the specified private endpoint connection associated with Azure Cosmos DB.
     text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Rejected"
 """
 
 helps['cosmosdb private-endpoint-connection show'] = """
 type: command
-short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
+short-summary: Show details of a private endpoint connection associated with Azure Cosmos DB.
 examples:
-  - name: Show details of a private endpoint connection associated with Azure Comsos DB.
+  - name: Show details of a private endpoint connection associated with Azure Cosmos DB.
     text: az cosmosdb private-endpoint-connection show --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
 """
 
 helps['cosmosdb private-link-resource'] = """
 type: group
-short-summary: Manage Azure Comsos DB private link resources.
+short-summary: Manage Azure Cosmos DB private link resources.
 """
 
 helps['cosmosdb private-link-resource list'] = """
 type: command
-short-summary: List the private link resources supported for Azure Comsos DB.
+short-summary: List the private link resources supported for Azure Cosmos DB.
 example:
-  - name: List the private link resources supported for Azure Comsos DB.
+  - name: List the private link resources supported for Azure Cosmos DB.
     text: cosmosdb private-link-resource list --account-name MyAccount --resource-group MyResourceGroup
 """
 

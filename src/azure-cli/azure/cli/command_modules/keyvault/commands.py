@@ -17,7 +17,7 @@ from azure.cli.command_modules.keyvault._transformers import (
 
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
-    validate_private_endpoint_connection_id)
+    validate_private_endpoint_connection_id, validate_role_assignment_args)
 
 
 def transform_assignment_list(result):
@@ -166,7 +166,7 @@ def load_command_table(self, _):
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key',
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key',
+        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
@@ -273,7 +273,7 @@ def load_command_table(self, _):
             pass
 
         with self.command_group('keyvault role assignment', data_access_control_entity.command_type) as g:
-            g.keyvault_custom('delete', 'delete_role_assignment')
+            g.keyvault_custom('delete', 'delete_role_assignment', validator=validate_role_assignment_args)
             g.keyvault_custom('list', 'list_role_assignments', table_transformer=transform_assignment_list)
             g.keyvault_custom('create', 'create_role_assignment')
 

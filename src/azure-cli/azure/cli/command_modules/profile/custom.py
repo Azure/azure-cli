@@ -52,11 +52,15 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    if not show_auth_for_sdk:
-        return profile.get_subscription(subscription)
 
-    # sdk-auth file should be in json format all the time, hence the print
-    print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+    if show_auth_for_sdk:
+        from azure.cli.command_modules.role.custom import CREDENTIAL_WARNING_MESSAGE
+        logger.warning(CREDENTIAL_WARNING_MESSAGE)
+        # sdk-auth file should be in json format all the time, hence the print
+        print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
+        return
+
+    return profile.get_subscription(subscription)
 
 
 def get_access_token(cmd, subscription=None, resource=None, resource_type=None, tenant=None):
@@ -174,7 +178,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         raise CLIError(err)
     except requests.exceptions.SSLError as err:
         from azure.cli.core.util import SSLERROR_TEMPLATE
-        raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
+        raise CLIError(SSLERROR_TEMPLATE + " Error detail: {}".format(str(err)))
     except requests.exceptions.ConnectionError as err:
         raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
     all_subscriptions = list(subscriptions)

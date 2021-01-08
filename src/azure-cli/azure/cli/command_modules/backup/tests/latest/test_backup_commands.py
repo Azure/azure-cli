@@ -194,7 +194,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'default': 'DefaultPolicy',
             'vault': vault_name,
             'vm1': vm1,
-            'vm2': vm2
+            'vm2': vm2,
+            'policy5': self.create_random_name('clitest-policy5', 24),
         })
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
@@ -216,6 +217,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{}'])".format(vm1), 1),
             self.check("length([?properties.friendlyName == '{}'])".format(vm2), 1)
         ])
+
+        self.kwargs['policy1_json']['name'] = self.kwargs['policy5']
+        self.kwargs['backup-management-type'] = self.kwargs['policy1_json']['properties']['backupManagementType']
+        self.kwargs['policy5_json'] = json.dumps(self.kwargs['policy1_json'])
+        self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {policy5} --policy '{policy5_json}'")
+
+        self.cmd('backup policy delete -g {rg} -v {vault} -n {policy5}')
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
