@@ -196,7 +196,7 @@ parameters:
   - name: --task-type
     type: string
     short-summary: >
-        The type of data movement the Task will support. The supported types are: OnlineMigration, OfflineMigration.
+        The type of data movement the Task will support. The supported types are: OnlineMigration, OfflineMigration. If not provided, will default to OfflineMigration for SQL and OnlineMigration for MySQL and PostgreSQL.
   - name: --database-options-json
     type: string
     short-summary: >
