@@ -6500,10 +6500,15 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
+                       vpn_gateway=None,
+                       p2s_vpn_gateway=None,
+                       express_route_gateway=None,
                        hosted_subnet=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
+    from azure.cli.core.commands import LongRunningOperation
+
     try:
         client.get(resource_group_name, virtual_hub_name)
         raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
@@ -6515,14 +6520,23 @@ def create_virtual_hub(cmd, client,
 
     VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
 
-    hub = VirtualHub(tags=tags, location=location, virtual_wan=None, sku='Standard')
-    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+    if vpn_gateway is not None:
+        vpn_gateway = SubResource(id=vpn_gateway)
+    if p2s_vpn_gateway is not None:
+        p2s_vpn_gateway = SubResource(id=p2s_vpn_gateway)
+    if express_route_gateway is not None:
+        express_route_gateway = SubResource(id=express_route_gateway)
 
-    from azure.cli.core.commands import LongRunningOperation
-
+    hub = VirtualHub(tags=tags, location=location,
+                     vpn_gateway=vpn_gateway,
+                     p2_s_vpn_gateway=p2s_vpn_gateway,
+                     express_route_gateway=express_route_gateway,
+                     virtual_wan=None,
+                     sku='Standard')
     vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
+    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
     vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
     try:
         vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
@@ -6537,7 +6551,9 @@ def create_virtual_hub(cmd, client,
     return client.get(resource_group_name, virtual_hub_name)
 
 
-def update_virtual_hub(cmd, instance, tags=None, allow_branch_to_branch_traffic=None):
+def update_virtual_hub(cmd, instance,
+                       tags=None,
+                       allow_branch_to_branch_traffic=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
         c.set_param('properties.allowBranchToBranchTraffic', allow_branch_to_branch_traffic)
