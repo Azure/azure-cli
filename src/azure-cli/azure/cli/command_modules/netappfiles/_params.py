@@ -83,9 +83,9 @@ def load_volumeArguments(self, account_name_type, pool_name_type, volume_name_ty
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'])
         c.argument('backup_enabled', arg_type=get_three_state_flag(), id_part=None)
         c.argument('policy_enforced', arg_type=get_three_state_flag(), id_part=None)
-        c.argument('kerberos-enabled', arg_type=get_three_state_flag(), id_part=None)
-        c.argument('smb-encryption', arg_type=get_three_state_flag(), id_part=None)
-        c.argument('smb-continuously-available', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('kerberos_enabled', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('smb_encryption', arg_type=get_three_state_flag(), id_part=None)
+        c.argument('smb_continuously_available', options_list=['--smb-continuously-avl'], arg_type=get_three_state_flag(), id_part=None)
 
     with self.argument_context('netappfiles volume list') as c:
         c.argument('account_name', account_name_type, id_part=None)

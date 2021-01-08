@@ -348,8 +348,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
         volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
                           "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s "
-                          "--smb-encryption %s --smb-continuously-available %s" %
+                          "--smb-encryption %s --smb-continuously-avl %s" %
                           (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
                            subnet_name, True, True)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
-

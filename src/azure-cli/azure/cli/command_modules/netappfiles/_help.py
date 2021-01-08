@@ -498,6 +498,10 @@ parameters:
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
     short-summary: Has root access to volume
+  - name: --smb-encryption
+    short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value: False
+  - name: --smb-continuously-avl
+    short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value:  sFalse
 examples:
   - name: Create an ANF volume
     text: >
