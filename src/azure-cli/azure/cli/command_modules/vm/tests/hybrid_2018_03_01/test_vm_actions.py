@@ -34,7 +34,8 @@ class TestActions(unittest.TestCase):
         self.addCleanup(shutil.rmtree, path=temp_dir_name)
 
         # first create file paths for the keys to be generated
-        _, private_key_file = tempfile.mkstemp(dir=temp_dir_name)
+        fd, private_key_file = tempfile.mkstemp(dir=temp_dir_name)
+        os.close(fd)
         public_key_file = private_key_file + '.pub'
         os.remove(private_key_file)
 
@@ -60,7 +61,8 @@ class TestActions(unittest.TestCase):
         self.assertEqual(generated_public_key_string, args.ssh_key_value[0])
 
         # 3 verify we do not generate unless told so
-        _, private_key_file2 = tempfile.mkstemp(dir=temp_dir_name)
+        fd, private_key_file2 = tempfile.mkstemp(dir=temp_dir_name)
+        os.close(fd)
         public_key_file2 = private_key_file2 + '.pub'
         args3 = mock.MagicMock()
         args3.ssh_key_value = [public_key_file2]
@@ -69,7 +71,8 @@ class TestActions(unittest.TestCase):
             validate_ssh_key(args3)
 
         # 4 verify file naming if the pub file doesn't end with .pub
-        _, public_key_file4 = tempfile.mkstemp(dir=temp_dir_name)
+        fd, public_key_file4 = tempfile.mkstemp(dir=temp_dir_name)
+        os.close(fd)
         public_key_file4 += '1'  # make it nonexisting
         args4 = mock.MagicMock()
         args4.ssh_key_value = [public_key_file4]

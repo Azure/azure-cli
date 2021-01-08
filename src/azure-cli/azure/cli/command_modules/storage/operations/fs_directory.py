@@ -6,6 +6,7 @@
 """Custom operations for storage file datalake"""
 
 from azure.cli.core.profiles import ResourceType
+from knack.util import todict
 
 
 def exists(cmd, client, timeout=None):
@@ -28,9 +29,53 @@ def list_fs_directories(client, path=None, recursive=True, num_results=None, tim
 
 
 def get_directory_properties(client, timeout=None):
-    from knack.util import todict
     from .._transformers import transform_fs_access_output
     prop = todict(client.get_directory_properties(timeout=timeout))
     acl = transform_fs_access_output(client.get_access_control(timeout=timeout))
     result = dict(prop, **acl)
+    return result
+
+
+def remove_access_control_recursive(client, acl, **kwargs):
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        if acl_changes.batch_failures:
+            failed_entries.extend(acl_changes.batch_failures)
+
+    result = client.remove_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
+    result = todict(result)
+    result['failedEntries'] = failed_entries
+    return result
+
+
+def set_access_control_recursive(client, acl, **kwargs):
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        if acl_changes.batch_failures:
+            failed_entries.extend(acl_changes.batch_failures)
+
+    result = client.set_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
+    result = todict(result)
+    result['failedEntries'] = failed_entries
+    return result
+
+
+def update_access_control_recursive(client, acl, **kwargs):
+    failed_entries = []
+
+    # the progress callback is invoked each time a batch is completed
+    def progress_callback(acl_changes):
+        # keep track of failed entries if there are any
+        if acl_changes.batch_failures:
+            failed_entries.extend(acl_changes.batch_failures)
+
+    result = client.update_access_control_recursive(acl=acl, progress_hook=progress_callback, **kwargs)
+    result = todict(result)
+    result['failedEntries'] = failed_entries
     return result

@@ -20,31 +20,6 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
             self.assertIsNone(invoice['downloadUrl'])
 
     @record_only()
-    def test_list_invoices_no_url(self):
-        # list
-        invoices_list = self.cmd('billing invoice list').get_output_in_json()
-        self.assertTrue(invoices_list)
-        self._validate_invoice(invoices_list[0], False)
-        # get
-        self.kwargs.update({
-            'invoice_name': invoices_list[0]['name']
-        })
-        invoice = self.cmd('billing invoice show -n {invoice_name}').get_output_in_json()
-        self._validate_invoice(invoice, True)
-
-    @record_only()
-    def test_list_invoices_with_url(self):
-        invoices_list = self.cmd('billing invoice list -d').get_output_in_json()
-        self.assertTrue(invoices_list)
-        self._validate_invoice(invoices_list[0], True)
-
-    @record_only()
-    def test_get_latest_invoice(self):
-        create_cmd = 'billing invoice show'
-        invoice = self.cmd(create_cmd).get_output_in_json()
-        self._validate_invoice(invoice, True)
-
-    @record_only()
     def test_list_billing_periods(self):
         # list
         periods_list = self.cmd('billing period list').get_output_in_json()

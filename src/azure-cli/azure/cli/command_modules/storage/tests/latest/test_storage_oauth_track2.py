@@ -145,7 +145,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         # test block blob
         self.oauth_cmd('storage blob upload -c {container} -n {block} -f "{local_file}" --account-name {sa}')
 
-        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
                                 JMESPathCheck('deleted', False),
                                 JMESPathCheck('encryptionScope', None),
@@ -184,7 +184,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('tagCount', None),
                                 JMESPathCheck('versionId', None))
 
-        self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}')\
+        self.kwargs['etag'] = self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .get_output_in_json()['properties']['etag']
 
         # test page blob
@@ -198,7 +198,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheckExists('properties.pageRanges'))
 
         # test snapshot
-        self.kwargs['snapshot'] = self.oauth_cmd('storage blob snapshot -c {container} -n {block} --account-name {sa}')\
+        self.kwargs['snapshot'] = self.oauth_cmd('storage blob snapshot -c {container} -n {block} --account-name {sa}') \
             .get_output_in_json()['snapshot']
         self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa}') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
@@ -230,9 +230,11 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-none-match *')
 
         with self.assertRaisesRegex(ResourceModifiedError, 'ErrorCode:ConditionNotMet'):
-            self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-unmodified-since "2020-06-29T06:32Z"')
+            self.oauth_cmd(
+                'storage blob show -c {container} -n {block} --account-name {sa} --if-unmodified-since "2020-06-29T06:32Z"')
 
-        self.oauth_cmd('storage blob show -c {container} -n {block} --account-name {sa} --if-modified-since "2020-06-29T06:32Z"') \
+        self.oauth_cmd(
+            'storage blob show -c {container} -n {block} --account-name {sa} --if-modified-since "2020-06-29T06:32Z"') \
             .assert_with_checks(JMESPathCheck('name', self.kwargs['block']),
                                 JMESPathCheck('properties.blobType', 'BlockBlob'),
                                 JMESPathCheck('properties.contentLength', 128 * 1024),
@@ -257,7 +259,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob upload -c {container} -f "{local_file}" -n {blob_name1} --account-name {account} ')
 
         # Test with include snapshot
-        result = self.oauth_cmd('storage blob snapshot -c {container} -n {blob_name1} --account-name {account} ')\
+        result = self.oauth_cmd('storage blob snapshot -c {container} -n {blob_name1} --account-name {account} ') \
             .get_output_in_json()
         self.assertIsNotNone(result['snapshot'])
         snapshot = result['snapshot']
@@ -266,8 +268,9 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('[0].snapshot', snapshot))
 
         # Test with metadata
-        self.oauth_cmd('storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
-        self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ')\
+        self.oauth_cmd(
+            'storage blob metadata update -c {container} -n {blob_name1} --metadata test=1 --account-name {account} ')
+        self.oauth_cmd('storage blob metadata show -c {container} -n {blob_name1} --account-name {account} ') \
             .assert_with_checks(JMESPathCheck('test', '1'))
 
         self.oauth_cmd('storage blob list -c {container} --include m --account-name {account}  ') \
@@ -284,7 +287,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1))
 
         result = self.oauth_cmd(
-            'storage blob list -c {container} --num-results 1 --show-next-marker --account-name {account} ')\
+            'storage blob list -c {container} --num-results 1 --show-next-marker --account-name {account} ') \
             .get_output_in_json()
         self.assertIsNotNone(result[1]['nextMarker'])
         self.kwargs['next_marker'] = result[1]['nextMarker']
@@ -301,6 +304,51 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
         self.oauth_cmd('storage blob list -c {container} --delimiter "/" --account-name {account} ') \
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir/'))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
+    def test_storage_queue_list_oauth(self, resource_group, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'account': storage_account,
+            'queue_name1': self.create_random_name(prefix='firstq', length=24),
+            'queue_name2': self.create_random_name(prefix='secondq', length=24)
+        })
+
+        # Prepare queue 1
+        self.oauth_cmd('storage queue create -n {queue_name1} --metadata key1=value1 --account-name {account} ')
+
+        # Test list
+        self.oauth_cmd('storage queue list --account-name {account}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1), JMESPathCheck('[0].metadata', None))
+
+        # Test with include-metadata
+        self.oauth_cmd('storage queue list --include-metadata --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1), JMESPathCheck('[0].metadata.key1', 'value1'))
+
+        # Prepare queue 2
+        self.oauth_cmd('storage queue create -n {queue_name2} --account-name {account} ')
+
+        self.oauth_cmd('storage queue list --account-name {account}') \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+
+        # Test num_results and next marker
+        self.oauth_cmd('storage queue list --num-results 1 --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        result = self.oauth_cmd(
+            'storage queue list --num-results 1 --show-next-marker --account-name {account} ') \
+            .get_output_in_json()
+        self.assertIsNotNone(result[1]['nextMarker'])
+        self.kwargs['next_marker'] = result[1]['nextMarker']
+
+        # Test with marker
+        self.oauth_cmd('storage queue list --marker {next_marker} --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Test with prefix
+        self.oauth_cmd('storage queue list --prefix second --account-name {account} ') \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
 
 
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')

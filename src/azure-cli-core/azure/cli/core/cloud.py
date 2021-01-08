@@ -163,42 +163,6 @@ class CloudSuffixes:  # pylint: disable=too-few-public-methods,too-many-instance
         return val
 
 
-def _get_ossrdbms_resource_id(cloud_name):
-    ossrdbms_mapper = {
-        'AzureCloud': 'https://ossrdbms-aad.database.windows.net',
-        'AzureChinaCloud': 'https://ossrdbms-aad.database.chinacloudapi.cn',
-        'AzureUSGovernment': 'https://ossrdbms-aad.database.usgovcloudapi.net',
-        'AzureGermanCloud': 'https://ossrdbms-aad.database.cloudapi.de'
-    }
-    return ossrdbms_mapper.get(cloud_name, None)
-
-
-def _get_microsoft_graph_resource_id(cloud_name):
-    graph_endpoint_mapper = {
-        'AzureCloud': 'https://graph.microsoft.com/',
-        'AzureChinaCloud': 'https://microsoftgraph.chinacloudapi.cn/',
-        'AzureUSGovernment': 'https://graph.microsoft.us/',
-        'AzureGermanCloud': 'https://graph.microsoft.de/'
-    }
-    return graph_endpoint_mapper.get(cloud_name, None)
-
-
-def _get_storage_sync_endpoint(cloud_name):
-    storage_sync_endpoint_mapper = {
-        'AzureCloud': 'afs.azure.net',
-        'AzureUSGovernment': 'afs.azure.us',
-    }
-    return storage_sync_endpoint_mapper.get(cloud_name, None)
-
-
-def _get_synapse_analytics_endpoint(cloud_name):
-    synapse_analytics_endpoint_mapper = {
-        'AzureCloud': '.dev.azuresynapse.net',
-        'AzureChinaCloud': '.dev.azuresynapse.azure.cn'
-    }
-    return synapse_analytics_endpoint_mapper.get(cloud_name, None)
-
-
 def _get_database_server_endpoint(sql_server_hostname, cloud_name):
     def _concat_db_server_endpoint(db_prefix):
         if cloud_name == 'AzureCloud':
@@ -209,58 +173,18 @@ def _get_database_server_endpoint(sql_server_hostname, cloud_name):
     return _concat_db_server_endpoint
 
 
-def _get_app_insights_telemetry_channel_resource_id(cloud_name):
-    app_insights_telemetry_channel_resource_id_mapper = {
-        'AzureCloud': 'https://dc.applicationinsights.azure.com/v2/track',
-        'AzureChinaCloud': 'https://dc.applicationinsights.azure.cn/v2/track',
-        'AzureUSGovernment': 'https://dc.applicationinsights.us/v2/track'
-    }
-    return app_insights_telemetry_channel_resource_id_mapper.get(cloud_name, None)
+def _get_endpoint_fallback_value(cloud_name):
+    def _get_cloud_endpoint_fallback_value(endpoint_name):
+        endpoint_mapper = {c.name: c.endpoints.__dict__.get(endpoint_name, None) for c in HARD_CODED_CLOUD_LIST}
+        return endpoint_mapper.get(cloud_name, None)
+    return _get_cloud_endpoint_fallback_value
 
 
-def _get_log_analytics_resource_id(cloud_name):
-    log_analytics_resource_id_mapper = {
-        'AzureCloud': 'https://api.loganalytics.io',
-        'AzureChinaCloud': 'https://api.loganalytics.azure.cn',
-        'AzureUSGovernment': 'https://api.loganalytics.us'
-    }
-    return log_analytics_resource_id_mapper.get(cloud_name, None)
-
-
-def _get_app_insights_resource_id(cloud_name):
-    app_insights_resource_id_mapper = {
-        'AzureCloud': 'https://api.applicationinsights.io',
-        'AzureChinaCloud': 'https://api.applicationinsights.azure.cn',
-        'AzureUSGovernment': 'https://api.applicationinsights.us'
-    }
-    return app_insights_resource_id_mapper.get(cloud_name, None)
-
-
-def _get_synapse_analytics_resource_id(cloud_name):
-    synapse_analytics_resource_id_mapper = {
-        'AzureCloud': 'https://dev.azuresynapse.net',
-        'AzureChinaCloud': 'https://dev.azuresynapse.net'
-    }
-    return synapse_analytics_resource_id_mapper.get(cloud_name, None)
-
-
-def _get_attestation_resource_id(cloud_name):
-    attestation_resource_id_mapper = {
-        'AzureCloud': 'https://attest.azure.net'
-    }
-    return attestation_resource_id_mapper.get(cloud_name, None)
-
-
-def _get_attestation_endpoint(cloud_name):
-    attestation_endpoint_mapper = {
-        'AzureCloud': '.attest.azure.net'
-    }
-    return attestation_endpoint_mapper.get(cloud_name, None)
-
-
-def _get_mhsm_dns_suffix(cloud_name):
-    mhsm_dns_suffix_mapper = {c.name: c.suffixes.mhsm_dns for c in HARD_CODED_CLOUD_LIST}
-    return mhsm_dns_suffix_mapper.get(cloud_name, None)
+def _get_suffix_fallback_value(cloud_name):
+    def _get_cloud_suffix_fallback_value(suffix_name):
+        suffix_mapper = {c.name: c.suffixes.__dict__.get(suffix_name, None) for c in HARD_CODED_CLOUD_LIST}
+        return suffix_mapper.get(cloud_name, None)
+    return _get_cloud_suffix_fallback_value
 
 
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
@@ -291,42 +215,45 @@ def _arm_to_cli_mapper(arm_dict):
     sql_server_hostname = get_suffix('sqlServerHostname', add_dot=True)
     get_db_server_endpoint = _get_database_server_endpoint(sql_server_hostname, arm_dict['name'])
 
+    get_suffix_fallback_value = _get_suffix_fallback_value(arm_dict['name'])
+    get_endpoint_fallback_value = _get_endpoint_fallback_value(arm_dict['name'])
+
     return Cloud(
         arm_dict['name'],
-        endpoints=CloudEndpoints(
+        endpoints=CloudEndpoints(  # please add fallback_value if the endpoint is not added to https://management.azure.com/metadata/endpoints?api-version=2019-05-01 yet
             management=arm_dict['authentication']['audiences'][0],
-            resource_manager=arm_dict['resourceManager'],
-            sql_management=arm_dict['sqlManagement'],
-            batch_resource_id=arm_dict['batch'],
-            gallery=arm_dict['gallery'],
+            resource_manager=get_endpoint('resourceManager'),
+            sql_management=get_endpoint('sqlManagement'),
+            batch_resource_id=get_endpoint('batch'),
+            gallery=get_endpoint('gallery'),
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
-            active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # change once microsoft_graph_resource_id is fixed in ARM
-            vm_image_alias_doc=arm_dict['vmImageAliasDoc'],
-            media_resource_id=arm_dict['media'],
-            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
-            app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=_get_app_insights_resource_id(arm_dict['name'])),
-            log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=_get_log_analytics_resource_id(arm_dict['name'])),
-            synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=_get_synapse_analytics_resource_id(arm_dict['name'])),
-            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=_get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
-            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=_get_attestation_resource_id(arm_dict['name'])),
-            portal=arm_dict['portal'] if 'portal' in arm_dict else None),
+            active_directory_graph_resource_id=get_endpoint('graphAudience'),
+            microsoft_graph_resource_id=get_endpoint('microsoftGraphResourceId', fallback_value=get_endpoint_fallback_value('microsoft_graph_resource_id')),  # change once microsoft_graph_resource_id is fixed in ARM
+            vm_image_alias_doc=get_endpoint('vmImageAliasDoc'),
+            media_resource_id=get_endpoint('media'),
+            ossrdbms_resource_id=get_endpoint('ossrdbmsResourceId', fallback_value=get_endpoint_fallback_value('ossrdbms_resource_id')),  # change once ossrdbms_resource_id is available via ARM
+            active_directory_data_lake_resource_id=get_endpoint('activeDirectoryDataLake'),
+            app_insights_resource_id=get_endpoint('appInsightsResourceId', fallback_value=get_endpoint_fallback_value('app_insights_resource_id')),
+            log_analytics_resource_id=get_endpoint('logAnalyticsResourceId', fallback_value=get_endpoint_fallback_value('log_analytics_resource_id')),
+            synapse_analytics_resource_id=get_endpoint('synapseAnalyticsResourceId', fallback_value=get_endpoint_fallback_value('synapse_analytics_resource_id')),
+            app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId', fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
+            attestation_resource_id=get_endpoint('attestationResourceId', fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
+            portal=get_endpoint('portal')),
         suffixes=CloudSuffixes(
             storage_endpoint=get_suffix('storage'),
-            storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=_get_storage_sync_endpoint(arm_dict['name'])),
+            storage_sync_endpoint=get_suffix('storageSyncEndpointSuffix', fallback_value=get_suffix_fallback_value('storage_sync_endpoint')),
             keyvault_dns=get_suffix('keyVaultDns', add_dot=True),
-            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=_get_mhsm_dns_suffix(arm_dict['name'])),
+            mhsm_dns=get_suffix('mhsmDns', add_dot=True, fallback_value=get_suffix_fallback_value('mhsm_dns')),
             sql_server_hostname=sql_server_hostname,
             mysql_server_endpoint=get_suffix('mysqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mysql')),
             postgresql_server_endpoint=get_suffix('postgresqlServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.postgres')),
             mariadb_server_endpoint=get_suffix('mariadbServerEndpoint', add_dot=True, fallback_value=get_db_server_endpoint('.mariadb')),
             azure_datalake_store_file_system_endpoint=get_suffix('azureDataLakeStoreFileSystem'),
             azure_datalake_analytics_catalog_and_job_endpoint=get_suffix('azureDataLakeAnalyticsCatalogAndJob'),
-            synapse_analytics_endpoint=get_suffix('synapseAnalytics', add_dot=True, fallback_value=_get_synapse_analytics_endpoint(arm_dict['name'])),
+            synapse_analytics_endpoint=get_suffix('synapseAnalytics', add_dot=True, fallback_value=get_suffix_fallback_value('synapse_analytics_endpoint')),
             acr_login_server_endpoint=get_suffix('acrLoginServer', add_dot=True),
-            attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True, fallback_value=_get_attestation_endpoint(arm_dict['name']))))
+            attestation_endpoint=get_suffix('attestationEndpoint', add_dot=True, fallback_value=get_suffix_fallback_value('attestation_endpoint'))))
 
 
 class Cloud:  # pylint: disable=too-few-public-methods
@@ -419,7 +346,7 @@ AZURE_CHINA_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
-        synapse_analytics_resource_id='https://dev.azuresynapse.net',
+        synapse_analytics_resource_id='https://dev.azuresynapse.azure.cn',
         portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
@@ -450,6 +377,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         app_insights_resource_id='https://api.applicationinsights.us',
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
+        synapse_analytics_resource_id='https://dev.azuresynapse.usgovcloudapi.net',
         portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
@@ -460,7 +388,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.usgovcloudapi.net',
         postgresql_server_endpoint='.postgres.database.usgovcloudapi.net',
         mariadb_server_endpoint='.mariadb.database.usgovcloudapi.net',
-        acr_login_server_endpoint='.azurecr.us'))
+        acr_login_server_endpoint='.azurecr.us',
+        synapse_analytics_endpoint='.dev.azuresynapse.usgovcloudapi.net'))
 
 AZURE_GERMAN_CLOUD = Cloud(
     'AzureGermanCloud',

@@ -13,8 +13,55 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/1.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/1.0''
+        under resource group ''cli_test_template_specs_list000002'' was not found.
+        For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 00:07:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -32,7 +79,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:15:56 GMT
+      - Thu, 17 Dec 2020 00:07:08 GMT
       expires:
       - '-1'
       pragma:
@@ -47,7 +94,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -58,35 +105,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:15:58.4392827Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:15:58.4392827Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:10.6221591Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:10.6221591Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-list-template-spec000003\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '719'
+      - '734'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:15:58 GMT
+      - Thu, 17 Dec 2020 00:07:10 GMT
       expires:
       - '-1'
       pragma:
@@ -112,7 +160,7 @@ interactions:
       "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
       "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
       {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
-      "value": "[reference(parameters(''name''))]"}}}}}'
+      "value": "[reference(parameters(''name''))]"}}}}, "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -123,26 +171,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '781'
+      - '793'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/1.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:15:59.5191367Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:15:59.5191367Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:11.6771761Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:11.6771761Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
         \         \"metadata\": {\r\n            \"description\": \"Location for the
@@ -163,11 +211,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1817'
+      - '1832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:15:59 GMT
+      - Thu, 17 Dec 2020 00:07:11 GMT
       expires:
       - '-1'
       pragma:
@@ -197,8 +245,55 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/2.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/2.0''
+        under resource group ''cli_test_template_specs_list000001'' was not found.
+        For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 00:07:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -216,7 +311,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:00 GMT
+      - Thu, 17 Dec 2020 00:07:11 GMT
       expires:
       - '-1'
       pragma:
@@ -231,7 +326,7 @@ interactions:
       code: 404
       message: Not Found
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -242,35 +337,36 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '22'
+      - '34'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:16:01.3014735Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:16:01.3014735Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:14.1716877Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:14.1716877Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-list-template-spec000003\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '719'
+      - '734'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:01 GMT
+      - Thu, 17 Dec 2020 00:07:13 GMT
       expires:
       - '-1'
       pragma:
@@ -296,7 +392,7 @@ interactions:
       "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
       "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
       {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
-      "value": "[reference(parameters(''name''))]"}}}}}'
+      "value": "[reference(parameters(''name''))]"}}}}, "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -307,26 +403,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '781'
+      - '793'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/2.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:16:02.4979506Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:16:02.4979506Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:15.3796464Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:15.3796464Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
         \         \"metadata\": {\r\n            \"description\": \"Location for the
@@ -347,11 +443,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1817'
+      - '1832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:02 GMT
+      - Thu, 17 Dec 2020 00:07:15 GMT
       expires:
       - '-1'
       pragma:
@@ -381,29 +477,77 @@ interactions:
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/3.0?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/3.0''
+        under resource group ''cli_test_template_specs_list000001'' was not found.
+        For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 17 Dec 2020 00:07:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - ts create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -v -l -f
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:16:01.3014735Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:16:02.4979506Z\"\r\n
-        \ },\r\n  \"properties\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:14.1716877Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:15.3796464Z\"\r\n  },\r\n  \"properties\": {},\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \ \"type\": \"Microsoft.Resources/templateSpecs\",\r\n  \"name\": \"cli-test-list-template-spec000003\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '719'
+      - '734'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:03 GMT
+      - Thu, 17 Dec 2020 00:07:16 GMT
       expires:
       - '-1'
       pragma:
@@ -431,7 +575,7 @@ interactions:
       "Microsoft.Network/networkSecurityGroups", "name": "[parameters(''name'')]",
       "apiVersion": "2015-06-15", "location": "[parameters(''location'')]", "properties":
       {"securityRules": []}, "dependsOn": []}], "outputs": {"NewNSG": {"type": "object",
-      "value": "[reference(parameters(''name''))]"}}}}}'
+      "value": "[reference(parameters(''name''))]"}}}}, "tags": {}}'
     headers:
       Accept:
       - application/json
@@ -442,26 +586,26 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '781'
+      - '793'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -v -l -f
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/3.0?api-version=2019-06-01-preview
   response:
     body:
-      string: "{\r\n  \"location\": \"westus\",\r\n  \"systemData\": {\r\n    \"createdBy\":
-        \"daetienn@microsoft.com\",\r\n    \"createdByType\": \"User\",\r\n    \"createdAt\":
-        \"2020-09-16T14:16:04.7413092Z\",\r\n    \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
-        \   \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\": \"2020-09-16T14:16:04.7413092Z\"\r\n
-        \ },\r\n  \"properties\": {\r\n    \"artifacts\": [],\r\n    \"template\":
-        {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
+      string: "{\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"systemData\":
+        {\r\n    \"createdBy\": \"daetienn@microsoft.com\",\r\n    \"createdByType\":
+        \"User\",\r\n    \"createdAt\": \"2020-12-17T00:07:17.7570658Z\",\r\n    \"lastModifiedBy\":
+        \"daetienn@microsoft.com\",\r\n    \"lastModifiedByType\": \"User\",\r\n    \"lastModifiedAt\":
+        \"2020-12-17T00:07:17.7570658Z\"\r\n  },\r\n  \"properties\": {\r\n    \"artifacts\":
+        [],\r\n    \"template\": {\r\n      \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \     \"contentVersion\": \"1.0.0.0\",\r\n      \"parameters\": {\r\n        \"location\":
         {\r\n          \"type\": \"string\",\r\n          \"defaultValue\": \"[resourceGroup().location]\",\r\n
         \         \"metadata\": {\r\n            \"description\": \"Location for the
@@ -482,11 +626,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1817'
+      - '1832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:04 GMT
+      - Thu, 17 Dec 2020 00:07:17 GMT
       expires:
       - '-1'
       pragma:
@@ -516,8 +660,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -525,10 +669,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"westus\",\r\n
-        \     \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:16:01.3014735Z\",\r\n
+        \     \"tags\": {},\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-12-17T00:07:14.1716877Z\",\r\n
         \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:16:04.7413092Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:17.7570658Z\"\r\n
         \     },\r\n      \"properties\": {},\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \     \"type\": \"Microsoft.Resources/templateSpecs\",\r\n      \"name\":
         \"cli-test-list-template-spec000003\"\r\n    }\r\n  ]\r\n}"
@@ -536,11 +680,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '804'
+      - '823'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:05 GMT
+      - Thu, 17 Dec 2020 00:07:18 GMT
       expires:
       - '-1'
       pragma:
@@ -572,8 +716,8 @@ interactions:
       ParameterSetName:
       - -g
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -581,10 +725,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"westus\",\r\n
-        \     \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:15:58.4392827Z\",\r\n
+        \     \"tags\": {},\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-12-17T00:07:10.6221591Z\",\r\n
         \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:15:59.5191367Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:11.6771761Z\"\r\n
         \     },\r\n      \"properties\": {},\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \     \"type\": \"Microsoft.Resources/templateSpecs\",\r\n      \"name\":
         \"cli-test-list-template-spec000003\"\r\n    }\r\n  ]\r\n}"
@@ -592,11 +736,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '804'
+      - '823'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:06 GMT
+      - Thu, 17 Dec 2020 00:07:19 GMT
       expires:
       - '-1'
       pragma:
@@ -628,8 +772,8 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -637,10 +781,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"westus\",\r\n
-        \     \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:16:02.4979506Z\",\r\n
+        \     \"tags\": {},\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-12-17T00:07:15.3796464Z\",\r\n
         \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:16:02.4979506Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:15.3796464Z\"\r\n
         \     },\r\n      \"properties\": {\r\n        \"artifacts\": [],\r\n        \"template\":
         {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
@@ -659,11 +803,11 @@ interactions:
         \             \"type\": \"object\",\r\n              \"value\": \"[reference(parameters('name'))]\"\r\n
         \           }\r\n          }\r\n        }\r\n      },\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003/versions/2.0\",\r\n
         \     \"type\": \"Microsoft.Resources/templateSpecs/versions\",\r\n      \"name\":
-        \"2.0\"\r\n    },\r\n    {\r\n      \"location\": \"westus\",\r\n      \"systemData\":
-        {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n        \"createdByType\":
-        \"User\",\r\n        \"createdAt\": \"2020-09-16T14:16:04.7413092Z\",\r\n
+        \"2.0\"\r\n    },\r\n    {\r\n      \"location\": \"westus\",\r\n      \"tags\":
+        {},\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-12-17T00:07:17.7570658Z\",\r\n
         \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:16:04.7413092Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:17.7570658Z\"\r\n
         \     },\r\n      \"properties\": {\r\n        \"artifacts\": [],\r\n        \"template\":
         {\r\n          \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n
         \         \"contentVersion\": \"1.0.0.0\",\r\n          \"parameters\": {\r\n
@@ -687,11 +831,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '4102'
+      - '4140'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:06 GMT
+      - Thu, 17 Dec 2020 00:07:19 GMT
       expires:
       - '-1'
       pragma:
@@ -721,8 +865,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
@@ -730,39 +874,29 @@ interactions:
   response:
     body:
       string: "{\r\n  \"value\": [\r\n    {\r\n      \"location\": \"westus\",\r\n
-        \     \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:15:58.4392827Z\",\r\n
+        \     \"tags\": {},\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-12-17T00:07:10.6221591Z\",\r\n
         \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:15:59.5191367Z\"\r\n
+        \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:11.6771761Z\"\r\n
         \     },\r\n      \"properties\": {},\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000002/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \     \"type\": \"Microsoft.Resources/templateSpecs\",\r\n      \"name\":
         \"cli-test-list-template-spec000003\"\r\n    },\r\n    {\r\n      \"location\":
-        \"westus\",\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:16:01.3014735Z\",\r\n
-        \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:16:04.7413092Z\"\r\n
+        \"westus\",\r\n      \"tags\": {},\r\n      \"systemData\": {\r\n        \"createdBy\":
+        \"daetienn@microsoft.com\",\r\n        \"createdByType\": \"User\",\r\n        \"createdAt\":
+        \"2020-12-17T00:07:14.1716877Z\",\r\n        \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n
+        \       \"lastModifiedByType\": \"User\",\r\n        \"lastModifiedAt\": \"2020-12-17T00:07:17.7570658Z\"\r\n
         \     },\r\n      \"properties\": {},\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specs_list000001/providers/Microsoft.Resources/templateSpecs/cli-test-list-template-spec000003\",\r\n
         \     \"type\": \"Microsoft.Resources/templateSpecs\",\r\n      \"name\":
-        \"cli-test-list-template-spec000003\"\r\n    },\r\n    {\r\n      \"location\":
-        \"westus\",\r\n      \"systemData\": {\r\n        \"createdBy\": \"daetienn@microsoft.com\",\r\n
-        \       \"createdByType\": \"User\",\r\n        \"createdAt\": \"2020-09-16T14:16:04.4617274Z\",\r\n
-        \       \"lastModifiedBy\": \"daetienn@microsoft.com\",\r\n        \"lastModifiedByType\":
-        \"User\",\r\n        \"lastModifiedAt\": \"2020-09-16T14:16:06.6159216Z\"\r\n
-        \     },\r\n      \"properties\": {\r\n        \"displayName\": \"create-spec7xrtm3kjd\",\r\n
-        \       \"description\": \"AzCLI test root template spec\"\r\n      },\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_template_specswv52vejwhnw3shpxh7c4xtchqsuo2qtadifec27se3dgt73lyg7m/providers/Microsoft.Resources/templateSpecs/cli-test-update-template-specbmlhayrdfuh2eniewjxahkfmheakdmv\",\r\n
-        \     \"type\": \"Microsoft.Resources/templateSpecs\",\r\n      \"name\":
-        \"cli-test-update-template-specbmlhayrdfuh2eniewjxahkfmheakdmv\"\r\n    }\r\n
-        \ ]\r\n}"
+        \"cli-test-list-template-spec000003\"\r\n    }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2480'
+      - '1624'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 16 Sep 2020 14:16:07 GMT
+      - Thu, 17 Dec 2020 00:07:19 GMT
       expires:
       - '-1'
       pragma:
@@ -796,8 +930,8 @@ interactions:
       ParameterSetName:
       - --template-spec --yes
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
@@ -811,7 +945,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 16 Sep 2020 14:16:08 GMT
+      - Thu, 17 Dec 2020 00:07:23 GMT
       expires:
       - '-1'
       pragma:
@@ -843,8 +977,8 @@ interactions:
       ParameterSetName:
       - --template-spec --yes
       User-Agent:
-      - python/3.8.3 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-resource/10.2.0 Azure-SDK-For-Python AZURECLI/2.12.0
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
@@ -858,7 +992,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Wed, 16 Sep 2020 14:16:10 GMT
+      - Thu, 17 Dec 2020 00:07:26 GMT
       expires:
       - '-1'
       pragma:

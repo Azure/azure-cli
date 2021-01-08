@@ -335,8 +335,8 @@ class GraphGroupScenarioTest(ScenarioTest):
 
         domain = username.split('@', 1)[1]
         self.kwargs = {
-            'user1': 'deleteme1',
-            'user2': 'deleteme2',
+            'user1': self.create_random_name(prefix='deleteme1', length=15),
+            'user2': self.create_random_name(prefix='deleteme2', length=15),
             'domain': domain,
             'new_mail_nick_name': 'deleteme11',
             'group': 'deleteme_g',

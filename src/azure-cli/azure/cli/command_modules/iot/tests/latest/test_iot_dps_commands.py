@@ -23,10 +23,11 @@ class IoTDpsTest(ScenarioTest):
                          self.check('sku.name', 'S1')])
 
         # Create DPS
-        self.cmd('az iot dps create -g {} -n {}'.format(group_name, dps_name), checks=[
-            self.check('name', dps_name),
-            self.check('location', group_location)
-        ])
+        tags = "key1=value1 key2=value2"
+        self.cmd('az iot dps create -g {} -n {} --tags {}'.format(group_name, dps_name, tags),
+                 checks=[self.check('name', dps_name),
+                         self.check('location', group_location),
+                         self.check('tags', {'key1': 'value1', 'key2': 'value2'})])
 
         # List DPS
         self.cmd('az iot dps list -g {}'.format(group_name), checks=[
@@ -43,12 +44,20 @@ class IoTDpsTest(ScenarioTest):
 
         property_to_update = 'properties.allocationPolicy'
         updated_value = 'GeoLatency'
+        updated_tags = "key3=value3"
         # Update DPS
-        self.cmd('az iot dps update -g {} -n {} --set {}="{}"'.format(group_name, dps_name, property_to_update, updated_value), checks=[
-            self.check('name', dps_name),
-            self.check('location', group_location),
-            self.check(property_to_update, updated_value)
-        ])
+        updated_dps = self.cmd('az iot dps update -g {} -n {} --tags {} --set {}="{}"'
+                               .format(group_name, dps_name, updated_tags, property_to_update, updated_value),
+                               checks=[self.check('name', dps_name),
+                                       self.check('location', group_location),
+                                       self.check(property_to_update, updated_value),
+                                       self.check('tags', {'key3': 'value3'})])
+
+        # Update DPS with removing tags
+        updated_dps = self.cmd('az iot dps update -g {} -n {} --tags ""'
+                               .format(group_name, dps_name)).get_output_in_json()
+
+        assert len(updated_dps['tags']) == 0
 
         # Test DPS Access Policy Lifecycle
         policy_name = self.create_random_name('policy', 20)

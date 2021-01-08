@@ -171,7 +171,7 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
             'byos_n': 'clibatchtestuser1',
             'byos_l': 'southindia',
             'kv': self.create_random_name('clibatchtestkv', 24),
-            'obj_id': 'a74e6464-e4c7-4475-8048-50c410f91351',  # object id for Microsoft Azure Batch
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
             'perm_k': ALL_KEY_PERMISSIONS,
             'perm_s': ALL_SECRET_PERMISSIONS
         })

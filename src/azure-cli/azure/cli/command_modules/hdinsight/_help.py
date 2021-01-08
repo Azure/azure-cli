@@ -77,13 +77,6 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount --encryption-at-host true
-  - name: Create a cluster with private link settings.
-    text: |-
-        az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
-        -p "HttpPassword1234!" \\
-        --storage-account MyStorageAccount \\
-        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/subnet1" \\
-        --public-network-access-type OutboundOnly --outbound-public-network-access-type PublicLoadBalancer
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\
@@ -151,6 +144,12 @@ examples:
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --autoscale-type Schedule --timezone "Pacific Standard Time" --days Monday \\
         --time 09:00 --autoscale-workernode-count 5
+  - name: Create a cluster with Relay Outbound and Private Link feature.
+    text: |-
+        az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" --storage-account MyStorageAccount \\
+        --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/fakevnet/subnets/default" \\
+        --resource-provider-connection Outbound --enable-private-link
 """
 
 helps['hdinsight list'] = """

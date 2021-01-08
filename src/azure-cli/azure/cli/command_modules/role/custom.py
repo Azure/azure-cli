@@ -35,6 +35,15 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
+CREDENTIAL_WARNING_MESSAGE = (
+    "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
+    "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
+
+ROLE_ASSIGNMENT_CREATE_WARNING = (
+    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
+    "If needed, use the --role argument to explicitly create a role assignment."
+)
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -330,73 +339,75 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
     #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
-    role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
+    if start_events:
+        # Only query Role Definitions and Graph when there are events returned
+        role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
-    for op_id in start_events:
-        e = end_events.get(op_id, None)
-        if not e:
-            continue
+        for op_id in start_events:
+            e = end_events.get(op_id, None)
+            if not e:
+                continue
 
-        entry = {}
-        op = e.operation_name and e.operation_name.value
-        if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
-            s, payload = start_events[op_id], None
-            entry = dict.fromkeys(
-                ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
-                None)
-            entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
+            entry = {}
+            op = e.operation_name and e.operation_name.value
+            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+                s, payload = start_events[op_id], None
+                entry = dict.fromkeys(
+                    ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
+                    None)
+                entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
 
-            if s.http_request:
-                if s.http_request.method == 'PUT':
-                    # 'requestbody' has a wrong camel-case. Should be 'requestBody'
-                    payload = s.properties and s.properties.get('requestbody')
-                    entry['action'] = 'Granted'
-                    entry['scope'] = e.authorization.scope
-                elif s.http_request.method == 'DELETE':
-                    payload = e.properties and e.properties.get('responseBody')
-                    entry['action'] = 'Revoked'
-            if payload:
-                try:
-                    payload = json.loads(payload)
-                except ValueError:
-                    pass
+                if s.http_request:
+                    if s.http_request.method == 'PUT':
+                        # 'requestbody' has a wrong camel-case. Should be 'requestBody'
+                        payload = s.properties and s.properties.get('requestbody')
+                        entry['action'] = 'Granted'
+                        entry['scope'] = e.authorization.scope
+                    elif s.http_request.method == 'DELETE':
+                        payload = e.properties and e.properties.get('responseBody')
+                        entry['action'] = 'Revoked'
                 if payload:
-                    if payload.get('properties') is None:
-                        continue
-                    payload = payload['properties']
-                    entry['principalId'] = payload['principalId']
-                    if not entry['scope']:
-                        entry['scope'] = payload['scope']
-                    if entry['scope']:
-                        index = entry['scope'].lower().find('/providers/microsoft.authorization')
-                        if index != -1:
-                            entry['scope'] = entry['scope'][:index]
-                        parts = list(filter(None, entry['scope'].split('/')))
-                        entry['scopeName'] = parts[-1]
-                        if len(parts) < 3:
-                            entry['scopeType'] = 'Subscription'
-                        elif len(parts) < 5:
-                            entry['scopeType'] = 'Resource group'
-                        else:
-                            entry['scopeType'] = 'Resource'
+                    try:
+                        payload = json.loads(payload)
+                    except ValueError:
+                        pass
+                    if payload:
+                        if payload.get('properties') is None:
+                            continue
+                        payload = payload['properties']
+                        entry['principalId'] = payload['principalId']
+                        if not entry['scope']:
+                            entry['scope'] = payload['scope']
+                        if entry['scope']:
+                            index = entry['scope'].lower().find('/providers/microsoft.authorization')
+                            if index != -1:
+                                entry['scope'] = entry['scope'][:index]
+                            parts = list(filter(None, entry['scope'].split('/')))
+                            entry['scopeName'] = parts[-1]
+                            if len(parts) < 3:
+                                entry['scopeType'] = 'Subscription'
+                            elif len(parts) < 5:
+                                entry['scopeType'] = 'Resource group'
+                            else:
+                                entry['scopeType'] = 'Resource'
 
-                    # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
-                    role_resource_name = payload['roleDefinitionId'].split('/')[-1]
-                    entry['roleDefinitionId'] = role_resource_name
-                    # In case the role definition has been deleted.
-                    entry['roleName'] = role_defs.get(role_resource_name, "N/A")
+                        # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
+                        role_resource_name = payload['roleDefinitionId'].split('/')[-1]
+                        entry['roleDefinitionId'] = role_resource_name
+                        # In case the role definition has been deleted.
+                        entry['roleName'] = role_defs.get(role_resource_name, "N/A")
 
-            result.append(entry)
+                result.append(entry)
 
-    # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = {x['principalId'] for x in result if x['principalId']}
-    if principal_ids:
-        graph_client = _graph_client_factory(cmd.cli_ctx)
-        stubs = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
-        if principal_dics:
-            for e in result:
-                e['principalName'] = principal_dics.get(e['principalId'], None)
+        # Fill in logical user/sp names as guid principal-id not readable
+        principal_ids = {x['principalId'] for x in result if x['principalId']}
+        if principal_ids:
+            graph_client = _graph_client_factory(cmd.cli_ctx)
+            stubs = _get_object_stubs(graph_client, principal_ids)
+            principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
+            if principal_dics:
+                for e in result:
+                    e['principalName'] = principal_dics.get(e['principalId'], None)
 
     offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
                                                     x.operation_name.value.lower().startswith(
@@ -1395,7 +1406,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1477,8 +1488,11 @@ def create_service_principal_for_rbac(
 
     # retry while server replication is done
     if not skip_assignment:
+        if not role:
+            role = "Contributor"
+            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
-            logger.warning('Creating a role assignment under the scope of "%s"', scope)
+            logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1499,6 +1513,8 @@ def create_service_principal_for_rbac(
                             logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1769,6 +1785,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     }
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 

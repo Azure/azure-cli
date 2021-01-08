@@ -171,7 +171,7 @@ def validate_ip_address(cmd, namespace):
         _validate_ip_address_format(namespace)
         # For prevention of adding the duplicate IPs.
         if 'add' in cmd.name:
-            _validate_ip_address_existance(cmd, namespace)
+            _validate_ip_address_existence(cmd, namespace)
 
 
 def _validate_ip_address_format(namespace):
@@ -194,14 +194,15 @@ def _validate_ip_address_format(namespace):
         raise CLIError('Invalid IP address')
 
 
-def _validate_ip_address_existance(cmd, namespace):
+def _validate_ip_address_existence(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     slot = namespace.slot
+    scm_site = namespace.scm_site
     from ._appservice_utils import _generic_site_operation
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
-    access_rules = configs.ip_security_restrictions
+    access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
     is_exists = [(lambda x: x.ip_address == namespace.ip_address)(x) for x in access_rules]
     if True in is_exists:
-        raise CLIError('IP address ' + namespace.ip_address + ' already exists.'
+        raise CLIError('IP address ' + namespace.ip_address + ' already exists. '
                        'Cannot add duplicate IP address values.')

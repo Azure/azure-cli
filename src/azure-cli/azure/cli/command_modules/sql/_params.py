@@ -127,6 +127,10 @@ server_configure_help = 'You can configure the default using `az configure --def
 
 time_format_help = 'Time should be in following format: "YYYY-MM-DDTHH:MM:SS".'
 
+storage_arg_group = "Storage"
+log_analytics_arg_group = "Log Analytics"
+event_hub_arg_group = "Event Hub"
+
 
 def get_location_type_with_default_from_resource_group(cli_ctx):
     return CLIArgumentType(
@@ -257,6 +261,47 @@ read_replicas_param_type = CLIArgumentType(
     help='The number of readonly replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
+blob_storage_target_state_param_type = CLIArgumentType(
+    arg_group=storage_arg_group,
+    options_list=['--blob-storage-target-state', '--bsts'],
+    configured_default='sql-server',
+    help='Indicate whether blob storage is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_target_state_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-target-state', '--lats'],
+    configured_default='sql-server',
+    help='Indicate whether log analytics is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+log_analytics_workspace_resource_id_param_type = CLIArgumentType(
+    arg_group=log_analytics_arg_group,
+    options_list=['--log-analytics-workspace-resource-id', '--lawri'],
+    configured_default='sql-server',
+    help='The workspace ID (resource ID of a Log Analytics workspace) for a Log Analytics workspace '
+         'to which you would like to send Audit Logs.')
+
+event_hub_target_state_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-target-state', '--ehts'],
+    configured_default='sql-server',
+    help='Indicate whether event hub is a destination for audit records.',
+    arg_type=get_enum_type(BlobAuditingPolicyState))
+
+event_hub_authorization_rule_id_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub-authorization-rule-id', '--ehari'],
+    configured_default='sql-server',
+    help='The resource Id for the event hub authorization rule.')
+
+event_hub_param_type = CLIArgumentType(
+    arg_group=event_hub_arg_group,
+    options_list=['--event-hub', '--eh'],
+    configured_default='sql-server',
+    help='The name of the event hub. If none is specified '
+         'when providing event_hub_authorization_rule_id, the default event hub will be selected.')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -325,9 +370,6 @@ def _configure_db_dw_params(arg_ctx):
 
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
-
-    arg_ctx.argument('storage_account_type',
-                     arg_type=backup_storage_redundancy_param_type)
 
 
 def _configure_db_dw_create_params(
@@ -443,6 +485,9 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
@@ -543,9 +588,6 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -565,9 +607,6 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -596,9 +635,6 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -774,8 +810,10 @@ def load_arguments(self, _):
                    options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
+        c.argument('partner_database_name',
+                   options_list=['--partner-database'],
+                   help='Name of the new replica.'
+                   ' If unspecified, defaults to the source database name.')
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
@@ -803,8 +841,6 @@ def load_arguments(self, _):
     #           sql db audit-policy & threat-policy
     #####
     def _configure_security_policy_storage_params(arg_ctx):
-
-        storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
                          options_list=['--storage-account'],
@@ -839,6 +875,23 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
 
     with self.argument_context('sql db threat-policy update') as c:
         _configure_security_policy_storage_params(c)
@@ -1322,8 +1375,6 @@ def load_arguments(self, _):
     #           sql server audit-policy
     ######
     with self.argument_context('sql server audit-policy update') as c:
-        storage_arg_group = 'Storage'
-
         c.argument('storage_account',
                    options_list=['--storage-account'],
                    arg_group=storage_arg_group,
@@ -1355,6 +1406,23 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
 
     #####
     #           sql server conn-policy

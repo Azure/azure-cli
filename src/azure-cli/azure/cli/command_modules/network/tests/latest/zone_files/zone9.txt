@@ -1,0 +1,23 @@
+$TTL 300
+$ORIGIN zone9.com.
+
+@ 3600 IN SOA ns1-03.azure-dns.com. azuredns-hostmaster.@ (
+              1 ; serial
+              3600 ; refresh
+              300 ; retry
+              2419200 ; expire
+              300 ; minimum
+              )
+
+  172800 IN NS ns1-03.azure-dns.com.
+  172800 IN NS ns2-03.azure-dns.net.
+  172800 IN NS ns3-03.azure-dns.org.
+  172800 IN NS ns4-03.azure-dns.info.
+;
+
+test-ns IN NS ns1.@
+test-mx IN MX 10 mail.@
+_sip._tcp.test-srv IN SRV 1 2 3 target.@
+ns 3600 IN A 1.2.3.4
+* 3600 IN A 2.3.4.5
+www IN CNAME @

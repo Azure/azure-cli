@@ -48,6 +48,9 @@ from ._formatters import format_what_if_operation_result
 
 logger = get_logger(__name__)
 
+RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
+              'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements/default?api-version=2020-03-01-preview'}
+
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -275,16 +278,23 @@ def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
     template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
-    # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
-    result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
     try:
-        return shell_safe_json_parse(result, preserve_order)
+        return shell_safe_json_parse(minified, preserve_order, strict=False)  # use strict=False to allow multiline strings
     except CLIError:
         # Because the processing of removing comments and compression will lead to misplacement of error location,
         # so the error message should be wrapped.
         if file_path:
             raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
         raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
+
+
+def _raise_subdivision_deployment_error(error_message, error_code=None):
+    from azure.cli.core.azclierror import InvalidTemplateError, DeploymentError
+
+    if error_code == 'InvalidTemplateDeployment':
+        raise InvalidTemplateError(error_message)
+
+    raise DeploymentError(error_message)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
@@ -353,16 +363,20 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         )
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=properties)
-        validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment)
+        try:
+            validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = deployment_client.validate(resource_group_name, deployment_name, properties)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -461,16 +475,20 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_subscription_scope(deployment_name, deployment_properties, deployment_location)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -541,16 +559,20 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties)
-        validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate(resource_group_name, deployment_name, deployment_properties)
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -617,9 +639,13 @@ def _deploy_arm_template_at_management_group(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name, deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name, deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
@@ -627,7 +653,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -689,9 +715,13 @@ def _deploy_arm_template_at_tenant_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
+        from msrestazure.azure_exceptions import CloudError
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
-        validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+        try:
+            validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+        except CloudError as cx:
+            _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
     else:
         validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
@@ -700,7 +730,7 @@ def _deploy_arm_template_at_tenant_scope(cmd,
 
     if validation_result and validation_result.error:
         err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
+        _raise_subdivision_deployment_error(err_message)
     if validate_only:
         return validation_result
 
@@ -960,11 +990,17 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait):
+def _update_provider(cli_ctx, namespace, registering, wait, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
+    is_rpaas = namespace.lower() in RPAAS_APIS
     if registering:
+        if is_rpaas:
+            if not accept_terms:
+                from azure.cli.core.azclierror import RequiredArgumentMissingError
+                raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
+            wait = True
         r = rcf.providers.register(namespace)
     else:
         r = rcf.providers.unregister(namespace)
@@ -978,6 +1014,10 @@ def _update_provider(cli_ctx, namespace, registering, wait):
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
+        if is_rpaas and registering:
+            # call accept term API
+            from azure.cli.core.util import send_raw_request
+            send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
     else:
         action = 'Registering' if registering else 'Unregistering'
         msg_template = '%s is still on-going. You can monitor using \'az provider show -n %s\''
@@ -1650,9 +1690,9 @@ def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resourc
                                                                               resource_type,
                                                                               resource_name)]
 
-    return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
-            tags, is_incremental) for id_dict in parsed_ids])
+    return _single_or_collection([LongRunningOperation(cmd.cli_ctx)(
+        _get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version, latest_include_preview).tag(
+            tags, is_incremental)) for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
@@ -1751,7 +1791,7 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
 
 
 def create_template_spec(cmd, resource_group_name, name, template_file=None, location=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, tags=None, no_prompt=False):
     artifacts = None
     input_template = None
     if location is None:
@@ -1760,30 +1800,47 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if version:
+        Exists = False
+        if no_prompt is False:
+            try:  # Check if child template spec already exists.
+                existing_ts = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+                from knack.prompting import prompt_y_n
+                confirmation = prompt_y_n("This will override {}. Proceed?".format(existing_ts))
+                if not confirmation:
+                    return None
+                Exists = True
+            except Exception:  # pylint: disable=broad-except
+                pass
+
         if template_file:
             from azure.cli.command_modules.resource._packing_engine import (pack)
             packed_template = pack(cmd, template_file)
             input_template = getattr(packed_template, 'RootTemplate')
             artifacts = getattr(packed_template, 'Artifacts')
 
-        try:  # Check if parent template spec already exists.
-            rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
-        except Exception:  # pylint: disable=broad-except
-            TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-            template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
-            rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
+        if not Exists:
+            try:  # Check if parent template spec already exists.
+                exisiting_parent = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
+                if tags is None:  # New version should inherit tags from parent if none are provided.
+                    tags = getattr(exisiting_parent, 'tags')
+            except Exception:  # pylint: disable=broad-except
+                tags = tags or {}
+                TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
+                template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
+                rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
         TemplateSpecVersion = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpecVersion', mod='models')
-        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=None)
+        template_spec_child = TemplateSpecVersion(location=location, artifacts=artifacts, description=version_description, template=input_template, tags=tags)
         return rcf.template_spec_versions.create_or_update(resource_group_name, name, version, template_spec_child)
 
+    tags = tags or {}
     TemplateSpec = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, 'TemplateSpec', mod='models')
-    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=None)
+    template_spec_parent = TemplateSpec(location=location, description=description, display_name=display_name, tags=tags)
     return rcf.template_specs.create_or_update(resource_group_name, name, template_spec_parent)
 
 
 def update_template_spec(cmd, resource_group_name=None, name=None, template_spec=None, template_file=None, display_name=None,
-                         description=None, version=None, version_description=None):
+                         description=None, version=None, version_description=None, tags=None):
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     if template_spec:
@@ -1806,7 +1863,10 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         existing_template = rcf.template_spec_versions.get(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
 
         location = getattr(existing_template, 'location')
-        version_tags = getattr(existing_template, 'tags')
+
+        version_tags = tags
+        if tags is None:  # Do not remove tags if not explicitely empty.
+            version_tags = getattr(existing_template, 'tags')
         if version_description is None:
             version_description = getattr(existing_template, 'description')
         if template_file is None:
@@ -1820,7 +1880,9 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
     existing_template = rcf.template_specs.get(resource_group_name=resource_group_name, template_spec_name=name)
 
     location = getattr(existing_template, 'location')
-    tags = getattr(existing_template, 'tags')
+    version_tags = tags
+    if version_tags is None:  # Do not remove tags if not explicitely empty.
+        tags = getattr(existing_template, 'tags')
     if display_name is None:
         display_name = getattr(existing_template, 'display_name')
     if description is None:
@@ -1856,7 +1918,7 @@ def delete_template_spec(cmd, resource_group_name=None, name=None, version=None,
         if version == name:
             version = None
     if version:
-        return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
+        return rcf.template_spec_versions.delete(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
     return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name)
 
 
@@ -1926,8 +1988,8 @@ def list_resources(cmd, resource_group_name=None,
     return list(resources)
 
 
-def register_provider(cmd, resource_provider_namespace, wait=False):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait)
+def register_provider(cmd, resource_provider_namespace, wait=False, accept_terms=None):
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
