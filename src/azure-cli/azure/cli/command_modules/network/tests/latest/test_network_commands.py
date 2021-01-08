@@ -3552,6 +3552,13 @@ class NetworkVirtualRouter(ScenarioTest):
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
 
+class NetworkVirtualHubRouter(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='WestCentralUS')
+    def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
+        pass
+
+
 class NetworkSubnetScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_set_test')

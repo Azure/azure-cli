@@ -1942,6 +1942,28 @@ def load_arguments(self, _):
         c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
         c.argument('peer_ip', help='Peer IP address.')
 
+    with self.argument_context('network virtualhub-router') as c:
+        c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',
+                   help='The name of the Virtual Hub Router.')
+        c.argument('hosted_subnet', help='The ID of a subnet where Virtual Hub Router would be deployed')
+        c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
+                   arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
+
+    with self.argument_context('network virtualhub-router create') as c:
+        c.argument('virtual_hub_name', id_part=None)
+
+    with self.argument_context('network virtualhub-router peering') as c:
+        c.argument('virtual_hub_name', options_list=['--vrouter-name'], id_part='name',
+                   help='The name of the Virtual Hub Router.')
+        c.argument('connection_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The name of the Virtual Hub Router Peering')
+        c.argument('peer_asn', type=int, help='Peer ASN. Its range is from 1 to 4294967295.')
+        c.argument('peer_ip', help='Peer IP address.')
+
+    with self.argument_context('network virtualhub-router peering create') as c:
+        c.argument('virtual_hub_name', id_part=None)
+        c.argument('connection_name', id_part=None)
+
     param_map = {
         'dh_group': 'DhGroup',
         'ike_encryption': 'IkeEncryption',
