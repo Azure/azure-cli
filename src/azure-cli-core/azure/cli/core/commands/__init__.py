@@ -988,7 +988,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-        if poll_flag is True:
+        if poll_flag:
             telemetry.poll_end()
         return result
 
