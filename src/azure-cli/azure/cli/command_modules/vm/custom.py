@@ -3230,7 +3230,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_vgeneration=hyper_v_generation, features=feature_list)
+                         hyper_v_generation=hyper_v_generation, features=feature_list)
     return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
@@ -3275,7 +3275,14 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         cred, _, _ = profile.get_login_credentials(resource=resource,
                                                    aux_subscriptions=aux_subscriptions)
         _, _, _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
-        external_bearer_token = external_tokens[0][0] + ' ' + external_tokens[0][1]
+        if external_tokens:
+            external_token = external_tokens[0]
+            if len(external_token) >= 2:
+                external_bearer_token = external_token[0] + ' ' + external_token[1]
+            else:
+                logger.warning('Getting external tokens failed.')
+        else:
+            logger.warning('Getting external tokens failed.')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
