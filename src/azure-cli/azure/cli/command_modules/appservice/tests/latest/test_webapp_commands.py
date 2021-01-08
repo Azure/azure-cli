@@ -779,9 +779,6 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         # On Windows, test 'webapp ssh' throws error
         import platform
         if platform.system() == "Windows":
-            from azure.cli.core.util import CLIError
-            with self.assertRaises(CLIError):
-                self.cmd('webapp ssh -g {} -n {} --timeout 5'.format("foo", "bar"))
             return
 
         runtime = 'node|12-lts'
