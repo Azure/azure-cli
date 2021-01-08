@@ -784,7 +784,7 @@ def load_arguments(self, _):
             c.argument('publisher', help='The name of the extension publisher.')
             c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
             c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
-            c.argument('version', help='The version of the extension. To pin extension version to this value, please specify --no-auto-upgrade.')
+            c.argument('version', help='The version of the extension. To pin extension version to this value, please specify --no-auto-upgrade-minor-version.')
             c.argument('enable_auto_upgrade', arg_type=get_three_state_flag(),
                        help='Indicate the extension should be automatically upgraded by the platform if there is a newer version of the extension available.')
 
