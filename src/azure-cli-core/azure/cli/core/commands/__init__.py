@@ -952,7 +952,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
-
+        telemetry.poll_start()
         while not poller.done():
             self.cli_ctx.get_progress_controller().add(message='Running')
             try:
@@ -986,7 +986,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-
+        telemetry.poll_end()
         return result
 
 
