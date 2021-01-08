@@ -845,11 +845,14 @@ def _build_preflight_error_message(preflight_error):
 def _prepare_template_uri_with_query_string(template_uri, input_query_string):
     from six.moves.urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit  # pylint: disable=import-error
 
-    scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
-    query_params = parse_qs(input_query_string)
-    new_query_string = urlencode(query_params, doseq=True)
+    try:
+        scheme, netloc, path, query_string, fragment = urlsplit(template_uri)  # pylint: disable=unused-variable
+        query_params = parse_qs(input_query_string)
+        new_query_string = urlencode(query_params, doseq=True)
 
-    return urlunsplit((scheme, netloc, path, new_query_string, fragment))
+        return urlunsplit((scheme, netloc, path, new_query_string, fragment))
+    except Exception:  # pylint: disable=broad-except
+        raise CLIError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
 def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, parameters=None,
