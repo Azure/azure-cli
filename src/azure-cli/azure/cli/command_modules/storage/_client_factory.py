@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client, \
+    _prepare_client_kwargs_track2
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
@@ -205,8 +206,7 @@ def cf_blob_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
-    client_kwargs['logging_enable'] = True
+    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         try:
             return t_blob_service.from_connection_string(conn_str=connection_string, **client_kwargs)
@@ -253,8 +253,7 @@ def cf_adls_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
-    client_kwargs['logging_enable'] = True
+    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         return t_adls_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
@@ -293,8 +292,7 @@ def cf_queue_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
-    client_kwargs['logging_enable'] = True
+    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         return t_queue_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
