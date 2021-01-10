@@ -28,7 +28,7 @@ class VulnerabilityAssessmentForSqlTests(ScenarioTest):
         _set_vm_registry(resource_group, sqlvm)
         _install_oms_agent_on_vm(self, sqlvm, resource_group, la_workspace_id, la_workspace_key)
         _restart_monitoring_service(resource_group, sqlvm)
-        time.sleep(60 * 3) # Safety sleep
+        time.sleep(60 * 3)  # Graceful sleep
 
         # API parameters
         resource_id = _get_resource_id(resource_group, sqlvm)
@@ -66,7 +66,7 @@ class VulnerabilityAssessmentForSqlTests(ScenarioTest):
 
         # Set baseline with latest results
         baseline_set_result = self.cmd('az security va sql baseline set --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --latest'
-                                       .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id)).get_output_in_json()
+                                       .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
         baseline_list_result = self.cmd('az security va sql baseline list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {}'
                                         .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
         self.assertEqual(scan_results_count, len(baseline_list_result["value"]))
@@ -105,11 +105,11 @@ class VulnerabilityAssessmentForSqlTests(ScenarioTest):
         baseline_set_result = self.cmd('az security va sql baseline set --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} {}'
                                        .format(resource_id, workspace_id, server_name, database_name, baseline_input)).get_output_in_json()
         baseline_list_result = self.cmd('az security va sql baseline list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {}'
-                                .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
+                                        .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
         baseline_show_result = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
                                         .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
         baseline_show_result_2 = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
-                                        .format(resource_id, workspace_id, server_name, database_name, rule_id_2)).get_output_in_json()
+                                          .format(resource_id, workspace_id, server_name, database_name, rule_id_2)).get_output_in_json()
         baseline_rule_1 = [baseline for baseline in baseline_list_result["value"] if baseline["name"] == rule_id][0]
         baseline_rule_2 = [baseline for baseline in baseline_list_result["value"] if baseline["name"] == rule_id_2][0]
         self.assertEqual(baseline_rule_1, baseline_show_result)
