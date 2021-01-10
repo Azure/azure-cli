@@ -119,3 +119,21 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
             forbidden_string = ', '.join(_dest_to_option(x) for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
+
+#
+# class PercentageProgressBar:
+#     def __init__(self, cli_ctx, det=False, update_progress=None):
+#         self.det = det
+#         self._update_progress = update_progress
+#
+#     def _update_progress(current, total):
+#         message = getattr(_update_progress, 'message', 'xxxxRunning')
+#         # reuse = getattr(_update_progress, 'reuse', False)
+#
+#         if current < total:
+#             hook.add(message=message, value=current, total_val=total)
+#         else:
+#             hook.add(message=message, value=current, total_val=total+0.1)
+#
+#     hook = cmd.cli_ctx.get_progress_controller(det=True)
+#     _update_progress.hook = hook

@@ -29,7 +29,7 @@ from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 from azure.cli.core.local_context import LocalContextAction
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.commands.progress import IndeterminateProgressBar, TimingProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -696,14 +696,16 @@ class AzCliCommandInvoker(CommandInvoker):
             elif cmd_copy.no_wait_param and getattr(expanded_arg, cmd_copy.no_wait_param, False):
                 result = None
 
+            if _is_poller(result):
+                progress_bar = cmd_copy.command_kwargs.get('progress', None)
+                result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name),
+                                              progress_bar=progress_bar)(result)
+            elif _is_paged(result):
+                result = list(result)
+
             transform_op = cmd_copy.command_kwargs.get('transform', None)
             if transform_op:
                 result = transform_op(result)
-
-            if _is_poller(result):
-                result = LongRunningOperation(cmd_copy.cli_ctx, 'Starting {}'.format(cmd_copy.name))(result)
-            elif _is_paged(result):
-                result = list(result)
 
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
             event_data = {'result': result}
@@ -868,7 +870,8 @@ class AzCliCommandInvoker(CommandInvoker):
 
 
 class LongRunningOperation:  # pylint: disable=too-few-public-methods
-    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=1000.0):
+    def __init__(self, cli_ctx, start_msg='', finish_msg='', poller_done_interval_ms=500.0,
+                 progress_bar=None):
 
         self.cli_ctx = cli_ctx
         self.start_msg = start_msg
@@ -876,6 +879,9 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
+        self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+        if isinstance(self.progress_bar, TimingProgressBar):
+            self.poller_done_interval_ms = 1000.0
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)
@@ -948,13 +954,14 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
+        self.progress_bar.start_time = datetime.datetime.utcnow()
         correlation_id = None
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
-
         while not poller.done():
-            self.cli_ctx.get_progress_controller().add(message='Running')
+            # print(poller._polling_method._operation.status)
+            # self.cli_ctx.get_progress_controller().add(message='Running')
             try:
                 # pylint: disable=protected-access
                 correlation_id = json.loads(
@@ -972,6 +979,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
+                self.progress_bar.update_progress()
                 self._delay()
             except KeyboardInterrupt:
                 self.cli_ctx.get_progress_controller().stop()
@@ -985,7 +993,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             self.cli_ctx.get_progress_controller().stop()
             handle_long_running_operation_exception(client_exception)
 
-        self.cli_ctx.get_progress_controller().end()
+        self.progress_bar.end()
+        #self.cli_ctx.get_progress_controller().end()
 
         return result
 

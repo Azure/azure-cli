@@ -91,12 +91,12 @@ class AzCli(CLI):
         import uuid
         self.data['headers']['x-ms-client-request-id'] = str(uuid.uuid1())
 
-    def get_progress_controller(self, det=False):
+    def get_progress_controller(self, det=False, spinner=None):
         import azure.cli.core.commands.progress as progress
         if not self.progress_controller:
             self.progress_controller = progress.ProgressHook()
 
-        self.progress_controller.init_progress(progress.get_progress_view(det))
+        self.progress_controller.init_progress(progress.get_progress_view(det, spinner=spinner))
         return self.progress_controller
 
     def get_cli_version(self):
