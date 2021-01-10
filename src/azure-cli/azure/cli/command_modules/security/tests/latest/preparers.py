@@ -38,13 +38,11 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
-        return
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             execute(DummyCli(), 'az vm delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
-        return 'clitest'
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
@@ -70,14 +68,12 @@ class LogAnalyticsWorkspacePreparer(AbstractPreparer, SingleValueReplacer):
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
-        return
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             template = ('az monitor log-analytics workspace delete -g {} -n {} --yes')
             execute(DummyCli(), template.format(group, name))
 
     def _get_resource_group(self, **kwargs):
-        return 'clitest'
         try:
             return kwargs.get(self.resource_group_parameter_name)
         except KeyError:
