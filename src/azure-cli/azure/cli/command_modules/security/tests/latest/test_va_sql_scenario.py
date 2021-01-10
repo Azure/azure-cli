@@ -56,44 +56,62 @@ class VulnerabilityAssessmentForSqlTests(ScenarioTest):
 
         scan_results = self.cmd('az security va sql results list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --scan-id {}'
                                 .format(resource_id, workspace_id, server_name, database_name, scan_id)).get_output_in_json()
-        #scan_results_count = 
+        scan_results_count = scan_results["value"].count()
         selected_scan_results = _get_scans_with_multiple_columns_in_results(scan_results)
         selected_scan_result = selected_scan_results[0]
-        rule_id = selected_scan_result["name"]
+        rule_id = selected_scan_result["properties"]["ruleId"]
 
         scan_result = self.cmd('az security va sql results show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --scan-id {} --rule-id {}'
                                .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id)).get_output_in_json()
         # assert scan_result = selected_scan_result
-
         # assert no baseline adjusted in scan result
 
-        # assert error: baseline list (baseline not set)
-        # assert error: baseline show for rule id (baseline not set)
+        _assert_error('az security va sql baseline list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {}'
+                      .format(resource_id, workspace_id, server_name, database_name), error_reason='no baseline set')
+        _assert_error('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                      .format(resource_id, workspace_id, server_name, database_name, rule_id), error_reason='no baseline set')
 
-        # baseline set latest
-        # baseline list
+        baseline_set_result = self.cmd('az security va sql baseline set --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --latest'
+                                       .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id)).get_output_in_json()
+        baseline_list_result = self.cmd('az security va sql baseline list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {}'
+                                        .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
         # assert equal number of baselines to scan results count
+        # assert equal number of baselines_set_result to baseline_list_result
 
-        # select baseline of rule_id
-        # baseline show rule_id
+        # selected_baseline = select baseline of rule_id
+        baseline_show_result = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                                        .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
         # assert baseline equals selected baseline
 
-        # baseline delete
-        # assert error: baseline show rule rule id (baseline deleted)
+        self.cmd('az security va sql baseline delete --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                 .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
+        _assert_error('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                      .format(resource_id, workspace_id, server_name, database_name, rule_id), error_reason='no baseline set (baseline deleted)')
 
-        # baseline update latest for rule_id
-        # baseline show rule_id
+        baseline_update_result = self.cmd('az security va sql baseline update --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {} --latest'
+                                         .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id)).get_output_in_json()
+        baseline_show_result = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                                        .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
         # assert baseline equals selected baseline
 
-        # baseline update custom for rule_id
-        # baseline show rule_id
+        baseline_input = _get_baseline_input(selected_scan_result)
+        baseline_update_result = self.cmd('az security va sql baseline update --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {} {}'
+                                          .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id, baseline_input)).get_output_in_json()
+        baseline_show_result = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                                        .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
         # assert baseline equals updated baseline
 
-        # select two rule ids with more than one columns
-        # baseline set custom for rule_id_1 rule_id_2
-        # baseline list
-        # baseline show rule_id_1
-        # baseline show rule_id_2
+        selected_scan_result_2 = selected_scan_results[1]
+        rule_id_2 = selected_scan_result_2["name"]
+        baseline_input = _get_baseline_input(selected_scan_result, selected_scan_result_2)
+        baseline_set_result = self.cmd('az security va sql baseline set --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} {}'
+                                       .format(resource_id, workspace_id, server_name, database_name, scan_id, rule_id, baseline_input)).get_output_in_json()
+        baseline_list_result = self.cmd('az security va sql baseline list --vm-resource-id {} --workspace-id {} --server-name {} --database-name {}'
+                                .format(resource_id, workspace_id, server_name, database_name)).get_output_in_json()
+        baseline_show_result = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                                        .format(resource_id, workspace_id, server_name, database_name, rule_id)).get_output_in_json()
+        baseline_show_result_2 = self.cmd('az security va sql baseline show --vm-resource-id {} --workspace-id {} --server-name {} --database-name {} --rule-id {}'
+                                        .format(resource_id, workspace_id, server_name, database_name, rule_id_2)).get_output_in_json()
         # assert baseline equal for rule_id_1
         # assert baseline equal for rule_id_2
 
@@ -127,8 +145,8 @@ def _install_oms_agent_on_vm(self, vm_name, resource_group, workspace_id, worksp
     })
 
     self.cmd('vm extension set --vm-name {vm} --resource-group {rg} \
-                               -n {oms_extension} --publisher {oms_publisher} --version {oms_version}  \
-                               --settings "{public_config}" --protected-settings "{protected_config}" --force-update')
+             -n {oms_extension} --publisher {oms_publisher} --version {oms_version}  \
+             --settings "{public_config}" --protected-settings "{protected_config}" --force-update')
 
 
 def _restart_monitoring_service(resource_group, sqlvm):
@@ -165,11 +183,29 @@ def _get_resource_id(resource_group, sqlvm):
 
 
 def _get_scans_with_multiple_columns_in_results(scan_results):
-    return scan_results # TODO
+    return [scan for scan in scan_results["value"] if _has_multiple_columns(scan["properties"]["queryResults"])]
 
 
-def _assert_error():
+def _has_multiple_columns(query_results):
+    return query_results.count() > 0 and query_results[0].count() > 1
+
+
+def _get_baseline_input(scan_result):
+    columns_count = scan_result["properties"]["queryResults"][0].count()
+    return "--baseline"
+
+
+def _get_baseline_input(scan_result_1, scan_result_2):
+    columns_count_1 = scan_result_1["properties"]["queryResults"][0].count()
+    columns_count_2 = scan_result_2["properties"]["queryResults"][0].count()
+    return "--baseline"
+
+def _assert_error(cmd, error_reason):
+    error_indicated = False
     try:
-        execute(DummyCli(), template.format(intelligence_pack_name, resource_group, workspace_name))
+        execute(DummyCli(), cmd)
     except:
-        pass
+        error_indicated = True
+    finally:
+        if (not error_indicated):
+            raise CliTestError('No error raised when expected. ' + error_reason)
