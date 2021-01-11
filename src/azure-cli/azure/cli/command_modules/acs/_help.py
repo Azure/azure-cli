@@ -5,9 +5,12 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=import-error
+
 # pylint: disable=line-too-long, too-many-lines
 
-helps['acs'] = """
+helps[
+    "acs"
+] = """
 type: group
 short-summary: Manage Azure Container Services.
 long-summary: |
@@ -16,7 +19,9 @@ long-summary: |
     If you use the Kubernetes orchestrator, please migrate to AKS by January 31, 2020.
 """
 
-helps['acs browse'] = """
+helps[
+    "acs browse"
+] = """
 type: command
 short-summary: Show the dashboard for a service container's orchestrator in a web browser.
 examples:
@@ -25,7 +30,9 @@ examples:
     crafted: true
 """
 
-helps['acs create'] = """
+helps[
+    "acs create"
+] = """
 type: command
 short-summary: Create a new container service.
 parameters:
@@ -67,17 +74,23 @@ examples:
     text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """
 
-helps['acs dcos'] = """
+helps[
+    "acs dcos"
+] = """
 type: group
 short-summary: Commands to manage a DC/OS-orchestrated Azure Container Service.
 """
 
-helps['acs dcos install-cli'] = """
+helps[
+    "acs dcos install-cli"
+] = """
 type: command
 short-summary: Download and install the DC/OS command-line tool for a cluster.
 """
 
-helps['acs delete'] = """
+helps[
+    "acs delete"
+] = """
 type: command
 short-summary: Delete a container service.
 examples:
@@ -86,12 +99,16 @@ examples:
     crafted: true
 """
 
-helps['acs kubernetes'] = """
+helps[
+    "acs kubernetes"
+] = """
 type: group
 short-summary: Commands to manage a Kubernetes-orchestrated Azure Container Service.
 """
 
-helps['acs kubernetes get-credentials'] = """
+helps[
+    "acs kubernetes get-credentials"
+] = """
 type: command
 short-summary: Download and install credentials to access a cluster.  This command requires the same private-key used to create the cluster.
 parameters:
@@ -104,22 +121,30 @@ examples:
     crafted: true
 """
 
-helps['acs kubernetes install-cli'] = """
+helps[
+    "acs kubernetes install-cli"
+] = """
 type: command
 short-summary: Download and install the Kubernetes command-line tool for a cluster.
 """
 
-helps['acs list'] = """
+helps[
+    "acs list"
+] = """
 type: command
 short-summary: List container services.
 """
 
-helps['acs list-locations'] = """
+helps[
+    "acs list-locations"
+] = """
 type: command
 short-summary: List locations where Azure Container Service is in preview and in production.
 """
 
-helps['acs scale'] = """
+helps[
+    "acs scale"
+] = """
 type: command
 short-summary: Change the private agent count of a container service.
 parameters:
@@ -132,7 +157,9 @@ examples:
     crafted: true
 """
 
-helps['acs show'] = """
+helps[
+    "acs show"
+] = """
 type: command
 short-summary: Show the details for a container service.
 examples:
@@ -141,18 +168,38 @@ examples:
     crafted: true
 """
 
-helps['acs wait'] = """
+helps[
+    "acs wait"
+] = """
 type: command
 short-summary: Wait for a container service to reach a desired state.
 long-summary: If an operation on a container service was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
 """
 
-helps['aks'] = """
+helps[
+    "aks"
+] = """
 type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
-helps['aks browse'] = """
+helps[
+    "aks check-acr"
+] = """
+type: command
+short-summary: Validate an ACR is accesible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accesible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
+helps[
+    "aks browse"
+] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
 parameters:
@@ -172,7 +219,9 @@ examples:
     crafted: true
 """
 
-helps['aks create'] = """
+helps[
+    "aks create"
+] = """
 type: command
 short-summary: Create a new managed Kubernetes cluster.
 parameters:
@@ -432,7 +481,9 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
-helps['aks update'] = """
+helps[
+    "aks update"
+] = """
 type: command
 short-summary: Update a managed Kubernetes cluster.
 parameters:
@@ -525,7 +576,9 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
 """
 
-helps['aks delete'] = """
+helps[
+    "aks delete"
+] = """
 type: command
 short-summary: Delete a managed Kubernetes cluster.
 examples:
@@ -534,7 +587,9 @@ examples:
     crafted: true
 """
 
-helps['aks disable-addons'] = """
+helps[
+    "aks disable-addons"
+] = """
 type: command
 short-summary: Disable Kubernetes addons.
 parameters:
@@ -547,7 +602,9 @@ examples:
     crafted: true
 """
 
-helps['aks enable-addons'] = """
+helps[
+    "aks enable-addons"
+] = """
 type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
@@ -590,7 +647,9 @@ examples:
     crafted: true
 """
 
-helps['aks get-credentials'] = """
+helps[
+    "aks get-credentials"
+] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
 long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
@@ -614,7 +673,9 @@ examples:
     crafted: true
 """
 
-helps['aks get-upgrades'] = """
+helps[
+    "aks get-upgrades"
+] = """
 type: command
 short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
 examples:
@@ -623,7 +684,9 @@ examples:
     crafted: true
 """
 
-helps['aks get-versions'] = """
+helps[
+    "aks get-versions"
+] = """
 type: command
 short-summary: Get the versions available for creating a managed Kubernetes cluster.
 examples:
@@ -632,22 +695,30 @@ examples:
     crafted: true
 """
 
-helps['aks install-cli'] = """
+helps[
+    "aks install-cli"
+] = """
 type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
-helps['aks list'] = """
+helps[
+    "aks list"
+] = """
 type: command
 short-summary: List managed Kubernetes clusters.
 """
 
-helps['aks nodepool'] = """
+helps[
+    "aks nodepool"
+] = """
 type: group
 short-summary: Commands to manage node pools in Kubernetes kubernetes cluster.
 """
 
-helps['aks nodepool add'] = """
+helps[
+    "aks nodepool add"
+] = """
 type: command
 short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
@@ -722,12 +793,16 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
-helps['aks nodepool delete'] = """
+helps[
+    "aks nodepool delete"
+] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
 """
 
-helps['aks nodepool get-upgrades'] = """
+helps[
+    "aks nodepool get-upgrades"
+] = """
 type: command
 short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
 examples:
@@ -740,12 +815,16 @@ parameters:
     short-summary: name of the node pool.
 """
 
-helps['aks nodepool list'] = """
+helps[
+    "aks nodepool list"
+] = """
 type: command
 short-summary: List node pools in the managed Kubernetes cluster.
 """
 
-helps['aks nodepool scale'] = """
+helps[
+    "aks nodepool scale"
+] = """
 type: command
 short-summary: Scale the node pool in a managed Kubernetes cluster.
 parameters:
@@ -754,12 +833,16 @@ parameters:
     short-summary: Number of nodes in the Kubernetes node pool.
 """
 
-helps['aks nodepool show'] = """
+helps[
+    "aks nodepool show"
+] = """
 type: command
 short-summary: Show the details for a node pool in the managed Kubernetes cluster.
 """
 
-helps['aks nodepool update'] = """
+helps[
+    "aks nodepool update"
+] = """
 type: command
 short-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count
 parameters:
@@ -793,7 +876,9 @@ examples:
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
 """
 
-helps['aks nodepool upgrade'] = """
+helps[
+    "aks nodepool upgrade"
+] = """
 type: command
 short-summary: Upgrade the node pool in a managed Kubernetes cluster.
 parameters:
@@ -808,7 +893,9 @@ parameters:
     short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 """
 
-helps['aks remove-dev-spaces'] = """
+helps[
+    "aks remove-dev-spaces"
+] = """
 type: command
 short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.
 examples:
@@ -820,7 +907,9 @@ examples:
         az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
 """
 
-helps['aks scale'] = """
+helps[
+    "aks scale"
+] = """
 type: command
 short-summary: Scale the node pool in a managed Kubernetes cluster.
 parameters:
@@ -833,7 +922,9 @@ examples:
     crafted: true
 """
 
-helps['aks show'] = """
+helps[
+    "aks show"
+] = """
 type: command
 short-summary: Show the details for a managed Kubernetes cluster.
 examples:
@@ -842,7 +933,9 @@ examples:
     crafted: true
 """
 
-helps['aks update-credentials'] = """
+helps[
+    "aks update-credentials"
+] = """
 type: command
 short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
 parameters:
@@ -878,7 +971,9 @@ examples:
     text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-aad --aad-server-app-id MyExistingAADServerAppID --aad-server-app-secret MyNewAADServerAppSecret --aad-client-app-id MyExistingAADClientAppID --aad-tenant-id MyAADTenantID
 """
 
-helps['aks upgrade'] = """
+helps[
+    "aks upgrade"
+] = """
 type: command
 short-summary: Upgrade a managed Kubernetes cluster to a newer version.
 long-summary: "Kubernetes will be unavailable during cluster upgrades."
@@ -900,7 +995,9 @@ examples:
     crafted: true
 """
 
-helps['aks use-dev-spaces'] = """
+helps[
+    "aks use-dev-spaces"
+] = """
 type: command
 short-summary: Use Azure Dev Spaces with a managed Kubernetes cluster.
 parameters:
@@ -930,7 +1027,9 @@ examples:
         az aks use-dev-spaces -g my-aks-group -n my-aks -e private
 """
 
-helps['aks wait'] = """
+helps[
+    "aks wait"
+] = """
 type: command
 short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
 long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
@@ -943,19 +1042,25 @@ examples:
     crafted: true
 """
 
-helps['aks rotate-certs'] = """
+helps[
+    "aks rotate-certs"
+] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
 """
 
-helps['openshift'] = """
+helps[
+    "openshift"
+] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
-helps['openshift create'] = """
+helps[
+    "openshift create"
+] = """
 type: command
 short-summary: Create a new Azure Red Hat OpenShift 3.11 cluster.
 long-summary: Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1005,7 +1110,9 @@ examples:
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
-helps['openshift delete'] = """
+helps[
+    "openshift delete"
+] = """
 type: command
 short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1015,13 +1122,17 @@ examples:
     crafted: true
 """
 
-helps['openshift list'] = """
+helps[
+    "openshift list"
+] = """
 type: command
 short-summary: List Azure Red Hat OpenShift 3.11 clusters.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
-helps['openshift scale'] = """
+helps[
+    "openshift scale"
+] = """
 type: command
 short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1035,7 +1146,9 @@ examples:
     crafted: true
 """
 
-helps['openshift show'] = """
+helps[
+    "openshift show"
+] = """
 type: command
 short-summary: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1045,7 +1158,9 @@ examples:
     crafted: true
 """
 
-helps['openshift wait'] = """
+helps[
+    "openshift wait"
+] = """
 type: command
 short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
 long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete. Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1055,13 +1170,17 @@ examples:
         az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
 """
 
-helps['openshift monitor'] = """
+helps[
+    "openshift monitor"
+] = """
 type: group
 short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
-helps['openshift monitor enable'] = """
+helps[
+    "openshift monitor enable"
+] = """
 type: command
 short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
@@ -1071,7 +1190,9 @@ examples:
         az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
-helps['openshift monitor disable'] = """
+helps[
+    "openshift monitor disable"
+] = """
 type: command
 short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
 long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
