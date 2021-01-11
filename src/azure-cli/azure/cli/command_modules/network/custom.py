@@ -6500,9 +6500,6 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
 def create_virtual_hub(cmd, client,
                        resource_group_name,
                        virtual_hub_name,
-                       vpn_gateway=None,
-                       p2s_vpn_gateway=None,
-                       express_route_gateway=None,
                        hosted_subnet=None,
                        location=None,
                        tags=None):
@@ -6520,17 +6517,7 @@ def create_virtual_hub(cmd, client,
 
     VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
 
-    if vpn_gateway is not None:
-        vpn_gateway = SubResource(id=vpn_gateway)
-    if p2s_vpn_gateway is not None:
-        p2s_vpn_gateway = SubResource(id=p2s_vpn_gateway)
-    if express_route_gateway is not None:
-        express_route_gateway = SubResource(id=express_route_gateway)
-
     hub = VirtualHub(tags=tags, location=location,
-                     vpn_gateway=vpn_gateway,
-                     p2_s_vpn_gateway=p2s_vpn_gateway,
-                     express_route_gateway=express_route_gateway,
                      virtual_wan=None,
                      sku='Standard')
     vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
@@ -6551,12 +6538,16 @@ def create_virtual_hub(cmd, client,
     return client.get(resource_group_name, virtual_hub_name)
 
 
+def virtual_hub_update_setter(client, resource_group_name, virtual_hub_name, parameters):
+    return client.begin_create_or_update(resource_group_name, virtual_hub_name, parameters)
+
+
 def update_virtual_hub(cmd, instance,
                        tags=None,
                        allow_branch_to_branch_traffic=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
-        c.set_param('properties.allowBranchToBranchTraffic', allow_branch_to_branch_traffic)
+        c.set_param('allow_branch_to_branch_traffic', allow_branch_to_branch_traffic)
     return instance
 
 
@@ -6588,6 +6579,10 @@ def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_
     BgpConnection = cmd.get_models('BgpConnection')
     vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
     return client.begin_create_or_update(resource_group_name, virtual_hub_name, connection_name, vhub_bgp_conn)
+
+
+def virtual_hub_bgp_connection_update_setter(client, resource_group_name, virtual_hub_name, connection_name, parameters):
+    return client.begin_create_or_update(resource_group_name, virtual_hub_name, connection_name, parameters)
 
 
 def update_virtual_hub_bgp_connection(cmd, instance, peer_asn=None, peer_ip=None):

@@ -1948,11 +1948,6 @@ def load_arguments(self, _):
         c.argument('hosted_subnet', help='The ID of a subnet where Virtual Hub Router would be deployed')
         c.argument('allow_branch_to_branch_traffic', options_list=['--allow-b2b-traffic'],
                    arg_type=get_three_state_flag(), help='Allow branch to branch traffic.')
-        c.argument('vpn_gateway', options_list=['--vpn-gateway'], help='The VpnGateway associated with this VirtualHub')
-        c.argument('p2s_vpn_gateway', options_list=['--p2s-vpn-gateway'],
-                   help='The P2SVpnGateway associated with this VirtualHub')
-        c.argument('express_route_gateway', options_list=['--express-route-gateway'],
-                   help='The expressRouteGateway associated with this VirtualHub.')
 
     with self.argument_context('network virtualhub-router create') as c:
         c.argument('virtual_hub_name', id_part=None)
