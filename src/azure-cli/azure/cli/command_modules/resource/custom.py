@@ -266,8 +266,11 @@ def _ssl_context():
 
 
 def _urlretrieve(url):
-    req = urlopen(url, context=_ssl_context())
-    return req.read()
+    try:
+        req = urlopen(url, context=_ssl_context())
+        return req.read()
+    except Exception:  # pylint: disable=broad-except
+        raise CLIError('Unable to retrieve url {}'.format(url))
 
 
 # pylint: disable=redefined-outer-name
@@ -852,7 +855,8 @@ def _prepare_template_uri_with_query_string(template_uri, input_query_string):
 
         return urlunsplit((scheme, netloc, path, new_query_string, fragment))
     except Exception:  # pylint: disable=broad-except
-        raise CLIError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('Unable to parse parameter: {} .Make sure the value is formed correctly.'.format(input_query_string))
 
 
 def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, parameters=None,
