@@ -12,7 +12,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, \
-    cf_mysql_flexible_db, cf_mysql_check_resource_availability
+    cf_mysql_flexible_db
 from ._flexible_server_util import resolve_poller, generate_missing_parameters, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_mysql_list_skus_info, \
     DEFAULT_LOCATION_MySQL
@@ -49,7 +49,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                        "and --public_access is invalid. Use either one of them.")
+                       "and --public_access is invalid. Use either one of them.")
 
     # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
     # pylint: disable=too-many-boolean-expressions
@@ -57,21 +57,21 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
                 ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
                 ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                    ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
+                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
             raise CLIError("Incorrect usage : "
-                            "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
     server_result = firewall_id = subnet_id = None
 
     # Populate desired parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                server_name, 'mysql')
+                                                                             server_name, 'mysql')
     server_name = server_name.lower()
 
     # Handle Vnet scenario
     if (subnet_arm_resource_id is not None) or (vnet_resource_id is not None):
         subnet_id = prepare_vnet(cmd, server_name, vnet_resource_id, subnet_arm_resource_id, resource_group_name,
-                                    location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
+                                 location, DELEGATION_SERVICE_NAME, vnet_address_prefix, subnet_address_prefix)
         delegated_subnet_arguments = mysql_flexibleservers.models.DelegatedSubnetArguments(
             subnet_arm_resource_id=subnet_id)
     elif public_access is None and subnet_arm_resource_id is None and vnet_resource_id is None:
@@ -87,11 +87,11 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         # Create mysql server
         # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                        backup_retention,
-                                        sku_name, tier, storage_mb, administrator_login,
-                                        administrator_login_password,
-                                        version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                        high_availability, zone)
+                                       backup_retention,
+                                       sku_name, tier, storage_mb, administrator_login,
+                                       administrator_login_password,
+                                       version, tags, delegated_subnet_arguments, assign_identity, public_access,
+                                       high_availability, zone)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -114,19 +114,15 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     host = server_result.fully_qualified_domain_name
 
     logger.warning('Make a note of your password. If you forget, you would have to reset your password with'
-                    '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
-                    server_name, resource_group_name)
+                   '\'az mysql flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                            administrator_login_password if administrator_login_password is not None else '*****',
-                            _create_mysql_connection_string(host, database_name, user, administrator_login_password),
-                            database_name, firewall_id, subnet_id)
-
-    # except Exception as ex:  # pylint: disable=broad-except
-    #     logger.error(ex)
-    #     raise CLIError(ex)
+                          administrator_login_password if administrator_login_password is not None else '*****',
+                          _create_mysql_connection_string(host, database_name, user, administrator_login_password),
+                          database_name, firewall_id, subnet_id)
 
 
 def flexible_server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, location=None, no_wait=False):

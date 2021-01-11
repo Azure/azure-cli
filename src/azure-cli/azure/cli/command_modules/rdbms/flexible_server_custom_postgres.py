@@ -11,7 +11,7 @@ from knack.log import get_logger
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, cf_postgres_check_resource_availability
+from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client
 from .flexible_server_custom_common import user_confirmation
 from ._flexible_server_util import generate_missing_parameters, resolve_poller, create_firewall_rule, \
     parse_public_access_input, generate_password, parse_maintenance_window, get_postgres_list_skus_info, \
@@ -54,7 +54,7 @@ def flexible_server_create(cmd, client,
     # Raise error when user passes values for both parameters
     if subnet_arm_resource_id is not None and public_access is not None:
         raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                        "and --public_access is invalid. Use either one of them.")
+                       "and --public_access is invalid. Use either one of them.")
 
     # When address space parameters are passed, the only valid combination is : --vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix
     # pylint: disable=too-many-boolean-expressions
@@ -62,15 +62,15 @@ def flexible_server_create(cmd, client,
         if (((vnet_address_prefix is not None) and (subnet_address_prefix is None)) or
                 ((vnet_address_prefix is None) and (subnet_address_prefix is not None)) or
                 ((vnet_address_prefix is not None) and (subnet_address_prefix is not None) and
-                    ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
+                 ((vnet_resource_id is None) or (subnet_arm_resource_id is None)))):
             raise CLIError("Incorrect usage : "
-                            "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
+                           "--vnet, --subnet, --vnet-address-prefix, --subnet-address-prefix must be supplied together.")
 
     server_result = firewall_id = subnet_id = None
 
     # Populate desired parameters
     location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                server_name, 'postgres')
+                                                                             server_name, 'postgres')
     server_name = server_name.lower()
 
     # Handle Vnet scenario
@@ -91,11 +91,11 @@ def flexible_server_create(cmd, client,
         # Create postgresql
         # Note : passing public_access has no effect as the accepted values are 'Enabled' and 'Disabled'. So the value ends up being ignored.
         server_result = _create_server(db_context, cmd, resource_group_name, server_name, location,
-                                        backup_retention,
-                                        sku_name, tier, storage_mb, administrator_login,
-                                        administrator_login_password,
-                                        version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
-                                        high_availability, zone)
+                                       backup_retention,
+                                       sku_name, tier, storage_mb, administrator_login,
+                                       administrator_login_password,
+                                       version, tags, subnet_id, assign_identity, delegated_subnet_arguments,
+                                       high_availability, zone)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -113,18 +113,15 @@ def flexible_server_create(cmd, client,
     host = server_result.fully_qualified_domain_name
 
     logger.warning('Make a note of your password. If you forget, you would have to \
-                    reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
-                    server_name, resource_group_name)
+                   reset your password with \'az postgres flexible-server update -n %s -g %s -p <new-password>\'.',
+                   server_name, resource_group_name)
 
     _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version,
-                            administrator_login_password if administrator_login_password is not None else '*****',
-                            _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
-                            subnet_id)
-# except Exception as ex:  # pylint: disable=broad-except
-#     logger.error(ex)
-    # raise CLIError(ex)
+                          administrator_login_password if administrator_login_password is not None else '*****',
+                          _create_postgresql_connection_string(host, user, administrator_login_password), firewall_id,
+                          subnet_id)
 
 
 def flexible_server_restore(cmd, client,
