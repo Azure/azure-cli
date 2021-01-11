@@ -27,4 +27,5 @@ def set_encryption(cmd, client, resource_group_name, account_name, key_source=No
     encryption = AccountEncryption(type=key_source, key_vault_properties=key_vault_props)
     media_service = MediaService(location=account_info.location, identity=account_info.identity, storage_accounts=account_info.storage_accounts, encryption=encryption)
 
-    return client.create_or_update(resource_group_name, account_name, media_service)
+    result = client.create_or_update(resource_group_name, account_name, media_service)
+    print("result is", result)
