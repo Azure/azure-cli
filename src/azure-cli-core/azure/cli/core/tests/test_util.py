@@ -436,12 +436,17 @@ class TestUtils(unittest.TestCase):
         parent2.name.return_value = "explorer.exe"
         self.assertEqual(_get_parent_proc_name(), "cmd.exe")
 
-        # Linux
+        # Linux, launched by bash
         process.name.return_value = "python"
         parent1.name.return_value = "bash"
         parent2.name.return_value = "init"
-        parent3.name.return_value = "init"
         self.assertEqual(_get_parent_proc_name(), "bash")
+
+        # Linux, launched by pwsh, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "pwsh"
+        parent2.name.return_value = "bash"
+        self.assertEqual(_get_parent_proc_name(), "pwsh")
 
 
 class TestBase64ToHex(unittest.TestCase):

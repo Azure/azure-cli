@@ -1226,18 +1226,18 @@ def _get_parent_proc_name():
     import os
     parent = psutil.Process(os.getpid()).parent()
 
-    if parent and parent.name().lower().startswith('python'):
-        # On Windows, CLI is run inside a virtual environment which launches another python
+    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+    if parent and parent.name().lower() == 'python.exe':
         parent = parent.parent()
 
     if parent:
-        #  powershell.exe launches cmd.exe to launch the cli.
+        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
         grandparent = parent.parent()
         if grandparent:
             grandparent_name = grandparent.name().lower()
-            if grandparent_name.startswith("powershell") or grandparent_name.startswith("pwsh"):
+            if grandparent_name == "powershell.exe" or grandparent_name == "pwsh.exe":
                 return grandparent.name()
-        # if powershell is not the grandparent, simply return the parent's name.
+        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
         return parent.name()
     return None
 
