@@ -102,7 +102,6 @@ regions_in_prod = [
 
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
 nodepool_mode_type = ["System", "User"]
-canipull_image = "mcr.microsoft.com/aks/canipull:0.0.2-alpha"
 
 
 def load_arguments(self, _):

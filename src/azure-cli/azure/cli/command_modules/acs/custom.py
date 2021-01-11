@@ -117,6 +117,7 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import ADDONS
+from ._consts import CONST_CANIPULL_IMAGE
 
 logger = get_logger(__name__)
 
@@ -1514,7 +1515,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
                 {
                     "securityContext": {"runAsUser": 0},
                     "name": podName,
-                    "image": canipull_image,
+                    "image": CONST_CANIPULL_IMAGE,
                     "args": ["-v6", acr],
                     "stdin": True,
                     "stdinOnce": True,
@@ -1545,7 +1546,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
             "--rm",
             "--quiet",
             "--image",
-            canipull_image,
+            CONST_CANIPULL_IMAGE,
             "--overrides",
             json.dumps(overrides),
             "-it",
