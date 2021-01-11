@@ -5002,5 +5002,14 @@ class VMDiskLogicalSectorSize(ScenarioTest):
         ])
 
 
+class VMSSReimageScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_reimage_')
+    def test_vmss_reimage(self, resource_group):
+        self.cmd('vmss create -g {rg} -n vmss1 --image centos')
+        self.cmd('vmss reimage -g {rg} -n vmss1 --instance-id 1')
+        self.cmd('vmss reimage -g {rg} -n vmss1')
+
+
 if __name__ == '__main__':
     unittest.main()
