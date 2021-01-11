@@ -1503,7 +1503,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
     except subprocess.CalledProcessError as err:
         raise CLIError("Could not find kubectl minor version: {}".format(err))
-    if kubectl_minor_version == 0:
+    if kubectl_minor_version == -1:
         raise CLIError("Failed to get kubectl version")
 
     podName = "canipull-" + str(uuid.uuid4())
