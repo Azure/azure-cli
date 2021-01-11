@@ -1235,7 +1235,7 @@ def _get_parent_proc_name():
         grandparent = parent.parent()
         if grandparent:
             grandparent_name = grandparent.name().lower()
-            if grandparent_name == "powershell.exe" or grandparent_name == "pwsh.exe":
+            if grandparent_name in ("powershell.exe", "pwsh.exe"):
                 return grandparent.name()
         # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
         return parent.name()
