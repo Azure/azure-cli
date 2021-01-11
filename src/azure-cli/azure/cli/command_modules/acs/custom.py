@@ -3065,6 +3065,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     # currently log analytics supported only China East 2 region
     AzureChinaLocationToOmsRegionCodeMap = {
         "chinaeast": "EAST2",
+        "chinaeast2": "EAST2",
         "chinanorth": "EAST2",
         "chinanorth2": "EAST2"
     }
@@ -3076,18 +3077,15 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     }
 
     # mapping for azure us governmner cloud
-<<<<<<< HEAD
-    AzureFairfaxLocationToOmsRegionCodeMap = {"usgovvirginia": "USGV"}
-=======
     AzureFairfaxLocationToOmsRegionCodeMap = {
         "usgovvirginia": "USGV"
     }
     AzureFairfaxRegionToOmsRegionMap = {
         "usgovvirginia": "usgovvirginia"
     }
->>>>>>> 2f836c778... fixing automatic formating
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
+    cloud_name = cmd.cli_ctx.cloud.name
 
     workspace_region = "eastus"
     workspace_region_code = "EUS"
