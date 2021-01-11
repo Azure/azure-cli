@@ -25,8 +25,6 @@ interactions:
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '51781'
       content-type:
@@ -37,15 +35,19 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
     status:
-      code: 504
-      message: Gateway Timeout
+      code: 200
+      message: OK
 - request:
     body: '{"name": "azuredbclitest-000002", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
     headers:
@@ -271,8 +273,6 @@ interactions:
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '107'
       content-type:
@@ -287,13 +287,17 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
-      code: 504
-      message: Gateway Timeout
+      code: 200
+      message: OK
 - request:
-    body: '{"name": "azuredbclitest-000002", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -303,10 +307,6 @@ interactions:
       - postgres flexible-server create
       Connection:
       - keep-alive
-      Content-Length:
-      - '85'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -l -g -n --public-access
       User-Agent:
@@ -320,8 +320,6 @@ interactions:
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '107'
       content-type:
@@ -343,8 +341,8 @@ interactions:
       x-content-type-options:
       - nosniff
     status:
-      code: 504
-      message: Gateway Timeout
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -369,8 +367,6 @@ interactions:
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '106'
       content-type:
@@ -878,13 +874,15 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - service
     status:
-      code: 504
-      message: Gateway Timeout
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"startIpAddress": "9.9.9.9", "endIpAddress": "13.13.13.13"}}'
     headers:
@@ -933,17 +931,13 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -978,16 +972,21 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
     status:
-      code: 204
-      message: No Content
+      code: 200
+      message: OK
 - request:
-    body: '{"location": "eastus", "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -997,10 +996,6 @@ interactions:
       - postgres flexible-server firewall-rule update
       Connection:
       - keep-alive
-      Content-Length:
-      - '152'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - -g --name --rule-name --end-ip-address
       User-Agent:
@@ -1012,10 +1007,6 @@ interactions:
     body:
       string: '{"properties":{"startIpAddress":"9.9.9.9","endIpAddress":"13.13.13.13"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/azuredbclitest-000002/firewallRules/firewall_test_rule","name":"firewall_test_rule","type":"Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"}'
     headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/da412c66-9ce2-4ed5-870d-42b7755c57e7?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -1030,18 +1021,17 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-arm-service-request-id:
-      - c214ad31-a334-4453-920e-d6ba7b91411c
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"startIpAddress": "10.10.10.10", "endIpAddress": "12.12.12.12"}}'
     headers:
@@ -1088,7 +1078,6 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1134,7 +1123,6 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1143,8 +1131,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-arm-service-request-id:
-      - f706e2e2-ba41-4a8b-91b1-f48ed0b2bbd3
     status:
       code: 200
       message: OK
@@ -1183,7 +1169,6 @@ interactions:
       pragma:
       - no-cache
       server:
-      - Microsoft-HTTPAPI/2.0
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
@@ -1234,7 +1219,6 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1243,8 +1227,6 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-arm-service-request-id:
-      - 387fc765-4872-4676-beec-60a9bda2811a
     status:
       code: 200
       message: OK
@@ -1292,7 +1274,6 @@ interactions:
       - no-cache
       server:
       - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -1303,12 +1284,7 @@ interactions:
       code: 202
       message: Accepted
 - request:
-    body: '{"location": "eastus", "sku": {"name": "Standard_D2s_v3", "tier": "GeneralPurpose"},
-      "properties": {"administratorLogin": "sereneRuffs5", "administratorLoginPassword":
-      "rLM4DKty9GFdcp9Nsfgzuw", "version": "12", "storageProfile": {"backupRetentionDays":
-      7, "storageMB": 131072}, "haEnabled": "Disabled", "delegatedSubnetArguments":
-      {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/VNETbclitest-vf7cz/subnets/Subnetbclitest-vf7cz"},
-      "createMode": "Default"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -1318,10 +1294,6 @@ interactions:
       - postgres flexible-server firewall-rule delete
       Connection:
       - keep-alive
-      Content-Length:
-      - '619'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
       - --rule-name -g --name --yes
       User-Agent:
@@ -1335,8 +1307,6 @@ interactions:
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '107'
       content-type:
@@ -1347,15 +1317,19 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
     status:
-      code: 503
-      message: Service Unavailable
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -1941,17 +1915,13 @@ interactions:
       - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -2048,7 +2018,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"startIpAddress": "10.10.10.10", "endIpAddress": "12.12.12.12"}}'
+    body: null
     headers:
       Accept:
       - application/json
@@ -2059,9 +2029,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '80'
-      Content-Type:
-      - application/json; charset=utf-8
+      - '0'
       ParameterSetName:
       - -g -n --yes
       User-Agent:
@@ -2097,8 +2065,8 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
     status:
       code: 202
       message: Accepted
