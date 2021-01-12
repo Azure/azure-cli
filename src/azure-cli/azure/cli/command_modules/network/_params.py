@@ -1964,6 +1964,9 @@ def load_arguments(self, _):
         c.argument('virtual_hub_name', id_part=None)
         c.argument('connection_name', id_part=None)
 
+    with self.argument_context('network virtualhub-router peering list') as c:
+        c.argument('virtual_hub_name', id_part=None)
+
     param_map = {
         'dh_group': 'DhGroup',
         'ike_encryption': 'IkeEncryption',

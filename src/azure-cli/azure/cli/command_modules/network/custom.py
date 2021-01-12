@@ -6565,15 +6565,15 @@ def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wa
 def list_virtual_hub(client, resource_group_name=None):
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name)
-    else:
-        return client.list()
+    return client.list()
 
 
 def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_hub_name, connection_name,
                                       peer_asn, peer_ip, no_wait=False):
     BgpConnection = cmd.get_models('BgpConnection')
     vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, virtual_hub_name, connection_name, vhub_bgp_conn)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
+                       virtual_hub_name, connection_name, vhub_bgp_conn)
 
 
 def virtual_hub_bgp_connection_update_setter(client, resource_group_name,

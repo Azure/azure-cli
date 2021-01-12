@@ -5811,6 +5811,10 @@ short-summary: Manage the virtual hub router.
 helps['network virtualhub-router create'] = """
 type: command
 short-summary: Create a virtual hub router.
+examples:
+  - name: Create a virtual hub router.
+    text: |
+      az network virtualhub-router create --resource-group myresourcegroup --name myvirtualrouter --hosted-subnet my_subnet_id
 """
 
 helps['network virtualhub-router update'] = """
