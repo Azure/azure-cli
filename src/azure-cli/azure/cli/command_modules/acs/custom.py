@@ -1511,7 +1511,6 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if kubectl_minor_version == -1:
         raise ValidationError("Failed to get kubectl version")
 
-
     podName = "canipull-" + str(uuid.uuid4())
     overrides = {
         "spec": {
