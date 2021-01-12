@@ -126,8 +126,10 @@ def _transform_args_with_built_in_alias(cli_ctx, args):
 
 def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
-    args = _transform_args_with_built_in_alias(cli_ctx, args)
-    return _expand_file_prefixed_files(args)
+    args_transformed = _transform_args_with_built_in_alias(cli_ctx, args)
+    if args_transformed != args:
+        logger.warning('`{}` was transformed to `{}`'.format(' '.join(args), ' '.join(args_transformed)))
+    return _expand_file_prefixed_files(args_transformed)
 
 
 # pylint: disable=too-many-instance-attributes

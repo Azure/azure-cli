@@ -44,6 +44,6 @@ def _compare_and_transform(args, alias_section, command):
         if command_item != args[arg_index]:
             return False, args
         arg_index += 1
-    new_args.extend(alias_command)
+    new_args.extend(command.split())
     new_args.extend(args[arg_index:])
     return True, new_args
