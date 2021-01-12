@@ -1384,18 +1384,18 @@ def load_command_table(self, _):
                                  setter_name='virtual_hub_update_setter',
                                  setter_type=network_virtual_hub_update_sdk,
                                  custom_func_name='update_virtual_hub')
-        g.custom_command('delete', 'delete_virtual_hub')
+        g.custom_command('delete', 'delete_virtual_hub', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_virtual_hub')
 
     with self.command_group('network virtualhub-router peering', network_virtual_hub_bgp_connection_sdk,
                             custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
-        g.custom_command('create', 'create_virtual_hub_bgp_connection')
+        g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
         g.generic_update_command('update',
                                  setter_name='virtual_hub_bgp_connection_update_setter',
                                  setter_type=network_virtual_hub_bgp_connection_update_sdk,
                                  custom_func_name='update_virtual_hub_bgp_connection')
-        g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
 
     with self.command_group('network virtualhub-router peering', network_virtual_hub_bgp_connections_sdk,

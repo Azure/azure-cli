@@ -3613,9 +3613,9 @@ class NetworkVirtualHubRouter(ScenarioTest):
         # unable to update unless the ASN's range is required
         # self.cmd('network virtualhub-router peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
 
-        self.cmd('network virtualhub-router peering delete -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network virtualhub-router peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
 
-        self.cmd('network virtualhub-router delete -g {rg} -n {vrouter}')
+        self.cmd('network virtualhub-router delete -g {rg} -n {vrouter} -y')
 
 
 class NetworkSubnetScenarioTests(ScenarioTest):
