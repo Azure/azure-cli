@@ -6571,14 +6571,6 @@ def list_virtual_hub(client, resource_group_name=None):
 
 def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_hub_name, connection_name,
                                       peer_asn, peer_ip, no_wait=False):
-    from azure.core.exceptions import HttpResponseError
-    try:
-        vhub_client = network_client_factory(cmd.cli_ctx).virtual_hubs
-        vhub_client.get(resource_group_name, virtual_hub_name)
-    except HttpResponseError:
-        msg = 'The VirtualHub "{}" under resource group "{}" was not found'.format(virtual_hub_name,
-                                                                                   resource_group_name)
-        raise CLIError(msg)
     BgpConnection = cmd.get_models('BgpConnection')
     vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, virtual_hub_name, connection_name, vhub_bgp_conn)
