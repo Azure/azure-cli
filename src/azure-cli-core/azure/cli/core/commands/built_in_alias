@@ -1,0 +1,21 @@
+[sa]
+command = storage account
+
+[storage account bsp]
+command = storage account blob-service-properties
+
+[storage account fsp]
+command = storage account file-service-properties
+
+[storage account service-properties show-blob]
+command = storage account blob-service-properties show
+
+[storage account service-properties show-file]
+command = storage account file-service-properties show
+
+[configure --list-defaults {{ defaults_flag }}]
+command = config get {% 'defaults' if defaults_flag else None %}
+
+[configure --list-defaults {{ defaults_flag }} --scope {{ scope }}]
+command = config get {% 'defaults' if defaults_flag else None %} {% '--local' if scope=='local' else None %}
+
