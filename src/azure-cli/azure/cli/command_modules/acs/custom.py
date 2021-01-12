@@ -46,7 +46,8 @@ from azure.cli.core.api import get_config_dir
 from azure.cli.core.azclierror import (ResourceNotFoundError,
                                        ArgumentUsageError,
                                        ClientRequestError,
-                                       InvalidArgumentValueError)
+                                       InvalidArgumentValueError,
+                                       ValidationError)
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
@@ -1486,7 +1487,7 @@ def subnet_role_assignment_exists(cli_ctx, scope):
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr):
     if not which("kubectl"):
-        raise CLIError("Can not find kubectl executable in PATH")
+        raise ValidationError("Can not find kubectl executable in PATH")
 
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(
@@ -1502,9 +1503,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         kubectl_version = json.loads(jsonS)
         kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
     except subprocess.CalledProcessError as err:
-        raise CLIError("Could not find kubectl minor version: {}".format(err))
+        raise ValidationError("Could not find kubectl minor version: {}".format(err))
     if kubectl_minor_version == -1:
-        raise CLIError("Failed to get kubectl version")
+        raise ValidationError("Failed to get kubectl version")
 
     podName = "canipull-" + str(uuid.uuid4())
     overrides = {
