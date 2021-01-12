@@ -2187,7 +2187,7 @@ helps['appservice ase create'] = """
             --name Outbound --address-prefixes 10.0.1.0/24
 
           az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
-            --subnet Inbound --outbound-subnet Outbound --kind asev3
+            --subnet Outbound --inbound-subnet Inbound --kind asev3
 """
 
 

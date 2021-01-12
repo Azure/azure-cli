@@ -35,7 +35,7 @@ LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
-ASE_KINDS = ['asev2', 'asev3']
+ASE_KINDS = ['ASEv2', 'ASEv3']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -871,7 +871,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice']))
         c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(ASE_KINDS),
-                   default='asev2', help="Specify App Service Environment version")
+                   default='ASEv2', help="Specify App Service Environment version")
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
@@ -891,6 +891,8 @@ def load_arguments(self, _):
                    help='Scale of front ends to app service plan instance ratio.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
                    help='Size of front end servers.')
+        c.argument('inbound_subnet', help='Required for ASEv3. Name or ID of existing subnet. \
+                   To create vnet and/or subnet use `az network vnet [subnet] create`')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
