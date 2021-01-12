@@ -197,7 +197,7 @@ def get_account_url(cli_ctx, account_name, service):
 
 def cf_blob_service(cli_ctx, kwargs):
     from knack.util import CLIError
-    client_kwargs = {}
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
@@ -206,7 +206,6 @@ def cf_blob_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         try:
             return t_blob_service.from_connection_string(conn_str=connection_string, **client_kwargs)
@@ -244,7 +243,7 @@ def cf_container_client(cli_ctx, kwargs):
 
 
 def cf_adls_service(cli_ctx, kwargs):
-    client_kwargs = {}
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
     connection_string = kwargs.pop('connection_string', None)
@@ -253,7 +252,6 @@ def cf_adls_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         return t_adls_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
@@ -284,7 +282,7 @@ def cf_or_policy(cli_ctx, _):
 
 def cf_queue_service(cli_ctx, kwargs):
     from knack.util import CLIError
-    client_kwargs = {}
+    client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
     t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_QUEUE, '_queue_service_client#QueueServiceClient')
     connection_string = kwargs.pop('connection_string', None)
     account_name = kwargs.pop('account_name', None)
@@ -292,7 +290,6 @@ def cf_queue_service(cli_ctx, kwargs):
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
 
-    client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
     if connection_string:
         return t_queue_service.from_connection_string(conn_str=connection_string, **client_kwargs)
 
