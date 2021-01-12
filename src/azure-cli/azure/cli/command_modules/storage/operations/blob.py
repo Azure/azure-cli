@@ -46,9 +46,9 @@ def create_or_update_immutability_policy(cmd, client, container_name, account_na
                                                        if_match, immutability_policy)
 
 
-def extend_immutability_policy(cmd, client, container_name, account_name,
+def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
                                resource_group_name=None, allow_protected_append_writes=None,
-                               period=None, if_match=None):
+                               period=None):
     ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
                                              allow_protected_append_writes=allow_protected_append_writes)
