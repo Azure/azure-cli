@@ -1497,15 +1497,20 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
     # Get kubectl minor version
     kubectl_minor_version = -1
     try:
-        cmd = "kubectl version --client -o json"
+        cmd = f"kubectl version -o json --kubeconfig {browse_path}"
         output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         jsonS, _ = output.communicate()
         kubectl_version = json.loads(jsonS)
         kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
+        if int(kubectl_version["serverVersion"]["minor"]) < 17:
+            logger.warning('There is a known issue for Kuberentes versions < 1.17 when connecting to '
+                            'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
+                            'more information.')
     except subprocess.CalledProcessError as err:
         raise ValidationError("Could not find kubectl minor version: {}".format(err))
     if kubectl_minor_version == -1:
         raise ValidationError("Failed to get kubectl version")
+
 
     podName = "canipull-" + str(uuid.uuid4())
     overrides = {
