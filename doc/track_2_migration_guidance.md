@@ -24,7 +24,7 @@ Below is a list of typical issues.
 
 ### Long running operation function name change
 
-Long running operations have changed their function names in Track 2 SDK. A `begin_` prefix is added. E.g. `create_or_update` becomes `begin_create_or_update`. `delete` becomes `begin_delete`. It is a naming convention in Track 2 SDK to indicate that an operation is a long running operation. Test cases can uncover most instances. But if a command has no test, it will be missed. A rigorous method is going through all methods to see whether they are long running operations.
+Long running operations have changed their function names in Track 2 SDK. A `begin_` prefix is added. E.g. `create_or_update` becomes `begin_create_or_update`. `delete` becomes `begin_delete`. It is a naming convention in Track 2 SDK to indicate that an operation is a long running operation. Test cases can reveal most instances, but if a command has no test, it may be missed. A reliable approach is going through all methods to see whether they are long running operations.
 
 ### Property name change
 
