@@ -7,6 +7,10 @@ This document summarizes typical issues and solutions when adopting Track 2 SDK 
 Example PRs:
 1. [Compute PR #15750](https://github.com/Azure/azure-cli/pull/15750)
 2. [Network PR #16245](https://github.com/Azure/azure-cli/pull/16245)
+3. [Network PR #16350](https://github.com/Azure/azure-cli/pull/16350)
+4. [Storage PR #15845](https://github.com/Azure/azure-cli/pull/15845)
+5. [KeyVault PR #14150](https://github.com/Azure/azure-cli/pull/14150)
+6. [AppConfig PR #16376](https://github.com/Azure/azure-cli/pull/16376)
 
 Below is a list of typical issues.
 
@@ -40,6 +44,7 @@ virtual_machine_extension_type -> type_properties_type
 type1 -> type_properties_type
 instance_ids -> vm_instance_i_ds
 diskMbpsReadWrite -> diskMBpsReadWrite
+ipv4 -> I_PV4
 ```
 
 Some changes are unnecessary, even wrong in English. I opened [Azure/autorest.python#850](https://github.com/Azure/autorest.python/issues/850) to track this problem.
@@ -61,7 +66,9 @@ Error type changes in Track2 SDK.
 Examples:
 
 ```
-CloudError -> azure.core.exceptions.ResourceNotFoundError
+msrestazure.azure_exceptions.CloudError -> azure.core.exceptions.ResourceNotFoundError
+msrest.exceptions.ClientException -> azure.core.exceptions.HttpResponseError
+ErrorException -> HttpResponseError
 ```
 
 ### No enum type
@@ -70,13 +77,22 @@ Track 2 SDK removes enum type and adopts string type instead. It loses the valid
 
 ### Class hierarchy change
 
-The class hierarchy may change in Track 2 SDK. Some properties are not flattened. They are wrapped in classes. 
+The class hierarchy may change in Track 2 SDK. Some properties are not flattened. They are wrapped in classes. In Track 1 SDK, if the number of parameters is less than 3, it will be flattened.
 
 Examples:
 
 In VMSS `begin_update_instances`, a new type `VirtualMachineScaleSetVMInstanceRequiredIDs` is added.
 
 In DiskAccess `begin_create_or_update`, location and tags are moved to a nested structure `DiskAccess`, `disk_access = DiskAccess(location=location, tags=tags)`
+
+In Storage,
+```
+track1: client.check_name_availability(account_name) // account_name is string
+track2: account_name = StorageAccountCheckNameAvailabilityParameters(name=name) client.check_name_availability(account_name)
+```
+
+In AppConfig,
+`id` cannot be passed directly to `regenerate_key method`. It needs to be wrapped in the new model `RegenerateKeyParameters`.
 
 ### Obtaining subscription
 
