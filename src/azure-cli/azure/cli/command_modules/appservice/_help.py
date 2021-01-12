@@ -1320,11 +1320,11 @@ examples:
 
 helps['webapp config ssl import'] = """
 type: command
-short-summary: Import an SSL certificate to a web app from Key Vault.
+short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
@@ -1951,22 +1951,25 @@ short-summary: >
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
-        az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+        az webapp up --dryrun
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
+        az webapp up
+  - name: Create a web app with a specified name
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
+        az webapp up -n MyUniqueAppName
+  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
+    text: >
+        az webapp up -l locationName
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
-        az webapp up -n MyUniqueAppName --logs
+        az webapp up --logs
   - name: Create a web app and deploy as a static HTML app.
     text: >
-        az webapp up -n MyUniqueAppName --html
+        az webapp up --html
 """
 
 helps['webapp update'] = """

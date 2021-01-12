@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.16.0"
+VERSION = "2.17.1"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -45,11 +45,11 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'adal~=1.2.3',
     'argcomplete~=1.8',
-    'azure-cli-telemetry==1.0.6',
+    'azure-cli-telemetry==1.0.6.*',
     'colorama~=0.4.1',
-    'humanfriendly>=4.7,<9.0',
+    'humanfriendly>=4.7,<10.0',
     'jmespath',
-    'knack==0.7.2',
+    'knack==0.8.0rc2',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
     'msrestazure>=0.6.3',
