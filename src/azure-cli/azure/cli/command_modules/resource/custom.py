@@ -1824,6 +1824,9 @@ def create_template_spec(cmd, resource_group_name, name, template_file=None, loc
         location = rcf.resource_groups.get(resource_group_name).location
     rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
+    if template_file and not version:
+        raise IncorrectUsageError('please provide --version if --template-file is specified')
+
     if version:
         Exists = False
         if no_prompt is False:
