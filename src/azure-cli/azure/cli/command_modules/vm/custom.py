@@ -1615,7 +1615,7 @@ def list_extensions(cmd, resource_group_name, vm_name):
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
-                  extension_instance_name=None):
+                  extension_instance_name=None, enable_auto_upgrade=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -1636,7 +1636,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings=settings,
-                                  auto_upgrade_minor_version=(not no_auto_upgrade))
+                                  auto_upgrade_minor_version=(not no_auto_upgrade),
+                                  enable_automatic_upgrade=enable_auto_upgrade)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
     return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
@@ -2784,9 +2785,9 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.reimage,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
                            resource_group_name, vm_scale_set_name, instance_id)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.reimage, resource_group_name, vm_scale_set_name)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
@@ -3086,7 +3087,8 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False, extension_instance_name=None, provision_after_extensions=None):
+                       no_wait=False, extension_instance_name=None, provision_after_extensions=None,
+                       enable_auto_upgrade=None):
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -3113,7 +3115,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                                           type_handler_version=version,
                                           settings=settings,
                                           auto_upgrade_minor_version=(not no_auto_upgrade),
-                                          provision_after_extensions=provision_after_extensions)
+                                          provision_after_extensions=provision_after_extensions,
+                                          enable_automatic_upgrade=enable_auto_upgrade)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
@@ -3275,7 +3278,14 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
         cred, _, _ = profile.get_login_credentials(resource=resource,
                                                    aux_subscriptions=aux_subscriptions)
         _, _, _, external_tokens = cred.get_all_tokens('https://management.azure.com/.default')
-        external_bearer_token = external_tokens[0][0] + ' ' + external_tokens[0][1]
+        if external_tokens:
+            external_token = external_tokens[0]
+            if len(external_token) >= 2:
+                external_bearer_token = external_token[0] + ' ' + external_token[1]
+            else:
+                logger.warning('Getting external tokens failed.')
+        else:
+            logger.warning('Getting external tokens failed.')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
