@@ -64,8 +64,8 @@ from azure.cli.command_modules.network._validators import (
     process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
 
 ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
-NETWORK_VROUTER_DEPRECATION_INFO = 'network virtualhub-router'
-NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network virtualhub-router peering'
+NETWORK_VROUTER_DEPRECATION_INFO = 'network routeserver'
+NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -1377,7 +1377,7 @@ def load_command_table(self, _):
     # endregion
 
     # region VirtualHub
-    with self.command_group('network virtualhub-router', network_virtual_hub_sdk,
+    with self.command_group('network routeserver', network_virtual_hub_sdk,
                             custom_command_type=network_virtual_hub_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub')
         g.generic_update_command('update',
@@ -1388,7 +1388,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_virtual_hub')
 
-    with self.command_group('network virtualhub-router peering', network_virtual_hub_bgp_connection_sdk,
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connection_sdk,
                             custom_command_type=network_virtual_hub_bgp_connection_update_sdk) as g:
         g.custom_command('create', 'create_virtual_hub_bgp_connection', supports_no_wait=True)
         g.generic_update_command('update',
@@ -1398,7 +1398,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_virtual_hub_bgp_connection', supports_no_wait=True, confirmation=True)
         g.show_command('show', 'get')
 
-    with self.command_group('network virtualhub-router peering', network_virtual_hub_bgp_connections_sdk,
+    with self.command_group('network routeserver peering', network_virtual_hub_bgp_connections_sdk,
                             custom_command_type=network_virtual_hub_bgp_connections_update_sdk) as g:
         g.command('list', 'list')
         g.custom_command('list-learned-routes', 'list_virtual_hub_bgp_connection_learned_routes')

@@ -3580,7 +3580,7 @@ class NetworkVirtualHubRouter(ScenarioTest):
             'subnet1_id': vnet['subnets'][0]['id']
         })
 
-        self.cmd('network virtualhub-router create -g {rg} -l {location} -n {vrouter} '
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
                  '--hosted-subnet {subnet1_id}',
                  checks=[
                      self.check('type', 'Microsoft.Network/virtualHubs'),
@@ -3588,34 +3588,34 @@ class NetworkVirtualHubRouter(ScenarioTest):
                      self.check('provisioningState', 'Succeeded')
                  ])
 
-        self.cmd('network virtualhub-router update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
+        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
             self.check('allowBranchToBranchTraffic', True)
         ])
 
-        self.cmd('network virtualhub-router list -g {rg}')
+        self.cmd('network routeserver list -g {rg}')
 
-        self.cmd('network virtualhub-router show -g {rg} -n {vrouter}', checks=[
+        self.cmd('network routeserver show -g {rg} -n {vrouter}', checks=[
             self.check('virtualRouterAsn', 65515),
             self.check('length(virtualRouterIps)', 2),
         ])
 
-        self.cmd('network virtualhub-router peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
+        self.cmd('network routeserver peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
                  '--peer-asn 11000 --peer-ip 10.0.0.120')
 
-        self.cmd('network virtualhub-router peering list -g {rg} --vrouter-name {vrouter}')
+        self.cmd('network routeserver peering list -g {rg} --vrouter-name {vrouter}')
 
-        self.cmd('network virtualhub-router peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
 
-        self.cmd('network virtualhub-router peering list-advertised-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
 
-        self.cmd('network virtualhub-router peering list-learned-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
 
         # unable to update unless the ASN's range is required
-        # self.cmd('network virtualhub-router peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+        # self.cmd('network routeserver peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
 
-        self.cmd('network virtualhub-router peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
+        self.cmd('network routeserver peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
 
-        self.cmd('network virtualhub-router delete -g {rg} -n {vrouter} -y')
+        self.cmd('network routeserver delete -g {rg} -n {vrouter} -y')
 
 
 class NetworkSubnetScenarioTests(ScenarioTest):
