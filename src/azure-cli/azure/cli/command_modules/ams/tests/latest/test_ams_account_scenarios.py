@@ -18,9 +18,10 @@ class AmsAccountTests(ScenarioTest):
             'location': 'centralus'
         })
 
-        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location} --managed-identity', checks=[
             self.check('name', '{amsname}'),
-            self.check('location', 'Central US')
+            self.check('location', 'Central US'),
+            self.check('identity.type', 'SystemAssigned')
         ])
 
         self.cmd('az ams account update -n {amsname} -g {rg} --tags key=value', checks=[

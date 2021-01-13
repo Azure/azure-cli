@@ -2,7 +2,7 @@ interactions:
 - request:
     body: '{"location": "australiasoutheast", "properties": {"storageAccounts": [{"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+      "type": "Primary"}]}, "identity": {"type": "None"}}'
     headers:
       Accept:
       - application/json
@@ -13,33 +13,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '313'
+      - '343'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Australia
-        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"bc42f704-bf6b-46db-9171-2568d441ef15\",\"storageAccounts\":[\r\n
+        Southeast\",\"properties\":{\r\n    \"mediaServiceId\":\"77e32eda-a27a-4259-9bec-4c677a091138\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"identity\":{\r\n    \"type\":\"None\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '675'
+      - '793'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:30 GMT
+      - Wed, 13 Jan 2021 01:20:54 GMT
       expires:
       - '-1'
       odata-version:
@@ -53,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1196'
     status:
       code: 201
       message: Created
@@ -76,25 +78,25 @@ interactions:
       - -a -n -g
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000004\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"e3bc657d-64f7-4d07-b0b6-d39dc31e43a8\",\"created\":\"2020-09-25T21:41:31.74Z\",\"lastModified\":\"2020-09-25T21:41:31.74Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \   \"assetId\":\"0014e9e5-9baf-4175-b9f1-5256a75b029b\",\"created\":\"2021-01-13T01:20:56.413Z\",\"lastModified\":\"2021-01-13T01:20:56.413Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '530'
+      - '532'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:33 GMT
+      - Wed, 13 Jan 2021 01:20:57 GMT
       expires:
       - '-1'
       odata-version:
@@ -131,15 +133,15 @@ interactions:
       - -a -n -g
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000005?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000005?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000005\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000005\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"72e533c0-782b-4584-8b65-e2f8fe38ffcb\",\"created\":\"2020-09-25T21:41:34.413Z\",\"lastModified\":\"2020-09-25T21:41:34.413Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \   \"assetId\":\"dfd20bd0-8e9e-48a0-829c-660ecc748bf8\",\"created\":\"2021-01-13T01:20:58.903Z\",\"lastModified\":\"2021-01-13T01:20:58.903Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -149,7 +151,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:35 GMT
+      - Wed, 13 Jan 2021 01:20:59 GMT
       expires:
       - '-1'
       odata-version:
@@ -163,7 +165,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
     status:
       code: 201
       message: Created
@@ -187,15 +189,15 @@ interactions:
       - -a -n -g --preset
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"tra000006\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006\",\"type\":\"Microsoft.Media/mediaservices/transforms\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:36.5532278Z\",\"lastModified\":\"2020-09-25T21:41:36.5532278Z\",\"outputs\":[\r\n
+        \   \"created\":\"2021-01-13T01:21:01.140972Z\",\"lastModified\":\"2021-01-13T01:21:01.140972Z\",\"outputs\":[\r\n
         \     {\r\n        \"onError\":\"StopProcessingJob\",\"relativePriority\":\"Normal\",\"preset\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.BuiltInStandardEncoderPreset\",\"presetName\":\"AACGoodQualityAudio\"\r\n
         \       }\r\n      }\r\n    ]\r\n  }\r\n}"
@@ -203,11 +205,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '648'
+      - '646'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:36 GMT
+      - Wed, 13 Jan 2021 01:21:01 GMT
       expires:
       - '-1'
       odata-version:
@@ -221,7 +223,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1195'
     status:
       code: 201
       message: Created
@@ -247,29 +249,30 @@ interactions:
       - -t -a -g -n --input-asset-name --output-assets --priority --label --correlation-data
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:38.0076461Z\",\"state\":\"Queued\",\"input\":{\r\n
+        \   \"created\":\"2021-01-13T01:21:02.824924Z\",\"state\":\"Scheduled\",\"input\":{\r\n
         \     \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n        \r\n
-        \     ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n    },\"lastModified\":\"2020-09-25T21:41:38.0076461Z\",\"outputs\":[\r\n
-        \     {\r\n        \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \     ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n        \r\n      ],\"assetName\":\"asset000004\"\r\n
+        \   },\"lastModified\":\"2021-01-13T01:21:02.824924Z\",\"outputs\":[\r\n      {\r\n
+        \       \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
         \     }\r\n    ],\"priority\":\"High\",\"correlationData\":{\r\n      \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
         \   }\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '849'
+      - '890'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:38 GMT
+      - Wed, 13 Jan 2021 01:21:04 GMT
       expires:
       - '-1'
       odata-version:
@@ -302,29 +305,30 @@ interactions:
       - -a -n -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:38.007Z\",\"state\":\"Queued\",\"input\":{\r\n
+        \   \"created\":\"2021-01-13T01:21:02.823Z\",\"state\":\"Processing\",\"input\":{\r\n
         \     \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n        \r\n
-        \     ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n    },\"lastModified\":\"2020-09-25T21:41:38.007Z\",\"outputs\":[\r\n
-        \     {\r\n        \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \     ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n        \r\n      ],\"assetName\":\"asset000004\"\r\n
+        \   },\"lastModified\":\"2021-01-13T01:21:02.823Z\",\"outputs\":[\r\n      {\r\n
+        \       \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Processing\",\"progress\":0,\"label\":\"outputLabel\",\"startTime\":\"2021-01-13T01:21:04.253Z\",\"assetName\":\"asset000005\"\r\n
         \     }\r\n    ],\"priority\":\"High\",\"correlationData\":{\r\n      \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
-        \   }\r\n  }\r\n}"
+        \   },\"startTime\":\"2021-01-13T01:21:04.253Z\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '841'
+      - '967'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:39 GMT
+      - Wed, 13 Jan 2021 01:21:05 GMT
       expires:
       - '-1'
       odata-version:
@@ -359,11 +363,11 @@ interactions:
       - -a -n -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000008?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000008?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"error\": {\r\n    \"code\": \"NotFound\",\r\n    \"message\":
@@ -378,7 +382,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 25 Sep 2020 21:41:40 GMT
+      - Wed, 13 Jan 2021 01:21:06 GMT
       expires:
       - '-1'
       pragma:
@@ -407,30 +411,31 @@ interactions:
       - -a -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \       \"created\":\"2020-09-25T21:41:38.007Z\",\"state\":\"Queued\",\"input\":{\r\n
+        \       \"created\":\"2021-01-13T01:21:02.823Z\",\"state\":\"Processing\",\"input\":{\r\n
         \         \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n
-        \           \r\n          ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n
-        \       },\"lastModified\":\"2020-09-25T21:41:38.007Z\",\"outputs\":[\r\n
-        \         {\r\n            \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \           \r\n          ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n
+        \           \r\n          ],\"assetName\":\"asset000004\"\r\n        },\"lastModified\":\"2021-01-13T01:21:02.823Z\",\"outputs\":[\r\n
+        \         {\r\n            \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Processing\",\"progress\":0,\"label\":\"outputLabel\",\"startTime\":\"2021-01-13T01:21:04.253Z\",\"assetName\":\"asset000005\"\r\n
         \         }\r\n        ],\"priority\":\"High\",\"correlationData\":{\r\n          \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
-        \       }\r\n      }\r\n    }\r\n  ]\r\n}"
+        \       },\"startTime\":\"2021-01-13T01:21:04.253Z\"\r\n      }\r\n    }\r\n
+        \ ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '925'
+      - '1059'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:41 GMT
+      - Wed, 13 Jan 2021 01:21:08 GMT
       expires:
       - '-1'
       odata-version:
@@ -465,29 +470,30 @@ interactions:
       - -a -n -g -t --description --priority
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:38.007Z\",\"state\":\"Queued\",\"input\":{\r\n
+        \   \"created\":\"2021-01-13T01:21:02.823Z\",\"state\":\"Processing\",\"input\":{\r\n
         \     \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n        \r\n
-        \     ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n    },\"lastModified\":\"2020-09-25T21:41:38.007Z\",\"outputs\":[\r\n
-        \     {\r\n        \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \     ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n        \r\n      ],\"assetName\":\"asset000004\"\r\n
+        \   },\"lastModified\":\"2021-01-13T01:21:02.823Z\",\"outputs\":[\r\n      {\r\n
+        \       \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Processing\",\"progress\":0,\"label\":\"outputLabel\",\"startTime\":\"2021-01-13T01:21:04.253Z\",\"assetName\":\"asset000005\"\r\n
         \     }\r\n    ],\"priority\":\"High\",\"correlationData\":{\r\n      \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
-        \   }\r\n  }\r\n}"
+        \   },\"startTime\":\"2021-01-13T01:21:04.253Z\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '841'
+      - '967'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:42 GMT
+      - Wed, 13 Jan 2021 01:21:09 GMT
       expires:
       - '-1'
       odata-version:
@@ -530,29 +536,30 @@ interactions:
       - -a -n -g -t --description --priority
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:38.007Z\",\"state\":\"Queued\",\"description\":\"someDescription\",\"input\":{\r\n
+        \   \"created\":\"2021-01-13T01:21:02.823Z\",\"state\":\"Processing\",\"description\":\"someDescription\",\"input\":{\r\n
         \     \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n        \r\n
-        \     ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n    },\"lastModified\":\"2020-09-25T21:41:44.949677Z\",\"outputs\":[\r\n
-        \     {\r\n        \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Queued\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \     ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n        \r\n      ],\"assetName\":\"asset000004\"\r\n
+        \   },\"lastModified\":\"2021-01-13T01:21:11.192276Z\",\"outputs\":[\r\n      {\r\n
+        \       \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Processing\",\"progress\":0,\"label\":\"outputLabel\",\"startTime\":\"2021-01-13T01:21:04.253Z\",\"assetName\":\"asset000005\"\r\n
         \     }\r\n    ],\"priority\":\"Low\",\"correlationData\":{\r\n      \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
-        \   }\r\n  }\r\n}"
+        \   },\"startTime\":\"2021-01-13T01:21:04.253Z\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '875'
+      - '1001'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:44 GMT
+      - Wed, 13 Jan 2021 01:21:10 GMT
       expires:
       - '-1'
       odata-version:
@@ -591,11 +598,11 @@ interactions:
       - -n -a -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007/cancelJob?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007/cancelJob?api-version=2020-05-01
   response:
     body:
       string: ''
@@ -605,7 +612,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 25 Sep 2020 21:41:45 GMT
+      - Wed, 13 Jan 2021 01:21:12 GMT
       expires:
       - '-1'
       pragma:
@@ -636,29 +643,30 @@ interactions:
       - -a -n -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"job000007\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/transforms/tra000006/jobs/job000007\",\"type\":\"Microsoft.Media/mediaservices/transforms/jobs\",\"properties\":{\r\n
-        \   \"created\":\"2020-09-25T21:41:38.007Z\",\"state\":\"Canceling\",\"description\":\"someDescription\",\"input\":{\r\n
+        \   \"created\":\"2021-01-13T01:21:02.823Z\",\"state\":\"Canceling\",\"description\":\"someDescription\",\"input\":{\r\n
         \     \"@odata.type\":\"#Microsoft.Media.JobInputAsset\",\"files\":[\r\n        \r\n
-        \     ],\"label\":\"someLabel\",\"assetName\":\"asset000004\"\r\n    },\"lastModified\":\"2020-09-25T21:41:44.95Z\",\"outputs\":[\r\n
-        \     {\r\n        \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Scheduled\",\"progress\":0,\"label\":\"outputLabel\",\"assetName\":\"asset000005\"\r\n
+        \     ],\"label\":\"someLabel\",\"inputDefinitions\":[\r\n        \r\n      ],\"assetName\":\"asset000004\"\r\n
+        \   },\"lastModified\":\"2021-01-13T01:21:11.193Z\",\"outputs\":[\r\n      {\r\n
+        \       \"@odata.type\":\"#Microsoft.Media.JobOutputAsset\",\"state\":\"Canceling\",\"progress\":0,\"label\":\"outputLabel\",\"startTime\":\"2021-01-13T01:21:04.253Z\",\"assetName\":\"asset000005\"\r\n
         \     }\r\n    ],\"priority\":\"Low\",\"correlationData\":{\r\n      \"foo\":\"bar\",\"baz\":\"fuzz\"\r\n
-        \   }\r\n  }\r\n}"
+        \   },\"startTime\":\"2021-01-13T01:21:04.253Z\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '877'
+      - '996'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:47 GMT
+      - Wed, 13 Jan 2021 01:21:13 GMT
       expires:
       - '-1'
       odata-version:
@@ -695,11 +703,11 @@ interactions:
       - -n -a -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"error\": {\r\n    \"code\": \"BadRequest\",\r\n    \"message\":
@@ -716,7 +724,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 25 Sep 2020 21:41:48 GMT
+      - Wed, 13 Jan 2021 01:21:14 GMT
       expires:
       - '-1'
       pragma:
@@ -749,11 +757,11 @@ interactions:
       - -n -a -g -t
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/transforms/tra000006/jobs/job000007?api-version=2020-05-01
   response:
     body:
       string: ''
@@ -763,7 +771,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 25 Sep 2020 21:41:54 GMT
+      - Wed, 13 Jan 2021 01:21:21 GMT
       expires:
       - '-1'
       pragma:

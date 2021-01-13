@@ -2,7 +2,7 @@ interactions:
 - request:
     body: '{"location": "centralindia", "properties": {"storageAccounts": [{"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002",
-      "type": "Primary"}]}}'
+      "type": "Primary"}]}, "identity": {"type": "None"}}'
     headers:
       Accept:
       - application/json
@@ -13,33 +13,35 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '307'
+      - '337'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g --storage-account -l
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\",\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"Central
-        India\",\"properties\":{\r\n    \"mediaServiceId\":\"9b21a130-ad4f-4f16-9ba1-2c5209a37167\",\"storageAccounts\":[\r\n
+        India\",\"properties\":{\r\n    \"mediaServiceId\":\"b77e5df3-f7e6-48ee-b420-9de012716258\",\"storageAccounts\":[\r\n
         \     {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\",\"type\":\"Primary\"\r\n
-        \     }\r\n    ]\r\n  }\r\n}"
+        \     }\r\n    ],\"storageAuthentication\":\"System\",\"encryption\":{\r\n
+        \     \"type\":\"SystemKey\"\r\n    }\r\n  },\"identity\":{\r\n    \"type\":\"None\"\r\n
+        \ }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '669'
+      - '787'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:40:59 GMT
+      - Wed, 13 Jan 2021 01:19:55 GMT
       expires:
       - '-1'
       odata-version:
@@ -53,7 +55,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -76,15 +78,15 @@ interactions:
       - -a -n -g
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"asset000004\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/assets/asset000004\",\"type\":\"Microsoft.Media/mediaservices/assets\",\"properties\":{\r\n
-        \   \"assetId\":\"f8fd5e21-d378-4d37-a1e5-3c7b0ceaca34\",\"created\":\"2020-09-25T21:41:02.04Z\",\"lastModified\":\"2020-09-25T21:41:02.04Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
+        \   \"assetId\":\"195c61c6-b940-4b9e-b8ea-e06a9dd618ba\",\"created\":\"2021-01-13T01:19:57.44Z\",\"lastModified\":\"2021-01-13T01:19:57.44Z\",\"storageAccountName\":\"clitest000002\",\"storageEncryptionFormat\":\"None\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -94,7 +96,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:02 GMT
+      - Wed, 13 Jan 2021 01:19:59 GMT
       expires:
       - '-1'
       odata-version:
@@ -108,7 +110,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11999'
     status:
       code: 201
       message: Created
@@ -131,15 +133,15 @@ interactions:
       - -n -a -g --streaming-policy-name --asset-name
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingLocators/str000005?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/streamingLocators/str000005?api-version=2020-05-01
   response:
     body:
       string: "{\r\n  \"name\":\"str000005\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003/streamingLocators/str000005\",\"type\":\"Microsoft.Media/mediaservices/streamingLocators\",\"properties\":{\r\n
-        \   \"assetName\":\"asset000004\",\"created\":\"2020-09-25T21:41:05.0070152Z\",\"endTime\":\"9999-12-31T23:59:59.9999999Z\",\"streamingLocatorId\":\"064bf22a-d03e-4876-a685-51e896391591\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"contentKeys\":[\r\n
+        \   \"assetName\":\"asset000004\",\"created\":\"2021-01-13T01:20:01.0199173Z\",\"endTime\":\"9999-12-31T23:59:59.9999999Z\",\"streamingLocatorId\":\"47aaca7e-5d18-4b94-9289-e45837fad1f4\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\",\"contentKeys\":[\r\n
         \     \r\n    ],\"filters\":[\r\n      \r\n    ]\r\n  }\r\n}"
     headers:
       cache-control:
@@ -149,7 +151,7 @@ interactions:
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:04 GMT
+      - Wed, 13 Jan 2021 01:20:01 GMT
       expires:
       - '-1'
       odata-version:
@@ -184,24 +186,24 @@ interactions:
       - -a -n -g
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
-        azure-mgmt-media/2.1.0 Azure-SDK-For-Python AZURECLI/2.12.0
+        azure-mgmt-media/3.0.0 Azure-SDK-For-Python AZURECLI/2.15.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004/listStreamingLocators?api-version=2018-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaServices/ams000003/assets/asset000004/listStreamingLocators?api-version=2020-05-01
   response:
     body:
-      string: "{\r\n  \"streamingLocators\":[\r\n    {\r\n      \"name\":\"str000005\",\"assetName\":\"asset000004\",\"created\":\"2020-09-25T21:41:05.007Z\",\"endTime\":\"9999-12-31T23:59:59.997Z\",\"streamingLocatorId\":\"064bf22a-d03e-4876-a685-51e896391591\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\"\r\n
+      string: "{\r\n  \"streamingLocators\":[\r\n    {\r\n      \"name\":\"str000005\",\"assetName\":\"asset000004\",\"created\":\"2021-01-13T01:20:01.02Z\",\"endTime\":\"9999-12-31T23:59:59.997Z\",\"streamingLocatorId\":\"47aaca7e-5d18-4b94-9289-e45837fad1f4\",\"streamingPolicyName\":\"Predefined_ClearStreamingOnly\"\r\n
         \   }\r\n  ]\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '292'
+      - '291'
       content-type:
       - application/json; odata.metadata=minimal
       date:
-      - Fri, 25 Sep 2020 21:41:06 GMT
+      - Wed, 13 Jan 2021 01:20:03 GMT
       expires:
       - '-1'
       odata-version:

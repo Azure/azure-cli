@@ -26,7 +26,9 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_encoding_types_list,
                                                        get_allowed_resolutions_completion_list,
                                                        get_allowed_transcription_languages,
-                                                       get_allowed_analysis_modes)
+                                                       get_allowed_analysis_modes,
+                                                       get_stretch_mode_types_list,
+                                                       get_storage_authentication_allowed_values_list)
 
 from azure.cli.command_modules.ams._validators import (validate_storage_account_id,
                                                        datetime_format,
@@ -63,7 +65,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
+                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.'),
+        c.argument('managed_identity', help='Set this flag to enable managed identity on the account.')
 
     with self.argument_context('ams account check-name') as c:
         c.argument('account_name', options_list=['--name', '-n'], id_part=None,
@@ -82,6 +85,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account storage sync-storage-keys') as c:
         c.argument('id', required=True)
+
+    with self.argument_context('ams account storage set-authentication') as c:
+        c.argument('storage_authentication', help='Allowed values: {}'.format(", ".join(get_storage_authentication_allowed_values_list())))
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
@@ -348,7 +354,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('auto_start', action='store_true', help='The flag indicates if the resource should be automatically started on creation.')
         c.argument('encoding_type', arg_group='Encoding', help='The encoding type for live event. This value is specified at creation time and cannot be updated. Allowed values: {}.'.format(", ".join(get_encoding_types_list())))
         c.argument('preset_name', arg_group='Encoding', help='The encoding preset name. This value is specified at creation time and cannot be updated.')
-        c.argument('stretch_mode', arg_group='Encoding', help='Specifies how the input video will be resized to fit the desired output resolution(s). Default is None. Possible values include: None, AutoSize, AutoFit')
+        c.argument('stretch_mode', arg_group='Encoding', help='Specifies how the input video will be resized to fit the desired output resolution(s). Default is None.  Allowed values: {}.'.format(", ".join(get_stretch_mode_types_list())))
         c.argument('key_frame_interval', arg_group='Encoding', help='Use an ISO 8601 time value between 0.5 to 20 seconds to specify the output fragment length for the video and audiotracks of an encoding live event. For example, use PT2S to indicate 2 seconds. For the video track it also defines the key frame interval, or the length of a GoP (group of pictures). If this value is not set for anencoding live event, the fragment duration defaults to 2 seconds. The value cannot be set for pass-through live events.')
         c.argument('tags', arg_type=tags_type)
         c.argument('key_frame_interval_duration', key_frame_interval_duration_arg_type, arg_group='Input', validator=validate_key_frame_interval_duration,

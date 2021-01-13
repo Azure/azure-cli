@@ -12,7 +12,8 @@ from azure.cli.command_modules.ams._sdk_utils import (get_stand_alone_presets, g
                                                       get_allowed_languages_for_preset,
                                                       get_protocols, get_encoding_types,
                                                       get_allowed_resolutions, get_transcription_langauges,
-                                                      get_analysis_modes)
+                                                      get_analysis_modes, get_stretch_mode_types,
+                                                      get_storage_authentication_allowed_values)
 
 from azure.mgmt.media.models import EncoderNamedPreset
 
@@ -84,3 +85,11 @@ def get_allowed_transcription_languages():
 def get_allowed_analysis_modes():
     modes = get_analysis_modes()
     return modes
+
+def get_stretch_mode_types_list():
+    modes = get_stretch_mode_types()
+    return modes
+
+def get_storage_authentication_allowed_values_list():
+    values = get_storage_authentication_allowed_values()
+    return values

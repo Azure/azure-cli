@@ -105,6 +105,11 @@ helps['ams account storage sync-storage-keys'] = """
     short-summary: Synchronize storage account keys for a storage account associated with an Azure Media Services account.
 """
 
+helps['ams account storage set-authentication'] = """
+    type: command
+    short-summary: Set the authentication of a storage account attached to an Azure Media Services account. 
+"""
+
 helps['ams transform'] = """
     type: group
     short-summary: Manage transforms for an Azure Media Services account.

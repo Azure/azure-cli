@@ -5,7 +5,7 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.media.models import (ApiErrorException, MediaService, StorageAccount)
+from azure.mgmt.media.models import (ApiErrorException, MediaService, MediaServiceIdentity, StorageAccount)
 
 
 def get_mediaservice(client, account_name, resource_group_name=None):
@@ -17,11 +17,11 @@ def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
 
 
-def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, tags=None):
+def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, managed_identity=False, tags=None):
     storage_account_primary = StorageAccount(type='Primary', id=storage_account)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary],
-                                         location,
+                                         location, managed_identity,
                                          tags)
 
 
@@ -54,12 +54,19 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
                                          ams.location,
                                          ams.tags)
 
+def set_mediaservice_trusted_storage(client, resource_group_name, account_name, storage_account, storage_authentication):
+    ams = client.get(resource_group_name, account_name)
+    media_service = MediaService(location=ams.location, storage_accounts=ams.storage_accounts, storage_authentication=storage_authentication)
+    
+    return client.create_or_update(resource_group_name, account_name, media_service)
+
 
 def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None,
-                                  location=None,
+                                  location=None, managed_identity=False,
                                   tags=None):
-
-    media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
+    identity = 'SystemAssigned' if managed_identity else 'None'
+    media_service = MediaService(location=location, storage_accounts=storage_accounts, identity=MediaServiceIdentity(type=identity),
+                                 tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 

@@ -16,12 +16,20 @@ _rut_dict = {0: 'S1',
              2: 'S3'}
 
 
-def get_mru(cmd, resource_group_name, account_name):
+def get_mru(client, cmd, resource_group_name, account_name):
+    account_info = client.get(resource_group_name,
+                      account_name) if resource_group_name else client.get_by_subscription(account_name)
+    if account_info.encryption:
+        raise CLIError('Scaling Media Reserved Units for accounts created using the latest api is not supported by the CLI. Please use the Azure Portal to scale Media Reserved Units.')
     mru = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name).get_mru()
     return _map_mru(mru)
 
 
-def set_mru(cmd, resource_group_name, account_name, count=None, type=None):
+def set_mru(client, cmd, resource_group_name, account_name, count=None, type=None):
+    account_info = client.get(resource_group_name,
+                      account_name) if resource_group_name else client.get_by_subscription(account_name)
+    if account_info.encryption:
+        raise CLIError('Scaling Media Reserved Units for accounts created using the latest api is not supported by the CLI. Please use the Azure Portal to scale Media Reserved Units.')
     client = MediaV2Client(cmd.cli_ctx, resource_group_name, account_name)
     mru = client.get_mru()
 
