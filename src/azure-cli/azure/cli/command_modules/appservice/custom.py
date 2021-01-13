@@ -2619,7 +2619,7 @@ class _StackRuntimeHelper:
     @staticmethod
     def remove_delimiters(runtime):
         import re
-        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        runtime = re.split('[|:]', runtime)  # delimiters allowed: '|', ':'
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
