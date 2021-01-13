@@ -8,7 +8,7 @@
 
 import unittest
 import mock
-from knack.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 
 
 from azure.mgmt.web import WebSiteManagementClient
@@ -103,8 +103,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         subnet = Subnet(id=1, address_prefix='10.10.10.10/25')
         network_client.subnets.get.return_value = subnet
 
-        # assert that CLIError raised when called with small subnet
-        with self.assertRaises(CLIError):
+        # assert that ValidationError raised when called with small subnet
+        with self.assertRaises(ValidationError):
             create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                              subnet=subnet_name, vnet_name=vnet_name,
                                              ignore_network_security_group=True, ignore_route_table=True,
@@ -205,7 +205,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         network_client_factory_mock.return_value = network_client
 
         subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
-        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironment')
+        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironments')
         subnet.delegations = [hosting_delegation]
         network_client.subnets.get.return_value = subnet
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,

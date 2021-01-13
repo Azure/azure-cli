@@ -17,8 +17,9 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import (get_mgmt_service_client, get_subscription_id)
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from azure.cli.core.util import (sdk_no_wait, random_string)
+from azure.cli.core.azclierror import (ResourceNotFoundError, ValidationError, CommandNotFoundError,
+                                       MutuallyExclusiveArgumentError)
 from knack.log import get_logger
-from knack.util import CLIError
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
 VERSION_2019_10_01 = "2019-10-01"
@@ -104,7 +105,7 @@ def update_appserviceenvironment(cmd, name, resource_group_name=None, front_end_
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase_def = ase_client.get(resource_group_name, name)
     if ase_def.kind.lower() != 'asev2':
-        raise CLIError('Only ASEv2 currently supports update')
+        raise CommandNotFoundError('Only ASEv2 currently supports update')
 
     worker_sku = _map_worker_sku(front_end_sku)
     ase_def.worker_pools = ase_def.worker_pools or []  # v1 feature, but cannot be null
@@ -124,8 +125,8 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        raise CLIError('list-addresses is currently not supported for ASEv3. \
-                       Inbound IP is associated with the private endpoint.')
+        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3. ' \
+                                   'Inbound IP is associated with the private endpoint.')
     return ase_client.get_vip_info(resource_group_name, name)
 
 
@@ -175,7 +176,7 @@ def _get_resource_group_name_from_ase(ase_client, ase_name):
             ase_found = True
             break
     if not ase_found:
-        raise CLIError("App service environment '{}' not found in subscription.".format(ase_name))
+        raise ResourceNotFoundError("App service environment '{}' not found in subscription.".format(ase_name))
     return resource_group
 
 
@@ -192,7 +193,7 @@ def _validate_subnet_id(cli_ctx, subnet, vnet_name, resource_group_name):
             name=vnet_name,
             child_type_1='subnets',
             child_name_1=subnet)
-    raise CLIError('Usage error: --subnet ID | --subnet NAME --vnet-name NAME')
+    raise MutuallyExclusiveArgumentError('Please specify either: --subnet ID or (--subnet NAME and --vnet-name NAME)')
 
 
 def _map_worker_sku(sku_name):
@@ -212,7 +213,7 @@ def _validate_subnet_empty(cli_ctx, subnet_id):
     network_client = _get_network_client_factory(cli_ctx)
     subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
     if subnet_obj.resource_navigation_links or subnet_obj.service_association_links:
-        raise CLIError('Subnet is not empty.')
+        raise ValidationError('Subnet is not empty.')
 
 
 def _validate_subnet_size(cli_ctx, subnet_id):
@@ -225,8 +226,11 @@ def _validate_subnet_size(cli_ctx, subnet_id):
     address = subnet_obj.address_prefix
     size = int(address[address.index('/') + 1:])
     if size > 24:
-        raise CLIError('Subnet size could cause scaling issues. Recommended size is at least /24. '
-                       'Use --ignore-subnet-size-validation to skip size test.')
+        err_msg = 'Subnet size could cause scaling issues. Recommended size is at least /24.'
+        rec_msg = 'Use --ignore-subnet-size-validation to skip size test.'
+        validation_error = ValidationError(err_msg)
+        validation_error.set_recommendation(rec_msg)
+        raise validation_error
 
 
 def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
@@ -247,8 +251,11 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
                 in_subnet_name, subnet_parameters=in_subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
         except Exception:
-            raise CLIError('Inbound subnet must have Private Endpoint Network Policy disabled.'
-                           'Use: az network vnet subnet update --disable-private-endpoint-network-policies')
+            err_msg = 'Inbound subnet must have Private Endpoint Network Policy disabled.'
+            rec_msg = 'Use: az network vnet subnet update --disable-private-endpoint-network-policies'
+            validation_error = ValidationError(err_msg)
+            validation_error.set_recommendation(rec_msg)
+            raise validation_error
 
     # Outbound
     out_subnet_id_parts = parse_resource_id(outbound_subnet_id)
@@ -257,7 +264,7 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
     out_subnet_name = out_subnet_id_parts['resource_name']
     out_subnet_obj = network_client.subnets.get(out_vnet_resource_group, out_vnet_name, out_subnet_name)
     if out_subnet_obj.resource_navigation_links:
-        raise CLIError('Outbound subnet is not empty.')
+        raise ValidationError('Outbound subnet is not empty.')
 
     delegations = out_subnet_obj.delegations
     delegated = False
@@ -266,7 +273,7 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
             delegated = True
 
     if not delegated:
-        logger.warning('Adding delegation for hostingEnvironments to outbound subnet.')
+        logger.warning('Adding delegation for Microsoft.Web/hostingEnvironments to outbound subnet.')
         out_subnet_obj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/hostingEnvironments")]
         try:
             poller = network_client.subnets.begin_create_or_update(
@@ -274,8 +281,11 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
                 out_subnet_name, subnet_parameters=out_subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
         except Exception:
-            raise CLIError('Outbound subnet must be delegated to Microsoft.Web/hostingEnvironments. '
-                           'Use: az network vnet subnet update --delegations "Microsoft.Web/hostingEnvironments"')
+            err_msg = 'Outbound subnet must be delegated to Microsoft.Web/hostingEnvironments.'
+            rec_msg = 'Use: az network vnet subnet update --delegations "Microsoft.Web/hostingEnvironments"'
+            validation_error = ValidationError(err_msg)
+            validation_error.set_recommendation(rec_msg)
+            raise validation_error
 
 
 def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
@@ -321,9 +331,12 @@ def _ensure_route_table(cli_ctx, resource_group_name, ase_name, location, subnet
         route_table_id_parts = parse_resource_id(subnet_obj.route_table.id)
         rt_name = route_table_id_parts['name']
         if rt_name.lower() != ase_route_table_name.lower():
-            raise CLIError('Route table already exists. \
-                            Use --ignore-route-table to use existing route table. \
-                            Use --force-route-table to replace existing route table')
+            err_msg = 'Route table already exists.'
+            rec_msg = 'Use --ignore-route-table to use existing route table ' \
+                      'or --force-route-table to replace existing route table'
+            validation_error = ValidationError(err_msg)
+            validation_error.set_recommendation(rec_msg)
+            raise validation_error
 
 
 def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, location, subnet_id, force):
@@ -413,9 +426,12 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
         nsg_id_parts = parse_resource_id(subnet_obj.network_security_group.id)
         nsg_name = nsg_id_parts['name']
         if nsg_name.lower() != ase_nsg_name.lower():
-            raise CLIError('Network Security Group already exists. \
-                            Use --ignore-network-security-group to use existing NSG. \
-                            Use --force-network-security-group to replace existing NSG')
+            err_msg = 'Network Security Group already exists.'
+            rec_msg = 'Use --ignore-network-security-group to use existing NSG ' \
+                      'or --force-network-security-group to replace existing NSG'
+            validation_error = ValidationError(err_msg)
+            validation_error.set_recommendation(rec_msg)
+            raise validation_error
 
 
 def _get_unique_deployment_name(prefix):
