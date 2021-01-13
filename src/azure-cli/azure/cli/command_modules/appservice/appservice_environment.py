@@ -7,10 +7,13 @@
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.resource import ResourceManagementClient
+from azure.mgmt.privatedns import PrivateDnsManagementClient
 
 # Models
-from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
-from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment)
+from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation,
+                                       PrivateEndpoint, Subnet, PrivateLinkServiceConnection)
+from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment, SubResource)
+from azure.mgmt.privatedns.models import (PrivateZone, VirtualNetworkLink, RecordSet, ARecord)
 
 # Utils
 from azure.cli.core.commands import LongRunningOperation
@@ -42,7 +45,7 @@ def show_appserviceenvironment(cmd, name, resource_group_name=None):
     return ase_client.get(resource_group_name, name)
 
 
-def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv2', inbound_subnet=None,
+def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kind='ASEv2',
                                      vnet_name=None, ignore_route_table=False,
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
@@ -56,33 +59,25 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
     location = location or _get_location_from_resource_group(cmd.cli_ctx, resource_group_name)
     subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
+    _validate_subnet_empty(cmd.cli_ctx, subnet_id)
+    if not ignore_subnet_size_validation:
+        _validate_subnet_size(cmd.cli_ctx, subnet_id)
 
     if kind == 'ASEv2':
-        _validate_subnet_empty(cmd.cli_ctx, subnet_id)
-        if not ignore_subnet_size_validation:
-            _validate_subnet_size(cmd.cli_ctx, subnet_id)
         if not ignore_route_table:
             _ensure_route_table(cmd.cli_ctx, resource_group_name, name, location, subnet_id, force_route_table)
         if not ignore_network_security_group:
             _ensure_network_security_group(cmd.cli_ctx, resource_group_name, name, location,
                                            subnet_id, force_network_security_group)
-
         ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
                                                                      subnet_id=subnet_id,
                                                                      virtual_ip_type=virtual_ip_type,
                                                                      front_end_scale_factor=front_end_scale_factor,
-                                                                     front_end_sku=front_end_sku, tags=None)
+                                                                     front_end_sku=front_end_sku)
 
     elif kind == 'ASEv3':
-        inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, inbound_subnet, vnet_name, resource_group_name)
-        if not ignore_subnet_size_validation:
-            _validate_subnet_size(cmd.cli_ctx, subnet_id)
-        _ensure_subnets_asev3(cmd.cli_ctx, inbound_subnet_id, subnet_id)
-
-        ase_deployment_properties = _build_asev3_deployment_properties(name=name, location=location,
-                                                                       inbound_subnet_id=inbound_subnet_id,
-                                                                       outbound_subnet_id=subnet_id, tags=None)
-
+        ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
+                                                                     subnet_id=subnet_id, kind='ASEv3')
     logger.info('Create App Service Environment...')
     deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
@@ -125,7 +120,7 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     ase = ase_client.get(resource_group_name, name)
     if ase.kind.lower() == 'asev3':
-        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3. ' \
+        raise CommandNotFoundError('list-addresses is currently not supported for ASEv3. '
                                    'Inbound IP is associated with the private endpoint.')
     return ase_client.get_vip_info(resource_group_name, name)
 
@@ -135,6 +130,61 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
     return ase_client.list_app_service_plans(resource_group_name, name)
+
+
+def create_asev3_inbound_services(cmd, resource_group_name, name, subnet, vnet_name=None):
+    ase_client = _get_ase_client_factory(cmd.cli_ctx)
+    ase = ase_client.get(resource_group_name, name)
+    if not ase:
+        raise ResourceNotFoundError("App Service Environment '{}' not found.".format(name))
+    if ase.kind.lower() != 'asev3':
+        raise CommandNotFoundError('Only ASEv3 support private endpoint connections')
+
+    inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+    inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
+    _ensure_subnet_private_endpoint_network_policy(cmd.cli_ctx, inbound_subnet_id, False)
+
+    # Private Endpoint
+    network_client = _get_network_client_factory(cmd.cli_ctx)
+    pls_connection = PrivateLinkServiceConnection(private_link_service_id=ase.id,
+                                                  group_ids=['hostingEnvironments'],
+                                                  request_message='Link from CLI',
+                                                  name='{}-private-connection'.format(name))
+    private_endpoint = PrivateEndpoint(
+        location=ase.location,
+        tags=None,
+        subnet=Subnet(id=inbound_subnet_id)
+    )
+
+    private_endpoint.private_link_service_connections = [pls_connection]
+
+    poller = network_client.private_endpoints.begin_create_or_update(resource_group_name,
+                                                                     '{}-private-endpoint'.format(name),
+                                                                     private_endpoint)
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    ase_pe = poller.result()
+    nic_name = parse_resource_id(ase_pe.network_interfaces[0].id)['name']
+    nic = network_client.network_interfaces.get(resource_group_name, nic_name)
+
+    # Private DNS Zone
+    private_dns_client = _get_private_dns_client_factory(cmd.cli_ctx)
+    zone_name = '{}.appserviceenvironment.net'.format(name)
+    zone = PrivateZone(location='global', tags=None)
+    poller = private_dns_client.private_zones.create_or_update(resource_group_name, zone_name, zone, if_none_match='*')
+    LongRunningOperation(cmd.cli_ctx)(poller)
+
+    link_name = '{}_link'.format(name)
+    link = VirtualNetworkLink(location='global', tags=None)
+    link.virtual_network = SubResource(id=inbound_vnet_id)
+    link.registration_enabled = False
+    private_dns_client.virtual_network_links.create_or_update(resource_group_name, zone_name,
+                                                              link_name, link, if_none_match='*')
+    ase_record = ARecord(ipv4_address=nic.ip_configurations[0].private_ip_address)
+    record_set = RecordSet(ttl=3600)
+    record_set.a_records = [ase_record]
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*', record_set)
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '@', record_set)
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*.scm', record_set)
 
 
 def _get_ase_client_factory(cli_ctx):
@@ -160,6 +210,11 @@ def _get_network_client_factory(cli_ctx, api_version=None):
     return client
 
 
+def _get_private_dns_client_factory(cli_ctx):
+    client = get_mgmt_service_client(cli_ctx, PrivateDnsManagementClient)
+    return client
+
+
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     resource_group_client = _get_resource_client_factory(cli_ctx).resource_groups
     group = resource_group_client.get(resource_group_name)
@@ -176,7 +231,7 @@ def _get_resource_group_name_from_ase(ase_client, ase_name):
             ase_found = True
             break
     if not ase_found:
-        raise ResourceNotFoundError("App service environment '{}' not found in subscription.".format(ase_name))
+        raise ResourceNotFoundError("App Service Environment '{}' not found in subscription.".format(ase_name))
     return resource_group
 
 
@@ -194,6 +249,18 @@ def _validate_subnet_id(cli_ctx, subnet, vnet_name, resource_group_name):
             child_type_1='subnets',
             child_name_1=subnet)
     raise MutuallyExclusiveArgumentError('Please specify either: --subnet ID or (--subnet NAME and --vnet-name NAME)')
+
+
+def _get_vnet_id_from_subnet(cli_ctx, subnet_id):
+    subnet_id_parts = parse_resource_id(subnet_id)
+    vnet_resource_group = subnet_id_parts['resource_group']
+    vnet_name = subnet_id_parts['name']
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=vnet_resource_group,
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_name)
 
 
 def _map_worker_sku(sku_name):
@@ -233,56 +300,52 @@ def _validate_subnet_size(cli_ctx, subnet_id):
         raise validation_error
 
 
-def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
+def _ensure_subnet_private_endpoint_network_policy(cli_ctx, subnet_id, network_policy_enabled):
     network_client = _get_network_client_factory(cli_ctx)
+    subnet_id_parts = parse_resource_id(subnet_id)
+    vnet_resource_group = subnet_id_parts['resource_group']
+    vnet_name = subnet_id_parts['name']
+    subnet_name = subnet_id_parts['resource_name']
+    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+    target_state = 'Enabled' if network_policy_enabled else 'Disabled'
 
-    # Inbound
-    in_subnet_id_parts = parse_resource_id(inbound_subnet_id)
-    in_vnet_resource_group = in_subnet_id_parts['resource_group']
-    in_vnet_name = in_subnet_id_parts['name']
-    in_subnet_name = in_subnet_id_parts['resource_name']
-    in_subnet_obj = network_client.subnets.get(in_vnet_resource_group, in_vnet_name, in_subnet_name)
-    if in_subnet_obj.private_endpoint_network_policies == 'Enabled':
-        logger.warning('Disabling inbound subnet Private Endpoint Network Policy setting.')
-        in_subnet_obj.private_endpoint_network_policies = 'Disabled'
+    if subnet_obj.private_endpoint_network_policies != target_state:
+        subnet_obj.private_endpoint_network_policies = target_state
         try:
             poller = network_client.subnets.begin_create_or_update(
-                in_vnet_resource_group, in_vnet_name,
-                in_subnet_name, subnet_parameters=in_subnet_obj)
+                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
         except Exception:
-            err_msg = 'Inbound subnet must have Private Endpoint Network Policy disabled.'
+            err_msg = 'Subnet must have Private Endpoint Network Policy {}.'.format(target_state)
             rec_msg = 'Use: az network vnet subnet update --disable-private-endpoint-network-policies'
             validation_error = ValidationError(err_msg)
             validation_error.set_recommendation(rec_msg)
             raise validation_error
 
-    # Outbound
-    out_subnet_id_parts = parse_resource_id(outbound_subnet_id)
-    out_vnet_resource_group = out_subnet_id_parts['resource_group']
-    out_vnet_name = out_subnet_id_parts['name']
-    out_subnet_name = out_subnet_id_parts['resource_name']
-    out_subnet_obj = network_client.subnets.get(out_vnet_resource_group, out_vnet_name, out_subnet_name)
-    if out_subnet_obj.resource_navigation_links:
-        raise ValidationError('Outbound subnet is not empty.')
 
-    delegations = out_subnet_obj.delegations
+def _ensure_subnet_delegation(cli_ctx, subnet_id, delegation_service_name):
+    network_client = _get_network_client_factory(cli_ctx)
+    subnet_id_parts = parse_resource_id(subnet_id)
+    vnet_resource_group = subnet_id_parts['resource_group']
+    vnet_name = subnet_id_parts['name']
+    subnet_name = subnet_id_parts['resource_name']
+    subnet_obj = network_client.subnets.get(vnet_resource_group, vnet_name, subnet_name)
+
+    delegations = subnet_obj.delegations
     delegated = False
     for d in delegations:
-        if d.service_name.lower() == "microsoft.web/hostingenvironments":
+        if d.service_name.lower() == delegation_service_name.lower():
             delegated = True
 
     if not delegated:
-        logger.warning('Adding delegation for Microsoft.Web/hostingEnvironments to outbound subnet.')
-        out_subnet_obj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/hostingEnvironments")]
+        subnet_obj.delegations = [Delegation(name="delegation", service_name=delegation_service_name)]
         try:
             poller = network_client.subnets.begin_create_or_update(
-                out_vnet_resource_group, out_vnet_name,
-                out_subnet_name, subnet_parameters=out_subnet_obj)
+                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
         except Exception:
-            err_msg = 'Outbound subnet must be delegated to Microsoft.Web/hostingEnvironments.'
-            rec_msg = 'Use: az network vnet subnet update --delegations "Microsoft.Web/hostingEnvironments"'
+            err_msg = 'Subnet must be delegated to {}.'.format(delegation_service_name)
+            rec_msg = 'Use: az network vnet subnet update --delegations "{}"'.format(delegation_service_name)
             validation_error = ValidationError(err_msg)
             validation_error.set_recommendation(rec_msg)
             raise validation_error
@@ -364,63 +427,14 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
                                                                                    ase_nsg_name, ase_nsg)
             LongRunningOperation(cli_ctx)(poller)
 
-            logger.info('Ensure Network Security Group Rules...')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-management',
-                             100, 'Used to manage ASE from public VIP', '*', 'Allow', 'Inbound',
-                             '*', 'AppServiceManagement', '454-455', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-load-balancer-keep-alive',
-                             105, 'Allow communication to ASE from Load Balancer', '*', 'Allow', 'Inbound',
-                             '*', 'AzureLoadBalancer', '16001', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'ASE-internal-inbound',
-                             110, 'ASE-internal-inbound', '*', 'Allow', 'Inbound',
-                             '*', subnet_address_prefix, '*', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-HTTP',
-                             120, 'Allow HTTP', '*', 'Allow', 'Inbound',
-                             '*', '*', '80', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-HTTPS',
-                             130, 'Allow HTTPS', '*', 'Allow', 'Inbound',
-                             '*', '*', '443', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTP',
-                             140, 'Allow FTP', '*', 'Allow', 'Inbound',
-                             '*', '*', '21', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTPS',
-                             150, 'Allow FTPS', '*', 'Allow', 'Inbound',
-                             '*', '*', '990', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTP-Data',
-                             160, 'Allow FTP Data', '*', 'Allow', 'Inbound',
-                             '*', '*', '10001-10020', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-Remote-Debugging',
-                             170, 'Visual Studio remote debugging', '*', 'Allow', 'Inbound',
-                             '*', '*', '4016-4022', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-443',
-                             100, 'Azure Storage blob', '*', 'Allow', 'Outbound',
-                             '*', '*', '443', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-DB',
-                             110, 'Database', '*', 'Allow', 'Outbound',
-                             '*', '*', '1433', 'Sql')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-DNS',
-                             120, 'DNS', '*', 'Allow', 'Outbound',
-                             '*', '*', '53', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'ASE-internal-outbound',
-                             130, 'Azure Storage queue', '*', 'Allow', 'Outbound',
-                             '*', '*', '*', subnet_address_prefix)
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-80',
-                             140, 'Outbound 80', '*', 'Allow', 'Outbound',
-                             '*', '*', '80', '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-monitor',
-                             150, 'Azure Monitor', '*', 'Allow', 'Outbound',
-                             '*', '*', 12000, '*')
-            _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-NTP',
-                             160, 'Clock', '*', 'Allow', 'Outbound',
-                             '*', '*', '123', '*')
+            _create_asev2_nsg_rules(cli_ctx, resource_group_name, ase_nsg_name, subnet_address_prefix)
 
         nsg = network_client.network_security_groups.get(resource_group_name, ase_nsg_name)
         if not subnet_obj.network_security_group or subnet_obj.network_security_group.id != nsg.id:
             logger.info('Associate Network Security Group with Subnet...')
             subnet_obj.network_security_group = NetworkSecurityGroup(id=nsg.id)
             poller = network_client.subnets.begin_create_or_update(
-                vnet_resource_group, vnet_name,
-                subnet_name, subnet_parameters=subnet_obj)
+                vnet_resource_group, vnet_name, subnet_name, subnet_parameters=subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
     else:
         nsg_id_parts = parse_resource_id(subnet_obj.network_security_group.id)
@@ -429,8 +443,7 @@ def _ensure_network_security_group(cli_ctx, resource_group_name, ase_name, locat
             err_msg = 'Network Security Group already exists.'
             rec_msg = 'Use --ignore-network-security-group to use existing NSG ' \
                       'or --force-network-security-group to replace existing NSG'
-            validation_error = ValidationError(err_msg)
-            validation_error.set_recommendation(rec_msg)
+            validation_error = ValidationError(err_msg, rec_msg)
             raise validation_error
 
 
@@ -438,8 +451,8 @@ def _get_unique_deployment_name(prefix):
     return prefix + random_string(16)
 
 
-def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
-                                     front_end_scale_factor=None, front_end_sku=None, tags=None):
+def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type=None,
+                                     front_end_scale_factor=None, front_end_sku=None, tags=None, kind='ASEv2'):
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
@@ -461,8 +474,8 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
         'name': name,
         'type': 'Microsoft.Web/hostingEnvironments',
         'location': location,
-        'apiVersion': '2019-02-01',
-        'kind': 'ASEV2',
+        'apiVersion': '2019-08-01',
+        'kind': kind,
         'tags': tags,
         'properties': ase_properties
     }
@@ -477,63 +490,56 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
     return deployment
 
 
-def _build_asev3_deployment_properties(name, location, inbound_subnet_id, outbound_subnet_id, tags=None):
-    ase_properties = {
-        "location": location,
-        "virtualNetwork": {
-            "id": outbound_subnet_id
-        }
-    }
-
-    ase_resource = {
-        "name": name,
-        "type": "Microsoft.Web/hostingEnvironments",
-        "location": location,
-        "apiVersion": "2019-08-01",
-        "kind": "ASEV3",
-        "tags": tags,
-        "properties": ase_properties
-    }
-
-    privateLinkConnectionName = '{}-privateLink'.format(name)
-    pe_properties = {
-        "subnet": {
-            "id": inbound_subnet_id
-        },
-        "privateLinkServiceConnections": [
-            {
-                "name": privateLinkConnectionName,
-                "properties": {
-                    "privateLinkServiceId": "[resourceId('Microsoft.Web/hostingEnvironments', '{}')]".format(name),
-                    "groupIds": [
-                        "hostingEnvironments"
-                    ]
-                }
-            }
-        ]
-    }
-
-    privateEndpointName = '{}-privateEndpoint'.format(name)
-    pe_resource = {
-        "name": privateEndpointName,
-        "type": "Microsoft.Network/privateEndpoints",
-        "location": location,
-        "apiVersion": "2019-04-01",
-        "dependsOn": [
-            "[resourceId('Microsoft.Web/hostingEnvironments', '{}')]".format(name)
-        ],
-        "properties": pe_properties
-    }
-
-    deployment_template = ArmTemplateBuilder()
-    deployment_template.add_resource(ase_resource)
-    deployment_template.add_resource(pe_resource)
-    template = deployment_template.build()
-    parameters = deployment_template.build_parameters()
-
-    deploymentProperties = DeploymentProperties(template=template, parameters=parameters, mode='Incremental')
-    deployment = Deployment(properties=deploymentProperties)
-    return deployment
+def _create_asev2_nsg_rules(cli_ctx, resource_group_name, ase_nsg_name, subnet_address_prefix):
+    logger.info('Ensure Network Security Group Rules...')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-management',
+                     100, 'Used to manage ASE from public VIP', '*', 'Allow', 'Inbound',
+                     '*', 'AppServiceManagement', '454-455', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-load-balancer-keep-alive',
+                     105, 'Allow communication to ASE from Load Balancer', '*', 'Allow', 'Inbound',
+                     '*', 'AzureLoadBalancer', '16001', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'ASE-internal-inbound',
+                     110, 'ASE-internal-inbound', '*', 'Allow', 'Inbound',
+                     '*', subnet_address_prefix, '*', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-HTTP',
+                     120, 'Allow HTTP', '*', 'Allow', 'Inbound',
+                     '*', '*', '80', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-HTTPS',
+                     130, 'Allow HTTPS', '*', 'Allow', 'Inbound',
+                     '*', '*', '443', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTP',
+                     140, 'Allow FTP', '*', 'Allow', 'Inbound',
+                     '*', '*', '21', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTPS',
+                     150, 'Allow FTPS', '*', 'Allow', 'Inbound',
+                     '*', '*', '990', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-FTP-Data',
+                     160, 'Allow FTP Data', '*', 'Allow', 'Inbound',
+                     '*', '*', '10001-10020', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Inbound-Remote-Debugging',
+                     170, 'Visual Studio remote debugging', '*', 'Allow', 'Inbound',
+                     '*', '*', '4016-4022', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-443',
+                     100, 'Azure Storage blob', '*', 'Allow', 'Outbound',
+                     '*', '*', '443', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-DB',
+                     110, 'Database', '*', 'Allow', 'Outbound',
+                     '*', '*', '1433', 'Sql')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-DNS',
+                     120, 'DNS', '*', 'Allow', 'Outbound',
+                     '*', '*', '53', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'ASE-internal-outbound',
+                     130, 'Azure Storage queue', '*', 'Allow', 'Outbound',
+                     '*', '*', '*', subnet_address_prefix)
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-80',
+                     140, 'Outbound 80', '*', 'Allow', 'Outbound',
+                     '*', '*', '80', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-monitor',
+                     150, 'Azure Monitor', '*', 'Allow', 'Outbound',
+                     '*', '*', '12000', '*')
+    _create_nsg_rule(cli_ctx, resource_group_name, ase_nsg_name, 'Outbound-NTP',
+                     160, 'Clock', '*', 'Allow', 'Outbound',
+                     '*', '*', '123', '*')
 
 
 def _create_nsg_rule(cli_ctx, resource_group_name, network_security_group_name, security_rule_name,

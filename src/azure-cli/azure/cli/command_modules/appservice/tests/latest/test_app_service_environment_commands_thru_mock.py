@@ -190,7 +190,6 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
         subnet_name = 'mock_subnet_name'
-        inbound_subnet_name = 'mock_inbound_subnet_name'
         deployment_name = 'mock_deployment_name'
 
         ase_client = mock.MagicMock()
@@ -210,7 +209,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         network_client.subnets.get.return_value = subnet
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
                                          subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
-                                         inbound_subnet=inbound_subnet_name, location='westeurope')
+                                         location='westeurope')
 
         # Assert create_or_update is called with correct rg and deployment name
         resource_client_mock.deployments.create_or_update.assert_called_once()

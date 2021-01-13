@@ -891,8 +891,6 @@ def load_arguments(self, _):
                    help='Scale of front ends to app service plan instance ratio.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
                    help='Size of front end servers.')
-        c.argument('inbound_subnet', help='Required for ASEv3. Name or ID of existing subnet. \
-                   To create vnet and/or subnet use `az network vnet [subnet] create`')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
@@ -907,6 +905,12 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase list-plans') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('appservice ase create-inbound-services') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
+        c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
+                   To create vnet and/or subnet use `az network vnet [subnet] create`')
+        c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:

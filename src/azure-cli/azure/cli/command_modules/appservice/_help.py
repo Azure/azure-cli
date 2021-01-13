@@ -2186,8 +2186,18 @@ helps['appservice ase create'] = """
           az network vnet subnet create -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
             --name Outbound --address-prefixes 10.0.1.0/24
 
-          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
-            --subnet Outbound --inbound-subnet Inbound --kind asev3
+          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Outbound --kind asev3
+"""
+
+helps['appservice ase create-inbound-services'] = """
+    type: command
+    short-summary: Creates the inbound services needed in preview for ASEv3 (private endpoint and dns).
+    examples:
+    - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
+      text: |
+          az appservice ase create-inbound-services -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Inbound
 """
 
 
