@@ -185,7 +185,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_v3_create(self, ase_client_factory_mock, network_client_factory_mock,
-                                              resource_client_factory_mock, deployment_name_mock):
+                                               resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -209,13 +209,14 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         subnet.delegations = [hosting_delegation]
         network_client.subnets.get.return_value = subnet
         create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
-                                             subnet=subnet_name, vnet_name=vnet_name, kind='asev3',
-                                             inbound_subnet=inbound_subnet_name, location='westeurope')
+                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         inbound_subnet=inbound_subnet_name, location='westeurope')
 
         # Assert create_or_update is called with correct rg and deployment name
         resource_client_mock.deployments.create_or_update.assert_called_once()
         self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
         self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
+
 
 if __name__ == '__main__':
     unittest.main()

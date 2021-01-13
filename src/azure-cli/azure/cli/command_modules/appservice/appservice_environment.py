@@ -242,7 +242,7 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
         logger.warning('Disabling inbound subnet Private Endpoint Network Policy setting.')
         in_subnet_obj.private_endpoint_network_policies = 'Disabled'
         try:
-            poller = network_client.subnets.create_or_update(
+            poller = network_client.subnets.begin_create_or_update(
                 in_vnet_resource_group, in_vnet_name,
                 in_subnet_name, subnet_parameters=in_subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
@@ -269,7 +269,7 @@ def _ensure_subnets_asev3(cli_ctx, inbound_subnet_id, outbound_subnet_id):
         logger.warning('Adding delegation for hostingEnvironments to outbound subnet.')
         out_subnet_obj.delegations = [Delegation(name="delegation", service_name="Microsoft.Web/hostingEnvironments")]
         try:
-            poller = network_client.subnets.create_or_update(
+            poller = network_client.subnets.begin_create_or_update(
                 out_vnet_resource_group, out_vnet_name,
                 out_subnet_name, subnet_parameters=out_subnet_obj)
             LongRunningOperation(cli_ctx)(poller)
