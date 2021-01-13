@@ -152,6 +152,18 @@ type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
+helps["aks check-acr"] = """
+type: command
+short-summary: Validate an ACR is accesible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accesible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
 helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
