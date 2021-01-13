@@ -212,51 +212,49 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         # flexible-server create with user input
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_name_2 = self.create_random_name(SERVER_NAME_PREFIX + '2', SERVER_NAME_MAX_LENGTH)
+        server_name_3 = self.create_random_name(SERVER_NAME_PREFIX + '3', SERVER_NAME_MAX_LENGTH)
 
         # IOPS passed is within limit of max allowed by SKU but smaller than storage*3
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 200'
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 200 --tier Burstable --sku-name Standard_B1s'
                  .format(database_engine, resource_group, server_name, location))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
 
-        # IOPS passed exceeds max iops
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1s --iops 500'
+        # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 600)])
+    
+        # SKU downgraded and IOPS not specified
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+
+        # IOPS passed is within limit of max allowed by SKU but smaller than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1s'
                  .format(database_engine, resource_group, server_name_2, location))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 320)])
+                 checks=[JMESPathCheck('storageProfile.storageIops', 100)])
 
-        # SKU upgraded and IOPS value set beyond limit of max of IOPS of new SKU
-        self.cmd('{} flexible-server update -g {} -n {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --iops 3400'
-                 .format(database_engine, resource_group, server_name))
-
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 3200)])
-
-        # SKU upgraded and IOPS value set within limit of max of IOPS
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B2s --iops 500'
-                 .format(database_engine, resource_group, server_name_2))
-
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 1280)])
-
-        # SKU downgraded and user supplied IOPS <= Max IOPS supported by the new SKU
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B2s --iops 1200'
-                 .format(database_engine, resource_group, server_name))
-
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storageProfile.storageIops', 1200)])
-
-        # SKU downgraded and user supplied IOPS > Max IOPS supported by the new SKU
-        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 1500'
-                 .format(database_engine, resource_group, server_name_2))
-
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
+        # SKU upgraded and IOPS value set bigger than max iops for the sku 
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
+                 .format(database_engine, resource_group, server_name_2),
                  checks=[JMESPathCheck('storageProfile.storageIops', 640)])
+    
 
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name_2), checks=NoneCheck())
+        # IOPS passed is within limit of max allowed by SKU and bigger than default
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
+                 .format(database_engine, resource_group, server_name_3, location))
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 120)])
+
+        # SKU upgraded and IOPS value set lower than max iops for the sku but bigger than free iops
+        self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --storage-size 300 --iops 500'
+                 .format(database_engine, resource_group, server_name_3),
+                 checks=[JMESPathCheck('storageProfile.storageIops', 640)])
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
