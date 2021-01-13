@@ -38,7 +38,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         location = DEFAULT_LOCATION_MySQL
     sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
-    
 
     from azure.mgmt.rdbms import mysql_flexibleservers
     try:
@@ -92,7 +91,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
         # calculate IOPS
         iops = _determine_iops(storage_mb, iops_info, iops, tier, sku_name)
 
-        storage_mb *= 1024 # storage input comes in GiB value
+        storage_mb *= 1024  # storage input comes in GiB value
         administrator_login_password = generate_password(administrator_login_password)
         if server_result is None:
             # Create mysql server
@@ -200,7 +199,7 @@ def flexible_server_update_custom_func(cmd, instance,
 
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb * 1024
-    
+
     sku_rank = {'Standard_B1s': 1, 'Standard_B1ms': 2, 'Standard_B2s': 3, 'Standard_D2ds_v4': 4,
                 'Standard_D4ds_v4': 5, 'Standard_D8ds_v4': 6,
                 'Standard_D16ds_v4': 7, 'Standard_D32ds_v4': 8, 'Standard_D48ds_v4': 9, 'Standard_D64ds_v4': 10,
@@ -210,12 +209,11 @@ def flexible_server_update_custom_func(cmd, instance,
                 'Standard_E64ds_v4': 17}
 
     if iops:
-        
         if (tier is not None and sku_name is None) or (tier is None and sku_name is not None):
             raise CLIError('Argument Error. If you pass --tier, --sku_name is a mandatory parameter and vice-versa.')
 
         if tier is None and sku_name is None:
-            iops = _determine_iops(instance.storage_profile.storage_mb//1024, iops_info, iops, instance.sku.tier, instance.sku.name)
+            iops = _determine_iops(instance.storage_profile.storage_mb // 1024, iops_info, iops, instance.sku.tier, instance.sku.name)
 
         else:
             new_sku_rank = sku_rank[sku_name]
@@ -223,8 +221,8 @@ def flexible_server_update_custom_func(cmd, instance,
             supplied_iops = iops
             max_allowed_iops_new_sku = iops_info[tier][sku_name]
             default_iops = 100
-            free_iops = (instance.storage_profile.storage_mb//1024) * 3
-            
+            free_iops = (instance.storage_profile.storage_mb // 1024) * 3
+
             # Downgrading SKU
             if new_sku_rank < old_sku_rank:
                 if supplied_iops > max_allowed_iops_new_sku:
@@ -269,14 +267,13 @@ def flexible_server_update_custom_func(cmd, instance,
         instance.sku.name = sku_name
         instance.sku.tier = tier
         max_allowed_iops_new_sku = iops_info[tier][sku_name]
-        max_allowed_iops_old_sku = iops_info[tier][instance.sku.name]
-        iops = instance.storage_profile.storage_iops 
+        iops = instance.storage_profile.storage_iops
 
-        if new_sku_rank < old_sku_rank: # Downgrading
+        if new_sku_rank < old_sku_rank:  # Downgrading
             if instance.storage_profile.storage_iops > max_allowed_iops_new_sku:
                 logger.warning('Updating the server with max %s IOPS...', iops)
                 iops = max_allowed_iops_new_sku
-        else: # Upgrading
+        else:  # Upgrading
             if instance.storage_profile.storage_iops < (instance.storage_profile.storage_mb // 1024) * 3:
                 iops = min(max_allowed_iops_new_sku, (instance.storage_profile.storage_mb // 1024) * 3)
                 logger.warning('Updating the server with free %s IOPS...', iops)

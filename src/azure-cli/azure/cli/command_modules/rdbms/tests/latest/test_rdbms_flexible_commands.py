@@ -69,19 +69,19 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
+    @ResourceGroupPreparer(name_prefix='daeunyim-test-', location=mysql_location)
     def test_mysql_flexible_server_iops_mgmt(self, resource_group):
         self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # def test_postgres_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('postgres', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('postgres', resource_group)
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=mysql_location)
-    # def test_mysql_flexible_server_mgmt(self, resource_group):
-    #     self._test_flexible_server_mgmt('mysql', resource_group)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group):
+        self._test_flexible_server_mgmt('mysql', resource_group)
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
 
@@ -225,7 +225,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 400'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storageProfile.storageIops', 600)])
-    
+
         # SKU downgraded and IOPS not specified
         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1s'
                  .format(database_engine, resource_group, server_name),
@@ -238,11 +238,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
                  checks=[JMESPathCheck('storageProfile.storageIops', 100)])
 
-        # SKU upgraded and IOPS value set bigger than max iops for the sku 
+        # SKU upgraded and IOPS value set bigger than max iops for the sku
         self.cmd('{} flexible-server update -g {} -n {} --tier Burstable --sku-name Standard_B1ms --iops 700'
                  .format(database_engine, resource_group, server_name_2),
                  checks=[JMESPathCheck('storageProfile.storageIops', 640)])
-    
 
         # IOPS passed is within limit of max allowed by SKU and bigger than default
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 40 --tier Burstable --sku-name Standard_B1s'
