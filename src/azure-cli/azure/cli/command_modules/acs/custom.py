@@ -1504,8 +1504,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         kubectl_minor_version = int(kubectl_version["clientVersion"]["minor"])
         if int(kubectl_version["serverVersion"]["minor"]) < 17:
             logger.warning('There is a known issue for Kuberentes versions < 1.17 when connecting to '
-                            'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
-                            'more information.')
+                           'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
+                           'more information.')
     except subprocess.CalledProcessError as err:
         raise ValidationError("Could not find kubectl minor version: {}".format(err))
     if kubectl_minor_version == -1:
