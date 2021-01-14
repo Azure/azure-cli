@@ -1800,7 +1800,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             "Name2": "Value2",
             "Name3": "",
             "Name4": {
-                "key":"value"
+                "key": "value"
             }
         }
 
@@ -1925,7 +1925,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                 "three"
             ],
             # This is the output in python object format - our backend stores the bool and null values in correct JSON format
-            "BoolParam": True, 
+            "BoolParam": True,
             "NullParam": None
         }
 
