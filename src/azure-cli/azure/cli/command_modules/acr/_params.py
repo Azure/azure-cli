@@ -49,10 +49,10 @@ image_by_tag_or_digest_type = CLIArgumentType(
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
         BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, \
-        TokenStatus, ZoneRedundancy = self.get_models(
+        TokenStatus, ZoneRedundancy, NetworkRuleBypassOptions  = self.get_models(
             'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
             'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
-            'TokenStatus', 'ZoneRedundancy')
+            'TokenStatus', 'ZoneRedundancy', 'NetworkRuleBypassOptions ')
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
@@ -82,7 +82,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         with self.argument_context(scope, arg_group='Network Rule') as c:
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
-            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry. The Default is allowed")
+            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry. The Default is to allow public access.")
+            c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services. The default is to allow trusted services. ")
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
