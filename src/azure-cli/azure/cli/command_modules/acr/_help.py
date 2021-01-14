@@ -1232,7 +1232,7 @@ examples:
   - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
-            -t app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
+            --repository app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 
