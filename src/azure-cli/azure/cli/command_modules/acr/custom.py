@@ -140,7 +140,8 @@ def _configure_public_network_access(cmd, registry, enabled):
 def _handle_network_bypass(cmd, registry, allow_trusted_services):
     if allow_trusted_services is not None:
         NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions')
-        registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services if allow_trusted_services else NetworkRuleBypassOptions.none)
+        registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services
+                                                if allow_trusted_services else NetworkRuleBypassOptions.none)
 
 
 def acr_update_get(cmd):
