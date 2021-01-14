@@ -16,7 +16,7 @@ Release History
 **ACR**
 
 * Support zone redundancy (#15975)
-* `az acr connected-registry`: Added support for private preview of connected registry feature. (#16238)
+* `az acr connected-registry`: add support for private preview of connected registry feature. (#16238)
 * `az acr scope-map update`: Deprecated the --add and --remove argument names, replaced with --add-repo and --remove-repo. (#16238)
 * `az acr scope-map create/update`: Introduced gateway permissions to support private preview of connected registry feature. (#16238)
 * `az acr token create`: Introduced synchronization tokens to support private preview of connected registry feature. (#16238)
