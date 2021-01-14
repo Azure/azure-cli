@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 def _resource_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, None, "2020-06-01")
 
 
 def web_client_factory(cli_ctx, **_):
