@@ -271,8 +271,8 @@ def flexible_server_update_custom_func(cmd, instance,
 
         if new_sku_rank < old_sku_rank:  # Downgrading
             if instance.storage_profile.storage_iops > max_allowed_iops_new_sku:
-                logger.warning('Updating the server with max %s IOPS...', iops)
                 iops = max_allowed_iops_new_sku
+                logger.warning('Updating the server with max %s IOPS...', iops)
         else:  # Upgrading
             if instance.storage_profile.storage_iops < (instance.storage_profile.storage_mb // 1024) * 3:
                 iops = min(max_allowed_iops_new_sku, (instance.storage_profile.storage_mb // 1024) * 3)

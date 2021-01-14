@@ -69,7 +69,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     mysql_location = 'eastus2euap'
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='daeunyim-test-', location=mysql_location)
+    @ResourceGroupPreparer(location=mysql_location)
     def test_mysql_flexible_server_iops_mgmt(self, resource_group):
         self._test_flexible_server_iops_mgmt('mysql', resource_group)
 
