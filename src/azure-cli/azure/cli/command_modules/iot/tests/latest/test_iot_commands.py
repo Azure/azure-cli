@@ -407,7 +407,7 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'identity-test-hub-cli-2'
+        identity_hub = self.create_random_name(prefix='identitytesthub', length=32)
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
