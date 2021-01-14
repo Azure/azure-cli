@@ -80,9 +80,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group='Network Rule') as c:
+            default_allow_suffix = " The Default is to allow." if "create" in scope else ""
+
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
-            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry. The Default is allowed")
+            c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
+            c.argument('allow_trusted_services', get_three_state_flag(), is_preview=True, help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
 
     with self.argument_context('acr create', arg_group="Customer managed key") as c:
         c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
