@@ -627,23 +627,30 @@ class WebAppUpE2ETests(ScenarioTest):
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node 10.6" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "java|1.8|Java SE|8" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['sku'].lower() == 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
-        self.assertTrue(result['runtime_version'] == 'node|10.6')
-        self.assertTrue(result['os'].lower() == 'linux')
+        self.assertTrue(result['runtime_version'] == 'java|1.8|Java SE|8')
 
         # test dryrun operation
         result = self.cmd(
-            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node:10.1" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+            'webapp up -n {} -g {} --plan {} --os "linux" --runtime "node 10.1" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
         self.assertTrue(result['sku'].lower() == 'standard')
         self.assertTrue(result['name'].startswith(webapp_name))
         self.assertTrue(result['src_path'].replace(
             os.sep + os.sep, os.sep), up_working_dir)
         self.assertTrue(result['runtime_version'] == 'node|10.1')
-        self.assertTrue(result['os'].lower() == 'linux')
+
+        # test dryrun operation
+        result = self.cmd(
+            'webapp up -n {} -g {} --plan {} --os "windows" --runtime "java:1.8:Java SE:8" --sku "S1" --dryrun'.format(webapp_name, resource_group, plan)).get_output_in_json()
+        self.assertTrue(result['sku'].lower() == 'standard')
+        self.assertTrue(result['name'].startswith(webapp_name))
+        self.assertTrue(result['src_path'].replace(
+            os.sep + os.sep, os.sep), up_working_dir)
+        self.assertTrue(result['runtime_version'] == 'java|1.8|Java SE|8')
 
         # cleanup
         # switch back the working dir
