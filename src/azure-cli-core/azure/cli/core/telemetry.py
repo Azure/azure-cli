@@ -53,8 +53,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.error_type = 'None'
         # The class name of the raw exception
         self.exception_name = 'None'
-        # The stacktrace of the raw exception
-        self.stack_trace = 'None'
         self.init_time_elapsed = None
         self.invoke_time_elapsed = None
         self.debug_info = []
@@ -64,12 +62,12 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         # stops generate_payload() from adding new azurecli/command event
         # used for interactive to send new custom event upon exit
         self.suppress_new_event = False
+        self.poll_start_time = None
+        self.poll_end_time = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         # Move the exception info into userTask record, in order to make one Telemetry record for one command
         self.exception_name = exception.__class__.__name__
-        self.result_summary = _remove_cmd_chars(message or str(exception))
-        self.stack_trace = _remove_cmd_chars(_get_stack_trace())
 
         # Backward compatible, so there are duplicated info recorded
         # The logic below should be removed along with self.exceptions after confirmation
@@ -81,7 +79,6 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
             AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
 
@@ -200,8 +197,9 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
         set_custom_properties(result, 'error_type', self.error_type)
         set_custom_properties(result, 'exception_name', self.exception_name)
-        set_custom_properties(result, 'stack_trace', self.stack_trace)
         set_custom_properties(result, 'debug_info', ','.join(self.debug_info))
+        set_custom_properties(result, 'PollStartTime', str(self.poll_start_time))
+        set_custom_properties(result, 'PollEndTime', str(self.poll_end_time))
 
         return result
 
@@ -262,6 +260,16 @@ def set_init_time_elapsed(init_time_elapsed):
 @decorators.suppress_all_exceptions()
 def set_invoke_time_elapsed(invoke_time_elapsed):
     _session.invoke_time_elapsed = invoke_time_elapsed
+
+
+@decorators.suppress_all_exceptions()
+def poll_start():
+    _session.poll_start_time = datetime.datetime.utcnow()
+
+
+@decorators.suppress_all_exceptions()
+def poll_end():
+    _session.poll_end_time = datetime.datetime.utcnow()
 
 
 @_user_agrees_to_telemetry

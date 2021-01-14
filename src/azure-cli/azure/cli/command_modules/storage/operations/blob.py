@@ -46,9 +46,9 @@ def create_or_update_immutability_policy(cmd, client, container_name, account_na
                                                        if_match, immutability_policy)
 
 
-def extend_immutability_policy(cmd, client, container_name, account_name,
+def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
                                resource_group_name=None, allow_protected_append_writes=None,
-                               period=None, if_match=None):
+                               period=None):
     ImmutabilityPolicy = cmd.get_models('ImmutabilityPolicy', resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy = ImmutabilityPolicy(immutability_period_since_creation_in_days=period,
                                              allow_protected_append_writes=allow_protected_append_writes)
@@ -643,7 +643,9 @@ def generate_sas_blob_uri(client, container_name, blob_name, permission=None,
             content_encoding=content_encoding, content_language=content_language, content_type=content_type)
     if full_uri:
         from ..url_quote_util import encode_url_path
-        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol, sas_token=sas_token))
+        from urllib.parse import quote
+        return encode_url_path(client.make_blob_url(container_name, blob_name, protocol=protocol,
+                                                    sas_token=quote(sas_token, safe='&%()$=\',~')))
     return sas_token
 
 
