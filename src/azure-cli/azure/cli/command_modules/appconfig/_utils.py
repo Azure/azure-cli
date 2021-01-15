@@ -10,7 +10,7 @@ from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
-from azure.mgmt.appconfiguration.models import ErrorException
+from azure.core.exceptions import HttpResponseError
 
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders
@@ -30,7 +30,7 @@ def construct_connection_string(cmd, config_store_name):
         for entry in access_keys:
             if not entry.read_only:
                 return connection_string_template.format(endpoint, entry.id, entry.value)
-    except ErrorException as ex:
+    except HttpResponseError as ex:
         raise CLIError('Failed to get access keys for the App Configuration "{}". Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}'.format(config_store_name, str(ex)))
 
     raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(config_store_name))
@@ -44,7 +44,7 @@ def resolve_store_metadata(cmd, config_store_name):
             if store.name.lower() == config_store_name.lower():
                 # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
                 return store.id.split('/')[4], store.endpoint
-    except ErrorException as ex:
+    except HttpResponseError as ex:
         raise CLIError("Failed to get the list of App Configuration stores for the current user. Make sure that the account that logged in has sufficient permissions to access the App Configuration store.\n{}".format(str(ex)))
 
     raise CLIError("Failed to find the App Configuration store '{}'.".format(config_store_name))

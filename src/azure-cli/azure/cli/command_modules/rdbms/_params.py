@@ -296,7 +296,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('database_name')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
-            c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
+            c.argument('resource_group_name', required=True)
+            c.argument('server_name', id_part='name', options_list=['--name', '-n'], required=True, arg_type=server_name_getter_arg_type)
             c.argument('yes', options_list=['--yes', '-y'], action='store_true',
                        help='Do not prompt for confirmation.')
 

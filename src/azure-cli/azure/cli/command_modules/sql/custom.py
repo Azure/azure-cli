@@ -1429,6 +1429,11 @@ def db_update(
     if read_replica_count is not None:
         instance.read_replica_count = read_replica_count
 
+    # Set storage_account_type even if storage_acount_type is None
+    # Otherwise, empty value defaults to current storage_account_type
+    # and will potentially conflict with a previously requested update
+    instance.storage_account_type = storage_account_type
+
     #####
     # Set other (serverless related) properties
     #####

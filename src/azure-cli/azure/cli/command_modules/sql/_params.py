@@ -371,9 +371,6 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('zone_redundant',
                      arg_type=zone_redundant_param_type)
 
-    arg_ctx.argument('storage_account_type',
-                     arg_type=backup_storage_redundancy_param_type)
-
 
 def _configure_db_dw_create_params(
         arg_ctx,
@@ -488,6 +485,9 @@ def _configure_db_dw_create_params(
     arg_ctx.argument('elastic_pool_id',
                      help='The name or resource id of the elastic pool to create the database in.')
 
+    arg_ctx.argument('storage_account_type',
+                     arg_type=backup_storage_redundancy_param_type)
+
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
@@ -588,9 +588,6 @@ def load_arguments(self, _):
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
-
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation.', action='store_true')
@@ -610,9 +607,6 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -641,9 +635,6 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified. ' +
                    time_format_help)
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -823,9 +814,6 @@ def load_arguments(self, _):
                    options_list=['--partner-database'],
                    help='Name of the new replica.'
                    ' If unspecified, defaults to the source database name.')
-
-        c.argument('storage_account_type',
-                   arg_type=backup_storage_redundancy_param_type)
 
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',

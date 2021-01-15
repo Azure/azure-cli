@@ -89,9 +89,6 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
                 if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None,
                 umask=None, permissions=None):
 
-    count = os.path.getsize(local_path)
-    with open(local_path, 'rb') as stream:
-        data = stream.read(count)
     from azure.core import MatchConditions
     upload_file_args = {
         'content_settings': content_settings,
@@ -126,7 +123,10 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
 
         upload_file_args['match_condition'] = MatchConditions.IfPresent
         try:
-            return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
+            count = os.path.getsize(local_path)
+            with open(local_path, 'rb') as stream:
+                response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+            return response
         except HttpResponseError as ex:
             StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
@@ -135,5 +135,7 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
                 raise CLIError("You cannot upload to an existing non-empty file with overwrite=false. "
                                "Please set --overwrite to overwrite the existing file.")
             raise ex
-
-    return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
+    count = os.path.getsize(local_path)
+    with open(local_path, 'rb') as stream:
+        response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
+    return response
