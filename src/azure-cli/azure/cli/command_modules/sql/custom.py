@@ -1650,6 +1650,7 @@ def _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name):
             next((log for log in ds.logs if log.enabled and
                   log.category == category_name), None) is not None]
 
+
 def server_ms_support_audit_policy_get(
         client,
         server_name,
