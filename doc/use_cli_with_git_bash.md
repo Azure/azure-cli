@@ -11,7 +11,7 @@ We do not recommend to use `az` installed through `pip install azure-cli` on Git
 
 On Git Bash, if you specify command-line options starting with a slash, POSIX-to-Windows path conversion will kick in. This causes an issue for passing ARM Resource IDs, like:
 
-```bash
+```azurecli
 $ az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm"
 
 invalid resource ID: C:/Program Files/Git/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm
@@ -19,7 +19,7 @@ invalid resource ID: C:/Program Files/Git/subscriptions/00000000-0000-0000-0000-
 
 To disable the path conversion. You can set environment variable `MSYS_NO_PATHCONV=1` or set it temporarily when a running command:
 
-```bash
+```azurecli
 $ MSYS_NO_PATHCONV=1 az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm"
 ```
 
@@ -30,7 +30,7 @@ More discussions [here](https://stackoverflow.com/questions/7250130/how-to-stop-
 #### Quoting Issues
 The double quotes will be stripped in the value and cause trouble when there are spaces inside the quotes since Git Bash will treat each parts separated by spaces as an individual command option.
 
-```bash
+```azurecli
 $ az find "vm create"
 $ Command arguments: ['find', 'vm', 'create', '--debug']
 ...
@@ -40,7 +40,7 @@ az: error: unrecognized arguments: create
 
 You can wrap the value with additional single quotes to avoid the issue:
 
-```bash
+```azurecli
 $ az find '"vm create"' --debug
 $ Command arguments: ['find', 'vm create', '--debug']
 ...
