@@ -1570,5 +1570,5 @@ def get_not_none_validator(attribute_name):
 
 def validate_policy(namespace):
     if namespace.id is not None:
-        logger.warning("\nPlease do not speicfy --expiry and --permissions if they are already specified in your "
+        logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
                        "policy.")
