@@ -3006,7 +3006,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "australiacentral2": "australiacentral",
         "australiaeast": "australiaeast",
         "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "southcentralus",
+        "brazilsouth": "brazilsouth",
         "canadacentral": "canadacentral",
         "canadaeast": "canadacentral",
         "centralus": "centralus",
@@ -3020,20 +3020,30 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "japanwest": "japaneast",
         "koreacentral": "koreacentral",
         "koreasouth": "koreacentral",
-        "northcentralus": "eastus",
+        "northcentralus": "northcentralus",
         "northeurope": "northeurope",
-        "southafricanorth": "westeurope",
-        "southafricawest": "westeurope",
+        "southafricanorth": "southafricanorth",
+        "southafricawest": "southafricanorth",
         "southcentralus": "southcentralus",
         "southeastasia": "southeastasia",
         "southindia": "centralindia",
         "uksouth": "uksouth",
-        "ukwest": "uksouth",
+        "ukwest": "ukwest",
         "westcentralus": "eastus",
         "westeurope": "westeurope",
         "westindia": "centralindia",
         "westus": "westus",
-        "westus2": "westus2"
+        "westus2": "westus2",
+        "norwayeast": "norwayeast",
+        "norwaywest": "norwayeast",
+        "switzerlandnorth": "switzerlandnorth",
+        "switzerlandwest": "switzerlandwest",
+        "uaenorth": "uaenorth",
+        "germanywestcentral": "germanywestcentral",
+        "germanynorth": "germanywestcentral",
+        "uaecentral": "uaecentral",
+        "eastus2euap": "eastus2euap",
+        "brazilsoutheast": "brazilsoutheast"
     }
 
     # mapping for azure china cloud
@@ -3053,10 +3063,13 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # mapping for azure us governmner cloud
     AzureFairfaxLocationToOmsRegionCodeMap = {
-        "usgovvirginia": "USGV"
+        "usgovvirginia": "USGV",
+        "usgovarizona": "PHX"
     }
     AzureFairfaxRegionToOmsRegionMap = {
-        "usgovvirginia": "usgovvirginia"
+        "usgovvirginia": "usgovvirginia",
+        "usgovtexas": "usgovvirginia",
+        "usgovarizona": "usgovarizona"
     }
 
     rg_location = _get_rg_location(cmd.cli_ctx, resource_group_name)
