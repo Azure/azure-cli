@@ -242,7 +242,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01') as g:
         from ._transformers import transform_restore_policy_output
         g.show_command('show', 'get_service_properties', transform=transform_restore_policy_output)
         g.generic_update_command('update',
@@ -363,7 +363,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
-        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
+        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', supports_no_wait=True)
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
