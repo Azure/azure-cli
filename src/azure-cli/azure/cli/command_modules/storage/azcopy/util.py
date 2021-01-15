@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.5.0'
+AZCOPY_VERSION = '10.8.0'
 
 
 class AzCopy:
@@ -39,7 +39,7 @@ class AzCopy:
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext.azureedge.net/release20200709/azcopy_{}_{}_{}.{}'
+        base_url = 'https://azcopyvnext.azureedge.net/release20201211/azcopy_{}_{}_{}.{}'
 
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
@@ -57,7 +57,8 @@ class AzCopy:
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         except IOError as err:
-            raise CLIError('Connection error while attempting to download azcopy ({})'.format(err))
+            raise CLIError('Connection error while attempting to download azcopy ({}). You could also install azcopy '
+                           '{} to {} manually.'.format(err))
 
     def check_version(self):
         try:
