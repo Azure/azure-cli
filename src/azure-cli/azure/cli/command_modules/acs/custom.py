@@ -2999,7 +2999,18 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         "westcentralus": "EUS",
         "westeurope": "WEU",
         "westus": "WUS",
-        "westus2": "WUS2"
+        "westus2": "WUS2",
+        "brazilsouth": "CQ",
+        "brazilsoutheast": "BRSE",
+        "norwayeast": "NOE",
+        "southafricanorth": "JNB",
+        "northcentralus": "NCUS",
+        "uaenorth": "DXB",
+        "germanywestcentral": "DEWC",
+        "ukwest": "WUK",
+        "switzerlandnorth": "CHN",
+        "switzerlandwest": "CHW",
+        "uaecentral": "AUH"
     }
     AzureCloudRegionToOmsRegionMap = {
         "australiacentral": "australiacentral",
