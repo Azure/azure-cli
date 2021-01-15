@@ -277,8 +277,6 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     filtered_items = [item for item in items if
                       item.properties.protectable_item_type is not None and
                       item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
-
-
     # Server Name filter
     filtered_items = [item for item in filtered_items if item.properties.server_name.lower() == server_name.lower()]
 
@@ -303,7 +301,6 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
 
 def list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
                             extended_info=None, use_secondary_region=None):
-    
     # Get container and item URIs
     container_uri = cust_help.get_protection_container_uri_from_id(item.id)
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)

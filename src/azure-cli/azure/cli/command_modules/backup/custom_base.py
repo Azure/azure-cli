@@ -19,11 +19,14 @@ fabric_name = "Azure"
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
                    status="Registered", use_secondary_region=None):
-    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status, use_secondary_region)
+    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status,
+                                 use_secondary_region)
 
 
-def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered", use_secondary_region=None):
-    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status, use_secondary_region)
+def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered",
+                    use_secondary_region=None):
+    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status,
+                                  use_secondary_region)
 
 
 def show_policy(client, resource_group_name, vault_name, name):
@@ -67,7 +70,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                         backup_management_type=None, workload_type=None, start_date=None, end_date=None, use_secondary_region=None):
+                         backup_management_type=None, workload_type=None, start_date=None, end_date=None,
+                         use_secondary_region=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -78,7 +82,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
         raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date, use_secondary_region)
+        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
+                                           use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,

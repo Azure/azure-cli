@@ -23,7 +23,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
@@ -455,8 +455,8 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None, use_secondary_region=None):
-    
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                         use_secondary_region=None):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -511,7 +511,6 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
-    
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -586,12 +585,13 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         aad_client = aad_properties_cf(cmd.cli_ctx)
         aad_result = aad_client.get(azure_region)
         rp_client = recovery_points_cf(cmd.cli_ctx)
-        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_name, item_name,
-                                               rp_name, aad_result).properties
+        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_name,
+                                                      item_name, rp_name, aad_result).properties
         crr_access_token.object_type = "CrrAccessToken"
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_restore_properties.region = azure_region
-        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True, polling=False).result()
+        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
+                                    polling=False).result()
         return _track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     # Trigger restore
@@ -686,7 +686,7 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
 
 
 def list_jobs(cmd, client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None,
-             use_secondary_region=None):
+              use_secondary_region=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
     filter_string = _get_filter_string({
@@ -716,6 +716,8 @@ def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_r
 
 
 def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):
+    if use_secondary_region:
+        raise InvalidArgumentValueError("Secondary region jobs do not support cancellation as of now.")
     client.trigger(vault_name, resource_group_name, name)
 
 
