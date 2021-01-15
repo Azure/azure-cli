@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr create / update`: Add --allow-trusted-services. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
+* `az acr create / update`: Add `--allow-trusted-services`. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
 
 **AKS**
 
@@ -35,7 +35,7 @@ Release History
 * Fix issue of none storage_profile (#16260)
 * Better error handling of external tokens (#16406)
 * Fix a vmss reimage issue (#16483)
-* `az vm/vmss extension set`: New parameter --enable-auto-upgrade (#16243)
+* `az vm/vmss extension set`: New parameter `--enable-auto-upgrade` (#16243)
 
 **Container**
 
@@ -53,7 +53,7 @@ Release History
 
 **Monitor**
 
-* [BREAKING CHANGE] `az monitor log-analytics workspace data-export`: Remove deprecated  --export-all-tables parameter and require--tables parameter (#16402)
+* [BREAKING CHANGE] `az monitor log-analytics workspace data-export`: Remove deprecated `--export-all-tables` parameter and require `--tables` parameter (#16402)
 
 **RDBMS**
 
@@ -66,7 +66,7 @@ Release History
 **Storage**
 
 * Fix #16072: Upload file with big size (#16372)
-* Fix #12291: `az storage blob generate-sas` does not properly encode --full-uri (#15748)
+* Fix #12291: `az storage blob generate-sas` does not properly encode `--full-uri` (#15748)
 * GA PITR and blob service properties in SRP (#16540)
 
 2.17.1
