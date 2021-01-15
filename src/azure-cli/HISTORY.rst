@@ -24,7 +24,7 @@ Release History
 **ARM**
 
 * `az deployment` : Add support for `--query-string` (#16447)
-* `az ts`: Error handling improvement `-` use of `--template-file` without `--version` prohibited (#16446)
+* `az ts`: Error handling improvement for `--template-file` without `--version` prohibited (#16446)
 
 **Backup**
 
