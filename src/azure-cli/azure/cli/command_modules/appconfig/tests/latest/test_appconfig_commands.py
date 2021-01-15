@@ -1915,6 +1915,14 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
             self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
+        # Error on filter parameter with empty name
+        invalid_filter_params = '=value'
+        self.kwargs.update({
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, 'Parameter name cannot be empty.'):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
         # Test more inputs for filter param value
         filter_name = 'NewFilter'
         filter_params = 'ArrayParam=[1,2,\\"three\\"] BoolParam=true NullParam=null'

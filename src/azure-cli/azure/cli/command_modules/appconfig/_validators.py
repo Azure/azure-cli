@@ -155,7 +155,6 @@ def validate_filter_parameter(string):
     if string:
         comps = string.split('=', 1)
 
-        # Ignore invalid arguments like  '=value' or '='
         if comps[0]:
             if len(comps) > 1:
                 # In the portal, if value textbox is blank we store the value as empty string.
@@ -172,7 +171,8 @@ def validate_filter_parameter(string):
             else:
                 result = (string, '')
         else:
-            logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
+            # Error out on invalid arguments like '=value' or '='
+            raise CLIError('Invalid filter parameter "{}". Parameter name cannot be empty.'.format(string))
     return result
 
 
