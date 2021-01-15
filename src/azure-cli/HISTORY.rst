@@ -28,7 +28,7 @@ Release History
 
 **Backup**
 
-* Added default backup retention as 30 days (#16394)
+* Add default backup retention as 30 days (#16394)
 * `az backup protection backup-now`: Set default retention period to 30 days (#16500)
 
 **Compute**
