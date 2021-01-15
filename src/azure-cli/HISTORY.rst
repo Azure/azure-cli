@@ -17,7 +17,7 @@ Release History
 **App Service**
 
 * Fix #13907: az webapp config ssl import: Change command to also import App Service Certificate (#16320)
-* Fixes #16125: az webapp ssh if using a windows client, open browser to scm link (#16432)
+* Fix #16125: az webapp ssh if using a windows client, open browser to scm link (#16432)
 * Fix #13291: az webapp deployment slot swap should support preserv… (#16424)
 * [BREAKING CHANGE] Fix regression where you can't use a runtime version with a space in the name (#16528)
 
