@@ -76,9 +76,19 @@ def update_security_alert(client, location, resource_name, status, resource_grou
     client.config.asc_location = location
 
     if resource_group_name:
-        client.update_resource_group_level_alert_state(resource_name, status, resource_group_name)
+        if status == "Dismiss":
+            client.update_resource_group_level_alert_state_to_dismiss(resource_name, resource_group_name)
+        if status == "Activate":
+            client.update_resource_group_level_alert_state_to_reactivate(resource_name, resource_group_name)
+        if status == "Resolve":
+            client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
     else:
-        client.update_subscription_level_alert_state(resource_name, status)
+        if status == "Dismiss":
+            client.update_subscription_level_alert_state_to_dismiss(resource_name)
+        if status == "Activate":
+            client.update_subscription_level_alert_state_to_reactivate(resource_name)
+        if status == "Resolve":
+            client.update_subscription_level_state_to_resolve(resource_name)
 
 
 # --------------------------------------------------------------------------------------------
@@ -670,3 +680,32 @@ def get_regulatory_compliance_assessment(client, resource_name, standard_name, c
     return client.get(regulatory_compliance_standard_name=standard_name,
                       regulatory_compliance_control_name=control_name,
                       regulatory_compliance_assessment_name=resource_name)
+
+# --------------------------------------------------------------------------------------------
+# Security Secure Score
+# --------------------------------------------------------------------------------------------
+
+
+def list_secure_scores(client):
+
+    return client.list()
+
+
+def get_secure_score(client, resource_name):
+
+    return client.get(resource_name)
+
+
+def list_secure_score_controls(client):
+
+    return client.list()
+
+
+def list_by_score(client, resource_name):
+
+    return client.list_by_secure_score(resource_name)
+
+
+def list_secure_score_control_definitions(client):
+
+    return client.list_by_subscription()

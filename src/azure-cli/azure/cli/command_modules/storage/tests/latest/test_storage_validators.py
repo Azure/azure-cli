@@ -19,7 +19,8 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            process_blob_source_uri, get_char_options_validator,
                                                            get_source_file_or_blob_service_client,
                                                            validate_encryption_source, validate_source_uri,
-                                                           validate_encryption_services, as_user_validator)
+                                                           validate_encryption_services, as_user_validator,
+                                                           get_not_none_validator)
 from azure.cli.testsdk import api_version_constraint
 
 
@@ -162,6 +163,27 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
                        source_sas='some_sas_token')
         validate_source_uri(MockCmd(self.cli), ns)
         self.assertEqual(ns.copy_source, 'https://other_name.file.core.windows.net/share2?some_sas_token')
+
+    def test_get_not_none_validator(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        from knack.arguments import CLICommandArgument, CLIArgumentType
+
+        container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='The container name.')
+        arg_type = CLIArgumentType(help='whatever arg')
+        cmd = MockCmd(self.cli)
+        cmd.arguments = {'container_name': CLICommandArgument(dest='container_name', argtype=container_name_type),
+                         'arg': CLICommandArgument(dest='arg', argtype=arg_type)}
+
+        validate_container_name = get_not_none_validator('container_name')
+        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Argument --container-name/-c should be specified'):
+            validate_container_name(cmd, Namespace(container_name=''))
+
+        validate_arg = get_not_none_validator('arg')
+        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Argument --arg should be specified'):
+            validate_arg(cmd, Namespace(arg=None))
+
+        validate_arg(cmd, Namespace(arg=0))
+        validate_arg(cmd, Namespace(arg=False))
 
 
 @api_version_constraint(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01')

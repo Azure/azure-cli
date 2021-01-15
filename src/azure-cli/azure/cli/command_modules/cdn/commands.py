@@ -8,7 +8,7 @@ from knack.util import CLIError
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
-                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set)
+                              cf_edge_nodes, cf_waf_policy, cf_waf_rule_set, cf_origin_groups)
 
 
 def _not_found(message):
@@ -32,6 +32,7 @@ def load_command_table(self, _):
     endpoint_not_found_msg = _not_found_msg.format('Endpoint')
     cd_not_found_msg = _not_found_msg.format('Custom Domain')
     origin_not_found_msg = _not_found_msg.format('Origin')
+    origin_not_found_msg = _not_found_msg.format('Origin Group')
     waf_policy_not_found_msg = _not_found_msg.format('WAF Policy')
 
     cdn_sdk = CliCommandType(
@@ -60,6 +61,12 @@ def load_command_table(self, _):
     cdn_origin_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#OriginsOperations.{}',
         client_factory=cf_origins,
+        exception_handler=_not_found(origin_not_found_msg)
+    )
+
+    cdn_origin_group_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cdn.operations#OriginGroupsOperations.{}',
+        client_factory=cf_origin_groups,
         exception_handler=_not_found(origin_not_found_msg)
     )
 
@@ -147,7 +154,16 @@ def load_command_table(self, _):
     with self.command_group('cdn origin', cdn_origin_sdk) as g:
         g.show_command('show', 'get')
         g.command('list', 'list_by_endpoint')
+        g.custom_command('create', 'create_origin', client_factory=cf_origins, is_preview=True)
         g.custom_command('update', 'update_origin', client_factory=cf_origins)
+        g.command('delete', 'delete', confirmation=True)
+
+    with self.command_group('cdn origin-group', cdn_origin_group_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_endpoint')
+        g.custom_command('create', 'create_origin_group', client_factory=cf_origin_groups)
+        g.custom_command('update', 'update_origin_group', client_factory=cf_origin_groups)
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('cdn edge-node', cdn_edge_sdk) as g:
         g.command('list', 'list')

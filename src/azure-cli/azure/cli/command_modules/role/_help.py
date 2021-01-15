@@ -95,6 +95,10 @@ examples:
 helps['ad app credential reset'] = """
 type: command
 short-summary: Append or overwrite an application's password or certificate credentials
+long-summary: >-
+    The output includes credentials that you must protect. Be sure that you do not include these credentials
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 examples:
   - name: Append a certificate to the application with the certificate string.
     text: az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
@@ -161,7 +165,16 @@ short-summary: Manage an application's OAuth2 permissions.
 helps['ad app permission add'] = """
 type: command
 short-summary: Add an API permission
-long-summary: Invoking "az ad app permission grant" is needed to activate it
+long-summary: >-
+    Invoking "az ad app permission grant" is needed to activate it.
+
+
+    To get available permissions of the resource app, run `az ad sp show --id <resource-appId>`. For example,
+    to get available permissions for Graph API:
+      - Azure Active Directory Graph: `az ad sp show --id 00000002-0000-0000-c000-000000000000`
+      - Microsoft Graph: `az ad sp show --id 00000003-0000-0000-c000-000000000000`
+    Application permissions under the `appRoles` property correspond to `Role` in --api-permissions.
+    Delegated permissions under the `oauth2Permissions` property correspond to `Scope` in --api-permissions.
 examples:
   - name: Add Azure Active Directory Graph delegated permission User.Read (Sign in and read user profile).
     text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
@@ -370,6 +383,20 @@ examples:
 helps['ad sp create-for-rbac'] = """
 type: command
 short-summary: Create a service principal and configure its access to Azure resources.
+long-summary: >-
+    The output includes credentials that you must protect. Be sure that you do not include these credentials
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
+
+
+    By default, this command assigns the 'Contributor' role to the service principal at the subscription scope.
+    To reduce your risk of a compromised service principal, use --skip-assignment to avoid creating a role assignment,
+    then assign a more specific role and narrow the scope to a resource or resource group.
+    See [steps to add a role assignment](https://aka.ms/azadsp-more) for more information.
+
+
+    WARNING: In a future release, this command will NOT create a 'Contributor' role assignment by default.
+    If needed, use the --role argument to explicitly create a role assignment.
 parameters:
   - name: --name -n
     short-summary: A URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
@@ -393,19 +420,13 @@ parameters:
     short-summary: Role of the service principal.
 examples:
   - name: Create with a default role assignment.
-    text: >
-        az ad sp create-for-rbac
+    text: az ad sp create-for-rbac
   - name: Create using a custom name, and with a default assignment.
-    text: >
-        az ad sp create-for-rbac -n "MyApp"
+    text: az ad sp create-for-rbac -n "MyApp"
   - name: Create without a default assignment.
-    text: >
-        az ad sp create-for-rbac --skip-assignment
-  - name: Create with customized contributor assignments.
-    text: |
-        az ad sp create-for-rbac -n "MyApp" --role contributor \\
-            --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} \\
-            /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
+    text: az ad sp create-for-rbac --skip-assignment
+  - name: Create with a Contributor role assignments on specified scope.
+    text: az ad sp create-for-rbac -n "MyApp" --role Contributor --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
   - name: Create using a self-signed certificate.
     text: az ad sp create-for-rbac --create-cert
   - name: Create using a self-signed certificate, and store it within KeyVault.
@@ -441,7 +462,13 @@ examples:
 helps['ad sp credential reset'] = """
 type: command
 short-summary: Reset a service principal credential.
-long-summary: Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
+long-summary: >-
+    Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
+
+
+    The output includes credentials that you must protect. Be sure that you do not include these credentials
+    in your code or check the credentials into your source control. As an alternative, consider using
+    [managed identities](https://aka.ms/azadsp-managed-identities) if available to avoid the need to use credentials.
 parameters:
   - name: --name -n
     short-summary: Name or app ID of the service principal.

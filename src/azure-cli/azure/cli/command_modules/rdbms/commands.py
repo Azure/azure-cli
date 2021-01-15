@@ -448,8 +448,7 @@ def load_command_table(self, _):
 
     with self.command_group('mysql server key',
                             mysql_key_sdk,
-                            client_factory=cf_mysql_server_keys_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_server_keys_operations) as g:
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete', confirmation=True)
         g.custom_show_command('show', 'server_key_get')
@@ -457,8 +456,7 @@ def load_command_table(self, _):
 
     with self.command_group('postgres server key',
                             postgres_key_sdk,
-                            client_factory=cf_postgres_server_keys_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_server_keys_operations) as g:
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete', confirmation=True)
         g.custom_show_command('show', 'server_key_get')
@@ -466,8 +464,7 @@ def load_command_table(self, _):
 
     with self.command_group('mysql server ad-admin',
                             mysql_adadmin_sdk,
-                            client_factory=cf_mysql_server_ad_administrators_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_mysql_server_ad_administrators_operations) as g:
         g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
@@ -477,8 +474,7 @@ def load_command_table(self, _):
 
     with self.command_group('postgres server ad-admin',
                             postgres_adadmin_sdk,
-                            client_factory=cf_postgres_server_ad_administrators_operations,
-                            is_preview=True) as g:
+                            client_factory=cf_postgres_server_ad_administrators_operations) as g:
         g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
@@ -489,13 +485,16 @@ def load_command_table(self, _):
                             mysql_location_based_performance_tier_sdk,
                             client_factory=cf_mysql_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
+        g.custom_command('show-connection-string', 'get_connection_string')
 
     with self.command_group('postgres server',
                             postgres_location_based_performance_tier_sdk,
                             client_factory=cf_postgres_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
+        g.custom_command('show-connection-string', 'get_connection_string')
 
     with self.command_group('mariadb server',
                             mariadb_location_based_performance_tier_sdk,
                             client_factory=cf_mariadb_location_based_performance_tier_operations) as g:
         g.command('list-skus', 'list', table_transformer=table_transform_output_list_skus_single_server)
+        g.custom_command('show-connection-string', 'get_connection_string')

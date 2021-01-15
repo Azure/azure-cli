@@ -118,6 +118,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
 
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('local-context off')
+
         list_checks = [JMESPathCheck('name', servers[0]),
                        JMESPathCheck('resourceGroup', resource_group_1),
                        JMESPathCheck('administratorLogin', admin_login),
@@ -290,6 +293,14 @@ class ServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server list'.format(database_engine),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
+        connection_string = self.cmd('{} server show-connection-string -s {}'
+                                     .format(database_engine, servers[0])).get_output_in_json()
+
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ruby', connection_string['connectionStrings'])
         # test mysql version upgrade
         if database_engine == 'mysql':
             self.cmd('{} server create -g {} --name {} -l {} '

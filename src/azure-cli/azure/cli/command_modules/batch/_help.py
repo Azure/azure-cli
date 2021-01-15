@@ -161,7 +161,7 @@ short-summary: Update the properties of a Batch job. Updating a property in a su
 
 helps['batch job task-counts'] = """
 type: group
-short-summary: View the number of tasks in a Batch job and their states.
+short-summary: View the number of tasks and slots in a Batch job and their states.
 """
 
 helps['batch job-schedule'] = """
