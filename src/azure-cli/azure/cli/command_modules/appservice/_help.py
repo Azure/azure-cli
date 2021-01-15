@@ -2192,7 +2192,7 @@ helps['appservice ase create'] = """
 
 helps['appservice ase create-inbound-services'] = """
     type: command
-    short-summary: Creates the inbound services needed in preview for ASEv3 (private endpoint and dns).
+    short-summary: Create the inbound services needed in preview for ASEv3 (private endpoint and DNS).
     examples:
     - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
       text: |
