@@ -16,9 +16,9 @@ Release History
 
 **App Service**
 
-* Fix #13907: az webapp config ssl import: Change command to also import App Service Certificate (#16320)
-* Fix #16125: az webapp ssh if using a windows client, open browser to scm link (#16432)
-* Fix #13291: az webapp deployment slot swap should support preserv… (#16424)
+* Fix #13907: `az webapp config ssl import`: Change command to also import App Service Certificate (#16320)
+* Fix #16125: `az webapp ssh`: If using a windows client, open browser to scm link (#16432)
+* Fix #13291: `az webapp deployment slot swap`: The command should support preserve vnet. (#16424)
 * [BREAKING CHANGE] Fix regression where you can't use a runtime version with a space in the name (#16528)
 
 **ARM**
@@ -28,7 +28,6 @@ Release History
 
 **Backup**
 
-* Add default backup retention as 30 days (#16394)
 * `az backup protection backup-now`: Set default retention period to 30 days (#16500)
 
 **Compute**
@@ -45,7 +44,7 @@ Release History
 **DMS**
 
 * `az dms project task create`: Added task type parameter to help distinguish if a scenario is an online migration or an offline migration. (#15746)
-* `az dms project task cutover`: add new command which allows tasks with an online migration task type to cutover and end the migration. (#15746)
+* `az dms project task cutover`: Add new command which allows tasks with an online migration task type to cutover and end the migration. (#15746)
 * `az dms project create/az dms project task create`: Enable MySQL and PostgreSQL projects/tasks to be created. (#15746)
 
 **IoT**
@@ -67,7 +66,7 @@ Release History
 **Storage**
 
 * Fix #16072: Upload file with big size (#16372)
-* Fix #12291: az storage blob generate-sas does not properly encode --full-uri (#15748)
+* Fix #12291: `az storage blob generate-sas` does not properly encode --full-uri (#15748)
 * GA PITR and blob service properties in SRP (#16540)
 
 2.17.1
