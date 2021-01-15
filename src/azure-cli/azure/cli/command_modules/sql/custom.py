@@ -1650,6 +1650,35 @@ def _fetch_all_audit_diagnostic_settings(diagnostic_settings, category_name):
             next((log for log in ds.logs if log.enabled and
                   log.category == category_name), None) is not None]
 
+def server_ms_support_audit_policy_get(
+        client,
+        server_name,
+        resource_group_name):
+    '''
+    Get server Microsoft support operations audit policy
+    '''
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default')
+
+
+def server_ms_support_audit_policy_set(
+        client,
+        server_name,
+        resource_group_name,
+        parameters):
+    '''
+    Set server Microsoft support operations audit policy
+    '''
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dev_ops_auditing_settings_name='default',
+        parameters=parameters)
+
 
 def _audit_policy_show(
         cmd,
@@ -1665,10 +1694,10 @@ def _audit_policy_show(
     # Request audit policy
     if database_name is None:
         if category_name == 'DevOpsOperationsAudit':
-            audit_policy = client.get(
+            audit_policy = server_ms_support_audit_policy_get(
+                client=client,
                 resource_group_name=resource_group_name,
-                server_name=server_name,
-                dev_ops_auditing_settings_name='default')
+                server_name=server_name)
         else:
             audit_policy = client.get(
                 resource_group_name=resource_group_name,
@@ -1770,36 +1799,6 @@ def server_ms_support_audit_policy_show(
         resource_group_name=resource_group_name,
         server_name=server_name,
         category_name='DevOpsOperationsAudit')
-
-
-def server_ms_support_audit_policy_get(
-        client,
-        server_name,
-        resource_group_name):
-    '''
-    Get server Microsoft support operations audit policy
-    '''
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        dev_ops_auditing_settings_name='default')
-
-
-def server_ms_support_audit_policy_set(
-        client,
-        server_name,
-        resource_group_name,
-        parameters):
-    '''
-    Set server Microsoft support operations audit policy
-    '''
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        dev_ops_auditing_settings_name='default',
-        parameters=parameters)
 
 
 def _audit_policy_validate_arguments(
