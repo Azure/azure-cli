@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* `az acr create / update`: add --allow-trusted-services. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
+* `az acr create / update`: Add --allow-trusted-services. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
 
 **AKS**
 
@@ -23,8 +23,8 @@ Release History
 
 **ARM**
 
-* Az Deployments : Add support for --query-string (#16447)
-* ts: error handling improvement - use of --template-file without --version prohibited (#16446)
+* `az deployment` : Add support for `--query-string` (#16447)
+* `az ts`: Error handling improvement `-` use of `--template-file` without `--version` prohibited (#16446)
 
 **Backup**
 
@@ -36,11 +36,11 @@ Release History
 * Fix issue of none storage_profile (#16260)
 * Better error handling of external tokens (#16406)
 * Fix a vmss reimage issue (#16483)
-* vm/vmss extension set: New parameter --enable-auto-upgrade (#16243)
+* `az vm/vmss extension set`: New parameter --enable-auto-upgrade (#16243)
 
 **Container**
 
-* `az container exec`: remove eol check to avoid closing terminal before it even started on linux (#16000)
+* `az container exec`: Remove eol check to avoid closing terminal before it even started on linux (#16000)
 
 **DMS**
 
@@ -54,7 +54,7 @@ Release History
 
 **Monitor**
 
-* [BREAKING CHANGE] az monitor log-analytics workspace data-export : Remove deprecated  --export-all-tables parameter and require--tables parameter (#16402)
+* [BREAKING CHANGE] `az monitor log-analytics workspace data-export`: Remove deprecated  --export-all-tables parameter and require--tables parameter (#16402)
 
 **RDBMS**
 
@@ -62,12 +62,12 @@ Release History
 
 **Role**
 
-* Fix #11594: az role assignment create: Only show supported values for --assignee-principal-type (#16056)
+* Fix #11594: `az role assignment create`: Only show supported values for `--assignee-principal-type` (#16056)
 
 **Storage**
 
 * Fix #16072: Upload file with big size (#16372)
-* Fix issue #12291: az storage blob generate-sas does not properly encode --full-uri (#15748)
+* Fix #12291: az storage blob generate-sas does not properly encode --full-uri (#15748)
 * GA PITR and blob service properties in SRP (#16540)
 
 2.17.1
