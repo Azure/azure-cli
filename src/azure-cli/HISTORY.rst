@@ -3,6 +3,73 @@
 Release History
 ===============
 
+2.18.0
+++++++
+
+**ACR**
+
+* `az acr create / update`: add --allow-trusted-services. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
+
+**AKS**
+
+* `az aks check-acr`: Add new check-acr command (#16490)
+
+**App Service**
+
+* Fix #13907: az webapp config ssl import: Change command to also import App Service Certificate (#16320)
+* Fixes #16125: az webapp ssh if using a windows client, open browser to scm link (#16432)
+* : fix for #13291- az webapp deployment slot swap should support preserv… (#16424)
+* [BREAKING CHANGE] Fix regression where you can't use a runtime version with a space in the name (#16528)
+
+**ARM**
+
+* Az Deployments : Add support for --query-string (#16447)
+* ts: error handling improvement - use of --template-file without --version prohibited (#16446)
+
+**Backup**
+
+* Added default backup retention as 30 days (#16394)
+* `az backup protection backup-now`: Set default retention period to 30 days (#16500)
+
+**Compute**
+
+* Fix issue of none storage_profile (#16260)
+* Better error handling of external tokens (#16406)
+* Fix a vmss reimage issue (#16483)
+* vm/vmss extension set: New parameter --enable-auto-upgrade (#16243)
+
+**Container**
+
+* `az container exec`: remove eol check to avoid closing terminal before it even started on linux (#16000)
+
+**DMS**
+
+* [BREAKING CHANGE] az dms project task create: Added mandatory task type parameter to help distinguish if a scenario is an online migration or an offline migration. (#15746)
+* `az dms project task cutover`: add new command which allows tasks with an online migration task type to cutover and end the migration. (#15746)
+* `az dms project create/az dms project task create`: Enable MySQL and PostgreSQL projects/tasks to be created. (#15746)
+
+**IoT**
+
+* Add --tags to IoT Hub create and update (#16336)
+
+**Monitor**
+
+* [BREAKING CHANGE] az monitor log-analytics workspace data-export : Remove deprecated  --export-all-tables parameter and require--tables parameter (#16402)
+
+**RDBMS**
+
+* Remove the preview tag for server key and ad admin commands for Postgres and MySql (#16412)
+
+**Role**
+
+* Fix #11594: az role assignment create: Only show supported values for --assignee-principal-type (#16056)
+
+**Storage**
+
+* Fix #16072: Upload file with big size (#16372)
+* Fix issue #12291: az storage blob generate-sas does not properly encode --full-uri (#15748)
+* GA PITR and blob service properties in SRP (#16540)
+
 2.17.1
 ++++++
 
