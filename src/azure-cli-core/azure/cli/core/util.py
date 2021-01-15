@@ -672,7 +672,11 @@ def _get_platform_info():
 
 def is_wsl():
     platform_name, release = _get_platform_info()
-    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+    # "Official" way of detecting WSL: https://github.com/Microsoft/WSL/issues/423#issuecomment-221627364
+    # Run `uname -a` to get 'release' without python
+    #   - WSL 1: '4.4.0-19041-Microsoft'
+    #   - WSL 2: '4.19.128-microsoft-standard'
+    return platform_name == 'linux' and 'microsoft' in release
 
 
 def is_windows():
