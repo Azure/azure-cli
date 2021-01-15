@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -99,6 +100,9 @@ def backup_now(cmd, client, resource_group_name, vault_name, item_name, retain_u
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
+
+    if retain_until is None:
+        retain_until = datetime.now(timezone.utc) + timedelta(days=30)
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
@@ -307,10 +311,10 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None):
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
-                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks)
+                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,

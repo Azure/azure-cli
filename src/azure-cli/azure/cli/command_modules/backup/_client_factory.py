@@ -108,12 +108,20 @@ def backup_operation_statuses_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_operation_statuses
 
 
+def crr_operation_status_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).crr_operation_status
+
+
 def backups_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backups
 
 
 def backup_jobs_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_jobs
+
+
+def backup_crr_jobs_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_crr_jobs
 
 
 def backup_workload_items_cf(cli_ctx, *_):
@@ -123,6 +131,10 @@ def backup_workload_items_cf(cli_ctx, *_):
 # Job Client Factories
 def job_details_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).job_details
+
+
+def backup_crr_job_details_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_crr_job_details
 
 
 def job_cancellations_cf(cli_ctx, *_):
@@ -142,9 +154,18 @@ def restores_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).restores
 
 
+def cross_region_restore_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).cross_region_restore
+
+
 def item_level_recovery_connections_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).item_level_recovery_connections
 
 
 def backup_resource_vault_config_cf(cli_ctx, *_):
     return _backup_client_factory(cli_ctx).backup_resource_vault_configs
+
+
+# Azure Active Directory Client Factories
+def aad_properties_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).aad_properties

@@ -48,7 +48,7 @@ def transform_job(result):
     if result['properties']['backupManagementType'] == 'AzureIaasVM':
         columns.append(('Duration', result['properties']['duration']))
     elif result['properties']['backupManagementType'] == 'AzureStorage':
-        columns.append(('Duration', result['properties']['additionalProperties']['duration']))
+        columns.append(('Duration', result['properties']['duration']))
     elif result['properties']['backupManagementType'] == 'AzureWorkload':
         columns.append(('Duration', result['properties']['duration']))
 

@@ -195,10 +195,8 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
 
 def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None, use_secondary_region=None):
-    if use_secondary_region and use_secondary_region.lower() == "yes":
-        #Code for retreiving afs rp list for secondary region
+    if use_secondary_region:
         raise InvalidArgumentValueError("--use-secondary-region flag is not supported for --backup-management-type AzureStorage. Please either remove the flag or query for any other backup-management-type.")
-        print(use_secondary_region)
 
     # Get container and item URIs
     container_uri = helper.get_protection_container_uri_from_id(item.id)
