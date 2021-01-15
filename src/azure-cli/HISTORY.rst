@@ -44,7 +44,7 @@ Release History
 
 **DMS**
 
-* [BREAKING CHANGE] az dms project task create: Added mandatory task type parameter to help distinguish if a scenario is an online migration or an offline migration. (#15746)
+* `az dms project task create`: Added task type parameter to help distinguish if a scenario is an online migration or an offline migration. (#15746)
 * `az dms project task cutover`: add new command which allows tasks with an online migration task type to cutover and end the migration. (#15746)
 * `az dms project create/az dms project task create`: Enable MySQL and PostgreSQL projects/tasks to be created. (#15746)
 
