@@ -76,6 +76,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                                                      front_end_sku=front_end_sku)
 
     elif kind == 'ASEv3':
+        _ensure_subnet_delegation(cmd.cli_ctx, subnet_id, 'Microsoft.Web/hostingEnvironments')
         ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
                                                                      subnet_id=subnet_id, kind='ASEv3')
     logger.info('Create App Service Environment...')
