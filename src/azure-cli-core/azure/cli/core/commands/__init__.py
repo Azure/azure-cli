@@ -114,6 +114,8 @@ def _expand_file_prefixed_files(args):
 
 
 def _transform_args_with_built_in_alias(cli_ctx, args):
+    if len(args) <= 1:
+        return args
     transform_built_in_alias = cli_ctx.config.getboolean('core', 'transform_built_in_alias', fallback=True)
     if not transform_built_in_alias:
         return args
