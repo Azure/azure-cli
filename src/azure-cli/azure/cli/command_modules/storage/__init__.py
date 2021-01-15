@@ -19,12 +19,7 @@ class StorageCommandsLoader(AzCommandsLoader):
                                                     resource_type=ResourceType.DATA_STORAGE,
                                                     custom_command_type=storage_custom,
                                                     command_group_cls=StorageCommandGroup,
-                                                    argument_context_cls=StorageArgumentContext,
-                                                    suppress_extension=ModExtensionSuppress(
-                                                        __name__, 'storage-or-preview', '0.4.0',
-                                                        reason='The storage account or policy commands are now in CLI.',
-                                                        recommend_remove=True)
-                                                    )
+                                                    argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.storage.commands import load_command_table
