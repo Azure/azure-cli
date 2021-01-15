@@ -20,7 +20,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
-                          validate_fs_public_access, validate_logging_version, validate_or_policy)
+                          validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -1053,7 +1053,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from .completers import get_storage_acl_name_completion_list
         t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
         c.register_sas_arguments()
-        c.argument('id', options_list='--policy-name',
+        c.argument('id', options_list='--policy-name', validator=validate_policy,
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))

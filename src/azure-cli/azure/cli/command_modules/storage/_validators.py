@@ -1566,3 +1566,9 @@ def get_not_none_validator(attribute_name):
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none
+
+
+def validate_policy(namespace):
+    if namespace.id is not None:
+        logger.warning("\nPlease do not speicfy --expiry and --permissions if they are already specified in your "
+                       "policy.")
