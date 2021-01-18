@@ -624,19 +624,30 @@ class Profile:
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
-    def get_access_token_for_scopes(self, username, tenant, scopes):
+    def get_access_token_for_scopes(self, username, tenant, scopes, **kwargs):
         tenant = tenant or 'common'
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant, cred_cache=self._adal_cache)
         identity_credential = identity.get_user_credential(username)
         from azure.cli.core.credential import CredentialAdaptor
         auth = CredentialAdaptor(identity_credential)
-        token = auth.get_token(*scopes)
+        token = auth.get_token(*scopes, **kwargs)
         return token.token
 
     def get_access_token_for_resource(self, username, tenant, resource):
         """get access token for current user account, used by vsts and iot module"""
         return self.get_access_token_for_scopes(username, tenant, resource_to_scopes(resource))
+
+    def get_msal_token(self, scopes, data):
+        """
+        This is added for vmssh feature with backward compatible interface.
+        data contains token_type (ssh-cert), key_id and JWK.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID] or 'common'
+        certificate = self.get_access_token_for_scopes(username, tenant, scopes, data=data)
+        return username, certificate
 
     @staticmethod
     def _try_parse_msi_account_name(account):
