@@ -14,7 +14,7 @@ This document provides the roadmap for track2 SDK migration in Azure CLI. When y
 - If track1 is in preview (0.x.x or x.x.xrc), the lower priority.
 - Extenison has lower priority.
 
-## Here is the proposed roadmap for managment plane migration. (Total ~50 CLI modules and ~50 extensions.)
+## Here is the proposed roadmap for managment plane migration. (Total ~50 CLI modules and ~40 extensions.)
 
 | Module   | Latest Track2 SDK Status | Latest Track1 SDK status  | Release frequency | CLI Module or Extension |Migration Status | ETA | 
 | --------- |:-------------:| :-----:|:-----:|:--:|:--:|:--:|
@@ -71,5 +71,45 @@ This document provides the roadmap for track2 SDK migration in Azure CLI. When y
 | DataLakeStore | N/A | Preview (0.5.0) | | Module |Not Started | N/A |
 | PrivateDNS | N/A | Preview (0.1.0) | | Module |Not Started | N/A |
 | Role | MSI: N/A | MSI: GA (1.0.0) | | Module |Not Started | N/A |
+| |  |  | |  | |  |
+| Account   | Subscription: Vendored_Preview (0.5.0) | N/A | N/A | Extension | Done | N/A |
+| Attestation   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| Automation   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| Communication   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| ConnectedMachine   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| CostManagement   | Vendored_GA (1.2.0) | N/A | N/A | Extension |Done | N/A |
+| DataDog   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| DataFactory   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| DataShare   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| DesktopVirtualization   | Vendored_Preview (0.2.0) | N/A | N/A | Extension |Done | N/A |
+| Footprint   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| GuestConfig   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| HardwareSecutiryModules   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| HealthCareAPIs   | Vendored_Preview (0.3.0) | N/A | N/A | Extension |Done | N/A |
+| Import-Export   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| Kusto   | Vendored_Preview (0.1.0) | N/A | N/A | Extension |Done | N/A |
+| Footprint   | Vendored_SDK | N/A | N/A | Extension |Done | N/A |
+| AKS-Preview   | N/A | ContainerService: Vendored_GA (0.2.0) | N/A | Extension |Not Started | 05/31/2021 |
+| AlertsManagement   | N/A | Vendored_Preview (0.2.0rc2) | N/A | Extension |Not Started | 05/31/2021 |
+| ApplicationInsights   | N/A | Vendored_Preview (0.2.0) | N/A | Extension |Not Started | 05/31/2021 |
+| Firewall   | N/A | Vendored_GA (13.0.0) | N/A | Extension |Not Started | 05/31/2021 |
+| BlockChain   | N/A | Vendored_GA (2.0.0) | N/A | Extension |Not Started | 05/31/2021 |
+| BluePrint   | N/A | Vendored_Preview (2018-11-01-preview) | N/A | Extension |Not Started | 05/31/2021 |
+| CodeSpaces   | N/A | Vendored_SDK | N/A | Extension |Not Started | 05/31/2021 |
+| ConnectedK8S   | N/A | Vendored_Preview (0.1.1) | N/A | Extension |Not Started | 05/31/2021 |
+| CustomProviders   | N/A | Vendored_Preview (0.1.0) | N/A | Extension |Not Started | 05/31/2021 |
+| DataBox   | N/A | Vendored_Preview (0.2.0) | N/A | Extension |Not Started | 05/31/2021 |
+| DataBricks   | N/A | Vendored_Preview (0.1.0 | N/A | Extension |Not Started | 05/31/2021 |
+| DB-Up   | N/A | RDBMS: Vendored_GA (1.5.0) <br> SQL: Vendored_Preview (0.11.0) | N/A | Extension |Not Started | 05/31/2021 |
+| DMS-Preview   | N/A | Vendored_GA (4.0.0) | N/A | Extension |Not Started | 05/31/2021 |
+| EventGrid   | N/A | Vendored_Preview (3.0.0rc6) | N/A | Extension |Not Started | 05/31/2021 |
+| ExpressRouteCrossConnection   | N/A | Network: Vendored_SDK | N/A | Extension |Not Started | 05/31/2021 |
+| Frontdoor   | N/A | Vendored_Preview (0.3.1) | N/A | Extension |Not Started | 05/31/2021 |
+| Hack   | N/A | Call AppService, CosmosDB, RDBMS, CognitiveServices | N/A | Extension |Not Started | 05/31/2021 |
+| HPC-Cache   | N/A | Vendored_Preview (0.2.0 | N/A | Extension |Not Started | 05/31/2021 |
+| InternetAnalyzer   | N/A | Frontdoor: Vendored_Preview (0.3.0) | N/A | Extension |Not Started | 05/31/2021 |
+| Ip-Group   | N/A | Network: Vendored_SDK | N/A | Extension |Not Started | 05/31/2021 |
+| K8SConfiguration   | N/A | Vendored_SDK) | N/A | Extension |Not Started | 05/31/2021 |
+| Log-Analytics   | N/A | Vendored_Preview (0.1.0) | N/A | Extension |Not Started | 05/31/2021 |
 
 ## Here is the proposed roadmap for data plane migration.
