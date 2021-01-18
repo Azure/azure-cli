@@ -96,7 +96,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _msal_app(self):
         if not self._msal_app_instance:
             # Build the authority in MSAL style, like https://login.microsoftonline.com/your_tenant
-            msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
+            msal_authority = "{}/{}".format(self.authority, self.tenant_id)
             self._msal_app_instance = self._build_persistent_msal_app(msal_authority)
         return self._msal_app_instance
 
