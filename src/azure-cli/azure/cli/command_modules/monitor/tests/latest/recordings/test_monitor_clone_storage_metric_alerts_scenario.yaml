@@ -21,7 +21,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/microsoft.insights/actionGroups/ag1?api-version=2019-06-01
   response:
@@ -35,7 +35,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Jan 2021 02:42:03 GMT
+      - Fri, 15 Jan 2021 10:01:04 GMT
       expires:
       - '-1'
       pragma:
@@ -47,7 +47,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1184'
     status:
       code: 201
       message: Created
@@ -80,7 +80,7 @@ interactions:
       ParameterSetName:
       - -g -n --scopes --region --action --description --condition --condition
       User-Agent:
-      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
@@ -124,7 +124,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Jan 2021 02:42:14 GMT
+      - Fri, 15 Jan 2021 10:01:19 GMT
       expires:
       - '-1'
       pragma:
@@ -162,7 +162,7 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource
       User-Agent:
-      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Insights/metricAlerts?api-version=2018-03-01
   response:
@@ -231,25 +231,70 @@ interactions:
         \         ],\r\n          \"odata.type\": \"Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria\"\r\n
         \       },\r\n        \"targetResourceType\": \"microsoft.insights/components\",\r\n
         \       \"actions\": [\r\n          {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/zhoxing-test/providers/microsoft.insights/actionGroups/test-ag-yu\"\r\n
-        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2cutzwf4okh644cbhw3f3vdrohf6qhdohqyedgr5ynsgwa6tlosy/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
         \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
         \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
-        \"Test2\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
-        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2cutzwf4okh644cbhw3f3vdrohf6qhdohqyedgr5ynsgwa6tlosy/providers/Microsoft.Storage/storageAccounts/clitesttkkutbaplmqrpsvwx\"\r\n
+        \"Test\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
         \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
         \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
-        \             \"threshold\": 250.0,\r\n              \"name\": \"cond0\",\r\n
-        \             \"metricNamespace\": \"Microsoft.Storage/storageAccounts\",\r\n
-        \             \"metricName\": \"SuccessE2ELatency\",\r\n              \"dimensions\":
-        [\r\n                {\r\n                  \"name\": \"ApiName\",\r\n                  \"operator\":
-        \"Include\",\r\n                  \"values\": [\r\n                    \"GetBlob:\"\r\n
-        \                 ]\r\n                }\r\n              ],\r\n              \"operator\":
-        \"GreaterThan\",\r\n              \"timeAggregation\": \"Average\",\r\n              \"criterionType\":
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricNamespace\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
         \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
         \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
-        \       \"targetResourceType\": \"Microsoft.Storage/storageAccounts\",\r\n
+        \       \"targetResourceType\": \"Microsoft.Network/publicIPAddresses\",\r\n
         \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
-        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_v2cutzwf4okh644cbhw3f3vdrohf6qhdohqyedgr5ynsgwa6tlosy/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Insights/metricAlerts/alert2\",\r\n
+        \     \"name\": \"alert2\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
+        \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
+        \"Test2\",\r\n        \"severity\": 2,\r\n        \"enabled\": true,\r\n        \"scopes\":
+        [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Network/publicIPAddresses/ip1\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricNamespace\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Maximum\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceType\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Insights/metricAlerts/cloned-ip2-2f314a22-6eb7-4740-908c-8de8ed29b9fd\",\r\n
+        \     \"name\": \"cloned-ip2-2f314a22-6eb7-4740-908c-8de8ed29b9fd\",\r\n      \"type\":
+        \"Microsoft.Insights/metricAlerts\",\r\n      \"location\": \"global\",\r\n
+        \     \"properties\": {\r\n        \"description\": \"Test\",\r\n        \"severity\":
+        2,\r\n        \"enabled\": true,\r\n        \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Network/publicIPAddresses/ip2\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricNamespace\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Total\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceType\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/microsoft.insights/actionGroups/ag1\"\r\n
+        \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Insights/metricAlerts/cloned-ip2-82bcce99-4bdb-4515-bd91-7dcb8d7194e0\",\r\n
+        \     \"name\": \"cloned-ip2-82bcce99-4bdb-4515-bd91-7dcb8d7194e0\",\r\n      \"type\":
+        \"Microsoft.Insights/metricAlerts\",\r\n      \"location\": \"global\",\r\n
+        \     \"properties\": {\r\n        \"description\": \"Test2\",\r\n        \"severity\":
+        2,\r\n        \"enabled\": true,\r\n        \"scopes\": [\r\n          \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/Microsoft.Network/publicIPAddresses/ip2\"\r\n
+        \       ],\r\n        \"evaluationFrequency\": \"PT1M\",\r\n        \"windowSize\":
+        \"PT5M\",\r\n        \"criteria\": {\r\n          \"allOf\": [\r\n            {\r\n
+        \             \"threshold\": 5.0,\r\n              \"name\": \"cond0\",\r\n
+        \             \"metricNamespace\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \             \"metricName\": \"TCPBytesForwardedDDoS\",\r\n              \"operator\":
+        \"GreaterThan\",\r\n              \"timeAggregation\": \"Maximum\",\r\n              \"criterionType\":
+        \"StaticThresholdCriterion\"\r\n            }\r\n          ],\r\n          \"odata.type\":
+        \"Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria\"\r\n        },\r\n
+        \       \"targetResourceType\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \       \"targetResourceRegion\": \"westus\",\r\n        \"actions\": [\r\n
+        \         {\r\n            \"actionGroupId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clonezf7efhguvannbofrisexs6ijveoabqcgkuglhtjprz6ycn6k/providers/microsoft.insights/actionGroups/ag1\"\r\n
         \         }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1\",\r\n
         \     \"name\": \"alert1\",\r\n      \"type\": \"Microsoft.Insights/metricAlerts\",\r\n
         \     \"location\": \"global\",\r\n      \"properties\": {\r\n        \"description\":
@@ -286,11 +331,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '10425'
+      - '15341'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Jan 2021 02:42:16 GMT
+      - Fri, 15 Jan 2021 10:01:21 GMT
       expires:
       - '-1'
       pragma:
@@ -343,14 +388,14 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource
       User-Agent:
-      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/alert1?api-version=2018-03-01
   response:
     body:
       string: '{"Code":"BadRequest","Message":"Alerts are currently not supported
         with multi resource level for Microsoft.Storage/storageAccounts. Activity
-        ID: c69e395a-86e0-4af0-9001-d9cd9e33f2bc."}'
+        ID: a2937349-5c67-4a25-bfad-711aac1d07b6."}'
     headers:
       cache-control:
       - no-cache
@@ -359,7 +404,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Jan 2021 02:42:16 GMT
+      - Fri, 15 Jan 2021 10:01:21 GMT
       expires:
       - '-1'
       pragma:
@@ -373,7 +418,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '297'
+      - '299'
       x-powered-by:
       - ASP.NET
     status:
@@ -409,7 +454,7 @@ interactions:
       ParameterSetName:
       - --source-resource --target-resource
       User-Agent:
-      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
+      - AZURECLI/2.18.0 azsdk-python-azure-mgmt-monitor/2.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_metric_alert_clone000001/providers/Microsoft.Insights/metricAlerts/cloned-clitest000003-88888888-0000-0000-0000-000000000001?api-version=2018-03-01
   response:
@@ -453,7 +498,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 13 Jan 2021 02:42:28 GMT
+      - Fri, 15 Jan 2021 10:01:31 GMT
       expires:
       - '-1'
       pragma:
@@ -471,7 +516,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '296'
+      - '298'
       x-powered-by:
       - ASP.NET
     status:

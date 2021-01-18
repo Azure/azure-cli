@@ -333,7 +333,7 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd("monitor log-analytics workspace create -g {rg} -n {workspace_name} --tags clitest=myron")
 
-        # Disable checks due to service issue: https://github.com/Azure/azure-rest-api-specs/issues/1907, will enable checks after service issue is fixed.
+        # Disable checks due to service issue: https://github.com/Azure/azure-rest-api-specs/issues/12363, will enable checks after service issue is fixed.
         self.cmd('monitor log-analytics workspace saved-search create -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
                  '--category {category} --display-name {display_name} -q "{query}" --fa {function_alias} '
                  '--fp "{function_param}" --tags a=b c=d',
@@ -422,6 +422,7 @@ class TestLogProfileScenarios(ScenarioTest):
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
+        # Disable this test because msrest cannot deserialize content-type "text/plan".
         # with self.assertRaisesRegexp(HttpResponseError, 'You have exceeded the number of allowed export rules in your workspace'):
         #     self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
         #              '--destination {sa_id_1} --enable -t {table_name}',
