@@ -448,6 +448,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
             'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name
         })
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
+            self.check("properties.crossRegionRestoreFlag", True)
+        ]).get_output_in_json()
+        time.sleep(300)
 
         self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
 
@@ -498,10 +502,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # Trigger Cross Region Restore
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --cross-region-restore-flag true', checks=[
-            self.check("properties.crossRegionRestoreFlag", True)
-        ]).get_output_in_json()
-        time.sleep(300)
         self.kwargs['crr_rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_id} -i {vm_id} --use-secondary-region --query [0].name').get_output_in_json()
 
         trigger_restore_job3_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_id} -i {vm_id} -r {crr_rp} --storage-account {secondary_sa} -t {target_rg} --use-secondary-region', checks=[
