@@ -114,23 +114,28 @@ def _expand_file_prefixed_files(args):
 
 
 def _transform_args_with_built_in_alias(cli_ctx, args):
-    if len(args) <= 1:
-        return args
+    if not args:
+        return
+    if len(args) == 1 and args['az']:
+        return
     transform_built_in_alias = cli_ctx.config.getboolean('core', 'transform_built_in_alias', fallback=True)
     if not transform_built_in_alias:
         return args
-    import configparser
-    alias_table = configparser.ConfigParser(interpolation=None)
+    import configobj
     alias_fp = os.path.join(os.path.dirname(__file__), 'built_in_alias')
-    alias_table.read(alias_fp)
-    return find_alias_and_transform_args(args, alias_table)
+    alias_config = configobj.ConfigObj(alias_fp, interpolation=None)
+    if args[0] == 'az':
+        args_transformed = ['az']
+        args_transformed.extend(find_alias_and_transform_args(args[1:], alias_config))
+        return args_transformed
+    return find_alias_and_transform_args(args, alias_config)
 
 
 def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
     args_transformed = _transform_args_with_built_in_alias(cli_ctx, args)
     if args_transformed != args:
-        logger.warning('`{}` was transformed to `{}`'.format(' '.join(args), ' '.join(args_transformed)))
+        logger.warning('`{}` is alias of `{}`'.format(' '.join(args), ' '.join(args_transformed)))
     return _expand_file_prefixed_files(args_transformed)
 
 
