@@ -50,7 +50,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                      ignore_network_security_group=False, virtual_ip_type='Internal',
                                      front_end_scale_factor=None, front_end_sku=None, force_route_table=False,
                                      force_network_security_group=False, ignore_subnet_size_validation=False,
-                                     location=None, no_wait=False):
+                                     location=None, no_wait=False, os_preference=None):
     # The current SDK has a couple of challenges creating ASE. The current swagger version used,
     # did not have 201 as valid response code, and thus will fail with polling operations.
     # The Load Balancer Type is an Enum Flag, that is expressed as a simple string enum in swagger,
@@ -73,7 +73,8 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                                                      subnet_id=subnet_id,
                                                                      virtual_ip_type=virtual_ip_type,
                                                                      front_end_scale_factor=front_end_scale_factor,
-                                                                     front_end_sku=front_end_sku)
+                                                                     front_end_sku=front_end_sku,
+                                                                     os_preference=os_preference)
 
     elif kind == 'ASEv3':
         _ensure_subnet_delegation(cmd.cli_ctx, subnet_id, 'Microsoft.Web/hostingEnvironments')
@@ -133,59 +134,40 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
     return ase_client.list_app_service_plans(resource_group_name, name)
 
 
-def create_asev3_inbound_services(cmd, resource_group_name, name, subnet, vnet_name=None):
+def create_ase_inbound_services(cmd, resource_group_name, name, subnet, vnet_name=None, skip_dns=False):
     ase_client = _get_ase_client_factory(cmd.cli_ctx)
     ase = ase_client.get(resource_group_name, name)
     if not ase:
         raise ResourceNotFoundError("App Service Environment '{}' not found.".format(name))
-    if ase.kind.lower() != 'asev3':
-        raise CommandNotFoundError('Only ASEv3 support private endpoint connections')
 
     inbound_subnet_id = _validate_subnet_id(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
     inbound_vnet_id = _get_vnet_id_from_subnet(cmd.cli_ctx, inbound_subnet_id)
-    _ensure_subnet_private_endpoint_network_policy(cmd.cli_ctx, inbound_subnet_id, False)
+    if ase.kind.lower() == 'asev3':
+        _ensure_subnet_private_endpoint_network_policy(cmd.cli_ctx, inbound_subnet_id, False)
+        network_client = _get_network_client_factory(cmd.cli_ctx)
+        pls_connection = PrivateLinkServiceConnection(private_link_service_id=ase.id,
+                                                      group_ids=['hostingEnvironments'],
+                                                      request_message='Link from CLI',
+                                                      name='{}-private-connection'.format(name))
+        private_endpoint = PrivateEndpoint(location=ase.location, tags=None, subnet=Subnet(id=inbound_subnet_id))
+        private_endpoint.private_link_service_connections = [pls_connection]
+        poller = network_client.private_endpoints.begin_create_or_update(resource_group_name,
+                                                                         '{}-private-endpoint'.format(name),
+                                                                         private_endpoint)
+        LongRunningOperation(cmd.cli_ctx)(poller)
+        ase_pe = poller.result()
+        nic_name = parse_resource_id(ase_pe.network_interfaces[0].id)['name']
+        nic = network_client.network_interfaces.get(resource_group_name, nic_name)
+        inbound_ip_address = nic.ip_configurations[0].private_ip_address
+    elif ase.kind.lower() == 'asev2':
+        if ase.internal_load_balancing_mode == 0:
+            raise ValidationError('Private DNS Zone is not relevant for External ASEv2.')
+        ase_vip_info = ase_client.get_vip_info(resource_group_name, name)
+        inbound_ip_address = ase_vip_info.internal_ip_address
 
-    # Private Endpoint
-    network_client = _get_network_client_factory(cmd.cli_ctx)
-    pls_connection = PrivateLinkServiceConnection(private_link_service_id=ase.id,
-                                                  group_ids=['hostingEnvironments'],
-                                                  request_message='Link from CLI',
-                                                  name='{}-private-connection'.format(name))
-    private_endpoint = PrivateEndpoint(
-        location=ase.location,
-        tags=None,
-        subnet=Subnet(id=inbound_subnet_id)
-    )
-
-    private_endpoint.private_link_service_connections = [pls_connection]
-
-    poller = network_client.private_endpoints.begin_create_or_update(resource_group_name,
-                                                                     '{}-private-endpoint'.format(name),
-                                                                     private_endpoint)
-    LongRunningOperation(cmd.cli_ctx)(poller)
-    ase_pe = poller.result()
-    nic_name = parse_resource_id(ase_pe.network_interfaces[0].id)['name']
-    nic = network_client.network_interfaces.get(resource_group_name, nic_name)
-
-    # Private DNS Zone
-    private_dns_client = _get_private_dns_client_factory(cmd.cli_ctx)
-    zone_name = '{}.appserviceenvironment.net'.format(name)
-    zone = PrivateZone(location='global', tags=None)
-    poller = private_dns_client.private_zones.create_or_update(resource_group_name, zone_name, zone, if_none_match='*')
-    LongRunningOperation(cmd.cli_ctx)(poller)
-
-    link_name = '{}_link'.format(name)
-    link = VirtualNetworkLink(location='global', tags=None)
-    link.virtual_network = SubResource(id=inbound_vnet_id)
-    link.registration_enabled = False
-    private_dns_client.virtual_network_links.create_or_update(resource_group_name, zone_name,
-                                                              link_name, link, if_none_match='*')
-    ase_record = ARecord(ipv4_address=nic.ip_configurations[0].private_ip_address)
-    record_set = RecordSet(ttl=3600)
-    record_set.a_records = [ase_record]
-    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*', record_set)
-    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '@', record_set)
-    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*.scm', record_set)
+    if not skip_dns:
+        _ensure_ase_private_dns_zone(cmd.cli_ctx, resource_group_name=resource_group_name, name=name,
+                                     inbound_vnet_id=inbound_vnet_id, inbound_ip_address=inbound_ip_address)
 
 
 def _get_ase_client_factory(cli_ctx):
@@ -453,7 +435,8 @@ def _get_unique_deployment_name(prefix):
 
 
 def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type=None,
-                                     front_end_scale_factor=None, front_end_sku=None, tags=None, kind='ASEv2'):
+                                     front_end_scale_factor=None, front_end_sku=None, tags=None,
+                                     kind='ASEv2', os_preference=None):
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
@@ -470,6 +453,8 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type=
     if front_end_sku:
         worker_sku = _map_worker_sku(front_end_sku)
         ase_properties['multiSize'] = worker_sku
+    if os_preference:
+        ase_properties['osPreference'] = os_preference
 
     ase_resource = {
         'name': name,
@@ -558,3 +543,25 @@ def _create_nsg_rule(cli_ctx, resource_group_name, network_security_group_name, 
     poller = network_client.security_rules.begin_create_or_update(
         resource_group_name, network_security_group_name, security_rule_name, settings)
     LongRunningOperation(cli_ctx)(poller)
+
+
+def _ensure_ase_private_dns_zone(cli_ctx, resource_group_name, name, inbound_vnet_id, inbound_ip_address):
+    # Private DNS Zone
+    private_dns_client = _get_private_dns_client_factory(cli_ctx)
+    zone_name = '{}.appserviceenvironment.net'.format(name)
+    zone = PrivateZone(location='global', tags=None)
+    poller = private_dns_client.private_zones.create_or_update(resource_group_name, zone_name, zone)
+    LongRunningOperation(cli_ctx)(poller)
+
+    link_name = '{}_link'.format(name)
+    link = VirtualNetworkLink(location='global', tags=None)
+    link.virtual_network = SubResource(id=inbound_vnet_id)
+    link.registration_enabled = False
+    private_dns_client.virtual_network_links.create_or_update(resource_group_name, zone_name,
+                                                              link_name, link, if_none_match='*')
+    ase_record = ARecord(ipv4_address=inbound_ip_address)
+    record_set = RecordSet(ttl=3600)
+    record_set.a_records = [ase_record]
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*', record_set)
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '@', record_set)
+    private_dns_client.record_sets.create_or_update(resource_group_name, zone_name, 'a', '*.scm', record_set)
