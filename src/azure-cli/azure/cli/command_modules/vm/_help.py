@@ -996,13 +996,13 @@ examples:
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
-long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli.'
+long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/linux/quick-create-cli.'
 parameters:
   - name: --image
     type: string
     short-summary: >
         The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
-        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
+        This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version". For more information, see https://docs.microsoft.com/azure/virtual-machines/linux/cli-ps-findimage
     populator-commands:
       - az vm image list
       - az vm image show
@@ -1403,6 +1403,10 @@ examples:
   - name: Add a customScript extension to VM(s) specified by --ids.
     text: |
         az vm extension set -n customScript --publisher Microsoft.Azure.Extensions --ids {vm_id}
+  - name: Add an extension and enable automatic upgrade by the platform if there is a newer version of the extension available.
+    text: |
+        az vm extension set -n extName --publisher publisher --vm-name MyVM -g MyResourceGroup \\
+        --enable-auto-upgrade true
 parameters:
   - name: --name -n
     populator-commands:
@@ -2474,6 +2478,10 @@ examples:
             --version 2.0 --publisher Microsoft.Azure.Extensions \\
             --provision-after-extensions NetworkWatcherAgentLinux VMAccessForLinux  \\
             --settings '{"commandToExecute": "echo testing"}'
+  - name: Add an extension and enable automatic upgrade by the platform if there is a newer version of the extension available.
+    text: >
+        az vmss extension set -n extName --publisher publisher --vmss-name my-vmss -g my-group \\
+        --enable-auto-upgrade true
 """
 
 helps['vmss extension show'] = """

@@ -53,7 +53,7 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
-        --hyper-v --sku P3V3
+        --hyper-v --sku P1V3
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
@@ -1320,11 +1320,11 @@ examples:
 
 helps['webapp config ssl import'] = """
 type: command
-short-summary: Import an SSL certificate to a web app from Key Vault.
+short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
@@ -1434,6 +1434,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
+  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
@@ -1951,22 +1957,31 @@ short-summary: >
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
-        az webapp up -n MyUniqueAppName --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to deployed exists.
+        az webapp up --dryrun
+  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
-  - name: Create a web app in a specific region, by running the command from the folder where the code to deployed exists.
+        az webapp up
+  - name: Create a web app with a specified name
     text: >
-        az webapp up -n MyUniqueAppName -l locationName
+        az webapp up -n MyUniqueAppName
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using '|' delimiter
+    text: >
+        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using ':' delimiter
+    text: >
+        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:8"
+  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
+    text: >
+        az webapp up -l locationName
   - name: Deploy new code to an app that was originally created using the same command
     text: >
         az webapp up -n MyUniqueAppName -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
-        az webapp up -n MyUniqueAppName --logs
+        az webapp up --logs
   - name: Create a web app and deploy as a static HTML app.
     text: >
-        az webapp up -n MyUniqueAppName --html
+        az webapp up --html
 """
 
 helps['webapp update'] = """
@@ -2145,7 +2160,7 @@ helps['appservice ase create'] = """
     type: command
     short-summary: Create app service environment.
     examples:
-    - name: Create Resource Group, vNet and app service environment with default values.
+    - name: Create Resource Group, vNet and app service environment v2 with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2154,26 +2169,49 @@ helps['appservice ase create'] = """
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet
-    - name: Create External app service environments with large front-ends and scale factor of 10 in existing resource group and vNet.
+    - name: Create External app service environments v2 with large front-ends and scale factor of 10 in existing resource group and vNet.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 \\
             --virtual-ip-type External
-    - name: Create vNet and app service environment, but do not create network security group and route table in existing resource group.
+    - name: Create vNet and app service environment v2, but do not create network security group and route table in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-network-security-group --ignore-route-table
-    - name: Create vNet and app service environment in a smaller than recommended subnet in existing resource group.
+    - name: Create vNet and app service environment v2 in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-subnet-size-validation
+    - name: Create Resource Group, vNet and app service environment v3 with default values.
+      text: |
+          az group create -g ASEv3ResourceGroup --location westeurope
+
+          az network vnet create -g ASEv3ResourceGroup -n MyASEv3VirtualNetwork \\
+            --address-prefixes 10.0.0.0/16 --subnet-name Inbound --subnet-prefixes 10.0.0.0/24
+
+          az network vnet subnet create -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
+            --name Outbound --address-prefixes 10.0.1.0/24
+
+          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Outbound --kind asev3
 """
+
+helps['appservice ase create-inbound-services'] = """
+    type: command
+    short-summary: Create the inbound services needed in preview for ASEv3 (private endpoint and DNS).
+    examples:
+    - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
+      text: |
+          az appservice ase create-inbound-services -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Inbound
+"""
+
 
 helps['appservice ase update'] = """
     type: command

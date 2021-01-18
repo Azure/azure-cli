@@ -246,12 +246,12 @@ def _build_identities_info(identities):
 
 
 def _get_resource(client, resource_group_name, *subresources):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         resource = client.get(resource_group_name, *subresources)
         return resource
-    except CloudError as ex:
-        if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
             return None
         raise
 
@@ -681,8 +681,6 @@ def _cycle_exec_pipe(ws):
     r, _, _ = select.select([ws.sock, sys.stdin], [], [])
     if ws.sock in r:
         data = ws.recv()
-        if not data:
-            return False
         sys.stdout.write(data)
         sys.stdout.flush()
     if sys.stdin in r:

@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.16.0"
+VERSION = "2.18.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -63,7 +63,7 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement~=0.2.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration~=0.6.0',
+    'azure-mgmt-appconfiguration~=1.0.1',
     'azure-mgmt-authorization~=0.61.0',
     'azure-mgmt-batch~=9.0.0',
     'azure-mgmt-batchai~=2.0',
@@ -74,12 +74,13 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=18.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry==3.0.0rc15',
+    'azure-mgmt-containerregistry==3.0.0rc16',
     'azure-mgmt-cosmosdb~=1.0.0',
     'azure-mgmt-containerservice~=9.4.0',
+    'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
-    'azure-mgmt-datamigration~=0.1.0',
+    'azure-mgmt-datamigration~=4.1.0',
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
@@ -112,7 +113,7 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==10.3.0',
+    'azure-mgmt-resource==12.0.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.6.0',
     'azure-mgmt-servicebus~=0.6.0',
