@@ -420,7 +420,7 @@ helps['appconfig feature filter add'] = """
     examples:
         - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and 2 parameters.
           text:
-            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=Value Name2=Value2
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters Name=\\"Value\\" Name2=\\"Value2\\"
         - name: Insert a filter at index 2 (zero-based index) for feature 'color' with label MyLabel and filter name 'MyFilter' with no parameters
           text:
             az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --index 2
@@ -430,6 +430,9 @@ helps['appconfig feature filter add'] = """
         - name: Add a filter with name 'MyFilter' using App Configuration endpoint and your 'az login' credentials.
           text:
             az appconfig feature filter add --endpoint=https://contoso.azconfig.io --feature color --filter-name MyFilter --auth-mode login
+        - name: Add a filter for feature 'color' with label MyLabel with name 'MyFilter' and array parameters.
+          text:
+            az appconfig feature filter add -n MyAppConfiguration --feature color --label MyLabel --filter-name MyFilter --filter-parameters ArrayParam=[1,2,3]
     """
 
 helps['appconfig feature filter delete'] = """
