@@ -1,3 +1,4 @@
+
 interactions:
 - request:
     body: '{"location": "centralus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
@@ -205,7 +206,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_network_private_endpoints000001%27%20and%20name%20eq%20%27pubip1%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_network_private_endpoints000001%27%20and%20name%20eq%20%27pubip1%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2020-10-01
   response:
     body:
       string: '{"value":[]}'
@@ -265,7 +266,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/lb_deploy_HclH8WmJNlr4PjINWmimw0ifyCkbHmfD","name":"lb_deploy_HclH8WmJNlr4PjINWmimw0ifyCkbHmfD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6338275759684071015","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-16T05:34:28.0768222Z","duration":"PT2.1656402S","correlationId":"768ad3ad-fcec-43c8-adf6-0864fddc8306","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["centralus"]},{"resourceType":"loadBalancers","locations":["centralus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/publicIPAddresses/pubip1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"pubip1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}]}}'
@@ -396,7 +397,7 @@ interactions:
       - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Resources/deployments/lb_deploy_HclH8WmJNlr4PjINWmimw0ifyCkbHmfD","name":"lb_deploy_HclH8WmJNlr4PjINWmimw0ifyCkbHmfD","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6338275759684071015","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T05:35:10.460305Z","duration":"PT44.549123S","correlationId":"768ad3ad-fcec-43c8-adf6-0864fddc8306","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["centralus"]},{"resourceType":"loadBalancers","locations":["centralus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/publicIPAddresses/pubip1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"pubip1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"c4107362-dbe2-4da2-a5fe-d4d0e4376662","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"fd7524c8-243d-473e-a43f-da3d4894036c\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/publicIPAddresses/pubip1"},"privateIPAddressVersion":"IPv4"}}],"backendAddressPools":[{"name":"lb1bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool","etag":"W/\"fd7524c8-243d-473e-a43f-da3d4894036c\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/loadBalancers/lb1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_private_endpoints000001/providers/Microsoft.Network/publicIPAddresses/pubip1"}]}}'
@@ -1418,11 +1419,6 @@ interactions:
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.ContainerService/managedClusters\",\r\n      \"displayName\":
         \"Microsoft.ContainerService/managedClusters\",\r\n      \"apiVersion\": \"2019-04-01\"\r\n
-        \   },\r\n    {\r\n      \"name\": \"Microsoft.Attestation.attestationProviders\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Attestation.attestationProviders\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Attestation/attestationProviders\",\r\n      \"displayName\":
-        \"Microsoft.Attestation/attestationProviders\",\r\n      \"apiVersion\": \"2018-09-01-preview\"\r\n
         \   },\r\n    {\r\n      \"name\": \"Microsoft.Devices.IotHubs\",\r\n      \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Devices.IotHubs\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
@@ -1432,10 +1428,6 @@ interactions:
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.Cache/Redis\",\r\n      \"displayName\": \"Microsoft.Cache/Redis\",\r\n
         \     \"apiVersion\": \"2019-07-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.OperationalInsights.Workspaces\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.OperationalInsights.Workspaces\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.OperationalInsights/Workspaces\",\r\n      \"displayName\": \"Microsoft.OperationalInsights/Workspaces\",\r\n
-        \     \"apiVersion\": \"2015-11-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
         \"Microsoft.SignalRService.SignalR\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.SignalRService.SignalR\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.SignalRService/SignalR\",\r\n      \"displayName\": \"Microsoft.SignalRService/SignalR\",\r\n
@@ -1449,20 +1441,11 @@ interactions:
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.Batch/batchAccounts\",\r\n      \"displayName\": \"Microsoft.Batch/batchAccounts\",\r\n
         \     \"apiVersion\": \"2020-03-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Insights.components\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Insights.components\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Insights/components\",\r\n      \"displayName\": \"Microsoft.Insights/components\",\r\n
-        \     \"apiVersion\": \"2018-05-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
         \"Microsoft.ContainerRegistry.registries\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.ContainerRegistry.registries\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.ContainerRegistry/registries\",\r\n      \"displayName\": \"Microsoft.ContainerRegistry/registries\",\r\n
         \     \"apiVersion\": \"2019-12-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Automation.automationPrivateLinkServices\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Automation.automationPrivateLinkServices\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Automation/automationPrivateLinkServices\",\r\n      \"displayName\":
-        \"Microsoft.Automation/automationPrivateLinkServices\",\r\n      \"apiVersion\":
-        \"2020-01-13-preview\"\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.RecoveryServices.vaults\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.RecoveryServices.vaults\",\r\n
+        \"Microsoft.RecoveryServices.vaults\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.RecoveryServices.vaults\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.RecoveryServices/vaults\",\r\n      \"displayName\": \"Microsoft.RecoveryServices/vaults\",\r\n
         \     \"apiVersion\": \"2020-02-02-preview\"\r\n    },\r\n    {\r\n      \"name\":
@@ -1490,20 +1473,6 @@ interactions:
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.StorageSync/storageSyncServices\",\r\n      \"displayName\": \"Microsoft.StorageSync/storageSyncServices\",\r\n
         \     \"apiVersion\": \"2020-03-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.StorageSyncDev.storageSyncServices\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.StorageSyncDev.storageSyncServices\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.StorageSyncDev/storageSyncServices\",\r\n      \"displayName\":
-        \"Microsoft.StorageSyncDev/storageSyncServices\",\r\n      \"apiVersion\":
-        \"2020-03-01\"\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.StorageSyncInt.storageSyncServices\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.StorageSyncInt.storageSyncServices\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.StorageSyncInt/storageSyncServices\",\r\n      \"displayName\":
-        \"Microsoft.StorageSyncInt/storageSyncServices\",\r\n      \"apiVersion\":
-        \"2020-03-01\"\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.Notebooks.notebookProxy\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Notebooks.notebookProxy\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Notebooks/notebookProxy\",\r\n      \"displayName\": \"Microsoft.Notebooks/notebookProxy\",\r\n
-        \     \"apiVersion\": \"2019-10-11-preview\"\r\n    },\r\n    {\r\n      \"name\":
         \"Microsoft.HealthcareApis.services\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.HealthcareApis.services\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.HealthcareApis/services\",\r\n      \"displayName\": \"Microsoft.HealthcareApis/services\",\r\n
@@ -1528,69 +1497,10 @@ interactions:
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.Network/applicationgateways\",\r\n      \"displayName\": \"Microsoft.Network/applicationgateways\",\r\n
         \     \"apiVersion\": \"2020-03-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Media.mediaservices\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Media.mediaservices\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Media/mediaservices\",\r\n      \"displayName\": \"Microsoft.Media/mediaservices\",\r\n
-        \     \"apiVersion\": \"2020-05-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Databricks.workspaces\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Databricks.workspaces\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Databricks/workspaces\",\r\n      \"displayName\": \"Microsoft.Databricks/workspaces\",\r\n
-        \     \"apiVersion\": \"2018-04-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.SQL.managedInstances\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.SQL.managedInstances\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.SQL/managedInstances\",\r\n      \"displayName\": \"Microsoft.SQL/managedInstances\",\r\n
-        \     \"apiVersion\": \"2019-06-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.aadiam.privateLinkForAzureAD\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.aadiam.privateLinkForAzureAD\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.aadiam/privateLinkForAzureAD\",\r\n      \"displayName\": \"Microsoft.aadiam/privateLinkForAzureAD\",\r\n
-        \     \"apiVersion\": \"2020-03-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.DevSpaces.privateLinks\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.DevSpaces.privateLinks\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.DevSpaces/privateLinks\",\r\n      \"displayName\": \"Microsoft.DevSpaces/privateLinks\",\r\n
-        \     \"apiVersion\": \"2020-05-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Migrate.assessmentProjects\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Migrate.assessmentProjects\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Migrate/assessmentProjects\",\r\n      \"displayName\": \"Microsoft.Migrate/assessmentProjects\",\r\n
-        \     \"apiVersion\": \"2020-05-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Migrate.migrateProjects\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Migrate.migrateProjects\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Migrate/migrateProjects\",\r\n      \"displayName\": \"Microsoft.Migrate/migrateProjects\",\r\n
-        \     \"apiVersion\": \"2020-06-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.OffAzure.vmwaresites\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.OffAzure.vmwaresites\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.OffAzure/vmwaresites\",\r\n      \"displayName\": \"Microsoft.OffAzure/vmwaresites\",\r\n
-        \     \"apiVersion\": \"2020-05-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.OffAzure.hypervsites\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.OffAzure.hypervsites\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.OffAzure/hypervsites\",\r\n      \"displayName\": \"Microsoft.OffAzure/hypervsites\",\r\n
-        \     \"apiVersion\": \"2020-05-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.OffAzure.serversites\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.OffAzure.serversites\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.OffAzure/serversites\",\r\n      \"displayName\": \"Microsoft.OffAzure/serversites\",\r\n
-        \     \"apiVersion\": \"2020-05-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.OffAzure.importsites\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.OffAzure.importsites\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.OffAzure/importsites\",\r\n      \"displayName\": \"Microsoft.OffAzure/importsites\",\r\n
-        \     \"apiVersion\": \"2020-01-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.MixedReality.spatialAnchorsAccounts\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.MixedReality.spatialAnchorsAccounts\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.MixedReality/spatialAnchorsAccounts\",\r\n      \"displayName\":
-        \"Microsoft.MixedReality/spatialAnchorsAccounts\",\r\n      \"apiVersion\":
-        \"2019-12-02-preview\"\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.DataFactory.factories\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.DataFactory.factories\",\r\n
+        \"Microsoft.DataFactory.factories\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.DataFactory.factories\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.DataFactory/factories\",\r\n      \"displayName\": \"Microsoft.DataFactory/factories\",\r\n
         \     \"apiVersion\": \"2018-06-01\"\r\n    },\r\n    {\r\n      \"name\":
-        \"Microsoft.Authorization.resourceManagementPrivateLinks\",\r\n      \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Authorization.resourceManagementPrivateLinks\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.Authorization/resourceManagementPrivateLinks\",\r\n      \"displayName\":
-        \"Microsoft.Authorization/resourceManagementPrivateLinks\",\r\n      \"apiVersion\":
-        \"2020-05-01\"\r\n    },\r\n    {\r\n      \"name\": \"Microsoft.ProjectBabylon.accounts\",\r\n
-        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.ProjectBabylon.accounts\",\r\n
-        \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
-        \"Microsoft.ProjectBabylon/accounts\",\r\n      \"displayName\": \"Microsoft.ProjectBabylon/accounts\",\r\n
-        \     \"apiVersion\": \"2019-10-01-preview\"\r\n    },\r\n    {\r\n      \"name\":
         \"Microsoft.Devices.ProvisioningServices\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/AvailablePrivateEndpointTypes/Microsoft.Devices.ProvisioningServices\",\r\n
         \     \"type\": \"Microsoft.Network/AvailablePrivateEndpointTypes\",\r\n      \"resourceName\":
         \"Microsoft.Devices/ProvisioningServices\",\r\n      \"displayName\": \"Microsoft.Devices/ProvisioningServices\",\r\n
@@ -1879,8 +1789,13 @@ interactions:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
