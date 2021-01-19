@@ -324,7 +324,7 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
                 start_events[item.operation_id] = item
             else:
                 end_events[item.operation_id] = item
-    return start_events, end_events, client
+    return start_events, end_events
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
@@ -332,7 +332,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
-    start_events, end_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
+    start_events, end_events = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
 
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
