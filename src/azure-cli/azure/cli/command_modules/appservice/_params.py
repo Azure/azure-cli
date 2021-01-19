@@ -36,6 +36,7 @@ WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv2', 'ASEv3']
+ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -891,6 +892,8 @@ def load_arguments(self, _):
                    help='Scale of front ends to app service plan instance ratio.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
                    help='Size of front end servers.')
+        c.argument('os_preference', arg_type=get_enum_type(ASE_OS_PREFERENCE_TYPES),
+                   help='Determine if app service environment should start with Linux workers. Applies to ASEv2 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
@@ -911,6 +914,8 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
                    To create vnet and/or subnet use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
+        c.argument('skip_dns', arg_type=get_three_state_flag(),
+                   help='Do not create Private DNS Zone and DNS records.')
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:
