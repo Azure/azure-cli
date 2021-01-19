@@ -196,7 +196,6 @@ def get_account_url(cli_ctx, account_name, service):
 
 
 def cf_blob_service(cli_ctx, kwargs):
-    from knack.util import CLIError
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
@@ -276,7 +275,6 @@ def cf_or_policy(cli_ctx, _):
 
 
 def cf_queue_service(cli_ctx, kwargs):
-    from knack.util import CLIError
     client_kwargs = _prepare_client_kwargs_track2(cli_ctx)
     t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_QUEUE, '_queue_service_client#QueueServiceClient')
     connection_string = kwargs.pop('connection_string', None)

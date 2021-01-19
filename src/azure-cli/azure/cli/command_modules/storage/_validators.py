@@ -184,7 +184,7 @@ def validate_client_parameters(cmd, namespace):
                        'your command. Please use --help to get more information.')
         try:
             n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
-        except Exception:  # allow do some operations without credential provided.
+        except Exception:  # pylint: disable=broad-except
             pass
 
 
