@@ -51,6 +51,10 @@ logger = get_logger(__name__)
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
               'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements/default?api-version=2020-03-01-preview'}
 
+# The default value for polling interval of ARM deployment
+# From msrestazure.azure_configuration.AzureConfiguration self.long_running_operation_timeout = 30
+default_polling_interval = 30
+
 
 def _build_resource_id(**kwargs):
     from msrestazure.tools import resource_id as resource_id_from_dict
@@ -304,7 +308,8 @@ def _raise_subdivision_deployment_error(error_message, error_code=None):
 def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file=None,
                                          template_uri=None, deployment_name=None, parameters=None,
                                          mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
-                                         aux_subscriptions=None, aux_tenants=None, no_prompt=False):
+                                         aux_subscriptions=None, aux_tenants=None, no_prompt=False,
+                                         polling_interval=default_polling_interval):
     DeploymentProperties, TemplateLink, OnErrorDeployment = cmd.get_models('DeploymentProperties', 'TemplateLink',
                                                                            'OnErrorDeployment')
     template_link = None
@@ -370,7 +375,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=properties)
         try:
-            validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment)
+            validation_poller = deployment_client.validate(resource_group_name, deployment_name, deployment,
+                                                           long_running_operation_timeout=polling_interval)
         except CloudError as cx:
             _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
@@ -384,7 +390,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         return validation_result
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, deployment)
+        return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name,
+                           deployment, long_running_operation_timeout=polling_interval)
     return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -431,7 +438,8 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                               confirm_with_what_if=None, what_if_result_format=None,
-                                              what_if_exclude_change_types=None, template_spec=None, query_string=None):
+                                              what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                              polling_interval=default_polling_interval):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                           template_file=template_file, template_uri=template_uri,
@@ -439,7 +447,8 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                                           deployment_location=deployment_location,
                                                           result_format=what_if_result_format,
                                                           exclude_change_types=what_if_exclude_change_types,
-                                                          no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                          no_prompt=no_prompt, template_spec=template_spec,
+                                                          query_string=query_string, polling_interval=polling_interval)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -449,7 +458,8 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=False, no_wait=no_wait,
-                                                      no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                      no_prompt=no_prompt, template_spec=template_spec,
+                                                      query_string=query_string, polling_interval=polling_interval)
 
 
 # pylint: disable=unused-argument
@@ -457,18 +467,21 @@ def validate_arm_template_at_subscription_scope(cmd,
                                                 template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
                                                 no_wait=False, handle_extended_json_format=None,
-                                                no_prompt=False, template_spec=None, query_string=None):
+                                                no_prompt=False, template_spec=None,
+                                                query_string=None, polling_interval=default_polling_interval):
     return _deploy_arm_template_at_subscription_scope(cmd=cmd,
                                                       template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                       deployment_name=deployment_name, deployment_location=deployment_location,
                                                       validate_only=True, no_wait=no_wait,
-                                                      no_prompt=no_prompt, template_spec=template_spec, query_string=query_string,)
+                                                      no_prompt=no_prompt, template_spec=template_spec,
+                                                      query_string=query_string, polling_interval=polling_interval)
 
 
 def _deploy_arm_template_at_subscription_scope(cmd,
                                                template_file=None, template_uri=None, parameters=None,
                                                deployment_name=None, deployment_location=None, validate_only=False,
-                                               no_wait=False, no_prompt=False, template_spec=None, query_string=None):
+                                               no_wait=False, no_prompt=False, template_spec=None, query_string=None,
+                                               polling_interval=default_polling_interval):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri, parameters=parameters,
                                                                       mode='Incremental',
@@ -482,7 +495,8 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties, location=deployment_location)
         try:
-            validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment)
+            validation_poller = mgmt_client.validate_at_subscription_scope(deployment_name, deployment,
+                                                                           long_running_operation_timeout=polling_interval)
         except CloudError as cx:
             _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
@@ -496,7 +510,8 @@ def _deploy_arm_template_at_subscription_scope(cmd,
         return validation_result
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope, deployment_name, deployment)
+        return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope, deployment_name, deployment,
+                           long_running_operation_timeout=polling_interval)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope, deployment_name,
                        deployment_properties, deployment_location)
 
@@ -509,7 +524,8 @@ def deploy_arm_template_at_resource_group(cmd,
                                           no_wait=False, handle_extended_json_format=None,
                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False,
                                           confirm_with_what_if=None, what_if_result_format=None,
-                                          what_if_exclude_change_types=None, template_spec=None, query_string=None):
+                                          what_if_exclude_change_types=None, template_spec=None,
+                                          query_string=None, polling_interval=default_polling_interval):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_resource_group(cmd,
                                                       resource_group_name=resource_group_name,
@@ -517,7 +533,8 @@ def deploy_arm_template_at_resource_group(cmd,
                                                       parameters=parameters, deployment_name=deployment_name, mode=mode,
                                                       aux_tenants=aux_tenants, result_format=what_if_result_format,
                                                       exclude_change_types=what_if_exclude_change_types,
-                                                      no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                      no_prompt=no_prompt, template_spec=template_spec,
+                                                      query_string=query_string, polling_interval=polling_interval)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -529,7 +546,8 @@ def deploy_arm_template_at_resource_group(cmd,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=False, no_wait=no_wait,
                                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants,
-                                                  no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                  no_prompt=no_prompt, template_spec=template_spec,
+                                                  query_string=query_string, polling_interval=polling_interval)
 
 
 # pylint: disable=unused-argument
@@ -537,13 +555,15 @@ def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
                                             template_file=None, template_uri=None, parameters=None,
                                             deployment_name=None, mode=None, rollback_on_error=None,
-                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None, query_string=None):
+                                            no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None,
+                                            query_string=None, polling_interval=default_polling_interval):
     return _deploy_arm_template_at_resource_group(cmd,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=True, no_wait=no_wait,
-                                                  no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                  no_prompt=no_prompt, template_spec=template_spec,
+                                                  query_string=query_string, polling_interval=polling_interval)
 
 
 def _deploy_arm_template_at_resource_group(cmd,
@@ -551,12 +571,14 @@ def _deploy_arm_template_at_resource_group(cmd,
                                            template_file=None, template_uri=None, parameters=None,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False, no_wait=False,
-                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False, template_spec=None, query_string=None):
+                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False, template_spec=None,
+                                           query_string=None, polling_interval=default_polling_interval):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode=mode,
                                                                       rollback_on_error=rollback_on_error,
-                                                                      no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                                      no_prompt=no_prompt, template_spec=template_spec,
+                                                                      query_string=query_string)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
@@ -566,7 +588,8 @@ def _deploy_arm_template_at_resource_group(cmd,
         Deployment = cmd.get_models('Deployment')
         deployment = Deployment(properties=deployment_properties)
         try:
-            validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment)
+            validation_poller = mgmt_client.validate(resource_group_name, deployment_name, deployment,
+                                                     long_running_operation_timeout=polling_interval)
         except CloudError as cx:
             _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
@@ -580,7 +603,8 @@ def _deploy_arm_template_at_resource_group(cmd,
         return validation_result
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name, deployment_name, deployment)
+        return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name, deployment_name, deployment,
+                           long_running_operation_timeout=polling_interval)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name, deployment_name, deployment_properties)
 
 
@@ -591,7 +615,8 @@ def deploy_arm_template_at_management_group(cmd,
                                             deployment_name=None, deployment_location=None,
                                             no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                             confirm_with_what_if=None, what_if_result_format=None,
-                                            what_if_exclude_change_types=None, template_spec=None, query_string=None):
+                                            what_if_exclude_change_types=None, template_spec=None,
+                                            query_string=None, polling_interval=default_polling_interval):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_management_group(cmd,
                                                         management_group_id=management_group_id,
@@ -600,7 +625,8 @@ def deploy_arm_template_at_management_group(cmd,
                                                         deployment_location=deployment_location,
                                                         result_format=what_if_result_format,
                                                         exclude_change_types=what_if_exclude_change_types,
-                                                        no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                        no_prompt=no_prompt, template_spec=template_spec,
+                                                        query_string=query_string, polling_interval=polling_interval)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -611,7 +637,8 @@ def deploy_arm_template_at_management_group(cmd,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=False, no_wait=no_wait,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                    no_prompt=no_prompt, template_spec=template_spec,
+                                                    query_string=query_string, polling_interval=polling_interval)
 
 
 # pylint: disable=unused-argument
@@ -620,20 +647,23 @@ def validate_arm_template_at_management_group(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None,
-                                              no_prompt=False, template_spec=None, query_string=None):
+                                              no_prompt=False, template_spec=None, query_string=None,
+                                              polling_interval=default_polling_interval):
     return _deploy_arm_template_at_management_group(cmd=cmd,
                                                     management_group_id=management_group_id,
                                                     template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                     deployment_name=deployment_name, deployment_location=deployment_location,
                                                     validate_only=True, no_wait=no_wait,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                    no_prompt=no_prompt, template_spec=template_spec,
+                                                    query_string=query_string, polling_interval=polling_interval)
 
 
 def _deploy_arm_template_at_management_group(cmd,
                                              management_group_id=None,
                                              template_file=None, template_uri=None, parameters=None,
                                              deployment_name=None, deployment_location=None, validate_only=False,
-                                             no_wait=False, no_prompt=False, template_spec=None, query_string=None):
+                                             no_wait=False, no_prompt=False, template_spec=None, query_string=None,
+                                             polling_interval=default_polling_interval):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode='Incremental',
@@ -646,7 +676,8 @@ def _deploy_arm_template_at_management_group(cmd,
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
         try:
-            validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name, deployment)
+            validation_poller = mgmt_client.validate_at_management_group_scope(management_group_id, deployment_name,
+                                                                               deployment, long_running_operation_timeout=polling_interval)
         except CloudError as cx:
             _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
@@ -662,7 +693,7 @@ def _deploy_arm_template_at_management_group(cmd,
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
         return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
-                           management_group_id, deployment_name, deployment)
+                           management_group_id, deployment_name, deployment, long_running_operation_timeout=polling_interval)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_management_group_scope,
                        management_group_id, deployment_name, deployment_properties, deployment_location)
 
@@ -673,7 +704,8 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                         deployment_name=None, deployment_location=None,
                                         no_wait=False, handle_extended_json_format=None, no_prompt=False,
                                         confirm_with_what_if=None, what_if_result_format=None,
-                                        what_if_exclude_change_types=None, template_spec=None, query_string=None):
+                                        what_if_exclude_change_types=None, template_spec=None, query_string=None,
+                                        polling_interval=default_polling_interval):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_tenant_scope(cmd,
                                                     template_file=template_file, template_uri=template_uri,
@@ -681,7 +713,8 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                                     deployment_location=deployment_location,
                                                     result_format=what_if_result_format,
                                                     exclude_change_types=what_if_exclude_change_types,
-                                                    no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                    no_prompt=no_prompt, template_spec=template_spec,
+                                                    query_string=query_string, polling_interval=polling_interval)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -691,25 +724,29 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
                                                 validate_only=False, no_wait=no_wait,
-                                                no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                no_prompt=no_prompt, template_spec=template_spec,
+                                                query_string=query_string, polling_interval=polling_interval)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template_at_tenant_scope(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, deployment_location=None,
-                                          no_wait=False, handle_extended_json_format=None, no_prompt=False, template_spec=None, query_string=None):
+                                          no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                          template_spec=None, query_string=None, polling_interval=default_polling_interval):
     return _deploy_arm_template_at_tenant_scope(cmd=cmd,
                                                 template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                 deployment_name=deployment_name, deployment_location=deployment_location,
                                                 validate_only=True, no_wait=no_wait,
-                                                no_prompt=no_prompt, template_spec=template_spec, query_string=query_string)
+                                                no_prompt=no_prompt, template_spec=template_spec,
+                                                query_string=query_string, polling_interval=polling_interval)
 
 
 def _deploy_arm_template_at_tenant_scope(cmd,
                                          template_file=None, template_uri=None, parameters=None,
                                          deployment_name=None, deployment_location=None, validate_only=False,
-                                         no_wait=False, no_prompt=False, template_spec=None, query_string=None):
+                                         no_wait=False, no_prompt=False, template_spec=None, query_string=None,
+                                         polling_interval=default_polling_interval):
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       parameters=parameters, mode='Incremental',
@@ -722,7 +759,9 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         ScopedDeployment = cmd.get_models('ScopedDeployment')
         deployment = ScopedDeployment(properties=deployment_properties, location=deployment_location)
         try:
-            validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, parameters=deployment)
+            validation_poller = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
+                                                                     parameters=deployment,
+                                                                     long_running_operation_timeout=polling_interval)
         except CloudError as cx:
             _raise_subdivision_deployment_error(cx.response.text, cx.error.error if cx.error else None)
         validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
@@ -738,7 +777,8 @@ def _deploy_arm_template_at_tenant_scope(cmd,
         return validation_result
 
     if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-        return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope, deployment_name, deployment)
+        return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope, deployment_name, deployment,
+                           long_running_operation_timeout=polling_interval)
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_tenant_scope, deployment_name,
                        deployment_properties, deployment_location)
 
@@ -748,12 +788,14 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
                                                   aux_tenants=None, result_format=None,
                                                   no_pretty_print=None, no_prompt=False,
-                                                  exclude_change_types=None, template_spec=None, query_string=None):
+                                                  exclude_change_types=None, template_spec=None, query_string=None,
+                                                  polling_interval=default_polling_interval):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
                                                     plug_pipeline=(template_uri is None and template_spec is None))
-    what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
+    what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties,
+                                         long_running_operation_timeout=polling_interval)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
@@ -762,11 +804,13 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
                                                       result_format=None, no_pretty_print=None, no_prompt=False,
-                                                      exclude_change_types=None, template_spec=None, query_string=None):
+                                                      exclude_change_types=None, template_spec=None, query_string=None,
+                                                      polling_interval=default_polling_interval):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
-    what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
+    what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location,
+                                                               long_running_operation_timeout=polling_interval)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
@@ -775,12 +819,14 @@ def what_if_deploy_arm_template_at_management_group(cmd, management_group_id=Non
                                                     template_file=None, template_uri=None, parameters=None,
                                                     deployment_name=None, deployment_location=None,
                                                     result_format=None, no_pretty_print=None, no_prompt=False,
-                                                    exclude_change_types=None, template_spec=None, query_string=None):
+                                                    exclude_change_types=None, template_spec=None, query_string=None,
+                                                    polling_interval=default_polling_interval):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec=template_spec, query_string=query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
     what_if_poller = mgmt_client.what_if_at_management_group_scope(management_group_id, deployment_name,
-                                                                   deployment_location, what_if_properties)
+                                                                   deployment_location, what_if_properties,
+                                                                   long_running_operation_timeout=polling_interval)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
@@ -789,11 +835,13 @@ def what_if_deploy_arm_template_at_tenant_scope(cmd,
                                                 template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
                                                 result_format=None, no_pretty_print=None, no_prompt=False,
-                                                exclude_change_types=None, template_spec=None, query_string=None):
+                                                exclude_change_types=None, template_spec=None, query_string=None,
+                                                polling_interval=default_polling_interval):
     what_if_properties = _prepare_deployment_what_if_properties(cmd, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt, template_spec, query_string)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None and template_spec is None))
-    what_if_poller = mgmt_client.what_if_at_tenant_scope(deployment_name, deployment_location, what_if_properties)
+    what_if_poller = mgmt_client.what_if_at_tenant_scope(deployment_name, deployment_location, what_if_properties,
+                                                         long_running_operation_timeout=polling_interval)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
@@ -1502,22 +1550,22 @@ def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
                         parameters=None, mode=None, rollback_on_error=None, no_wait=False,
                         handle_extended_json_format=None, aux_subscriptions=None, aux_tenants=None,
-                        no_prompt=False):
+                        no_prompt=False, polling_interval=default_polling_interval):
     return _deploy_arm_template_core_unmodified(cmd, resource_group_name=resource_group_name,
                                                 template_file=template_file, template_uri=template_uri,
                                                 deployment_name=deployment_name, parameters=parameters, mode=mode,
                                                 rollback_on_error=rollback_on_error, no_wait=no_wait,
                                                 aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants,
-                                                no_prompt=no_prompt)
+                                                no_prompt=no_prompt, polling_interval=polling_interval)
 
 
 # pylint: disable=unused-argument
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None,
-                          no_prompt=False):
+                          no_prompt=False, polling_interval=default_polling_interval):
     return _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file, template_uri,
                                                 'deployment_dry_run', parameters, mode, rollback_on_error,
-                                                validate_only=True, no_prompt=no_prompt)
+                                                validate_only=True, no_prompt=no_prompt, polling_interval=polling_interval)
 
 
 def export_template_at_subscription_scope(cmd, deployment_name):

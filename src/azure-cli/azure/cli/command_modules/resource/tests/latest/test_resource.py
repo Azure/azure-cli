@@ -1329,6 +1329,38 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         ])
 
 
+class DeploymentTestWithPollingInterval(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_polling_interval')
+    def test_deployment_polling_interval(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        })
+
+        import datetime
+        start_time1 = datetime.datetime.now()
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters @"{params}" -i 10',
+                 checks=[
+                     self.check('properties.provisioningState', 'Succeeded')
+                 ])
+        interval1 = (datetime.datetime.now() - start_time1).seconds
+
+        start_time2 = datetime.datetime.now()
+        self.cmd(
+            'deployment group create --resource-group {rg} --template-file "{tf}" --parameters @"{params}" -i 100',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+        interval2 = (datetime.datetime.now() - start_time2).seconds
+
+        # Because in addition to the stage of polling results, there are some differences in the time consumption of other stages
+        # (Such as the time consumption of POST verification and PUT deployment request is inconsistent)
+        # So the expected time difference is adjusted to 70s, Because the time difference of other stages of this template is generally less than 20s
+        assert interval2 >= interval1 + 70
+
+
 class DeploymentTestAtManagementGroup(ScenarioTest):
 
     def test_management_group_deployment(self):

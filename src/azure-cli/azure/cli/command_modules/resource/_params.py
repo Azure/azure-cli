@@ -86,6 +86,8 @@ def load_arguments(self, _):
     ts_display_name_type = CLIArgumentType(options_list=['--display-name', '-d'], help='The display name of the template spec')
     ts_description_type = CLIArgumentType(options_list=['--description'], help='The description of the parent template spec.')
     ts_version_description_type = CLIArgumentType(options_list=['--version-description'], help='The description of the template spec version.')
+    polling_interval_type = CLIArgumentType(options_list=['--polling-interval', '-i'], type=int,
+                                            help='The polling interval for ARM deployment, the time unit is seconds. Please note that if there is "retry-after" in the response header, then "retry-after" will replace it as the actual polling interval')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -234,6 +236,7 @@ def load_arguments(self, _):
         c.argument('parameters', arg_type=deployment_parameters_type)
         c.argument('rollback_on_error', nargs='?', action=RollbackAction,
                    help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+        c.argument('polling_interval', arg_type=polling_interval_type)
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -265,6 +268,7 @@ def load_arguments(self, _):
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
+        c.argument('polling_interval', arg_type=polling_interval_type)
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
