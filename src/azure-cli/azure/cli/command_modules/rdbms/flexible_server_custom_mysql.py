@@ -40,7 +40,6 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
 
     from azure.mgmt.rdbms import mysql_flexibleservers
-    # try:
     db_context = DbContext(
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         logging_name='MySQL', command_group='mysql', server_client=client)
@@ -81,6 +80,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     else:
         delegated_subnet_arguments = None
 
+    # calculate IOPS
+    iops = _determine_iops(storage_mb, iops_info, iops, tier, sku_name)
+
+    storage_mb *= 1024  # storage input comes in GiB value
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
         # Create mysql server
@@ -90,7 +93,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                                        sku_name, tier, storage_mb, administrator_login,
                                        administrator_login_password,
                                        version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                       high_availability, zone)
+                                       high_availability, zone, iops)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -193,6 +196,16 @@ def flexible_server_update_custom_func(cmd, instance,
                 'Standard_E4ds_v4': 12, 'Standard_E8ds_v4': 13, 'Standard_E16ds_v4': 14, 'Standard_E32ds_v4': 15,
                 'Standard_E48ds_v4': 16,
                 'Standard_E64ds_v4': 17}
+    if location == 'eastus2euap':
+        sku_rank.update({
+            'Standard_D2s_v3': 4,
+            'Standard_D4s_v3': 5, 'Standard_D8s_v3': 6,
+            'Standard_D16s_v3': 7, 'Standard_D32s_v3': 8, 'Standard_D48s_v3': 9, 'Standard_D64s_v3': 10,
+            'Standard_E2s_v3': 11,
+            'Standard_E4s_v3': 12, 'Standard_E8s_v3': 13, 'Standard_E16s_v3': 14, 'Standard_E32s_v3': 15,
+            'Standard_E48s_v3': 16,
+            'Standard_E64s_v3': 17
+        })
 
     if iops:
         if (tier is not None and sku_name is None) or (tier is None and sku_name is not None):
