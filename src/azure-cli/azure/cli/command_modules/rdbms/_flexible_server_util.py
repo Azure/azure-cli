@@ -283,3 +283,7 @@ def _map_maintenance_window(day_of_week):
                "Sun": 0,
                }
     return options[day_of_week]
+
+def get_current_time():
+    import datetime
+    return datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc, microsecond=0).isoformat()

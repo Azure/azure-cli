@@ -19,6 +19,7 @@ from azure.cli.command_modules.rdbms.validators import configuration_value_valid
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 from .randomname.generate import generate_username
+from ._flexible_server_util import get_current_time
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements
@@ -97,7 +98,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type)
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
-            c.argument('restore_point_in_time', options_list=['--restore-point-in-time', '--pitr-time'], help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('restore_point_in_time', options_list=['--restore-point-in-time', '--pitr-time'], help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} server georestore'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -304,11 +305,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} flexible-server restore'.format(command_group)) as c:
             c.argument('server_name', options_list=['--name', '-n'], arg_type=overriding_none_arg_type,
                        help='The name of the new server that is created by the restore command.')
-            c.argument('restore_point_in_time', options_list=['--restore-time'],
-                       help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
+            c.argument('restore_point_in_time', options_list=['--restore-time'], default=get_current_time(),
+                       help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
             if command_group == 'postgres':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name of the source server to restore from.')
+                c.argument('zone', options_list=['--zone'],
+                           help='Availability zone into which to provision the resource.')
             elif command_group == 'mysql':
                 c.argument('source_server', options_list=['--source-server'],
                            help='The name or resource ID of the source server to restore from.')
