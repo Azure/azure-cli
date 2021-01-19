@@ -17,18 +17,22 @@ def list_workspaces(cmd, client, resource_group_name=None):
 
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
-                     allowed_aad_tenant_ids=None, tags=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, enable_data_exfiltration=None, tags=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
     default_data_lake_storage = DataLakeStorageAccountDetails(account_url=account_url, filesystem=file_system)
-    if str(key_identifier).endswith('/'):
-        key_identifier = key_identifier[:-1]
-    workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
-    encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
+    encryption = None
     managed_virtual_network_settings = None
+    if key_identifier is not None:
+        workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
+        encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
+
     if enable_managed_virtual_network:
-        managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
+        if enable_data_exfiltration:
+            managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
+        else:
+            managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=False)
 
     workspace_info = Workspace(
         identity=identity,
@@ -45,13 +49,15 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
 
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     allowed_aad_tenant_ids=None, disable_all_allowed_aad_tenant_ids=None, tags=None, key_name=None, key_identifier=None, no_wait=False):
-    if str(key_identifier).endswith('/'):
-        key_identifier = key_identifier[:-1]
-    workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
-    encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
-    if disable_all_allowed_aad_tenant_ids is True:
+                     allowed_aad_tenant_ids=None, tags=None, key_name=None, key_identifier=None, no_wait=False):
+    encryption = None
+    if key_name and key_identifier:
+        workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
+        encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
+
+    if allowed_aad_tenant_ids is not None and "None" in allowed_aad_tenant_ids:
         allowed_aad_tenant_ids = []
+
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)

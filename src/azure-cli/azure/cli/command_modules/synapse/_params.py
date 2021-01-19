@@ -61,9 +61,6 @@ def load_arguments(self, _):
             c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
-    with self.argument_context('synapse workspace update') as c:
-        c.argument('disable_all_allowed_aad_tenant_ids', options_list=['--disable-tenant-ids'], arg_type=get_three_state_flag(), help="Disable all approved Azure AD tenants which outbound data traffic allowed to.")
-
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument("storage_account", validator=validate_storage_account,
@@ -75,6 +72,8 @@ def load_arguments(self, _):
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
+        c.argument('enable_data_exfiltration', arg_type=get_three_state_flag(),
+                   help='The flag indicates whether enable data exfiltration.')
 
     with self.argument_context('synapse workspace activate') as c:
         c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
