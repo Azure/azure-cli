@@ -758,7 +758,7 @@ class AzCliCommandInvoker(CommandInvoker):
             deprecate_kwargs['object_type'] = 'command'
             del deprecate_kwargs['_get_tag']
             del deprecate_kwargs['_get_message']
-            deprecations.append(ImplicitDeprecated(**deprecate_kwargs))
+            deprecations.append(ImplicitDeprecated(cli_ctx=self.cli_ctx, **deprecate_kwargs))
 
         previews = [] + getattr(parsed_args, '_argument_previews', [])
         if cmd.preview_info:
@@ -776,7 +776,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 preview_kwargs['object_type'] = 'command'
                 del preview_kwargs['_get_tag']
                 del preview_kwargs['_get_message']
-                previews.append(ImplicitPreviewItem(**preview_kwargs))
+                previews.append(ImplicitPreviewItem(cli_ctx=self.cli_ctx, **preview_kwargs))
 
         experimentals = [] + getattr(parsed_args, '_argument_experimentals', [])
         if cmd.experimental_info:
@@ -794,7 +794,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimental_kwargs['object_type'] = 'command'
                 del experimental_kwargs['_get_tag']
                 del experimental_kwargs['_get_message']
-                experimentals.append(ImplicitExperimentalItem(**experimental_kwargs))
+                experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
             for d in deprecations:
@@ -952,8 +952,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
         cli_logger = get_logger()  # get CLI logger which has the level set through command lines
         is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
-
+        telemetry.poll_start()
+        poll_flag = False
         while not poller.done():
+            poll_flag = True
             self.cli_ctx.get_progress_controller().add(message='Running')
             try:
                 # pylint: disable=protected-access
@@ -986,7 +988,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-
+        if poll_flag:
+            telemetry.poll_end()
         return result
 
 

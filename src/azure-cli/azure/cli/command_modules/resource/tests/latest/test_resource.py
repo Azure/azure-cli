@@ -13,7 +13,7 @@ import unittest
 from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                create_random_name, live_only, record_only)
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
@@ -642,6 +642,29 @@ class ProviderRegistrationTest(ScenarioTest):
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
+    def test_provider_registration_rpaas(self):
+        self.kwargs.update({'prov': 'Microsoft.Confluent'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
+        if result['registrationState'] == 'Unregistered':
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
+                self.cmd('provider register -n {prov}')
+            self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+        else:
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
+            with self.assertRaisesRegexp(CLIError, '--accept-terms must be specified'):
+                self.cmd('provider register -n {prov}')
+            self.cmd('provider register -n {prov} --accept-terms')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
+            self.assertTrue(result['registrationState'], 'Registered')
+
 
 class ProviderOperationTest(ScenarioTest):
 
@@ -731,8 +754,11 @@ class TemplateSpecsTest(ScenarioTest):
             self.check('template.variables.name', "[if(parameters('useHyphen'), variables('hyphenedNameAfterInstanceCount'), replace(variables('hyphenedNameAfterInstanceCount'), '-', ''))]")
         ]).get_output_in_json()
 
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('ts create --name {template_spec_name} -g {rg} -l {resource_group_location} --template-file "{tf}"')
+
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -768,7 +794,7 @@ class TemplateSpecsTest(ScenarioTest):
         ])
 
         # clean up
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', ' ')
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -927,7 +953,7 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts show --template-spec {template_spec_version_three_id}', checks=[self.check('tags', {})])
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {'cli-test': 'test'})])
 
-        self.cmd('ts create -g {rg} -n {template_spec_name} -f "{tf}" --yes')
+        self.cmd('ts create -g {rg} -n {template_spec_name} --yes')
         self.cmd('ts show --template-spec {template_spec_id}', checks=[self.check('tags', {})])
 
         # clean up
@@ -987,6 +1013,99 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_artifactFile1))
         self.assertTrue(os.path.isfile(_artifactFile2))\
 
+
+
+class DeploymentTestsWithQueryString(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
+    @StorageAccountPreparer(name_prefix='testquerystrrg', location='eastus', kind='StorageV2')
+    def test_resource_group_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
+
+        container_name = self.create_random_name('querystr', 20)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'resource_group_level_linked_template.json')
+        linked_template = os.path.join(curr_dir, 'storage_account_linked_template.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'storage_account': storage_account,
+            'container_name': container_name,
+            'tf': tf,
+            'linked_tf': linked_template
+        })
+
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
+
+        self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
+
+        self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n storage_account_linked_template.json --account-name {storage_account} --account-key {storage_key}')
+
+        from datetime import datetime, timedelta
+        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs['sas_token'] = self.cmd(
+            'storage container generate-sas --account-name {storage_account} --account-key {storage_key} --name {container_name} --permissions rw --expiry {expiry}  -otsv').output.strip()
+
+        self.kwargs['blob_url'] = self.cmd(
+            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account} --account-key {storage_key}').output.strip()
+
+        self.cmd('deployment group validate -g {resource_group} --template-uri {blob_url} --query-string "{sas_token}" --parameters projectName=qsproject', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group create -g {resource_group} --template-uri {blob_url} --query-string "{sas_token}" --parameters projectName=qsproject', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_query_str_sub', location='eastus')
+    @StorageAccountPreparer(name_prefix='testquerystrsub', location='eastus', kind='StorageV2')
+    def test_subscription_level_deployment_with_query_string(self, resource_group, resource_group_location, storage_account):
+
+        container_name = self.create_random_name('querystr', 20)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'subscription_level_linked_template.json')
+        linked_tf = os.path.join(curr_dir, 'createResourceGroup.json')
+        linked_tf1 = os.path.join(curr_dir, 'createKeyVault.json')
+        linked_tf2 = os.path.join(curr_dir, 'createKeyVaultWithSecret.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource_group_location': resource_group_location,
+            'storage_account': storage_account,
+            'container_name': container_name,
+            'tf': tf,
+            'linked_tf': linked_tf,
+            'linked_tf1': linked_tf1,
+            'linked_tf2': linked_tf2
+        })
+
+        self.kwargs['storage_key'] = str(self.cmd('az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
+
+        self.cmd('storage container create -n {container_name} --account-name {storage_account} --account-key {storage_key}')
+
+        self.cmd('storage blob upload -c {container_name} -f "{tf}" -n mainTemplate --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf}" -n createResourceGroup.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf1}" -n createKeyVault.json --account-name {storage_account} --account-key {storage_key}')
+        self.cmd('storage blob upload -c {container_name} -f "{linked_tf2}" -n createKeyVaultWithSecret.json --account-name {storage_account} --account-key {storage_key}')
+
+        from datetime import datetime, timedelta
+        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.kwargs['sas_token'] = self.cmd(
+            'storage container generate-sas --account-name {storage_account} --name {container_name} --permissions dlrw --expiry {expiry} --https-only -otsv').output.strip()
+
+        self.kwargs['blob_url'] = self.cmd(
+            'storage blob url -c {container_name} -n mainTemplate --account-name {storage_account}').output.strip()
+
+        self.kwargs['key_vault'] = self.create_random_name('querystrKV', 20)
+
+        self.cmd('deployment sub validate -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub create -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
@@ -1108,6 +1227,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'tf_multiline': os.path.join(curr_dir, 'simple_deploy_multiline.json').replace('\\', '\\\\'),
             'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
@@ -1125,6 +1245,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf_multiline}" --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
         with self.assertRaises(CLIError) as err:
             self.cmd('deployment group validate --resource-group {rg} --template-file "{extra_param_tf}" --parameters @"{params}" --no-prompt true')
             self.assertTrue("Deployment template validation failed" in str(err.exception))
@@ -1138,6 +1262,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.assertTrue("Missing input parameters" in str(err.exception))
 
         self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file "{tf_multiline}" --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
