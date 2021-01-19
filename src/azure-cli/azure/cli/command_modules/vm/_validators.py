@@ -1066,12 +1066,7 @@ def validate_ssh_key(namespace, cmd=None):
             namespace.ssh_key_value = [ssh_key_resource.public_key]
             logger.info('Get a key from --ssh-key-name successfully')
         elif namespace.ssh_key_value:
-            parameters = {}
-            parameters['location'] = namespace.location
-            parameters['public_key'] = namespace.ssh_key_value[0]
-            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
-                                          ssh_public_key_name=namespace.ssh_key_name,
-                                          parameters=parameters)
+            raise ValidationError('--ssh-key-name and --ssh-key-values cannot be used together')
         elif namespace.generate_ssh_keys:
             parameters = {}
             parameters['location'] = namespace.location

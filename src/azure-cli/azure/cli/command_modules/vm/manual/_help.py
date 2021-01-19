@@ -39,6 +39,10 @@ helps['sshkey create'] = """
         text: |-
                az sshkey create --location "westus" --public-key "{ssh-rsa public key}" --resource-group \
 "myResourceGroup" --name "mySshPublicKeyName"
+      - name: Create a new SSH public key resource using public key in a file.
+        text: |-
+               az sshkey create --location "westus" --public-key "@filename" --resource-group \
+"myResourceGroup" --name "mySshPublicKeyName"
       - name: Create a new SSH public key resource with auto-generated value.
         text: |-
                az sshkey create --location "westus" --resource-group "myResourceGroup" --name "mySshPublicKeyName"
