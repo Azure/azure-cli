@@ -30,7 +30,7 @@ from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
-    backup_protected_items_crr_cf, recovery_points_crr_cf)
+    backup_protected_items_crr_cf)
 
 logger = get_logger(__name__)
 
@@ -158,10 +158,7 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
     if cross_region_restore_flag is not None:
-        if cross_region_restore_flag.lower() == 'true':
-            cross_region_restore_flag = True
-        else:
-            cross_region_restore_flag = False
+        cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
 
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
                                                  cross_region_restore_flag=cross_region_restore_flag)
