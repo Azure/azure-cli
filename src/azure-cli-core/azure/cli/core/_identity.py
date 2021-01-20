@@ -345,9 +345,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
-            return ClientSecretCredential(self.tenant_id, client_id, client_secret)
+            return ClientSecretCredential(self.tenant_id, client_id, client_secret, **self._credential_kwargs)
         if certificate_path:
-            return CertificateCredential(self.tenant_id, client_id, certificate_path)
+            return CertificateCredential(self.tenant_id, client_id, certificate_path, **self._credential_kwargs)
         raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
     def get_environment_credential(self):

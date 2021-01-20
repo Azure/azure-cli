@@ -642,10 +642,10 @@ class Profile:
         """
         account = self.get_subscription()
         username = account[_USER_ENTITY][_USER_NAME]
-        tenant = account[_TENANT_ID]
-        # TODO: Confirm with service team whether it works for service principal. If not, errors out.
-        certificate = self.get_access_token_for_scopes(username, tenant, *scopes, data=data)
-        return username, certificate
+        subscription_id = account[_SUBSCRIPTION_ID]
+        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
+        certificate = credential.get_token(*scopes, data=data)
+        return username, certificate.token
 
     @staticmethod
     def _try_parse_msi_account_name(account):
