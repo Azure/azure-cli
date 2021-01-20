@@ -3470,7 +3470,7 @@ def _get_log_analytics_client(cmd):
 def _prepare_workspace(cmd, resource_group_name, workspace):
     from msrestazure.tools import is_valid_resource_id
 
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     workspace_id = None
     if not is_valid_resource_id(workspace):
@@ -3479,7 +3479,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         workspace_result = None
         try:
             workspace_result = log_client.workspaces.get(resource_group_name, workspace_name)
-        except CloudError:
+        except HttpResponseError:
             from azure.mgmt.loganalytics.models import Workspace, WorkspaceSku, WorkspaceSkuNameEnum
             sku = WorkspaceSku(name=WorkspaceSkuNameEnum.per_gb2018.value)
             retention_time = 30  # default value
@@ -3487,7 +3487,7 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.workspaces.create_or_update(
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.workspaces.begin_create_or_update(
                 resource_group_name,
                 workspace_name,
                 workspace_instance))
@@ -3501,7 +3501,7 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
     from ._client_factory import cf_log_analytics_data_sources
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.loganalytics.models import DataSource
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
@@ -3526,7 +3526,7 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
                                                          workspace_name,
                                                          data_source_name,
                                                          data_source)
-                except CloudError as ex:
+                except HttpResponseError as ex:
                     logger.warning("Failed to set data source due to %s. "
                                    "Skip this step and need manual work later.", ex.message)
     else:
