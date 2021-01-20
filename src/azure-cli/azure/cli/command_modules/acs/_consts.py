@@ -39,3 +39,5 @@ ADDONS = {
     'azure-policy': CONST_AZURE_POLICY_ADDON_NAME,
     'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME
 }
+
+CONST_CANIPULL_IMAGE = "mcr.microsoft.com/aks/canipull:0.0.2-alpha"
