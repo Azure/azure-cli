@@ -29,7 +29,8 @@ from azure.cli.command_modules.backup._client_factory import (
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
-    cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf)
+    cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
+    backup_protected_items_crr_cf, recovery_points_crr_cf)
 
 logger = get_logger(__name__)
 
@@ -155,6 +156,12 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
                                                  enhanced_security_state=enhanced_security_state)
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
+
+    if cross_region_restore_flag is not None:
+        if cross_region_restore_flag.lower() == 'true':
+            cross_region_restore_flag = True
+        else:
+            cross_region_restore_flag = False
 
     backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
                                                  cross_region_restore_flag=cross_region_restore_flag)
@@ -368,8 +375,9 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item,
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM",
-              item_type="VM"):
-    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type)
+              item_type="VM", use_secondary_region=None):
+    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type,
+                       use_secondary_region)
 
     if _is_native_name(name):
         filtered_items = [item for item in items if item.name == name]
@@ -380,11 +388,13 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, container_name=None, container_type="AzureIaasVM",
-               item_type="VM"):
+               item_type="VM", use_secondary_region=None):
     filter_string = _get_filter_string({
         'backupManagementType': container_type,
         'itemType': item_type})
 
+    if use_secondary_region:
+        client = backup_protected_items_crr_cf(cmd.cli_ctx)
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = _get_list_from_paged_response(items)
     if container_name:
@@ -443,14 +453,21 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,  # pylint: disable=redefined-builtin
-                        container_type="AzureIaasVM", item_type="VM"):
+                        container_type="AzureIaasVM", item_type="VM", use_secondary_region=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
+                     item_name, container_type, item_type, use_secondary_region)
     _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
+
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
+        paged_rps = _get_list_from_paged_response(recovery_points)
+        filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
+        return _get_none_one_or_many(filtered_rps)
 
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
@@ -512,10 +529,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
                   diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, "AzureIaasVM", "VM")
+                     item_name, "AzureIaasVM", "VM", use_secondary_region)
     _validate_item(item)
     recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                         container_name, item_name, rp_name, "AzureIaasVM", "VM")
+                                         container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
 
@@ -585,8 +602,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         aad_client = aad_properties_cf(cmd.cli_ctx)
         aad_result = aad_client.get(azure_region)
         rp_client = recovery_points_cf(cmd.cli_ctx)
-        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_name,
-                                                      item_name, rp_name, aad_result).properties
+        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                      item_uri, rp_name, aad_result).properties
         crr_access_token.object_type = "CrrAccessToken"
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_restore_properties.region = azure_region
