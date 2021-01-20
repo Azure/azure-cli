@@ -165,19 +165,20 @@ def format_styled_text(styled_text, theme=None):
 
 
 def highlight_command(raw_command):
-    """Highlight a command to make it colored.
+    """Highlight a command with colors.
 
-    The highlighting rules after the command is splitted into args:
-        1. Args starting with '-' are regarded as parameter names, and they are with the ACTION style.
-        2. Args before the first parameter name are regarded as command name (or positional argument),
-        and they are with the ACTION style.
-        3. Args between the parameter names are regarded as parameter values, and they are with the PRIMARY style.
-        4. Args containing '=' are regarded as parameter name-value pairs, and they are with the PRIMARY style.
+    For example, for
 
-    :param raw_command: The command that needs to be colored
+        az group create --name myrg --location westus
+
+    The command name 'az group create', argument name '--name', '--location' are marked as ACTION style.
+    The argument value 'myrg' and 'westus' are marked as PRIMARY style.
+    If the argument is provided as '--location=westus', it will be marked as PRIMARY style.
+
+    :param raw_command: The command that needs to be highlighted.
     :type raw_command: str
-    :return: The styled command text
-    :type: list
+    :return: The styled command text.
+    :rtype: list
     """
 
     styled_command = []
