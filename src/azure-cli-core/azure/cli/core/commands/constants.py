@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from colorama import Fore, Style
+from azure.cli.core.style import Style
 from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 
 
@@ -33,9 +33,13 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 SURVEY_PROMPT = 'Please let us know how we are doing: https://aka.ms/azureclihats'
-SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE + \
-    'https://aka.ms/azureclihats' + Style.RESET_ALL
+SURVEY_PROMPT_STYLED = [
+    (Style.PRIMARY, 'Please let us know how we are doing: '),
+    (Style.HYPERLINK, 'https://aka.ms/azureclihats'),
+]
+
 UX_SURVEY_PROMPT = 'and let us know if you\'re interested in trying out our newest features: https://aka.ms/CLIUXstudy'
-UX_SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + \
-    'and let us know if you\'re interested in trying out our newest features: ' \
-    + Fore.BLUE + 'https://aka.ms/CLIUXstudy' + Style.RESET_ALL
+UX_SURVEY_PROMPT_STYLED = [
+    (Style.PRIMARY, 'and let us know if you\'re interested in trying out our newest features: '),
+    (Style.HYPERLINK, 'https://aka.ms/CLIUXstudy'),
+]

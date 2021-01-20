@@ -5,7 +5,6 @@
 
 import json
 import datetime
-import six
 
 from applicationinsights import TelemetryClient
 from applicationinsights.channel import SynchronousSender, SynchronousQueue, TelemetryChannel
@@ -49,7 +48,7 @@ class CliTelemetryClient:
                 properties = {}
                 measurements = {}
                 for k, v in raw_properties.items():
-                    if isinstance(v, six.string_types):
+                    if isinstance(v, str):
                         properties[k] = v
                     else:
                         measurements[k] = v

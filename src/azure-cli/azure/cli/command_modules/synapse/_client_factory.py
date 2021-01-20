@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-def cf_synapse(cli_ctx, *_):
 
+def cf_synapse(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.synapse import SynapseManagementClient
     return get_mgmt_service_client(cli_ctx, SynapseManagementClient)
@@ -12,6 +12,10 @@ def cf_synapse(cli_ctx, *_):
 
 def cf_synapse_client_workspace_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).workspaces
+
+
+def cf_synapse_client_workspace_aad_admins_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).workspace_aad_admins
 
 
 def cf_synapse_client_bigdatapool_factory(cli_ctx, *_):
@@ -22,8 +26,64 @@ def cf_synapse_client_sqlpool_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).sql_pools
 
 
+def cf_synapse_client_sqlpool_sensitivity_labels_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_sensitivity_labels
+
+
+def cf_synapse_client_restorable_dropped_sqlpools_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).restorable_dropped_sql_pools
+
+
+def cf_synapse_client_sqlpool_transparent_data_encryptions_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_transparent_data_encryptions
+
+
+def cf_synapse_client_sqlpool_security_alert_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_security_alert_policies
+
+
+def cf_synapse_client_sqlpool_blob_auditing_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).sql_pool_blob_auditing_policies
+
+
+def cf_synapse_client_sqlserver_blob_auditing_policies_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).workspace_managed_sql_server_blob_auditing_policies
+
+
 def cf_synapse_client_ipfirewallrules_factory(cli_ctx, *_):
     return cf_synapse(cli_ctx).ip_firewall_rules
+
+
+def cf_synapse_client_integrationruntimes_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtimes
+
+
+def cf_synapse_client_integrationruntimeauthkeys_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_auth_keys
+
+
+def cf_synapse_client_integrationruntimemonitoringdata_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_monitoring_data
+
+
+def cf_synapse_client_integrationruntimenodes_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_nodes
+
+
+def cf_synapse_client_integrationruntimenodeipaddress_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_node_ip_address
+
+
+def cf_synapse_client_integrationruntimecredentials_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_credentials
+
+
+def cf_synapse_client_integrationruntimeconnectioninfos_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_connection_infos
+
+
+def cf_synapse_client_integrationruntimestatus_factory(cli_ctx, *_):
+    return cf_synapse(cli_ctx).integration_runtime_status
 
 
 def cf_synapse_client_operations_factory(cli_ctx, *_):
