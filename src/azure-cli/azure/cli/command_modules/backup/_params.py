@@ -313,6 +313,7 @@ def load_arguments(self, _):
         c.argument('operation', arg_type=get_enum_type(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']), help='User initiated operation.')
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
+        c.argument('backup_management_type', backup_management_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to show recoverypoints in secondary region.')
 
     with self.argument_context('backup job wait') as c:
