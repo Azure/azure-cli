@@ -39,6 +39,11 @@ CREDENTIAL_WARNING_MESSAGE = (
     "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
     "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
 
+ROLE_ASSIGNMENT_CREATE_WARNING = (
+    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
+    "If needed, use the --role argument to explicitly create a role assignment."
+)
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -311,17 +316,15 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     odata_filters = 'resourceProvider eq Microsoft.Authorization and {}'.format(time_filter)
 
     activity_log = list(client.activity_logs.list(filter=odata_filters))
-    start_events, end_events, offline_events = {}, {}, []
+    start_events, end_events = {}, {}
 
     for item in activity_log:
-        if item.http_request:
+        if item.operation_name.value.startswith('Microsoft.Authorization/roleAssignments'):
             if item.status.value == 'Started':
                 start_events[item.operation_id] = item
             else:
                 end_events[item.operation_id] = item
-        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(item)
-    return start_events, end_events, offline_events, client
+    return start_events, end_events
 
 
 # A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
@@ -329,7 +332,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
-    start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
+    start_events, end_events = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
 
     # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
     #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
@@ -344,8 +347,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
                 continue
 
             entry = {}
-            op = e.operation_name and e.operation_name.value
-            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+            if e.status.value == 'Succeeded':
                 s, payload = start_events[op_id], None
                 entry = dict.fromkeys(
                     ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
@@ -403,25 +405,6 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
             if principal_dics:
                 for e in result:
                     e['principalName'] = principal_dics.get(e['principalId'], None)
-
-    offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
-                                                    x.operation_name.value.lower().startswith(
-                                                        'microsoft.authorization/classicadministrators'))]
-    for e in offline_events:
-        entry = {
-            'timestamp': e.event_timestamp,
-            'caller': 'Subscription Admin',
-            'roleDefinitionId': None,
-            'principalId': None,
-            'principalType': 'User',
-            'scope': '/subscriptions/' + client.config.subscription_id,
-            'scopeType': 'Subscription',
-            'scopeName': client.config.subscription_id,
-        }
-        if e.properties:
-            entry['principalName'] = e.properties.get('adminEmail')
-            entry['roleName'] = e.properties.get('adminType')
-        result.append(entry)
 
     return result
 
@@ -1401,7 +1384,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1483,8 +1466,11 @@ def create_service_principal_for_rbac(
 
     # retry while server replication is done
     if not skip_assignment:
+        if not role:
+            role = "Contributor"
+            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
-            logger.warning('Creating a role assignment under the scope of "%s"', scope)
+            logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1505,6 +1491,8 @@ def create_service_principal_for_rbac(
                             logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1527,8 +1515,6 @@ def create_service_principal_for_rbac(
             "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
-
-    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 

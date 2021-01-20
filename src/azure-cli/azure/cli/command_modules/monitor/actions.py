@@ -137,10 +137,19 @@ class MetricAlertConditionAction(argparse._AppendAction):
 class MetricAlertAddAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
+        action_group_id = values[0]
+        try:
+            webhook_property_candidates = dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+        except ValueError:
+            err_msg = "value of {} is invalid. Please refer to --help to get insight of correct format".format(
+                option_string
+            )
+            raise InvalidArgumentValueError(err_msg)
+
         from azure.mgmt.monitor.models import MetricAlertAction
         action = MetricAlertAction(
-            action_group_id=values[0],
-            web_hook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+            action_group_id=action_group_id,
+            web_hook_properties=webhook_property_candidates
         )
         action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
                            'DataContracts.Resources.ScheduledQueryRules.Action'

@@ -292,7 +292,12 @@ def get_route_tables_from_subnets(cli_ctx, subnets):
 
 def get_cluster_network_resources(cli_ctx, oc):
     master_subnet = oc.master_profile.subnet_id
-    worker_subnets = {w.subnet_id for w in oc.worker_profiles}
+    worker_subnets = set()
+
+    # Ensure that worker_profiles exists
+    # it will not be returned if the cluster resources do not exist
+    if oc.worker_profiles is not None:
+        worker_subnets = {w.subnet_id for w in oc.worker_profiles if w}
 
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(

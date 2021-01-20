@@ -7,7 +7,6 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
-from msrest.exceptions import HttpOperationError
 
 
 class MonitorTests(ScenarioTest):
@@ -35,7 +34,7 @@ class MonitorTests(ScenarioTest):
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
         self.cmd('monitor action-group create -g {rg} -n {ag2}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --region westus --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -66,7 +65,7 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert list -g {rg}',
                  checks=self.check('length(@)', 0))
 
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob:"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --action {ag1} --description "Test2" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob:"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
             self.check('length(criteria.allOf)', 1),
@@ -74,8 +73,10 @@ class MonitorTests(ScenarioTest):
         ])
         # test appservice plan with dimensions *
         self.cmd('appservice plan create -g {rg} -n {plan}')
-        self.kwargs['app_id'] = self.cmd('webapp create -g {rg} -n {app} -p plan1').get_output_in_json()['id']
-        self.cmd('monitor metrics alert create -g {rg} -n {alert}2 --scopes {app_id} --action {ag1} --description "Test *" --condition "total Http4xx > 10 where Instance includes *"', checks=[
+        output = self.cmd('webapp create -g {rg} -n {app} -p plan1').get_output_in_json()
+        self.kwargs['app_id'] = output['id']
+        self.kwargs['app_location'] = output['location']
+        self.cmd('monitor metrics alert create -g {rg} -n {alert}2 --scopes {app_id} --region "{app_location}" --action {ag1} --description "Test *" --condition "total Http4xx > 10 where Instance includes *"', checks=[
             self.check('length(criteria.allOf)', 1),
             self.check('length(criteria.allOf[0].dimensions)', 1),
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
@@ -92,18 +93,23 @@ class MonitorTests(ScenarioTest):
 
         storage_account = self.cmd('storage account show -n {sa}').get_output_in_json()
         storage_account_id = storage_account['id']
+        storage_location = storage_account['location']
         self.kwargs.update({
-            'storage_account_id': storage_account_id
+            'storage_account_id': storage_account_id,
+            'storage_location': storage_location
         })
 
-        with self.assertRaisesRegexp(HttpOperationError, 'were not found: MS-ERRORCODE-SU001'):
+        from azure.core.exceptions import HttpResponseError
+        with self.assertRaisesRegexp(HttpResponseError, 'were not found: MS-ERRORCODE-SU001'):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
+                     ' --region {storage_location}'
                      ' --condition "count account.MS-ERRORCODE-SU001 > 4" --description "Cloud_lumico"')
 
-        with self.assertRaisesRegexp(HttpOperationError, 'were not found: MS-ERRORCODE|,-SU001'):
+        with self.assertRaisesRegexp(HttpResponseError, 'were not found: MS-ERRORCODE|,-SU001'):
             self.cmd('monitor metrics alert create -n {alert_name} -g {rg}'
                      ' --scopes {storage_account_id}'
+                     ' --region {storage_location}'
                      ' --condition "count account.MS-ERRORCODE|,-SU001 > 4" --description "Cloud_lumico"')
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_special_char')
@@ -116,7 +122,7 @@ class MonitorTests(ScenarioTest):
         self.kwargs.update({
             'ag_id': gateway_json['id'],
         })
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ag_id} --description "Test"'
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ag_id} --region westus --description "Test"'
                  ' --condition "avg UnhealthyHostCount>= 1 where BackendSettingsPool includes address-pool-dcc-blue~backendHttpSettings"',
                  checks=[
                      self.check('description', 'Test'),
@@ -256,7 +262,7 @@ class MonitorTests(ScenarioTest):
                 type='virtualMachines')
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --region westus --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
             self.check('description', 'High CPU'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -264,6 +270,42 @@ class MonitorTests(ScenarioTest):
             self.check('evaluationFrequency', '0:01:00'),
             self.check('length(scopes)', 2),
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert')
+    @VMPreparer(parameter_name='vm1')
+    def test_dynamic_metric_alert_basic(self, resource_group, vm1):
+        from azure.mgmt.core.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines'),
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd(
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} --region westus --action {ag1} --condition "avg Percentage CPU > dynamic low 2 of 4 since 2020-11-01T16:00:00.000Z" --description "High CPU"',
+            checks=[
+                self.check('description', 'High CPU'),
+                self.check('severity', 2),
+                self.check('autoMitigate', None),
+                self.check('windowSize', '0:05:00'),
+                self.check('evaluationFrequency', '0:01:00'),
+                self.check('length(scopes)', 1),
+                self.check('criteria.allOf[0].alertSensitivity', 'Low'),
+                self.check('criteria.allOf[0].criterionType', 'DynamicThresholdCriterion'),
+                self.check('criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert', 2.0),
+                self.check('criteria.allOf[0].failingPeriods.numberOfEvaluationPeriods', 4.0),
+                self.check('criteria.allOf[0].operator', 'GreaterThan'),
+                self.check('criteria.allOf[0].ignoreDataBefore', '2020-11-01T16:00:00+00:00')
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert_v2')
     @VMPreparer(parameter_name='vm1')
@@ -294,7 +336,7 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
         self.cmd('monitor action-group create -g {rg} -n {ag2}')
         self.cmd(
-            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --condition "avg Percentage CPU > dynamic low 2 of 4 since 2020-11-01T16:00:00.000Z" --description "High CPU"',
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --region westus --condition "avg Percentage CPU > dynamic low 2 of 4 since 2020-11-01T16:00:00.000Z" --description "High CPU"',
             checks=[
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
@@ -384,7 +426,7 @@ class MonitorTests(ScenarioTest):
         ).output.strip()
 
         self.cmd(
-            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --description "High CPU" --condition ' + condition,
+            'monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --action {ag1} --region westus --description "High CPU" --condition ' + condition,
             checks=[
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),

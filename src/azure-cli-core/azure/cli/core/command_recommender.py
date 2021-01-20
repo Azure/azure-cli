@@ -205,7 +205,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
         :type: list
         """
 
-        from azure.cli.core.style import Style, get_styled_command
+        from azure.cli.core.style import Style, highlight_command
         from azure.cli.core.parser import OVERVIEW_REFERENCE
 
         def sort_recommendations(recommendations):
@@ -293,7 +293,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
             # raw_command = replace_param_values(raw_command)
 
             # generate decorated commands shown to users
-            decorated_command = get_styled_command(raw_command)
+            decorated_command = highlight_command(raw_command)
             decorated_description = [(Style.SECONDARY, recommendation['description'] + '\n')]
             decorated_recommendations.append((decorated_command, decorated_description))
 
