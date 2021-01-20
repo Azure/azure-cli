@@ -191,7 +191,7 @@ def validate_key_import_type(ns):
 
     if (kty == 'EC' and crv is None) or (kty != 'EC' and crv):
         from azure.cli.core.azclierror import ValidationError
-        raise ValidationError('parameter --curve should be specified when key type is EC.')
+        raise ValidationError('parameter --curve should be specified when key type --kty is EC.')
 
 
 def validate_key_type(ns):
