@@ -53,4 +53,4 @@ def load_command_table(self, _):
 
     with self.command_group('policy metadata', policy_metadata_sdk, client_factory=policy_metadata_operations) as g:
         g.custom_command('list', 'list_policy_metadata')
-        g.custom_command('show', 'show_policy_metadata')
+        g.custom_show_command('show', 'show_policy_metadata')

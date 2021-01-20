@@ -155,7 +155,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology delete -g {rg} -n {st_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
 
         self.kwargs = {
@@ -166,7 +166,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-topology delete -g {rg} -n {st_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service-topology show -n {st_name} -g {rg}')
 
     def services_validations(
@@ -236,11 +236,11 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service delete -g {rg} --service-topology-name {st_name} -n {s_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s_name}')
 
         self.cmd('deploymentmanager service delete -g {rg} --service-topology-name {st_name} -n {s2_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service show -g {rg} --service-topology-name {st_name} -n {s2_name}')
 
     def service_units_validations(
@@ -333,7 +333,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-unit delete -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
         self.kwargs = {
@@ -344,7 +344,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager service-unit delete -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager service-unit show -g {rg} --service-topology-name {st_name} --service-name {s_name} -n {su_name}')
 
     def steps_validations(
@@ -406,7 +406,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager step delete -g {rg} -n {step_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
 
     def healthcheck_step_validations(
@@ -485,7 +485,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager step delete -g {rg} -n {step_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager step show -g {rg} -n {step_name}')
 
         self.kwargs = {
@@ -494,7 +494,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
 
         self.cmd('deploymentmanager step delete -g {rg} -n {step2_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager step show -g {rg} -n {step2_name}')
 
     def rollouts_validations(
@@ -600,9 +600,9 @@ class DeploymentManagerTests(ScenarioTest):
         self.cmd('deploymentmanager rollout delete -g {rg} -n {failed_rollout_name}')
         self.cmd('deploymentmanager rollout delete -g {rg} -n {rollout_name}')
 
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager rollout show -g {rg} -n {failed_rollout_name}')
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager rollout show -g {rg} -n {rollout_name}')
 
     def set_managed_identity(self, subscription_id, resource_group_name):
@@ -805,7 +805,7 @@ class DeploymentManagerTests(ScenarioTest):
         }
         self.cmd('deploymentmanager artifact-source delete -n {name} -g {rg} --yes')
 
-        with self.assertRaisesRegexp(CloudError, 'not found'):
+        with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('deploymentmanager artifact-source show -n {name} -g {rg}')
 
     def upload_blob(self, storage_account_info, storage_container_name, file_path, file_name):

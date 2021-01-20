@@ -20,11 +20,18 @@ from azure.cli.command_modules.acs._params import (regions_in_preview,
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
                                                   _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
                                                   create_application, _update_addons,
-                                                  _ensure_container_insights_for_monitoring, k8s_install_cli)
+                                                  _ensure_container_insights_for_monitoring,
+                                                  k8s_install_kubectl, k8s_install_kubelogin)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
 from azure.cli.core.util import CLIError
+from azure.cli.command_modules.acs._consts import (CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+                                                   CONST_MONITORING_ADDON_NAME,
+                                                   CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
+                                                   CONST_KUBE_DASHBOARD_ADDON_NAME,
+                                                   CONST_AZURE_POLICY_ADDON_NAME)
 
 
 class AcsCustomCommandTest(unittest.TestCase):
@@ -585,44 +592,130 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance.addon_profiles = None
         cmd = mock.MagicMock()
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'http_application_routing', enable=True)
-        self.assertIn('httpApplicationRouting', instance.addon_profiles)
-        addon_profile = instance.addon_profiles['httpApplicationRouting']
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
+        self.assertIn(CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, instance.addon_profiles)
+        addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertTrue(addon_profile.enabled)
 
-        # http_application_routing enabled
+        # http_application_routing disabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'http_application_routing', enable=False)
-        addon_profile = instance.addon_profiles['httpApplicationRouting']
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=False)
+        addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertFalse(addon_profile.enabled)
 
         # monitoring added
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=True)
-        monitoring_addon_profile = instance.addon_profiles['omsagent']
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertTrue(monitoring_addon_profile.enabled)
-        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertFalse(routing_addon_profile.enabled)
 
         # monitoring disabled, routing enabled
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=False)
-        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000', 'clitest000001',
-                                  'http_application_routing', enable=True)
-        monitoring_addon_profile = instance.addon_profiles['omsagent']
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
         self.assertFalse(monitoring_addon_profile.enabled)
-        routing_addon_profile = instance.addon_profiles['httpApplicationRouting']
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
         self.assertTrue(routing_addon_profile.enabled)
-        self.assertEqual(sorted(list(instance.addon_profiles)), ['httpApplicationRouting', 'omsagent'])
+        self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
+
+        # azurepolicy added
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'azure-policy', enable=True)
+        azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
+        self.assertTrue(azurepolicy_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
+        self.assertTrue(routing_addon_profile.enabled)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_addon_profile.enabled)
+
+        # azurepolicy disabled, routing enabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'azure-policy', enable=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'http_application_routing', enable=True)
+        azurepolicy_addon_profile = instance.addon_profiles[CONST_AZURE_POLICY_ADDON_NAME]
+        self.assertFalse(azurepolicy_addon_profile.enabled)
+        monitoring_addon_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_addon_profile.enabled)
+        routing_addon_profile = instance.addon_profiles[CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME]
+        self.assertTrue(routing_addon_profile.enabled)
+        self.assertEqual(sorted(list(instance.addon_profiles)), [CONST_AZURE_POLICY_ADDON_NAME, CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME, CONST_MONITORING_ADDON_NAME])
+
+        # kube-dashboard disabled, no existing dashboard addon profile
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
+        dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
+        self.assertFalse(dashboard_addon_profile.enabled)
+
+        # kube-dashboard enabled, no existing dashboard addon profile
+        instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
+        dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
+        self.assertTrue(dashboard_addon_profile.enabled)
+
+        # kube-dashboard disabled, there's existing dashboard addon profile
+        instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
+        # test lower cased key name
+        instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=True)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=False)
+        dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
+        self.assertFalse(dashboard_addon_profile.enabled)
+
+        # kube-dashboard enabled, there's existing dashboard addon profile
+        instance.addon_profiles.pop(CONST_KUBE_DASHBOARD_ADDON_NAME, None)
+        # test lower cased key name
+        instance.addon_profiles['kubedashboard'] = ManagedClusterAddonProfile(enabled=False)
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'kube-dashboard', enable=True)
+        dashboard_addon_profile = instance.addon_profiles[CONST_KUBE_DASHBOARD_ADDON_NAME]
+        self.assertTrue(dashboard_addon_profile.enabled)
 
         # monitoring enabled and then enabled again should error
         instance = mock.Mock()
         instance.addon_profiles = None
         instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                  'clitest000001', 'monitoring', enable=True)
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
         with self.assertRaises(CLIError):
             instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
-                                      'clitest000001', 'monitoring', enable=True)
+                                      'clitest000001', 'clitest000001', 'monitoring', enable=True)
+
+        # virtual-node enabled
+        instance = mock.MagicMock()
+        instance.addon_profiles = None
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'virtual-node', enable=True, subnet_name='foo')
+        self.assertIn('aciConnectorLinux', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['aciConnectorLinux']
+        self.assertTrue(addon_profile.enabled)
+
+        # virtual-node disabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'virtual-node', enable=False)
+        addon_profile = instance.addon_profiles['aciConnectorLinux']
+        self.assertFalse(addon_profile.enabled)
+
+        # ingress-appgw enabled
+        instance = mock.MagicMock()
+        instance.addon_profiles = None
+        cmd = mock.MagicMock()
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'ingress-appgw', enable=True, appgw_subnet_cidr='10.2.0.0/16')
+        self.assertIn('ingressApplicationGateway', instance.addon_profiles)
+        addon_profile = instance.addon_profiles['ingressApplicationGateway']
+        self.assertTrue(addon_profile.enabled)
+
+        # ingress-appgw disabled
+        instance = _update_addons(cmd, instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
+        addon_profile = instance.addon_profiles['ingressApplicationGateway']
+        self.assertFalse(addon_profile.enabled)
 
     @mock.patch('azure.cli.command_modules.acs.custom.cf_resources', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.custom._invoke_deployment')
@@ -631,7 +724,16 @@ class AcsCustomCommandTest(unittest.TestCase):
         addon = mock.Mock()
         wsID = "/subscriptions/1234abcd-cad5-417b-1234-aec62ffa6fe7/resourcegroups/mbdev/providers/microsoft.operationalinsights/workspaces/mbdev"
         addon.config = {
-            'logAnalyticsWorkspaceResourceID': wsID
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
+        }
+        self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
+        args, kwargs = invoke_def.call_args
+        self.assertEqual(args[3]['resources'][0]['type'], "Microsoft.Resources/deployments")
+        self.assertEqual(args[4]['workspaceResourceId']['value'], wsID)
+
+        # when addon config key is lower cased
+        addon.config = {
+            CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: wsID
         }
         self.assertTrue(_ensure_container_insights_for_monitoring(cmd, addon))
         args, kwargs = invoke_def.call_args
@@ -640,32 +742,115 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_k8s_install_cli_emit_warnings(self, logger_mock, mock_url_retrieve):
+    def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
-            test_location = os.path.join(temp_dir, 'kubectl.exe')
-            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+            test_location = os.path.join(temp_dir, 'kubectl')
+            k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
             # 2 warnings, 1st for download result; 2nd for updating PATH
             self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
-
-            if platform.system() == 'Windows':
-                # try again with install location in PATH, we should only get one more warning
-                os.environ['PATH'] += ';' + temp_dir
-                k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
-                self.assertEqual(logger_mock.warning.call_count, 3)
         finally:
             shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_k8s_install_cli_create_installation_dir(self, logger_mock, mock_url_retrieve):
+    def test_k8s_install_kubectl_create_installation_dir(self, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
-            test_location = os.path.join(temp_dir, 'foo', 'kubectl.exe')
-            k8s_install_cli(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl')
+            k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertTrue(os.path.exists(test_location))
         finally:
             shutil.rmtree(temp_dir)
+
+    @unittest.skip('Update api version')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_emit_warnings(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = os.path.realpath(tempfile.mkdtemp())  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'kubelogin')
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 2 warnings, 1st for download result; 2nd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 2)  # 2 warnings, one for download result
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @unittest.skip('Update api version')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_create_installation_dir(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+            k8s_install_kubelogin(mock.MagicMock(), client_version='0.0.4', install_location=test_location)
+            self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubectl_with_custom_source_url(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubectl')
+            test_ver = '1.2.5'
+            test_source_url = 'http://url1'
+            k8s_install_kubectl(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
+            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_with_custom_source_url(self, logger_mock, mock_url_retrieve):
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+            test_ver = '1.2.6'
+            test_source_url = 'http://url2'
+            k8s_install_kubelogin(mock.MagicMock(), client_version=test_ver, install_location=test_location, source_url=test_source_url)
+            mock_url_retrieve.assert_called_with(mockUrlretrieveUrlValidator(test_source_url, test_ver), mock.ANY)
+        finally:
+            shutil.rmtree(temp_dir)
+
+
+class mockUrlretrieveUrlValidator(object):
+    def __init__(self, url, version):
+        self.url = url
+        self.version = version
+
+    def __eq__(self, other):
+        return other.startswith(self.url) and self.version in other
+
+
+def create_kubelogin_zip(file_url, download_path):
+    import zipfile
+    try:
+        cwd = os.getcwd()
+        temp_dir = os.path.realpath(tempfile.mkdtemp())
+        os.chdir(temp_dir)
+        bin_dir = 'bin'
+        system = platform.system()
+        if system == 'Windows':
+            bin_dir += '/windows_amd64'
+        elif system == 'Linux':
+            bin_dir += '/linux_amd64'
+        elif system == 'Darwin':
+            bin_dir += '/darwin_amd64'
+        os.makedirs(bin_dir)
+        bin_location = os.path.join(bin_dir, 'kubelogin')
+        open(bin_location, 'a').close()
+        with zipfile.ZipFile(download_path, 'w', zipfile.ZIP_DEFLATED) as outZipFile:
+            outZipFile.write(bin_location)
+    finally:
+        os.chdir(cwd)
+        shutil.rmtree(temp_dir)

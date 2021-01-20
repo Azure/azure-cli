@@ -304,13 +304,18 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(str(err.exception), 'The extension {} is not installed.'.format(MY_EXT_NAME))
 
     def test_update_extension_no_updates(self):
+        logger_msgs = []
+
+        def mock_log_warning(_, msg):
+            logger_msgs.append(msg)
+
         add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
-        with mock.patch('azure.cli.core.extension.operations.resolve_from_index', side_effect=NoExtensionCandidatesError()):
-            with self.assertRaises(CLIError) as err:
-                update_extension(self.cmd, MY_EXT_NAME)
-            self.assertTrue("No updates available for '{}'.".format(MY_EXT_NAME) in str(err.exception))
+        with mock.patch('azure.cli.core.extension.operations.resolve_from_index', side_effect=NoExtensionCandidatesError()), \
+                mock.patch('logging.Logger.warning', mock_log_warning):
+            update_extension(self.cmd, MY_EXT_NAME)
+        self.assertTrue("No updates available for '{}'.".format(MY_EXT_NAME) in logger_msgs[0])
 
     def test_update_extension_exception_in_update_and_rolled_back(self):
         add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)

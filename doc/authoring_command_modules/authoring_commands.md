@@ -60,12 +60,10 @@ class MyCommandsLoader(AzCommandsLoader):
                                                custom_command_type=mymod_custom)
 
     def load_command_table(self, args):
-        super(MyCommandsLoader, self).load_command_table(args)
         # TODO: Register command groups and commands here
         return self.command_table
 
     def load_arguments(self, command):
-        super(MyCommandsLoader, self).load_arguments(command)
         # TODO: Register argument contexts and arguments here
 
 COMMAND_LOADER_CLS = MyCommandsLoader
@@ -76,7 +74,7 @@ Note that `MGMT_MYTYPE` will need to be added to the `azure\cli\core\profiles\_s
 ```Python
 class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     ...
-    MGMT_MYTYPE = ('azure.mgmt.mytype', 'MyTypeManagmenentClient')
+    MGMT_MYTYPE = ('azure.mgmt.mytype', 'MyTypeManagementClient')
     ...
 ```
 
@@ -153,7 +151,7 @@ Any kwargs that are not specified will be pulled from the `command_type` kwarg, 
 
 ***custom_command***
 
-The signature for `custom_command` is exactly the same as `command`. The only difference is that, whereas `command` uses `command_type` as the fallback for missings kwargs, `custom_command` relies on `custom_command_type`.
+The signature for `custom_command` is exactly the same as `command`. The only difference is that, whereas `command` uses `command_type` as the fallback for missing kwargs, `custom_command` relies on `custom_command_type`.
 
 ***generic_update_command***
 
@@ -161,7 +159,7 @@ See the section on [Generic Update Commands](#generic-update-commands)
 
 ***wait_command***
 
-The generic wait command provides a templated solution for polling Azure resources until specific conditions are met.
+The generic wait command provides a template solution for polling Azure resources until specific conditions are met.
 
 ```Python
 wait_command(self, name, getter_name='get', **kwargs)
@@ -178,7 +176,7 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
 
 ***custom_wait_command***
 
-Similar to `custom_command` and `command`, the signature for `custom_wait_command` is exactly the same as `wait_command` but uses `custom_command_type` as the fallback for missings kwargs.
+Similar to `custom_command` and `command`, the signature for `custom_wait_command` is exactly the same as `wait_command` but uses `custom_command_type` as the fallback for missing kwargs.
 
 ***show_command***
 
@@ -195,7 +193,7 @@ show_command(self, name, getter_name='get', **kwargs)
 
 ***custom_show_command***
 
-Similar to `custom_command` and `command`, the signature for `custom_show_command` is exactly the same as `show_command` but uses `custom_command_type` as the fallback for missings kwargs.
+Similar to `custom_command` and `command`, the signature for `custom_show_command` is exactly the same as `show_command` but uses `custom_command_type` as the fallback for missing kwargs.
 
 **(4) Supporting --no-wait**
 
@@ -350,7 +348,7 @@ From the diagram you can see that any kwargs supplied when creating the `AzComma
 
 While kwargs are inherited from higher levels on the diagram, they can be overridden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
 
-Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
+Additionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
 
 ****Command Group****
 
@@ -361,7 +359,7 @@ The following special kwargs are supported by command group and its helper metho
 - `validator` - See section on [Validators](#validators)
 - `confirmation` - During interactive use, will prompt the user to confirm their choice to proceed. Supply a value of True to use the default prompt, or supply a string to use a custom prompt message. If the command is invoked in non-interactive scenarios and the --yes/-y parameter is not supplied, the command will fail.
 - `transform` - Accepts a callable that takes a command result, which can be manipulated as desired. The transformed result is then returned. In general, output formats should closely mirror those returned by the service, and so this should be infrequently used. The modifies the output *regardless of the output format type*.
-- `deprecate_info` - See [Deprecating Commands and Arugments](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md#deprecating-commands-and-arguments)
+- `deprecate_info` - See [Deprecating Commands and Arguments](https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md#deprecating-commands-and-arguments)
 - `formatter_class` - Advanced. Accepts a custom class that derives from `argparse.HelpFormatter` to modify the help document generation.
 - `argument_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default argument loader.
 - `description_loader` - Advanced. Accepts a callable that takes no parameters which will be used in place of the default description loader.
@@ -782,7 +780,7 @@ class MyCommandsLoader(AzCommandsLoader):
 
 ## Deprecating Commands and Arguments
 
-The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arugments are supported when deprecating an item:
+The CLI has built-in support for deprecating the following: commands, command groups, arguments, option values. Deprecated items will appear with a warning in the help system or when invoked. The following keyword arguments are supported when deprecating an item:
 
 - `target`: The thing being deprecated. This is often not needed as in most cases the CLI can figure out what is being deprecated.
 - `redirect`: This is the alternative that should be used in lieu of the deprecated thing. If not provided, the item is expected to be removed in the future with no replacement.
@@ -849,7 +847,7 @@ AZURE_API_PROFILES = {
     ResourceType.MGMT_MYSERVICE: '2019-03-01' # the supported API version on that profile
     ...
   },
-  '2019-03-01-hybrid': {
+  '2020-09-01-hybrid': {
     ResourceType.MGMT_MYSERVICE: '2018-08-01' # different API version for this profile
     ...
   },

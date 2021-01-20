@@ -9,6 +9,7 @@ from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.util import sdk_no_wait
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -45,7 +46,7 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
 
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
 from ._client_factory import resource_service_factory
-from ._utils import open_certificate, generateKey
+from ._utils import open_certificate, generate_key
 
 
 logger = get_logger(__name__)
@@ -83,18 +84,21 @@ def iot_dps_get(client, dps_name, resource_group_name=None):
     return client.iot_dps_resource.get(dps_name, resource_group_name)
 
 
-def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1):
+def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1, tags=None):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     dps_property = IotDpsPropertiesDescription()
     dps_description = ProvisioningServiceDescription(location=location,
                                                      properties=dps_property,
-                                                     sku=IotDpsSkuInfo(name=sku, capacity=unit))
+                                                     sku=IotDpsSkuInfo(name=sku, capacity=unit),
+                                                     tags=tags)
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
 
 
-def iot_dps_update(client, dps_name, parameters, resource_group_name):
+def iot_dps_update(client, dps_name, parameters, resource_group_name, tags=None):
+    if tags is not None:
+        parameters.tags = tags
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, parameters)
 
 
@@ -387,7 +391,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_storage_container_name=None,
                    fileupload_sas_ttl=1,
                    fileupload_storage_authentication_type=None,
-                   fileupload_storage_container_uri=None):
+                   fileupload_storage_container_uri=None,
+                   min_tls_version=None,
+                   tags=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -402,7 +408,6 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Key-based authentication requires a connection string.')
     if identity_based_file_upload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
-    _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
@@ -429,20 +434,16 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
                                   storage_endpoints=storage_endpoint_dic,
-                                  cloud_to_device=cloud_to_device_properties)
+                                  cloud_to_device=cloud_to_device_properties,
+                                  min_tls_version=min_tls_version)
     properties.enable_file_upload_notifications = enable_fileupload_notifications
 
     hub_description = IotHubDescription(location=location,
                                         sku=sku,
-                                        properties=properties)
+                                        properties=properties,
+                                        tags=tags)
 
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
-
-
-def _check_name_availability(iot_hub_resource, hub_name):
-    name_availability = iot_hub_resource.check_name_availability(hub_name)
-    if name_availability is not None and not name_availability.name_available:
-        raise CLIError(name_availability.message)
 
 
 def iot_hub_get(cmd, client, hub_name, resource_group_name=None):
@@ -480,8 +481,11 @@ def update_iot_hub_custom(instance,
                           fileupload_storage_container_name=None,
                           fileupload_sas_ttl=None,
                           fileupload_storage_authentication_type=None,
-                          fileupload_storage_container_uri=None):
+                          fileupload_storage_container_uri=None,
+                          tags=None):
     from datetime import timedelta
+    if tags is not None:
+        instance.tags = tags
     if sku is not None:
         instance.sku.name = sku
     if unit is not None:
@@ -636,9 +640,9 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     requested_policy = [p for p in policies if p.key_name.lower() == policy_name.lower()]
     if regenerate_key == RenewKeyType.Primary.value:
-        requested_policy[0].primary_key = generateKey()
+        requested_policy[0].primary_key = generate_key()
     if regenerate_key == RenewKeyType.Secondary.value:
-        requested_policy[0].secondary_key = generateKey()
+        requested_policy[0].secondary_key = generate_key()
     if regenerate_key == RenewKeyType.Swap.value:
         temp = requested_policy[0].primary_key
         requested_policy[0].primary_key = requested_policy[0].secondary_key
@@ -1054,7 +1058,7 @@ def _delete_routing_endpoints(endpoint_name, endpoint_type, endpoints):
 
 def iot_central_app_create(
         cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
-        location=None, template=None, display_name=None
+        location=None, template=None, display_name=None, no_wait=False
 ):
     cli_ctx = cmd.cli_ctx
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -1067,9 +1071,7 @@ def iot_central_app_create(
               sku=appSku,
               template=template)
 
-    createResult = client.apps.create_or_update(
-        resource_group_name, app_name, app)
-    return createResult
+    return sdk_no_wait(no_wait, client.apps.create_or_update, resource_group_name, app_name, app)
 
 
 def iot_central_app_get(client, app_name, resource_group_name=None):
@@ -1078,8 +1080,8 @@ def iot_central_app_get(client, app_name, resource_group_name=None):
     return client.apps.get(resource_group_name, app_name)
 
 
-def iot_central_app_delete(client, app_name, resource_group_name):
-    return client.apps.delete(resource_group_name, app_name)
+def iot_central_app_delete(client, app_name, resource_group_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.apps.delete, resource_group_name, app_name)
 
 
 def iot_central_app_list(client, resource_group_name=None):

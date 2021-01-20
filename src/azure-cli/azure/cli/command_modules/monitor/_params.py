@@ -25,7 +25,7 @@ from knack.arguments import CLIArgumentType
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
     from azure.mgmt.monitor.models import ConditionOperator, TimeAggregationOperator, EventData
-
+    from .grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion, agg_conversion, op_conversion, sens_conversion
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
@@ -125,6 +125,12 @@ def load_arguments(self, _):
                                              'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
+        c.argument('target_resource_type', options_list=['--target-resource-type', '--type'],
+                   help='The resource type of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
+        c.argument('target_resource_region', options_list=['--target-resource-region', '--region'],
+                   help='The region of the target resource(s) in scopes. '
+                        'This must be provided when scopes is resource group or subscription.')
 
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))
@@ -136,6 +142,45 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert update', arg_group='Condition') as c:
         c.argument('add_conditions', options_list='--add-condition', action=MetricAlertConditionAction, nargs='+')
         c.argument('remove_conditions', nargs='+')
+
+    with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
+        c.argument('dimension_name', options_list=['--name', '-n'],
+                   help='Name of the dimension.')
+        c.argument('operator', options_list=['--operator', '--op'],
+                   arg_type=get_enum_type(dim_op_conversion.values(), default=dim_op_conversion['includes']),
+                   help="Dimension operator.")
+        c.argument('value_list', options_list=['--value', '-v'], nargs='+',
+                   help='The values to apply on the operation.')
+
+    with self.argument_context('monitor metrics alert condition create', arg_group=None) as c:
+        c.argument('condition_type', options_list=['--type', '-t'], arg_type=get_enum_type(['static', 'dynamic']),
+                   help='Type of condition threshold.')
+        c.argument('metric_name', options_list=['--metric'],
+                   help='Name of metric.')
+        c.argument('metric_namespace', options_list=['--namespace'],
+                   help='Namespace of metric.')
+        c.argument('dimension_list', options_list=['--dimension'], nargs='+',
+                   help='Dimension created by \'az monitor metrics alert dimension create\'.')
+        c.argument('aggregation', arg_type=get_enum_type(agg_conversion.values()),
+                   help='Time aggregation.')
+        c.argument('operator', options_list=['--operator', '--op'], arg_type=get_enum_type(op_conversion.values()),
+                   help="Operator for static threshold can be 'Equals', 'NotEquals', 'GreaterThan', 'GreaterThanOrEqual', 'LessThan' or 'LessThanOrEqual'. "
+                   "Operator for dynamic threshold can be 'GreaterThan', 'LessThan', 'GreaterOrLessThan'.")
+        c.argument('threshold', type=float,
+                   help='Static threshold value.')
+        c.argument('alert_sensitivity', options_list=['--sensitivity'],
+                   arg_type=get_enum_type(sens_conversion.values(), default='Medium'),
+                   help="Alert sensitivity for dynamic threshold.")
+        c.argument('number_of_evaluation_periods', options_list=['--num-periods'], type=int,
+                   help='The number of evaluation periods for dynamic threshold. '
+                        'Range: 1-6.')
+        c.argument('min_failing_periods_to_alert', options_list=['--num-violations'], type=int,
+                   help='The number of violations to trigger an dynamic alert. '
+                        'Range: 1-6. It should be less than or equal to --num-periods.')
+        c.argument('ignore_data_before', options_list=['--since'],
+                   arg_type=get_datetime_type(
+                       help='The date from which to start learning the metric historical data and calculate the dynamic thresholds.'))
+
     # endregion
 
     # region Autoscale
@@ -397,8 +442,6 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace data-export') as c:
         c.argument('data_export_name', options_list=['--name', '-n'], help="Name of the data export rule")
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('enable_all_tables', options_list=['--all', '--export-all-tables'], arg_type=get_three_state_flag(),
-                   help="All workspace's tables are exported when this is enabled.")
         c.argument('table_names', nargs='+', options_list=['--tables', '-t'],
                    help='An array of tables to export. if --export-all-tables is true, this argument should not be provided.')
         c.argument('destination', validator=process_workspace_data_export_destination,

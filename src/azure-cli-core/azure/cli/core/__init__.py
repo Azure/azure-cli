@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.9.1"
+__version__ = "2.18.0"
 
 import os
 import sys
@@ -35,7 +35,7 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
-ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
+ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
 
 
 class AzCli(CLI):
@@ -48,7 +48,10 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
+        from azure.cli.core.style import format_styled_text
+        from azure.cli.core.util import handle_version_update
+        from azure.cli.core.commands.query_examples import register_global_query_examples_argument
 
         from knack.util import ensure_dir
 
@@ -64,16 +67,24 @@ class AzCli(CLI):
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
+        handle_version_update()
 
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
         self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
+        register_global_query_examples_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
         register_cache_arguments(self)
 
         self.progress_controller = None
+
+        if not self.enable_color:
+            format_styled_text.theme = 'none'
+
+        _configure_knack()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -97,17 +108,18 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
-        from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
-                                                       UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
+        from azure.cli.core.commands.constants import SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED
+        from azure.cli.core.style import print_styled_text
 
-        ver_string, updates_available = get_az_version_string()
+        ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
-        show_updates(updates_available)
+        show_updates(updates_available_components)
 
         show_link = self.config.getboolean('output', 'show_survey_link', True)
         if show_link:
-            print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
-            print(UX_SURVEY_PROMPT_COLOR if self.enable_color else UX_SURVEY_PROMPT)
+            print_styled_text()
+            print_styled_text(SURVEY_PROMPT_STYLED)
+            print_styled_text(UX_SURVEY_PROMPT_STYLED)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -373,18 +385,6 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
-        def _roughly_parse_command(args):
-            # Roughly parse the command part: <az vm create> --name vm1
-            # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
-            # positional args
-            nouns = []
-            for arg in args:
-                if arg and arg[0] != '-':
-                    nouns.append(arg)
-                else:
-                    break
-            return ' '.join(nouns).lower()
-
         # Clear the tables to make this method idempotent
         self.command_group_table.clear()
         self.command_table.clear()
@@ -404,17 +404,32 @@ class MainCommandsLoader(CLICommandsLoader):
                 _update_command_table_from_extensions([], index_extensions)
 
                 logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+                from azure.cli.core.util import roughly_parse_command
                 # The index may be outdated. Make sure the command appears in the loaded command table
-                command_str = _roughly_parse_command(args)
-                if command_str in self.command_table:
-                    logger.debug("Found a match in the command table for '%s'", command_str)
-                    return self.command_table
-                if command_str in self.command_group_table:
-                    logger.debug("Found a match in the command group table for '%s'", command_str)
+                raw_cmd = roughly_parse_command(args)
+                for cmd in self.command_table:
+                    if raw_cmd.startswith(cmd):
+                        # For commands with positional arguments, the raw command won't match the one in the
+                        # command table. For example, `az find vm create` won't exist in the command table, but the
+                        # corresponding command should be `az find`.
+                        # raw command  : az find vm create
+                        # command table: az find
+                        # remaining    :         vm create
+                        logger.debug("Found a match in the command table.")
+                        logger.debug("Raw command  : %s", raw_cmd)
+                        logger.debug("Command table: %s", cmd)
+                        remaining = raw_cmd[len(cmd) + 1:]
+                        if remaining:
+                            logger.debug("remaining    : %s %s", ' ' * len(cmd), remaining)
+                        return self.command_table
+                # For command group, it must be an exact match, as no positional argument is supported by
+                # command group operations.
+                if raw_cmd in self.command_group_table:
+                    logger.debug("Found a match in the command group table for '%s'.", raw_cmd)
                     return self.command_table
 
-                logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
-                             command_str)
+                logger.debug("Could not find a match in the command or command group table for '%s'. "
+                             "The index may be outdated.", raw_cmd)
             else:
                 logger.debug("No module found from index for '%s'", args)
 
@@ -843,3 +858,19 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
+
+
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append("azure")

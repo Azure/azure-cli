@@ -14,6 +14,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.storage._client_factory import MISSING_CREDENTIALS_ERROR_MESSAGE
 from ..storage_test_util import StorageScenarioMixin
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -347,6 +348,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
                              container, local_file, blob_name)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @api_version_constraint(resource_type=ResourceType.DATA_STORAGE, max_api='2018-11-09')

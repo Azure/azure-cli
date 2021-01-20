@@ -1,0 +1,2489 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"05b457c2-0f63-4b82-b73f-7ed07fde0e9c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '605'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:24 GMT
+      etag:
+      - W/"05b457c2-0f63-4b82-b73f-7ed07fde0e9c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 039a3dc8-a791-49b9-836b-d834c845567a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForPostgreSql/locations/eastus2euap/capabilities?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"value":[{"zone":"none","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33553408","supportedIOPS":20000,"storageSizeMB":33553408,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.0","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.2","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.2.8","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"}],"supportedNodeTypes":[{"name":"Coordinator","nodeType":"Coordinator","status":"Default"}],"status":"Available"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33553408","supportedIOPS":20000,"storageSizeMB":33553408,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.0","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.2","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.2.8","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"}],"supportedNodeTypes":[{"name":"Worker","nodeType":"Worker","status":"Default"}],"status":"Available"}],"status":"Default"},{"zone":"1","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"},{"zone":"2","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"},{"zone":"3","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '51781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "testvnetserver5postgres", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForPostgreSql/checkNameAvailability?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"testvnetserver5postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers","nameAvailable":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '119'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 31 Dec 2020 07:59:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"05b457c2-0f63-4b82-b73f-7ed07fde0e9c\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '605'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:26 GMT
+      etag:
+      - W/"05b457c2-0f63-4b82-b73f-7ed07fde0e9c"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - fd18e968-24f9-4722-bbdd-a24bbefb0370
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default",
+      "name": "default", "properties": {"addressPrefix": "10.0.0.0/24", "delegations":
+      [{"name": "Microsoft.DBforPostgreSQL/flexibleServers", "properties": {"serviceName":
+      "Microsoft.DBforPostgreSQL/flexibleServers"}}], "privateEndpointNetworkPolicies":
+      "Enabled", "privateLinkServiceNetworkPolicies": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '545'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"7b09fe40-12d9-49e1-a081-3f171f7e164b\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"7b09fe40-12d9-49e1-a081-3f171f7e164b\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/65687df8-6ab1-40c3-b309-3e68c3727ee2?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1385'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d6725f4b-9d8e-4900-bd16-529b375e09c1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/65687df8-6ab1-40c3-b309-3e68c3727ee2?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4d78f90c-65ed-4f21-8362-aa638bd022aa
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default\",\r\n
+        \ \"etag\": \"W/\\\"c93da67d-90df-4485-90d1-59540367e60a\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"c93da67d-90df-4485-90d1-59540367e60a\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1386'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:30 GMT
+      etag:
+      - W/"c93da67d-90df-4485-90d1-59540367e60a"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4f93b764-c5e8-437a-a65d-0e76584ce13b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "sku": {"name": "Standard_D2s_v3", "tier":
+      "GeneralPurpose"}, "properties": {"administratorLogin": "entireToucan0", "administratorLoginPassword":
+      "fUMnBT8DNVjuzLvuwsfXGA", "version": "12", "storageProfile": {"backupRetentionDays":
+      7, "storageMB": 131072}, "haEnabled": "Disabled", "delegatedSubnetArguments":
+      {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},
+      "createMode": "Default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '618'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 07:59:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/operationResults/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"faccf3b1-8142-4bd2-acff-171e603e19ab","status":"InProgress","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:00:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"faccf3b1-8142-4bd2-acff-171e603e19ab","status":"InProgress","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:01:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"faccf3b1-8142-4bd2-acff-171e603e19ab","status":"InProgress","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:02:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"faccf3b1-8142-4bd2-acff-171e603e19ab","status":"InProgress","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:03:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/faccf3b1-8142-4bd2-acff-171e603e19ab?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"faccf3b1-8142-4bd2-acff-171e603e19ab","status":"Succeeded","startTime":"2020-12-31T07:59:33.613Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet -l --subnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"entireToucan0","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-12-31T08:04:35.3392864+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver5postgres","name":"testvnetserver5postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForPostgreSql/locations/eastus2euap/capabilities?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"value":[{"zone":"none","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33553408","supportedIOPS":20000,"storageSizeMB":33553408,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.0","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.2","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"11.2.8","supportedVcores":[{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"}],"supportedNodeTypes":[{"name":"Coordinator","nodeType":"Coordinator","status":"Default"}],"status":"Available"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33553408","supportedIOPS":20000,"storageSizeMB":33553408,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.0","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.2","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":8192,"status":"Available"}],"status":"Available"},{"name":"11.2.8","supportedVcores":[{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":25600,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":51200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":80000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"}],"supportedNodeTypes":[{"name":"Worker","nodeType":"Worker","status":"Default"}],"status":"Available"}],"status":"Default"},{"zone":"1","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"},{"zone":"2","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"},{"zone":"3","supportedFlexibleServerEditions":[{"name":"Burstable","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_B1ms","vCores":1,"supportedIOPS":640,"supportedMemoryPerVcoreMB":2048,"status":"Available"},{"name":"Standard_B2s","vCores":2,"supportedIOPS":1280,"supportedMemoryPerVcoreMB":2048,"status":"Available"}],"status":"Available"}],"status":"Available"},{"name":"GeneralPurpose","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Default"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_D2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":4096,"status":"Default"},{"name":"Standard_D8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"},{"name":"Standard_D64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":4096,"status":"Available"}],"status":"Default"}],"status":"Default"},{"name":"MemoryOptimized","supportedStorageEditions":[{"name":"ManagedDisk","supportedStorageMB":[{"name":"32768","supportedIOPS":120,"storageSizeMB":32768,"status":"Available"},{"name":"65536","supportedIOPS":240,"storageSizeMB":65536,"status":"Available"},{"name":"131072","supportedIOPS":500,"storageSizeMB":131072,"status":"Available"},{"name":"262144","supportedIOPS":1100,"storageSizeMB":262144,"status":"Available"},{"name":"524288","supportedIOPS":2300,"storageSizeMB":524288,"status":"Available"},{"name":"1048576","supportedIOPS":5000,"storageSizeMB":1048576,"status":"Available"},{"name":"2097152","supportedIOPS":7500,"storageSizeMB":2097152,"status":"Available"},{"name":"4194304","supportedIOPS":7500,"storageSizeMB":4194304,"status":"Available"},{"name":"8388608","supportedIOPS":16000,"storageSizeMB":8388608,"status":"Available"},{"name":"16777216","supportedIOPS":18000,"storageSizeMB":16777216,"status":"Available"},{"name":"33554432","supportedIOPS":20000,"storageSizeMB":33554432,"status":"Available"}],"status":"Default"}],"supportedServerVersions":[{"name":"11","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.0","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"},{"name":"12.1","supportedVcores":[{"name":"Standard_E2s_v3","vCores":2,"supportedIOPS":3200,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E4s_v3","vCores":4,"supportedIOPS":6400,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E8s_v3","vCores":8,"supportedIOPS":12800,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E16s_v3","vCores":16,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E32s_v3","vCores":32,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E48s_v3","vCores":48,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":8192,"status":"Available"},{"name":"Standard_E64s_v3","vCores":64,"supportedIOPS":18000,"supportedMemoryPerVcoreMB":6912,"status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedHyperscaleNodeEditions":[],"status":"Available"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '51781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "testvnetserver6postgres", "type": "Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '88'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBForPostgreSql/checkNameAvailability?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"testvnetserver6postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers","nameAvailable":true,"message":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '119'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 31 Dec 2020 08:04:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6?api-version=2020-07-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Network/virtualNetworks/clitestvnet6''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '293'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "eastus2euap", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '157'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"clitestvnet6\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6\",\r\n
+        \ \"etag\": \"W/\\\"f20ea9c0-3e80-4279-9464-289be8373283\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"9713e456-38bd-47fd-99a2-cd03a363a0a3\",\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\":
+        [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"subnets\": [],\r\n
+        \   \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\": false,\r\n
+        \   \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/4e876e0b-df8d-4ec8-a0d2-b36b135c5c24?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '716'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8515ba30-58ac-4d1f-bbce-6779feace9ad
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"name": "Subnetetserver6postgres", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [{"name": "Microsoft.DBforPostgreSQL/flexibleServers", "properties":
+      {"serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '231'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \ \"etag\": \"W/\\\"6c071093-42fd-4953-8020-391b138f76bf\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"6c071093-42fd-4953-8020-391b138f76bf\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/4d87cf09-1f26-4726-8381-384e35a889b7?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1409'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 063563ef-6024-40b1-9882-d487611ae87b
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/4e876e0b-df8d-4ec8-a0d2-b36b135c5c24?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Canceled\",\r\n  \"error\": {\r\n    \"code\":
+        \"Canceled\",\r\n    \"message\": \"Operation was canceled.\",\r\n    \"details\":
+        [\r\n      {\r\n        \"code\": \"CanceledAndSupersededDueToAnotherOperation\",\r\n
+        \       \"message\": \"Operation PutVirtualNetworkOperation (4e876e0b-df8d-4ec8-a0d2-b36b135c5c24)
+        was canceled and superseded by operation PutSubnetOperation (4d87cf09-1f26-4726-8381-384e35a889b7).\"\r\n
+        \     }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      canceled-by-azure-asyncoperation:
+      - https://management.azure.com/subscriptions/7fec3109-5b78-4a24-b834-5d47d63e2596/providers/Microsoft.Network/locations/eastus2euap/operations/4d87cf09-1f26-4726-8381-384e35a889b7?api-version=2020-07-01
+      content-length:
+      - '420'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 363a6759-caf9-40d7-a5ae-2c5d858f70fd
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/4d87cf09-1f26-4726-8381-384e35a889b7?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 33b4cdff-5d2d-4c86-992f-fdbe88215665
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \ \"etag\": \"W/\\\"629dff11-8fe9-47ba-96d3-b0d1520ce253\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"629dff11-8fe9-47ba-96d3-b0d1520ce253\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1410'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:45 GMT
+      etag:
+      - W/"629dff11-8fe9-47ba-96d3-b0d1520ce253"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 73947f5e-0b81-491f-ba44-8812d2cc9806
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2020-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","date":"2020-12-31T07:59:16Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "sku": {"name": "Standard_D2s_v3", "tier":
+      "GeneralPurpose"}, "properties": {"administratorLogin": "wornoutCod0", "administratorLoginPassword":
+      "xuYvpwS7Qq0jH_IpA6obAg", "version": "12", "storageProfile": {"backupRetentionDays":
+      7, "storageMB": 131072}, "haEnabled": "Disabled", "delegatedSubnetArguments":
+      {"subnetArmResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},
+      "createMode": "Default"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '620'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"operation":"UpsertServerManagementOperationV2","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '88'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:04:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/operationResults/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"7a41883b-100d-4906-a16d-6162cf18420e","status":"InProgress","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:05:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"7a41883b-100d-4906-a16d-6162cf18420e","status":"InProgress","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:06:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"7a41883b-100d-4906-a16d-6162cf18420e","status":"InProgress","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:07:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"7a41883b-100d-4906-a16d-6162cf18420e","status":"InProgress","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:08:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus2euap/azureAsyncOperation/7a41883b-100d-4906-a16d-6162cf18420e?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"7a41883b-100d-4906-a16d-6162cf18420e","status":"Succeeded","startTime":"2020-12-31T08:04:48.073Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:09:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --vnet
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"wornoutCod0","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"2","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-12-31T08:09:51.6324437+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver6postgres","name":"testvnetserver6postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1253'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:09:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver5postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"entireToucan0","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitest.vn000002/subnets/default"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"1","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-12-31T08:09:53.0770718+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver5postgres","name":"testvnetserver5postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:09:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D2s_v3","tier":"GeneralPurpose","capacity":2},"properties":{"fullyQualifiedDomainName":"testvnetserver6postgres.postgres.database.azure.com","version":"12","standbyCount":0,"haEnabled":"Disabled","administratorLogin":"wornoutCod0","publicNetworkAccess":"Disabled","delegatedSubnetArguments":{"subnetArmResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres"},"logBackupStorageSku":"Standard_ZRS","haState":"NotEnabled","state":"Ready","availabilityZone":"2","storageProfile":{"storageMB":131072,"backupRetentionDays":7},"earliestRestoreDate":"2020-12-31T08:09:53.7921157+00:00","byokEnforcement":"Disabled","maintenanceWindow":{"customWindow":"Disabled","dayOfWeek":0,"startHour":0,"startMinute":0}},"location":"East
+        US 2 EUAP","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/flexibleServers/testvnetserver6postgres","name":"testvnetserver6postgres","type":"Microsoft.DBforPostgreSQL/flexibleServers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1253'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:09:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver5postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"operation":"DropServerManagementOperation","startTime":"2020-12-31T08:09:54.77Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/cbb2ea19-1d26-44df-944d-5410d55a2580?api-version=2020-02-14-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '83'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:09:54 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/operationResults/cbb2ea19-1d26-44df-944d-5410d55a2580?api-version=2020-02-14-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/cbb2ea19-1d26-44df-944d-5410d55a2580?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"cbb2ea19-1d26-44df-944d-5410d55a2580","status":"InProgress","startTime":"2020-12-31T08:09:54.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:10:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/cbb2ea19-1d26-44df-944d-5410d55a2580?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"cbb2ea19-1d26-44df-944d-5410d55a2580","status":"InProgress","startTime":"2020-12-31T08:09:54.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:10:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/cbb2ea19-1d26-44df-944d-5410d55a2580?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"cbb2ea19-1d26-44df-944d-5410d55a2580","status":"Succeeded","startTime":"2020-12-31T08:09:54.77Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '106'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:10:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBForPostgreSql/flexibleServers/testvnetserver6postgres?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"operation":"DropServerManagementOperation","startTime":"2020-12-31T08:10:42.103Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/385adda5-046c-4a46-82a9-c89475b7914b?api-version=2020-02-14-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '84'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:10:41 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/operationResults/385adda5-046c-4a46-82a9-c89475b7914b?api-version=2020-02-14-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/385adda5-046c-4a46-82a9-c89475b7914b?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"385adda5-046c-4a46-82a9-c89475b7914b","status":"InProgress","startTime":"2020-12-31T08:10:42.103Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:10:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/385adda5-046c-4a46-82a9-c89475b7914b?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"385adda5-046c-4a46-82a9-c89475b7914b","status":"InProgress","startTime":"2020-12-31T08:10:42.103Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:11:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres flexible-server delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-rdbms/2020-02-14-privatepreview Azure-SDK-For-Python AZURECLI/2.17.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/East%20US%202%20EUAP/azureAsyncOperation/385adda5-046c-4a46-82a9-c89475b7914b?api-version=2020-02-14-preview
+  response:
+    body:
+      string: '{"name":"385adda5-046c-4a46-82a9-c89475b7914b","status":"Succeeded","startTime":"2020-12-31T08:10:42.103Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:11:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --vnet-name --remove
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \ \"etag\": \"W/\\\"9f14cc07-6f91-43a8-a39d-3a2ace941d30\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
+        \   },\r\n    \"delegations\": [\r\n      {\r\n        \"name\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres/delegations/Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \       \"etag\": \"W/\\\"9f14cc07-6f91-43a8-a39d-3a2ace941d30\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"serviceName\": \"Microsoft.DBforPostgreSQL/flexibleServers\",\r\n
+        \         \"actions\": [\r\n            \"Microsoft.Network/virtualNetworks/subnets/join/action\"\r\n
+        \         ]\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets/delegations\"\r\n
+        \     }\r\n    ],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1699'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:26:28 GMT
+      etag:
+      - W/"9f14cc07-6f91-43a8-a39d-3a2ace941d30"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c5ce7b1e-3814-4953-9186-de85ac9b6ccb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres",
+      "name": "Subnetetserver6postgres", "properties": {"addressPrefix": "10.0.0.0/24",
+      "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS"},
+      "delegations": [], "privateEndpointNetworkPolicies": "Enabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '706'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name --vnet-name --remove
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \ \"etag\": \"W/\\\"60dc2e17-b460-43b0-8061-1d6e86c4203b\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
+        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/71c80909-8fed-4ce8-ad07-3930feec8e0a?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '913'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:26:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1a28df8b-4f06-4763-94b9-ddd881a862ec
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --vnet-name --remove
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/71c80909-8fed-4ce8-ad07-3930feec8e0a?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:26:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c7e1d0ee-eef6-4a30-b753-75e4d34365f9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --vnet-name --remove
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"Subnetetserver6postgres\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6/subnets/Subnetetserver6postgres\",\r\n
+        \ \"etag\": \"W/\\\"296d2900-e100-48f3-82f5-e8127326b08a\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"networkSecurityGroup\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkSecurityGroups/clitestvnet6-Subnetetserver6postgres-NRMS\"\r\n
+        \   },\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \ },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '914'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:26:32 GMT
+      etag:
+      - W/"296d2900-e100-48f3-82f5-e8127326b08a"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 8373e5ed-9305-4f7b-bfee-a575e1c63455
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/clitestvnet6?api-version=2020-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/55e04c7d-9ca2-4d6d-97e3-58078744a140?api-version=2020-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 31 Dec 2020 08:26:33 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operationResults/55e04c7d-9ca2-4d6d-97e3-58078744a140?api-version=2020-07-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ce7d8578-832d-4095-a2ba-4fe21dd3a1dc
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.17.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.4 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/55e04c7d-9ca2-4d6d-97e3-58078744a140?api-version=2020-07-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 31 Dec 2020 08:26:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 865868cc-1311-470f-8cc8-54ff67f5bc0b
+    status:
+      code: 200
+      message: OK
+version: 1

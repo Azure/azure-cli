@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "target_resource_name": {
+            "defaultValue": "ernestt-appconfig-privatelink",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.AppConfiguration/configurationStores",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('target_resource_name')]",
+            "location": "westus",
+            "sku": {
+                "name": "standard"
+            },
+            "properties": {
+                "encryption": {}
+            }
+        }
+    ]
+}

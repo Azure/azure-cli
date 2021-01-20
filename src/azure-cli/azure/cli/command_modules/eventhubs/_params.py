@@ -44,6 +44,8 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
+        c.argument('trusted_service_access_enabled', options_list=['--enable-trusted-service-access', '-t'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Trusted Service Access is enabled for Network Rule Set.')
         c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
         c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
@@ -59,6 +61,19 @@ def load_arguments_eh(self, _):
         c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
         c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
+
+# Cluster region
+    for scope in ['eventhubs cluster', 'eventhubs cluster namespace list']:
+        with self.argument_context(scope) as c:
+            c.argument('cluster_name', arg_type=name_type, id_part=None, help='Name of Cluster')
+
+    with self.argument_context('eventhubs cluster create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), id_part=None, help='Location of the Cluster, for locations of available pre-provision clusters, please check az evetnhubs ')
+        c.argument('capacity', type=int, help='Capacity for Sku, allowed value : 1')
+
+    for scope in ['eventhubs cluster create', 'eventhubs cluster update']:
+        with self.argument_context(scope) as c:
+            c.argument('tags', arg_type=tags_type)
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
@@ -94,7 +109,7 @@ def load_arguments_eh(self, _):
             c.argument('skip_empty_archives', options_list=['--skip-empty-archives'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether to Skip Empty.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
-            c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
+            c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination, should be EventHubArchive.AzureBlockBlob.')
             c.argument('storage_account_resource_id', arg_group='Capture-Destination', validator=validate_storageaccount, options_list=['--storage-account'], help='Name (if within same resource group and not of type Classic Storage) or ARM id of the storage account to be used to create the blobs')
             c.argument('blob_container', arg_group='Capture-Destination', help='Blob container Name')
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')

@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: hybrid-2019-03-01. Python module name can't begin with a digit.
     target_profile=hybrid_${target_profile//-/_}
 fi
-echo Pick up profile: $target_profile 
+echo Pick up profile: $target_profile
 
 ##############################################
 # Define colored output func
@@ -39,7 +39,7 @@ function title {
 # Update version strings
 title 'Determine version'
 . $script_dir/version.sh $1
-echo -n $version > ./artifacts/version
+# echo -n $version > ./artifacts/version
 
 ##############################################
 # build product packages
@@ -86,7 +86,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0.dev$version"
+VERSION = "1.0.0.$version"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',

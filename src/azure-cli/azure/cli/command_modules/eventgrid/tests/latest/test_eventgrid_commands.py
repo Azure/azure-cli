@@ -1246,7 +1246,7 @@ class EventGridTests(ScenarioTest):
         self.assertIsNotNone(output['key1'])
         self.assertIsNotNone(output['key2'])
 
-        self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group-name {rg} --desination-topic-name {partner_topic_name} --source {source}', checks=[
+        self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group {rg} --desination-topic-name {partner_topic_name} --source {source}', checks=[
             self.check('type', 'Microsoft.EventGrid/partnerNamespaces/eventChannels'),
             self.check('name', self.kwargs['event_channel_name']),
             self.check('provisioningState', 'Succeeded'),
@@ -1260,7 +1260,7 @@ class EventGridTests(ScenarioTest):
             # self.check('partnerTopicReadinessState', 'NotActivatedByUserYet')
         ])
 
-        outputeventchannel = self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group-name {rg} --desination-topic-name {partner_topic_name} --source {source} --activation-expiration-date \'{exp_time}\' --partner-topic-description \'{partner_topic_friendly_description}\' --publisher-filter data.key1 NumberIn 2 3 4 100 200 --publisher-filter data.key2 StringIn 2 3 4 100 200').get_output_in_json()
+        outputeventchannel = self.cmd('az eventgrid partner namespace event-channel create --resource-group {rg} --partner-namespace-name {partner_namespace_name} --name {event_channel_name} --destination-subscription-id {destination_subscription_id} --destination-resource-group {rg} --desination-topic-name {partner_topic_name} --source {source} --activation-expiration-date \'{exp_time}\' --partner-topic-description \'{partner_topic_friendly_description}\' --publisher-filter data.key1 NumberIn 2 3 4 100 200 --publisher-filter data.key2 StringIn 2 3 4 100 200').get_output_in_json()
 
         self.check(outputeventchannel['type'], 'Microsoft.EventGrid/partnerNamespaces/eventChannels'),
         self.check(outputeventchannel['name'], self.kwargs['event_channel_name']),

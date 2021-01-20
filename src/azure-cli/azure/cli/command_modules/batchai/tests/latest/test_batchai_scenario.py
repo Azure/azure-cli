@@ -17,10 +17,11 @@ except ImportError:
     import mock
 
 from azure.cli.testsdk import JMESPathCheck, JMESPathCheckExists, StringContainCheck
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 NODE_STARTUP_TIME = 10 * 60  # Compute node should start in 10 mins after cluster creation.
 CLUSTER_RESIZE_TIME = 20 * 60  # Cluster should resize in 20 mins after job submitted/completed.
-LOCATION_FOR_SCENARIO_TESTS = 'northeurope'
+LOCATION_FOR_SCENARIO_TESTS = 'eastus'
 PASSWORD = str(uuid.uuid4())
 
 
@@ -92,13 +93,12 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
             self.cmd('az batchai job file list -g {0} -w workspace -e experiment -j job -d stdouterr'.format(
                 resource_group), checks=[
-                JMESPathCheck("[].name | contains(@, 'execution.log')", True),
-                JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
-                JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
-                JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
-                JMESPathCheckExists("[0].downloadUrl"),
-                JMESPathCheckExists("[1].downloadUrl"),
+                    JMESPathCheck("[].name | contains(@, 'execution.log')", True),
+                    JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
+                    JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
+                    JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
+                    JMESPathCheckExists("[0].downloadUrl"),
+                    JMESPathCheckExists("[1].downloadUrl"),
             ])
 
             # Check the job's output directory
@@ -282,6 +282,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             self.cmd('az batchai cluster show -g {0} -w workspace -n cluster'.format(resource_group),
                      checks=[JMESPathCheck('nodeStateCounts.idleNodeCount', 1)])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_auto_storage(self, resource_group, storage_account):
@@ -303,6 +304,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                     JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
                     JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_setup_command(self, resource_group, storage_account):
@@ -366,7 +368,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                     JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
                     JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                     JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                    JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                     JMESPathCheckExists("[0].downloadUrl"),
                     JMESPathCheckExists("[1].downloadUrl"),
             ])
@@ -399,7 +400,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 JMESPathCheck("[].name | contains(@, 'stderr.txt')", True),
                 JMESPathCheck("[].name | contains(@, 'stdout.txt')", True),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
-                JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
                 JMESPathCheckExists("[0].downloadUrl"),
                 JMESPathCheckExists("[1].downloadUrl"),
             ])
@@ -414,9 +414,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
     def test_batchai_usages(self):
         # Just check if we can get a usage and it contains info about clusters.
         self.cmd('batchai list-usages -l {0}'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
-            StringContainCheck("Clusters")])
+            StringContainCheck("Cluster")])
         self.cmd('batchai list-usages -l {0} -o table'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
-            StringContainCheck("Clusters")])
+            StringContainCheck("Cluster")])
 
     @contextmanager
     def _given_configured_environment(self, resource_group, storage_account):

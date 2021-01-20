@@ -8,7 +8,7 @@ set -exv
 : ${DISTRO:?"DISTRO is not set"}
 : ${DISTRO_BASE_IMAGE:?"DISTRO_BASE_IMAGE is not set"}
 
-CLI_VERSION=`cat src/azure-cli/azure/cli/__init__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+CLI_VERSION=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
 
 docker run --rm \
            -v "$BUILD_SOURCESDIRECTORY":/mnt/repo \

@@ -13,15 +13,15 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-06-29T07:31:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T07:37:57Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:31:56 GMT
+      - Wed, 16 Dec 2020 07:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -46,8 +46,8 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
-      "10.0.0.0/24"}, "name": "subnet1"}]}}'
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"name": "subnet1", "properties":
+      {"addressPrefix": "10.0.0.0/24"}}]}}'
     headers:
       Accept:
       - application/json
@@ -60,40 +60,36 @@ interactions:
       Content-Length:
       - '205'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
-        ,\r\n  \"etag\": \"W/\\\"8e7d7f0b-fd4d-42f9-8a3b-1ef1ed272980\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"b26d80a1-03f3-470d-a16e-efccae748f41\"\
-        ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
-        10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
-        : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        ,\r\n        \"etag\": \"W/\\\"8e7d7f0b-fd4d-42f9-8a3b-1ef1ed272980\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
-        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
-        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n  \
-        \        \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
-        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
-        : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
+        \ \"etag\": \"W/\\\"02123ccc-e291-4969-a87a-4a488ee75ee2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"21acbce4-b0d8-4b72-b0ef-9a4c6b384f9a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"02123ccc-e291-4969-a87a-4a488ee75ee2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/65a92553-4e15-46c1-b9e1-2f2ddd05b755?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e0a5ffeb-f3dc-4d87-b007-21ac1376c4b3?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -101,7 +97,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:01 GMT
+      - Wed, 16 Dec 2020 07:38:09 GMT
       expires:
       - '-1'
       pragma:
@@ -114,9 +110,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8021bae3-2159-46d8-8e27-7d000fd7b421
+      - 9c8673be-6a95-4fe7-84f4-f8aef1988505
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1178'
     status:
       code: 201
       message: Created
@@ -124,7 +120,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -134,10 +130,9 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/65a92553-4e15-46c1-b9e1-2f2ddd05b755?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e0a5ffeb-f3dc-4d87-b007-21ac1376c4b3?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -149,7 +144,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:05 GMT
+      - Wed, 16 Dec 2020 07:38:12 GMT
       expires:
       - '-1'
       pragma:
@@ -166,7 +161,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 03a3a7de-cedd-43dd-a9ef-00fb5064e8ba
+      - 3d2cf3e8-f03b-4f59-9e2a-dd131677186a
     status:
       code: 200
       message: OK
@@ -174,7 +169,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -184,29 +179,27 @@ interactions:
       ParameterSetName:
       - -g -n --subnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
-        ,\r\n  \"etag\": \"W/\\\"5aa8c24f-61d4-4fab-96bd-76edc39f53cd\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"b26d80a1-03f3-470d-a16e-efccae748f41\"\
-        ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
-        10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
-        : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        ,\r\n        \"etag\": \"W/\\\"5aa8c24f-61d4-4fab-96bd-76edc39f53cd\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\"\
-        : [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n  \
-        \        \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n        },\r\
-        \n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n    \
-        \  }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
-        : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1\",\r\n
+        \ \"etag\": \"W/\\\"476c71ee-2906-402b-9a0d-f47a419cfc17\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"21acbce4-b0d8-4b72-b0ef-9a4c6b384f9a\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\",\r\n
+        \       \"etag\": \"W/\\\"476c71ee-2906-402b-9a0d-f47a419cfc17\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -215,9 +208,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:05 GMT
+      - Wed, 16 Dec 2020 07:38:13 GMT
       etag:
-      - W/"5aa8c24f-61d4-4fab-96bd-76edc39f53cd"
+      - W/"476c71ee-2906-402b-9a0d-f47a419cfc17"
       expires:
       - '-1'
       pragma:
@@ -234,7 +227,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - fffeb733-2b3a-4c85-9fc6-a1800f0d7d50
+      - b2d3db82-81b2-4147-953d-122d9a5ebda3
     status:
       code: 200
       message: OK
@@ -252,15 +245,15 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-06-29T07:31:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T07:37:57Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -269,7 +262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:06 GMT
+      - Wed, 16 Dec 2020 07:38:15 GMT
       expires:
       - '-1'
       pragma:
@@ -284,11 +277,10 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"location": "westus", "properties": {"ipConfigurations": [{"properties":
-      {"privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion": "IPv4",
-      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}},
-      "name": "ipconfig1"}], "dnsSettings": {"dnsServers": []}, "enableIPForwarding":
-      false}}'''
+    body: '{"location": "westus", "properties": {"ipConfigurations": [{"name": "ipconfig1",
+      "properties": {"privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
+      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}}}],
+      "dnsSettings": {"dnsServers": []}, "enableIPForwarding": false}}'
     headers:
       Accept:
       - application/json
@@ -301,42 +293,37 @@ interactions:
       Content-Length:
       - '468'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4458e5f8-d470-4f3e-8fdc-483254d5468c?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e254828e-94d3-4614-8eda-40906c6bd7ce?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -344,7 +331,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:11 GMT
+      - Wed, 16 Dec 2020 07:38:22 GMT
       expires:
       - '-1'
       pragma:
@@ -357,9 +344,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6c8d0805-127b-4d85-8457-019d1d51be7a
+      - 7931076d-a6b8-4d35-8db7-865722a2bfde
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1188'
     status:
       code: 201
       message: Created
@@ -367,7 +354,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -377,10 +364,9 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4458e5f8-d470-4f3e-8fdc-483254d5468c?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/e254828e-94d3-4614-8eda-40906c6bd7ce?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -392,7 +378,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:42 GMT
+      - Wed, 16 Dec 2020 07:38:53 GMT
       expires:
       - '-1'
       pragma:
@@ -409,7 +395,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ced99cb1-0218-4c68-ace1-028f9446d04a
+      - a330e703-c827-4674-8a5b-47b97d945409
     status:
       code: 200
       message: OK
@@ -417,7 +403,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -427,31 +413,28 @@ interactions:
       ParameterSetName:
       - -g -n --subnet --vnet-name
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -460,9 +443,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:42 GMT
+      - Wed, 16 Dec 2020 07:38:53 GMT
       etag:
-      - W/"ea73f75a-4915-43be-b2af-9ca26626c036"
+      - W/"f10bf2bc-0e28-4591-87c9-6b01a695c67b"
       expires:
       - '-1'
       pragma:
@@ -479,7 +462,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 10de95e1-3919-4c39-8bbc-b41fddaf0953
+      - bc230bf3-b959-45ef-9240-4d0ccd4244f2
     status:
       code: 200
       message: OK
@@ -497,15 +480,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-06-29T07:31:51Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001","name":"cli_test_nic_lb_address_pools000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-12-16T07:37:57Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -514,7 +497,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:43 GMT
+      - Wed, 16 Dec 2020 07:38:55 GMT
       expires:
       - '-1'
       pragma:
@@ -542,12 +525,57 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_nic_lb_address_pools000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27cli_test_nic_lb_address_pools000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2020-10-01
+  response:
+    body:
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_nic_lb_address_pools000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2fpublicIPAddresses%27&api-version=2020-10-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5UbERNREktIiwibmV4dFJvd0tleSI6IjEhMTY0IVFURkNSa0UyTXpWR01rSkdOREpHTVRnMlFqVTRORGhETmpjMFJrTXpNakZmUjFKTUxWUkZUVkJNUVZSRlUxQkZRMU5EVEVrdFRVbERVazlUVDBaVU9qSkZVa1ZUVDFWU1EwVlRPakpHVkVWTlVFeEJWRVZUVUVWRFV6b3lSbFZZVkVWVFZEb3lSbFpGVWxOSlQwNVRPakpHT0RrdFJVRlRWRlZUIn0%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '646'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 18 Dec 2020 00:03:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27cli_test_nic_lb_address_pools000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2020-10-01&%24skiptoken=eyJuZXh0UGFydGl0aW9uS2V5IjoiMSE4IU5UbERNREktIiwibmV4dFJvd0tleSI6IjEhMTY0IVFURkNSa0UyTXpWR01rSkdOREpHTVRnMlFqVTRORGhETmpjMFJrTXpNakZmUjFKTUxWUkZUVkJNUVZSRlUxQkZRMU5EVEVrdFRVbERVazlUVDBaVU9qSkZVa1ZUVDFWU1EwVlRPakpHVkVWTlVFeEJWRVZUVUVWRFV6b3lSbFZZVkVWVFZEb3lSbFpGVWxOSlQwNVRPakpHT0RrdFJVRlRWRlZUIn0%3D
   response:
     body:
       string: '{"value":[]}'
@@ -559,7 +587,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:43 GMT
+      - Wed, 16 Dec 2020 07:38:57 GMT
       expires:
       - '-1'
       pragma:
@@ -574,18 +602,18 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
-      [{"apiVersion": "2020-05-01", "type": "Microsoft.Network/publicIPAddresses",
+      [{"apiVersion": "2020-07-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "PublicIPlb1", "location": "westus", "tags": {}, "dependsOn": [], "properties":
       {"publicIPAllocationMethod": "Dynamic"}, "sku": {"name": "Basic"}}, {"type":
       "Microsoft.Network/loadBalancers", "name": "lb1", "location": "westus", "tags":
-      {}, "apiVersion": "2020-05-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb1"],
+      {}, "apiVersion": "2020-07-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb1"],
       "properties": {"backendAddressPools": [{"name": "lb1bepool"}], "frontendIPConfigurations":
       [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"},
       "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Basic"}}], "outputs":
-      {"loadBalancer": {"type": "object", "value": "[reference(\''lb1\'')]"}}}, "parameters":
-      {}, "mode": "Incremental"}}'''
+      {"loadBalancer": {"type": "object", "value": "[reference(''lb1'')]"}}}, "parameters":
+      {}, "mode": "Incremental"}}'
     headers:
       Accept:
       - application/json
@@ -602,26 +630,26 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_9zHoo4FZNHhHT8nGglkoEILi0e5R4R8h","name":"lb_deploy_9zHoo4FZNHhHT8nGglkoEILi0e5R4R8h","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9318472915989068023","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-06-29T07:32:47.7751139Z","duration":"PT2.5759588S","correlationId":"b21c783b-df2f-4bdc-b30d-b25978d286dd","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_FHG2jbF3OlcIJbdZE4aDwnAumwU6cr3D","name":"lb_deploy_FHG2jbF3OlcIJbdZE4aDwnAumwU6cr3D","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18188510169371780373","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-16T07:39:01.9136146Z","duration":"PT2.3680433S","correlationId":"692909af-07b4-453d-9bab-02d8d2d83503","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_9zHoo4FZNHhHT8nGglkoEILi0e5R4R8h/operationStatuses/08586081909202784790?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_FHG2jbF3OlcIJbdZE4aDwnAumwU6cr3D/operationStatuses/08585935025459320504?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
-      - '1346'
+      - '1347'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:32:48 GMT
+      - Wed, 16 Dec 2020 07:39:02 GMT
       expires:
       - '-1'
       pragma:
@@ -631,7 +659,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1185'
     status:
       code: 201
       message: Created
@@ -649,10 +677,10 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586081909202784790?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585935025459320504?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -664,7 +692,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:19 GMT
+      - Wed, 16 Dec 2020 07:39:33 GMT
       expires:
       - '-1'
       pragma:
@@ -692,13 +720,13 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-resource/10.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - python/3.7.8 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_9zHoo4FZNHhHT8nGglkoEILi0e5R4R8h","name":"lb_deploy_9zHoo4FZNHhHT8nGglkoEILi0e5R4R8h","type":"Microsoft.Resources/deployments","properties":{"templateHash":"9318472915989068023","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-06-29T07:33:06.6135295Z","duration":"PT21.4143744S","correlationId":"b21c783b-df2f-4bdc-b30d-b25978d286dd","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"72418d35-e2e3-4666-92ae-e1850535369d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"74ca31f8-c69f-44e0-a083-acadfbf909b2\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"},"privateIPAddressVersion":"IPv4"}}],"backendAddressPools":[{"name":"lb1bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool","etag":"W/\"74ca31f8-c69f-44e0-a083-acadfbf909b2\"","properties":{"provisioningState":"Succeeded"},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Resources/deployments/lb_deploy_FHG2jbF3OlcIJbdZE4aDwnAumwU6cr3D","name":"lb_deploy_FHG2jbF3OlcIJbdZE4aDwnAumwU6cr3D","type":"Microsoft.Resources/deployments","properties":{"templateHash":"18188510169371780373","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-16T07:39:23.903263Z","duration":"PT24.3576917S","correlationId":"692909af-07b4-453d-9bab-02d8d2d83503","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb1"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb1"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"5c14b38c-b2e1-4025-a8ae-00be5cbc55d4","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"e0d77d79-4abc-42c9-a1d0-d1da79f21942\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"},"privateIPAddressVersion":"IPv4"}}],"backendAddressPools":[{"name":"lb1bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool","etag":"W/\"e0d77d79-4abc-42c9-a1d0-d1da79f21942\"","properties":{"provisioningState":"Succeeded"},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -707,7 +735,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:19 GMT
+      - Wed, 16 Dec 2020 07:39:34 GMT
       expires:
       - '-1'
       pragma:
@@ -735,46 +763,43 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
-        ,\r\n  \"etag\": \"W/\\\"74ca31f8-c69f-44e0-a083-acadfbf909b2\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"72418d35-e2e3-4666-92ae-e1850535369d\"\
-        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
-        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
-        ,\r\n        \"etag\": \"W/\\\"74ca31f8-c69f-44e0-a083-acadfbf909b2\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
-        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
-        \r\n          },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n  \
-        \      }\r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\
-        \n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
-        ,\r\n        \"etag\": \"W/\\\"74ca31f8-c69f-44e0-a083-acadfbf909b2\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
-        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
-        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
-        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
+        \ \"etag\": \"W/\\\"e0d77d79-4abc-42c9-a1d0-d1da79f21942\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"5c14b38c-b2e1-4025-a8ae-00be5cbc55d4\",\r\n    \"frontendIPConfigurations\":
+        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
+        \       \"etag\": \"W/\\\"e0d77d79-4abc-42c9-a1d0-d1da79f21942\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
+        \         },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n        }\r\n
+        \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
+        \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
+        \       \"etag\": \"W/\\\"e0d77d79-4abc-42c9-a1d0-d1da79f21942\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
+        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
+        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2112'
+      - '2137'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:21 GMT
+      - Wed, 16 Dec 2020 07:39:36 GMT
       etag:
-      - W/"74ca31f8-c69f-44e0-a083-acadfbf909b2"
+      - W/"e0d77d79-4abc-42c9-a1d0-d1da79f21942"
       expires:
       - '-1'
       pragma:
@@ -791,19 +816,19 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 63e37786-17bc-4b03-90be-52ea2681297e
+      - 55d73c86-27c5-40dc-895f-fa4180a39d75
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1",
-      "location": "westus", "tags": {}, "sku": {"name": "Basic"}, "properties": {"frontendIPConfigurations":
-      [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd",
-      "properties": {"privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
-      "IPv4", "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}},
-      "name": "LoadBalancerFrontEnd"}], "backendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1",
+      "location": "westus", "tags": {}, "sku": {"name": "Basic", "tier": "Regional"},
+      "properties": {"frontendIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd",
+      "name": "LoadBalancerFrontEnd", "properties": {"privateIPAllocationMethod":
+      "Dynamic", "privateIPAddressVersion": "IPv4", "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1"}}}],
+      "backendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool",
       "name": "lb1bepool"}, {"name": "pool1"}], "loadBalancingRules": [], "probes":
-      [], "inboundNatRules": [], "inboundNatPools": []}}'''
+      [], "inboundNatRules": [], "inboundNatPools": []}}'
     headers:
       Accept:
       - application/json
@@ -814,57 +839,53 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1285'
+      - '1305'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
-        ,\r\n  \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"72418d35-e2e3-4666-92ae-e1850535369d\"\
-        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
-        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
-        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
-        \r\n          },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n  \
-        \      }\r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\
-        \n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
-        \r\n      },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
-        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
-        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
-        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
+        \ \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"5c14b38c-b2e1-4025-a8ae-00be5cbc55d4\",\r\n    \"frontendIPConfigurations\":
+        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
+        \         },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n        }\r\n
+        \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
+        \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
+        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
+        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4371045b-9a64-46ef-89b4-880688b515f2?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0737fb77-e7c9-4a48-87a6-764deeefc03f?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
-      - '2605'
+      - '2630'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:21 GMT
+      - Wed, 16 Dec 2020 07:39:37 GMT
       expires:
       - '-1'
       pragma:
@@ -881,9 +902,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4d83b6db-52c3-4c1b-b835-3953670bf7b6
+      - ae9cdce9-3ab9-49fe-bb77-d5b19a2c1530
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1193'
+      - '1189'
     status:
       code: 200
       message: OK
@@ -891,7 +912,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -901,10 +922,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4371045b-9a64-46ef-89b4-880688b515f2?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/0737fb77-e7c9-4a48-87a6-764deeefc03f?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -916,7 +936,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:53 GMT
+      - Wed, 16 Dec 2020 07:40:09 GMT
       expires:
       - '-1'
       pragma:
@@ -933,7 +953,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5bc78cbd-1cca-45da-9aa8-e5853b087267
+      - 624b8f0b-37eb-4e8b-9818-054b6a1abe38
     status:
       code: 200
       message: OK
@@ -941,7 +961,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -951,49 +971,47 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\"\
-        ,\r\n  \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\",\r\n \
-        \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"72418d35-e2e3-4666-92ae-e1850535369d\"\
-        ,\r\n    \"frontendIPConfigurations\": [\r\n      {\r\n        \"name\": \"\
-        LoadBalancerFrontEnd\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"\
-        publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\
-        \r\n          },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n  \
-        \      }\r\n      }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\
-        \n        \"name\": \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
-        \r\n      },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\"\
-        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        ,\r\n        \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        \r\n        },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\
-        \r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\"\
-        : [],\r\n    \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n \
-        \ },\r\n  \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+      string: "{\r\n  \"name\": \"lb1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1\",\r\n
+        \ \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\",\r\n  \"tags\":
+        {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"5c14b38c-b2e1-4025-a8ae-00be5cbc55d4\",\r\n    \"frontendIPConfigurations\":
+        [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/frontendIPConfigurations/LoadBalancerFrontEnd\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/loadBalancers/frontendIPConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAllocationMethod\": \"Dynamic\",\r\n          \"publicIPAddress\":
+        {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb1\"\r\n
+        \         },\r\n          \"privateIPAddressVersion\": \"IPv4\"\r\n        }\r\n
+        \     }\r\n    ],\r\n    \"backendAddressPools\": [\r\n      {\r\n        \"name\":
+        \"lb1bepool\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/lb1bepool\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     },\r\n      {\r\n        \"name\": \"pool1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
+        \       \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n
+        \     }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n    \"probes\": [],\r\n
+        \   \"inboundNatRules\": [],\r\n    \"inboundNatPools\": []\r\n  },\r\n  \"sku\":
+        {\r\n    \"name\": \"Basic\",\r\n    \"tier\": \"Regional\"\r\n  }\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2605'
+      - '2630'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:53 GMT
+      - Wed, 16 Dec 2020 07:40:09 GMT
       etag:
-      - W/"f082fc50-992f-41cd-95cf-a55f51cde181"
+      - W/"da933f7c-4cd8-483f-af75-acc5058175dd"
       expires:
       - '-1'
       pragma:
@@ -1010,7 +1028,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c06b7ed2-6a77-49cd-978a-281f8847fa1f
+      - cc000d3e-59a6-40f7-b336-b0e318daa75e
     status:
       code: 200
       message: OK
@@ -1028,18 +1046,14 @@ interactions:
       ParameterSetName:
       - -g --lb-name -n
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"pool1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        ,\r\n  \"etag\": \"W/\\\"f082fc50-992f-41cd-95cf-a55f51cde181\\\"\",\r\n \
-        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n\
-        \  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
+      string: "{\r\n  \"name\": \"pool1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\",\r\n
+        \ \"etag\": \"W/\\\"da933f7c-4cd8-483f-af75-acc5058175dd\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"Microsoft.Network/loadBalancers/backendAddressPools\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1048,9 +1062,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:54 GMT
+      - Wed, 16 Dec 2020 07:40:10 GMT
       etag:
-      - W/"f082fc50-992f-41cd-95cf-a55f51cde181"
+      - W/"da933f7c-4cd8-483f-af75-acc5058175dd"
       expires:
       - '-1'
       pragma:
@@ -1067,7 +1081,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4f3f5f4e-b85a-484f-b309-1e01b1ff73a2
+      - 46b1739c-8d68-4b6d-a3fb-272774ab2e4f
     status:
       code: 200
       message: OK
@@ -1085,33 +1099,28 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"ea73f75a-4915-43be-b2af-9ca26626c036\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"f10bf2bc-0e28-4591-87c9-6b01a695c67b\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1120,9 +1129,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:54 GMT
+      - Wed, 16 Dec 2020 07:40:12 GMT
       etag:
-      - W/"ea73f75a-4915-43be-b2af-9ca26626c036"
+      - W/"f10bf2bc-0e28-4591-87c9-6b01a695c67b"
       expires:
       - '-1'
       pragma:
@@ -1139,18 +1148,19 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - c166bf05-c1eb-4db2-805f-5634ac1a87c1
+      - f5ce7568-4ff7-455c-b680-0b35b9a2d95a
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
       "location": "westus", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "properties": {"loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
       "privateIPAddress": "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
       "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}, "name": "ipconfig1"}], "dnsSettings": {"dnsServers": []},
-      "enableAcceleratedNetworking": false, "enableIPForwarding": false}}'''
+      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false}}'
     headers:
       Accept:
       - application/json
@@ -1163,42 +1173,37 @@ interactions:
       Content-Length:
       - '1251'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b6b1e73a-258c-48bc-8800-acca1f18889c?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/262af3cb-1431-490e-8903-12cf9fc18b34?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1206,7 +1211,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:33:54 GMT
+      - Wed, 16 Dec 2020 07:40:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1223,9 +1228,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - feb6998b-36f2-4b2d-983a-7da2835763e1
+      - a3dae44a-f499-45fc-924c-fbdf4e082165
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1189'
+      - '1188'
     status:
       code: 200
       message: OK
@@ -1233,7 +1238,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1243,10 +1248,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b6b1e73a-258c-48bc-8800-acca1f18889c?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/262af3cb-1431-490e-8903-12cf9fc18b34?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1258,7 +1262,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:25 GMT
+      - Wed, 16 Dec 2020 07:40:44 GMT
       expires:
       - '-1'
       pragma:
@@ -1275,7 +1279,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 3d46814b-ad4e-4054-bf41-7484b18c303c
+      - a86d3089-10d4-4442-a8e1-617965a5bda7
     status:
       code: 200
       message: OK
@@ -1283,7 +1287,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1293,33 +1297,30 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1328,9 +1329,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:25 GMT
+      - Wed, 16 Dec 2020 07:40:44 GMT
       etag:
-      - W/"bef13eb1-8363-47b6-8019-b294f4f6f30c"
+      - W/"6e413c05-2355-429f-b86f-fffa965b9adb"
       expires:
       - '-1'
       pragma:
@@ -1347,7 +1348,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 13d43312-5b90-4f37-a99e-0aa95a795a52
+      - a1353df5-d3b4-4ec8-ad61-8fdfe0ae513e
     status:
       code: 200
       message: OK
@@ -1365,35 +1366,30 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"bef13eb1-8363-47b6-8019-b294f4f6f30c\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"6e413c05-2355-429f-b86f-fffa965b9adb\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1402,9 +1398,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:26 GMT
+      - Wed, 16 Dec 2020 07:40:46 GMT
       etag:
-      - W/"bef13eb1-8363-47b6-8019-b294f4f6f30c"
+      - W/"6e413c05-2355-429f-b86f-fffa965b9adb"
       expires:
       - '-1'
       pragma:
@@ -1421,18 +1417,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5fc1d5db-6333-41e6-afff-be7756d35d36
+      - 4da64640-a359-4515-b3a6-0e34f52e82e9
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
       "location": "westus", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress": "10.0.0.4",
-      "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion": "IPv4", "subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}, "name": "ipconfig1"}], "dnsSettings": {"dnsServers": []},
-      "enableAcceleratedNetworking": false, "enableIPForwarding": false}}'''
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress":
+      "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
+      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
+      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false}}'
     headers:
       Accept:
       - application/json
@@ -1445,40 +1441,35 @@ interactions:
       Content-Length:
       - '1027'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/061f661c-d404-4a28-ab5a-5b73b0bf441b?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8eaa843f-0e28-46c6-aa61-4d7653229c05?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1486,7 +1477,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:27 GMT
+      - Wed, 16 Dec 2020 07:40:47 GMT
       expires:
       - '-1'
       pragma:
@@ -1503,9 +1494,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5f8b36df-e939-47f5-a013-e4e2bbf71506
+      - 94dd17e1-dbb9-4627-aec1-ccfe164ba2d9
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1195'
+      - '1187'
     status:
       code: 200
       message: OK
@@ -1513,7 +1504,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1523,10 +1514,9 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/061f661c-d404-4a28-ab5a-5b73b0bf441b?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/8eaa843f-0e28-46c6-aa61-4d7653229c05?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1538,7 +1528,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:57 GMT
+      - Wed, 16 Dec 2020 07:41:17 GMT
       expires:
       - '-1'
       pragma:
@@ -1555,7 +1545,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0f4921a2-6e9b-423e-b707-8a6729bf4e6d
+      - 81dd670e-98fd-4072-9b81-29dd8f6cb291
     status:
       code: 200
       message: OK
@@ -1563,7 +1553,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1573,31 +1563,28 @@ interactions:
       ParameterSetName:
       - -g --lb-name --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1606,9 +1593,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:58 GMT
+      - Wed, 16 Dec 2020 07:41:18 GMT
       etag:
-      - W/"632f7586-0560-4415-93a8-c2c6a7e5c7f5"
+      - W/"93c4e08b-c4ac-4f3e-af3c-897a2ead5804"
       expires:
       - '-1'
       pragma:
@@ -1625,7 +1612,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 0a8fcc25-3181-4bdb-a486-295071f58f5d
+      - 4608d2c5-58a6-4a05-a942-05bef9b17fb8
     status:
       code: 200
       message: OK
@@ -1643,33 +1630,28 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"632f7586-0560-4415-93a8-c2c6a7e5c7f5\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"93c4e08b-c4ac-4f3e-af3c-897a2ead5804\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1678,9 +1660,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:58 GMT
+      - Wed, 16 Dec 2020 07:41:19 GMT
       etag:
-      - W/"632f7586-0560-4415-93a8-c2c6a7e5c7f5"
+      - W/"93c4e08b-c4ac-4f3e-af3c-897a2ead5804"
       expires:
       - '-1'
       pragma:
@@ -1697,18 +1679,19 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 96a4282e-710e-4f4e-8664-7644b6b14cab
+      - 3b80f285-6e52-44e2-8dde-7aa7581da702
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
       "location": "westus", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "properties": {"loadBalancerBackendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1"}],
       "privateIPAddress": "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
       "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}, "name": "ipconfig1"}], "dnsSettings": {"dnsServers": []},
-      "enableAcceleratedNetworking": false, "enableIPForwarding": false}}'''
+      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false}}'
     headers:
       Accept:
       - application/json
@@ -1721,42 +1704,37 @@ interactions:
       Content-Length:
       - '1251'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fd8ec1dc-dcae-4be1-bfda-5fa9a8208e9e?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3485c87f-ec8e-4a34-a4b8-ee55b029a211?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1764,7 +1742,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:34:59 GMT
+      - Wed, 16 Dec 2020 07:41:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1781,9 +1759,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 4fbb8f6c-4bbd-4ac4-9e42-94669a8008c0
+      - dd273275-6c7b-456b-8443-78c00997af14
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1187'
     status:
       code: 200
       message: OK
@@ -1791,7 +1769,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1801,10 +1779,9 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fd8ec1dc-dcae-4be1-bfda-5fa9a8208e9e?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3485c87f-ec8e-4a34-a4b8-ee55b029a211?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -1816,7 +1793,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:35:31 GMT
+      - Wed, 16 Dec 2020 07:41:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1833,7 +1810,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 2ebf6df0-3658-419e-bf2b-6be8001f9fda
+      - a8fb121a-5405-42f8-8c0b-2e8403ed0760
     status:
       code: 200
       message: OK
@@ -1841,7 +1818,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -1851,33 +1828,30 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1886,9 +1860,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:35:31 GMT
+      - Wed, 16 Dec 2020 07:41:51 GMT
       etag:
-      - W/"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee"
+      - W/"c68086fc-9887-47a9-ba2d-762ee5668213"
       expires:
       - '-1'
       pragma:
@@ -1905,7 +1879,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 92a24054-7086-4dd5-9104-648a9fe2d7d1
+      - ec2086c6-d962-4b41-be46-52659c9ad2b7
     status:
       code: 200
       message: OK
@@ -1923,35 +1897,30 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n      \
-        \      {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\
-        \r\n            }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n   \
-        \ \"dnsSettings\": {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\"\
-        : [],\r\n      \"internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"c68086fc-9887-47a9-ba2d-762ee5668213\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\",\r\n          \"loadBalancerBackendAddressPools\": [\r\n            {\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/loadBalancers/lb1/backendAddressPools/pool1\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\":
+        {\r\n      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1960,9 +1929,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:35:31 GMT
+      - Wed, 16 Dec 2020 07:41:54 GMT
       etag:
-      - W/"6bf7f13f-2ea9-4348-81cd-a38a576ef8ee"
+      - W/"c68086fc-9887-47a9-ba2d-762ee5668213"
       expires:
       - '-1'
       pragma:
@@ -1979,18 +1948,18 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e3c874c2-1e1f-4b9e-acc9-6ab883364994
+      - 9c9832ed-aa84-4199-b59e-7fc9543da4c1
     status:
       code: 200
       message: OK
 - request:
-    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1",
       "location": "westus", "properties": {"ipConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1",
-      "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress": "10.0.0.4",
-      "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion": "IPv4", "subnet":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "primary": true}, "name": "ipconfig1"}], "dnsSettings": {"dnsServers": []},
-      "enableAcceleratedNetworking": false, "enableIPForwarding": false}}'''
+      "name": "ipconfig1", "properties": {"loadBalancerBackendAddressPools": [], "privateIPAddress":
+      "10.0.0.4", "privateIPAllocationMethod": "Dynamic", "privateIPAddressVersion":
+      "IPv4", "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
+      "primary": true}}], "dnsSettings": {"dnsServers": []}, "enableAcceleratedNetworking":
+      false, "enableIPForwarding": false}}'
     headers:
       Accept:
       - application/json
@@ -2003,40 +1972,35 @@ interactions:
       Content-Length:
       - '1027'
       Content-Type:
-      - application/json; charset=utf-8
+      - application/json
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
-      accept-language:
-      - en-US
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"76f12300-fc45-4453-a7b1-cff70b222e82\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"76f12300-fc45-4453-a7b1-cff70b222e82\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"f777d880-4c49-483a-8eba-a7964ed4ca1c\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"f777d880-4c49-483a-8eba-a7964ed4ca1c\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/98715d6f-f7ae-4121-a715-afeb9d7dccfa?api-version=2020-05-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6978bf0e-b31e-4f83-8e5a-10470eb23f62?api-version=2020-07-01
       cache-control:
       - no-cache
       content-length:
@@ -2044,7 +2008,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:35:32 GMT
+      - Wed, 16 Dec 2020 07:41:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2061,9 +2025,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - db3339b1-9c01-4854-95c5-8757b362e62e
+      - 5fb47042-1ae0-4a11-8320-cc0aa9f25dd0
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1186'
     status:
       code: 200
       message: OK
@@ -2071,7 +2035,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2081,10 +2045,9 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/98715d6f-f7ae-4121-a715-afeb9d7dccfa?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6978bf0e-b31e-4f83-8e5a-10470eb23f62?api-version=2020-07-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -2096,7 +2059,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:36:03 GMT
+      - Wed, 16 Dec 2020 07:42:25 GMT
       expires:
       - '-1'
       pragma:
@@ -2113,7 +2076,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 1e8a0588-2f93-4175-9ab9-a5fe928a0a23
+      - e6b2d71c-e4ec-4979-b0c8-04105d87dd31
     status:
       code: 200
       message: OK
@@ -2121,7 +2084,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate
       CommandName:
@@ -2131,31 +2094,28 @@ interactions:
       ParameterSetName:
       - -g --nic-name --ip-config-name --address-pool
       User-Agent:
-      - python/3.7.4 (Linux-4.15.0-99-generic-x86_64-with-debian-buster-sid) msrest/0.6.17
-        msrest_azure/0.6.3 azure-mgmt-network/11.0.0 Azure-SDK-For-Python AZURECLI/2.8.0
+      - AZURECLI/2.16.0 azsdk-python-azure-mgmt-network/17.0.0 Python/3.7.8 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1?api-version=2020-07-01
   response:
     body:
-      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\"\
-        ,\r\n  \"etag\": \"W/\\\"76f12300-fc45-4453-a7b1-cff70b222e82\\\"\",\r\n \
-        \ \"location\": \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\"\
-        : \"Succeeded\",\r\n    \"resourceGuid\": \"c44f5ea5-deba-4f2b-a5b1-b28e2d1b8e64\"\
-        ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfig1\"\
-        ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\"\
-        ,\r\n        \"etag\": \"W/\\\"76f12300-fc45-4453-a7b1-cff70b222e82\\\"\"\
-        ,\r\n        \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\"\
-        ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
-        ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
-        : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
-        : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
-        \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"ugag1mxtamgupilo35gk23epib.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"enableAcceleratedNetworking\": false,\r\n    \"enableIPForwarding\"\
-        : false,\r\n    \"hostedWorkloads\": [],\r\n    \"tapConfigurations\": [],\r\
-        \n    \"nicType\": \"Standard\"\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\
-        \r\n}"
+      string: "{\r\n  \"name\": \"nic1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1\",\r\n
+        \ \"etag\": \"W/\\\"f777d880-4c49-483a-8eba-a7964ed4ca1c\\\"\",\r\n  \"location\":
+        \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"07914c1e-7973-46eb-88a7-da251eeedfba\",\r\n    \"ipConfigurations\":
+        [\r\n      {\r\n        \"name\": \"ipconfig1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/networkInterfaces/nic1/ipConfigurations/ipconfig1\",\r\n
+        \       \"etag\": \"W/\\\"f777d880-4c49-483a-8eba-a7964ed4ca1c\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_nic_lb_address_pools000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"2s4kyioywbzexmhptjggwocptc.dx.internal.cloudapp.net\"\r\n    },\r\n    \"enableAcceleratedNetworking\":
+        false,\r\n    \"enableIPForwarding\": false,\r\n    \"hostedWorkloads\": [],\r\n
+        \   \"tapConfigurations\": [],\r\n    \"nicType\": \"Standard\"\r\n  },\r\n
+        \ \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2164,9 +2124,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 29 Jun 2020 07:36:04 GMT
+      - Wed, 16 Dec 2020 07:42:26 GMT
       etag:
-      - W/"76f12300-fc45-4453-a7b1-cff70b222e82"
+      - W/"f777d880-4c49-483a-8eba-a7964ed4ca1c"
       expires:
       - '-1'
       pragma:
@@ -2183,7 +2143,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b08fd5ba-bf01-4c98-9aa8-b611263981e8
+      - 50e7ac6c-8d7e-4cf9-b238-8ed2dc404673
     status:
       code: 200
       message: OK

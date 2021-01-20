@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
+
+from knack.util import CLIError
 
 
 def process_autoscale_create_namespace(cmd, namespace):
@@ -136,6 +138,68 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
             del namespace.resource_group_name
 
     return _validator
+
+
+def validate_metrics_alert_dimension(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import dim_op_conversion
+    for keyword, value in dim_op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+
+
+def validate_metrics_alert_condition(namespace):
+    from azure.cli.command_modules.monitor.grammar.metric_alert.MetricAlertConditionValidator import op_conversion, \
+        agg_conversion, sens_conversion
+    for keyword, value in agg_conversion.items():
+        if namespace.aggregation == value:
+            namespace.aggregation = keyword
+            break
+    for keyword, value in op_conversion.items():
+        if namespace.operator == value:
+            namespace.operator = keyword
+            break
+
+    if namespace.condition_type == 'static':
+        if namespace.threshold is None:
+            raise RequiredArgumentMissingError('Parameter --threshold is required for static threshold.')
+        if namespace.operator not in ('=', '!=', '>', '>=', '<', '<='):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for static threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+    elif namespace.condition_type == 'dynamic':
+        if namespace.operator not in ('>', '<', '><'):
+            raise InvalidArgumentValueError('Parameter --operator {} is invalid for dynamic threshold.'.format(
+                op_conversion[namespace.operator]
+            ))
+        if namespace.alert_sensitivity is None:
+            raise RequiredArgumentMissingError('Parameter --sensitivity is required for dynamic threshold.')
+        for keyword, value in sens_conversion.items():
+            if namespace.alert_sensitivity == value:
+                namespace.alert_sensitivity = keyword
+                break
+
+        if namespace.number_of_evaluation_periods is None:
+            setattr(namespace, 'number_of_evaluation_periods', 4)
+
+        if namespace.number_of_evaluation_periods < 1 or namespace.number_of_evaluation_periods > 6:
+            raise InvalidArgumentValueError('Parameter --num-periods {} should in range 1-6.'.format(
+                namespace.number_of_evaluation_periods
+            ))
+
+        if namespace.min_failing_periods_to_alert is None:
+            setattr(namespace, 'min_failing_periods_to_alert', min(4, namespace.number_of_evaluation_periods))
+
+        if namespace.min_failing_periods_to_alert < 1 or namespace.min_failing_periods_to_alert > 6:
+            raise InvalidArgumentValueError('Parameter --num-violations {} should in range 1-6.'.format(
+                namespace.min_failing_periods_to_alert
+            ))
+
+        if namespace.min_failing_periods_to_alert > namespace.number_of_evaluation_periods:
+            raise InvalidArgumentValueError(
+                'Parameter --num-violations {} should be less than or equal to parameter --num-periods {}.'.format(
+                    namespace.min_failing_periods_to_alert, namespace.number_of_evaluation_periods))
+    else:
+        raise NotImplementedError()
 
 
 def validate_diagnostic_settings(cmd, namespace):
@@ -354,7 +418,8 @@ def process_workspace_data_export_destination(namespace):
     if namespace.destination:
         from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
         if not is_valid_resource_id(namespace.destination):
-            raise CLIError('usage error: --destination should be a storage account or an event hub resource id.')
+            raise CLIError('usage error: --destination should be a storage account, '
+                           'an evenhug namespace or an event hub resource id.')
         result = parse_resource_id(namespace.destination)
         if result['namespace'].lower() == 'microsoft.storage' and result['type'].lower() == 'storageaccounts':
             namespace.data_export_type = 'StorageAccount'
@@ -370,4 +435,5 @@ def process_workspace_data_export_destination(namespace):
             if 'child_type_1' in result and result['child_type_1'].lower() == 'eventhubs':
                 namespace.event_hub_name = result['child_name_1']
         else:
-            raise CLIError('usage error: --destination should be a storage account or an event hub resource id.')
+            raise CLIError('usage error: --destination should be a storage account, '
+                           'an evenhug namespace or an event hub resource id.')

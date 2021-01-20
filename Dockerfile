@@ -37,6 +37,7 @@ LABEL maintainer="Microsoft" \
 RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
  && apk add --no-cache libintl icu-libs libc6-compat \
+ && apk add --no-cache bash-completion \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"
@@ -50,7 +51,6 @@ COPY . /azure-cli
 
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
-# 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
 RUN ./scripts/install_full.sh \
  && cat /azure-cli/az.completion > ~/.bashrc \
  && runDeps="$( \

@@ -53,7 +53,7 @@ The storage fields can be stored in your config file or as environment variables
 
 Once your extension is published, you can view it via `az extension list-avaliable -o table`.
 
-However, if you want your extension to be listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest), you have to wait until the next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We update that document every time Azure CLI is released. Alternatively, you could file a PR to update it manually if it's urgent.
+However, if you want your extension to be listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/cli/azure/azure-cli-extensions-list), you have to wait until the next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We update that document every time Azure CLI is released. Alternatively, you could file a PR to update it manually if it's urgent.
 
 ## Uncommon Flows
 
@@ -69,7 +69,7 @@ The `.whl` is the artifact that can be installed with the `az extension add` com
 
 ### Trying out your extension
 
-Normally, you will have you extension installed in dev mode and your code changes will be immediately testable. However, if you want to test a generated WHL file specfically, follow these directions.
+Normally, you will have you extension installed in dev mode and your code changes will be immediately testable. However, if you want to test a generated WHL file specifically, follow these directions.
 
 **(Step 1)** Build the extension to generate a WHL file.
 
@@ -120,7 +120,7 @@ See [Extension Metadata](metadata.md) for more information.
 ### Limit dependencies in setup.py
 
 - Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-core/setup.py).
-- Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core CLI functionality.
+- Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core CLI functionality. You can use [autorest](https://github.com/azure/autorest) to generate your SDK into a package that isn't under the `azure` directory.
 
 ### How do I know I'm using my dev extension(s)?
 

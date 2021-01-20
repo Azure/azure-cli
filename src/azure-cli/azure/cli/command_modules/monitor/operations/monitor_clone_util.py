@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.transform import _parse_id
+from msrestazure.tools import parse_resource_id
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import parse_resource_id
-from azure.cli.core.commands.transform import _parse_id
 
 from .._client_factory import cf_monitor
 from ..util import gen_guid

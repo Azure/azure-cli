@@ -89,21 +89,29 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 
 ### Common scenarios and use Azure CLI effectively
 
-Please check [Tips for using Azure CLI effectively](doc/use_cli_effectively.md). It describes some common scenarios:
+Please check [Tips for using Azure CLI effectively](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively). It describes some common scenarios:
 
-- [Output formatting (json, table, or tsv)](doc/use_cli_effectively.md#output-formatting-json-table-or-tsv)
-- [Pass values from one command to another](doc/use_cli_effectively.md#pass-values-from-one-command-to-another)
-- [Async operations](doc/use_cli_effectively.md#async-operations)
-- [Generic update arguments](doc/use_cli_effectively.md#generic-update-arguments)
-- [Generic resource commands - `az resource`](doc/use_cli_effectively.md#generic-resource-commands---az-resource)
-- [REST API command - `az rest`](doc/use_cli_effectively.md#rest-api-command---az-rest)
-- [Quoting issues](doc/use_cli_effectively.md#quoting-issues)
-- [Work behind a proxy](doc/use_cli_effectively.md#work-behind-a-proxy)
-- [Concurrent builds](doc/use_cli_effectively.md#concurrent-builds)
+- [Output formatting (json, table, or tsv)](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#output-formatting-json-table-or-tsv)
+- [Pass values from one command to another](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#pass-values-from-one-command-to-another)
+- [Async operations](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#async-operations)
+- [Generic update arguments](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-update-arguments)
+- [Generic resource commands - `az resource`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#generic-resource-commands---az-resource)
+- [REST API command - `az rest`](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#rest-api-command---az-rest)
+- [Quoting issues](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#quoting-issues)
+- [Work behind a proxy](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#work-behind-a-proxy)
+- [Concurrent builds](https://docs.microsoft.com/en-us/cli/azure/use-cli-effectively#concurrent-builds)
 
 ### More samples and snippets
 
 For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
+
+## Data Collection
+
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft's privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+### Telemetry Configuration
+
+Telemetry collection is on by default. To opt out, please run `az config set core.collect_telemetry=no` to turn it off.
 
 ## Reporting issues and feedback
 
@@ -120,12 +128,6 @@ See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for avai
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
-```
-
-For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
-For example:
-```bash
-$ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
 ```
 
 ### Edge builds
@@ -198,4 +200,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 If you would like to become an active contributor to this project please
-follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.io/guidelines.html).
+follow the instructions provided in [Microsoft Open Source Guidelines](https://opensource.microsoft.com/collaborate).

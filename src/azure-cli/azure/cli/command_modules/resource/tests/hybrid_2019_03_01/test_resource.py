@@ -88,8 +88,10 @@ class ResourceScenarioTest(ScenarioTest):
                  checks=self.check("length([?location == '{loc}']) == length(@)", True))
         self.cmd('resource list --resource-type {rt}',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --name {vnet}',
-                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}', checks=[
+            self.check("length([?name=='{vnet}'])", vnet_count),
+            self.check('[0].provisioningState', 'Succeeded')
+        ])
         self.cmd('resource list --tag cli-test',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
         self.cmd('resource list --tag cli-test=test',
@@ -243,7 +245,7 @@ class TagScenarioTest(ScenarioTest):
         tag_values = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
         for tag_value in tag_values:
             self.cmd('tag remove-value --value {} -n {{tag}}'.format(tag_value))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
 
         self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
         self.cmd('tag create -n {tag}', checks=[
@@ -261,7 +263,7 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag remove-value -n {tag} --value test2')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.check('[].values[].tagValue', []))
-        self.cmd('tag delete -n {tag}')
+        self.cmd('tag delete -n {tag} -y')
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 

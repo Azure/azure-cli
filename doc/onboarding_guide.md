@@ -1,7 +1,9 @@
 Onboarding Best Practices
 =========================
 
-Reach out to `azpycli@microsoft.com` to get the process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
+As a prerequisite, please contact Carl Shipley first for the [PLR](http://aka.ms/plrcriteria) (Product Launch Readiness) process.
+
+Then reach out to `azpycli@microsoft.com` to get the CLI onboarding process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
 
 ## Extension vs. Module
 
@@ -14,7 +16,7 @@ One of the key decisions you will need to make is whether to create your command
 | Release separate from the CLI release schedule | Requires dedicated installation (az extension add …) |
 | Higher velocity fixes possible                 | Can be broken by changes to the azure-cli-core       |
 | Experimental UX is permissible                 |                                                      |
-| Leverage CLI code generator to genreate code   |                                                      |
+| Leverage CLI code generator to generate code   |                                                      |
 
 #### CLI Modules
 

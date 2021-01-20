@@ -43,14 +43,12 @@ def transform_job(result):
     columns.append(('Operation', result['properties']['operation']))
     columns.append(('Status', result['properties']['status']))
     columns.append(('Item Name', result['properties']['entityFriendlyName']))
+    columns.append(('Backup Management Type', result['properties']['backupManagementType']))
     columns.append(('Start Time UTC', result['properties']['startTime']))
-
-    if result['properties']['backupManagementType'] == 'AzureIaasVM':
-        columns.append(('Duration', result['properties']['duration']))
-    elif result['properties']['backupManagementType'] == 'AzureStorage':
-        columns.append(('Duration', result['properties']['additionalProperties']['duration']))
-    elif result['properties']['backupManagementType'] == 'AzureWorkload':
-        columns.append(('Duration', result['properties']['duration']))
+    duration = "0:00:00.000000"
+    if result['properties']['duration'] is not None:
+        duration = result['properties']['duration']
+    columns.append(('Duration', duration))
 
     return OrderedDict(columns)
 

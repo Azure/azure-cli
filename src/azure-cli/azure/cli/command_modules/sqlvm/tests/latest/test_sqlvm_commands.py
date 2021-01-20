@@ -175,6 +175,42 @@ class SqlVmScenarioTest(ScenarioTest):
                      JMESPathCheck('sqlManagement', 'Full')
                  ]).get_output_in_json()
 
+        # test expand parameter: * - all settings exist
+        expand_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, '*')
+                              ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_all
+        assert 'autoPatchingSettings' in expand_all
+        assert 'keyVaultCredentialSettings' in expand_all
+        assert 'serverConfigurationsManagementSettings' in expand_all
+
+        # test expand parameter: single value - only specified setting exists
+        expand_one = self.cmd('sql vm show -n {} -g {} --expand {}'
+                              .format(sqlvm, resource_group, 'AutoBackupSettings')
+                              ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_one
+        assert 'autoPatchingSettings' not in expand_one
+        assert 'keyVaultCredentialSettings' not in expand_one
+        assert 'serverConfigurationsManagementSettings' not in expand_one
+
+        # test expand parameter: comma-separated values - all specificed settings exist
+        expand_comma = self.cmd('sql vm show -n {} -g {} --expand {}'
+                                .format(sqlvm, resource_group, 'AutoPatchingSettings AutoBackupSettings')
+                                ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_comma
+        assert 'autoPatchingSettings' in expand_comma
+        assert 'keyVaultCredentialSettings' not in expand_comma
+        assert 'serverConfigurationsManagementSettings' not in expand_comma
+
+        # test expand parameter: comma-separated values with * - all settings exist
+        expand_comma_all = self.cmd('sql vm show -n {} -g {} --expand {}'
+                                    .format(sqlvm, resource_group, 'AutoPatchingSettings * AutoBackupSettings')
+                                    ).get_output_in_json()
+        assert 'autoBackupSettings' in expand_comma_all
+        assert 'autoPatchingSettings' in expand_comma_all
+        assert 'keyVaultCredentialSettings' in expand_comma_all
+        assert 'serverConfigurationsManagementSettings' in expand_comma_all
+
         # test license change
         self.cmd('sql vm update -n {} -g {} --license-type {}'
                  .format(sqlvm, resource_group, 'AHUB'),
