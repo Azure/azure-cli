@@ -18,6 +18,8 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
+from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
+
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
@@ -26,7 +28,7 @@ from azure.cli.command_modules.keyvault._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_or_hsm, validate_key_id, validate_sas_definition_id, validate_storage_account_id,
     validate_storage_disabled_attribute, validate_deleted_vault_or_hsm_name, validate_encryption, validate_decryption,
-    validate_vault_name_and_hsm_name, set_vault_base_url,
+    validate_vault_name_and_hsm_name, set_vault_base_url, process_release_policy,
     process_hsm_name, KeyEncryptionDataType)
 
 # CUSTOM CHOICE LISTS
@@ -37,13 +39,16 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
+    (JsonWebKeyOperation, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
      SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
      JsonWebKeyEncryptionAlgorithm) = self.get_models(
-         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
+         'JsonWebKeyOperation', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
+
+    resource_type = ResourceType.DATA_KEYVAULT if is_azure_stack_profile(self) else ResourceType.DATA_PRIVATE_KEYVAULT
+    KeyAttributes = self.get_models('KeyAttributes', resource_type=resource_type)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -70,6 +75,7 @@ def load_arguments(self, _):
     class CLIKeyTypeForBYOKImport(str, Enum):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
+        oct = 'oct'
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -339,6 +345,15 @@ def load_arguments(self, _):
                            type=datetime_type)
                 c.argument('not_before', default=None, type=datetime_type,
                            help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').')
+                c.argument('exportable', arg_type=get_three_state_flag(),
+                           is_preview=True,
+                           help='Set "exportable" field in KeyAttributes.')
+
+            c.argument('release_policy', options_list=['--policy'],
+                       help='The policy rules under which the key can be exported encoded with JSON. '
+                            'Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=get_json_object, is_preview=True,
+                       validator=process_release_policy)
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
@@ -356,6 +371,7 @@ def load_arguments(self, _):
         c.argument('pem_password', help='Password of PEM file.')
         c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
         c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
+        c.argument('byok_kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), help='The key type of BYOK file or string.')
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
@@ -499,7 +515,7 @@ def load_arguments(self, _):
                 c.ignore('cls')
 
     with self.argument_context('keyvault backup start', arg_group='Storage Id') as c:
-        c.argument('storage_resource_uri', required=False,
+        c.argument('storage_resource_uri', options_list=['--storage-resource-uri', '-u'], required=False,
                    help='Azure Blob storage container Uri. If specified all other \'Storage Id\' arguments '
                         'should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')
@@ -515,7 +531,7 @@ def load_arguments(self, _):
                    help='Name of the blob container which contains the backup')
 
     with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
-        c.extra('storage_resource_uri', required=False,
+        c.extra('storage_resource_uri', options_list=['--storage-resource-uri', '-u'], required=False,
                 help='Azure Blob storage container Uri. If specified all other \'Storage Id\' '
                      'arguments should be omitted')
         c.extra('storage_account_name', help='Name of Azure Storage Account.')

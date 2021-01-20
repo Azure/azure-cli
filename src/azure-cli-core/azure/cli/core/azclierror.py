@@ -233,6 +233,7 @@ class UnclassifiedUserFault(UserFault):
     Avoid using this class unless the error can not be classified into
     the UserFault related specific error types.
     """
+
     def print_error(self):
         from azure.cli.core.azlogging import CommandLoggerContext
         with CommandLoggerContext(logger):

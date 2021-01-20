@@ -23,6 +23,7 @@ from azure.cli.command_modules.keyvault.security_domain.shared_secret import Sha
 from azure.cli.command_modules.keyvault.security_domain.sp800_108 import KDF
 from azure.cli.command_modules.keyvault.security_domain.utils import Utils
 from azure.cli.core import telemetry
+
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError,\
     MutuallyExclusiveArgumentError
 from azure.cli.core.profiles import ResourceType, AZURE_API_PROFILES, SDKProfile
@@ -211,7 +212,7 @@ def delete_vault_or_hsm(cmd, client, resource_group_name=None, vault_name=None, 
         return client.delete(resource_group_name=resource_group_name, vault_name=vault_name)
 
     assert hsm_name
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return sdk_no_wait(
         no_wait, hsm_client.begin_delete,
         resource_group_name=resource_group_name,
@@ -252,7 +253,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         return list_vault(client, resource_group_name)
 
     if resource_type is None:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
         try:
             resources.extend(list_vault(client, resource_group_name))
@@ -263,7 +264,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         return resources
 
     if resource_type == 'hsm':
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         return list_hsm(hsm_client, resource_group_name)
 
     if resource_type == 'vault':
@@ -375,7 +376,7 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
                              no_wait=no_wait)
 
     if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         return recover_hsm(cmd=cmd,
                            client=hsm_client,
                            resource_group_name=resource_group_name,
@@ -387,9 +388,9 @@ def recover_vault_or_hsm(cmd, client, resource_group_name=None, location=None, v
 def recover_hsm(cmd, client, hsm_name, resource_group_name, location, no_wait=False):
     from azure.cli.core._profile import Profile
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
-    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    CreateMode = cmd.get_models('CreateMode', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
 
     # tenantId and sku shouldn't be required
     profile = Profile(cli_ctx=cmd.cli_ctx)
@@ -490,7 +491,7 @@ def get_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name
     if is_azure_stack_profile(cmd) or vault_name:
         return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
 
-    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
     return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
@@ -537,30 +538,20 @@ def create_vault_or_hsm(cmd, client,  # pylint: disable=too-many-locals
                             no_wait=no_wait)
 
     if hsm_name:
-        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-
-        from msrest.exceptions import ValidationError
-        try:
-            return create_hsm(cmd=cmd,
-                              client=hsm_client,
-                              resource_group_name=resource_group_name,
-                              hsm_name=hsm_name,
-                              administrators=administrators,
-                              location=location,
-                              sku=sku,
-                              enable_purge_protection=enable_purge_protection,
-                              retention_days=retention_days,
-                              bypass=bypass,
-                              default_action=default_action,
-                              tags=tags,
-                              no_wait=no_wait)
-        except ValidationError as ex:
-            error_msg = str(ex)
-            if 'Parameter \'name\' must conform to the following pattern' in error_msg:
-                error_msg = 'Managed HSM name must be between 3-24 alphanumeric characters. ' \
-                            'The name must begin with a letter, end with a letter or digit, ' \
-                            'and not contain hyphens.'
-            raise CLIError(error_msg)
+        hsm_client = get_client_factory(ResourceType.MGMT_PRIVATE_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return create_hsm(cmd=cmd,
+                          client=hsm_client,
+                          resource_group_name=resource_group_name,
+                          hsm_name=hsm_name,
+                          administrators=administrators,
+                          location=location,
+                          sku=sku,
+                          enable_purge_protection=enable_purge_protection,
+                          retention_days=retention_days,
+                          bypass=bypass,
+                          default_action=default_action,
+                          tags=tags,
+                          no_wait=no_wait)
 
 
 def create_hsm(cmd, client,
@@ -582,9 +573,9 @@ def create_hsm(cmd, client,
     if not sku:
         sku = 'Standard_B1'
 
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_KEYVAULT)
-    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmProperties = cmd.get_models('ManagedHsmProperties', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
+    ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
@@ -766,7 +757,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
-    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_KEYVAULT)
+    ManagedHsm = cmd.get_models('ManagedHsm', resource_type=ResourceType.MGMT_PRIVATE_KEYVAULT)
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        name=name,
@@ -1067,9 +1058,26 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 def create_key(cmd, client, key_name=None, vault_base_url=None,
                hsm_name=None, protection=None, identifier=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+               not_before=None, tags=None, kty=None, curve=None, release_policy=None, exportable=None):
+    if is_azure_stack_profile(cmd):
+        resource_type = ResourceType.DATA_KEYVAULT
+    else:
+        resource_type = ResourceType.DATA_PRIVATE_KEYVAULT
+
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=resource_type)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    if not is_azure_stack_profile(cmd) and exportable is not None:
+        key_attrs.exportable = exportable
+
+    if is_azure_stack_profile(cmd):
+        return client.create_key(vault_base_url=vault_base_url,
+                                 key_name=key_name,
+                                 kty=kty,
+                                 key_size=key_size,
+                                 key_ops=key_ops,
+                                 key_attributes=key_attrs,
+                                 tags=tags,
+                                 curve=curve)
 
     return client.create_key(vault_base_url=vault_base_url,
                              key_name=key_name,
@@ -1078,7 +1086,8 @@ def create_key(cmd, client, key_name=None, vault_base_url=None,
                              key_ops=key_ops,
                              key_attributes=key_attrs,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             release_policy=release_policy)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -1189,13 +1198,19 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA'):
+               byok_string=None, kty='RSA', release_policy=None, exportable=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
+    if is_azure_stack_profile(cmd):
+        resource_type = ResourceType.DATA_KEYVAULT
+    else:
+        resource_type = ResourceType.DATA_PRIVATE_KEYVAULT
 
+    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=resource_type)
+    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=resource_type)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
+    if not is_azure_stack_profile(cmd) and exportable is not None:
+        key_attrs.exportable = exportable
 
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file or pem_string:
@@ -1235,7 +1250,11 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.kty = kty + '-HSM'
         key_obj.t = byok_data
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    if is_azure_stack_profile(cmd):
+        return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+
+    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags,
+                             release_policy=release_policy)
 
 
 def _bytes_to_int(b):

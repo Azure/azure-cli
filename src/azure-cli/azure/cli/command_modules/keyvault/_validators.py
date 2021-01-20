@@ -51,7 +51,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
                 return id_comps['resource_group']
 
     if hsm_name:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
+        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
         try:
             for hsm in client.list_by_subscription():
                 id_comps = parse_resource_id(hsm.id)
@@ -145,6 +145,11 @@ def process_hsm_name(ns):
         ns.hsm_name = ns.identifier
 
 
+def process_release_policy(ns):
+    if ns.release_policy and not ns.exportable:
+        ns.exportable = ns.key_attributes.exportable = True
+
+
 def validate_vault_name_and_hsm_name(ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
@@ -160,11 +165,17 @@ def validate_vault_name_and_hsm_name(ns):
 def get_attribute_validator(name, attribute_class, create=False):
     def validator(ns):
         ns_dict = ns.__dict__
+        exportable = ns_dict.get('exportable', None)
+        kwargs = {}
+        if exportable:
+            kwargs = {'exportable': True}
+
         enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled=enabled,
             not_before=ns_dict.pop('not_before', None),
-            expires=ns_dict.pop('expires', None))
+            expires=ns_dict.pop('expires', None),
+            **kwargs)
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
@@ -294,7 +305,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     if vault_name:
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     else:
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).managed_hsms
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_PRIVATE_KEYVAULT).managed_hsms
 
     # if the location is specified, use get_deleted rather than list_deleted
     if ns.location:

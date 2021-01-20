@@ -19,6 +19,16 @@ from .transfer_key_py3 import TransferKey
 from .certificate_set_py3 import CertificateSet
 from .error_py3 import Error
 from .key_vault_error_py3 import KeyVaultError, KeyVaultErrorException
+from .attributes_py3 import Attributes
+from .json_web_key_py3 import JsonWebKey
+from .key_attributes_py3 import KeyAttributes
+from .key_bundle_py3 import KeyBundle
+from .key_release_authority_py3 import KeyReleaseAuthority
+from .key_release_condition_py3 import KeyReleaseCondition
+from .key_release_policy_py3 import KeyReleasePolicy
+from .key_update_parameters_py3 import KeyUpdateParameters
+from .key_import_parameters_py3 import KeyImportParameters
+from .key_create_parameters_py3 import KeyCreateParameters
 
 
 from .key_vault_client_enums import (
@@ -35,5 +45,15 @@ __all__ = [
     'Error',
     'KeyVaultError',
     'KeyVaultErrorException',
-    'OperationStatus'
+    'OperationStatus',
+    'Attributes',
+    'JsonWebKey',
+    'KeyAttributes',
+    'KeyBundle',
+    'KeyReleaseAuthority',
+    'KeyReleaseCondition',
+    'KeyReleasePolicy',
+    'KeyUpdateParameters',
+    'KeyImportParameters',
+    'KeyCreateParameters'
 ]
