@@ -43,7 +43,7 @@ class AmsEncryptionTests(ScenarioTest):
         ])
 
         self.cmd('az ams account encryption show -a {amsname} -g {rg}', checks=[
-            self.check('keyVaultProperties.keyIdentifier', '{keyVaultId}')    
+            self.check('keyVaultProperties.keyIdentifier', '{keyVaultId}')
         ])
 
         self.cmd('az ams account delete -n {amsname} -g {rg}')

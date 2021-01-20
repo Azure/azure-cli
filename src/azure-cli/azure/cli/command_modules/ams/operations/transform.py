@@ -17,33 +17,35 @@ from azure.mgmt.media.models import (BuiltInStandardEncoderPreset, EncoderNamedP
 
 
 def create_transform(client, account_name, resource_group_name, transform_name, preset,
-                     insights_to_extract=None, video_analysis_mode=None, audio_language=None, audio_analysis_mode=None, on_error=None,
-                     relative_priority=None, description=None, resolution=None):
+                     insights_to_extract=None, video_analysis_mode=None, audio_language=None,
+                     audio_analysis_mode=None, on_error=None, relative_priority=None,
+                     description=None, resolution=None):
 
-    outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode,
-                                      on_error, relative_priority, resolution)]
+    outputs = [build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language,
+                                      audio_analysis_mode, on_error, relative_priority, resolution)]
 
     return client.create_or_update(resource_group_name, account_name, transform_name,
                                    outputs, description)
 
 
 def add_transform_output(client, account_name, resource_group_name, transform_name, preset,
-                         insights_to_extract=None, video_analysis_mode=None, audio_language=None, audio_analysis_mode=None, on_error=None,
-                         relative_priority=None, resolution=None):
+                         insights_to_extract=None, video_analysis_mode=None, audio_language=None,
+                         audio_analysis_mode=None, on_error=None, relative_priority=None, resolution=None):
 
     transform = client.get(resource_group_name, account_name, transform_name)
 
     if not transform:
         show_resource_not_found_message(resource_group_name, account_name, 'transforms', transform_name)
 
-    transform.outputs.append(build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode,
-                                                    on_error, relative_priority, resolution))
+    transform.outputs.append(build_transform_output(preset, insights_to_extract, video_analysis_mode,
+                                                    audio_language, audio_analysis_mode, on_error,
+                                                    relative_priority, resolution))
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform.outputs)
 
 
-def build_transform_output(preset, insights_to_extract, video_analysis_mode, audio_language, audio_analysis_mode, on_error,
-                           relative_priority, resolution):
+def build_transform_output(preset, insights_to_extract, video_analysis_mode,
+                           audio_language, audio_analysis_mode, on_error, relative_priority, resolution):
 
     validate_arguments(preset, insights_to_extract, audio_language, resolution)
     transform_output = get_transform_output(preset)

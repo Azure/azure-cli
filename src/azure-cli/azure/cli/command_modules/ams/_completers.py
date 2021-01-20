@@ -78,17 +78,21 @@ def get_encoding_types_list():
     encoding_types = get_encoding_types()
     return encoding_types
 
+
 def get_allowed_transcription_languages():
     languages = get_transcription_langauges()
     return languages
+
 
 def get_allowed_analysis_modes():
     modes = get_analysis_modes()
     return modes
 
+
 def get_stretch_mode_types_list():
     modes = get_stretch_mode_types()
     return modes
+
 
 def get_storage_authentication_allowed_values_list():
     values = get_storage_authentication_allowed_values()

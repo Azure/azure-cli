@@ -27,9 +27,9 @@ class AmsMruTests(LiveScenarioTest):
             self.cmd('az ams account mru set -n {amsname} -g {rg} --count {count} --type {type}', expect_failure=True)
         else:
             self.cmd('az ams account mru set -n {amsname} -g {rg} --count {count} --type {type}', checks=[
-                    self.check('count', '{count}'),
-                    self.check('type', '{type}')
-                ])
+                self.check('count', '{count}'),
+                self.check('type', '{type}')
+            ])
 
             self.cmd('az ams account mru show -n {amsname} -g {rg}', checks=[
                 self.check('count', '{count}'),

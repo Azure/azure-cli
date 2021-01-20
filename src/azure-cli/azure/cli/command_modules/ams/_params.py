@@ -60,12 +60,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   validator=get_default_location_from_resource_group, required=True)
+                   validator=get_default_location_from_resource_group, required=False)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.'),
+                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. The storage account MUST be in the same Azure subscription as the Media Services account. It is strongly recommended that the storage account be in the same resource group as the Media Services account. Blob only accounts are not allowed as primary.')
         c.argument('managed_identity', help='Set this flag to enable managed identity on the account.')
 
     with self.argument_context('ams account check-name') as c:

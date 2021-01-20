@@ -17,7 +17,8 @@ def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
 
 
-def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, managed_identity=False, tags=None):
+def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None,
+                        managed_identity=False, tags=None):
     storage_account_primary = StorageAccount(type='Primary', id=storage_account)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary],
@@ -54,10 +55,13 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
                                          ams.location,
                                          ams.tags)
 
-def set_mediaservice_trusted_storage(client, resource_group_name, account_name, storage_account, storage_authentication):
+
+def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
+                                     storage_authentication):
     ams = client.get(resource_group_name, account_name)
-    media_service = MediaService(location=ams.location, storage_accounts=ams.storage_accounts, storage_authentication=storage_authentication)
-    
+    media_service = MediaService(location=ams.location, storage_accounts=ams.storage_accounts,
+                                 storage_authentication=storage_authentication)
+
     return client.create_or_update(resource_group_name, account_name, media_service)
 
 
@@ -65,8 +69,8 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
                                   location=None, managed_identity=False,
                                   tags=None):
     identity = 'SystemAssigned' if managed_identity else 'None'
-    media_service = MediaService(location=location, storage_accounts=storage_accounts, identity=MediaServiceIdentity(type=identity),
-                                 tags=tags)
+    media_service = MediaService(location=location, storage_accounts=storage_accounts,
+                                 identity=MediaServiceIdentity(type=identity), tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 

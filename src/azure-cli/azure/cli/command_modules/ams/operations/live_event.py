@@ -13,11 +13,11 @@ from azure.mgmt.media.models import (CrossSiteAccessPolicies, IPAccessControl, L
 
 
 def create(cmd, client, resource_group_name, account_name, live_event_name, streaming_protocol, ips,  # pylint: disable=too-many-locals
-           auto_start=False, encoding_type=None, preset_name=None, stretch_mode=None, key_frame_interval=None, tags=None, description=None,
-           key_frame_interval_duration=None, access_token=None, no_wait=False, preview_ips=None,
-           preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
-           client_access_policy=None, cross_domain_policy=None, stream_options=None, live_transcription_language=None,
-           use_static_hostname=False, custom_hostname_prefix=None):
+           auto_start=False, encoding_type=None, preset_name=None, stretch_mode=None, key_frame_interval=None,
+           tags=None, description=None, key_frame_interval_duration=None, access_token=None, no_wait=False,
+           preview_ips=None, preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
+           client_access_policy=None, cross_domain_policy=None, stream_options=None,
+           live_transcription_language=None, use_static_hostname=False, custom_hostname_prefix=None):
 
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
@@ -48,9 +48,11 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
     policies = create_cross_site_access_policies(client_access_policy, cross_domain_policy)
 
     live_event = LiveEvent(input=live_event_input, location=location, preview=live_event_preview,
-                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name, stretch_mode=stretch_mode, key_frame_interval=key_frame_interval),
-                           tags=tags, stream_options=stream_options,
-                           cross_site_access_policies=policies, description=description, transcriptions=transcriptions, use_static_hostname=use_static_hostname, hostname_prefix=custom_hostname_prefix)
+                           encoding=LiveEventEncoding(encoding_type=encoding_type, preset_name=preset_name,
+                                                      stretch_mode=stretch_mode, key_frame_interval=key_frame_interval),
+                           tags=tags, stream_options=stream_options, cross_site_access_policies=policies,
+                           description=description, transcriptions=transcriptions,
+                           use_static_hostname=use_static_hostname, hostname_prefix=custom_hostname_prefix)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
                        live_event_name=live_event_name, parameters=live_event, auto_start=auto_start)
@@ -95,6 +97,7 @@ def start(cmd, client, resource_group_name, account_name, live_event_name, no_wa
     LongRunningOperation(cmd.cli_ctx)(client.start(resource_group_name, account_name, live_event_name))
 
     return client.get(resource_group_name, account_name, live_event_name)
+
 
 def standby(cmd, client, resource_group_name, account_name, live_event_name, no_wait=False):
     if no_wait:

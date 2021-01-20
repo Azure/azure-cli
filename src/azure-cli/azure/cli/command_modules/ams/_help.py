@@ -53,12 +53,12 @@ helps['ams account encryption'] = """
 """
 
 helps['ams account encryption show'] = """
-    type: group
+    type: command
     short-summary: Show the details of encryption settings for an Azure Media Services account.
 """
 
 helps['ams account encryption set'] = """
-    type: group
+    type: command
     short-summary: Set the encryption settings for an Azure Media Services account.
 """
 
@@ -107,7 +107,7 @@ helps['ams account storage sync-storage-keys'] = """
 
 helps['ams account storage set-authentication'] = """
     type: command
-    short-summary: Set the authentication of a storage account attached to an Azure Media Services account. 
+    short-summary: Set the authentication of a storage account attached to an Azure Media Services account.
 """
 
 helps['ams transform'] = """
