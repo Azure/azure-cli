@@ -164,6 +164,41 @@ def format_styled_text(styled_text, theme=None):
     return ''.join(formatted_parts)
 
 
+def highlight_command(raw_command):
+    """Highlight a command with colors.
+
+    For example, for
+
+        az group create --name myrg --location westus
+
+    The command name 'az group create', argument name '--name', '--location' are marked as ACTION style.
+    The argument value 'myrg' and 'westus' are marked as PRIMARY style.
+    If the argument is provided as '--location=westus', it will be marked as PRIMARY style.
+
+    :param raw_command: The command that needs to be highlighted.
+    :type raw_command: str
+    :return: The styled command text.
+    :rtype: list
+    """
+
+    styled_command = []
+    argument_begins = False
+
+    for index, arg in enumerate(raw_command.split()):
+        spaced_arg = ' {}'.format(arg) if index > 0 else arg
+        style = Style.PRIMARY
+
+        if arg.startswith('-') and '=' not in arg:
+            style = Style.ACTION
+            argument_begins = True
+        elif not argument_begins and '=' not in arg:
+            style = Style.ACTION
+
+        styled_command.append((style, spaced_arg))
+
+    return styled_command
+
+
 def _is_modern_terminal():
     # Windows Terminal: https://github.com/microsoft/terminal/issues/1040
     if 'WT_SESSION' in os.environ:
