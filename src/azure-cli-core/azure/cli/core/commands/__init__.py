@@ -1252,8 +1252,10 @@ class AzCommandGroup(CommandGroup):
 
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        operation = operations_tmpl.format(method_name)
+        merged_kwargs['operation_str'] = operation
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
-                                         operation=operations_tmpl.format(method_name),
+                                         operation=operation,
                                          **merged_kwargs)
 
         return command_name
@@ -1325,6 +1327,7 @@ class AzCommandGroup(CommandGroup):
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        merged_kwargs['operation_str'] = getter_op
         _cli_wait_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                           custom_command=custom_command, **merged_kwargs)
 
@@ -1343,6 +1346,7 @@ class AzCommandGroup(CommandGroup):
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type, custom_command=custom_command)
+        merged_kwargs['operation_str'] = getter_op
         _cli_show_command(self.command_loader, '{} {}'.format(self.group_name, name), getter_op=getter_op,
                           custom_command=custom_command, **merged_kwargs)
 

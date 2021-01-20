@@ -67,6 +67,8 @@ class KeyVaultCommandGroup(AzCommandGroup):
         self._apply_tags(merged_kwargs, kwargs, name)
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
+        operation = operations_tmpl.format(method_name)
+        merged_kwargs['operation_str'] = operation
 
         def get_op_handler():
             return self.command_loader.get_op_handler(operations_tmpl.format(method_name))
