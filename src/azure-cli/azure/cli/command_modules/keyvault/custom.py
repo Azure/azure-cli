@@ -1236,7 +1236,6 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
         key_obj.t = byok_data
         key_obj.crv = curve
 
-        print(key_obj)
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 
 
