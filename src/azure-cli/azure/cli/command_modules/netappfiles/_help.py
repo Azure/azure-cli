@@ -48,6 +48,10 @@ parameters:
     short-summary: When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
   - name: --backup-operators
     short-summary: Users to be added to the Built-in Backup Operator active directory group. A list of unique usernames without domain specifier
+  - name: --aes-encryption
+    short-summary: If enabled, AES encryption will be enabled for SMB communication
+  - name: --ldap-signing
+    short-summary: Specifies whether or not the LDAP traffic needs to be signed
 examples:
   - name: Add an active directory to the account
     text: >
@@ -439,11 +443,11 @@ parameters:
   - name: --usage-threshold
     short-summary: The maximum storage quota allowed for a file system as integer number of GiB. Min 100 GiB, max 100TiB"
   - name: --file-path
-    short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target subnet
+    short-summary: A 1-80 character long alphanumeric string value that identifies a unique file share or mount point in the target delegate subnet
   - name: --vnet
     short-summary: The ARM Id or name of the vnet for the volume
   - name: --subnet
-    short-summary: The ARM Id or name of the subnet for the vnet. If omitted 'default' will be used
+    short-summary: The ARM Id or name of the delegated subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
     short-summary: Space seperated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type

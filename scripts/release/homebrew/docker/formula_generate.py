@@ -121,9 +121,8 @@ def update_formula() -> str:
     resp.raise_for_status()
     text = resp.text
 
-    # update url, version and sha256 of azure-cli
+    # update url and sha256 of azure-cli
     text = re.sub('url ".*"', 'url "{}"'.format(HOMEBREW_UPSTREAM_URL), text, 1)
-    text = re.sub('version ".*"', 'version "{}"'.format(CLI_VERSION), text, 1)
     upstream_sha = compute_sha256(HOMEBREW_UPSTREAM_URL)
     text = re.sub('sha256 ".*"', 'sha256 "{}"'.format(upstream_sha), text, 1)
     text = re.sub('.*revision.*\n', '', text, 1)  # remove revision for previous version if exists
@@ -134,7 +133,15 @@ def update_formula() -> str:
     line_idx_to_remove = set()
     upgrade = False
     for idx, line in enumerate(lines):
-        if line.strip().startswith("resource"):
+        # In released formula, the url is in the release tag format, such as
+        # "https://github.com/Azure/azure-cli/archive/azure-cli-2.17.1.tar.gz".
+        # version is extracted from url. During build, the url is in the format like
+        # "https://codeload.github.com/Azure/azure-cli/legacy.tar.gz/7e09fd50c9ef02e1ed7d4709c7ab1a71acd3840b".
+        # We need to add the version explicitly after url.
+        # We will change the url in our release pipeline and remove version.
+        if line.startswith("  url"):
+            lines[idx] = lines[idx] + '\n' + '  version "{}"'.format(CLI_VERSION)
+        elif line.strip().startswith("resource"):
             m = re.search(r'resource "(.*)" do', line)
             if m is not None:
                 pack = m.group(1)
