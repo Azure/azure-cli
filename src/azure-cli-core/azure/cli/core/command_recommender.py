@@ -417,7 +417,9 @@ def get_parameter_mappings(command_table):
         '--output': None,
         '--query': None,
         '--debug': None,
-        '--verbose': None
+        '--verbose': None,
+        '--yes': None,
+        '--no-wait': None
     }
 
     if parameter_table:
