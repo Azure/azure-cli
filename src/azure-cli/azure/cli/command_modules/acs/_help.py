@@ -964,7 +964,7 @@ helps['aks rotate-certs'] = """
 helps['openshift'] = """
 type: group
 short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift create'] = """
@@ -1020,7 +1020,7 @@ examples:
 helps['openshift delete'] = """
 type: command
 short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
@@ -1030,13 +1030,13 @@ examples:
 helps['openshift list'] = """
 type: command
 short-summary: List Azure Red Hat OpenShift 3.11 clusters.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift scale'] = """
 type: command
 short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 parameters:
   - name: --compute-count -c
     type: int
@@ -1060,7 +1060,7 @@ examples:
 helps['openshift wait'] = """
 type: command
 short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
-long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete. Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
@@ -1070,13 +1070,13 @@ examples:
 helps['openshift monitor'] = """
 type: group
 short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift monitor enable'] = """
 type: command
 short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Enable Log Analytics monitoring.
     text: |-
@@ -1086,7 +1086,7 @@ examples:
 helps['openshift monitor disable'] = """
 type: command
 short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
-long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
+long-summary: The az openshift command is deprecated and has been replaced by az aro for ARO 4 clusters. See http://aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Disable Log Analytics monitoring.
     text: |-
