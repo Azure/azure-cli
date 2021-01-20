@@ -17,7 +17,7 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
            tags=None, description=None, key_frame_interval_duration=None, access_token=None, no_wait=False,
            preview_ips=None, preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
            client_access_policy=None, cross_domain_policy=None, stream_options=None,
-           live_transcription_language=None, use_static_hostname=False, custom_hostname_prefix=None):
+           transcription_language=None, use_static_hostname=False, custom_hostname=None):
 
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
@@ -30,8 +30,8 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
     live_event_input_access_control = LiveEventInputAccessControl(ip=IPAccessControl(allow=allowed_ips))
 
     transcriptions = []
-    if live_transcription_language:
-        transcriptions = [{'language': live_transcription_language}]
+    if transcription_language:
+        transcriptions = [{'language': transcription_language}]
 
     live_event_input = LiveEventInput(streaming_protocol=LiveEventInputProtocol(streaming_protocol),
                                       access_token=access_token,
@@ -52,7 +52,7 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
                                                       stretch_mode=stretch_mode, key_frame_interval=key_frame_interval),
                            tags=tags, stream_options=stream_options, cross_site_access_policies=policies,
                            description=description, transcriptions=transcriptions,
-                           use_static_hostname=use_static_hostname, hostname_prefix=custom_hostname_prefix)
+                           use_static_hostname=use_static_hostname, hostname_prefix=custom_hostname)
 
     return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name, account_name=account_name,
                        live_event_name=live_event_name, parameters=live_event, auto_start=auto_start)

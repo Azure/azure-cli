@@ -57,10 +57,10 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
 
 
 def set_mediaservice_trusted_storage(client, resource_group_name, account_name,
-                                     storage_authentication):
+                                     storage_auth):
     ams = client.get(resource_group_name, account_name)
     media_service = MediaService(location=ams.location, storage_accounts=ams.storage_accounts,
-                                 storage_authentication=storage_authentication)
+                                 storage_authentication=storage_auth)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
 
