@@ -16,7 +16,7 @@ TYPE_CLIENT_MAPPING = {
 
 
 def register_providers():
-    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
+    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', True)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
     _register_one_provider('Microsoft.CognitiveServices/accounts', '2017-04-18', True)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)

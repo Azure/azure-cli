@@ -9,7 +9,7 @@ from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.17.11"
+VERSION = "2.18.10"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -46,11 +46,10 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry==1.0.6.*',
     'colorama~=0.4.1',
-    'humanfriendly>=4.7,<9.0',
+    'humanfriendly>=4.7,<10.0',
     'jmespath',
-    'knack==0.7.2',
+    'knack==0.8.0rc2',
     'azure-identity==1.5.0b2',
-    'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT==1.7.1',

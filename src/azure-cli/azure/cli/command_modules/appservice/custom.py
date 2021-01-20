@@ -2198,19 +2198,23 @@ def list_slots(cmd, resource_group_name, webapp):
     return slots
 
 
-def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, action='swap'):
+def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve_vnet=None, action='swap'):
     client = web_client_factory(cmd.cli_ctx)
+    # Default isPreserveVnet to 'True' if preserve_vnet is 'None'
+    isPreserveVnet = preserve_vnet if preserve_vnet is not None else 'true'
+    # converstion from string to Boolean
+    isPreserveVnet = bool(isPreserveVnet == 'true')
     if action == 'swap':
         poller = client.web_apps.swap_slot_slot(resource_group_name, webapp,
-                                                slot, (target_slot or 'production'), True)
+                                                slot, (target_slot or 'production'), isPreserveVnet)
         return poller
     if action == 'preview':
         if target_slot is None:
             result = client.web_apps.apply_slot_config_to_production(resource_group_name,
-                                                                     webapp, slot, True)
+                                                                     webapp, slot, isPreserveVnet)
         else:
             result = client.web_apps.apply_slot_configuration_slot(resource_group_name, webapp,
-                                                                   slot, target_slot, True)
+                                                                   slot, target_slot, isPreserveVnet)
         return result
     # we will reset both source slot and target slot
     if target_slot is None:
@@ -2431,6 +2435,21 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
+
+    if kv_subscription.lower() != client.config.subscription_id.lower():
+        diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                           subscription_id=kv_subscription)
+        ascs = diff_subscription_client.app_service_certificate_orders.list()
+    else:
+        ascs = client.app_service_certificate_orders.list()
+
+    kv_secret_name = None
+    for asc in ascs:
+        if asc.name == key_vault_certificate_name:
+            kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+    if not kv_secret_name:
+        kv_secret_name = key_vault_certificate_name
+
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
@@ -2440,7 +2459,7 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
-                              key_vault_secret_name=key_vault_certificate_name, server_farm_id=server_farm_id)
+                              key_vault_secret_name=kv_secret_name, server_farm_id=server_farm_id)
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -2600,7 +2619,13 @@ class _StackRuntimeHelper:
     @staticmethod
     def remove_delimiters(runtime):
         import re
-        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        # delimiters allowed: '|', ':'
+        if '|' in runtime:
+            runtime = re.split('[|]', runtime)
+        elif ':' in runtime:
+            runtime = re.split('[:]', runtime)
+        else:
+            runtime = [runtime]
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
@@ -4009,12 +4034,19 @@ def _start_ssh_session(hostname, port, username, password):
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):  # pylint: disable=too-many-statements
     import platform
     if platform.system() == "Windows":
-        raise CLIError('webapp ssh is only supported on linux and mac')
+        webapp = show_webapp(cmd, resource_group_name, name, slot)
+        is_linux = webapp.reserved
+        if not is_linux:
+            raise ValidationError("Only Linux App Service Plans supported, found a Windows App Service Plan")
 
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-    create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
+        scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+        open_page_in_browser(scm_url + '/webssh/host')
+    else:
+        config = get_site_configs(cmd, resource_group_name, name, slot)
+        if config.remote_debugging_enabled:
+            raise ValidationError('Remote debugging is enabled, please disable')
+        create_tunnel_and_session(
+            cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout, instance=instance)
 
 
 def create_devops_pipeline(

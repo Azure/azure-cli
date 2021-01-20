@@ -8,6 +8,10 @@ Release History
 
 * Migrate the authentication library from ADAL to MSAL.
 
+2.18.0
+++++++
+* Print INFO log from SDK (#15676)
+
 2.17.1
 ++++++
 * No changes

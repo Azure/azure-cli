@@ -174,7 +174,9 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk, 
 
 
 def _is_linux_os(vm):
-    os_type = vm.storage_profile.os_disk.os_type if vm.storage_profile.os_disk.os_type else None
+    os_type = None
+    if vm and vm.storage_profile and vm.storage_profile.os_disk and vm.storage_profile.os_disk.os_type:
+        os_type = vm.storage_profile.os_disk.os_type
     if os_type:
         return os_type.lower() == 'linux'
     # the os_type could be None for VM scaleset, let us check out os configurations
@@ -1613,7 +1615,7 @@ def list_extensions(cmd, resource_group_name, vm_name):
 
 def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publisher, version=None, settings=None,
                   protected_settings=None, no_auto_upgrade=False, force_update=False, no_wait=False,
-                  extension_instance_name=None):
+                  extension_instance_name=None, enable_auto_upgrade=None):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -1634,7 +1636,8 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings=settings,
-                                  auto_upgrade_minor_version=(not no_auto_upgrade))
+                                  auto_upgrade_minor_version=(not no_auto_upgrade),
+                                  enable_automatic_upgrade=enable_auto_upgrade)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
     return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
@@ -2782,9 +2785,9 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.reimage,
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_reimage,
                            resource_group_name, vm_scale_set_name, instance_id)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.reimage, resource_group_name, vm_scale_set_name)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_reimage, resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
@@ -3084,7 +3087,8 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
-                       no_wait=False, extension_instance_name=None, provision_after_extensions=None):
+                       no_wait=False, extension_instance_name=None, provision_after_extensions=None,
+                       enable_auto_upgrade=None):
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -3111,7 +3115,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                                           type_handler_version=version,
                                           settings=settings,
                                           auto_upgrade_minor_version=(not no_auto_upgrade),
-                                          provision_after_extensions=provision_after_extensions)
+                                          provision_after_extensions=provision_after_extensions,
+                                          enable_automatic_upgrade=enable_auto_upgrade)
     if force_update:
         ext.force_update_tag = str(_gen_guid())
 
@@ -3228,7 +3233,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
                          os_type=os_type, os_state=os_state, end_of_life_date=end_of_life_date,
                          recommended=recommendation, disallowed=Disallowed(disk_types=disallowed_disk_types),
                          purchase_plan=purchase_plan, location=location, eula=eula, tags=(tags or {}),
-                         hyper_vgeneration=hyper_v_generation, features=feature_list)
+                         hyper_v_generation=hyper_v_generation, features=feature_list)
     return client.gallery_images.begin_create_or_update(resource_group_name, gallery_name, gallery_image_name, image)
 
 
