@@ -68,13 +68,8 @@ class TestStyle(unittest.TestCase):
         with self.assertRaisesRegex(CLIInternalError, "Invalid styled text."):
             format_styled_text(["dummy text"])
 
-<<<<<<< HEAD
-    def test_get_styled_text(self):
-        from azure.cli.core.style import Style, get_styled_command, format_styled_text
-=======
     def test_highlight_command(self):
         from azure.cli.core.style import Style, highlight_command, format_styled_text
->>>>>>> dev
 
         raw_commands = [
             'az cmd',
