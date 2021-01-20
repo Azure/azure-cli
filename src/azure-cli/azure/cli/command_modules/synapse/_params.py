@@ -57,7 +57,7 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
-            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default.")
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='*', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. If no argument, will disable all allowed tenant ids.")
             c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
@@ -73,11 +73,7 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
         c.argument('enable_data_exfiltration', arg_type=get_three_state_flag(),
-                   help='The flag indicates whether enable data exfiltration.')
-
-    with self.argument_context('synapse workspace activate') as c:
-        c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
-        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+                   help='The flag indicates whether enable data exfiltration.', options_list=['--enable_exfiltration', '--enable_data_exfiltration'])
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -327,12 +323,16 @@ def load_arguments(self, _):
     with self.argument_context('synapse workspace key list') as c:
         c.argument('workspace_name', id_part=None, help='The workspace name.')
 
-    for scope in ['show', 'create', 'delete']:
+    for scope in ['show', 'create', 'delete', 'update']:
         with self.argument_context('synapse workspace key ' + scope) as c:
             c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
 
     with self.argument_context('synapse workspace key create') as c:
         c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+
+    with self.argument_context('synapse workspace key update') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+        c.argument('is_active', arg_type=get_three_state_flag(), help='Set True to change the workspace state from pending to success state.')
 
     # synapse workspace managed-identity
     with self.argument_context('synapse workspace managed-identity') as c:

@@ -55,9 +55,6 @@ def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin
         workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
 
-    if allowed_aad_tenant_ids is not None and "None" in allowed_aad_tenant_ids:
-        allowed_aad_tenant_ids = []
-
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
@@ -96,8 +93,9 @@ def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_n
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_vault_url=key_identifier)
 
 
-def activate_workspace(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, no_wait=False):
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=True, key_name=key_name, key_vault_url=key_identifier)
+
+def update_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, is_active=False, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=is_active, key_name=key_name, key_vault_url=key_identifier)
 
 
 def grant_sql_access_to_managed_identity(cmd, client, resource_group_name, workspace_name, no_wait=False):

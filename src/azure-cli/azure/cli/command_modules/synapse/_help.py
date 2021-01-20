@@ -40,16 +40,6 @@ examples:
           --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
 """
 
-helps['synapse workspace activate'] = """
-type: command
-short-summary: Activate workspace using customer-managed key after creating.
-examples:
-  - name: Activate workspace using customer-managed key after creating.
-    text: |-
-        az synapse workspace activate --key-name existedkey --name testsynapseworkspace \\
-        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
-"""
-
 helps['synapse workspace list'] = """
 type: command
 short-summary: List all Synapse workspaces.
@@ -572,6 +562,16 @@ examples:
   - name: Create a workspace's key.
     text: |-
         az synapse workspace key create --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key update'] = """
+type: command
+short-summary: Update a workspace's key or update the state of key to change the workspace state from pending to success state when the workspace is first being provisioned.
+examples:
+  - name: Update a workspace's key.
+    text: |-
+        az synapse workspace key update --name newkey --workspace-name testsynapseworkspace \\
         --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
 """
 
