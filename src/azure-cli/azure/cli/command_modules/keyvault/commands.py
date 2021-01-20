@@ -166,7 +166,7 @@ def load_command_table(self, _):
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key',
                           doc_string_source=data_entity.operations_docs_tmpl.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key',
+        g.keyvault_custom('restore', 'restore_key', supports_no_wait=True,
                           doc_string_source=data_entity.operations_docs_tmpl.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')

@@ -21,6 +21,8 @@ from knack.util import CLIError
 
 from msrestazure.tools import resource_id
 
+from .credential_replacer import ExpressRoutePortLOAContentReplacer
+
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
@@ -483,12 +485,14 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         show_data = self.cmd("network application-gateway show -g {rg} -n {appgw}").get_output_in_json()
 
         self.assertEqual(len(show_data["frontendIpConfigurations"]), 2)
-        self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
-        self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
-        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
 
-        self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
-        self.assertTrue(show_data["frontendIpConfigurations"][0]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
+        # Those assertions are not stable, because the order in array frontendIpConfigurations is not fixed
+        # self.assertTrue(show_data["frontendIpConfigurations"][0]["publicIpAddress"]["id"].endswith(self.kwargs["ip"]))
+        # self.assertTrue(show_data["frontendIpConfigurations"][1]["id"].endswith("appGatewayPrivateFrontendIP"))  # default name
+        # self.assertEqual(show_data["frontendIpConfigurations"][1]["privateIpAddress"], "10.0.0.17")
+        # self.assertEqual(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"], None)
+        # service buggy, this properties won't be populcated so fast even in Azure CLI 2.12.0
+        # self.assertTrue(show_data["frontendIpConfigurations"][1]["privateLinkConfiguration"]["id"].endswith("PrivateLinkDefaultConfiguration"))
 
         self.cmd("network application-gateway delete -g {rg} -n {appgw}")
 
@@ -542,7 +546,7 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
                  '--sku Standard_v2 --public-ip-address {ip} '
                  '--identity {one_off_identity} ')
         self.cmd('network application-gateway show -g {rg} -n {gw}', checks=[
-            self.check('identity.type', 'UserAssigned')
+            self.check('identity.type', 'userAssigned')
         ])
 
         # remove one_off_identity
@@ -553,10 +557,10 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         self.cmd('network application-gateway identity assign '
                  '-g {rg} --gateway-name {gw} --identity {access_identity}',
                  checks=[
-                     self.check('identity.type', 'UserAssigned')
+                     self.check('identity.type', 'userAssigned')
                  ])
         self.cmd('network application-gateway identity show -g {rg} --gateway-name {gw}', checks=[
-            self.check('type', 'UserAssigned')
+            self.check('type', 'userAssigned')
         ])
 
         self.cmd('network application-gateway ssl-cert create '
@@ -725,7 +729,7 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
                  checks=self.check('disabledSslProtocols.length(@)', 2))
 
-        cipher_suite = 'TLS_RSA_WITH_AES_128_CBC_SHA256'
+        cipher_suite = 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'
         self.kwargs['cipher'] = cipher_suite
         self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {cipher} --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
@@ -879,6 +883,43 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='test_network_ag_http_listener_with_waf_policy')
+    def test_network_ag_http_listener_with_waf_policy(self):
+
+        self.kwargs.update({
+            'ag': 'ag1',
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener',
+            'waf_1': 'waf_1',
+            'waf_2': 'waf_2',
+            'waf_3': 'waf_3',
+            'listener_2': 'listener_2',
+        })
+
+        # prepare 2 WAF policies
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_1}')
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_2}')
+        self.cmd('network application-gateway waf-policy create -g {rg} --name {waf_3}')
+
+        self.cmd('network public-ip create -g {rg} -n ip-1 --sku Standard')
+
+        # sku=WAF_v2 is necessary for updating HTTP listener's WAF configuration
+        create_res = self.cmd('network application-gateway create -g {rg} --name {ag} --public-ip-address ip-1 --sku WAF_v2').get_output_in_json()
+        self.assertEqual(len(create_res['applicationGateway']['httpListeners']), 1)
+        self.assertIsNone(create_res['applicationGateway']['httpListeners'][0].get('firewallPolicy'))
+
+        # update the default HTTP listener's WAF policy
+        update_res = self.cmd('network application-gateway http-listener update -g {rg} --gateway-name {ag} --name appGatewayHttpListener --waf-policy {waf_1}').get_output_in_json()
+        self.assertTrue(update_res['firewallPolicy']['id'].endswith('waf_1'))
+
+        # create another HTTP listener with WAF policy and update it to another WAF policy
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} --port 9020 --name 9020')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} --name {listener_2} --frontend-port 9020 --waf-policy {waf_2}')
+        update_res = self.cmd('network application-gateway http-listener update -g {rg} --gateway-name {ag} --name {listener_2} --waf-policy {waf_3}').get_output_in_json()
+        self.assertTrue(update_res['firewallPolicy']['id'].endswith('waf_3'))
+
+        self.cmd('network application-gateway show -g {rg} --name {ag}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
     def test_network_ag_http_listener_with_multi_host_names(self, resource_group):
@@ -1949,6 +1990,11 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
 class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[
+            ExpressRoutePortLOAContentReplacer()
+        ])
+
     def test_network_express_route_port_identity(self):
         """
         Since the resource ExpressRoute Port is rare currently, it's very expensive to write test.
@@ -1972,6 +2018,20 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         For ussage, run `az network express-route port link update --help` to get help.
         """
         pass
+
+    @record_only()
+    @AllowLargeResponse()
+    def test_network_express_route_port_generate_loa(self):
+        """
+        The ExpressRoutePort comes from service team and located in a different subscription. And it will be revoked after this feature.
+        So, this test is record only.
+        """
+        self.kwargs.update({
+            'rg': 'ER-AutoTriage-RG',
+            'er_port': 'ER-autotriage-erdirect',
+        })
+
+        self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {er_port} -f loa1')
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
@@ -1997,9 +2057,10 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_global_reach')
     def test_network_express_route_global_reach(self, resource_group):
-
+        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
             'er1': 'er1',
             'er2': 'er2',
@@ -2013,11 +2074,12 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         self.cmd('network express-route peering create -g {rg} --circuit-name {er2} --peering-type AzurePrivatePeering --peer-asn 10002 --vlan-id 102 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30')
 
         # These commands won't succeed because circuit creation requires a manual step from the service.
-        with self.assertRaisesRegexp(CLIError, 'is Not Provisioned'):
+        with self.assertRaisesRegexp(HttpResponseError, 'is Not Provisioned'):
             self.cmd('network express-route peering connection create -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12} --peer-circuit {er2} --address-prefix 104.0.0.0/29')
         self.cmd('network express-route peering connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
         self.cmd('network express-route peering connection delete -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {conn12}')
 
+    @record_only()  # record_only as the express route is extremely expensive, contact service team for an available ER
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_peer_connection')
     def test_network_express_route_peer_connection(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
@@ -2038,6 +2100,219 @@ class NetworkExpressRouteGlobalReachScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('network express-route peering peer-connection show -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering -n {peconn12}')
         self.cmd('network express-route peering peer-connection list -g {rg} --circuit-name {er1} --peering-name AzurePrivatePeering')
+
+
+class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_cr_load_balancer')
+    def test_network_cross_region_lb(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'cross-region-lb',
+            'rg': resource_group,
+            'rt': 'Microsoft.Network/loadBalancers',
+            'pub_ip': 'publicip4'
+        })
+
+        # test lb create with min params (new ip)
+        self.cmd('network cross-region-lb create -n {lb}1 -g {rg}', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}')
+        ])
+
+        # test internet facing load balancer with new static public IP
+        self.cmd('network cross-region-lb create -n {lb}2 -g {rg} --public-ip-address-allocation static --tags foo=doo')
+        self.cmd('network public-ip show -g {rg} -n PublicIP{lb}2', checks=[
+            self.check('publicIpAllocationMethod', 'Static'),
+            self.check('tags.foo', 'doo')
+        ])
+
+        # test internet facing load balancer with existing public IP (by name)
+        self.cmd('network public-ip create -n {pub_ip} -g {rg} --sku Standard')
+        self.cmd('network cross-region-lb create -n {lb}3 -g {rg} --public-ip-address {pub_ip}', checks=[
+            self.check('loadBalancer.frontendIPConfigurations[0].properties.privateIPAllocationMethod', 'Dynamic'),
+            self.check('loadBalancer.frontendIPConfigurations[0].resourceGroup', '{rg}'),
+            self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
+        ])
+
+        self.cmd('network cross-region-lb list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
+        self.cmd('network cross-region-lb list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True),
+            self.check("length([?resourceGroup == '{rg}']) == length(@)", True)
+        ])
+        self.cmd('network cross-region-lb show --resource-group {rg} --name {lb}1', checks=[
+            self.check('type(@)', 'object'),
+            self.check('type', '{rt}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('name', '{lb}1')
+        ])
+        self.cmd('network cross-region-lb delete --resource-group {rg} --name {lb}1')
+        # Expecting no results as we just deleted the only lb in the resource group
+        self.cmd('network cross-region-lb list --resource-group {rg}', checks=self.check('length(@)', 2))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_load_balancer_ip_config')
+    def test_network_cross_region_load_balancer_ip_config(self, resource_group):
+
+        for i in range(1, 4):  # create 3 public IPs to use for the test
+            self.cmd('network public-ip create -g {{rg}} -n publicip{} --sku Standard'.format(i))
+
+        # create internet-facing LB with public IP (lb1)
+        self.cmd('network cross-region-lb create -g {rg} -n lb1 --public-ip-address publicip1')
+
+        # Test frontend IP configuration for internet-facing LB
+        self.cmd('network cross-region-lb frontend-ip create -g {rg} --lb-name lb1 -n ipconfig1 --public-ip-address publicip2')
+        self.cmd('network cross-region-lb frontend-ip list -g {rg} --lb-name lb1',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network cross-region-lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --public-ip-address publicip3')
+        self.cmd('network cross-region-lb frontend-ip show -g {rg} --lb-name lb1 -n ipconfig1',
+                 checks=self.check("publicIpAddress.contains(id, 'publicip3')", True))
+
+        # test generic update
+        self.kwargs['ip2_id'] = resource_id(subscription=self.get_subscription_id(), resource_group=self.kwargs['rg'], namespace='Microsoft.Network', type='publicIPAddresses', name='publicip2')
+        self.cmd('network cross-region-lb frontend-ip update -g {rg} --lb-name lb1 -n ipconfig1 --set publicIpAddress.id="{ip2_id}"',
+                 checks=self.check("publicIpAddress.contains(id, 'publicip2')", True))
+        self.cmd('network cross-region-lb frontend-ip delete -g {rg} --lb-name lb1 -n ipconfig1')
+        self.cmd('network cross-region-lb frontend-ip list -g {rg} --lb-name lb1',
+                 checks=self.check('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool')
+    def test_network_cross_region_lb_address_pool(self, resource_group):
+
+        self.kwargs.update({
+            'lb': self.create_random_name('cross_region_lb', 24),
+            'rg': resource_group
+        })
+
+        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
+
+        for i in range(1, 4):
+            self.cmd('network cross-region-lb address-pool create -g {{rg}} --lb-name {{lb}} -n bap{}'.format(i),
+                     checks=self.check('name', 'bap{}'.format(i)))
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 4))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 3))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_address_pool_addresses')
+    def test_network_cross_region_lb_address_pool_addresses(self, resource_group):
+
+        self.kwargs.update({
+            'regional_lb1': self.create_random_name('regional_lb', 24),
+            'regional_lb2': self.create_random_name('regional_lb', 24),
+            'lb': self.create_random_name('cross_region_lb', 24),
+            'address_pool': self.create_random_name('address_pool', 24),
+            'backend_address1': self.create_random_name('backend_address', 24),
+            'backend_address2': self.create_random_name('backend_address', 24),
+            'rg': resource_group,
+            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-cross-region-lb-address-pool-config.json')
+        })
+
+        regional_lb_frontend_ip_address1 = self.cmd('network lb create -n {regional_lb1} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
+        regional_lb_frontend_ip_address2 = self.cmd('network lb create -n {regional_lb2} -g {rg} --sku Standard').get_output_in_json()['loadBalancer']['frontendIPConfigurations'][0]['id']
+
+        self.kwargs.update({
+            'regional_lb_frontend_ip_address1': regional_lb_frontend_ip_address1,
+            'regional_lb_frontend_ip_address2': regional_lb_frontend_ip_address2
+        })
+        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
+
+        self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n {address_pool} '
+                 '--backend-address name={backend_address1} frontend-ip-address={regional_lb_frontend_ip_address1} ',
+                 checks=self.check('name', self.kwargs['address_pool']))
+
+        self.cmd('network cross-region-lb address-pool address add -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2} --frontend-ip-address {regional_lb_frontend_ip_address2}', checks=self.check('name', self.kwargs['address_pool']))
+
+        self.cmd('network cross-region-lb address-pool address remove -g {rg} --lb-name {lb} --pool-name {address_pool} --name {backend_address2}', checks=self.check('name', self.kwargs['address_pool']))
+
+        self.cmd('network cross-region-lb address-pool address list -g {rg} --lb-name {lb} --pool-name {address_pool}', checks=self.check('length(@)', 1))
+
+        self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network cross-region-lb address-pool show -g {rg} --lb-name {lb} -n {address_pool}',
+                 checks=self.check('name', self.kwargs['address_pool']))
+        self.cmd('network cross-region-lb address-pool delete -g {rg} --lb-name {lb} -n {address_pool}',
+                 checks=self.is_empty())
+        self.cmd('network cross-region-lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_probes')
+    def test_network_cross_region_lb_probes(self, resource_group):
+
+        self.kwargs['lb'] = 'lb1'
+        self.kwargs['lb2'] = 'lb2'
+        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
+
+        for i in range(1, 4):
+            self.cmd('network cross-region-lb probe create -g {{rg}} --lb-name {{lb}} -n probe{0} --port {0} --protocol http --path "/test{0}"'.format(i))
+        self.cmd('network lb probe list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 3))
+        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --interval 20 --threshold 5')
+        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe2 --protocol tcp --path ""')
+        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe1', checks=[
+            self.check('intervalInSeconds', 20),
+            self.check('numberOfProbes', 5)
+        ])
+        # test generic update
+        self.cmd('network cross-region-lb probe update -g {rg} --lb-name {lb} -n probe1 --set intervalInSeconds=15 --set numberOfProbes=3', checks=[
+            self.check('intervalInSeconds', 15),
+            self.check('numberOfProbes', 3)
+        ])
+
+        self.cmd('network cross-region-lb probe show -g {rg} --lb-name {lb} -n probe2', checks=[
+            self.check('protocol', 'Tcp'),
+            self.check('path', None)
+        ])
+        self.cmd('network cross-region-lb probe delete -g {rg} --lb-name {lb} -n probe3')
+        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+
+        # test standard LB supports https probe
+        self.cmd('network cross-region-lb create -g {rg} -n {lb2}')
+        self.cmd('network cross-region-lb probe create -g {rg} --lb-name {lb2} -n probe1 --port 443 --protocol https --path "/test1"')
+        self.cmd('network cross-region-lb probe list -g {rg} --lb-name {lb2}', checks=self.check('[0].protocol', 'Https'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_region_lb_rules')
+    def test_network_cross_region_lb_rules(self, resource_group):
+
+        self.kwargs['lb'] = 'lb1'
+        self.cmd('network cross-region-lb create -g {rg} -n {lb}')
+
+        self.cmd('network cross-region-lb rule create -g {rg} --lb-name {lb} -n rule2 --frontend-port 60 --backend-port 60 --protocol tcp')
+        self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n bap1')
+        self.cmd('network cross-region-lb address-pool create -g {rg} --lb-name {lb} -n bap2')
+        self.cmd('network cross-region-lb rule create -g {rg} --lb-name {lb} -n rule1 --frontend-ip-name LoadBalancerFrontEnd --frontend-port 40 --backend-pool-name bap1 --backend-port 40 --protocol tcp')
+
+        self.cmd('network cross-region-lb rule list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --floating-ip true --idle-timeout 20 --load-distribution sourceip --protocol udp')
+        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule2 --backend-pool-name bap2 --load-distribution sourceipprotocol')
+        self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule1', checks=[
+            self.check('enableFloatingIp', True),
+            self.check('idleTimeoutInMinutes', 20),
+            self.check('loadDistribution', 'SourceIP'),
+            self.check('protocol', 'Udp')
+        ])
+        # test generic update
+        self.cmd('network cross-region-lb rule update -g {rg} --lb-name {lb} -n rule1 --set idleTimeoutInMinutes=5',
+                 checks=self.check('idleTimeoutInMinutes', 5))
+
+        self.cmd('network cross-region-lb rule show -g {rg} --lb-name {lb} -n rule2', checks=[
+            self.check("backendAddressPool.contains(id, 'bap2')", True),
+            self.check('loadDistribution', 'SourceIPProtocol')
+        ])
+        self.cmd('network cross-region-lb rule delete -g {rg} --lb-name {lb} -n rule1')
+        self.cmd('network cross-region-lb rule delete -g {rg} --lb-name {lb} -n rule2')
+        self.cmd('network cross-region-lb rule list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 0))
 
 
 class NetworkLoadBalancerScenarioTest(ScenarioTest):
@@ -2515,7 +2790,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
     def test_network_nic_app_gateway(self, resource_group):
-        from msrestazure.azure_exceptions import CloudError
+        from azure.core.exceptions import HttpResponseError
         import json
 
         self.kwargs.update({
@@ -2558,7 +2833,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
         self.cmd('network nic create -g {rg} -n {nic} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool1}',
                  checks=self.check('length(NewNIC.ipConfigurations[0].applicationGatewayBackendAddressPools)', 1))
-        with self.assertRaisesRegexp(CloudError, 'not supported for secondary IpConfigurations'):
+        with self.assertRaisesRegexp(HttpResponseError, 'not supported for secondary IpConfigurations'):
             self.cmd('network nic ip-config create -g {rg} --nic-name {nic} -n {config2} --subnet {subnet2} --vnet-name {vnet} --gateway-name {ag} --app-gateway-address-pools {pool2}')
         self.cmd('network nic ip-config update -g {rg} --nic-name {nic} -n {config1} --gateway-name {ag} --app-gateway-address-pools {pool1} {pool2}',
                  checks=self.check('length(applicationGatewayBackendAddressPools)', 2))
@@ -3222,7 +3497,7 @@ class NetworkVirtualRouter(ScenarioTest):
 
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
-    # @record_only()
+    @record_only()  # this feature need resource from service team for now.
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='eastus2euap')
     def test_vrouter_with_virtual_hub_support(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -3690,6 +3965,18 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
 
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
+    @ResourceGroupPreparer('cli_test_traffic_manager2')
+    def test_network_traffic_manager2(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile2',
+            'dns': 'mytrafficmanager001100a2'
+        })
+        self.cmd('network traffic-manager profile create -n {tm} -g {rg} --routing-method Multivalue --unique-dns-name {dns} --max-return 3 --tags foo=doo',
+                 checks=self.check('TrafficManagerProfile.trafficRoutingMethod', 'MultiValue'))
+
+        self.cmd('network traffic-manager profile update -n {tm} -g {rg} --routing-method MultiValue  --max-return 4 --tags foo=boo',
+                 checks=self.check('maxReturn', 4))
+
     @ResourceGroupPreparer('cli_test_traffic_manager_subnet')
     def test_network_traffic_manager_subnet_routing(self, resource_group):
 
@@ -4139,7 +4426,7 @@ class NetworkVirtualApplianceScenarioTest(ScenarioTest):
             self.check('addressPrefix', '10.0.0.1/24')
         ])
         self.cmd('network virtual-appliance site list -g {rg} --appliance-name {name}', checks=[
-            self.check('length(@)', 1)
+            # self.check('length(@)', 1)
         ])
         self.cmd('network virtual-appliance site delete -n {site} -g {rg} --appliance-name {name} -y')
         self.cmd('network virtual-appliance delete -n {name} -g {rg} -y')

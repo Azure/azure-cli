@@ -148,14 +148,16 @@ def _format_resource_changes(builder, resource_changes):
     if not resource_changes:
         return
 
-    num_scopes = len(set(map(_get_scope, resource_changes)))
-    resource_changes_by_scope = groupby(sorted(resource_changes, key=_get_scope), _get_scope)
+    num_scopes = len(set(map(_get_scope_uppercase, resource_changes)))
+    resource_changes_by_scope = groupby(sorted(resource_changes, key=_get_scope_uppercase), _get_scope_uppercase)
 
     builder.append_line()
     builder.append_line(f"The deployment will update the following {'scope:' if num_scopes == 1 else 'scopes'}")
 
-    for scope, resource_changes_in_scope in resource_changes_by_scope:
-        _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope)
+    for _, resource_changes_in_scope in resource_changes_by_scope:
+        resource_changes_in_scope_list = list(resource_changes_in_scope)
+        scope = _get_scope(resource_changes_in_scope_list[0])
+        _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope_list)
 
 
 def _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope):
@@ -359,6 +361,10 @@ def _get_api_version(resource_change):
 def _get_scope(resource_change):
     scope, _ = split_resource_id(resource_change.resource_id)
     return scope
+
+
+def _get_scope_uppercase(resource_change):
+    return _get_scope(resource_change).upper()
 
 
 def _get_relative_resource_id(resource_change):

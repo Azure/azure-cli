@@ -188,7 +188,7 @@ class TestFormatWhatIfOperationResult(unittest.TestCase):
     def test_group_resources_changes_by_sorted_scope(self):
         changes = [
             WhatIfChange(
-                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1",
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/RG1/providers/p1/foo1",
                 change_type=ChangeType.create,
             ),
             WhatIfChange(
@@ -214,7 +214,7 @@ class TestFormatWhatIfOperationResult(unittest.TestCase):
         ]
 
         expected = f"""
-Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
+Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/RG1
 {Color.GREEN}
   + p1/foo1
   + p2/bar

@@ -24,7 +24,7 @@ jobs:
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
   strategy:
-    maxParallel: 20
+    maxParallel: 5
     matrix:
       acr:
         Target: acr
@@ -324,7 +324,7 @@ jobs:
           echo "##vso[task.setvariable variable=Match]0"
         fi
     - task: UsePythonVersion@0
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         versionSpec: '3.8'
         addToPath: true
@@ -350,10 +350,10 @@ jobs:
 
         python -m venv env
         source env/bin/activate
-        # pip install azdev
+        pip install azdev
         # git clone https://github.com/Azure/azure-cli-dev-tools.git
-        git clone -b fix https://github.com/qwordy/azure-cli-dev-tools.git
-        pip install -e azure-cli-dev-tools
+        # git clone -b fix https://github.com/qwordy/azure-cli-dev-tools.git
+        # pip install -e azure-cli-dev-tools
         pip install pytest-json-report
         pip install pytest-html
         pip install pytest-rerunfailures
@@ -375,17 +375,20 @@ jobs:
         az login -u azureclitest@azuresdkteam.onmicrosoft.com -p $(AZURECLITESTPASSWORD)
         az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
 
+        # Clean resources
+        python /home/vsts/work/1/s/scripts/live_test/clean_policy.py
+
         # Whether commit changes
         if [[ "$(USER_USERNAME)" != "" && "$(USER_TOKEN)" != "" ]]; then
           echo "Commit mode"
           azdev test ${FinalTarget} --no-exitfirst -a "-n $(USER_PARALLELISM)"
-          azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+          azdev test ${FinalTarget} --live --lf --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
         else
           echo "Normal mode"
           # Sequential
-          azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 -s"
+          azdev test ${FinalTarget} $(USER_LIVE) --mark serial --xml-path test_results.sequential.xml --no-exitfirst -a "-n 1 --json-report --json-report-summary --json-report-file=$(Target).report.sequential.json --html=$(Target).report.sequential.html --self-contained-html --reruns 3 --capture=sys"
           # Parallel
-          azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 -s"
+          azdev test ${FinalTarget} $(USER_LIVE) --mark "not serial" --xml-path test_results.parallel.xml --no-exitfirst -a "-n $(USER_PARALLELISM) --json-report --json-report-summary --json-report-file=$(Target).report.parallel.json --html=$(Target).report.parallel.html --self-contained-html --reruns 3 --capture=sys"
         fi
 
         pwd
@@ -399,34 +402,34 @@ jobs:
           git push origin $(USER_BRANCH)
         fi
 
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
     - task: PublishTestResults@2
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         testResultsFiles: '/home/vsts/work/1/test_results.*.xml'
         testRunTitle: 'Azure CLI live test results of $(Target)'
         mergeTestResults: true
         # testResultsFormat: 'JUnit'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.json'
         ArtifactName: '$(Target).report.sequential.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.sequential.html'
         ArtifactName: '$(Target).report.sequential.html'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.json'
         ArtifactName: '$(Target).report.parallel.json'
         publishLocation: 'Container'
     - task: PublishBuildArtifacts@1
-      condition: eq(variables.Match, '1')
+      condition: and(succeededOrFailed(), eq(variables.Match, '1'))
       inputs:
         PathtoPublish: '/home/vsts/work/1/$(Target).report.parallel.html'
         ArtifactName: '$(Target).report.parallel.html'

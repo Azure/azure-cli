@@ -15,7 +15,8 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
+     _get_parent_proc_name)
 from azure.cli.core.mock import DummyCli
 
 
@@ -380,25 +381,72 @@ class TestUtils(unittest.TestCase):
     def test_scopes_to_resource(self):
         from azure.cli.core.util import scopes_to_resource
         # scopes as a list
-        self.assertEqual(scopes_to_resource(['https://management.core.windows.net/.default']),
+        self.assertEqual(scopes_to_resource(['https://management.core.windows.net//.default']),
                          'https://management.core.windows.net/')
         # scopes as a tuple
         self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
-                         'https://storage.azure.com/')
+                         'https://storage.azure.com')
 
-        # Double slashes are reduced
+        # resource with trailing slash
+        self.assertEqual(scopes_to_resource(('https://management.azure.com//.default',)),
+                         'https://management.azure.com/')
         self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
                          'https://datalake.azure.net/')
+
+        # resource without trailing slash
+        self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
+                         'https://managedhsm.azure.com')
 
     def test_resource_to_scopes(self):
         from azure.cli.core.util import resource_to_scopes
         # resource converted to a scopes list
         self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
-                         ['https://management.core.windows.net/.default'])
+                         ['https://management.core.windows.net//.default'])
 
-        # Use double slashes for certain services
+        # resource with trailing slash
+        self.assertEqual(resource_to_scopes('https://management.azure.com/'),
+                         ['https://management.azure.com//.default'])
         self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
                          ['https://datalake.azure.net//.default'])
+
+        # resource without trailing slash
+        self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
+                         ['https://managedhsm.azure.com/.default'])
+
+    @mock.patch("psutil.Process")
+    def test_get_parent_proc_name(self, mock_process_type):
+        process = mock_process_type.return_value
+        parent1 = process.parent.return_value
+        parent2 = parent1.parent.return_value
+        parent3 = parent2.parent.return_value
+
+        # Windows, in a virtual env, launched by pwsh.exe
+        process.name.return_value = "python.exe"
+        parent1.name.return_value = "python.exe"
+        parent2.name.return_value = "cmd.exe"
+        parent3.name.return_value = "pwsh.exe"
+        self.assertEqual(_get_parent_proc_name(), "pwsh.exe")
+
+        # Windows, in a virtual env, launched by powershell.exe
+        parent3.name.return_value = "powershell.exe"
+        self.assertEqual(_get_parent_proc_name(), "powershell.exe")
+
+        # Windows, launched by cmd.exe
+        parent1.name.return_value = "cmd.exe"
+        parent2.name.return_value = "explorer.exe"
+        self.assertEqual(_get_parent_proc_name(), "cmd.exe")
+
+        # Linux, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "bash"
+        parent2.name.return_value = "init"
+        self.assertEqual(_get_parent_proc_name(), "bash")
+
+        # Linux, launched by pwsh, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "pwsh"
+        parent2.name.return_value = "bash"
+        self.assertEqual(_get_parent_proc_name(), "pwsh")
 
 
 class TestBase64ToHex(unittest.TestCase):

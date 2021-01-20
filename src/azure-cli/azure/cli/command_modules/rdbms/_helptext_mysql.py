@@ -291,3 +291,11 @@ examples:
     text: az mysql flexible-server wait --exists --resource-group testGroup --name testServer
     crafted: true
 """
+
+helps['mysql flexible-server show-connection-string'] = """
+type: command
+short-summary: Show the connection strings for a MySQL flexible-server database.
+examples:
+  - name: Show connection strings for cmd and programming languages.
+    text: az mysql flexible-server show-connection-string -s testServer -u username -p password -d databasename
+"""

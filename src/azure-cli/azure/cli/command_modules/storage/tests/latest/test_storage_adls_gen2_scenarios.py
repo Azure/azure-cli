@@ -228,6 +228,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         # Test with account key
         filesystem1 = self.create_random_name(prefix='filesystem', length=24)
+        self.storage_cmd('storage fs exists -n {}', account_info, filesystem1) \
+            .assert_with_checks(JMESPathCheck('exists', False))
         self.storage_cmd('storage fs create -n {} --public-access file', account_info, filesystem1)
         self.storage_cmd('storage fs exists -n {}', account_info, filesystem1) \
             .assert_with_checks(JMESPathCheck('exists', True))

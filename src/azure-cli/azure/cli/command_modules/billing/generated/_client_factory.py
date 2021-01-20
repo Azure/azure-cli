@@ -24,6 +24,10 @@ def cf_balance(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).available_balances
 
 
+def cf_instruction(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).instructions
+
+
 def cf_profile(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_profiles
 
@@ -34,6 +38,10 @@ def cf_customer(cli_ctx, *_):
 
 def cf_invoice_section(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).invoice_sections
+
+
+def cf_permission(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).billing_permissions
 
 
 def cf_subscription(cli_ctx, *_):
@@ -58,3 +66,15 @@ def cf_policy(cli_ctx, *_):
 
 def cf_property(cli_ctx, *_):
     return cf_billing_cl(cli_ctx).billing_property
+
+
+def cf_role_definition(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).billing_role_definitions
+
+
+def cf_role_assignment(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).billing_role_assignments
+
+
+def cf_agreement(cli_ctx, *_):
+    return cf_billing_cl(cli_ctx).agreements

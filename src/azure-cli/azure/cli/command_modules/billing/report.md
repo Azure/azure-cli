@@ -11,15 +11,20 @@
 |---------|------------|--------|
 |az billing account|BillingAccounts|[commands](#CommandsInBillingAccounts)|
 |az billing balance|AvailableBalances|[commands](#CommandsInAvailableBalances)|
+|az billing instruction|Instructions|[commands](#CommandsInInstructions)|
 |az billing profile|BillingProfiles|[commands](#CommandsInBillingProfiles)|
 |az billing customer|Customers|[commands](#CommandsInCustomers)|
 |az billing invoice section|InvoiceSections|[commands](#CommandsInInvoiceSections)|
+|az billing permission|BillingPermissions|[commands](#CommandsInBillingPermissions)|
 |az billing subscription|BillingSubscriptions|[commands](#CommandsInBillingSubscriptions)|
 |az billing product|Products|[commands](#CommandsInProducts)|
 |az billing invoice|Invoices|[commands](#CommandsInInvoices)|
 |az billing transaction|Transactions|[commands](#CommandsInTransactions)|
 |az billing policy|Policies|[commands](#CommandsInPolicies)|
 |az billing property|BillingProperty|[commands](#CommandsInBillingProperty)|
+|az billing role-definition|BillingRoleDefinitions|[commands](#CommandsInBillingRoleDefinitions)|
+|az billing role-assignment|BillingRoleAssignments|[commands](#CommandsInBillingRoleAssignments)|
+|az billing agreement|Agreements|[commands](#CommandsInAgreements)|
 
 ## COMMANDS
 ### <a name="CommandsInBillingAccounts">Commands in `az billing account` group</a>
@@ -28,6 +33,12 @@
 |[az billing account list](#BillingAccountsList)|List|[Parameters](#ParametersBillingAccountsList)|[Example](#ExamplesBillingAccountsList)|
 |[az billing account show](#BillingAccountsGet)|Get|[Parameters](#ParametersBillingAccountsGet)|[Example](#ExamplesBillingAccountsGet)|
 |[az billing account update](#BillingAccountsUpdate)|Update|[Parameters](#ParametersBillingAccountsUpdate)|[Example](#ExamplesBillingAccountsUpdate)|
+
+### <a name="CommandsInAgreements">Commands in `az billing agreement` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing agreement list](#AgreementsListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersAgreementsListByBillingAccount)|[Example](#ExamplesAgreementsListByBillingAccount)|
+|[az billing agreement show](#AgreementsGet)|Get|[Parameters](#ParametersAgreementsGet)|[Example](#ExamplesAgreementsGet)|
 
 ### <a name="CommandsInAvailableBalances">Commands in `az billing balance` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -40,6 +51,13 @@
 |[az billing customer list](#CustomersListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersCustomersListByBillingProfile)|[Example](#ExamplesCustomersListByBillingProfile)|
 |[az billing customer list](#CustomersListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersCustomersListByBillingAccount)|[Example](#ExamplesCustomersListByBillingAccount)|
 |[az billing customer show](#CustomersGet)|Get|[Parameters](#ParametersCustomersGet)|[Example](#ExamplesCustomersGet)|
+
+### <a name="CommandsInInstructions">Commands in `az billing instruction` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing instruction list](#InstructionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersInstructionsListByBillingProfile)|[Example](#ExamplesInstructionsListByBillingProfile)|
+|[az billing instruction show](#InstructionsGet)|Get|[Parameters](#ParametersInstructionsGet)|[Example](#ExamplesInstructionsGet)|
+|[az billing instruction create](#InstructionsPut)|Put|[Parameters](#ParametersInstructionsPut)|[Example](#ExamplesInstructionsPut)|
 
 ### <a name="CommandsInInvoices">Commands in `az billing invoice` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -56,6 +74,14 @@
 |[az billing invoice section show](#InvoiceSectionsGet)|Get|[Parameters](#ParametersInvoiceSectionsGet)|[Example](#ExamplesInvoiceSectionsGet)|
 |[az billing invoice section create](#InvoiceSectionsCreateOrUpdate#Create)|CreateOrUpdate#Create|[Parameters](#ParametersInvoiceSectionsCreateOrUpdate#Create)|[Example](#ExamplesInvoiceSectionsCreateOrUpdate#Create)|
 |[az billing invoice section update](#InvoiceSectionsCreateOrUpdate#Update)|CreateOrUpdate#Update|[Parameters](#ParametersInvoiceSectionsCreateOrUpdate#Update)|Not Found|
+
+### <a name="CommandsInBillingPermissions">Commands in `az billing permission` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing permission list](#BillingPermissionsListByInvoiceSections)|ListByInvoiceSections|[Parameters](#ParametersBillingPermissionsListByInvoiceSections)|[Example](#ExamplesBillingPermissionsListByInvoiceSections)|
+|[az billing permission list](#BillingPermissionsListByCustomer)|ListByCustomer|[Parameters](#ParametersBillingPermissionsListByCustomer)|[Example](#ExamplesBillingPermissionsListByCustomer)|
+|[az billing permission list](#BillingPermissionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersBillingPermissionsListByBillingProfile)|[Example](#ExamplesBillingPermissionsListByBillingProfile)|
+|[az billing permission list](#BillingPermissionsListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersBillingPermissionsListByBillingAccount)|[Example](#ExamplesBillingPermissionsListByBillingAccount)|
 
 ### <a name="CommandsInPolicies">Commands in `az billing policy` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -87,6 +113,23 @@
 |---------|------------|--------|-----------|
 |[az billing property show](#BillingPropertyGet)|Get|[Parameters](#ParametersBillingPropertyGet)|[Example](#ExamplesBillingPropertyGet)|
 |[az billing property update](#BillingPropertyUpdate)|Update|[Parameters](#ParametersBillingPropertyUpdate)|[Example](#ExamplesBillingPropertyUpdate)|
+
+### <a name="CommandsInBillingRoleAssignments">Commands in `az billing role-assignment` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing role-assignment list](#BillingRoleAssignmentsListByInvoiceSection)|ListByInvoiceSection|[Parameters](#ParametersBillingRoleAssignmentsListByInvoiceSection)|[Example](#ExamplesBillingRoleAssignmentsListByInvoiceSection)|
+|[az billing role-assignment list](#BillingRoleAssignmentsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersBillingRoleAssignmentsListByBillingProfile)|[Example](#ExamplesBillingRoleAssignmentsListByBillingProfile)|
+|[az billing role-assignment list](#BillingRoleAssignmentsListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersBillingRoleAssignmentsListByBillingAccount)|[Example](#ExamplesBillingRoleAssignmentsListByBillingAccount)|
+|[az billing role-assignment delete](#BillingRoleAssignmentsDeleteByInvoiceSection)|DeleteByInvoiceSection|[Parameters](#ParametersBillingRoleAssignmentsDeleteByInvoiceSection)|[Example](#ExamplesBillingRoleAssignmentsDeleteByInvoiceSection)|
+|[az billing role-assignment delete](#BillingRoleAssignmentsDeleteByBillingProfile)|DeleteByBillingProfile|[Parameters](#ParametersBillingRoleAssignmentsDeleteByBillingProfile)|[Example](#ExamplesBillingRoleAssignmentsDeleteByBillingProfile)|
+|[az billing role-assignment delete](#BillingRoleAssignmentsDeleteByBillingAccount)|DeleteByBillingAccount|[Parameters](#ParametersBillingRoleAssignmentsDeleteByBillingAccount)|[Example](#ExamplesBillingRoleAssignmentsDeleteByBillingAccount)|
+
+### <a name="CommandsInBillingRoleDefinitions">Commands in `az billing role-definition` group</a>
+|CLI Command|Operation Swagger name|Parameters|Examples|
+|---------|------------|--------|-----------|
+|[az billing role-definition list](#BillingRoleDefinitionsListByInvoiceSection)|ListByInvoiceSection|[Parameters](#ParametersBillingRoleDefinitionsListByInvoiceSection)|[Example](#ExamplesBillingRoleDefinitionsListByInvoiceSection)|
+|[az billing role-definition list](#BillingRoleDefinitionsListByBillingProfile)|ListByBillingProfile|[Parameters](#ParametersBillingRoleDefinitionsListByBillingProfile)|[Example](#ExamplesBillingRoleDefinitionsListByBillingProfile)|
+|[az billing role-definition list](#BillingRoleDefinitionsListByBillingAccount)|ListByBillingAccount|[Parameters](#ParametersBillingRoleDefinitionsListByBillingAccount)|[Example](#ExamplesBillingRoleDefinitionsListByBillingAccount)|
 
 ### <a name="CommandsInBillingSubscriptions">Commands in `az billing subscription` group</a>
 |CLI Command|Operation Swagger name|Parameters|Examples|
@@ -163,6 +206,32 @@ region="WA"
 |**--enrollment-accounts**|array|The accounts associated to the enrollment.|enrollment_accounts|enrollmentAccounts|
 |**--billing-profiles-value**|array|The billing profiles associated with the billing account.|value|value|
 
+### group `az billing agreement`
+#### <a name="AgreementsListByBillingAccount">Command `az billing agreement list`</a>
+
+##### <a name="ExamplesAgreementsListByBillingAccount">Example</a>
+```
+az billing agreement list --account-name "{billingAccountName}"
+```
+##### <a name="ParametersAgreementsListByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--expand**|string|May be used to expand the participants.|expand|$expand|
+
+#### <a name="AgreementsGet">Command `az billing agreement show`</a>
+
+##### <a name="ExamplesAgreementsGet">Example</a>
+```
+az billing agreement show --name "{agreementName}" --account-name "{billingAccountName}"
+```
+##### <a name="ParametersAgreementsGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--name**|string|The ID that uniquely identifies an agreement.|name|agreementName|
+|**--expand**|string|May be used to expand the participants.|expand|$expand|
+
 ### group `az billing balance`
 #### <a name="AvailableBalancesGet">Command `az billing balance show`</a>
 
@@ -217,6 +286,51 @@ az billing customer show --expand "enabledAzurePlans,resellers" --account-name "
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
 |**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
 |**--expand**|string|May be used to expand enabledAzurePlans and resellers|expand|$expand|
+
+### group `az billing instruction`
+#### <a name="InstructionsListByBillingProfile">Command `az billing instruction list`</a>
+
+##### <a name="ExamplesInstructionsListByBillingProfile">Example</a>
+```
+az billing instruction list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersInstructionsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+
+#### <a name="InstructionsGet">Command `az billing instruction show`</a>
+
+##### <a name="ExamplesInstructionsGet">Example</a>
+```
+az billing instruction show --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{instructionName}"
+```
+##### <a name="ParametersInstructionsGet">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--name**|string|Instruction Name.|name|instructionName|
+
+#### <a name="InstructionsPut">Command `az billing instruction create`</a>
+
+##### <a name="ExamplesInstructionsPut">Example</a>
+```
+az billing instruction create --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{instructionName}" --amount 5000 --end-date "2020-12-30T21:26:47.997Z" --start-date "2019-12-30T21:26:47.997Z"
+```
+##### <a name="ParametersInstructionsPut">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--name**|string|Instruction Name.|name|instructionName|
+|**--amount**|number|The amount budgeted for this billing instruction.|amount|amount|
+|**--start-date**|date-time|The date this billing instruction goes into effect.|start_date|startDate|
+|**--end-date**|date-time|The date this billing instruction is no longer in effect.|end_date|endDate|
+|**--creation-date**|date-time|The date this billing instruction was created.|creation_date|creationDate|
 
 ### group `az billing invoice`
 #### <a name="InvoicesListByBillingProfile">Command `az billing invoice list`</a>
@@ -341,6 +455,50 @@ az billing invoice section create --account-name "{billingAccountName}" --profil
 |**--display-name**|string|The name of the invoice section.|display_name|displayName|
 |**--labels**|dictionary|Dictionary of metadata associated with the invoice section.|labels|labels|
 
+### group `az billing permission`
+#### <a name="BillingPermissionsListByInvoiceSections">Command `az billing permission list`</a>
+
+##### <a name="ExamplesBillingPermissionsListByInvoiceSections">Example</a>
+```
+az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+```
+##### <a name="ParametersBillingPermissionsListByInvoiceSections">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+
+#### <a name="BillingPermissionsListByCustomer">Command `az billing permission list`</a>
+
+##### <a name="ExamplesBillingPermissionsListByCustomer">Example</a>
+```
+az billing permission list --account-name "{billingAccountName}" --customer-name "{customerName}"
+```
+##### <a name="ParametersBillingPermissionsListByCustomer">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--customer-name**|string|The ID that uniquely identifies a customer.|customer_name|customerName|
+
+#### <a name="BillingPermissionsListByBillingProfile">Command `az billing permission list`</a>
+
+##### <a name="ExamplesBillingPermissionsListByBillingProfile">Example</a>
+```
+az billing permission list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersBillingPermissionsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="BillingPermissionsListByBillingAccount">Command `az billing permission list`</a>
+
+##### <a name="ExamplesBillingPermissionsListByBillingAccount">Example</a>
+```
+az billing permission list --account-name "{billingAccountName}"
+```
+##### <a name="ParametersBillingPermissionsListByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
 ### group `az billing policy`
 #### <a name="PoliciesUpdate">Command `az billing policy update`</a>
 
@@ -556,6 +714,106 @@ az billing property update --cost-center "1010"
 |------|----|-----------|----------|------------|
 |**--cost-center**|string|The cost center applied to the subscription.|cost_center|costCenter|
 
+### group `az billing role-assignment`
+#### <a name="BillingRoleAssignmentsListByInvoiceSection">Command `az billing role-assignment list`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsListByInvoiceSection">Example</a>
+```
+az billing role-assignment list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsListByInvoiceSection">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+
+#### <a name="BillingRoleAssignmentsListByBillingProfile">Command `az billing role-assignment list`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsListByBillingProfile">Example</a>
+```
+az billing role-assignment list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="BillingRoleAssignmentsListByBillingAccount">Command `az billing role-assignment list`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsListByBillingAccount">Example</a>
+```
+az billing role-assignment list --account-name "{billingAccountName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsListByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="BillingRoleAssignmentsDeleteByInvoiceSection">Command `az billing role-assignment delete`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsDeleteByInvoiceSection">Example</a>
+```
+az billing role-assignment delete --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{billingRoleAssignmentName}" --invoice-section-name "{invoiceSectionName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsDeleteByInvoiceSection">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+|**--name**|string|The ID that uniquely identifies a role assignment.|name|billingRoleAssignmentName|
+
+#### <a name="BillingRoleAssignmentsDeleteByBillingProfile">Command `az billing role-assignment delete`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsDeleteByBillingProfile">Example</a>
+```
+az billing role-assignment delete --account-name "{billingAccountName}" --profile-name "{billingProfileName}" --name \
+"{billingRoleAssignmentName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsDeleteByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="BillingRoleAssignmentsDeleteByBillingAccount">Command `az billing role-assignment delete`</a>
+
+##### <a name="ExamplesBillingRoleAssignmentsDeleteByBillingAccount">Example</a>
+```
+az billing role-assignment delete --account-name "{billingAccountName}" --name "{billingRoleAssignmentName}"
+```
+##### <a name="ParametersBillingRoleAssignmentsDeleteByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+### group `az billing role-definition`
+#### <a name="BillingRoleDefinitionsListByInvoiceSection">Command `az billing role-definition list`</a>
+
+##### <a name="ExamplesBillingRoleDefinitionsListByInvoiceSection">Example</a>
+```
+az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}" \
+--invoice-section-name "{invoiceSectionName}"
+```
+##### <a name="ParametersBillingRoleDefinitionsListByInvoiceSection">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+|**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
+|**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
+|**--invoice-section-name**|string|The ID that uniquely identifies an invoice section.|invoice_section_name|invoiceSectionName|
+
+#### <a name="BillingRoleDefinitionsListByBillingProfile">Command `az billing role-definition list`</a>
+
+##### <a name="ExamplesBillingRoleDefinitionsListByBillingProfile">Example</a>
+```
+az billing role-definition list --account-name "{billingAccountName}" --profile-name "{billingProfileName}"
+```
+##### <a name="ParametersBillingRoleDefinitionsListByBillingProfile">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
+#### <a name="BillingRoleDefinitionsListByBillingAccount">Command `az billing role-definition list`</a>
+
+##### <a name="ExamplesBillingRoleDefinitionsListByBillingAccount">Example</a>
+```
+az billing role-definition list --account-name "{billingAccountName}"
+```
+##### <a name="ParametersBillingRoleDefinitionsListByBillingAccount">Parameters</a> 
+|Option|Type|Description|Path (SDK)|Swagger name|
+|------|----|-----------|----------|------------|
 ### group `az billing subscription`
 #### <a name="BillingSubscriptionsListByInvoiceSection">Command `az billing subscription list`</a>
 
