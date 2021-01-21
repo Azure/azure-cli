@@ -7,24 +7,25 @@ This document provides the roadmap for track2 SDK migration in Azure CLI. When y
 
 ## Here are criteria to determine the priority of migration:
 - On-demand for track2 SDK from CLI customers (such as LinkedIn) has higher priority.
-- On-demand for track2 SDK from SDK team has higher priority.
+- On-demand for track2 SDK from service team has higher priority.
 - The smaller the gap between track1 version and track2 version, the higher priority.
 - The more frequent release, the higher priority.
-- If there is no track2 SDK released, it has lower priority.
 - If track1 is in preview (0.x.x or x.x.xrc), the lower priority.
 - Extenison has lower priority.
 
-## Here is the proposed roadmap for managment plane migration. (Total ~60 CLI modules and ~60 extensions.)
+## Here is the proposed roadmap for managment plane migration. (Total ~60 CLI modules: 6 completed and ~60 extensions: 20 completed.)
 
 | Module   | CAE support | Migration Status | ETA | Latest Track2 SDK Status | Latest Track1 SDK status  | Release frequency | CLI Module or Extension |
 | --------- |:-------------:| :-----:|:-----:|:--:|:--:|:--:|:--:|
-|**Phase 1** |  |  | |  | |  |||
+|**Phase 1: Compute, Network, Storage** |  |  | |  | |  |||
 | Network     |Yes| **Completed** | 04/31/2021 | GA (17.0.0) | GA (13.0.0) | High (Once a month)| Module |
 | Storage     |Yes|**Completed** | 04/31/2021 | GA (16.0.0) | GA (11.2.0) | Medium (Once two months) | Module |
 | Compute     | Yes|**Completed** | 04/31/2021 |GA (18.0.0) | GA (14.0.0) | High (Once a month) | Module |
 | KeyVault    | Yes|**Completed** | 04/31/2021 |GA (8.0.0) | GA (2.2.0) | Medium (Once three months) | Module |
 | Monitor     |Yes |**Completed** | 04/31/2021 |Monitor: GA (2.0.0)<br> LogAnalytics: GA (8.0.0) | Monitor: Preview (0.12.0)<br> LogAnalytics: GA (2.0.0) | Medium (Once two months) | Module |
 | Resource   | Yes |Not Started | 04/31/2021 |GA (15.0.0) | GA (12.0.0) | Medium (Once two months) | Module |
+| SQL   | No |Not Started | 04/31/2021 |GA (1.0.0) | Preview (0.25.0) | High (Once a month) | Module |
+| Role   | No |Not Started | 04/31/2021 |GA (1.0.0) | Preview (0.61.0) | High (Once a month) | Module |
 | AppService   |  Yes|Not Started | 04/31/2021 |GA (1.0.0) | Preview (0.48.0) | Medium (Once three months) | Module |
 | ACS   |  Yes |Not Started | 04/31/2021 |ContainerService: GA (14.0.0)<br> ContainerInstance: GA (7.0.0) | ContainerService: GA (11.0.0)<br> ContainerInstance: GA (2.0.0) | Medium (Once two months) | Module |
 | ACR   | Yes |Not Started | 04/31/2021 |Preview (8.0.0b1) | Preview (3.0.0rc16) | Medium (Once two months) | Module |
@@ -36,23 +37,17 @@ This document provides the roadmap for track2 SDK migration in Azure CLI. When y
 | ApplicationInsights   |Yes | Not Started | 04/31/2021 |N/A | Vendored_Preview (0.2.0) | N/A | Extension |
 | Firewall   |Yes| Not Started | 04/31/2021 | N/A | Vendored_GA (13.0.0) | N/A | Extension |
 | Frontdoor   | Yes | Not Started | 04/31/2021 |N/A | Vendored_Preview (0.3.1) | N/A | Extension |
-|**Phase 2** |  |  | |  | |  |||
+|**Phase 2: Management&Governance&others** |  |  | |  | |  |||
 | CostManagement   | Yes | **Completed** | 06/31/2021 |Vendored_GA (1.2.0) | N/A | N/A | Extension |
 | DataFactory   | Yes | **Completed** | 06/31/2021 |Vendored_SDK | N/A | N/A | Extension |
 | RDBMS |  Yes|Not Started | 06/31/2021 |GA (8.0.0) | Preview (3.1.0rc1) | Medium (Once two months) | Module |
 | EventGrid | Yes |Not Started | 06/31/2021 | GA (8.0.0) | Preview (3.0.0rc8) | Medium (Once three months) | Module |
 | HDInsight | Yes |Not Started | 06/31/2021 | GA (7.0.0) | GA (2.1.0) | Medium (Once two months) | Module |
 | Kusto |  Yes |Not Started | 06/31/2021 |Preview (1.0.0b1) | Preview (0.10.0) | Medium (Once two months | Module |
-| *Below services are not supported in CLI repo*|  |  | |  | |  |||
-| Azure Security Center |  Yes | | 06/31/2021 | |  |  |  |
-| Sentinel|  Yes | | 06/31/2021 | |  |  |  |
-| Azure Data Explorer|  Yes | | 06/31/2021 | |  |  |  |
-| Azure DevOps|  Yes | | 06/31/2021 | |  |  |  |
-| Azure Machine Learning|  Yes | | 06/31/2021 | |  |  |  |
+|**Phase 3** |  |  | |  | |  |||
 | NatGateway || **Completed** | N/A | Network: GA (8.0.0) | Network: GA (2.2.0) | Use Network package| Module |
-| SQL   |  |Not Started | N/A |GA (1.0.0) | Preview (0.25.0) | High (Once a month) | Module |
 | Synapse |  |Not Started | N/A |Preview (1.0.0b1) | Preview (0.6.0) | Medium (Once two months) | Module |
-| AppConfiguration  |  |N/A | 03/31/2021 |GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
+| AppConfiguration  |  |N/A | N/A |GA (1.0.1) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Security |  |Not Started | N/A |GA (1.0.0) | Preview (0.6.0) | Medium (Once three months) | Module |
 | Batch   |  |Not Started | N/A |GA (14.0.0) | GA (9.0.0) | Low (Once half year) | Module |
 | CognitiveServices | |Not Started | N/A | GA (11.0.0) | GA (6.3.0) | Low (Once half year) | Module |
@@ -138,3 +133,9 @@ This document provides the roadmap for track2 SDK migration in Azure CLI. When y
 | VirtualWan   | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | Swiftlet   | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
 | ScheduledQuery   | | Not Started | N/A |N/A | Vendored_Preview (0.1.0) | N/A | Extension |
+| *Below services are not supported in CLI repo*|  |  | |  | |  |||
+| Azure Security Center |  Yes | | 06/31/2021 | |  |  |  |
+| Sentinel|  Yes | | 06/31/2021 | |  |  |  |
+| Azure Data Explorer|  Yes | | 06/31/2021 | |  |  |  |
+| Azure DevOps|  Yes | | 06/31/2021 | |  |  |  |
+| Azure Machine Learning|  Yes | | 06/31/2021 | |  |  |  |
