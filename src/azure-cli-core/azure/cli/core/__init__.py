@@ -389,9 +389,17 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
+        # Configure the commands that require all modules to be loaded
+        # Such as: "az next" need to support searching the contents of other module commands
+        full_loaded_commands = ['next']
+        need_load_all_modules = False
+        if isinstance(args, list) and args:
+            need_load_all_modules = args[0] in full_loaded_commands
+
         command_index = None
         # Set fallback=False to turn off command index in case of regression
-        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+        use_command_index = (self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True) and
+                             not need_load_all_modules)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
