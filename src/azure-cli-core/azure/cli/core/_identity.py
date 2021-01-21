@@ -173,13 +173,15 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if self._cred_cache:
             self._cred_cache.save_service_principal_cred(entry)
 
-        credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
+        credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority,
+                                            **self._credential_kwargs)
         return credential
 
     def login_with_service_principal_certificate(self, client_id, certificate_path):
         # Use CertificateCredential
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
+        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority,
+                                           **self._credential_kwargs)
 
         # CertificateCredential.__init__ will verify the certificate
         # Persist to encrypted cache
@@ -207,14 +209,16 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                credential = ManagedIdentityCredential(identity_config={"mi_res_id": identity_id})
+                credential = ManagedIdentityCredential(identity_config={"mi_res_id": identity_id},
+                                                       **self._credential_kwargs)
                 token = credential.get_token(*scopes)
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
                 try:
                     # Try client ID
-                    credential = ManagedIdentityCredential(client_id=identity_id)
+                    credential = ManagedIdentityCredential(client_id=identity_id,
+                                                           **self._credential_kwargs)
                     token = credential.get_token(*scopes)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
@@ -230,7 +234,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 if not authenticated:
                     try:
                         # Try object ID
-                        credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
+                        credential = ManagedIdentityCredential(identity_config={"object_id": identity_id},
+                                                               **self._credential_kwargs)
                         token = credential.get_token(*scopes)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
@@ -248,7 +253,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         else:
             # Use the default managed identity. It can be either system assigned or user assigned.
-            credential = ManagedIdentityCredential()
+            credential = ManagedIdentityCredential(**self._credential_kwargs)
             token = credential.get_token(*scopes)
 
         decoded = _decode_access_token(token)
@@ -274,7 +279,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         return credential, managed_identity_info
 
     def login_in_cloud_shell(self, scopes):
-        credential = ManagedIdentityCredential()
+        credential = ManagedIdentityCredential(**self._credential_kwargs)
         # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
         # The scopes is only used for acquiring the initial access token
         token = credential.get_token(*scopes)
@@ -345,9 +350,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             self._msal_secret_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
-            return ClientSecretCredential(self.tenant_id, client_id, client_secret)
+            return ClientSecretCredential(self.tenant_id, client_id, client_secret, **self._credential_kwargs)
         if certificate_path:
-            return CertificateCredential(self.tenant_id, client_id, certificate_path)
+            return CertificateCredential(self.tenant_id, client_id, certificate_path, **self._credential_kwargs)
         raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
     def get_environment_credential(self):
@@ -361,9 +366,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         return EnvironmentCredential(**self._credential_kwargs)
 
-    @staticmethod
-    def get_managed_identity_credential(client_id=None):
-        return ManagedIdentityCredential(client_id=client_id)
+    def get_managed_identity_credential(self, client_id=None):
+        return ManagedIdentityCredential(client_id=client_id, **self._credential_kwargs)
 
     def migrate_tokens(self):
         """Migrate ADAL token cache to MSAL."""
