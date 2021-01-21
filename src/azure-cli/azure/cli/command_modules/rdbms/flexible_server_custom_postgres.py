@@ -149,7 +149,7 @@ def flexible_server_restore(cmd, client,
         source_server_name=source_server,  # this should be the source server name, not id
         create_mode="PointInTimeRestore",
         availability_zone=zone,
-        location=location
+        location=location,
         server_name=server_name)
 
     # Retrieve location from same location as source server
