@@ -329,7 +329,8 @@ def get_site_availability(cmd, name):
     if "." in name:
         availability.name_available = False
         availability.reason = "Invalid"
-        availability.message = "Site names only allow alphanumeric characters and hyphens, cannot start or end in a hyphen, and must be less than 64 chars."
+        availability.message = ("Site names only allow alphanumeric characters and hyphens, "
+                                "cannot start or end in a hyphen, and must be less than 64 chars.")
     return availability
 
 
