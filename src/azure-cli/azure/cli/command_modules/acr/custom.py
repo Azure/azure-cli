@@ -12,7 +12,8 @@ from ._utils import (
     validate_managed_registry,
     validate_sku_update,
     get_resource_group_name_by_registry_name,
-    user_confirmation
+    user_confirmation,
+    resolve_identity_client_id
 )
 from ._docker_utils import get_login_credentials, EMPTY_GUID
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
@@ -45,6 +46,7 @@ def acr_create(cmd,
                key_encryption_key=None,
                public_network_enabled=None,
                zone_redundancy=None,
+               allow_trusted_services=None,
                tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
@@ -64,6 +66,8 @@ def acr_create(cmd,
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
+
+    _handle_network_bypass(cmd, registry, allow_trusted_services)
 
     lro_poller = client.create(resource_group_name, registry_name, registry)
 
@@ -102,6 +106,7 @@ def acr_update_custom(cmd,
                       default_action=None,
                       data_endpoint_enabled=None,
                       public_network_enabled=None,
+                      allow_trusted_services=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -123,12 +128,21 @@ def acr_update_custom(cmd,
     if public_network_enabled is not None:
         _configure_public_network_access(cmd, instance, public_network_enabled)
 
+    _handle_network_bypass(cmd, instance, allow_trusted_services)
+
     return instance
 
 
 def _configure_public_network_access(cmd, registry, enabled):
     PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
     registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
+
+
+def _handle_network_bypass(cmd, registry, allow_trusted_services):
+    if allow_trusted_services is not None:
+        NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions')
+        registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services
+                                                if allow_trusted_services else NetworkRuleBypassOptions.none)
 
 
 def acr_update_get(cmd):
@@ -403,7 +417,7 @@ def _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_
                                             resource_group=resource_group_name,
                                             resource=identity)
 
-    identity_client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+    identity_client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
     KeyVaultProperties, EncryptionProperty = cmd.get_models('KeyVaultProperties', 'EncryptionProperty')
     registry.encryption = EncryptionProperty(status='enabled', key_vault_properties=KeyVaultProperties(
@@ -524,7 +538,7 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
                 identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
                                                         resource_group=resource_group_name,
                                                         resource=identity)
-                client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+                client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
         registry.encryption.key_vault_properties.identity = client_id
 
@@ -545,16 +559,6 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
                        namespace='Microsoft.ManagedIdentity',
                        type='userAssignedIdentities',
                        name=resource)
-
-
-def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
-
-    res = parse_resource_id(managed_identity_resource_id)
-    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
-    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
 
 
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):

@@ -122,12 +122,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     routing_choice_type = CLIArgumentType(
         arg_group='Routing Preference', arg_type=get_enum_type(t_routing_choice),
         help='Routing Choice defines the kind of network routing opted by the user.',
-        is_preview=True, min_api='2019-06-01')
+        min_api='2019-06-01')
     publish_microsoft_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
         help='A boolean flag which indicates whether microsoft routing storage endpoints are to be published.')
     publish_internet_endpoints_type = CLIArgumentType(
-        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), min_api='2019-06-01',
         help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
     umask_type = CLIArgumentType(
@@ -144,12 +144,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     timeout_type = CLIArgumentType(
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
-    marker_type = CLIArgumentType(
-        help='A string value that identifies the portion of the list of containers to be '
-             'returned with the next listing operation. The operation returns the NextMarker value within '
-             'the response body if the listing operation did not return all containers remaining to be listed '
-             'with the current page. If specified, this generator will begin returning results from the point '
-             'where the previous generator stopped.')
 
     marker_type = CLIArgumentType(
         help='A string value that identifies the portion of the list of containers to be '

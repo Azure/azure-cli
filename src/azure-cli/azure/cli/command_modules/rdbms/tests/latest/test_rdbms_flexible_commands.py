@@ -70,15 +70,17 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('postgres', resource_group)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group, server):
+        self._test_flexible_server_mgmt('postgres', resource_group, server)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_mgmt(self, resource_group):
-        self._test_flexible_server_mgmt('mysql', resource_group)
+    @ServerPreparer(engine_type='mysql', location=mysql_location)
+    def test_mysql_flexible_server_mgmt(self, resource_group, server):
+        self._test_flexible_server_mgmt('mysql', resource_group, server)
 
-    def _test_flexible_server_mgmt(self, database_engine, resource_group):
+    def _test_flexible_server_mgmt(self, database_engine, resource_group, server_name):
 
         if self.cli_ctx.local_context.is_on:
             self.cmd('local-context off')
@@ -98,7 +100,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location_result = 'East US 2 EUAP'
 
         # flexible-server create with user input
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        random_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        random_name2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         storage_size_mb = storage_size * 1024
         backup_retention = 7
 
@@ -111,20 +114,20 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-                 .format(database_engine, resource_group, server_name, location))
+        # self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
+        #          .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
-            self.cmd('postgres flexible-server create -g {} -l {} --tier Burstable --sku-name Standard_B1ms --public-access none'
-                     .format(resource_group, location))
-            self.cmd('postgres flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
-                     .format(resource_group, location))
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier Burstable --sku-name Standard_B1ms --public-access none'
+                     .format(resource_group, location, random_name))
+            self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, location, random_name2))
         elif database_engine == 'mysql':
-            self.cmd('mysql flexible-server create -g {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
-                     .format(resource_group, location))
-            self.cmd('mysql flexible-server create -g {} -l {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
-                     .format(resource_group, location))
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
+                     .format(resource_group, location, random_name))
+            self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
+                     .format(resource_group, location, random_name2))
 
         self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=list_checks)
@@ -194,8 +197,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
                  checks=[JMESPathCheck('type(@)', 'array')])
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
@@ -858,56 +859,3 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, servers[1]),
                  checks=NoneCheck())
-
-
-'''
-class FlexibleServerLocalContextScenarioTest(LocalContextScenarioTest):
-
-    postgres_location = 'southeastasia'
-    mysql_location = 'southeastasia'
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('postgres', resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=mysql_location)
-    def test_mysql_flexible_server_local_context(self, resource_group):
-        self._test_flexible_server_local_context('mysql', resource_group)
-
-    def _test_flexible_server_local_context(self, database_engine, resource_group):
-        self.cmd('config param-persist on')
-        from knack.util import CLIError
-        if database_engine == 'mysql':
-            location = self.mysql_location
-        else:
-            location = self.postgres_location
-
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-
-        self.cli_ctx.local_context.set(['all'], 'resource_group_name', resource_group)
-        self.cli_ctx.local_context.set(['all'], 'location', location)
-
-        self.cmd('{} flexible-server create -n {} --public-access none'.format(database_engine, server_name))
-
-        self.cmd('{} flexible-server show'.format(database_engine))
-
-        self.cmd('{} flexible-server update --backup-retention {}'
-                 .format(database_engine, 10))
-
-        self.cmd('{} flexible-server stop'.format(database_engine))
-
-        self.cmd('{} flexible-server start'.format(database_engine))
-
-        self.cmd('{} flexible-server restart'.format(database_engine))
-
-        self.cmd('{} flexible-server list'.format(database_engine))
-
-        self.cmd('{} flexible-server show-connection-string'.format(database_engine))
-
-        self.cmd('{} flexible-server list-skus'.format(database_engine))
-
-        self.cmd('{} flexible-server delete --yes'.format(database_engine))
-        self.cmd('config param-persist off')
-'''

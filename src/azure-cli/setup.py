@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.17.1"
+VERSION = "2.18.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -80,7 +80,7 @@ DEPENDENCIES = [
     'azure-mgmt-databoxedge~=0.2.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
-    'azure-mgmt-datamigration~=0.1.0',
+    'azure-mgmt-datamigration~=4.1.0',
     'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
@@ -93,13 +93,13 @@ DEPENDENCIES = [
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault==8.0.0',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=0.7.0',
+    'azure-mgmt-loganalytics~=8.0.0',
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=2.1,>=2.1.0',
-    'azure-mgmt-monitor~=0.11.0',
+    'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.14.0',
     'azure-mgmt-network~=17.0.0',
@@ -144,10 +144,6 @@ DEPENDENCIES = [
     'javaproperties==0.5.1',
     'jsondiff==1.2.0'
 ]
-
-# dependencies for specific OSes
-if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.7')
 
 TESTS_REQUIRE = [
     'mock~=4.0'
