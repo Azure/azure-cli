@@ -35,13 +35,13 @@ class CredentialAdaptor:
         self._external_credentials = external_credentials
         self._resource = resource
 
-    def _get_token(self, scopes=None):
+    def _get_token(self, scopes=None, **kwargs):
         external_tenant_tokens = []
         # If scopes is not provided, use CLI-managed resource
         scopes = scopes or resource_to_scopes(self._resource)
         logger.debug("Retrieving token from MSAL for scopes %r", scopes)
         try:
-            token = self._credential.get_token(*scopes)
+            token = self._credential.get_token(*scopes, **kwargs)
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token(*scopes) for cred in self._external_credentials]
         except CLIError as err:
@@ -87,11 +87,11 @@ class CredentialAdaptor:
             session.headers['x-ms-authorization-auxiliary'] = aux_tokens
         return session
 
-    def get_token(self, *scopes):
+    def get_token(self, *scopes, **kwargs):
         # type: (*str) -> AccessToken
         logger.debug("CredentialAdaptor.get_token invoked by Track 2 SDK with scopes=%r", scopes)
         scopes = _normalize_scopes(scopes)
-        token, _ = self._get_token(scopes)
+        token, _ = self._get_token(scopes, **kwargs)
         return token
 
     def get_all_tokens(self, *scopes):

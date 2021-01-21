@@ -138,7 +138,7 @@ class Profile:
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = None
         if store_adal_cache:
@@ -624,19 +624,28 @@ class Profile:
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
-    def get_access_token_for_scopes(self, username, tenant, scopes):
-        tenant = tenant or 'common'
-        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant, cred_cache=self._adal_cache)
-        identity_credential = identity.get_user_credential(username)
-        from azure.cli.core.credential import CredentialAdaptor
-        auth = CredentialAdaptor(identity_credential)
-        token = auth.get_token(*scopes)
+    def get_access_token_for_scopes(self, username, tenant, *scopes, **kwargs):
+        """Get access token for user account. Service Principal is not supported."""
+        identity = Identity(self._authority, tenant)
+        credential = identity.get_user_credential(username)
+        token = credential.get_token(*scopes, **kwargs)
         return token.token
 
     def get_access_token_for_resource(self, username, tenant, resource):
         """get access token for current user account, used by vsts and iot module"""
-        return self.get_access_token_for_scopes(username, tenant, resource_to_scopes(resource))
+        return self.get_access_token_for_scopes(username, tenant, *resource_to_scopes(resource))
+
+    def get_msal_token(self, scopes, data):
+        """
+        This is added for vmssh feature with backward compatible interface.
+        data contains token_type (ssh-cert), key_id and JWK.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        subscription_id = account[_SUBSCRIPTION_ID]
+        credential, _, _ = self.get_login_credentials(subscription_id=subscription_id)
+        certificate = credential.get_token(*scopes, data=data)
+        return username, certificate.token
 
     @staticmethod
     def _try_parse_msi_account_name(account):
@@ -876,7 +885,7 @@ class SubscriptionFinder:
         self.cli_ctx = cli_ctx
         self.secret = None
         self._arm_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
-        self.authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        self.authority = self.cli_ctx.cloud.endpoints.active_directory
         self.adal_cache = kwargs.pop("adal_cache", None)
 
         def create_arm_client_factory(credentials):

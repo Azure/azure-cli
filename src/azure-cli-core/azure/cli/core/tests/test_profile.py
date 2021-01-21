@@ -14,7 +14,7 @@ import datetime
 
 from copy import deepcopy
 
-from adal import AdalError
+from azure.core.credentials import AccessToken
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _USE_VENDORED_SUBSCRIPTION_SDK,
                                      _detect_adfs_authority, _attach_token_tenant)
@@ -121,7 +121,6 @@ class TestProfile(unittest.TestCase):
             "accessToken": cls.raw_token1,
             "userId": cls.user1
         }
-        from azure.core.credentials import AccessToken
         import time
         cls.access_token = AccessToken(cls.raw_token1, int(cls.token_entry1['expiresIn'] + time.time()))
         cls.user2 = 'bar@bar.com'
@@ -1840,6 +1839,46 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
 
         # With pytest, use -o log_cli=True to manually check the log
+
+    @mock.patch('azure.cli.core._identity.Identity.get_user_credential', autospec=True)
+    def test_get_access_token_for_scopes(self, get_user_credential_mock):
+        credential_mock = get_user_credential_mock.return_value
+        credential_mock.get_token.return_value = self.access_token
+
+        cli = DummyCli()
+        profile = Profile(cli_ctx=cli)
+        token = profile.get_access_token_for_scopes(self.user1, self.tenant_id, *self.msal_scopes)
+
+        get_user_credential_mock.assert_called_with(mock.ANY, self.user1)
+        credential_mock.get_token.assert_called_with(*self.msal_scopes)
+        self.assertEqual(token, self.raw_token1)
+
+    @mock.patch('azure.cli.core._identity.Identity.get_user_credential', autospec=True)
+    def test_get_msal_token(self, get_user_credential_mock):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        credential_mock = get_user_credential_mock.return_value
+        credential_mock.get_token.return_value = self.access_token
+
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
+        profile._set_subscriptions(consolidated)
+
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+        data = {
+            "token_type": "ssh-cert",
+            "req_cnf": "fake_jwk",
+            "key_id": "fake_id"
+        }
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, self.user1)
+        self.assertEqual(access_token, self.raw_token1)
+        credential_mock.get_token.assert_called_with(*scopes, data=data)
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
