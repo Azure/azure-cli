@@ -178,6 +178,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
     installer = os.getenv(_ENV_AZ_INSTALLER)
     system = platform.system()
     if system == 'Darwin':
+        subprocess.call(['xcode-select', '--install'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if installer != 'HOMEBREW':
             from shutil import which
             if which('brew') is None:
@@ -188,6 +189,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
             update_cmd = ['brew', 'install', 'postgresql']
             logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
             subprocess.call(update_cmd)
+        subprocess.call(['export', 'LIBRARY_PATH=$LIBRARY_PATH:/usr/local/opt/openssl/lib/'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     elif system == 'Linux':
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
