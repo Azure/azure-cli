@@ -182,7 +182,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_workspaces')
         g.custom_command('create', 'create_workspace', supports_no_wait=True)
-        g.custom_command('activate', 'activate_workspace', client_factory=cf_synapse_client_cmk_factory, supports_no_wait=True)
         g.custom_command('update', 'update_workspace', supports_no_wait=True)
         g.custom_command('check-name', 'custom_check_name_availability',
                          command_type=synapse_operations_sdk,

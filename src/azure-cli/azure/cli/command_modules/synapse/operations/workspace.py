@@ -93,7 +93,6 @@ def create_workspace_key(cmd, client, resource_group_name, workspace_name, key_n
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, key_name=key_name, key_vault_url=key_identifier)
 
 
-
 def update_workspace_key(cmd, client, resource_group_name, workspace_name, key_name, key_identifier, is_active=False, no_wait=False):
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, workspace_name, is_active_cmk=is_active, key_name=key_name, key_vault_url=key_identifier)
 
