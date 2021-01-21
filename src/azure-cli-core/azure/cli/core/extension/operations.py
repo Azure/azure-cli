@@ -100,6 +100,8 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
+    if extension_name == 'rdbms-connect':
+        _install_deps_for_rdbms_connect()
     ext_file = None
     if is_url:
         # Download from URL
@@ -165,6 +167,64 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     logger.debug('Saved the whl to %s', dst)
 
     return extension_name
+
+
+def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
+    # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
+    import platform
+    import subprocess
+    from azure.cli.core.util import get_linux_distro
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    installer = os.getenv(_ENV_AZ_INSTALLER)
+    system = platform.system()
+    if system == 'Darwin':
+        if installer != 'HOMEBREW':
+            from shutil import which
+            if which('brew') is None:
+                logger.warning('You may need to install postgresql with homebrew first before you install this extension.')
+                return
+        exit_code = subprocess.call(['brew', 'list', 'postgresql'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if exit_code != 0:
+            update_cmd = ['brew', 'install', 'postgresql']
+            logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
+            subprocess.call(update_cmd)
+    elif system == 'Linux':
+        distname, _ = get_linux_distro()
+        distname = distname.lower().strip()
+        if installer == 'DEB' or any(x in distname for x in ['ubuntu', 'debian']):
+            from azure.cli.core.util import in_cloud_console
+            if in_cloud_console():
+                raise CLIError("This extension is not supported in Cloud Shell as you do not have permission to install extra dependencies.")
+            try:
+                subprocess.check_output(['dpkg', '-s', 'libpq-dev', 'python3-dev'], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError:
+                apt_update_cmd = 'apt-get update'.split()
+                apt_install_cmd = 'apt-get install -y libpq-dev python3-dev'.split()
+                if os.geteuid() != 0:  # pylint: disable=no-member
+                    apt_update_cmd.insert(0, 'sudo')
+                    apt_install_cmd.insert(0, 'sudo')
+                cmd = apt_update_cmd + ['&&'] + apt_install_cmd
+                logger.debug("Install dependencies with '%s'", " ".join(cmd))
+                subprocess.call(cmd)
+        elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
+            try:
+                subprocess.check_output(['rpm', '-q', 'postgresql-devel', 'python-devel'], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError:
+                if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                    yum_install_cmd = 'yum install -y postgresql-devel python3-devel'.split()
+                    if os.geteuid() != 0:  # pylint: disable=no-member
+                        yum_install_cmd.insert(0, 'sudo')
+                    logger.debug("Install dependencies with '%s'", " ".join(yum_install_cmd))
+                    subprocess.call(yum_install_cmd)
+                elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                    zypper_refresh_cmd = ['zypper', 'refresh']
+                    zypper_install_cmd = 'zypper install -y postgresql-devel python3-devel'.split()
+                    if os.geteuid() != 0:  # pylint: disable=no-member
+                        zypper_refresh_cmd.insert(0, 'sudo')
+                        zypper_install_cmd.insert(0, 'sudo')
+                    cmd = zypper_refresh_cmd + ['&&'] + zypper_install_cmd
+                    logger.debug("Install dependencies with '%s'", " ".join(cmd))
+                    subprocess.call(cmd)
 
 
 def is_valid_sha256sum(a_file, expected_sum):
