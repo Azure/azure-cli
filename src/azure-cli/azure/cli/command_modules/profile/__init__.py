@@ -60,10 +60,11 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('username', options_list=['--username', '-u'], help='user name, service principal, or managed service identity ID')
             c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.', validator=validate_tenant)
             c.argument('tenant_access', action='store_true',
+                       deprecate_info=c.deprecate(target='--tenant-access', hide=True),
                        help='Only log in to the home tenant or the tenant specified by --tenant. CLI will not perform '
                             'ARM operations to list tenants and subscriptions. Then you may run tenant-level commands, '
                             'such as `az ad`, `az account get-access-token`.')
-            c.argument('allow_no_subscriptions', action='store_true', deprecate_info=c.deprecate(target='--allow-no-subscriptions', expiration='3.0.0', redirect="--tenant-access", hide=False),
+            c.argument('allow_no_subscriptions', action='store_true',
                        help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as `az ad`")
             c.ignore('_subscription')  # hide the global subscription parameter
             c.argument('identity', options_list=('-i', '--identity'), action='store_true', help="Log in using the Virtual Machine's managed identity", arg_group='Managed Identity')
@@ -72,6 +73,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help="Use CLI's old authentication flow based on device code. CLI will also use this if it can't launch a browser in your behalf, e.g. in remote SSH or Cloud Shell")
             c.argument('use_cert_sn_issuer', action='store_true', help='used with a service principal configured with Subject Name and Issuer Authentication in order to support automatic certificate rolls')
             c.argument('environment', options_list=['--environment', '-e'], action='store_true',
+                       deprecate_info=c.deprecate(target='--environment', hide=True),
                        help='Use EnvironmentCredential. Both user and service principal accounts are supported. '
                             'For required environment variables, see https://docs.microsoft.com/en-us/python/api/overview/azure/identity-readme?view=azure-python#environment-variables')
 

@@ -34,24 +34,6 @@ examples:
       text: az login --identity
     - name: Log in using a VM's user-assigned managed identity. Client or object ids of the service identity also work.
       text: az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-    - name: Log in with a service principal using EnvironmentCredential.
-      text: |-
-        # Bash script
-        export AZURE_TENANT_ID='<tenant ID>'
-        export AZURE_CLIENT_ID='<service principal appId>'
-        # With secret
-        export AZURE_CLIENT_SECRET='<secret>'
-        # Or with certificate
-        # export AZURE_CLIENT_CERTIFICATE_PATH='<path to a PEM-encoded certificate file>'
-        az login --environment
-    - name: Log in with a user account using EnvironmentCredential.
-      text: |-
-        # Bash script
-        # AZURE_CLIENT_ID defaults to Azure CLI's client ID
-        # export AZURE_CLIENT_ID='04b07795-8ddb-461a-bbee-02f9e1bf7b46'
-        export AZURE_USERNAME='<username>'
-        export AZURE_PASSWORD='<password>'
-        az login --environment
 """
 
 helps['account'] = """
