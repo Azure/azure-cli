@@ -42,7 +42,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'Central US')
         ])
 
-        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --live-transcription-language {liveTranscriptionLanguage} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --key-frame-interval {keyFrameInterval} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --use-static-hostname --custom-hostname-prefix {customHostnamePrefix} --stretch-mode {stretchMode}', checks=[
+        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --transcription-language {liveTranscriptionLanguage} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --key-frame-interval {keyFrameInterval} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --use-static-hostname --custom-hostname {customHostnamePrefix} --stretch-mode {stretchMode}', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'Central US'),
             self.check('input.streamingProtocol', '{streamingProtocol}'),

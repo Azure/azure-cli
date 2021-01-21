@@ -31,8 +31,6 @@ class AmsEncryptionTests(ScenarioTest):
         self.cmd('keyvault create --name {keyVault} -g {rg} --enable-soft-delete --enable-purge-protection')
         key_vault_result = self.cmd('keyvault key create --name {keyName} --vault-name {keyVault}')
 
-        print(key_vault_result.get_output_in_json())
-
         self.kwargs['keyVaultId'] = key_vault_result.get_output_in_json()['key']['kid']
         self.kwargs['principalId'] = account_result.get_output_in_json()['identity']['principalId']
 
