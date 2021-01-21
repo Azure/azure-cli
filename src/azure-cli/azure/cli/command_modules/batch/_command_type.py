@@ -834,4 +834,4 @@ class BatchCommandGroup(AzCommandGroup):
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
         command = AzureBatchDataPlaneCommand(operation, self.command_loader, **merged_kwargs)
 
-        self.command_loader._cli_command(command_name, operation_str=operation, **command.get_kwargs())  # pylint: disable=protected-access
+        self.command_loader._cli_command(command_name, **command.get_kwargs())  # pylint: disable=protected-access
