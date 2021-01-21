@@ -73,7 +73,7 @@ def load_arguments(self, _):
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
         c.argument('enable_data_exfiltration', arg_type=get_three_state_flag(),
-                   help='The flag indicates whether enable data exfiltration.', options_list=['--enable_exfiltration', '--enable_data_exfiltration'])
+                   help='The flag indicates whether enable data exfiltration.', options_list=['--enable-exfiltration', '--enable-data-exfiltration'])
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
