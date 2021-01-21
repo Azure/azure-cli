@@ -20,6 +20,8 @@ def _compare_and_transform(args, section_key, alias_section):
     args_index = 0
     import shlex
     for cmd in shlex.split(section_key):
+        if args_index >= len(args):
+            return False, args
         if cmd != args[args_index]:
             return False, args
         args_index += 1
