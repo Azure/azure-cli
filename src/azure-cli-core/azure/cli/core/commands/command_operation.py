@@ -126,7 +126,7 @@ class WaitCommandOperation(BaseCommandOperation):
         super(WaitCommandOperation, self).__init__(ctx, **kwargs)
         self.operation = operation
 
-    def handler(self, command_args):
+    def handler(self, command_args):    # pylint: disable=too-many-statements
         from msrest.exceptions import ClientException
         from azure.core.exceptions import HttpResponseError
         from knack.util import CLIError
@@ -293,7 +293,7 @@ class ShowCommandOperation(BaseCommandOperation):
         return self.load_op_description(op)
 
 
-class GenericUpdateCommandOperation(BaseCommandOperation):
+class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable=too-many-instance-attributes
 
     class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
         def __call__(self, parser, namespace, values, option_string=None):
@@ -319,25 +319,25 @@ class GenericUpdateCommandOperation(BaseCommandOperation):
         self.child_collection_key = child_collection_key
         self.child_arg_name = child_arg_name
 
-    def handler(self, args):
+    def handler(self, command_args):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
         from knack.util import CLIError
         from azure.cli.core.commands import cached_get, cached_put, _is_poller
         from azure.cli.core.util import find_child_item, augment_no_wait_handler_args
         from azure.cli.core.commands.arm import add_usage, remove_usage, set_usage,\
             add_properties, remove_properties, set_properties
 
-        self.cmd = args.get('cmd')
+        self.cmd = command_args.get('cmd')
 
-        force_string = args.get('force_string', False)
-        ordered_arguments = args.pop('ordered_arguments', [])
+        force_string = command_args.get('force_string', False)
+        ordered_arguments = command_args.pop('ordered_arguments', [])
         dest_names = self.child_arg_name.split('.')
-        child_names = [args.get(key, None) for key in dest_names]
+        child_names = [command_args.get(key, None) for key in dest_names]
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
-            if args[item]:
+            if command_args[item]:
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
-            del args[item]
+            del command_args[item]
 
-        getter, getterargs = self._extract_handler_and_args(args, self.getter_operation)
+        getter, getterargs = self._extract_handler_and_args(command_args, self.getter_operation)
 
         if self.child_collection_prop_name:
             parent = cached_get(self.cmd, getter, **getterargs)
@@ -349,14 +349,14 @@ class GenericUpdateCommandOperation(BaseCommandOperation):
 
         # pass instance to the custom_function, if provided
         if self.custom_function_operation:
-            custom_function, custom_func_args = self._extract_handler_and_args(args, self.custom_function_operation)
+            custom_function, custom_func_args = self._extract_handler_and_args(command_args, self.custom_function_operation)
             if self.child_collection_prop_name:
                 parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
                 instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setter, setterargs = self._extract_handler_and_args(args, self.setter_operation)
+        setter, setterargs = self._extract_handler_and_args(command_args, self.setter_operation)
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -383,14 +383,14 @@ class GenericUpdateCommandOperation(BaseCommandOperation):
         # Handle no-wait
         supports_no_wait = self.cmd.command_kwargs.get('supports_no_wait', None)
         if supports_no_wait:
-            no_wait_enabled = args.get('no_wait', False)
+            no_wait_enabled = command_args.get('no_wait', False)
             augment_no_wait_handler_args(no_wait_enabled,
                                          setter,
                                          setterargs)
         else:
             no_wait_param = self.cmd.command_kwargs.get('no_wait_param', None)
             if no_wait_param:
-                setterargs[no_wait_param] = args[no_wait_param]
+                setterargs[no_wait_param] = command_args[no_wait_param]
 
         if self.setter_arg_name == 'parameters':
             result = cached_put(self.cmd, setter, **setterargs)
