@@ -17,7 +17,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                             '--authentication-type password ' \
                             '--admin-username deploy ' \
                             '--admin-password PassPass10!) ' \
-                            '--nsg {vm} '
+                            '--nsg {vm} ' \
+                            '--nsg-rule None '
         vm_info = self.cmd(vm_create_cmd_tpl.format(rg=resource_group, vm=vm)).get_output_in_json()
 
         vm_enable_ext_tpl = 'vm extension set -g {rg} ' \
@@ -77,7 +78,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--authentication-type password '
                  '--admin-username deploy '
                  '--admin-password PassPass10!) '
-                 '--nsg {vm2} ')
+                 '--nsg {vm2} '
+                 '--nsg-rule None')
         self.cmd('vm extension set -g {rg} '
                  '--vm-name {vm2} '
                  '-n NetworkWatcherAgentLinux '
@@ -87,7 +89,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--authentication-type password '
                  '--admin-username deploy '
                  '--admin-password PassPass10!) '
-                 '--nsg {vm3}')
+                 '--nsg {vm3} '
+                 '--nsg-rule None')
         self.cmd('vm extension set -g {rg} '
                  '--vm-name {vm3} '
                  '-n NetworkWatcherAgentLinux '
@@ -135,16 +138,23 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        self.cmd('network vnet create -g {rg} --name cmv2-vnet --subnet-name subnet1 --address-prefix 10.0.0.0/24')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name cmv2-vnet --name subnet1').get_output_in_json()
+        self.kwargs.update({
+            'cm_subnet_endpoint': 'cm_subnet_endpoint',
+            'subnet_id': subnet['id']
+        })
+
         # add an endpoint as source
         self.cmd('network watcher connection-monitor endpoint add '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
                  '--source-test-groups {test_group} '
-                 '--name vm02 '
-                 '--resource-id {vm2_id} '
-                 '--filter-type Include '
-                 '--filter-item type=AgentAddress address=10.0.0.1 '
-                 '--filter-item type=AgentAddress address=10.0.0.2 ')
+                 '--name {cm_subnet_endpoint} '
+                 '--resource-id {subnet_id} '
+                 '--type AzureSubnet '
+                 '--address-exclude 10.0.0.25 '
+                 '--coverage-level BelowAverage')
 
         # add an endpoint as destination
         self.cmd('network watcher connection-monitor endpoint add '
@@ -152,7 +162,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--location {location} '
                  '--dest-test-groups {test_group} '
                  '--name Github '
-                 '--address github.com ')
+                 '--address github.com '
+                 '--type ExternalAddress')
 
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 4))
@@ -165,7 +176,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor endpoint remove '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
-                 '--name vm02 '
+                 '--name {cm_subnet_endpoint} '
                  '--test-groups DefaultTestGroup ')
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 3))
@@ -174,6 +185,19 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_nw_connection_monitor_v2_test_configuration(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        # add a TCP test configuration
+        self.cmd('network watcher connection-monitor test-configuration add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name TCPConfig '
+                 '--protocol Tcp '
+                 '--test-groups DefaultTestGroup '
+                 '--tcp-port 8080 '
+                 '--tcp-port-behavior ListenIfAvailable '
+                 '--tcp-disable-trace-route true '
+                 '--frequency 120 '
+                 '--threshold-round-trip-time 1200')
 
         # add a HTTP test configuration
         self.cmd('network watcher connection-monitor test-configuration add '
@@ -191,7 +215,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 3))
         self.cmd('network watcher connection-monitor test-configuration show '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
@@ -207,7 +231,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 3))
+                 checks=self.check('length(@)', 4))
         self.cmd('network watcher connection-monitor test-configuration show '
                  '--connection-monitor {cmv2} '
                  '--location {location} '
@@ -220,7 +244,7 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor test-configuration list '
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 3))
 
     @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
     @AllowLargeResponse()
@@ -309,30 +333,19 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_output(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('clitest', 20)
+        })
+
         workspace = self.cmd('monitor log-analytics workspace create '
                              '-g {rg} '
                              '--location {location} '
-                             '--workspace-name MyLogAnalytics4321 ').get_output_in_json()
+                             '--workspace-name {workspace_name} ').get_output_in_json()
 
         self.kwargs.update({
             'workspace_id': workspace['id']
         })
 
-        self.cmd('network watcher connection-monitor output add '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} '
-                 '--type Workspace '
-                 '--workspace-id {workspace_id} ')
-
         self.cmd('network watcher connection-monitor output list '
                  '--location {location} '
                  '--connection-monitor {cmv2} ')
-
-        self.cmd('network watcher connection-monitor output remove '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} ')
-
-        self.cmd('network watcher connection-monitor output list '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} ',
-                 checks=self.check('length(@)', 0))

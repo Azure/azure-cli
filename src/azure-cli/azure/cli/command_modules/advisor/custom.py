@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-from azure.cli.core.util import sdk_no_wait
 
 
 def list_recommendations(client, ids=None, resource_group_name=None,
@@ -56,12 +55,15 @@ def enable_recommendations(client, ids=None, resource_group_name=None, recommend
 
     for rec in recs:
         for sup in all_sups:
-            if sup.suppression_id in rec.suppression_ids:
-                result = _parse_recommendation_uri(rec.id)
-                client.suppressions.delete(
-                    resource_uri=result['resource_uri'],
-                    recommendation_id=result['recommendation_id'],
-                    name=sup.name)
+            try:
+                if sup.suppression_id in rec.suppression_ids:
+                    result = _parse_recommendation_uri(rec.id)
+                    client.suppressions.delete(
+                        resource_uri=result['resource_uri'],
+                        recommendation_id=result['recommendation_id'],
+                        name=sup.name)
+            except TypeError:  # when rec.id is already suppressed, rec.suppression_ids is None
+                pass
         rec.suppression_ids = None
 
     return recs
@@ -132,7 +134,7 @@ def _parse_recommendation_uri(recommendation_uri):
 def _generate_recommendations(client):
     from msrestazure.azure_exceptions import CloudError
 
-    response = sdk_no_wait(True, client.generate)
+    response = client.generate(raw=True)
     location = response.headers['Location']
     operation_id = _parse_operation_id(location)
 

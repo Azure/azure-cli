@@ -15,7 +15,7 @@ class AzureKustoClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_cluster_life_cycle(self, resource_group):
         self.kwargs.update({
-            'sku': 'D13_v2',
+            'sku': 'Standard_D13_v2',
             'name': self.create_random_name(prefix='test', length=20),
             'location': "Central US",
             'capacity': 4
@@ -39,7 +39,7 @@ class AzureKustoClusterTests(ScenarioTest):
 
         # Update cluster
         self.kwargs.update({
-            'sku': 'D14_v2',
+            'sku': 'Standard_D14_v2',
             'capacity': 6
         })
         self.cmd('az kusto cluster update -n {name} -g {rg} --sku {sku} --capacity {capacity} ',
@@ -55,7 +55,7 @@ class AzureKustoClusterTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_cluster_stop_start(self, resource_group):
         self.kwargs.update({
-            'sku': 'D13_v2',
+            'sku': 'Standard_D13_v2',
             'name': self.create_random_name(prefix='test', length=20),
         })
 
@@ -90,7 +90,7 @@ class AzureKustoDatabaseTests (ScenarioTest):
     @ResourceGroupPreparer()
     def test_kusto_database_life_cycle(self, resource_group):
         self.kwargs.update({
-            'sku': 'D13_v2',
+            'sku': 'Standard_D13_v2',
             'cluster_name': self.create_random_name(prefix='test', length=20),
             'database_name': self.create_random_name(prefix='testdb', length=20),
             'location': "Central US",

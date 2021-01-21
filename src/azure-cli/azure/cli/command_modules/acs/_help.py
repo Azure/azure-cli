@@ -152,6 +152,18 @@ type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
+helps["aks check-acr"] = """
+type: command
+short-summary: Validate an ACR is accesible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accesible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
 helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
@@ -205,9 +217,12 @@ parameters:
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the node pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --ssh-key-value
@@ -216,6 +231,21 @@ parameters:
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
+  - name: --windows-admin-username
+    type: string
+    short-summary: Username to create on Windows node VMs.
+  - name: --windows-admin-password
+    type: string
+    short-summary: Password to create on Windows node VMs.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) for Windows VMs.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -259,7 +289,11 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
+  - name: --outbound-type
+    type: string
+    short-summary: How outbound traffic will be configured for a cluster.
+    long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -282,7 +316,11 @@ parameters:
             monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
                          Specify "--workspace-resource-id" to use an existing workspace.
                          If monitoring addon is enabled --no-wait argument will have no effect
-            virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+            azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                         Learn more at aka.ms/aks/policy.
+            virtual-node - enable AKS Virtual Node.
+                         Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.
@@ -319,9 +357,18 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -334,16 +381,40 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --assign-identity
+    type: string
+    short-summary: Specify an existing user assigned identity for control plane's usage in order to manage cluster resource group.
+  - name: --node-osdisk-diskencryptionset-id -d
+    type: string
+    short-summary: ResourceId of the disk encryption set to use for enabling encryption at rest on agent node os disk.
+  - name: --aci-subnet-name
+    type: string
+    short-summary: The name of a subnet in an existing VNet into which to deploy the virtual nodes.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
   - name: Create a Kubernetes cluster with a specific version.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.12.6
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9
   - name: Create a Kubernetes cluster with a larger node pool.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSet).
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.16.9 --vm-set-type AvailabilitySet
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSets).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -359,6 +430,18 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24,195.168.1.0
   - name: Create a kubernetes cluster which enables managed identity.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Create a kubernetes cluster with userDefinedRouting, standard load balancer SKU and a custom subnet preconfigured with a route table
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
+  - name: Create a kubernetes cluster with supporting Windows agent pools.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
+  - name: Create a kubernetes cluster with supporting Windows agent pools with AHUB enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$' --enable-ahub
+  - name: Create a kubernetes cluster with managed AAD enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Create a kubernetes cluster with server side encryption using your owned key.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-diskencryptionset-id <disk-encryption-set-resource-id>
+  - name: Create a kubernetes cluster with ephemeral OS enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks update'] = """
@@ -380,18 +463,21 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ports
     type: int
     short-summary: Load balancer outbound allocated ports.
@@ -399,7 +485,7 @@ parameters:
   - name: --load-balancer-idle-timeout
     type: int
     short-summary: Load balancer idle timeout in minutes.
-    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 100].
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -409,6 +495,21 @@ parameters:
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+  - name: --aad-tenant-id
+    type: string
+    short-summary: The ID of an Azure Active Directory tenant.
+  - name: --enable-ahub
+    type: bool
+    short-summary: Enable Azure Hybrid User Benefits (AHUB) feature for cluster.
+  - name: --disable-ahub
+    type: bool
+    short-summary: Disable Azure Hybrid User Benefits (AHUB) feature for cluster.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
@@ -426,6 +527,14 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges ""
   - name: Restrict apiserver traffic in a kubernetes cluster to agentpool nodes.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 0.0.0.0/32
+  - name: Update a AKS-managed AAD cluster with tenant ID or admin group object IDs.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Migrate a AKS AAD-Integrated cluster or a non-AAD cluster to a AKS-managed AAD cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-aad --aad-admin-group-object-ids <id-1,id-2> --aad-tenant-id <id>
+  - name: Enable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-ahub
+  - name: Disable Azure Hybrid User Benefits featture for a kubernetes cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-ahub
 """
 
 helps['aks delete'] = """
@@ -458,7 +567,10 @@ long-summary: |-
         http_application_routing - configure ingress with automatic public DNS name creation.
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
                      If monitoring addon is enabled --no-wait argument will have no effect
-        virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        virtual-node - enable AKS Virtual Node. Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
+        azure-policy - enable Azure policy. The Azure Policy add-on for AKS enables at-scale enforcements and safeguards on your clusters in a centralized, consistent manner.
+                     Learn more at aka.ms/aks/policy.
+        ingress-appgw - enable Application Gateway Ingress Controller addon.
 parameters:
   - name: --addons -a
     type: string
@@ -466,19 +578,39 @@ parameters:
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+  - name: --appgw-name
+    type: string
+    short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
+  - name: --appgw-subnet-cidr
+    type: string
+    short-summary: Subnet CIDR to use for a new subnet created to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-id
+    type: string
+    short-summary: Resource Id of an existing Application Gateway to use with AGIC. Use with ingress-azure addon.
+  - name: --appgw-subnet-id
+    type: string
+    short-summary: Resource Id of an existing Subnet used to deploy the Application Gateway. Use with ingress-azure addon.
+  - name: --appgw-watch-namespace
+    type: string
+    short-summary: Specify the namespace, which AGIC should watch. This could be a single string value, or a comma-separated list of namespaces.
 examples:
   - name: Enable Kubernetes addons. (autogenerated)
-    text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup
+    text: az aks enable-addons --addons virtual-node --name MyManagedCluster --resource-group MyResourceGroup --subnet MySubnetName
+    crafted: true
+  - name: Enable ingress-appgw addon with subnet prefix.
+    text: az aks enable-addons --name MyManagedCluster --resource-group MyResourceGroup --addons ingress-appgw --appgw-subnet-cidr 10.2.0.0/16 --appgw-name gateway
     crafted: true
 """
 
 helps['aks get-credentials'] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
+long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
 parameters:
   - name: --admin -a
     type: bool
     short-summary: "Get cluster administrator credentials.  Default: cluster user credentials."
+    long-summary: "On clusters with Azure Active Directory integration, this bypasses normal Azure AD authentication and can be used if you're permanently blocked by not having access to a valid Azure AD group with access to your cluster. Requires 'Azure Kubernetes Service Cluster Admin' role."
   - name: --file -f
     type: string
     short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
@@ -514,59 +646,7 @@ examples:
 
 helps['aks install-cli'] = """
 type: command
-short-summary: Download and install kubectl, the Kubernetes command-line tool.
-"""
-
-helps['aks install-connector'] = """
-type: command
-short-summary: Install the ACI Connector on a managed Kubernetes cluster.
-parameters:
-  - name: --chart-url
-    type: string
-    short-summary: URL of a Helm chart that installs ACI Connector.
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --os-type
-    type: string
-    short-summary: Install support for deploying ACIs of this operating system type.
-  - name: --service-principal
-    type: string
-    short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
-  - name: --client-secret
-    type: string
-    short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
-  - name: --image-tag
-    type: string
-    short-summary: The image tag of the virtual kubelet. Use 'latest' if it is not specified
-  - name: --aci-resource-group
-    type: string
-    short-summary: The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
-  - name: --location -l
-    type: string
-    short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-examples:
-  - name: Install the virtual Kubelet for Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
-  - name: Install the virtual Kubelet for Windows to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name virtual-kubelet --os-type Windows
-  - name: Install the virtual Kubelet for both Windows and Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --os-type Both
-  - name: Install the virtual Kubelet using a specific service principal in a specific resource group.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
-          --aci-resource-group ACI-resource-group
-  - name: Install the virtual Kubelet from a custom Helm chart with custom tag.
-    text: |-
-        az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
+short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
 helps['aks list'] = """
@@ -591,12 +671,15 @@ parameters:
     short-summary: Number of nodes in the Kubernetes agent pool. After creating a cluster, you can change the size of its node pool with `az aks scale`.
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+    short-summary: Version of Kubernetes to use for creating the cluster, such as "1.16.9".
     populator-commands:
       - "`az aks get-versions`"
   - name: --node-osdisk-size
     type: int
     short-summary: Size in GB of the OS disk for each node in the agent pool. Minimum 30 GB.
+  - name: --node-osdisk-type
+    type: string
+    short-summary: OS disk type to be used for machines in a given agent pool. Defaults to 'Ephemeral' when possible in conjunction with VM size and OS disk size. May not be changed for this pool after creation.
   - name: --max-pods -m
     type: int
     short-summary: The maximum number of pods deployable to a node.
@@ -604,9 +687,15 @@ parameters:
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --ppg
+    type: string
+    short-summary: The ID of a PPG.
   - name: --os-type
     type: string
     short-summary: The OS Type. Linux or Windows.
@@ -625,11 +714,42 @@ parameters:
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
+  - name: --mode
+    type: string
+    short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --priority
+    type: string
+    short-summary: The priority of the node pool.
+  - name: --eviction-policy
+    type: string
+    short-summary: The eviction policy of the Spot node pool. It can only be set when --priority is Spot.
+  - name: --spot-max-price
+    type: float
+    short-summary: It can only be set when --priority is Spot. Specify the maximum price you are willing to pay in US Dollars. Possible values are any decimal value greater than zero or -1 which indicates default price to be up-to on-demand. It can only include up to 5 decimal places.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
+examples:
+  - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
 """
 
 helps['aks nodepool delete'] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
+"""
+
+helps['aks nodepool get-upgrades'] = """
+type: command
+short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+examples:
+  - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
+    text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+parameters:
+  - name: --nodepool-name
+    type: string
+    short-summary: name of the node pool.
 """
 
 helps['aks nodepool list'] = """
@@ -670,6 +790,12 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --mode
+    type: string
+    short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
+  - name: --max-surge
+    type: string
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -685,30 +811,13 @@ short-summary: Upgrade the node pool in a managed Kubernetes cluster.
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.11.12".
-"""
-
-helps['aks remove-connector'] = """
-type: command
-short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
-parameters:
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --graceful
+    short-summary: Version of Kubernetes to upgrade the node pool to, such as "1.16.9".
+  - name: --node-image-only
     type: bool
-    short-summary: Use a "cordon and drain" strategy to evict pods safely before removing the ACI node.
-  - name: --os-type
+    short-summary: Only upgrade agent pool's node image.
+  - name: --max-surge
     type: string
-    short-summary: Remove support for deploying ACIs of this operating system type.
-examples:
-  - name: Remove the ACI Connector from a cluster using the graceful mode.
-    text: |-
-        az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name MyConnector --graceful
-  - name: Remove the ACI Connector from a managed Kubernetes cluster. (autogenerated)
-    text: az aks remove-connector --connector-name MyConnector --name MyManagedCluster --os-type Windows --resource-group MyResourceGroup
-    crafted: true
+    short-summary: Extra nodes used to speed upgrade. When specified, it represents the number or percent used, eg. 5 or 33%
 """
 
 helps['aks remove-dev-spaces'] = """
@@ -788,69 +897,19 @@ long-summary: "Kubernetes will be unavailable during cluster upgrades."
 parameters:
   - name: --kubernetes-version -k
     type: string
-    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.11.8" or "1.12.6".
+    short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.16.9".
     populator-commands:
       - "`az aks get-upgrades`"
   - name: --control-plane-only
     type: bool
     short-summary: Upgrade the cluster control plane only. If not specified, both control plane AND all node pools will be upgraded.
+  - name: --node-image-only
+    type: bool
+    short-summary: Only upgrade node image for agent pools.
 examples:
   - name: Upgrade a managed Kubernetes cluster to a newer version. (autogenerated)
     text: az aks upgrade --kubernetes-version 1.12.6 --name MyManagedCluster --resource-group MyResourceGroup
     crafted: true
-"""
-
-helps['aks upgrade-connector'] = """
-type: command
-short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
-parameters:
-  - name: --chart-url
-    type: string
-    short-summary: URL of a Helm chart that installs ACI Connector.
-  - name: --connector-name
-    type: string
-    short-summary: Name of the ACI Connector.
-  - name: --os-type
-    type: string
-    short-summary: Install support for deploying ACIs of this operating system type.
-  - name: --service-principal
-    type: string
-    short-summary: Service principal used for authentication to Azure APIs.
-    long-summary: If not specified, use the AKS service principal defined in the file /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
-  - name: --client-secret
-    type: string
-    short-summary: Secret associated with the service principal. This argument is required if `--service-principal` is specified.
-  - name: --image-tag
-    type: string
-    short-summary: The image tag of the virtual kubelet. Use 'latest' if it is not specified
-  - name: --aci-resource-group
-    type: string
-    short-summary: The resource group to create the ACI container groups. Use the MC_* resource group if it is not specified.
-  - name: --location -l
-    type: string
-    short-summary: The location to create the ACI container groups. Use the location of the MC_* resource group if it is not specified.
-examples:
-  - name: Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet
-  - name: Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-           --connector-name virtual-kubelet --os-type Windows
-  - name: Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --os-type Both
-  - name: Upgrade the ACI Connector to use a specific service principal in a specific resource group.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --service-principal {SPN_ID} --client-secret {SPN_SECRET} \\
-          --aci-resource-group ACI-resource-group
-  - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
-    text: |-
-        az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
-          --connector-name virtual-kubelet --chart-url {CustomURL} --image-tag {VirtualKubeletImageTag}
 """
 
 helps['aks use-dev-spaces'] = """
@@ -904,12 +963,14 @@ helps['aks rotate-certs'] = """
 
 helps['openshift'] = """
 type: group
-short-summary: Manage Azure Red Hat OpenShift Services.
+short-summary: Manage Azure Red Hat OpenShift 3.11 clusters.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift create'] = """
 type: command
-short-summary: Create a new managed OpenShift cluster.
+short-summary: Create a new Azure Red Hat OpenShift 3.11 cluster.
+long-summary: Support for the creation of ARO 3.11 clusters ends 30 Nov 2020. Please see aka.ms/aro/4 for information on switching to ARO 4.
 parameters:
   - name: --compute-vm-size -s
     type: string
@@ -958,44 +1019,48 @@ examples:
 
 helps['openshift delete'] = """
 type: command
-short-summary: Delete a managed OpenShift cluster.
+short-summary: Delete an Azure Red Hat OpenShift 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 examples:
-  - name: Delete a managed OpenShift cluster. (autogenerated)
+  - name: Delete an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift delete --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
     crafted: true
 """
 
 helps['openshift list'] = """
 type: command
-short-summary: List managed OpenShift clusters.
+short-summary: List Azure Red Hat OpenShift 3.11 clusters.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift scale'] = """
 type: command
-short-summary: Scale the compute pool in a managed OpenShift cluster.
+short-summary: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 parameters:
   - name: --compute-count -c
     type: int
     short-summary: Number of nodes in the OpenShift compute pool.
 examples:
-  - name: Scale the compute pool in a managed OpenShift cluster. (autogenerated)
+  - name: Scale the compute pool in an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift scale --compute-count 5 --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
     crafted: true
 """
 
 helps['openshift show'] = """
 type: command
-short-summary: Show the details for a managed OpenShift cluster.
+short-summary: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 examples:
-  - name: Show the details for a managed OpenShift cluster. (autogenerated)
+  - name: Show the details for an Azure Red Hat OpenShift 3.11 cluster.
     text: az openshift show --name MyManagedOpenShiftCluster --resource-group MyResourceGroup
     crafted: true
 """
 
 helps['openshift wait'] = """
 type: command
-short-summary: Wait for a managed OpenShift cluster to reach a desired state.
-long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+short-summary: Wait for an Azure Red Hat OpenShift 3.11 cluster to reach a desired state.
+long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete. Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
@@ -1004,21 +1069,24 @@ examples:
 
 helps['openshift monitor'] = """
 type: group
-short-summary: Commands to manage Log Analytics monitoring. Requires "--workspace-id".
+short-summary: Commands to manage Log Analytics monitoring in an ARO 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 """
 
 helps['openshift monitor enable'] = """
 type: command
-short-summary: Enable Log Analytics monitoring. Requires "--workspace-id".
+short-summary: Enable Log Analytics monitoring in an ARO 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 examples:
-  - name: Enable Log Analytics in a managed OpenShift cluster.
+  - name: Enable Log Analytics monitoring.
     text: |-
         az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
 helps['openshift monitor disable'] = """
 type: command
-short-summary: Disable Log Analytics monitoring.
+short-summary: Disable Log Analytics monitoring in an ARO 3.11 cluster.
+long-summary: Support for existing ARO 3.11 clusters ends June 2022. Please see aka.ms/aro/4 for information on switching to ARO 4.
 examples:
   - name: Disable Log Analytics monitoring.
     text: |-

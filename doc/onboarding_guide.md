@@ -1,7 +1,9 @@
 Onboarding Best Practices
 =========================
 
-Reach out to `azpycli@microsoft.com` to get the process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
+As a prerequisite, please contact Carl Shipley first for the [PLR](http://aka.ms/plrcriteria) (Product Launch Readiness) process.
+
+Then reach out to `azpycli@microsoft.com` to get the CLI onboarding process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
 
 ## Extension vs. Module
 
@@ -14,6 +16,7 @@ One of the key decisions you will need to make is whether to create your command
 | Release separate from the CLI release schedule | Requires dedicated installation (az extension add …) |
 | Higher velocity fixes possible                 | Can be broken by changes to the azure-cli-core       |
 | Experimental UX is permissible                 |                                                      |
+| Leverage CLI code generator to generate code   |                                                      |
 
 #### CLI Modules
 
@@ -25,6 +28,7 @@ One of the key decisions you will need to make is whether to create your command
 - Common uses for extensions include experimental commands, commands in private or public preview, or to separate between frequently used and rarely used functionality (where infrequently used commands are acquired via extension).
 - Note that if you are trying to get commands into the CLI out of step with the normal release cycle, extensions are your **only** option.
 - Because non-standard, experimental authoring patterns are permitted for extensions, simply trying to "move an extension into the CLI" is often **not** a trivial process and will necessitate a full review with higher scrutiny from the CLI team. Expect to need to make changes.
+- If you want to use CLI code generator to generate CLI code automatically, extension is your **only** option. Please reference [AZ CLI Codegen On boarding](https://github.com/Azure/autorest.az/blob/master/doc/00-onboarding-guide.md) and start from **Step 2** now.
 
 ## Initial Timeline and Milestones
 

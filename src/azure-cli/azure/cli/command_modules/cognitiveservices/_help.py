@@ -171,3 +171,35 @@ examples:
   - name: List all the Cognitive Services accounts in a resource group.
     text: az cognitiveservices list -g MyResourceGroup
 """
+
+helps['cognitiveservices account identity'] = """
+type: group
+short-summary: Manage identity of Cognitive Services accounts.
+"""
+
+helps['cognitiveservices account identity assign'] = """
+type: command
+short-summary: Assign an identity of a Cognitive Services account.
+long-summary: Assign an identity object of a Cognitive Services account. An system assigned identity will be generate and assigned to the account.
+examples:
+  - name: Assign an identity of Cognitive Services accounts.
+    text: az cognitiveservices account identity assign --name myresource --resource-group cognitive-services-resource-group
+"""
+
+helps['cognitiveservices account identity show'] = """
+type: command
+short-summary: Show the identity of a Cognitive Services account.
+long-summary: Show the identity object of a Cognitive Services account, empty object might be returned if the account has no assigned identity.
+examples:
+  - name: Show the identity of Cognitive Services accounts.
+    text: az cognitiveservices account identity show --name myresource --resource-group cognitive-services-resource-group
+"""
+
+helps['cognitiveservices account identity remove'] = """
+type: command
+short-summary: Remove the identity from a Cognitive Services account.
+long-summary: Remove the identity (if exists) from a Cognitive Services account.
+examples:
+  - name: Remove the identity from a Cognitive Services account.
+    text: az cognitiveservices account identity remove --name myresource --resource-group cognitive-services-resource-group
+"""

@@ -214,12 +214,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @VaultPreparer()
     @StorageAccountPreparer(location="southeastasia")
     @FilePreparer()
-    @FileSharePreparer(file_upload=True)
+    @FilePreparer()
+    @FilePreparer(parameter_name="file2")
+    @FileSharePreparer(file_upload=True, file_parameter_name=['file_name', 'file2'])
     @AFSPolicyPreparer()
     @AFSItemPreparer()
     @AFSRPPreparer()
     @FileSharePreparer(parameter_name="afs2")
-    def test_afs_backup_restore(self, resource_group, vault_name, storage_account, file_name, afs_name, afs2):
+    def test_afs_backup_restore(self, resource_group, vault_name, storage_account, file_name, afs_name, afs2, file2):
         self.kwargs.update({
             'vault': vault_name,
             'item1': afs_name,
@@ -227,7 +229,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'container': storage_account,
             'rg': resource_group,
             'type': "AzureStorage",
-            'file': file_name
+            'file': file_name,
+            'file2': file2
         })
 
         # full share restore original location
@@ -305,6 +308,24 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+        # item level multiple file restore to original location
+        trigger_restore_job5_json = self.cmd('backup restore restore-azurefiles -g {rg} -v {vault} -c {container} -i {item1} -r {rp1} --resolve-conflict Overwrite --restore-mode AlternateLocation --source-file-type File --source-file-path {file} {file2} --target-storage-account {container} --target-file-share {item2} --target-folder folder1', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job5'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job5}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job5}', checks=[
+            self.check("properties.entityFriendlyName", '{item1}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item1} --backup-management-type AzureStorage --delete-backup-data true --yes').get_output_in_json()
         self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
 

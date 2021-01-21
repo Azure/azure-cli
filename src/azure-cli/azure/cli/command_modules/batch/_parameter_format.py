@@ -23,7 +23,8 @@ BASIC_TYPES = {
 
 # Parameters that we want to be present in the namespace, but not exposed to the user as arguments
 SILENT_PARAMETERS = [
-    'pool.virtual_machine_configuration.image_reference'
+    'pool.virtual_machine_configuration.image_reference',
+    'pool.virtual_machine_configuration.disk_encryption_configuration'
 ]
 
 # Common argument names the should always be prefixed by their context

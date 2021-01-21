@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
@@ -116,7 +117,9 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     @StorageTestFilesPreparer()
     def test_storage_file_batch_download_scenarios(self, test_dir, storage_account_info):
         src_share = self.create_share(storage_account_info)
-
+        # Prepare files
+        snapshot = self.storage_cmd('storage share snapshot -n {} ',
+                                    storage_account_info, src_share).get_output_in_json()["snapshot"]
         self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
                          test_dir, src_share)
 
@@ -144,6 +147,25 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage file download-batch -s {} -d "{}" --pattern nonexists/*', storage_account_info,
                          src_share, local_folder)
         self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download with snapshot
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --snapshot {}', storage_account_info,
+                         src_share, local_folder, snapshot)
+        self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        snapshot = self.storage_cmd('storage share snapshot -n {} ',
+                                    storage_account_info, src_share).get_output_in_json()["snapshot"]
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --snapshot {}', storage_account_info,
+                         src_share, local_folder, snapshot)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        local_folder = self.create_temp_dir()
+        share_url = self.storage_cmd('storage file url -s {} -p \'\' -otsv', storage_account_info,
+                                     src_share).output.strip()[:-1]
+        self.storage_cmd('storage file download-batch -s {} -d "{}" --pattern apple/* --snapshot {} ',
+                         storage_account_info, share_url, local_folder, snapshot)
+        self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -390,9 +412,9 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # delete recursively with if-modified-since
         src_container = create_and_populate_container()
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {} --dryrun',
-                         storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {}',
-                         storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 0))
 

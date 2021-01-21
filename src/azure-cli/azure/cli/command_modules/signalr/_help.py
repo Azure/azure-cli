@@ -17,6 +17,16 @@ type: group
 short-summary: Manage CORS for Azure SignalR Service.
 """
 
+helps['signalr network-rule'] = """
+type: group
+short-summary: Manage network rules.
+"""
+
+helps['signalr upstream'] = """
+type: group
+short-summary: Manage upstream settings.
+"""
+
 helps['signalr cors add'] = """
 type: command
 short-summary: Add allowed origins to a SignalR Service
@@ -44,9 +54,9 @@ helps['signalr create'] = """
 type: command
 short-summary: Creates a SignalR Service.
 examples:
-  - name: Create a SignalR Service with the Standard SKU and serverless mode.
+  - name: Create a SignalR Service with the Standard SKU and serverless mode and enable messaging logs.
     text: >
-        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless
+        az signalr create -n MySignalR -g MyResourceGroup --sku Standard_S1 --unit-count 1 --service-mode Serverless --enable-message-logs True
 """
 
 helps['signalr delete'] = """
@@ -121,4 +131,49 @@ examples:
   - name: Update service mode.
     text: >
         az signalr update -n MySignalR -g MyResourceGroup --service-mode Serverless
+  - name: Update for enabling messaging logs in the service.
+    text: >
+        az signalr update -n MySignalR -g MyResourceGroup --enable-message-logs True
+"""
+
+helps['signalr upstream list'] = """
+type: command
+short-summary: List upstream settings of an existing SignalR Service.
+"""
+
+helps['signalr upstream update'] = """
+type: command
+short-summary: Update order sensitive upstream settings for an existing SignalR Service.
+examples:
+  - name: Update two upstream settings to handle messages and connections separately.
+    text: >
+        az signalr upstream update -n MySignalR -g MyResourceGroup --template url-template="http://host-connections.com" category-pattern="connections" --template url-template="http://host-connections.com" category-pattern="messages"
+  - name: Update one upstream setting to handle a specific event in a specific hub.
+    text: >
+        az signalr upstream update -n MySignalR -g MyResourceGroup --template url-template="http://host.com/{hub}/{event}/{category}" category-pattern="messages" event-pattern="broadcast" hub-pattern="chat"
+"""
+
+helps['signalr upstream clear'] = """
+type: command
+short-summary: List upstream settings of an existing SignalR Service.
+"""
+
+helps['signalr network-rule list'] = """
+type: command
+short-summary: Get the Network access control of SignalR Service.
+"""
+
+helps['signalr network-rule update'] = """
+type: command
+short-summary: Update the Network access control of SignalR Service.
+examples:
+  - name: Set allowing RESTAPI only for public network.
+    text: >
+        az signalr network-rule update --public-network -n MySignalR -g MyResourceGroup --allow RESTAPI
+  - name: Set allowing client connection and server connection for a private endpoint connection
+    text: >
+        az signalr network-rule update --connection-name MyPrivateEndpointConnection -n MySignalR -g MyResourceGroup --allow ClientConnection ServerConnection
+  - name: Set denying client connection for both public network and private endpoint connections
+    text: >
+        az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
 """

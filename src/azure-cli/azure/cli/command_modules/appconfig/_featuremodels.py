@@ -7,7 +7,7 @@ from enum import Enum
 import json
 from knack.log import get_logger
 from azure.cli.core.util import shell_safe_json_parse
-from ._azconfig.models import KeyValue
+from ._models import KeyValue
 from ._constants import FeatureFlagConstants
 
 # pylint: disable=too-few-public-methods
@@ -35,7 +35,7 @@ class FeatureQueryFields(Enum):
     ALL = KEY | LABEL | LAST_MODIFIED | LOCKED | STATE | DESCRIPTION | CONDITIONS
 
 
-class FeatureFlagValue(object):
+class FeatureFlagValue:
     '''
     Schema of Value inside KeyValue when key is a Feature Flag.
 
@@ -72,7 +72,7 @@ class FeatureFlagValue(object):
         return json.dumps(featureflagvalue, indent=2, ensure_ascii=False)
 
 
-class FeatureFlag(object):
+class FeatureFlag:
     '''
     Feature Flag schema as displayed to the user.
 
@@ -86,8 +86,8 @@ class FeatureFlag(object):
         Description of Feature Flag
     :ivar bool locked:
         Represents whether the feature flag is locked.
-    :ivar datetime last_modified:
-        A datetime object representing the last time the feature flag was modified.
+    :ivar str last_modified:
+        A str representation of the datetime object representing the last time the feature flag was modified.
     :ivar str etag:
         The ETag contains a value that you can use to perform operations.
     :ivar dict {string, FeatureFilter[]} conditions:
@@ -124,13 +124,13 @@ class FeatureFlag(object):
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
 
 
-class FeatureFilter(object):
+class FeatureFilter:
     '''
     Feature filters class.
 
     :ivar str Name:
         Name of the filter
-    :ivar dict {str, str} parameters:
+    :ivar dict parameters:
         Name-Value pairs of parameters
     '''
 
@@ -224,9 +224,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
             FeatureFlag object
     '''
     feature_name = keyvalue.key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
-
     feature_flag_value = map_keyvalue_to_featureflagvalue(keyvalue)
-
     state = FeatureState.OFF
     if feature_flag_value.enabled:
         state = FeatureState.ON
@@ -310,11 +308,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
     except ValueError as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
-                    "{0}\nFull exception: \n{1}".format(keyvalue.value, str(exception))
+                    "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
     except:
-        logger.debug("Exception while parsing value:\n%s\n", keyvalue.value)
+        logger.error("Exception while parsing feature flag. key:%s value:%s.", keyvalue.key, keyvalue.value)
         raise
 
     return feature_flag_value

@@ -1,787 +1,2686 @@
 interactions:
 - request:
-    body: '{"location": "centralus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-04-18T17:39:51Z"}}'
+    body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['113']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/dms_cli_test000001?api-version=2019-07-01
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-network/12.0.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default?api-version=2020-07-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001","name":"dms_cli_test000001","location":"centralus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-18T17:39:51Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body:
+      string: "{\r\n  \"name\": \"default\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default\"\
+        ,\r\n  \"etag\": \"W/\\\"4e062055-bd09-424c-b83a-7f3f8e141ac4\\\"\",\r\n \
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"\
+        addressPrefix\": \"10.0.0.0/24\",\r\n    \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\"\
+        : \"Enabled\",\r\n    \"privateLinkServiceNetworkPolicies\": \"Enabled\",\r\
+        \n    \"subnetID\": 0\r\n  },\r\n  \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\
+        \r\n}"
     headers:
-      cache-control: [no-cache]
-      content-length: ['387']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:39:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      cache-control:
+      - no-cache
+      content-length:
+      - '625'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:05:48 GMT
+      etag:
+      - W/"4e062055-bd09-424c-b83a-7f3f8e141ac4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - f65add3a-6a46-44a5-9a83-04358b425c92
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms list-skus]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms list-skus
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/skus?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/skus?api-version=2018-07-15-preview
   response:
-    body: {string: '{"value":[{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["South
-        Central US"],"locationInfo":[{"location":"South Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["East
-        US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        Central US"],"locationInfo":[{"location":"West Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        Central US"],"locationInfo":[{"location":"West Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["South
-        Central US"],"locationInfo":[{"location":"South Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["East
-        US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["South
-        Central US"],"locationInfo":[{"location":"South Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Central
-        US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["Central US"],"locationInfo":[{"location":"Central
-        US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        Central US"],"locationInfo":[{"location":"West Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["West Central US"],"locationInfo":[{"location":"West Central
-        US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
+    body:
+      string: '{"value":[{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
         vCores","locations":["West Central US"],"locationInfo":[{"location":"West
-        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["West Central US"],"locationInfo":[{"location":"West
-        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["East
-        US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["East US"],"locationInfo":[{"location":"East
-        US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["West US 2"],"locationInfo":[{"location":"West
-        US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Central
-        US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["East
-        US 2 EUAP"],"locationInfo":[{"location":"East US 2 EUAP","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Australia
-        East"],"locationInfo":[{"location":"Australia East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Brazil
-        South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil
-        South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["West Europe"],"locationInfo":[{"location":"West
-        Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["East
-        US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["East US"],"locationInfo":[{"location":"East
-        US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Canada
-        Central"],"locationInfo":[{"location":"Canada Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["Canada Central"],"locationInfo":[{"location":"Canada
-        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West Central US"],"locationInfo":[{"location":"West
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Brazil South"],"locationInfo":[{"location":"Brazil South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West Europe"],"locationInfo":[{"location":"West Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Australia East"],"locationInfo":[{"location":"Australia
+        East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Australia East"],"locationInfo":[{"location":"Australia
+        East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Australia East"],"locationInfo":[{"location":"Australia
+        East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Australia East"],"locationInfo":[{"location":"Australia
+        East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["East US"],"locationInfo":[{"location":"East US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["East US 2"],"locationInfo":[{"location":"East US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["East US 2"],"locationInfo":[{"location":"East US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["East US 2"],"locationInfo":[{"location":"East US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["East US 2"],"locationInfo":[{"location":"East US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
         vCores","locations":["Canada Central"],"locationInfo":[{"location":"Canada
-        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["Canada Central"],"locationInfo":[{"location":"Canada
-        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["West India"],"locationInfo":[{"location":"West
-        India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Canada
-        East"],"locationInfo":[{"location":"Canada East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Central
-        US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["Central US"],"locationInfo":[{"location":"Central
-        US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["North
-        Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["North Europe"],"locationInfo":[{"location":"North
-        Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["South
-        Central US"],"locationInfo":[{"location":"South Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["South Central US"],"locationInfo":[{"location":"South
-        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Canada Central"],"locationInfo":[{"location":"Canada
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Canada Central"],"locationInfo":[{"location":"Canada
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Canada Central"],"locationInfo":[{"location":"Canada
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["East Asia"],"locationInfo":[{"location":"East Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["East Asia"],"locationInfo":[{"location":"East Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["East Asia"],"locationInfo":[{"location":"East Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["East Asia"],"locationInfo":[{"location":"East Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Central India"],"locationInfo":[{"location":"Central
+        India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Central India"],"locationInfo":[{"location":"Central
+        India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Central India"],"locationInfo":[{"location":"Central
+        India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Central India"],"locationInfo":[{"location":"Central
+        India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West India"],"locationInfo":[{"location":"West India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Japan East"],"locationInfo":[{"location":"Japan East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Japan East"],"locationInfo":[{"location":"Japan East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Japan East"],"locationInfo":[{"location":"Japan East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Japan East"],"locationInfo":[{"location":"Japan East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Korea South"],"locationInfo":[{"location":"Korea South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Korea South"],"locationInfo":[{"location":"Korea South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Korea South"],"locationInfo":[{"location":"Korea South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Korea South"],"locationInfo":[{"location":"Korea South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["North Central US"],"locationInfo":[{"location":"North
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["North Central US"],"locationInfo":[{"location":"North
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["North Central US"],"locationInfo":[{"location":"North
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["North Central US"],"locationInfo":[{"location":"North
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Australia Southeast"],"locationInfo":[{"location":"Australia
+        Southeast","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Australia Southeast"],"locationInfo":[{"location":"Australia
+        Southeast","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Australia Southeast"],"locationInfo":[{"location":"Australia
+        Southeast","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Australia Southeast"],"locationInfo":[{"location":"Australia
+        Southeast","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Canada East"],"locationInfo":[{"location":"Canada East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Canada East"],"locationInfo":[{"location":"Canada East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Canada East"],"locationInfo":[{"location":"Canada East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Canada East"],"locationInfo":[{"location":"Canada East","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Central US"],"locationInfo":[{"location":"Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["South India"],"locationInfo":[{"location":"South India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["South India"],"locationInfo":[{"location":"South India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["South India"],"locationInfo":[{"location":"South India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["South India"],"locationInfo":[{"location":"South India","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Japan West"],"locationInfo":[{"location":"Japan West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Japan West"],"locationInfo":[{"location":"Japan West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Japan West"],"locationInfo":[{"location":"Japan West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Japan West"],"locationInfo":[{"location":"Japan West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["Korea Central"],"locationInfo":[{"location":"Korea Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Korea Central"],"locationInfo":[{"location":"Korea Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Korea Central"],"locationInfo":[{"location":"Korea Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Korea Central"],"locationInfo":[{"location":"Korea Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["North Europe"],"locationInfo":[{"location":"North Europe","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
         vCores","locations":["South Central US"],"locationInfo":[{"location":"South
-        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["South Central US"],"locationInfo":[{"location":"South
-        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["Southeast
-        Asia"],"locationInfo":[{"location":"Southeast Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
-        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["South Central US"],"locationInfo":[{"location":"South
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["South Central US"],"locationInfo":[{"location":"South
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["South Central US"],"locationInfo":[{"location":"South
+        Central US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
         vCores","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
-        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
-        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"PP1","tier":"Basic","size":"Standard_D4_v2","locations":["West
-        US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_1vCore","tier":"Basic","size":"1
-        vCore","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Basic_2vCores","tier":"Basic","size":"2
-        vCores","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"GeneralPurpose_4vCores","tier":"General
-        Purpose","size":"4 vCores","locations":["West US"],"locationInfo":[{"location":"West
-        US","zones":[]}],"restrictions":[]}]}'}
+        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
+        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
+        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["Southeast Asia"],"locationInfo":[{"location":"Southeast
+        Asia","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["UK West"],"locationInfo":[{"location":"UK West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["UK West"],"locationInfo":[{"location":"UK West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["UK West"],"locationInfo":[{"location":"UK West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["UK West"],"locationInfo":[{"location":"UK West","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West US"],"locationInfo":[{"location":"West US","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["UK South"],"locationInfo":[{"location":"UK South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["UK South"],"locationInfo":[{"location":"UK South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["UK South"],"locationInfo":[{"location":"UK South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["UK South"],"locationInfo":[{"location":"UK South","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["West US 2"],"locationInfo":[{"location":"West US 2","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["South Africa North"],"locationInfo":[{"location":"South
+        Africa North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["South Africa North"],"locationInfo":[{"location":"South
+        Africa North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["South Africa North"],"locationInfo":[{"location":"South
+        Africa North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["South Africa North"],"locationInfo":[{"location":"South
+        Africa North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["UAE North"],"locationInfo":[{"location":"UAE North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["UAE North"],"locationInfo":[{"location":"UAE North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["UAE North"],"locationInfo":[{"location":"UAE North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["UAE North"],"locationInfo":[{"location":"UAE North","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_1vCores","tier":"Standard","size":"1
+        vCores","locations":["France Central"],"locationInfo":[{"location":"France
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_2vCores","tier":"Standard","size":"2
+        vCores","locations":["France Central"],"locationInfo":[{"location":"France
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Standard_4vCores","tier":"Standard","size":"4
+        vCores","locations":["France Central"],"locationInfo":[{"location":"France
+        Central","zones":[]}],"restrictions":[]},{"resourceType":"services","name":"Premium_4vCores","tier":"Premium","size":"4
+        vCores","locations":["France Central"],"locationInfo":[{"location":"France
+        Central","zones":[]}],"restrictions":[]}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['13119']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:39:56 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '24563'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:05:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003?api-version=2018-07-15-preview
   response:
-    body: {string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.DataMigration/services/dmsclitest000002''
-        under resource group ''dms_cli_test000001'' was not found."}}'}
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.DataMigration/services/dmsclitest000003''
+        under resource group ''dms_cli_test000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['227']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:39:57 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-failure-cause: [gateway]
-    status: {code: 404, message: Not Found}
+      cache-control:
+      - no-cache
+      content-length:
+      - '295'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:05:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
 - request:
     body: '{"tags": {"area": "cli", "env": "test"}, "location": "centralus", "properties":
-      {"virtualSubnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1"},
-      "sku": {"name": "Basic_2vCores"}}'
+      {"virtualSubnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default"},
+      "sku": {"name": "Premium_4vCores"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms create]
-      Connection: [keep-alive]
-      Content-Length: ['303']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '367'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003?api-version=2018-07-15-preview
   response:
-    body: {string: '{"properties":{"provisioningState":"Accepted","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1"},"etag":"wrYuUygn5I2+ZkezenFVOS9Y5bS9mUYDPlZT9IPGWvQ=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002","location":"centralus","name":"dmsclitest000002","sku":{"name":"Basic_2vCores","size":"2
-        vCores","tier":"Basic"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'}
+    body:
+      string: '{"properties":{"provisioningState":"Accepted","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default"},"etag":"djCC6DloI5S957I1wQoX3Zz/0Mj/Zk03nE8odAHJCAo=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003","kind":"Cloud","location":"centralus","name":"dmsclitest000003","sku":{"name":"Premium_4vCores","size":"4
+        vCores","tier":"Premium"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f6d6dc39-3f98-4dd7-970e-dbca69ce5c09?api-version=2018-03-31-preview']
-      cache-control: [no-cache]
-      content-length: ['685']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:40:00 GMT']
-      etag: ['"wrYuUygn5I2+ZkezenFVOS9Y5bS9mUYDPlZT9IPGWvQ="']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '766'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:05:51 GMT
+      etag:
+      - '"djCC6DloI5S957I1wQoX3Zz/0Mj/Zk03nE8odAHJCAo="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 201
+      message: Created
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms create]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f6d6dc39-3f98-4dd7-970e-dbca69ce5c09?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"f6d6dc39-3f98-4dd7-970e-dbca69ce5c09","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f6d6dc39-3f98-4dd7-970e-dbca69ce5c09","status":"Running"}'}
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['234']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:06:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms create]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f6d6dc39-3f98-4dd7-970e-dbca69ce5c09?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"f6d6dc39-3f98-4dd7-970e-dbca69ce5c09","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f6d6dc39-3f98-4dd7-970e-dbca69ce5c09","status":"Succeeded"}'}
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['236']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:39 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:06:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms create]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
   response:
-    body: {string: '{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-6ubxp7ewbj496j38skwnt8tb","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1"},"etag":"IwpEjfiFZtKfM4y1zlVLlPrmGOAV55reE+z7Oku9o/4=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002","location":"centralus","name":"dmsclitest000002","sku":{"name":"Basic_2vCores","size":"2
-        vCores","tier":"Basic"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'}
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['921']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:39 GMT']
-      etag: ['"IwpEjfiFZtKfM4y1zlVLlPrmGOAV55reE+z7Oku9o/4="']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:07:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
   response:
-    body: {string: '{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-6ubxp7ewbj496j38skwnt8tb","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1"},"etag":"IwpEjfiFZtKfM4y1zlVLlPrmGOAV55reE+z7Oku9o/4=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002","location":"centralus","name":"dmsclitest000002","sku":{"name":"Basic_2vCores","size":"2
-        vCores","tier":"Basic"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'}
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['921']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:41 GMT']
-      etag: ['"IwpEjfiFZtKfM4y1zlVLlPrmGOAV55reE+z7Oku9o/4="']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:07:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
   response:
-    body: {string: '{"value":[{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-6ubxp7ewbj496j38skwnt8tb","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/AzureDMS-CORP-USC-VNET-5044/subnets/Subnet-1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002","location":"centralus","name":"dmsclitest000002","sku":{"name":"Basic_2vCores","size":"2
-        vCores","tier":"Basic"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}]}'}
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['879']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:41 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:08:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms check-status]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:08:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:09:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:09:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:10:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:10:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:11:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:11:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"68b78115-2953-48f2-ba74-f049e61d83f3","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/68b78115-2953-48f2-ba74-f049e61d83f3","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '236'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -n -g --sku-name --subnet --tags
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-huxjgnrrafzwnhke82n7te3h","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default"},"etag":"92xza0Ne9SyAU8HC7dk+EO508qQrUQSkdKrh8YrCYmU=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003","kind":"Cloud","location":"centralus","name":"dmsclitest000003","sku":{"name":"Premium_4vCores","size":"4
+        vCores","tier":"Premium"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1002'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:55 GMT
+      etag:
+      - '"92xza0Ne9SyAU8HC7dk+EO508qQrUQSkdKrh8YrCYmU="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-huxjgnrrafzwnhke82n7te3h","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default"},"etag":"92xza0Ne9SyAU8HC7dk+EO508qQrUQSkdKrh8YrCYmU=","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003","kind":"Cloud","location":"centralus","name":"dmsclitest000003","sku":{"name":"Premium_4vCores","size":"4
+        vCores","tier":"Premium"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1002'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:56 GMT
+      etag:
+      - '"92xza0Ne9SyAU8HC7dk+EO508qQrUQSkdKrh8YrCYmU="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"provisioningState":"Succeeded","virtualNicId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/networkInterfaces/NIC-huxjgnrrafzwnhke82n7te3h","virtualSubnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.Network/virtualNetworks/dms.clitest.vn000002/subnets/default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003","kind":"Cloud","location":"centralus","name":"dmsclitest000003","sku":{"name":"Premium_4vCores","size":"4
+        vCores","tier":"Premium"},"tags":{"area":"cli","env":"test"},"type":"Microsoft.DataMigration/services"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '960'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms check-status
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002/checkStatus?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003/checkStatus?api-version=2018-07-15-preview
   response:
-    body: {string: '{"agentVersion":"3.4.4022.1","status":"Online","vmSize":"Standard_A2_v2","supportedTaskTypes":["diagnostic.count","diagnostic.echo","diagnostic.error","diagnostic.fastCount","Migrate.SqlServer.AzureSqlDb.Sync","DataMigration.AzureSqlDbPostMigrationValidationScenarioId","Migrate.SqlServer.AzureSqlDbMI","ValidateMigrationInput.SqlServer.AzureSqlDbMI","ConnectToTarget.AzureDbMySql","ConnectToSource.SqlServer","GetUserTables.Sql","ConnectToTarget.AzureSqlDbMI","ConnectToTarget.SqlDb","ConnectToTarget.SqlServer","DataMigration.RunAssessment","Migrate.SqlServer.SqlDb","Migrate.SqlServer.SqlServer","ValidateMigrationInput.SqlServer.SqlServer","ConnectToSource.MySql","ConnectToSource.Oracle","GetProjectDetails.MySql.Sql","GetProjectDetails.Oracle.Sql","Migrate.Oracle.Sql","Migrate.MySql.Sql"]}'}
+    body:
+      string: '{"agentVersion":"5.1.4925.4","status":"Online","provisioningState":"Succeeded","vmSize":"Standard_F4","supportedTaskTypes":["Connect.MongoDb","Migrate.MongoDb","Validate.MongoDb","ConnectToSource.Oracle.Sync","ConnectToSource.PostgreSql.Sync","ConnectToSource.AWSRDSPostgreSql.Sync","ConnectToTarget.AzureDbForPostgreSql.Sync","ConnectToTarget.Oracle.AzureDbForPostgreSql.Sync","GetUserTablesOracle","GetUserTablesPostgreSql","Validate.Oracle.AzureDbPostgreSql.Sync","Service.Check.OCI","Service.Upload.OCI","Service.Install.OCI","Migrate.PostgreSql.AzureDbForPostgreSql.Sync","Migrate.PostgreSql.AzureDbForPostgreSql.SyncV2","Migrate.AWSRDSPostgreSql.AzureDbForPostgreSql.Sync","ConnectToSource.AWSRDSSqlServer.Sync","ConnectToSource.SqlServer.Sync","Migrate.AWSRDSMySql.AzureDbForMySql.Sync","SyncMigrationOperationalTelemetry.LogCollector","Migrate.Oracle.AzureDbForPostgreSql.Sync","Migrate.AWSRDSSqlServer.AzureSqlDb.Sync","GetUserTables.AzureSqlDb.Sync","ConnectToTarget.SqlDb.Sync","Migrate.MySql.AzureDbForMySql.Sync","Migrate.SqlServer.AzureSqlDb.Sync","ValidateMigrationInput.SqlServer.SqlDb.Sync","GetTDECertificates.Sql","Migrate.Ssis","Migrate.SqlServer.AzureSqlDbMI","MigrateSchemaSqlServerSqlDb","ValidateSsisMigrationInput.SqlServer","ValidateMigrationInput.SqlServer.AzureSqlDbMI","ConnectToTarget.AzureDbForMySql","ConnectToSource.SqlServer","GetUserTables.Sql","ConnectToTarget.AzureSqlDbMI","ConnectToTarget.SqlDb","ConnectToTarget.SqlServer","Migrate.SqlServer.SqlDb","Migrate.SqlServer.SqlServer","ValidateMigrationInput.SqlServer.SqlServer","ConnectToSource.AWSRDSMySql.Sync","ConnectToSource.MySql","GetProjectDetails.MySql.Sql","GetProjectDetails.Oracle.Sql","ConnectToTarget.AzureSqlDbMI.Sync.LRS","ValidateMigrationInput.SqlServer.AzureSqlDbMI.Sync.LRS","Migrate.SqlServer.AzureSqlDbMI.Sync.LRS"],"workerType":"Cloud","registeredWorker":"","agentConfiguration":{"maxParallelMigrationActivities":-1,"enableWindowsLoginsMigrationToMi":false,"disableTlsEnforcement":false}}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['796']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:50:43 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '1997'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:12:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms stop]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002/stop?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003/stop?api-version=2018-07-15-preview
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/99240f9e-f611-4294-84bc-14fda6dc8fb0?api-version=2018-03-31-preview']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 18 Apr 2018 17:50:44 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/99240f9e-f611-4294-84bc-14fda6dc8fb0?api-version=2018-03-31-preview']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Oct 2020 11:12:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms stop]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/99240f9e-f611-4294-84bc-14fda6dc8fb0?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"99240f9e-f611-4294-84bc-14fda6dc8fb0","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/99240f9e-f611-4294-84bc-14fda6dc8fb0","status":"Running"}'}
+    body:
+      string: '{"name":"966b9326-16cb-431e-9b8f-bde39e7b8900","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['234']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:51:14 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:13:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms stop]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/99240f9e-f611-4294-84bc-14fda6dc8fb0?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"99240f9e-f611-4294-84bc-14fda6dc8fb0","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/99240f9e-f611-4294-84bc-14fda6dc8fb0","status":"Succeeded"}'}
+    body:
+      string: '{"name":"966b9326-16cb-431e-9b8f-bde39e7b8900","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['236']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:53:46 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:14:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms check-status]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002/checkStatus?api-version=2018-03-31-preview
-  response:
-    body: {string: '{"status":"Stopped"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['20']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:53:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms start]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002/start?api-version=2018-03-31-preview
-  response:
-    body: {string: ''}
-    headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/5794893f-ded8-4cf0-a9a4-de84f38a1d32?api-version=2018-03-31-preview']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 18 Apr 2018 17:53:48 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/5794893f-ded8-4cf0-a9a4-de84f38a1d32?api-version=2018-03-31-preview']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms start]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/5794893f-ded8-4cf0-a9a4-de84f38a1d32?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"5794893f-ded8-4cf0-a9a4-de84f38a1d32","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/5794893f-ded8-4cf0-a9a4-de84f38a1d32","status":"Running"}'}
+    body:
+      string: '{"name":"966b9326-16cb-431e-9b8f-bde39e7b8900","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['234']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:54:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:14:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms start]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/5794893f-ded8-4cf0-a9a4-de84f38a1d32?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"5794893f-ded8-4cf0-a9a4-de84f38a1d32","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/5794893f-ded8-4cf0-a9a4-de84f38a1d32","status":"Succeeded"}'}
+    body:
+      string: '{"name":"966b9326-16cb-431e-9b8f-bde39e7b8900","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['236']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:56:51 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:15:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms check-status]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002/checkStatus?api-version=2018-03-31-preview
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms stop
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900?api-version=2018-07-15-preview
   response:
-    body: {string: '{"agentVersion":"3.4.4022.1","status":"Online","vmSize":"Standard_A2_v2","supportedTaskTypes":["diagnostic.count","diagnostic.echo","diagnostic.error","diagnostic.fastCount","Migrate.SqlServer.AzureSqlDb.Sync","DataMigration.AzureSqlDbPostMigrationValidationScenarioId","Migrate.SqlServer.AzureSqlDbMI","ValidateMigrationInput.SqlServer.AzureSqlDbMI","ConnectToTarget.AzureDbMySql","ConnectToSource.SqlServer","GetUserTables.Sql","ConnectToTarget.AzureSqlDbMI","ConnectToTarget.SqlDb","ConnectToTarget.SqlServer","DataMigration.RunAssessment","Migrate.SqlServer.SqlDb","Migrate.SqlServer.SqlServer","ValidateMigrationInput.SqlServer.SqlServer","ConnectToSource.MySql","ConnectToSource.Oracle","GetProjectDetails.MySql.Sql","GetProjectDetails.Oracle.Sql","Migrate.Oracle.Sql","Migrate.MySql.Sql"]}'}
+    body:
+      string: '{"name":"966b9326-16cb-431e-9b8f-bde39e7b8900","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/966b9326-16cb-431e-9b8f-bde39e7b8900","status":"Succeeded"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['796']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:56:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: 'b''{"name": "dmsclitest000002", "type": "services"}'''
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms check-name]
-      Connection: [keep-alive]
-      Content-Length: ['47']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/checkNameAvailability?api-version=2018-03-31-preview
-  response:
-    body: {string: '{"reason":"AlreadyExists","message":"The resource name is already
-        in use.","nameAvailable":false}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['97']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:56:54 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '236'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:15:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms check-status
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003/checkStatus?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"status":"Stopped","provisioningState":"Stopped","registeredWorker":""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '72'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:15:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003/start?api-version=2018-07-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Oct 2020 11:15:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:16:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:16:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:17:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:17:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:18:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:18:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:19:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:19:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:20:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:20:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:21:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:21:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:22:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms start
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"f2671eae-168a-49c7-bb38-1a8bc8183306","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/f2671eae-168a-49c7-bb38-1a8bc8183306","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '236'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:22:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms check-status
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003/checkStatus?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"agentVersion":"5.1.4925.4","status":"Online","provisioningState":"Succeeded","vmSize":"Standard_F4","supportedTaskTypes":["Connect.MongoDb","Migrate.MongoDb","Validate.MongoDb","ConnectToSource.Oracle.Sync","ConnectToSource.PostgreSql.Sync","ConnectToSource.AWSRDSPostgreSql.Sync","ConnectToTarget.AzureDbForPostgreSql.Sync","ConnectToTarget.Oracle.AzureDbForPostgreSql.Sync","GetUserTablesOracle","GetUserTablesPostgreSql","Validate.Oracle.AzureDbPostgreSql.Sync","Service.Check.OCI","Service.Upload.OCI","Service.Install.OCI","Migrate.PostgreSql.AzureDbForPostgreSql.Sync","Migrate.PostgreSql.AzureDbForPostgreSql.SyncV2","Migrate.AWSRDSPostgreSql.AzureDbForPostgreSql.Sync","ConnectToSource.AWSRDSSqlServer.Sync","ConnectToSource.SqlServer.Sync","Migrate.AWSRDSMySql.AzureDbForMySql.Sync","SyncMigrationOperationalTelemetry.LogCollector","Migrate.Oracle.AzureDbForPostgreSql.Sync","Migrate.AWSRDSSqlServer.AzureSqlDb.Sync","GetUserTables.AzureSqlDb.Sync","ConnectToTarget.SqlDb.Sync","Migrate.MySql.AzureDbForMySql.Sync","Migrate.SqlServer.AzureSqlDb.Sync","ValidateMigrationInput.SqlServer.SqlDb.Sync","GetTDECertificates.Sql","Migrate.Ssis","Migrate.SqlServer.AzureSqlDbMI","MigrateSchemaSqlServerSqlDb","ValidateSsisMigrationInput.SqlServer","ValidateMigrationInput.SqlServer.AzureSqlDbMI","ConnectToTarget.AzureDbForMySql","ConnectToSource.SqlServer","GetUserTables.Sql","ConnectToTarget.AzureSqlDbMI","ConnectToTarget.SqlDb","ConnectToTarget.SqlServer","Migrate.SqlServer.SqlDb","Migrate.SqlServer.SqlServer","ValidateMigrationInput.SqlServer.SqlServer","ConnectToSource.AWSRDSMySql.Sync","ConnectToSource.MySql","GetProjectDetails.MySql.Sql","GetProjectDetails.Oracle.Sql","ConnectToTarget.AzureSqlDbMI.Sync.LRS","ValidateMigrationInput.SqlServer.AzureSqlDbMI.Sync.LRS","Migrate.SqlServer.AzureSqlDbMI.Sync.LRS"],"workerType":"Cloud","registeredWorker":"","agentConfiguration":{"maxParallelMigrationActivities":-1,"enableWindowsLoginsMigrationToMi":false,"disableTlsEnforcement":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1997'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:22:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "dmsclitest000003", "type": "services"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/checkNameAvailability?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"reason":"AlreadyExists","message":"The resource name is already in
+        use.","nameAvailable":false}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '97'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:22:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000002?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dms_cli_test000001/providers/Microsoft.DataMigration/services/dmsclitest000003?api-version=2018-07-15-preview
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/466cdc08-c774-4f03-907a-2c54565b6835?api-version=2018-03-31-preview']
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 18 Apr 2018 17:56:55 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/466cdc08-c774-4f03-907a-2c54565b6835?api-version=2018-03-31-preview']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 202, message: Accepted}
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 28 Oct 2020 11:22:40 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationResults/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/466cdc08-c774-4f03-907a-2c54565b6835?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"466cdc08-c774-4f03-907a-2c54565b6835","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/466cdc08-c774-4f03-907a-2c54565b6835","status":"Running"}'}
+    body:
+      string: '{"name":"9a74850a-e735-4749-94f4-ff9398376969","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['234']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:57:26 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:23:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms delete]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/466cdc08-c774-4f03-907a-2c54565b6835?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
   response:
-    body: {string: '{"name":"466cdc08-c774-4f03-907a-2c54565b6835","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/466cdc08-c774-4f03-907a-2c54565b6835","status":"Succeeded"}'}
+    body:
+      string: '{"name":"9a74850a-e735-4749-94f4-ff9398376969","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969","status":"Running"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['236']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:59:58 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:23:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
-    body: 'b''{"name": "dmsclitest000002", "type": "services"}'''
+    body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [dms check-name]
-      Connection: [keep-alive]
-      Content-Length: ['47']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 azure-mgmt-datamigration/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"9a74850a-e735-4749-94f4-ff9398376969","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:24:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969?api-version=2018-07-15-preview
+  response:
+    body:
+      string: '{"name":"9a74850a-e735-4749-94f4-ff9398376969","id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/operationStatuses/9a74850a-e735-4749-94f4-ff9398376969","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '236'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:24:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "dmsclitest000003", "type": "services"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - dms check-name
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -n
+      User-Agent:
+      - python/3.7.3 (Linux-4.19.128-microsoft-standard-x86_64-with-debian-10.4) msrest/0.6.18
+        msrest_azure/0.6.3 azure-mgmt-datamigration/4.1.0 Azure-SDK-For-Python AZURECLI/2.12.1
+      accept-language:
+      - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/checkNameAvailability?api-version=2018-03-31-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DataMigration/locations/centralus/checkNameAvailability?api-version=2018-07-15-preview
   response:
-    body: {string: '{"nameAvailable":true}'}
+    body:
+      string: '{"nameAvailable":true}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['22']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 18 Apr 2018 17:59:59 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.24 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.30]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/dms_cli_test000001?api-version=2019-07-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Wed, 18 Apr 2018 18:00:00 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1ETVM6NUZDTEk6NUZURVNUN05EQ1NDSE9PS1RaSkhNNTJXSllZVDVLTU83UlhZQnw1QkYzM0UzQzY5NDZGRDNCLUNFTlRSQUxVUyIsImpvYkxvY2F0aW9uIjoiY2VudHJhbHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 11:24:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

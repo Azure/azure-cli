@@ -115,7 +115,7 @@ class AzureDevopsBuildInteractive(object):
         self.process_build('AZURE_DEVOPS')
         self.wait_for_build()
         self.process_release()
-        self.logger.warning("Pushing your code to master will now trigger another build.".format(
+        self.logger.warning("Pushing your code to {remote}:master will now trigger another build.".format(
             remote=self.repository_remote_name
         ))
         return {

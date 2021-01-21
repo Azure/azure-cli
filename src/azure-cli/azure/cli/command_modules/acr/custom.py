@@ -12,7 +12,8 @@ from ._utils import (
     validate_managed_registry,
     validate_sku_update,
     get_resource_group_name_by_registry_name,
-    user_confirmation
+    user_confirmation,
+    resolve_identity_client_id
 )
 from ._docker_utils import get_login_credentials, EMPTY_GUID
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
@@ -40,10 +41,13 @@ def acr_create(cmd,
                location=None,
                admin_enabled=False,
                default_action=None,
-               tags=None,
                workspace=None,
                identity=None,
-               key_encryption_key=None):
+               key_encryption_key=None,
+               public_network_enabled=None,
+               zone_redundancy=None,
+               allow_trusted_services=None,
+               tags=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -52,12 +56,18 @@ def acr_create(cmd,
         raise CLIError("Classic SKU is no longer supported. Please select a managed SKU.")
 
     Registry, Sku, NetworkRuleSet = cmd.get_models('Registry', 'Sku', 'NetworkRuleSet')
-    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
+    registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled,
+                        zone_redundancy=zone_redundancy, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
+    if public_network_enabled is not None:
+        _configure_public_network_access(cmd, registry, public_network_enabled)
+
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
+
+    _handle_network_bypass(cmd, registry, allow_trusted_services)
 
     lro_poller = client.create(resource_group_name, registry_name, registry)
 
@@ -94,6 +104,9 @@ def acr_update_custom(cmd,
                       sku=None,
                       admin_enabled=None,
                       default_action=None,
+                      data_endpoint_enabled=None,
+                      public_network_enabled=None,
+                      allow_trusted_services=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -109,7 +122,27 @@ def acr_update_custom(cmd,
         NetworkRuleSet = cmd.get_models('NetworkRuleSet')
         instance.network_rule_set = NetworkRuleSet(default_action=default_action)
 
+    if data_endpoint_enabled is not None:
+        instance.data_endpoint_enabled = data_endpoint_enabled
+
+    if public_network_enabled is not None:
+        _configure_public_network_access(cmd, instance, public_network_enabled)
+
+    _handle_network_bypass(cmd, instance, allow_trusted_services)
+
     return instance
+
+
+def _configure_public_network_access(cmd, registry, enabled):
+    PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
+    registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
+
+
+def _handle_network_bypass(cmd, registry, allow_trusted_services):
+    if allow_trusted_services is not None:
+        NetworkRuleBypassOptions = cmd.get_models('NetworkRuleBypassOptions')
+        registry.network_rule_bypass_options = (NetworkRuleBypassOptions.azure_services
+                                                if allow_trusted_services else NetworkRuleBypassOptions.none)
 
 
 def acr_update_get(cmd):
@@ -134,6 +167,41 @@ def acr_update_set(cmd,
     return client.update(resource_group_name, registry_name, parameters)
 
 
+def acr_show_endpoints(cmd,
+                       registry_name,
+                       resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    info = {
+        'loginServer': registry.login_server,
+        'dataEndpoints': []
+    }
+    if registry.data_endpoint_enabled:
+        for host in registry.data_endpoint_host_names:
+            info['dataEndpoints'].append({
+                'region': host.split('.')[1],
+                'endpoint': host,
+            })
+    else:
+        logger.warning('To configure client firewall w/o using wildcard storage blob urls, '
+                       'use "az acr update --name %s --data-endpoint-enabled" to enable dedicated '
+                       'data endpoints.', registry_name)
+        from ._client_factory import cf_acr_replications
+        replicate_client = cf_acr_replications(cmd.cli_ctx)
+        replicates = list(replicate_client.list(resource_group_name, registry_name))
+        for r in replicates:
+            info['dataEndpoints'].append({
+                'region': r.location,
+                'endpoint': '*.blob.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+            })
+        if not replicates:
+            info['dataEndpoints'].append({
+                'region': registry.location,
+                'endpoint': '*.blob.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+            })
+
+    return info
+
+
 def acr_login(cmd,
               registry_name,
               resource_group_name=None,  # pylint: disable=unused-argument
@@ -142,6 +210,9 @@ def acr_login(cmd,
               password=None,
               expose_token=False):
     if expose_token:
+        if username or password:
+            raise CLIError("`--expose-token` cannot be combined with `--username` or `--password`.")
+
         login_server, _, password = get_login_credentials(
             cmd=cmd,
             registry_name=registry_name,
@@ -346,7 +417,7 @@ def _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_
                                             resource_group=resource_group_name,
                                             resource=identity)
 
-    identity_client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+    identity_client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
     KeyVaultProperties, EncryptionProperty = cmd.get_models('KeyVaultProperties', 'EncryptionProperty')
     registry.encryption = EncryptionProperty(status='enabled', key_vault_properties=KeyVaultProperties(
@@ -408,6 +479,9 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         registry.identity.type = (ResourceIdentityType.none
                                   if registry.identity.type == ResourceIdentityType.system_assigned
                                   else ResourceIdentityType.user_assigned)
+        # if we have no system assigned identitiy then set identity object to none
+        registry.identity.principal_id = None
+        registry.identity.tenant_id = None
 
     if remove_user_identities:
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -447,6 +521,8 @@ def show_encryption(cmd, client, registry_name, resource_group_name=None):
 
 def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=None, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    if not registry.encryption or not registry.encryption.key_vault_properties:
+        raise CLIError('usage error: key rotation is only applicable to registries with CMK enabled')
     if key_encryption_key:
         registry.encryption.key_vault_properties.key_identifier = key_encryption_key
     if identity:
@@ -462,7 +538,7 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
                 identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
                                                         resource_group=resource_group_name,
                                                         resource=identity)
-                client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+                client_id = resolve_identity_client_id(cmd.cli_ctx, identity)
 
         registry.encryption.key_vault_properties.identity = client_id
 
@@ -483,16 +559,6 @@ def _ensure_identity_resource_id(subscription_id, resource_group, resource):
                        namespace='Microsoft.ManagedIdentity',
                        type='userAssignedIdentities',
                        name=resource)
-
-
-def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from msrestazure.tools import parse_resource_id
-
-    res = parse_resource_id(managed_identity_resource_id)
-    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
-    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
 
 
 def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):

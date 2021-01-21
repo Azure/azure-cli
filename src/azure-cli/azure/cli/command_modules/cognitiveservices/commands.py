@@ -36,3 +36,8 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_network_rule')
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
+
+    with self.command_group('cognitiveservices account identity', mgmt_type, client_factory=cf_accounts) as g:
+        g.custom_command('assign', 'identity_assign')
+        g.custom_command('remove', 'identity_remove')
+        g.custom_show_command('show', 'identity_show')

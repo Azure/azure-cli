@@ -1,206 +1,378 @@
 interactions:
 - request:
     body: '{"properties": {"email": "john@contoso.com", "phone": "", "alertNotifications":
-      "", "alertsToAdmins": ""}}'
+      "off", "alertsToAdmins": "off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact create]
-      Connection: [keep-alive]
-      Content-Length: ['106']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n --email]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '112'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --email --alert-notifications --alerts-admins
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","properties":{"email":"john@contoso.com","phone":"","alertNotifications":"Off","alertsToAdmins":"Off"}}'}
+    body:
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+        Europe"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['281']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['249']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact list]
-      Connection: [keep-alive]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","properties":{"email":"john@contoso.com","phone":"","alertNotifications":"Off","alertsToAdmins":"Off"}}]}'}
+    body:
+      string: '{"value":[{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+        Europe"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['293']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:50 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['749']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '366'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact show]
-      Connection: [keep-alive]
-      ParameterSetName: [-n]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","properties":{"email":"john@contoso.com","phone":"","alertNotifications":"Off","alertsToAdmins":"Off"}}'}
+    body:
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"john@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d033e8c-0000-0d00-0000-5fd0ca8d0000\"","location":"West
+        Europe"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['281']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:52 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['749']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"email": "lisa@contoso.com", "phone": "", "alertNotifications":
-      "", "alertsToAdmins": ""}}'
+      "off", "alertsToAdmins": "off"}}'
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact create]
-      Connection: [keep-alive]
-      Content-Length: ['106']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [-n --email]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '112'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --email --alert-notifications --alerts-admins
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","properties":{"email":"lisa@contoso.com","phone":"","alertNotifications":"Off","alertsToAdmins":"Off"}}'}
+    body:
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d03888d-0000-0d00-0000-5fd0ca8f0000\"","location":"West
+        Europe"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['281']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['249']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact show]
-      Connection: [keep-alive]
-      ParameterSetName: [-n]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1","name":"default1","type":"Microsoft.Security/securityContacts","properties":{"email":"lisa@contoso.com","phone":"","alertNotifications":"Off","alertsToAdmins":"Off"}}'}
+    body:
+      string: '{"properties":{"alertNotifications":"Off","alertsToAdmins":"Off","email":"lisa@contoso.com","phone":""},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContact/default1","name":"default1","type":"Microsoft.Security/securityContact","etag":"\"5d03888d-0000-0d00-0000-5fd0ca8f0000\"","location":"West
+        Europe"}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['281']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:53 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['749']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '354'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      ParameterSetName: [-n]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts/default1?api-version=2017-08-01-preview
   response:
-    body: {string: ''}
+    body:
+      string: ''
     headers:
-      cache-control: [no-cache]
-      date: ['Wed, 26 Dec 2018 23:49:55 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 204, message: No Content}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      date:
+      - Wed, 09 Dec 2020 13:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14997'
+    status:
+      code: 204
+      message: No Content
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [security contact list]
-      Connection: [keep-alive]
-      User-Agent: [python/3.7.1 (Windows-10-10.0.17763-SP0) msrest/0.6.1 msrest_azure/0.4.34
-          azure-mgmt-security/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.54]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security contact list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.6.0 Azure-SDK-For-Python AZURECLI/2.16.0
+      accept-language:
+      - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/securityContacts?api-version=2017-08-01-preview
   response:
-    body: {string: '{"value":[]}'}
+    body:
+      string: '{"value":[]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 26 Dec 2018 23:49:55 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['749']
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-08-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 09 Dec 2020 13:01:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '749'
+    status:
+      code: 200
+      message: OK
 version: 1

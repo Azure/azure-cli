@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-statements
     from azure.cli.core.commands import CliCommandType
     from ._client_factory import cf_hdinsight_applications
     from ._client_factory import cf_hdinsight_clusters
@@ -12,6 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import cf_hdinsight_locations
     from ._client_factory import cf_hdinsight_script_execution_history
     from ._client_factory import cf_hdinsight_script_actions
+    from ._client_factory import cf_hdinsight_virtual_machines
 
     hdinsight_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.hdinsight.operations#ClustersOperations.{}',
@@ -41,6 +42,11 @@ def load_command_table(self, _):
     hdinsight_script_execution_history_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.hdinsight.operations#ScriptExecutionHistoryOperations.{}',
         client_factory=cf_hdinsight_script_execution_history
+    )
+
+    hdinsight_virtual_machines_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.hdinsight.operations#VirtualMachinesOperations.{}',
+        client_factory=cf_hdinsight_virtual_machines
     )
 
     # cluster operations
@@ -92,3 +98,26 @@ def load_command_table(self, _):
         g.show_command('show', 'get_monitoring_status')
         g.custom_command('enable', 'enable_hdi_monitoring')
         g.command('disable', 'disable_monitoring')
+
+    # VirtualMachine operations
+    with self.command_group('hdinsight host', hdinsight_virtual_machines_sdk,
+                            client_factory=cf_hdinsight_virtual_machines) as g:
+        g.command('list', 'list_hosts')
+        g.command('restart', 'restart_hosts', confirmation=True)
+
+    # Autoscale operations
+    with self.command_group('hdinsight autoscale', hdinsight_clusters_sdk, client_factory=cf_hdinsight_clusters) as g:
+        g.custom_command('create', 'create_autoscale', supports_no_wait=True)
+        g.custom_command('update', 'update_autoscale', supports_no_wait=True)
+        g.custom_show_command('show', 'show_autoscale')
+        g.custom_command('delete', 'delete_autoscale', supports_no_wait=True, confirmation=True)
+        g.custom_command('list-timezones', 'list_timezones')
+        g.wait_command('wait')
+
+    with self.command_group('hdinsight autoscale condition', hdinsight_clusters_sdk,
+                            client_factory=cf_hdinsight_clusters) as g:
+        g.custom_command('create', 'create_autoscale_condition', supports_no_wait=True)
+        g.custom_command('update', 'update_autoscale_condition', supports_no_wait=True)
+        g.custom_command('list', 'list_autoscale_condition')
+        g.custom_command('delete', 'delete_autoscale_condition', supports_no_wait=True, confirmation=True)
+        g.wait_command('wait')

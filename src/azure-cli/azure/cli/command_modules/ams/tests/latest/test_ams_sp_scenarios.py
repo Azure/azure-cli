@@ -14,7 +14,7 @@ class AmsSpTests(ScenarioTest):
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @AllowLargeResponse()
     def test_ams_sp_create_reset(self, resource_group, storage_account_for_create):
-        with mock.patch('azure.cli.command_modules.ams._utils._gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.ams.operations.sp._gen_guid', side_effect=self.create_guid):
             amsname = self.create_random_name(prefix='ams', length=12)
 
             self.kwargs.update({

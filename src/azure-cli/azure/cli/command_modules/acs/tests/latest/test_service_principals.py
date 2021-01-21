@@ -77,7 +77,9 @@ class AcsServicePrincipalTest(unittest.TestCase):
         client = mock.MagicMock()
         client.service_principals = mock.Mock()
         client.applications = mock.Mock()
-        client.applications.create.return_value.app_id = app_id
+        result = mock.MagicMock()
+        result.output.app_id = app_id
+        client.applications.create.return_value = result
         client.applications.list.return_value = []
         cli_ctx = mock.MagicMock()
 
@@ -96,7 +98,7 @@ class AcsServicePrincipalTest(unittest.TestCase):
         ]
         client.applications.list.assert_has_calls(expected_calls)
         # TODO better matcher here
-        client.applications.create.assert_called_with(mock.ANY)
+        client.applications.create.assert_called_with(mock.ANY, raw=True)
 
 
 if __name__ == '__main__':

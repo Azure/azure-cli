@@ -69,12 +69,15 @@ helps['ams account sp'] = """
 
 helps['ams account sp create'] = """
     type: command
-    short-summary: Create a service principal and configure its access to an Azure Media Services account.
+    short-summary: Create or update a service principal and configure its access to an Azure Media Services account.
     long-summary: Service principal propagation throughout Azure Active Directory may take some extra seconds to complete.
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
             az ams account sp create -a myAmsAccount -g myRG -n mySpName --password mySecret --role Owner --xml
+        - name: Update a service principal with a new role and new name.
+          text: >
+            az ams account sp create -a myAmsAccount -g myRG -n mySpName --new-sp-name myNewSpName --role newRole
     """
 
 helps['ams account sp reset-credentials'] = """
@@ -250,6 +253,10 @@ helps['ams content-key-policy'] = """
 helps['ams content-key-policy create'] = """
     type: command
     short-summary: Create a new content key policy.
+    examples:
+        - name: Create an content-key-policy with a FairPlay Configuration.
+          text: >
+            az ams content-key-policy create -a amsAccount -g resourceGroup -n contentKeyPolicyName --policy-option-name policyOptionName --open-restriction --ask "ask-32-chars-hex-string" --fair-play-pfx pfxPath --fair-play-pfx-password "pfxPassword" --rental-and-lease-key-type PersistentUnlimited --rental-duration 5000
 """
 
 helps['ams content-key-policy show'] = """

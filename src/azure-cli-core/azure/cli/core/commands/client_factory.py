@@ -3,20 +3,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-
-from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.util import get_az_user_agent, is_track2
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
-UA_AGENT = "AZURECLI/{}".format(core_version)
-ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
+
+
+def _is_vendored_sdk_path(path_comps):
+    return len(path_comps) >= 5 and path_comps[4] == 'vendored_sdks'
 
 
 def resolve_client_arg_name(operation, kwargs):
@@ -26,12 +26,16 @@ def resolve_client_arg_name(operation, kwargs):
         logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
         return kwargs['client_arg_name']
     path, op_path = operation.split('#', 1)
+
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
-        # for CLI command modules
-        # SDK method: azure.mgmt.foo... or azure.foo...
-        # custom method: azure.cli.command_modules.foo...
-        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
+        if path_comps[1] != 'cli' or _is_vendored_sdk_path(path_comps):
+            # Public SDK: azure.mgmt.resource... (mgmt-plane) or azure.storage.blob... (data-plane)
+            # Vendored SDK: azure.cli.command_modules.keyvault.vendored_sdks...
+            client_arg_name = 'self'
+        else:
+            # CLI custom method: azure.cli.command_modules.resource...
+            client_arg_name = 'client'
     elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
         # for CLI extensions
         # SDK method: the operation takes the form '<class name>.<method_name>'
@@ -82,11 +86,7 @@ def configure_common_settings(cli_ctx, client):
 
     client.config.enable_http_logger = True
 
-    client.config.add_user_agent(UA_AGENT)
-    try:
-        client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
-    except KeyError:
-        pass
+    client.config.add_user_agent(get_az_user_agent())
 
     try:
         command_ext_name = cli_ctx.data['command_extension_name']
@@ -95,19 +95,69 @@ def configure_common_settings(cli_ctx, client):
     except KeyError:
         pass
 
+    # Prepare CommandName header
+    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
+    cli_ctx.data['headers']['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # Prepare ParameterSetName header
+    if cli_ctx.data.get('safe_params'):
+        cli_ctx.data['headers']['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
+    # Prepare x-ms-client-request-id header
+    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
+
+    logger.debug("Adding custom headers to the client:")
+
     for header, value in cli_ctx.data['headers'].items():
+        # msrest doesn't print custom headers in debug log, so CLI should do that
+        logger.debug("    '%s': '%s'", header, value)
         # We are working with the autorest team to expose the add_header functionality of the generated client to avoid
         # having to access private members
         client._client.add_header(header, value)  # pylint: disable=protected-access
 
+
+def _prepare_client_kwargs_track2(cli_ctx):
+    """Prepare kwargs for Track 2 SDK client."""
+    client_kwargs = {}
+
+    # Prepare connection_verify to change SSL verification behavior, used by ConnectionConfiguration
+    client_kwargs.update(_debug.change_ssl_cert_verification_track2())
+
+    # Enable NetworkTraceLoggingPolicy which logs all headers (except Authorization) without being redacted
+    client_kwargs['logging_enable'] = True
+
+    # Disable ARMHttpLoggingPolicy which logs only allowed headers
+    # from azure.core.pipeline.policies import SansIOHTTPPolicy
+    # client_kwargs['http_logging_policy'] = SansIOHTTPPolicy()
+
+    # Prepare User-Agent header, used by UserAgentPolicy
+    client_kwargs['user_agent'] = get_az_user_agent()
+
+    try:
+        command_ext_name = cli_ctx.data['command_extension_name']
+        if command_ext_name:
+            client_kwargs['user_agent'] += "CliExtension/{}".format(command_ext_name)
+    except KeyError:
+        pass
+
+    # Prepare custom headers, used by HeadersPolicy
+    headers = dict(cli_ctx.data['headers'])
+
+    # - Prepare CommandName header
     command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
-    # pylint: disable=protected-access
-    client._client.add_header('CommandName',
-                              "{}{}".format(cli_ctx.data['command'], command_name_suffix))
+    headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+
+    # - Prepare ParameterSetName header
     if cli_ctx.data.get('safe_params'):
-        client._client.add_header('ParameterSetName',
-                                  ' '.join(cli_ctx.data['safe_params']))
-    client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
+        headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
+    client_kwargs['headers'] = headers
+
+    # Prepare x-ms-client-request-id header, used by RequestIdPolicy
+    if 'x-ms-client-request-id' in cli_ctx.data['headers']:
+        client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+
+    return client_kwargs
 
 
 def _get_mgmt_service_client(cli_ctx,
@@ -122,6 +172,7 @@ def _get_mgmt_service_client(cli_ctx,
                              aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
+    from azure.cli.core.util import resource_to_scopes
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
@@ -139,18 +190,24 @@ def _get_mgmt_service_client(cli_ctx,
     if kwargs:
         client_kwargs.update(kwargs)
 
+    if is_track2(client_type):
+        client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
+        client_kwargs['credential_scopes'] = resource_to_scopes(resource)
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
         client = client_type(cred, **client_kwargs)
 
-    configure_common_settings(cli_ctx, client)
+    if not is_track2(client):
+        configure_common_settings(cli_ctx, client)
 
     return client, subscription_id
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,
-                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None):
+                            sas_token=None, socket_timeout=None, token_credential=None, endpoint_suffix=None,
+                            location_mode=None):
     logger.debug('Getting data service client service_type=%s', service_type.__name__)
     try:
         client_kwargs = {'account_name': account_name,
@@ -164,6 +221,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
+        if location_mode:
+            client.location_mode = location_mode
     except ValueError as exc:
         _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
                                               'common._error#_ERROR_STORAGE_MISSING_INFO')
@@ -185,12 +244,7 @@ def get_subscription_id(cli_ctx):
 def _get_add_headers_callback(cli_ctx):
 
     def _add_headers(request):
-        agents = [request.headers['User-Agent'], UA_AGENT]
-        try:
-            agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
-        except KeyError:
-            pass
-
+        agents = [request.headers['User-Agent'], get_az_user_agent()]
         request.headers['User-Agent'] = ' '.join(agents)
 
         try:

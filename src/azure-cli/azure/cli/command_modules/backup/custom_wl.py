@@ -3,15 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.command_modules.backup.custom_help as cust_help
-import azure.cli.command_modules.backup.custom_common as common
+from uuid import uuid4
+
 # pylint: disable=import-error
 # pylint: disable=broad-except
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 
-from uuid import uuid4
-from azure.cli.command_modules.backup._validators import datetime_type
+from knack.log import get_logger
 
 from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtectionContainer, \
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
@@ -20,11 +19,14 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
+from azure.cli.command_modules.backup._validators import datetime_type
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
+import azure.cli.command_modules.backup.custom_help as cust_help
+import azure.cli.command_modules.backup.custom_common as common
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError
 
-from knack.log import get_logger
 
 fabric_name = "Azure"
 logger = get_logger(__name__)
@@ -32,6 +34,8 @@ logger = get_logger(__name__)
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
+                     'SQLDataBase': 'SQLDataBase',
+                     'SAPHanaDatabase': 'SAPHanaDatabase',
                      'SAPASE': 'SAPAseDatabase'}
 
 # Mapping of module name
@@ -46,7 +50,9 @@ attr_map = {'sqldatabase': 'SQLDatabase',
 
 protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANADataBase': 'SAPHanaDatabase',
+                             'SAPHanaDatabase': 'SAPHanaDatabase',
                              'HANAInstance': 'SAPHanaSystem',
+                             'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
                              'SQLAG': 'SQLAG'}
 
@@ -57,9 +63,9 @@ def show_wl_policy(client, resource_group_name, vault_name, name):
 
 def list_wl_policies(client, resource_group_name, vault_name, workload_type, backup_management_type):
     if workload_type is None:
-        raise CLIError(
+        raise RequiredArgumentMissingError(
             """
-            Workload type is required for Azure Workload.
+            Workload type is required for Azure Workload. Use --workload-type.
             """)
 
     if backup_management_type is None:
@@ -68,7 +74,7 @@ def list_wl_policies(client, resource_group_name, vault_name, workload_type, bac
             Backup Management Type needs to be specified for Azure Workload.
             """)
 
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': backup_management_type,
@@ -93,7 +99,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
             Resource ID is not a valid one.
             """)
 
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
     container_name = resource_id.split('/')[-1]
 
     containers = list_protectable_containers(cmd, resource_group_name, vault_name)
@@ -115,14 +121,13 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
 def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type,
                              container_name, container_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     if not cust_help.is_native_name(container_name):
         raise CLIError(
@@ -151,8 +156,7 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -165,8 +169,7 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
             """)
 
     # Trigger unregister and wait for completion
-    result = sdk_no_wait(True, client.unregister,
-                         vault_name, resource_group_name, fabric_name, container_name)
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -186,8 +189,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     param = ProtectedItemResource(properties=item_properties)
 
     # Update policy
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -196,7 +199,7 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
 
 
 def initialize_protectable_items(client, resource_group_name, vault_name, container_name, workload_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': 'AzureWorkload',
@@ -206,7 +209,7 @@ def initialize_protectable_items(client, resource_group_name, vault_name, contai
 
 
 def create_policy(client, resource_group_name, vault_name, policy_name, policy, workload_type):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
     policy_object = cust_help.get_policy_from_json(client, policy)
     policy_object.properties.backup_management_type = "AzureWorkload"
     policy_object.properties.workload_type = workload_type
@@ -215,21 +218,30 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items):
     if policy_name is None:
         raise CLIError(
             """
             Policy name is required for set policy.
             """)
 
-    policy_object = cust_help.get_policy_from_json(client, policy)
+    if policy is not None:
+        policy_object = cust_help.get_policy_from_json(client, policy)
+    else:
+        if fix_for_inconsistent_items:
+            policy_object = common.show_policy(client, resource_group_name, vault_name, policy_name)
+            policy_object.properties.make_policy_consistent = True
+        else:
+            raise CLIError(
+                """
+                Please provide policy object.
+                """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
 def show_protectable_item(items, name, server_name, protectable_item_type):
-    if protectable_item_type_map.get(protectable_item_type) is not None:
-        protectable_item_type = protectable_item_type_map[protectable_item_type]
+    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Name filter
     if cust_help.is_native_name(name):
         filtered_items = [item for item in items if item.name.lower() == name.lower()]
@@ -247,8 +259,20 @@ def show_protectable_item(items, name, server_name, protectable_item_type):
 
 
 def show_protectable_instance(items, server_name, protectable_item_type):
-    if protectable_item_type_map.get(protectable_item_type) is not None:
-        protectable_item_type = protectable_item_type_map[protectable_item_type]
+    if server_name is None:
+        raise RequiredArgumentMissingError("""
+        Server name missing. Please provide a valid server name using --target-server-name.
+        """)
+
+    if protectable_item_type is None:
+        az_error = RequiredArgumentMissingError("""
+        Protectable item type missing. Please provide a valid protectable item type name using --target-server-type.
+        """)
+        recommendation_text = "{} are the allowed values.".format(str(list(protectable_item_type_map.keys())))
+        az_error.set_recommendation(recommendation_text)
+        raise az_error
+
+    protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
     # Server Name filter
     filtered_items = [item for item in items if item.properties.server_name.lower() == server_name.lower()]
 
@@ -260,7 +284,7 @@ def show_protectable_instance(items, server_name, protectable_item_type):
 
 
 def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
-    workload_type = workload_type_map[workload_type]
+    workload_type = _check_map(workload_type, workload_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': "AzureWorkload",
@@ -327,8 +351,8 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger enable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_name, item_name, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_name, item_name, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -358,9 +382,8 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     param = BackupRequestResource(properties=properties)
 
     # Trigger backup and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                         param)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -377,8 +400,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
             """)
 
     if delete_backup_data:
-        result = sdk_no_wait(True, client.delete,
-                             vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     properties = _get_protected_item_instance(backup_item_type)
@@ -387,8 +409,30 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
+    return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
+def undelete_protection(cmd, client, resource_group_name, vault_name, item):
+    container_uri = cust_help.get_protection_container_uri_from_id(item.id)
+    item_uri = cust_help.get_protected_item_uri_from_id(item.id)
+
+    backup_item_type = item_uri.split(';')[0]
+    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
+        raise ValidationError(
+            """
+            Item must be either of type SQLDataBase or SAPHanaDatabase.
+            """)
+
+    properties = _get_protected_item_instance(backup_item_type)
+    properties.protection_state = 'ProtectionStopped'
+    properties.policy_id = ''
+    properties.is_rehydrate = True
+    param = ProtectedItemResource(properties=properties)
+
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -496,9 +540,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
     # Trigger restore and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, recovery_point_id,
-                         trigger_restore_request)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -627,3 +670,29 @@ def _get_protected_item_instance(item_type):
     if item_type.lower() == "saphanadatabase":
         return AzureVmWorkloadSAPHanaDatabaseProtectedItem()
     return AzureVmWorkloadSQLDatabaseProtectedItem()
+
+
+def _check_map(item_type, item_type_map):
+    if item_type is None:
+        if item_type_map == workload_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Workload type missing. Please enter a valid workload type using --workload-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        if item_type_map == protectable_item_type_map:
+            az_error = RequiredArgumentMissingError("""
+            Protectable item type missing. Please enter a valid protectable item type using --protectable-item-type.
+            """)
+            recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+            az_error.set_recommendation(recommendation_text)
+            raise az_error
+        raise RequiredArgumentMissingError("Item type missing. Enter a valid item type.")
+    if item_type_map.get(item_type) is not None:
+        return item_type_map[item_type]
+    error_text = "{} is an invalid argument.".format(item_type)
+    recommendation_text = "{} are the allowed values.".format(str(list(item_type_map.keys())))
+    az_error = InvalidArgumentValueError(error_text)
+    az_error.set_recommendation(recommendation_text)
+    raise az_error

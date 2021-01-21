@@ -8,12 +8,12 @@
 
 import unittest
 import mock
-from knack.util import CLIError
+from azure.cli.core.azclierror import ValidationError
 
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostingEnvironmentProfile
-from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule)
+from azure.mgmt.network.models import (Subnet, RouteTable, Route, NetworkSecurityGroup, SecurityRule, Delegation)
 from azure.cli.core.adal_authentication import AdalAuthentication
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
@@ -67,7 +67,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         # Assert listvips is called
         list_appserviceenvironment_addresses(self.mock_cmd, ase_name_1)
-        ase_client.list_vips.assert_called_with(rg_name_1, ase_name_1)
+        ase_client.get_vip_info.assert_called_with(rg_name_1, ase_name_1)
 
         # Assert list_app_service_plans is called
         list_appserviceenvironment_plans(self.mock_cmd, ase_name_2)
@@ -78,11 +78,11 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_deployment_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_create(self, ase_client_factory_mock, network_client_factory_mock,
-                                            deployment_client_factory_mock, deployment_name_mock):
+                                            resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -92,8 +92,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client = mock.MagicMock()
         ase_client_factory_mock.return_value = ase_client
 
-        deployment_client = mock.MagicMock()
-        deployment_client_factory_mock.return_value = deployment_client
+        resource_client_mock = mock.MagicMock()
+        resource_client_factory_mock.return_value = resource_client_mock
+
         deployment_name_mock.return_value = deployment_name
 
         network_client = mock.MagicMock()
@@ -102,22 +103,24 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         subnet = Subnet(id=1, address_prefix='10.10.10.10/25')
         network_client.subnets.get.return_value = subnet
 
-        # assert that CLIError raised when called with small subnet
-        with self.assertRaises(CLIError):
-            create_appserviceenvironment_arm(self.mock_cmd, rg_name, ase_name, subnet_name, vnet_name,
+        # assert that ValidationError raised when called with small subnet
+        with self.assertRaises(ValidationError):
+            create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
+                                             subnet=subnet_name, vnet_name=vnet_name,
                                              ignore_network_security_group=True, ignore_route_table=True,
                                              location='westeurope')
 
         subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
         network_client.subnets.get.return_value = subnet
-        create_appserviceenvironment_arm(self.mock_cmd, rg_name, ase_name, subnet_name, vnet_name,
+        create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
+                                         subnet=subnet_name, vnet_name=vnet_name,
                                          ignore_network_security_group=True, ignore_route_table=True,
                                          location='westeurope')
 
         # Assert create_or_update is called with correct rg and deployment name
-        deployment_client.create_or_update.assert_called_once()
-        self.assertEqual(deployment_client.create_or_update.call_args[0][0], rg_name)
-        self.assertEqual(deployment_client.create_or_update.call_args[0][1], deployment_name)
+        resource_client_mock.deployments.create_or_update.assert_called_once()
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
@@ -132,6 +135,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         host_env = HostingEnvironmentProfile(id='id1')
         host_env.name = ase_name
+        host_env.kind = 'ASEv2'
         host_env.resource_group = rg_name
         host_env.worker_pools = []
         ase_client.get.return_value = host_env
@@ -142,11 +146,12 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         # Assert create_or_update is called with correct properties
         assert_host_env = HostingEnvironmentProfile(id='id1')
         assert_host_env.name = ase_name
+        assert_host_env.kind = 'ASEv2'
         assert_host_env.resource_group = rg_name
         assert_host_env.worker_pools = []
         assert_host_env.internal_load_balancing_mode = None
         assert_host_env.front_end_scale_factor = 10
-        ase_client.create_or_update.assert_called_once_with(name=ase_name, resource_group_name=rg_name,
+        ase_client.create_or_update.assert_called_once_with(resource_group_name=rg_name, name=ase_name,
                                                             hosting_environment_envelope=assert_host_env)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
@@ -174,6 +179,42 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         assert_host_env.name = ase_name
         assert_host_env.resource_group = rg_name
         ase_client.delete.assert_called_once_with(name=ase_name, resource_group_name=rg_name)
+
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
+    def test_app_service_environment_v3_create(self, ase_client_factory_mock, network_client_factory_mock,
+                                               resource_client_factory_mock, deployment_name_mock):
+        ase_name = 'mock_ase_name'
+        rg_name = 'mock_rg_name'
+        vnet_name = 'mock_vnet_name'
+        subnet_name = 'mock_subnet_name'
+        deployment_name = 'mock_deployment_name'
+
+        ase_client = mock.MagicMock()
+        ase_client_factory_mock.return_value = ase_client
+
+        resource_client_mock = mock.MagicMock()
+        resource_client_factory_mock.return_value = resource_client_mock
+
+        deployment_name_mock.return_value = deployment_name
+
+        network_client = mock.MagicMock()
+        network_client_factory_mock.return_value = network_client
+
+        subnet = Subnet(id=1, address_prefix='10.10.10.10/24')
+        hosting_delegation = Delegation(id=1, service_name='Microsoft.Web/hostingEnvironments')
+        subnet.delegations = [hosting_delegation]
+        network_client.subnets.get.return_value = subnet
+        create_appserviceenvironment_arm(self.mock_cmd, resource_group_name=rg_name, name=ase_name,
+                                         subnet=subnet_name, vnet_name=vnet_name, kind='ASEv3',
+                                         location='westeurope')
+
+        # Assert create_or_update is called with correct rg and deployment name
+        resource_client_mock.deployments.create_or_update.assert_called_once()
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
 
 
 if __name__ == '__main__':

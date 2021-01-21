@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from collections import namedtuple
+import os
 import sys
 import unittest
 import mock
@@ -14,7 +15,9 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
+     _get_parent_proc_name)
+from azure.cli.core.mock import DummyCli
 
 
 class TestUtils(unittest.TestCase):
@@ -197,6 +200,254 @@ class TestUtils(unittest.TestCase):
             result = can_launch_browser()
             self.assertFalse(result)
 
+    def test_configured_default_setter(self):
+        config = mock.MagicMock()
+        config.use_local_config = None
+        with ConfiguredDefaultSetter(config, True):
+            self.assertEqual(config.use_local_config, True)
+        self.assertIsNone(config.use_local_config)
+
+        config.use_local_config = True
+        with ConfiguredDefaultSetter(config, False):
+            self.assertEqual(config.use_local_config, False)
+        self.assertTrue(config.use_local_config)
+
+    @mock.patch('azure.cli.core.__version__', '7.8.9')
+    def test_get_az_user_agent(self):
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        with mock.patch.dict('os.environ', {_ENV_AZ_INSTALLER: 'PIP'}):
+            actual = get_az_user_agent()
+            self.assertEqual(actual, 'AZURECLI/7.8.9 (PIP)')
+
+        actual = get_az_user_agent()
+        self.assertEqual(actual, 'AZURECLI/7.8.9')
+
+    @mock.patch.dict('os.environ')
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    @mock.patch('requests.Session.send', autospec=True)
+    def test_send_raw_requests(self, send_mock, get_raw_token_mock):
+        if 'AZURE_HTTP_USER_AGENT' in os.environ:
+            del os.environ['AZURE_HTTP_USER_AGENT']  # Clear env var possibly added by DevOps
+
+        return_val = mock.MagicMock()
+        return_val.is_ok = True
+        send_mock.return_value = return_val
+        get_raw_token_mock.return_value = ("Bearer", "eyJ0eXAiOiJKV1", None), None, None
+
+        cli_ctx = DummyCli()
+        cli_ctx.data = {
+            'command': 'rest',
+            'safe_params': ['method', 'uri']
+        }
+        test_arm_active_directory_resource_id = 'https://management.core.windows.net/'
+        test_arm_endpoint = 'https://management.azure.com/'
+        subscription_id = '00000001-0000-0000-0000-000000000000'
+        arm_resource_id = '/subscriptions/{}/resourcegroups/02?api-version=2019-07-01'.format(subscription_id)
+        full_arm_rest_url = test_arm_endpoint.rstrip('/') + arm_resource_id
+        test_body = '{"b1": "v1"}'
+
+        expected_header = {
+            'User-Agent': get_az_rest_user_agent(),
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept': '*/*',
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/json',
+            'CommandName': 'rest',
+            'ParameterSetName': 'method uri',
+            'Content-Length': '12'
+        }
+        expected_header_with_auth = expected_header.copy()
+        expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
+
+        # Test basic usage
+        # Mock Put Blob https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob
+        # Authenticate with service SAS https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas
+        sas_token = ['sv=2019-02-02', '{"srt": "s"}', "{'ss': 'bf'}"]
+        send_raw_request(cli_ctx, 'PUT', 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30',
+                         uri_parameters=sas_token, body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.method, 'PUT')
+        self.assertEqual(request.url, 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30&sv=2019-02-02&srt=s&ss=bf')
+        self.assertEqual(request.body, '{"b1": "v1"}')
+        # Verify no Authorization header
+        self.assertDictEqual(dict(request.headers), expected_header)
+        self.assertEqual(send_mock.call_args.kwargs["verify"], not should_disable_connection_verify())
+
+        # Test Authorization header is skipped
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url, body=test_body, skip_authorization_header=True,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), expected_header)
+
+        # Test Authorization header is already provided
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url,
+                         body=test_body, headers={'Authorization=Basic ABCDE'},
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), {**expected_header, 'Authorization': 'Basic ABCDE'})
+
+        # Test Authorization header is auto appended
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url,
+                         body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test ARM Subscriptions - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        # /subscriptions?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/subscriptions?api-version=2020-01-01', body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/subscriptions?api-version=2020-01-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test ARM Tenants - List
+        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        # /tenants?api-version=2020-01-01
+        send_raw_request(cli_ctx, 'GET', '/tenants?api-version=2020-01-01', body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, test_arm_endpoint.rstrip('/') + '/tenants?api-version=2020-01-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test ARM resource ID
+        # /subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, full_arm_rest_url)
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
+        # Test full ARM URL
+        # https://management.azure.com/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, full_arm_rest_url)
+
+        # Test full ARM URL with port
+        # https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01
+        test_arm_endpoint_with_port = 'https://management.azure.com:443/'
+        full_arm_rest_url_with_port = test_arm_endpoint_with_port.rstrip('/') + arm_resource_id
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url_with_port)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01')
+
+        # Test non-ARM APIs
+
+        # Test AD Graph API https://graph.windows.net/
+        url = 'https://graph.windows.net/00000002-0000-0000-0000-000000000000/applications/00000003-0000-0000-0000-000000000000?api-version=1.6'
+        send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.windows.net/')
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.method, 'PATCH')
+        self.assertEqual(request.url, url)
+
+        # Test MS Graph API https://graph.microsoft.com/beta/appRoleAssignments/01
+        url = 'https://graph.microsoft.com/beta/appRoleAssignments/01'
+        send_raw_request(cli_ctx, 'PATCH', url, body=test_body, generated_client_request_id_name=None)
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/')
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.method, 'PATCH')
+        self.assertEqual(request.url, url)
+
+        # Test custom case-insensitive User-Agent
+        with mock.patch.dict('os.environ', {'AZURE_HTTP_USER_AGENT': "env-ua"}):
+            send_raw_request(cli_ctx, 'GET', full_arm_rest_url, headers={'user-agent=ARG-UA'})
+
+            get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=subscription_id)
+            request = send_mock.call_args.args[1]
+            self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
+
+    def test_scopes_to_resource(self):
+        from azure.cli.core.util import scopes_to_resource
+        # scopes as a list
+        self.assertEqual(scopes_to_resource(['https://management.core.windows.net//.default']),
+                         'https://management.core.windows.net/')
+        # scopes as a tuple
+        self.assertEqual(scopes_to_resource(('https://storage.azure.com/.default',)),
+                         'https://storage.azure.com')
+
+        # resource with trailing slash
+        self.assertEqual(scopes_to_resource(('https://management.azure.com//.default',)),
+                         'https://management.azure.com/')
+        self.assertEqual(scopes_to_resource(['https://datalake.azure.net//.default']),
+                         'https://datalake.azure.net/')
+
+        # resource without trailing slash
+        self.assertEqual(scopes_to_resource(('https://managedhsm.azure.com/.default',)),
+                         'https://managedhsm.azure.com')
+
+    def test_resource_to_scopes(self):
+        from azure.cli.core.util import resource_to_scopes
+        # resource converted to a scopes list
+        self.assertEqual(resource_to_scopes('https://management.core.windows.net/'),
+                         ['https://management.core.windows.net//.default'])
+
+        # resource with trailing slash
+        self.assertEqual(resource_to_scopes('https://management.azure.com/'),
+                         ['https://management.azure.com//.default'])
+        self.assertEqual(resource_to_scopes('https://datalake.azure.net/'),
+                         ['https://datalake.azure.net//.default'])
+
+        # resource without trailing slash
+        self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
+                         ['https://managedhsm.azure.com/.default'])
+
+    @mock.patch("psutil.Process")
+    def test_get_parent_proc_name(self, mock_process_type):
+        process = mock_process_type.return_value
+        parent1 = process.parent.return_value
+        parent2 = parent1.parent.return_value
+        parent3 = parent2.parent.return_value
+
+        # Windows, in a virtual env, launched by pwsh.exe
+        process.name.return_value = "python.exe"
+        parent1.name.return_value = "python.exe"
+        parent2.name.return_value = "cmd.exe"
+        parent3.name.return_value = "pwsh.exe"
+        self.assertEqual(_get_parent_proc_name(), "pwsh.exe")
+
+        # Windows, in a virtual env, launched by powershell.exe
+        parent3.name.return_value = "powershell.exe"
+        self.assertEqual(_get_parent_proc_name(), "powershell.exe")
+
+        # Windows, launched by cmd.exe
+        parent1.name.return_value = "cmd.exe"
+        parent2.name.return_value = "explorer.exe"
+        self.assertEqual(_get_parent_proc_name(), "cmd.exe")
+
+        # Linux, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "bash"
+        parent2.name.return_value = "init"
+        self.assertEqual(_get_parent_proc_name(), "bash")
+
+        # Linux, launched by pwsh, launched by bash
+        process.name.return_value = "python"
+        parent1.name.return_value = "pwsh"
+        parent2.name.return_value = "bash"
+        self.assertEqual(_get_parent_proc_name(), "pwsh")
+
 
 class TestBase64ToHex(unittest.TestCase):
 
@@ -212,7 +463,7 @@ class TestBase64ToHex(unittest.TestCase):
 
 class TestHandleException(unittest.TestCase):
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_keyboardinterrupt(self, mock_logger_error):
         # create test KeyboardInterrupt Exception
         keyboard_interrupt_ex = KeyboardInterrupt("KeyboardInterrupt")
@@ -221,10 +472,10 @@ class TestHandleException(unittest.TestCase):
         ex_result = handle_exception(keyboard_interrupt_ex)
 
         # test behavior
-        self.assertFalse(mock_logger_error.called)
+        self.assertTrue(mock_logger_error.called)
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_clierror(self, mock_logger_error):
         from knack.util import CLIError
 
@@ -237,10 +488,10 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(err_msg), mock_logger_error.call_args)
+        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_clouderror(self, mock_logger_error):
         from msrestazure.azure_exceptions import CloudError
 
@@ -255,10 +506,10 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_cloud_error.args[0]), mock_logger_error.call_args)
-        self.assertEqual(ex_result, mock_cloud_error.args[1])
+        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args.args[0])
+        self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_typical_response_error(self, mock_logger_error):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
@@ -267,17 +518,16 @@ class TestHandleException(unittest.TestCase):
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
-        expected_call = mock.call("%s%s", "{} - ".format(err_code), err_msg)
-
         # call handle_exception
         ex_result = handle_exception(mock_http_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(expected_call, mock_logger_error.call_args)
+        self.assertIn(err_msg, mock_logger_error.call_args.args[0])
+        self.assertIn(err_code, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_error_key_has_string_value(self, mock_logger_error):
         # test error in response, but has str value.
 
@@ -294,10 +544,10 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(expected_message), mock_logger_error.call_args)
+        self.assertIn(expected_message, mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_no_error_key(self, mock_logger_error):
         # test error not in response
 
@@ -312,10 +562,10 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
 
-    @mock.patch('azure.cli.core.util.logger.error', autospec=True)
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_httpoperationerror_no_response_text(self, mock_logger_error):
         # test no response text
 
@@ -329,52 +579,8 @@ class TestHandleException(unittest.TestCase):
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertEqual(mock.call(mock_http_error), mock_logger_error.call_args)
+        self.assertIn(str(mock.call(mock_http_error).args[0]), mock_logger_error.call_args.args[0])
         self.assertEqual(ex_result, 1)
-
-    def test_configured_default_setter(self):
-        config = mock.MagicMock()
-        config.use_local_config = None
-        with ConfiguredDefaultSetter(config, True):
-            self.assertEqual(config.use_local_config, True)
-        self.assertIsNone(config.use_local_config)
-
-        config.use_local_config = True
-        with ConfiguredDefaultSetter(config, False):
-            self.assertEqual(config.use_local_config, False)
-        self.assertTrue(config.use_local_config)
-
-    @mock.patch('requests.request', autospec=True)
-    def test_send_raw_requests(self, request_mock):
-        from azure.cli.core.commands.client_factory import UA_AGENT
-        return_val = mock.MagicMock()
-        return_val.is_ok = True
-        request_mock.return_value = return_val
-
-        cli_ctx = mock.MagicMock()
-        cli_ctx.data = {
-            'command': 'rest',
-            'safe_params': ['method', 'uri']
-        }
-        test_arm_endpoint = 'https://arm.com/'
-        test_url = 'subscription/1234/good'
-        tets_uri_parameters = ['p1=v1', "{'p2': 'v2'}"]
-        test_body = '{"b1": "v1"}'
-        cli_ctx.cloud.endpoints.resource_manager = test_arm_endpoint
-
-        expected_header = {
-            'User-Agent': UA_AGENT,
-            'Content-Type': 'application/json',
-            'CommandName': 'rest',
-            'ParameterSetName': 'method uri'
-        }
-
-        send_raw_request(cli_ctx, 'PUT', test_url, uri_parameters=tets_uri_parameters, body=test_body,
-                         skip_authorization_header=True, generated_client_request_id_name=None)
-
-        request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
-                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
-                                        headers=expected_header, verify=(not should_disable_connection_verify()))
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):

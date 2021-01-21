@@ -16,7 +16,7 @@ def run_tests(modules, parallel, run_live, tests):
 
     if not modules and not tests:
         display('No tests set to run.')
-        sys.exit(1)
+        sys.exit(0)
 
     display("""
 =============

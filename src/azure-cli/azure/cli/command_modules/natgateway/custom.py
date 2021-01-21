@@ -6,7 +6,6 @@
 from azure.cli.core.util import sdk_no_wait
 
 from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -21,9 +20,6 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                        location=None, public_ip_addresses=None,
                        public_ip_prefixes=None, idle_timeout=None, zone=None, no_wait=False):
 
-    if not public_ip_addresses and not public_ip_prefixes:
-        raise CLIError('usage error: --public-ip-addresses ADDRESSES | --public-ip-prefixes PREFIXES')
-
     client = network_client_factory(cmd.cli_ctx).nat_gateways
     NatGateway, NatGatewaySku = cmd.get_models('NatGateway', 'NatGatewaySku')
 
@@ -35,7 +31,7 @@ def create_nat_gateway(cmd, nat_gateway_name, resource_group_name,
                              public_ip_addresses=public_ip_addresses,
                              public_ip_prefixes=public_ip_prefixes)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, nat_gateway_name, nat_gateway)
 
 
 def update_nat_gateway(instance, cmd, public_ip_addresses=None,

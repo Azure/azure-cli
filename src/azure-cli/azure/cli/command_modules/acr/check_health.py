@@ -6,13 +6,12 @@
 from __future__ import print_function
 
 import re
-import sys
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
 from ._docker_utils import _get_aad_token
 from .helm import get_helm_command
-from ._utils import get_registry_by_name
+from ._utils import get_registry_by_name, resolve_identity_client_id
 from ._errors import ErrorClass
 
 logger = get_logger(__name__)
@@ -27,13 +26,12 @@ HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 RECOMMENDED_NOTARY_VERSION = "0.6.0"
 NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)')
+DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
 
 
 # Utilities functions
 def print_pass(message):
-    from colorama import Fore, Style, init
-    init()
-    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL, file=sys.stderr)
+    logger.warning("%s : OK", str(message))
 
 
 def _handle_error(error, ignore_errors):
@@ -85,16 +83,18 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        print("Docker daemon status: available", file=sys.stderr)
+        logger.warning("Docker daemon status: available")
 
     # Docker version check
-    output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
+    output, warning, stderr = _subprocess_communicate(
+        [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
+         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
     if stderr:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
             logger.warning(warning)
-        print("Docker version: {}".format(output), file=sys.stderr)
+        logger.warning("Docker version: %s", output)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -108,7 +108,11 @@ def _get_docker_status_and_version(ignore_errors, yes):
         output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
 
         if stderr:
-            _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
+            if DOCKER_PULL_WRONG_PLATFORM in stderr:
+                print_pass("Docker pull of '{}'".format(IMAGE))
+                logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
+            else:
+                _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
@@ -130,7 +134,7 @@ def _get_cli_version():
     if cli_component_name in working_set.by_key:
         cli_version = working_set.by_key[cli_component_name].version
 
-    print('Azure CLI version: {}'.format(cli_version), file=sys.stderr)
+    logger.warning('Azure CLI version: %s', cli_version)
 
 
 # Get helm versions
@@ -219,7 +223,8 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
 
     try:
         registry_ip = socket.gethostbyname(login_server)
-    except socket.gaierror:
+    except (socket.gaierror, UnicodeError):
+        # capture UnicodeError for https://github.com/Azure/azure-cli/issues/12936
         pass
 
     if not registry_ip:
@@ -290,11 +295,12 @@ def _get_endpoint_and_token_status(cmd, login_server, ignore_errors):
     print_pass("Fetch access token for registry '{}'".format(login_server))
 
 
-def _check_health_connectivity(cmd, registry_name, ignore_errors):
+def _check_registry_health(cmd, registry_name, ignore_errors):
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
 
+    # Connectivity
     try:
         registry, _ = get_registry_by_name(cmd.cli_ctx, registry_name)
         login_server = registry.login_server.rstrip('/')
@@ -313,6 +319,24 @@ def _check_health_connectivity(cmd, registry_name, ignore_errors):
     if status_validated:
         _get_endpoint_and_token_status(cmd, login_server, ignore_errors)
 
+    # CMK settings
+    if registry.encryption and registry.encryption.key_vault_properties:  # pylint: disable=too-many-nested-blocks
+        client_id = registry.encryption.key_vault_properties.identity
+        valid_identity = False
+        if registry.identity:
+            valid_identity = (client_id == 'system') and bool(registry.identity.principal_id)  # use system identity?
+            if not valid_identity and registry.identity.user_assigned_identities:
+                for k, v in registry.identity.user_assigned_identities.items():
+                    if v.client_id == client_id:
+                        from msrestazure.azure_exceptions import CloudError
+                        try:
+                            valid_identity = (resolve_identity_client_id(cmd.cli_ctx, k) == client_id)
+                        except CloudError:
+                            pass
+        if not valid_identity:
+            from ._errors import CMK_MANAGED_IDENTITY_ERROR
+            _handle_error(CMK_MANAGED_IDENTITY_ERROR.format_error_message(registry_name), ignore_errors)
+
 
 # General command
 def acr_check_health(cmd,  # pylint: disable useless-return
@@ -327,10 +351,10 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_docker_status_and_version(ignore_errors, yes)
         _get_cli_version()
 
-    _check_health_connectivity(cmd, registry_name, ignore_errors)
+    _check_registry_health(cmd, registry_name, ignore_errors)
 
     if not in_cloud_console:
         _get_helm_version(ignore_errors)
         _get_notary_version(ignore_errors)
 
-    print(FAQ_MESSAGE, file=sys.stderr)
+    logger.warning(FAQ_MESSAGE)

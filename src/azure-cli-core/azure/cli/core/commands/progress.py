@@ -10,7 +10,7 @@ import humanfriendly
 BAR_LEN = 70
 
 
-class ProgressViewBase(object):
+class ProgressViewBase:
     """ a view base for progress reporting """
     def __init__(self, out):
         self.out = out
@@ -28,7 +28,7 @@ class ProgressViewBase(object):
         pass  # pylint: disable=unnecessary-pass
 
 
-class ProgressReporter(object):
+class ProgressReporter:
     """ generic progress reporter """
     def __init__(self, message='', value=None, total_value=None):
         self.message = message
@@ -45,7 +45,7 @@ class ProgressReporter(object):
         total_val = kwargs.get('total_val', self.total_val)
         value = kwargs.get('value', self.value)
         if value and total_val:
-            assert value >= 0 and value <= total_val and total_val >= 0
+            assert 0 <= value <= total_val
             self.closed = value == total_val
         self.total_val = total_val
         self.value = value
@@ -57,7 +57,7 @@ class ProgressReporter(object):
         return {'message': self.message, 'percent': percent}
 
 
-class ProgressHook(object):
+class ProgressHook:
     """ sends the progress to the view """
     def __init__(self):
         self.reporter = ProgressReporter()
@@ -114,7 +114,7 @@ class IndeterminateStandardOut(ProgressViewBase):
         :param args: dictionary containing key 'message'
         """
         if self.spinner is None:
-            self.spinner = humanfriendly.Spinner(
+            self.spinner = humanfriendly.Spinner(  # pylint: disable=no-member
                 label='In Progress', stream=self.out, hide_cursor=False)
         msg = args.get('message', 'In Progress')
         try:

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 from .scenario_mixin import CdnScenarioMixin
 
 from azure.mgmt.cdn.models import SkuName
@@ -27,9 +27,19 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('isHttpsAllowed', True),
                   JMESPathCheck('isCompressionEnabled', False),
                   JMESPathCheck('queryStringCachingBehavior', 'IgnoreQueryString')]
-        self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin, checks=checks)
+        self.endpoint_create_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 origin,
+                                 checks=checks)
 
-        list_checks = [JMESPathCheck('length(@)', 1)]
+        list_checks = [JMESPathCheck('length(@)', 1),
+                       JMESPathCheck('@[0].name', endpoint_name),
+                       JMESPathCheck('@[0].origins[0].hostName', origin),
+                       JMESPathCheck('@[0].isHttpAllowed', True),
+                       JMESPathCheck('@[0].isHttpsAllowed', True),
+                       JMESPathCheck('@[0].isCompressionEnabled', False),
+                       JMESPathCheck('@[0].queryStringCachingBehavior', 'IgnoreQueryString')]
         self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
 
         update_checks = [JMESPathCheck('name', endpoint_name),
@@ -60,6 +70,43 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.endpoint_delete_cmd(resource_group, endpoint_name, profile_name)
 
+    @record_only()  # This test relies on existing resources in a specific subscription
+    @ResourceGroupPreparer()
+    def test_private_link(self, resource_group):
+        profile_name = 'profile123'
+        self.profile_create_cmd(resource_group, profile_name, sku='Standard_Microsoft')
+
+        endpoint_name = self.create_random_name(prefix='endpoint', length=24)
+        origin = 'www.example.com'
+        pls_subscription_id = '27cafca8-b9a4-4264-b399-45d0c9cca1ab'
+        # Workaround for overly heavy-handed subscription id replacement in playback mode.
+        if self.is_playback_mode():
+            pls_subscription_id = '00000000-0000-0000-0000-000000000000'
+        private_link_id = f'/subscriptions/{pls_subscription_id}/resourceGroups/cdn-sdk-test/providers/Microsoft.Network/privateLinkServices/cdn-sdk-pls-test'
+        private_link_location = 'EastUS'
+        private_link_message = 'Please approve the request'
+        checks = [JMESPathCheck('name', endpoint_name),
+                  JMESPathCheck('origins[0].hostName', origin),
+                  JMESPathCheck('origins[0].privateLinkResourceId', private_link_id),
+                  JMESPathCheck('origins[0].privateLinkLocation', private_link_location),
+                  JMESPathCheck('origins[0].privateLinkApprovalMessage', private_link_message)]
+        self.endpoint_create_cmd(resource_group,
+                                 endpoint_name,
+                                 profile_name,
+                                 origin,
+                                 private_link_id=private_link_id,
+                                 private_link_location=private_link_location,
+                                 private_link_message=private_link_message,
+                                 checks=checks)
+
+        list_checks = [JMESPathCheck('length(@)', 1),
+                       JMESPathCheck('@[0].name', endpoint_name),
+                       JMESPathCheck('@[0].origins[0].hostName', origin),
+                       JMESPathCheck('@[0].origins[0].privateLinkResourceId', private_link_id),
+                       JMESPathCheck('@[0].origins[0].privateLinkLocation', private_link_location),
+                       JMESPathCheck('@[0].origins[0].privateLinkApprovalMessage', private_link_message)]
+        self.endpoint_list_cmd(resource_group, profile_name, checks=list_checks)
+
     @ResourceGroupPreparer()
     def test_endpoint_start_and_stop(self, resource_group):
         profile_name = 'profile123'
@@ -83,7 +130,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.profile_create_cmd(resource_group, profile_name, options='--sku Standard_Verizon')
 
         endpoint_name = self.create_random_name(prefix='endpoint', length=24)
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         self.endpoint_create_cmd(resource_group, endpoint_name, profile_name, origin)
 
         content_paths = ['/index.html', '/javascript/app.js']
@@ -94,7 +141,7 @@ class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_endpoint_different_profiles(self, resource_group):
-        origin = 'www.example.com'
+        origin = 'www.contoso.com'
         checks = [JMESPathCheck('origins[0].hostName', origin),
                   JMESPathCheck('isHttpAllowed', True),
                   JMESPathCheck('isHttpsAllowed', True),

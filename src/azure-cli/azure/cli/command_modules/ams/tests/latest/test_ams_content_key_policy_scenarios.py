@@ -180,7 +180,7 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             'description': 'ExampleDescription',
             'policyOptionName': policy_option_name,
             'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
-            'ask': 'testtesttesttest',
+            'ask': '1234567890ABCDEF1234567890ABCDEF',
             'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
             'fairPlayPfxPassword': 'password',
             'rentalAndLeaseKeyType': 'Undefined',
@@ -196,6 +196,43 @@ class AmsContentKeyPolicyTests(ScenarioTest):
             self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
             self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
             self.check('options[0].configuration.rentalDuration', '{rentalDuration}')
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_content_key_policy_create_with_fairplay_offline(self, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+        policy_name = self.create_random_name(prefix='pn', length=12)
+        policy_option_name = self.create_random_name(prefix='pon', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'eastasia',
+            'contentKeyPolicyName': policy_name,
+            'description': 'ExampleDescription',
+            'policyOptionName': policy_option_name,
+            'configurationODataType': '#Microsoft.Media.ContentKeyPolicyFairPlayConfiguration',
+            'ask': '1234567890ABCDEF1234567890ABCDEF',
+            'fairPlayPfx': _get_test_data_file('TestCert2.pfx'),
+            'fairPlayPfxPassword': 'password',
+            'rentalAndLeaseKeyType': 'DualExpiry',
+            'fairPlayPlaybackDurationSeconds': 60,
+            'fairPlayStorageDurationSeconds': 60,
+            'rentalDuration': 60,
+            'restrictionODataType': '#Microsoft.Media.ContentKeyPolicyOpenRestriction'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}')
+
+        self.cmd('az ams content-key-policy create -a {amsname} -n {contentKeyPolicyName} -g {rg} --open-restriction --description {description} --ask {ask} --fair-play-pfx "{fairPlayPfx}" --fair-play-pfx-password {fairPlayPfxPassword} --rental-and-lease-key-type {rentalAndLeaseKeyType} --fp-playback-duration-seconds {fairPlayPlaybackDurationSeconds} --fp-storage-duration-seconds {fairPlayStorageDurationSeconds} --rental-duration {rentalDuration} --policy-option-name {policyOptionName}', checks=[
+            self.check('name', '{contentKeyPolicyName}'),
+            self.check('options[0].configuration.odatatype', '{configurationODataType}'),
+            self.check('options[0].restriction.odatatype', '{restrictionODataType}'),
+            self.check('options[0].configuration.rentalAndLeaseKeyType', '{rentalAndLeaseKeyType}'),
+            self.check('options[0].configuration.rentalDuration', 0),
+            self.check('options[0].configuration.offlineRentalConfiguration.playbackDurationSeconds', '{fairPlayPlaybackDurationSeconds}'),
+            self.check('options[0].configuration.offlineRentalConfiguration.storageDurationSeconds', '{fairPlayStorageDurationSeconds}')
         ])
 
     @ResourceGroupPreparer()

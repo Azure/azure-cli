@@ -24,8 +24,12 @@ def _log_analytics_client_factory(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
 
 
-def cf_log_analytics(cli_ctx, *_):
+def cf_log_analytics_workspace(cli_ctx, *_):
     return _log_analytics_client_factory(cli_ctx).workspaces
+
+
+def cf_log_analytics_workspace_shared_keys(cli_ctx, *_):
+    return _log_analytics_client_factory(cli_ctx).shared_keys
 
 
 def cf_resource(cli_ctx):

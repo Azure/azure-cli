@@ -14,9 +14,11 @@
 
 import fileinput
 import json
+import os
 import re
 import subprocess
 import requests
+from requests.auth import HTTPBasicAuth
 
 base_url = 'https://api.github.com/repos/azure/azure-cli'
 commit_pr_url = '{}/commits/commit_id/pulls'.format(base_url)
@@ -24,9 +26,40 @@ commit_pr_url = '{}/commits/commit_id/pulls'.format(base_url)
 history_line_breaker = '==============='
 history_notes = {}
 
+# key is lower case and removed spaces of a component
+# value is the recommended format of a component
+customized_dict = {
+    "privatedns": "Private DNS",
+    "appconfig": "App Config",
+}
+
+# This dict will be filled with all historical compenents.
+# key is lower case and removed spaces of a component
+# value is the recommended format of a component, when there're multiple formats,
+# the one with spaces will be picked, i.e. pick 'Key Vault' over 'KeyVault'.
+# If the key also exists in customized_dict, the value will be overwritten with customized_dict[key].
+component_dict = {}
+
+def get_component_dict():
+    with open('src/azure-cli/HISTORY.rst', 'r', encoding="utf-8") as history_file:
+        for line in history_file:
+            result = re.search(r'^\*\*(.*)\*\*$', line)
+            if result is not None:
+                comp = result.group(1)
+                key = comp.lower().replace(' ', '')
+                if key in customized_dict:
+                    component_dict[key] = customized_dict[key]
+                elif key in component_dict:
+                    if ' ' not in component_dict[key] and ' ' in comp:
+                        component_dict[key] = comp
+                else:
+                    component_dict[key] = comp
+    print(component_dict)
 
 def generate_history_notes():
+    get_component_dict()
     dev_commits = get_commits()
+    print("Get PRs for {} commits.".format(len(dev_commits)))
     for commit in dev_commits:
         prs = get_prs_for_commit(commit['sha'])
         # parse PR if one commit is mapped to one PR
@@ -97,8 +130,9 @@ def construct_core_history(component: str):
 
 
 def get_commits():
+    last_release = 'azure-cli-{}'.format(os.getenv('PRE_VERSION')) if os.getenv('PRE_VERSION') else 'upstream/release'
     out = subprocess.Popen([
-        'git', 'log', 'upstream/release...upstream/dev',
+        'git', 'log', '{}..upstream/dev'.format(last_release),
         '--pretty=format:"%H %s"'
     ],
                            stdout=subprocess.PIPE,
@@ -109,8 +143,7 @@ def get_commits():
         words = line.strip('"').split(None, 1)
         sha = words[0]
         subject = words[1]
-        if not subject.startswith('{'):
-            dev_commits.append({'sha': sha, 'subject': subject})
+        dev_commits.append({'sha': sha, 'subject': subject})
     dev_commits.reverse()
     return dev_commits
 
@@ -118,7 +151,7 @@ def get_commits():
 def get_prs_for_commit(commit: str):
     headers = {'Accept': 'application/vnd.github.groot-preview+json'}
     url = commit_pr_url.replace('commit_id', commit)
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, auth=HTTPBasicAuth('anything', os.environ.get('PAT_TOKEN')))
     if response.status_code != 200:
         raise Exception("Request to {} failed with {}".format(
             url, response.status_code))
@@ -129,19 +162,21 @@ def get_prs_for_commit(commit: str):
 def process_pr(pr):
     lines = [pr['title']]
     body = pr['body']
-    search_result = re.search(r'\*\*History Notes:\*\*(.*)---',
+    content = ''
+    search_result = re.search(r'\*\*History Notes\*\*(.*)---',
                               body,
                               flags=re.DOTALL)
     if search_result is None:
-        search_result = re.search(r'\*\*History Notes:\*\*(.*)',
+        search_result = re.search(r'\*\*History Notes\*\*(.*)',
                                   body,
                                   flags=re.DOTALL)
         if search_result is not None:
-            body = search_result.group(1)
+            content = search_result.group(1)
     else:
-        body = search_result.group(1)
-    lines.extend(body.splitlines())
-    process_lines(lines)
+        content = search_result.group(1)
+    if content:
+        lines.extend(content.splitlines())
+    process_lines(lines, pr['number'])
 
 
 def process_commit(commit):
@@ -149,42 +184,63 @@ def process_commit(commit):
     process_lines(lines)
 
 
-def process_lines(lines: [str]):
+def process_lines(lines: [str], pr_num: str = None):
     # do not put note of hotfix here since it's for last release
     if re.search('hotfix', lines[0], re.IGNORECASE):
         return
     note_in_desc = False
     for desc in lines[1:]:
-        component, note = parse_message(desc)
+        component, note = parse_message(desc, pr_num)
         if component is not None:
             note_in_desc = True
+            component = process_component(component)
             history_notes.setdefault(component, []).append(note)
     # if description has no history notes, parse PR title/commit message
     # otherwise should skip PR title/commit message
     if not note_in_desc:
-        component, note = parse_message(lines[0])
+        component, note = parse_message(lines[0], pr_num)
         if component is not None:
+            component = process_component(component)
             history_notes.setdefault(component, []).append(note)
 
 
-def parse_message(message: str) -> (str, str):
+def process_component(component):
+    key = component.lower().replace(' ', '')
+    if key in component_dict:
+        if ' ' not in component_dict[key] and ' ' in component:
+            component_dict[key] = component
+        else:
+            component = component_dict[key]
+    return component
+
+
+def parse_message(message: str, pr_num: str = None) -> (str, str):
     # do not include template
     if message.startswith('[Component Name'):
         return None, None
-    m = re.search(r'^\[(.+)\](.+)$', message)
+    m = re.search(r'^\[(.+?)\](.+)$', message)
     if m is not None:
         component = m.group(1)
         note = m.group(2).strip()
-        #remove appended PR number in commit message
-        note = re.sub(r' \(#[0-9]+\)$', '', note)
+        if not pr_number_appended(note) and pr_num:
+            note = '{} (#{})'.format(note, pr_num)
         note = re.sub('BREAKING CHANGE:',
                       '[BREAKING CHANGE]',
                       note,
                       flags=re.IGNORECASE)
+        note = re.sub(r"^'(az .*?)':", r"`\1`:", note)
+        note = re.sub(r"^(az .*?):", r"`\1`:", note)
+        if not note.startswith('az') and not ':' in note:
+            note = note[0].capitalize() + note[1:]
         if note.endswith('.'):
             note = note[:-1]
         return component, note
     return None, None
+
+
+def pr_number_appended(line):
+    m = re.search(r' \(#[0-9]+\)$', line)
+    return m is not None
 
 
 if __name__ == "__main__":

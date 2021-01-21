@@ -186,6 +186,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ])
 
+        self.cmd("backup policy set -g {rg} -v {vault} --backup-management-type AzureWorkload --fix-for-inconsistent-items -n {policy_new}", checks=[
+            self.check('name', '{policy_new}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
         self.cmd('backup policy show -g {rg} -v {vault} -n {policy_new}', checks=[
             self.check('name', '{policy_new}'),
             self.check('resourceGroup', '{rg}')
@@ -925,6 +930,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
+    @record_only()
     def test_backup_wl_sql_restore_as_files(self):
         self.kwargs.update({
             'vault': "iaasvmsqlworkloadexistingvault1",

@@ -23,10 +23,10 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.3.3'
+AZCOPY_VERSION = '10.5.0'
 
 
-class AzCopy(object):
+class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
         install_location = _get_default_install_location()
@@ -39,7 +39,7 @@ class AzCopy(object):
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext.azureedge.net/release20191212/azcopy_{}_{}_{}.{}'
+        base_url = 'https://azcopyvnext.azureedge.net/release20200709/azcopy_{}_{}_{}.{}'
 
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
@@ -76,7 +76,9 @@ class AzCopy(object):
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
-        subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        if result > 0:
+            raise CLIError('Failed to perform {} operation.'.format(args[1]))
 
     def copy(self, source, destination, flags=None):
         flags = flags or []
@@ -91,7 +93,7 @@ class AzCopy(object):
         self.run_command(['sync', source, destination] + flags)
 
 
-class AzCopyCredentials(object):  # pylint: disable=too-few-public-methods
+class AzCopyCredentials:  # pylint: disable=too-few-public-methods
     def __init__(self, sas_token=None, token_info=None):
         self.sas_token = sas_token
         self.token_info = token_info
@@ -178,12 +180,16 @@ def _get_default_install_location():
     if system == 'Windows':
         home_dir = os.environ.get('USERPROFILE')
         if not home_dir:
-            return None
+            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
+                           'as the installation location.')
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
         install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
-        install_location = None
+        raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
+                       'please refer to the document for supported platforms: '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       .format(system))
     return install_location
 
 

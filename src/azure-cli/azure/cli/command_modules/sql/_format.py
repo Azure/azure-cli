@@ -71,6 +71,32 @@ def _apply_format(result, format_group):
     # Apply format function to list
     return [format_group(item) for item in obj_list]
 
+###############################################
+#                sql instance-pool            #
+###############################################
+
+
+def instance_pool_table_format(result):
+    '''
+    Formats an instance pool or list of instance pools as summary results for display with "-o table".
+    '''
+    def _instance_pool_table_format(result):
+        '''
+        Formats an instance pool or list of instance pools as summary results for display with "-o table".
+        '''
+        from collections import OrderedDict
+        sku = result['sku']
+        return OrderedDict([
+            ('name', result['name']),
+            ('resourceGroup', result['resourceGroup']),
+            ('location', result['location']),
+            ('Capacity', result['vCores']),
+            ('SKU Family', sku['family']),
+            ('SKU Tier', sku['tier']),
+            ('Tags', str(result['tags']) if result['tags'] else '')
+        ])
+
+    return _apply_format(result, _instance_pool_table_format)
 
 ###############################################
 #                sql server                   #
@@ -126,7 +152,19 @@ def db_transform(result):
     result.edition = result.sku.tier
     result.elastic_pool_name = _last_segment(result.elastic_pool_id)
 
+    if hasattr(result, 'storage_account_type'):
+        result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
+        del result.storage_account_type
+
     return result
+
+
+def _get_external_backup_storage_redundancy(self):
+    return {
+        'lrs': 'Local',
+        'grs': 'Geo',
+        'zrs': 'Zone'
+    }.get(self.lower(), 'Invalid')
 
 
 #####
@@ -329,3 +367,40 @@ def firewall_rule_table_format(result):
         ])
 
     return _apply_format(result, _firewall_rule_table_format)
+
+
+###############################################
+#                sql mi             #
+###############################################
+
+
+#####
+#           sql mi transformers for json
+#####
+
+def mi_list_transform(results):
+    '''
+    Transforms the json response for a list of managed instances.
+    '''
+
+    return [mi_transform(r) for r in results]
+
+
+def mi_transform(result):
+    '''
+    Transforms the json response for a managed instance.
+    '''
+
+    if hasattr(result, 'storage_account_type'):
+        result.backupStorageRedundancy = _get_external_backup_storage_redundancy(result.storage_account_type)
+        del result.storage_account_type
+
+    return result
+
+
+def _get_external_backup_storage_redundancy(self):
+    return {
+        'lrs': 'Local',
+        'grs': 'Geo',
+        'zrs': 'Zone'
+    }.get(self.lower(), 'Invalid')

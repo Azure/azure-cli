@@ -68,7 +68,7 @@ class MediaV2Client():
                                        namespace=get_media_namespace(), type=get_media_type(),
                                        name=account_name) + '?api-version={}'.format(self._old_rp_api_version)
 
-        media_service_res = requests.get(cli_ctx.cloud.endpoints.resource_manager[:-1] + media_old_rp_url,
+        media_service_res = requests.get(cli_ctx.cloud.endpoints.resource_manager.rstrip('/') + media_old_rp_url,
                                          headers={'Authorization': 'Bearer {}'.format(access_token)})
         if not media_service_res.ok:
             err_info = 'Request to 2015-10-01 Media API failed.'

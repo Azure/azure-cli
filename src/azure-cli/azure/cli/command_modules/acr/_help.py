@@ -31,6 +31,9 @@ examples:
   - name: Queue a remote GitHub context as a Windows build, tag it, and push it to the registry.
     text: >
         az acr build -r MyRegistry https://github.com/Azure/acr-builder.git -f Windows.Dockerfile --platform windows
+  - name: Queue a remote OCI Artifact context build.
+    text: >
+        az acr build -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag
   - name: Queue a local context as a Linux build on arm/v7 architecture, tag it, and push it to the registry.
     text: >
         az acr build -t sample/hello-world:{{.Run.ID}} -r MyRegistry . --platform linux/arm/v7
@@ -113,7 +116,7 @@ examples:
 
 helps['acr create'] = """
 type: command
-short-summary: Creates an Azure Container Registry.
+short-summary: Create an Azure Container Registry.
 examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
@@ -248,16 +251,19 @@ helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
 examples:
-  - name: Import an image to the target registry and inherits sourcerepository:sourcetag from the source registry.
+  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
-  - name: Import an image from a registry in a different subscription.
+  - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
+    text: >
+        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
+  - name: Import an image from a private repository using its username and password. This also applies to registries outside Azure.
+    text: >
+        az acr import -n MyRegistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
+  - name: Import an image from an Azure container registry in a different subscription.
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
-  - name: Import an image from a public repository in Docker Hub
-    text: >
-        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
 """
 
 helps['acr list'] = """
@@ -505,6 +511,9 @@ examples:
   - name: Queue a remote git context with streaming logs and runs the task on Linux platform.
     text: >
         az acr run -r MyRegistry https://github.com/Azure-Samples/acr-tasks.git -f build-hello-world.yaml --platform linux
+  - name: Queue a remote OCI Artifact context and runs the task.
+    text: >
+        az acr run -r MyRegistry oci://myregistry.azurecr.io/myartifact:mytag -f hello-world.yaml
 """
 
 helps['acr scope-map'] = """
@@ -519,6 +528,12 @@ examples:
   - name: Create a scope map that allows content/write and metadata/read actions for `hello-world` repository, and content/read action for `hello-world-again`.
     text: >
         az acr scope-map create -n MyScopeMap -r MyRegistry --repository hello-world content/write metadata/read --repository hello-world-again content/read --description "Sample scope map."
+  - name: Create a scope map that allows all repository actions for `test`, and all gateway actions for `connectedRegistry`.
+    text: >
+        az acr scope-map create -n MyScopeMap -r MyRegistry --description "Sample scope map."
+          --repository test content/delete content/read content/write metadata/read metadata/write
+          --gateway connectedRegistry config/read config/write message/read message/write
+
 """
 
 helps['acr scope-map delete'] = """
@@ -552,9 +567,9 @@ helps['acr scope-map update'] = """
 type: command
 short-summary: Update a scope map for an Azure Container Registry.
 examples:
-  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and metadata/write action for `hello-world-again`.
+  - name: Update the scope map 'MyScopeMap' removing metadata/read and content/read actions for `hello-world` repository, and message/write action for `connectedRegistry`.
     text: >
-        az acr scope-map update -n MyScopeMap -r MyRegistry --remove hello-world metadata/read content/read --remove hello-world-again metadata/write
+        az acr scope-map update -n MyScopeMap -r MyRegistry --remove-repo hello-world metadata/read content/read --remove-gateway connectedRegistry message/write
 """
 
 helps['acr show'] = """
@@ -594,7 +609,7 @@ examples:
 
 helps['acr task create'] = """
 type: command
-short-summary: Creates a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
+short-summary: Create a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
 examples:
   - name: Create a task without the source location.
     text: >
@@ -972,9 +987,10 @@ examples:
   - name: Create a token which has read permissions on hello-world repository.
     text: >
         az acr token create -n myToken -r MyRegistry --repository hello-world content/read metadata/read
-  - name: Create a token without credentials.
-    text: >
-        az acr token create -n myToken -r MyRegistry --repository hello-world content/read --no-passwords
+  - name: Create a token without credentials and with all gateway permissions.
+    text: |
+        az acr token create -n myToken -r MyRegistry --repository hello-world content/read
+          --gateway registry config/read config/write message/read message/write --no-passwords
   - name: Create a token in disabled status.
     text: >
         az acr token create -n MyToken -r MyRegistry --scope-map MyScopeMap --status disabled
@@ -1036,6 +1052,63 @@ examples:
     text: >
         az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
 """
+
+helps['acr agentpool'] = """
+type: group
+short-summary: Manage private Tasks agent pools with Azure Container Registries.
+"""
+
+helps['acr agentpool create'] = """
+type: command
+short-summary: Create an agent pool for an Azure Container Registry.
+examples:
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry'.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry
+  - name: Create the agent pool 'MyAgentName' with 2 agent count.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry --count 2
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET subnet.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry --subnet-id /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
+"""
+
+helps['acr agentpool update'] = """
+type: command
+short-summary: Update an agent pool for an Azure Container Registry.
+examples:
+  - name: Update the agent pool 'MyAgentName' count to 5
+    text: >
+        az acr agentpool update -n MyAgentName -r MyRegistry --count 5
+"""
+
+helps['acr agentpool delete'] = """
+type: command
+short-summary: Delete an agent pool.
+examples:
+  - name: Delete the agent pool 'MyAgentName'.
+    text: >
+        az acr agentpool delete -n MyAgentName -r MyRegistry
+"""
+
+helps['acr agentpool list'] = """
+type: command
+short-summary: List the agent pools for an Azure Container Registry.
+examples:
+  - name: List agent pools and show the result in a table.
+    text: >
+        az acr agentpool list -r MyRegistry -o table
+"""
+
+helps['acr agentpool show'] = """
+type: command
+short-summary: Get the properties of a specified agent pool for an Azure Container Registry.
+examples:
+  - name: Get the properties of an agent pool, displaying the results in a table.
+    text: >
+        az acr agentpool show -n MyAgentName -r MyRegistry -o table
+"""
+
 
 helps['acr update'] = """
 type: command
@@ -1138,6 +1211,124 @@ examples:
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
 
+# region connected-registry
+helps['acr connected-registry'] = """
+type: group
+short-summary: Manage connected registry resources with Azure Container Registries.
+"""
+
+helps['acr connected-registry create'] = """
+type: command
+short-summary: Create a connected registry for an Azure Container Registry.
+examples:
+  - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
+    text: |
+        az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
+            --repository "app/hello-world service/mycomponent"
+  - name: Create a mirror connected registry with only read permissions and pass the sync token
+    text: |
+        az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
+            --mode mirror --parent myconnectedregistry --sync-token mySyncTokenName
+  - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
+    text: |
+        az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
+            --repository app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
+            --client-tokens myTokenName1 myTokenName2
+"""
+
+helps['acr connected-registry delete'] = """
+type: command
+short-summary: Delete a connected registry from Azure Container Registry.
+examples:
+  - name: Delete a mirror connected registry 'myconnectedregistry' from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete --registry mycloudregistry --name myconnectedregistry
+  - name: Delete a mirror connected registry 'myconnectedregistry' and it's sync token and scope-map from parent registry 'mycloudregistry'.
+    text: >
+        az acr connected-registry delete -r mycloudregistry -n myconnectedregistry --cleanup
+"""
+
+helps['acr connected-registry deactivate'] = """
+type: command
+short-summary: Deactivate a connected registry from Azure Container Registry.
+examples:
+  - name: Deactivate a connected registry 'myconnectedregistry'.
+    text: >
+        az acr connected-registry deactivate -r mycloudregistry -n myconnectedregistry
+"""
+
+helps['acr connected-registry list'] = """
+type: command
+short-summary: Lists all the connected registries under the current parent registry.
+examples:
+  - name: Lists all the connected registries of 'mycloudregistry' in table format.
+    text: >
+        az acr connected-registry list --registry mycloudregistry --output table
+  - name: Lists only the inmediate children of 'mycloudregistry' in expanded form in a table.
+    text: >
+        az acr connected-registry list --registry mycloudregistry --no-children --output table
+  - name: Lists all the offspring of 'myconnectedregistry' in expanded form inside a table.
+    text: >
+        az acr connected-registry list -r mycloudregistry -p myconnectedregistry --output table
+"""
+
+helps['acr connected-registry list-client-tokens'] = """
+type: command
+short-summary: Lists all the client tokens associated to a specific connected registries.
+examples:
+  - name: Lists all client tokens of 'mymirroracr'.
+    text: >
+        az acr connected-registry list-client-tokens -r mycloudregistry -n mymirroracr -o table
+"""
+
+helps['acr connected-registry show'] = """
+type: command
+short-summary: Show connected registry details.
+examples:
+  - name: Show all the details of the 'mymirroracr' registry in table form.
+    text: >
+        az acr connected-registry show --registry mycloudregistry --name mymirroracr --output table
+"""
+
+helps['acr connected-registry update'] = """
+type: command
+short-summary: Update a connected registry for an Azure Container Registry.
+examples:
+  - name: Update the connected registry client Tokens.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name myconnectedregistry \\
+            --remove-client-tokens myTokenName1 --add-client-tokens myTokenName2 myTokenName3
+
+  - name: Update the sync and window time of a connected registry.
+    text: |
+        az acr connected-registry update --registry mycloudregistry --name mymirroracr \\
+            --sync-schedule "0 12 * * *" --sync-window PT4H
+"""
+
+helps['acr connected-registry install'] = """
+type: group
+short-summary: Helps to access the necessary information for installing a connected registry. Please see https://aka.ms/acr/connected-registry for more information.
+"""
+
+helps['acr connected-registry install info'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry.
+examples:
+  - name: Prints the values requiered to activate a connected registry in json format
+    text: >
+        az acr connected-registry install info --registry mycloudregistry --name myconnectedregistry
+"""
+
+helps['acr connected-registry install renew-credentials'] = """
+type: command
+short-summary: Retrieves information required to activate a connected registry, and renews the sync token credentials.
+examples:
+  - name: Prints the values in json format requiered to activate a connected registry and the newly generated sync token credentials.
+    text: >
+        az acr connected-registry install renew-credentials -r mycloudregistry -n myconnectedregistry
+"""
+# endregion
+
 # region private-endpoint-connection
 # be careful to keep long-summary consistent in this region
 helps['acr private-endpoint-connection'] = """
@@ -1227,5 +1418,10 @@ short-summary: Remove a managed identity from a container registry
 helps['acr identity show'] = """
 type: command
 short-summary: Show the container registry's identity details
+"""
+
+helps['acr show-endpoints'] = """
+type: command
+short-summary: Display registry endpoints
 """
 # endregion

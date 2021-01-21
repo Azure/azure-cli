@@ -5,7 +5,6 @@
 
 import json
 import datetime
-import six
 
 from applicationinsights import TelemetryClient
 from applicationinsights.channel import SynchronousSender, SynchronousQueue, TelemetryChannel
@@ -20,7 +19,7 @@ except ImportError:
     from urllib.error import HTTPError
 
 
-class CliTelemetryClient(object):
+class CliTelemetryClient:
     def __init__(self, batch=100, sender=None):
         from azure.cli.telemetry.components.telemetry_logging import get_logger
 
@@ -49,7 +48,7 @@ class CliTelemetryClient(object):
                 properties = {}
                 measurements = {}
                 for k, v in raw_properties.items():
-                    if isinstance(v, six.string_types):
+                    if isinstance(v, str):
                         properties[k] = v
                     else:
                         measurements[k] = v

@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer)
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 
 class StorageLegalHold(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_legal_hold(self, resource_group):
         storage_account = self.create_random_name('clistorage', 20)

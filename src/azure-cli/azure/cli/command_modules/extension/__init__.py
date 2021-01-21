@@ -39,12 +39,13 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         extension_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.extension.custom#{}')
 
         with self.command_group('extension', extension_custom) as g:
-            g.command('add', 'add_extension', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
-            g.command('remove', 'remove_extension')
-            g.command('list', 'list_extensions')
-            g.show_command('show', 'show_extension')
-            g.command('list-available', 'list_available_extensions', table_transformer=transform_extension_list_available)
-            g.command('update', 'update_extension')
+            g.command('add', 'add_extension_cmd', confirmation=ext_add_has_confirmed, validator=validate_extension_add)
+            g.command('remove', 'remove_extension_cmd')
+            g.command('list', 'list_extensions_cmd')
+            g.show_command('show', 'show_extension_cmd')
+            g.command('list-available', 'list_available_extensions_cmd', table_transformer=transform_extension_list_available)
+            g.command('update', 'update_extension_cmd')
+            g.command('list-versions', 'list_versions_cmd')
 
         return self.command_table
 
@@ -64,11 +65,14 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             c.argument('pip_extra_index_urls', options_list=['--pip-extra-index-urls'], nargs='+',
                        help='Space-separated list of extra URLs of package indexes to use. This should point to a repository compliant with PEP 503 (the simple repository API) or a local directory laid out in the same format.', arg_group='Experimental Pip')
             c.ignore('_subscription')  # hide global subscription param
+            c.argument('system', action='store_true')
 
         with self.argument_context('extension add') as c:
             c.argument('extension_name', completer=extension_name_from_index_completion_list)
             c.argument('source', options_list=['--source', '-s'], help='Filepath or URL to an extension', completer=FilesCompleter())
             c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+            c.argument('version', default='latest', help='The specific version of an extension')
+            c.argument('upgrade', action='store_true', help='Update the extension if already installed, otherwise just install the extension.')
 
         with self.argument_context('extension list-available') as c:
             c.argument('show_details', options_list=['--show-details', '-d'], action='store_true', help='Show the raw data from the extension index.')

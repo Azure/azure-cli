@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # Mgmt Account Operations
     with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
-        g.custom_command('show', 'get_account')
+        g.custom_show_command('show', 'get_account')
         g.custom_command('create', 'create_account', supports_no_wait=True)
         g.custom_command('set', 'update_account')
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
@@ -98,7 +98,7 @@ def load_command_table(self, _):
     with self.command_group('batch pool', pool_type, client_factory=get_data_factory('pool')) as g:
         g.batch_command('usage-metrics list', 'list_usage_metrics')
         g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
-        g.batch_command('create', 'add', validator=validate_pool_settings)
+        g.batch_command('create', 'add', validator=validate_pool_settings, flatten=10)
         g.batch_command('list', 'list')
         g.batch_command('delete', 'delete')
         g.batch_command('show', 'get')

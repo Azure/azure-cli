@@ -32,7 +32,7 @@ class AcrTaskRunCommandsTests(ScenarioTest):
                          self.check('sku.tier', 'Standard'),
                          self.check('provisioningState', 'Succeeded')])
 
-        self.cmd('group deployment create --resource-group {rg} --template-file {tf} --parameters registryName={registry_name} --parameters taskRunName={taskrun_name} --parameters sourceLocation={sourceLocation} --parameters dockerFilePath={dockerFilePath} --parameters image={image} ')
+        self.cmd('group deployment create --resource-group {rg} --template-file "{tf}" --parameters registryName={registry_name} --parameters taskRunName={taskrun_name} --parameters sourceLocation={sourceLocation} --parameters dockerFilePath={dockerFilePath} --parameters image={image} ')
 
         self.cmd('acr taskrun list -r {registry_name} -g {rg}',
                  checks=[self.check('[0].name', '{taskrun_name}'),

@@ -4,31 +4,54 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+import mock
+
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
+from .recording_processors import KeyReplacer
 
 
 class IoTHubTest(ScenarioTest):
 
+    def __init__(self, method_name):
+        super(IoTHubTest, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+        )
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
-    def test_iot_hub(self, resource_group, resource_group_location):
-        hub = 'iot-hub-for-test-1'
+    @StorageAccountPreparer()
+    def test_iot_hub(self, resource_group, resource_group_location, storage_account):
+        hub = self.create_random_name(prefix='iot-hub-for-test-11', length=32)
         rg = resource_group
         location = resource_group_location
-        containerName = 'iothubcontainer1'
-        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName)
+        containerName = self.create_random_name(prefix='iothubcontainer1', length=24)
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
-        subscription_id = self._get_current_subscription()
+        subscription_id = self.get_subscription_id()
+
+        # Test hub life cycle in free tier
+        self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 4'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 2 --tags a=b c=d'.format(hub, rg),
+                 checks=[self.check('resourcegroup', rg),
+                         self.check('name', hub),
+                         self.check('sku.name', 'F1'),
+                         self.check('properties.minTlsVersion', None),
+                         self.check('properties.eventHubEndpoints.events.partitionCount', '2'),
+                         self.check('length(tags)', 2),
+                         self.check('tags', {'a': 'b', 'c': 'd'})])
+        self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
         # Test 'az iot hub create'
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
                  .format(hub, rg), expect_failure=True)
-        self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --mintls 2.5'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
-                 ' --fileupload-notification-ttl 20'.format(hub, rg),
+                 ' --fileupload-notification-ttl 20 --min-tls-version 1.2'.format(hub, rg),
                  checks=[self.check('resourcegroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
@@ -41,7 +64,8 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.cloudToDevice.maxDeliveryCount', '89'),
                          self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
                          self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
-                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79')])
+                         self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79'),
+                         self.check('properties.minTlsVersion', '1.2')])
 
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
@@ -64,7 +88,7 @@ class IoTHubTest(ScenarioTest):
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         # Test 'az iot hub update'
         updated_hub = self.cmd('iot hub update -n {0} --fnd 80 --rd 4 --ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
-                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2}'
+                               ' --fn true --fnt 32 --fst 3 --fcs {1} --fc {2} --tags e=f g=h'
                                .format(hub, storageConnectionString, containerName)).get_output_in_json()
 
         assert updated_hub['properties']['eventHubEndpoints']['events']['partitionCount'] == 4
@@ -79,6 +103,7 @@ class IoTHubTest(ScenarioTest):
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
         assert updated_hub['properties']['storageEndpoints']['$default']['sasTtlAsIso8601'] == '3:00:00'
+        assert updated_hub['tags'] == {'e': 'f', 'g': 'h'}
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -135,7 +160,7 @@ class IoTHubTest(ScenarioTest):
         policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
                           checks=[self.check('keyName', policy_name)]).get_output_in_json()
 
-        policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
+        policy_name_conn_str_pattern = r'HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
             hub, policy_name, policy['primaryKey'])
 
         # Test policy_name connection-string 'az iot hub show-connection-string'
@@ -180,18 +205,6 @@ class IoTHubTest(ScenarioTest):
             self.check('length([*])', 1),
             self.check('[0].name', '$Default')
         ])
-
-        # Test 'az iot hub job list'
-        self.cmd('iot hub job list --hub-name {0}'.format(hub), checks=self.is_empty())
-
-        # Test 'az iot hub job show'
-        job_id = 'fake-job'
-        self.cmd('iot hub job show --hub-name {0} --job-id {1}'.format(hub, job_id),
-                 expect_failure=True)
-
-        # Test 'az iot hub job cancel'
-        self.cmd('iot hub job cancel --hub-name {0} --job-id {1}'.format(hub, job_id),
-                 expect_failure=True)
 
         # Test 'az iot hub show-quota-metrics'
         self.cmd('iot hub show-quota-metrics -n {0}'.format(hub), checks=[
@@ -384,9 +397,153 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_identity_hub(self, resource_group, resource_group_location, storage_account):
+        # Test IoT Hub create with identity
+        subscription_id = self.get_subscription_id()
+        rg = resource_group
+        location = resource_group_location
+
+        private_endpoint_type = 'Microsoft.Devices/IoTHubs'
+        identity_hub = self.create_random_name(prefix='identitytesthub', length=32)
+        identity_based_auth = 'identityBased'
+        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
+
+        containerName = 'iothubcontainer'
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
+        endpoint_name = 'Event1'
+        endpoint_type = 'EventHub'
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+
+        identity_storage_role = 'Storage Blob Data Contributor'
+        storage_account_id = self.cmd('storage account show -n {0} -g {1}'.format(storage_account, rg)).get_output_in_json()['id']
+
+        # identity hub creation
+        import os
+        templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir, 'templates', 'identity.json')
+        self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'
+                 .format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
+        hub_props = self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
+            self.check('properties.minTlsVersion', '1.2'),
+            self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
+
+        hub_object_id = hub_props['identity']['principalId']
+        assert hub_object_id
+
+        # Add RBAC role for hub to storage container
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            role_assignment = self.cmd('az role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'
+                                       .format(identity_storage_role, hub_object_id, storage_account_id)).get_output_in_json()
+
+        assert role_assignment['principalId'] == hub_object_id
+
+        # Allow time for RBAC
+        from time import sleep
+        sleep(30)
+
+        # Test 'az iot hub update' with Identity-based fileUpload
+        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3} --fn true --fnt 32 --fnd 80 --rd 4 '
+                               '--ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
+                               .format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
+        assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        # TODO - implement file upload container URI instead of connectionString once implemented in service
+
+        eh_info = self._create_eventhub_and_link_identity(rg, hub_object_id)
+        eventhub_endpoint_uri = eh_info[0]
+        entity_path = eh_info[1]
+
+        # Test 'az iot hub routing-endpoint create' with Identity-based event hub endpoint
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} --auth-type {6} --endpoint-uri {7} --entity-path {8}'
+                 .format(identity_hub, rg, event_hub_identity_endpoint_name, endpoint_type, rg, subscription_id, identity_based_auth, eventhub_endpoint_uri, entity_path),
+                 checks=[self.check('length(eventHubs[*])', 1),
+                         self.check('eventHubs[0].resourceGroup', rg),
+                         self.check('eventHubs[0].name', event_hub_identity_endpoint_name),
+                         self.check('eventHubs[0].authenticationType', identity_based_auth),
+                         self.check('eventHubs[0].connectionString', None),
+                         self.check('eventHubs[0].endpointUri', eventhub_endpoint_uri),
+                         self.check('eventHubs[0].entityPath', entity_path),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 0)])
+
+        vnet = 'test-iot-vnet'
+        subnet = 'subnet1'
+        endpoint_name = 'iot-private-endpoint'
+        connection_name = 'iot-private-endpoint-connection'
+
+        # Test private endpoints
+        # Prepare network
+        self.cmd('network vnet create -n {0} -g {1} -l {2} --subnet-name {3}'
+                 .format(vnet, rg, location, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {0} --vnet-name {1} -g {2} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, rg),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('network private-link-resource list --type {0} -n {1} -g {2}'
+                      .format(private_endpoint_type, identity_hub, rg)).get_output_in_json()
+        group_id = pr[0]['properties']['groupId']
+
+        hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
+        hub_id = hub['id']
+
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {0} -n {1} --vnet-name {2} --subnet {3} -l {4} '
+            '--connection-name {5} --private-connection-resource-id {6} --group-ids {7}'
+            .format(rg, endpoint_name, vnet, subnet, location, connection_name, hub_id, group_id)
+        ).get_output_in_json()
+
+        self.assertEqual(private_endpoint['name'], endpoint_name)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], connection_name)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
+        endpoint_id = hub['properties']['privateEndpointConnections'][0]['id']
+        private_endpoint_name = hub['properties']['privateEndpointConnections'][0]['name']
+
+        # endpoint list
+        self.cmd('network private-endpoint-connection list --type {0} -n {1} -g {2}'
+                 .format(private_endpoint_type, identity_hub, rg),
+                 checks=[self.check('length(@)', 1),
+                         self.check('[0].id', endpoint_id),
+                         self.check('[0].name', private_endpoint_name)])
+
+        # endpoint connection approve by name
+        approve_desc = 'Approving endpoint connection'
+        self.cmd('network private-endpoint-connection approve --type {0} -n {1} --resource-name {2} -g {3} --description "{4}"'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg, approve_desc),
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # endpoint approve by id
+        self.cmd('network private-endpoint-connection approve --id {0} --description "{1}"'
+                 .format(endpoint_id, approve_desc),
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # endpoint connection reject by name
+        reject_desc = 'Rejecting endpoint connection'
+        self.cmd('network private-endpoint-connection reject --type {0} -n {1} --resource-name {2} -g {3} --description "{4}"'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg, reject_desc),
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # endpoint show
+        self.cmd('network private-endpoint-connection show --type {0} -n {1} --resource-name {2} -g {3}'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg),
+                 checks=self.check('id', endpoint_id))
+
+        # endpoint delete
+        self.cmd('network private-endpoint-connection delete --type {0} -n {1} --resource-name {2} -g {3} -y'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg))
+
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest-1'
-        eventHub = 'eventHubiothubfortest'
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
 
@@ -403,11 +560,7 @@ class IoTHubTest(ScenarioTest):
                           .format(rg, ehNamespace, eventHub, eventHubPolicy))
         return output.get_output_in_json()['primaryConnectionString']
 
-    def _get_azurestorage_connectionstring(self, rg, container_name):
-        storage_name = 'iothubteststorage1'
-
-        self.cmd('storage account create --resource-group {0} --name {1}'
-                 .format(rg, storage_name))
+    def _get_azurestorage_connectionstring(self, rg, container_name, storage_name):
 
         self.cmd('storage container create --name {0} --account-name {1}'
                  .format(container_name, storage_name))
@@ -416,6 +569,21 @@ class IoTHubTest(ScenarioTest):
                           .format(rg, storage_name))
         return output.get_output_in_json()['connectionString']
 
-    def _get_current_subscription(self):
-        output = self.cmd('account show')
-        return output.get_output_in_json()['id']
+    def _create_eventhub_and_link_identity(self, rg, hub_object_id):
+        ehNamespace = self.create_random_name(prefix='ehNamespaceiothubfortest1', length=32)
+        eventHub = self.create_random_name(prefix='eventHubiothubfortest', length=32)
+        role = 'Azure Event Hubs Data Sender'
+
+        self.cmd('eventhubs namespace create --resource-group {0} --name {1}'
+                 .format(rg, ehNamespace))
+
+        eh = self.cmd('eventhubs eventhub create --resource-group {0} --namespace-name {1} --name {2}'
+                      .format(rg, ehNamespace, eventHub)).get_output_in_json()
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "{0}" --assignee "{1}" --scope "{2}"'.format(role, hub_object_id, eh['id']))
+
+        # RBAC propogation
+        from time import sleep
+        sleep(30)
+
+        return ['sb://{0}.servicebus.windows.net'.format(ehNamespace), eventHub]

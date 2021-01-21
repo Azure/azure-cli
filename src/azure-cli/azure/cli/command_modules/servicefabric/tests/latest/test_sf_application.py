@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from test_util import _create_cluster
+from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster_with_separate_kv
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 
@@ -58,11 +58,12 @@ class ServiceFabricApplicationTests(ScenarioTest):
                  checks=[self.check('provisioningState', 'Succeeded')])
 
         self.cmd('az sf application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
-                 '--application-parameters Mode=decimal --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
+                 '--application-parameters Precision=3 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
                  '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('typeVersion', '{v2}'),
-                         self.check('parameters.Mode', 'decimal'),
+                         self.check('parameters.Mode', 'binary'),
+                         self.check('parameters.Precision', '3'),
                          self.check('upgradePolicy.forceRestart', True),
                          self.check('upgradePolicy.upgradeReplicaSetCheckTimeout', '00:05:00'),
                          self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
@@ -97,13 +98,13 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'app_type_name': 'CalcServiceApp',
             'v1': '1.0',
             'app_package_v1': 'https://sfrpserviceclienttesting.blob.core.windows.net/test-apps/CalcApp_1.0.sfpkg',
-            'v2': '1.1',
-            'app_package_v2': 'https://sfrpserviceclienttesting.blob.core.windows.net/test-apps/CalcApp_1.1.sfpkg',
+            'v2': '1.2',
+            'app_package_v2': 'https://sfrpserviceclienttesting.blob.core.windows.net/test-apps/CalcApp_1.2.sfpkg',
             'app_name': self.create_random_name('testApp', 11),
             'service_type': 'CalcServiceType'
         })
 
-        _create_cluster(self, self.kwargs)
+        _create_cluster_with_separate_kv(self, self.kwargs)
         self._app_type_test()
         self._app_type_version_test()
         self._app_service_test()

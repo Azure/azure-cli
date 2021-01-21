@@ -71,6 +71,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
         return pathname
 
 
+@unittest.skip("skip acs tests as it's deprected")
 class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
 
     # the length is set to avoid following error:

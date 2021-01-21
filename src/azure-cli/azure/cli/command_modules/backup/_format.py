@@ -23,7 +23,8 @@ def transform_item(result):
     columns.append(('Type', result['properties']['workloadType']))
     columns.append(('Last Backup Status', result['properties']['lastBackupStatus']))
     columns.append(('Last Recovery Point', result['properties']['lastRecoveryPoint']))
-    columns.append(('Protection Status', result['properties']['protectionStatus']))
+    if 'protectionStatus' in result['properties']:
+        columns.append(('Protection Status', result['properties']['protectionStatus']))
     if 'healthStatus' in result['properties']:
         columns.append(('Health Status', result['properties']['healthStatus']))
 
@@ -42,14 +43,12 @@ def transform_job(result):
     columns.append(('Operation', result['properties']['operation']))
     columns.append(('Status', result['properties']['status']))
     columns.append(('Item Name', result['properties']['entityFriendlyName']))
+    columns.append(('Backup Management Type', result['properties']['backupManagementType']))
     columns.append(('Start Time UTC', result['properties']['startTime']))
-
-    if result['properties']['backupManagementType'] == 'AzureIaasVM':
-        columns.append(('Duration', result['properties']['duration']))
-    elif result['properties']['backupManagementType'] == 'AzureStorage':
-        columns.append(('Duration', result['properties']['additionalProperties']['duration']))
-    elif result['properties']['backupManagementType'] == 'AzureWorkload':
-        columns.append(('Duration', result['properties']['duration']))
+    duration = "0:00:00.000000"
+    if result['properties']['duration'] is not None:
+        duration = result['properties']['duration']
+    columns.append(('Duration', duration))
 
     return OrderedDict(columns)
 

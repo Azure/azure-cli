@@ -59,4 +59,4 @@ def acr_taskrun_logs(cmd,
     response = client_taskruns.get(resource_group_name, registry_name, taskrun_name)
     run_id = response.run_result.run_id
 
-    return stream_logs(client, run_id, registry_name, resource_group_name)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name)

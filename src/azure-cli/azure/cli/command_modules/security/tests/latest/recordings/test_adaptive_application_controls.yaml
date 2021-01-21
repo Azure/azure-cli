@@ -1,0 +1,101 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security adaptive-application-controls list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.4.1 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/applicationWhitelistings?api-version=2020-01-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/centralus/applicationWhitelistings/REVIEWGROUP2","name":"REVIEWGROUP2","type":"Microsoft.Security/applicationWhitelistings","location":"centralus","properties":{"recommendationStatus":"NotRecommended","enforcementMode":"Audit","vmRecommendations":[{"configurationStatus":"NoStatus","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zuh/providers/microsoft.compute/virtualmachines/zuhvm","recommendationAction":"Recommended","recommendedDates":[],"enforcementSupport":"Unknown"}],"pathRecommendations":[],"configurationStatus":"NotConfigured","issues":[],"location":"centralus","sourceSystem":"Azure_AuditD","protectionMode":{"executable":"Audit"}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '789'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 14:06:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - ''
+      - ''
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - security adaptive-application-controls show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --group-name
+      User-Agent:
+      - python/3.6.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-security/0.4.1 Azure-SDK-For-Python AZURECLI/2.14.0 (MSI)
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/centralus/applicationWhitelistings/REVIEWGROUP2?api-version=2020-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Security/locations/centralus/applicationWhitelistings/REVIEWGROUP2","name":"REVIEWGROUP2","type":"Microsoft.Security/applicationWhitelistings","location":"centralus","properties":{"recommendationStatus":"NotRecommended","enforcementMode":"Audit","vmRecommendations":[{"configurationStatus":"NoStatus","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/zuh/providers/microsoft.compute/virtualmachines/zuhvm","recommendationAction":"Recommended","recommendedDates":[],"enforcementSupport":"Unknown"}],"pathRecommendations":[{"path":"/bin/bash","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/sbin/lvmetad","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/atd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-udevd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/python3.6","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/omsconfig/bin/omsconsistencyinvoker","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/rsyslogd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/python2.7","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/omi/bin/omiagent","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/lib/linux-azure-tools-5.0.0-1036/hv_kvp_daemon","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/omi/bin/omiserver","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/bin/sleep","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/apt-get","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-networkd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/omsagent/ruby/bin/ruby","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/lib/accountsservice/accounts-daemon","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/lib/policykit-1/polkitd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-logind","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/bin/dash","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/auoms/bin/auomscollect","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/sudo","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-resolved","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/omi/bin/omiengine","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/cron","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/auoms/bin/auoms","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/dbus-daemon","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/dsc/bin/dsc_host","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/bin/lxcfs","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/sbin/agetty","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-journald","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/sshd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/var/lib/waagent/microsoft.azure.networkwatcher.networkwatcheragentlinux-1.4.1421.1/networkwatcheragent/networkwatcheragent","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/lib/systemd/systemd-timesyncd","type":"File","common":false,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/omsagent/plugin/omsbaseline","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/omsagent/plugin/npmd_agent","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/auoms/bin/auomsctl","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/microsoft/dependency-agent/bin/microsoft-dependency-agent","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/opt/omi/bin/omicli","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/auditd","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/sbin/audispd","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"},{"path":"/usr/local/qualys/cloud-agent/bin/qualys-cloud-agent","type":"File","common":true,"action":"Recommended","usernames":[{"username":"Everyone","recommendationAction":"Recommended"}],"userSids":["S-1-1-0"],"fileType":"executable","configurationStatus":"NotConfigured"}],"configurationStatus":"NotConfigured","issues":[],"location":"centralus","sourceSystem":"Azure_AuditD","protectionMode":{"executable":"Audit"}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '11335'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2020 14:06:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Kestrel
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+    status:
+      code: 200
+      message: OK
+version: 1

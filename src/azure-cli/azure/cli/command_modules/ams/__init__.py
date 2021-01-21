@@ -16,13 +16,11 @@ class MediaServicesCommandsLoader(AzCommandsLoader):
         super(MediaServicesCommandsLoader, self).__init__(cli_ctx=cli_ctx, resource_type=ResourceType.MGMT_MEDIA)
 
     def load_command_table(self, args):
-        super(MediaServicesCommandsLoader, self).load_command_table(args)
         from azure.cli.command_modules.ams.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
-        super(MediaServicesCommandsLoader, self).load_arguments(command)
         from azure.cli.command_modules.ams._params import load_arguments
         load_arguments(self, command)
 

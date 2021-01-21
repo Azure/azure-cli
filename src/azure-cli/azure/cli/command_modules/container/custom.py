@@ -35,7 +35,8 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  GitRepoVolume, LogAnalytics, ContainerGroupDiagnostics, ContainerGroupNetworkProfile,
                                                  ContainerGroupIpAddressType, ResourceIdentityType, ContainerGroupIdentity)
 from azure.cli.core.util import sdk_no_wait
-from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics, cf_resource, cf_network)
+from ._client_factory import (cf_container_groups, cf_container, cf_log_analytics_workspace,
+                              cf_log_analytics_workspace_shared_keys, cf_resource, cf_network)
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
@@ -245,12 +246,12 @@ def _build_identities_info(identities):
 
 
 def _get_resource(client, resource_group_name, *subresources):
-    from msrestazure.azure_exceptions import CloudError
+    from azure.core.exceptions import HttpResponseError
     try:
         resource = client.get(resource_group_name, *subresources)
         return resource
-    except CloudError as ex:
-        if ex.error.error == "NotFound" or ex.error.error == "ResourceNotFound":
+    except HttpResponseError as ex:
+        if ex.error.code == "NotFound" or ex.error.code == "ResourceNotFound":
             return None
         raise
 
@@ -293,7 +294,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         if not subnet.delegations:
             logger.info('Adding ACI delegation to the existing subnet.')
             subnet.delegations = [aci_delegation]
-            subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+            subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
         else:
             for delegation in subnet.delegations:
                 if delegation.service_name != aci_delegation_service_name:
@@ -312,11 +313,11 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
         vnet = _get_resource(ncf.virtual_networks, resource_group_name, vnet_name)
         if not vnet:
             logger.info('Creating new vnet "%s" in resource group "%s"', vnet_name, resource_group_name)
-            ncf.virtual_networks.create_or_update(resource_group_name,
-                                                  vnet_name,
-                                                  VirtualNetwork(name=vnet_name,
-                                                                 location=location,
-                                                                 address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
+            ncf.virtual_networks.begin_create_or_update(resource_group_name,
+                                                        vnet_name,
+                                                        VirtualNetwork(name=vnet_name,
+                                                                       location=location,
+                                                                       address_space=AddressSpace(address_prefixes=[vnet_address_prefix])))
         subnet = Subnet(
             name=subnet_name,
             location=location,
@@ -324,7 +325,7 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
             delegations=[aci_delegation])
 
         logger.info('Creating new subnet "%s" in resource group "%s"', subnet_name, resource_group_name)
-        subnet = ncf.subnets.create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
+        subnet = ncf.subnets.begin_create_or_update(resource_group_name, vnet_name, subnet_name, subnet).result()
 
     NetworkProfile, ContainerNetworkInterfaceConfiguration, IPConfigurationProfile = cmd.get_models('NetworkProfile',
                                                                                                     'ContainerNetworkInterfaceConfiguration',
@@ -351,11 +352,12 @@ def _get_vnet_network_profile(cmd, location, resource_group_name, vnet, vnet_add
 
 def _get_diagnostics_from_workspace(cli_ctx, log_analytics_workspace):
     from msrestazure.tools import parse_resource_id
-    log_analytics_client = cf_log_analytics(cli_ctx)
+    log_analytics_workspace_client = cf_log_analytics_workspace(cli_ctx)
+    log_analytics_workspace_shared_keys_client = cf_log_analytics_workspace_shared_keys(cli_ctx)
 
-    for workspace in log_analytics_client.list():
+    for workspace in log_analytics_workspace_client.list():
         if log_analytics_workspace in (workspace.name, workspace.customer_id):
-            keys = log_analytics_client.get_shared_keys(
+            keys = log_analytics_workspace_shared_keys_client.get_shared_keys(
                 parse_resource_id(workspace.id)['resource_group'], workspace.name)
 
             log_analytics = LogAnalytics(
@@ -679,8 +681,6 @@ def _cycle_exec_pipe(ws):
     r, _, _ = select.select([ws.sock, sys.stdin], [], [])
     if ws.sock in r:
         data = ws.recv()
-        if not data:
-            return False
         sys.stdout.write(data)
         sys.stdout.flush()
     if sys.stdin in r:

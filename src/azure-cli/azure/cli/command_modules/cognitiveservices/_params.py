@@ -150,8 +150,11 @@ def load_arguments(self, _):
         c.argument('key_name', required=True, help='Key name to generate', choices=['key1', 'key2'])
         c.argument('api_properties', api_properties_type)
         c.argument('custom_domain', help='User domain assigned to the account. Name is the CNAME source.')
+        c.argument('storage', help='The storage accounts for this resource, in JSON array format.')
+        c.argument('encryption', help='The encryption properties for this resource, in JSON format.')
 
     with self.argument_context('cognitiveservices account create') as c:
+        c.argument('assign_identity', help='Generate and assign an Azure Active Directory Identity for this account.')
         c.argument('yes', action='store_true', help='Do not prompt for terms confirmation')
 
     with self.argument_context('cognitiveservices account network-rule') as c:

@@ -87,3 +87,13 @@ def patch_long_run_operation_delay(unit_test):
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',
                       _shortcut_long_run_operation)
+
+
+def patch_get_current_system_username(unit_test):
+    def _get_current_system_username(*args, **kwargs):  # pylint: disable=unused-argument
+        from .utilities import create_random_name
+        return create_random_name(prefix='example_')
+
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core.local_context._get_current_system_username',
+                      _get_current_system_username)

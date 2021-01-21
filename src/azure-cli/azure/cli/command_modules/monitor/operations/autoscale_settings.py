@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.log import get_logger
+from knack.util import CLIError
 
 
 logger = get_logger(__name__)
@@ -16,7 +17,6 @@ def scaffold_autoscale_settings_parameters(client):  # pylint: disable=unused-ar
     """Scaffold fully formed autoscale-settings' parameters as json template """
 
     import os.path
-    from knack.util import CLIError
     from azure.cli.core.util import get_file_json
 
     # Autoscale settings parameter scaffold file path
@@ -176,7 +176,6 @@ def _create_fixed_profile(autoscale_settings, profile_name, start, end, capacity
                           copy_rules=None, timezone=None):
     from azure.mgmt.monitor.models import AutoscaleProfile, TimeWindow
     if not (start and end):
-        from knack.util import CLIError
         raise CLIError('usage error: fixed schedule: --start DATETIME --end DATETIME')
     profile = AutoscaleProfile(
         name=profile_name,
@@ -274,8 +273,7 @@ def autoscale_profile_list_timezones(cmd, client, offset=None, search_query=None
 
 def autoscale_profile_show(cmd, client, autoscale_name, resource_group_name, profile_name):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
-    return profile
+    return _identify_profile(autoscale_settings.profiles, profile_name)
 
 
 def autoscale_profile_delete(cmd, client, autoscale_name, resource_group_name, profile_name):
@@ -307,11 +305,34 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
                           scale, profile_name=DEFAULT_PROFILE_NAME, cooldown=5, source=None,
                           timegrain="avg 1m"):
     from azure.mgmt.monitor.models import ScaleRule, ScaleAction, ScaleDirection
+    from azure.mgmt.core.tools import parse_resource_id, resource_id
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
+    profile = _identify_profile(autoscale_settings.profiles, profile_name)
     condition.metric_resource_uri = source or autoscale_settings.target_resource_uri
     condition.statistic = timegrain.statistic
     condition.time_grain = timegrain.time_grain
+
+    def preprocess_for_spring_cloud_service():
+        try:
+            result = parse_resource_id(autoscale_settings.target_resource_uri)
+            if result['namespace'].lower() == 'microsoft.appplatform' and result['type'].lower() == 'spring':
+                if condition.metric_namespace is None:
+                    condition.metric_namespace = "Microsoft.AppPlatform/Spring"
+                    logger.warning('Set metricNamespace to Microsoft.AppPlatform/Spring')
+                if source is None:
+                    condition.metric_resource_uri = resource_id(
+                        subscription=result['subscription'],
+                        resource_group=result['resource_group'],
+                        namespace=result['namespace'],
+                        type=result['type'],
+                        name=result['name']
+                    )
+                    logger.warning('Set metricResourceUri to Spring Cloud service')
+        except KeyError:
+            pass
+
+    preprocess_for_spring_cloud_service()
+
     rule = ScaleRule(
         metric_trigger=condition,
         scale_action=ScaleAction(
@@ -322,7 +343,6 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
     )
     profile.rules.append(rule)
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
 
     # determine if there are unbalanced rules
     scale_out_rule_count = len([x for x in profile.rules if x.scale_action.direction == ScaleDirection.increase])
@@ -338,7 +358,7 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
 
 def autoscale_rule_list(cmd, client, autoscale_name, resource_group_name, profile_name=DEFAULT_PROFILE_NAME):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
+    profile = _identify_profile(autoscale_settings.profiles, profile_name)
     index = 0
     # we artificially add indices to the rules so the user can target them with the remove command
     for rule in profile.rules:
@@ -349,7 +369,7 @@ def autoscale_rule_list(cmd, client, autoscale_name, resource_group_name, profil
 
 def autoscale_rule_delete(cmd, client, autoscale_name, resource_group_name, index, profile_name=DEFAULT_PROFILE_NAME):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
+    profile = _identify_profile(autoscale_settings.profiles, profile_name)
     # delete the indices provided
     if '*' in index:
         profile.rules = []
@@ -362,11 +382,20 @@ def autoscale_rule_delete(cmd, client, autoscale_name, resource_group_name, inde
 def autoscale_rule_copy(cmd, client, autoscale_name, resource_group_name, dest_profile, index,
                         source_profile=DEFAULT_PROFILE_NAME):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    src_profile = next(x for x in autoscale_settings.profiles if x.name == source_profile)
-    dst_profile = next(x for x in autoscale_settings.profiles if x.name == dest_profile)
+    src_profile = _identify_profile(autoscale_settings.profiles, source_profile)
+    dst_profile = _identify_profile(autoscale_settings.profiles, dest_profile)
     if '*' in index:
         dst_profile.rules = src_profile.rules
     else:
         for i in index:
             dst_profile.rules.append(src_profile.rules[int(i)])
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)
+
+
+def _identify_profile(profiles, profile_name):
+    try:
+        profile = next(x for x in profiles if x.name == profile_name)
+    except StopIteration:
+        raise CLIError('Cannot find profile {}. '
+                       'Please double check the name of the autoscale profile.'.format(profile_name))
+    return profile

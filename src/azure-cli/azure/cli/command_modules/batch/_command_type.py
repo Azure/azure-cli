@@ -186,7 +186,7 @@ def format_options_name(operation):
     return "{}_{}_options".format(op_class, op_function)
 
 
-class BatchArgumentTree(object):
+class BatchArgumentTree:
     """Dependency tree parser for arguments of complex objects"""
 
     def __init__(self, validator):
@@ -427,7 +427,7 @@ class BatchArgumentTree(object):
         self.done = True
 
 
-class AzureBatchDataPlaneCommand(object):
+class AzureBatchDataPlaneCommand:
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
     def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 

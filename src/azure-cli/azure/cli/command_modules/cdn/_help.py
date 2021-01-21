@@ -38,12 +38,12 @@ parameters:
 examples:
   - name: Create a custom domain within an endpoint and profile.
     text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name --hostname www.example.com
+        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
+        -n domain-name --hostname www.example.com
   - name: Enable custom https with a minimum
     text: >
-        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name --hostname www.example.com
+        az cdn custom-domain create -g group --endpoint-name endpoint --profile-name profile
+        -n domain-name --hostname www.example.com
 """
 
 helps['cdn custom-domain delete'] = """
@@ -52,8 +52,8 @@ short-summary: Delete the custom domain of a CDN.
 examples:
   - name: Delete a custom domain.
     text: >
-        az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name
+        az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile
+        -n domain-name
 """
 
 helps['cdn custom-domain show'] = """
@@ -62,8 +62,22 @@ short-summary: Show details for the custom domain of a CDN.
 examples:
   - name: Get the details of a custom domain.
     text: >
-        az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \\
-            -n domain-name
+        az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile
+        -n domain-name
+"""
+
+helps['cdn custom-domain enable-https'] = """
+type: command
+short-summary: Enable HTTPS delivery of the custom domain.
+examples:
+  - name: Enable HTTPS using a CDN-managed certificate
+    text: >
+        az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
+        -n domain-name
+  - name: Enable HTTPS using a CDN-managed certificate and a minimum TLS version of 1.2
+    text: >
+        az cdn custom-domain enable-https -g group --profile-name profile --endpoint-name endpoint
+        -n domain-name --min-tls-version 1.2
 """
 
 helps['cdn edge-node'] = """
@@ -88,6 +102,12 @@ examples:
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
         --origin www.example.com 88 4444
+  - name: Create an endpoint with a custom domain origin with private link enabled.
+    text: >
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com 80 443
+        /subscriptions/subid/resourcegroups/rg1/providers/Microsoft.Network/privateLinkServices/pls1
+        eastus "Please approve this request"
   - name: Create an endpoint with a custom domain with compression and only HTTPS.
     text: >
         az cdn endpoint create -g group -n endpoint --profile-name profile
@@ -152,6 +172,12 @@ examples:
 helps['cdn endpoint update'] = """
 type: command
 short-summary: Update a CDN endpoint to manage how content is delivered.
+parameters:
+  - name: --default-origin-group
+    type: string
+    short-summary: >
+        The origin group to use for origins not explicitly included in an origin group. Can be
+        specified as a resource ID or the name of an origin group of this endpoint.
 examples:
   - name: Turn off HTTP traffic for an endpoint.
     text: >
@@ -211,8 +237,8 @@ short-summary: Add a condition to a delivery rule.
 examples:
   - name: Add a remote address condition.
     text: >
-        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name \\
-            --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
+        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name
+        --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
 """
 
 helps['cdn endpoint rule condition remove'] = """
@@ -221,8 +247,8 @@ short-summary: Remove a condition from a delivery rule.
 examples:
   - name: Remove the first condition.
     text: >
-        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name \\
-            --index 0
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name
+        --index 0
 """
 
 helps['cdn endpoint rule condition show'] = """
@@ -245,12 +271,12 @@ short-summary: Add an action to a delivery rule.
 examples:
   - name: Add a redirect action.
     text: >
-        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name \\
-            --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name
+        --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
   - name: Add a cache expiration action
     text: >
-        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name \\
-            --action-name "CacheExpiration" --cache-behavior BypassCache
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name
+        --action-name "CacheExpiration" --cache-behavior BypassCache
 """
 
 helps['cdn endpoint rule action remove'] = """
@@ -259,8 +285,8 @@ short-summary: Remove an action from a delivery rule.
 examples:
   - name: Remove the first action.
     text: >
-        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name \\
-            --index 0
+        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name
+        --index 0
 """
 
 helps['cdn endpoint rule action show'] = """
@@ -308,8 +334,8 @@ parameters:
 examples:
   - name: Set the CDN WAF policy applied to a CDN endpoint by WAF Policy name.
     text: >
-        az cdn endpoint waf policy set -g group --endpoint-name endpoint \\
-            --profile-name profile --waf-policy-subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \\
+        az cdn endpoint waf policy set -g group --endpoint-name endpoint
+        --profile-name profile --waf-policy-subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['cdn endpoint waf policy remove'] = """
@@ -333,6 +359,247 @@ examples:
 helps['cdn origin'] = """
 type: group
 short-summary: List or show existing origins related to CDN endpoints.
+"""
+
+helps['cdn origin create'] = """
+type: command
+short-summary: Create an origin.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: >
+        The host name where requests to the origin will be sent.
+  - name: --http-port
+    type: int
+    short-summary: >
+        The port used for http requests to the origin.
+  - name: --https-port
+    type: int
+    short-summary: >
+        The port used for https requests to the origin.
+  - name: --origin-host-header
+    type: string
+    short-summary: >
+        The Host header to send for requests to this origin.
+  - name: --weight
+    type: int
+    short-summary: >
+        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
+  - name: --priority
+    type: int
+    short-summary: >
+        The load balancing priority. Higher priorities will not be used for load
+        balancing if any lower priority origin is healthy. Must be between 1 and 5.
+  - name: --disabled
+    type: bool
+    short-summary: >
+        Don't use the origin for load balancing.
+  - name: --private-link-resource-id -p
+    type: string
+    short-summary: >
+        The resource id of the private link that the origin will be connected to.
+  - name: --private-link-location -l
+    type: string
+    short-summary: >
+        The location of the private link that the origin will be connected to.
+  - name: --private-link-approval-message -m
+    type: string
+    short-summary: >
+        The message that is shown to the approver of the private link request.
+examples:
+  - name: Create an additional origin
+    text: >
+      az cdn origin create -g group --host-name example.contoso.com --profile-name profile --endpoint-name endpoint
+      -n origin --host-name example.contoso.com --origin-host-header example.contoso.com
+      --http-port 80 --https-port 443
+  - name: Create a private origin
+    text: >
+      az cdn origin create -g group --host-name example.contoso.com --profile-name profile --endpoint-name endpoint
+      -n origin --http-port 80 --https-port 443 --private-link-resource-id
+      /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
+      --private-link-location EastUS --private-link-approval-message 'Please approve this request'
+"""
+
+helps['cdn origin update'] = """
+type: command
+short-summary: Update an origin.
+parameters:
+  - name: --host-name
+    type: string
+    short-summary: >
+        The host name where requests to the origin will be sent.
+  - name: --http-port
+    type: int
+    short-summary: >
+        The port used for http requests to the origin.
+  - name: --https-port
+    type: int
+    short-summary: >
+        The port used for https requests to the origin.
+  - name: --origin-host-header
+    type: string
+    short-summary: >
+        The Host header to send for requests to this origin.
+  - name: --weight
+    type: int
+    short-summary: >
+        The weight of the origin in given origin group for load balancing. Must be between 1 and 1000.
+  - name: --priority
+    type: int
+    short-summary: >
+        The load balancing priority. Higher priorities will not be used for load
+        balancing if any lower priority origin is healthy. Must be between 1 and 5.
+  - name: --disabled
+    type: bool
+    short-summary: >
+        Don't use the origin for load balancing.
+  - name: --private-link-resource-id -p
+
+    type: string
+    short-summary: >
+        The resource id of the private link that the origin will be connected to.
+  - name: --private-link-location -l
+    type: string
+    short-summary: >
+        The location of the private link that the origin will be connected to.
+  - name: --private-link-approval-message -m
+    type: string
+    short-summary: >
+        The message that is shown to the approver of the private link request.
+examples:
+  - name: Update an origin
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --http-port 80
+      --https-port 443 --priority 3 --weight 500 --host-name example.contoso.com
+  - name: Disable an origin
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --disabled
+  - name: Connect an origin to a private link service
+    text: >
+      az cdn origin update -g group --profile-name profile --endpoint-name endpoint -n origin --http-port 80
+      --https-port 443 --private-link-resource-id
+      /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group/providers/Microsoft.Network/privateLinkServices/pls
+      --private-link-location EastUS --private-link-approval-message 'Please approve this request'
+"""
+
+helps['cdn origin-group'] = """
+type: group
+short-summary: Manage origin groups of an endpoint.
+"""
+
+helps['cdn origin-group create'] = """
+type: command
+short-summary: Create an origin group.
+parameters:
+  - name: --origins
+    type: int
+    short-summary: >
+        The origins load balanced by this origin group, as a comma-separated list of origin names or
+        origin resource IDs.
+  - name: --probe-interval
+    type: int
+    short-summary: >
+        The frequency to perform health probes in seconds.
+  - name: --probe-path
+    type: str
+    short-summary: >
+        The path relative to the origin that is used to determine the health of the origin.
+  - name: --probe-protocol
+    type: string
+    short-summary: >
+        The protocol to use for health probes.
+  - name: --probe-method
+    type: string
+    short-summary: >
+        The request method to use for health probes.
+  # Uncomment this once response error detection support is added in RP:
+  # - name: --response-error-detection-error-types
+  #   type: string
+  #   short-summary: >
+  #       The type of response errors for real user requests for which the origin will be deemed unhealthy.
+  # - name: --response-error-detection-failover-threshold
+  #   type: int
+  #   short-summary: >
+  #       The threshold of failed requests required to trigger failover as a percent of 100.
+  # - name: --response-error-detection-status-code-ranges
+  #   type: string
+  #   short-summary: >
+  #       The HTTP response status codes to count toward the response error detection failover threshold, specified
+  #       as a comma-separated list of ranges.
+examples:
+  - name: Create an origin group
+    text: >
+      az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1
+  - name: Create an origin group with a custom health probe
+    text: >
+      az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1 --probe-path /healthz --probe-interval 90
+      --probe-protocol HTTPS --probe-method GET
+  # Uncomment this once response error detection support is added in RP:
+  # - name: Create an origin group with response error detection
+  #   text: >
+  #     az cdn origin-group create -g group --profile-name profile --endpoint-name endpoint -n origin-group
+  #     --origins origin-0,origin-1 --response-error-detection-error-types TcpErrorsOnly
+  #     --response-error-detection-failover-threshold 5
+  #     --response-error-detection-status-code-ranges 300-399,500-599
+"""
+
+helps['cdn origin-group update'] = """
+type: command
+short-summary: Update an origin group.
+parameters:
+  - name: --origins
+    type: int
+    short-summary: >
+        The origins load balanced by this origin group, as a comma-separated list of origin names from the
+        parent endpoint origin IDs.
+  - name: --probe-interval
+    type: int
+    short-summary: >
+        The frequency to perform health probes in seconds.
+  - name: --probe-path
+    type: str
+    short-summary: >
+        The path relative to the origin that is used to determine the health of the origin.
+  - name: --probe-protocol
+    type: string
+    short-summary: >
+        The protocol to use for health probes.
+  - name: --probe-method
+    type: string
+    short-summary: >
+        The request method to use for health probes.
+  # Uncomment this once response error detection support is added in RP:
+  # - name: --response-error-detection-error-types
+  #   type: string
+  #   short-summary: >
+  #       The type of response errors for real user requests for which the origin will be deemed unhealthy.
+  # - name: --response-error-detection-failover-threshold
+  #   type: int
+  #   short-summary: >
+  #       The threshold of failed requests required to trigger failover as a percent of 100.
+  # - name: --response-error-detection-status-code-ranges
+  #   type: string
+  #   short-summary: >
+  #       The HTTP response status codes to count toward the response error detection failover threshold.
+examples:
+  - name: Update which origins are included in an origin group.
+    text: >
+      az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-2
+  - name: Update an origin group with a custom health probe
+    text: >
+      az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+      --origins origin-0,origin-1 --probe-path /healthz --probe-interval 90
+      --probe-protocol HTTPS --probe-method GET
+  # Uncomment this once response error detection support is added in RP:
+  # - name: Update an origin group with response error detection
+  #   text: >
+  #     az cdn origin-group update -g group --profile-name profile --endpoint-name endpoint -n origin-group
+  #     --origins origin-0,origin-1 --response-error-detection-error-types TcpErrorsOnly
+  #     --response-error-detection-failover-threshold 5
+  #     --response-error-detection-status-code-ranges 300-399,500-599
 """
 
 helps['cdn profile'] = """
@@ -415,10 +682,10 @@ parameters:
     short-summary: Disable the policy.
 examples:
   - name: Create a CDN WAF policy in detection mode.
-    text: |
+    text: >
         az cdn waf policy set -g group -n policy
   - name: Create a CDN WAF policy in with a custom block response status code.
-    text: |
+    text: >
         az cdn waf policy set -g group -n policy --mode Prevention --block-response-status-code 200
 """
 
@@ -458,9 +725,9 @@ type: command
 short-summary: Add a managed rule set to a CDN WAF policy.
 examples:
   - name: Add DefaultRuleSet_1.0 to a CDN WAF policy.
-    text: |
-        az cdn waf policy managed-rule-set add -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+    text: >
+        az cdn waf policy managed-rule-set add -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
 helps['cdn waf policy managed-rule-set remove'] = """
@@ -468,9 +735,9 @@ type: command
 short-summary: Remove a managed rule set from a CDN WAF policy.
 examples:
   - name: Remove DefaultRuleSet_1.0 from a CDN WAF policy.
-    text: |
-        az cdn waf policy managed-rule-set remove -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+    text: >
+        az cdn waf policy managed-rule-set remove -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
 helps['cdn waf policy managed-rule-set list'] = """
@@ -488,8 +755,8 @@ short-summary: Show a managed rule of a CDN WAF policy.
 examples:
   - name: Get a managed rule set of a CDN WAF policy.
     text: >
-        az cdn waf policy managed-rule-set show -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+        az cdn waf policy managed-rule-set show -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
 helps['cdn waf policy managed-rule-set list-available'] = """
@@ -511,23 +778,23 @@ short-summary: Add or update a rule group override to a managed rule set on a CD
 parameters:
   - name: --rule-override -r
     short-summary: Override a rule in the rule group.
-    long-summary: |
+    long-summary: >
         rule overrides are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
         Available keys are 'id', 'action', and 'enabled'. 'id' is required. Valid values for
         'action' are 'Block', 'Redirect', 'Allow', and 'Log', defaulting to 'Block'. Valid values
         for 'enabled' are 'Enabled' and 'Disabled', defaulting to 'Disabled'.
 examples:
   - name: Add a rule group override for SQL injections to DefaultRuleSet_1.0 on a CDN WAF policy.
-    text: |
-        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI -r \\
-          id=942440 action=Redirect enabled=Enabled
+    text: >
+        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI -r
+        id=942440 action=Redirect enabled=Enabled
   - name: Add multiple rule group overrides to DefaultRuleSet_1.0 on a CDN WAF policy.
-    text: |
-        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI \\
-          -r id=942440 action=Redirect enabled=Enabled \\
-          -r id=942120 -r id=942100
+    text: >
+        az cdn waf policy managed-rule-set rule-group-override set -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+        -r id=942440 action=Redirect enabled=Enabled
+        -r id=942120 -r id=942100
 """
 
 helps['cdn waf policy managed-rule-set rule-group-override delete'] = """
@@ -535,9 +802,9 @@ type: command
 short-summary: Remove a rule group override from a managed rule set on a CDN WAF policy.
 examples:
   - name: Remove the rule group override for SQLI from DefaultRuleSet_1.0 on a CDN WAF policy.
-    text: |
-        az cdn waf policy managed-rule-set rule-group-override delete -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+    text: >
+        az cdn waf policy managed-rule-set rule-group-override delete -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
 """
 
 helps['cdn waf policy managed-rule-set rule-group-override list'] = """
@@ -546,8 +813,8 @@ short-summary: List rule group overrides of a managed rule on a CDN WAF policy.
 examples:
   - name: List rule group overrides of a managed rule on a CDN WAF policy.
     text: >
-        az cdn waf policy managed-rule-set rule-group-override list -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0
+        az cdn waf policy managed-rule-set rule-group-override list -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
 helps['cdn waf policy managed-rule-set rule-group-override show'] = """
@@ -556,8 +823,8 @@ short-summary: Show a rule group override of a managed rule on a CDN WAF policy.
 examples:
   - name: Get the rule group override for rule group SQLI of DefaultRuleSet_1.0 on a CDN WAF policy.
     text: >
-        az cdn waf policy managed-rule-set rule-group-override show -g group --policy-name policy \\
-          --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+        az cdn waf policy managed-rule-set rule-group-override show -g group --policy-name policy
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
 """
 
 helps['cdn waf policy managed-rule-set rule-group-override list-available'] = """
@@ -565,9 +832,9 @@ type: command
 short-summary: List available CDN WAF managed rule groups of a managed rule set.
 examples:
   - name: List available rule groups for DefaultRuleSet_1.0.
-    text: |
-      az cdn waf policy managed-rule-set rule-group-override list-available \\
-        --rule-set-type DefaultRuleSet --rule-set-version 1.0
+    text: >
+      az cdn waf policy managed-rule-set rule-group-override list-available
+      --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
 helps['cdn waf policy custom-rule'] = """
@@ -586,7 +853,7 @@ parameters:
   - name: --match-condition -m
     type: string
     short-summary: Conditions used to determine if the rule is matched for a request.
-    long-summary: |
+    long-summary: >
         Match conditions are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
         Available keys are 'match-variable', 'operator', 'match-value', 'selector', 'negate', and
         'transform'. 'match-variable', 'operator', and 'match-value' are required. 'match-value'
@@ -607,16 +874,16 @@ parameters:
     short-summary: Disable the custom rule
 examples:
   - name: Create or update a rule that blocks requests unless method is GET or POST.
-    text: |
-        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule \\
-          --action Block --priority 100 --match-condition \\
-          match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
+    text: >
+        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule
+        --action Block --priority 100 --match-condition
+        match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
   - name: Create or update a custom rule with multiple match conditions and whitespace in a match value.
-    text: |
-        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule \\
-          --action Redirect --priority 100 \\
-          -m match-variable=RequestUri operator=Contains match-value=.. \\
-          -m match-variable=QueryString operator=Contains "match-value= "
+    text: >
+        az cdn waf policy custom-rule set -g group --policy-name policy -n customrule
+        --action Redirect --priority 100
+        -m match-variable=RequestUri operator=Contains match-value=..
+        -m match-variable=QueryString operator=Contains "match-value= "
 """
 
 helps['cdn waf policy custom-rule delete'] = """
@@ -682,16 +949,16 @@ parameters:
     short-summary: The request threshold to trigger rate limiting.
 examples:
   - name: Create or update a rule that rate limits requests unless method is GET or POST.
-    text: |
-        az cdn waf policy rate-limit-rule set -g group --policy-name policy \\
-          -n ratelimitrule --action Block --priority 100 --duration 1 --request-threshold 100 \\
-          -m match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
+    text: >
+        az cdn waf policy rate-limit-rule set -g group --policy-name policy
+        -n ratelimitrule --action Block --priority 100 --duration 1 --request-threshold 100
+        -m match-variable=RequestMethod operator=Equal negate=true match-value=GET match-value=HEAD
   - name: Create or update a rate limit rule with multiple match conditions.
-    text: |
-        az cdn waf policy rate-limit-rule set -g group --policy-name policy \\
-          -n ratelimitrule --action Redirect --priority 200 --duration 5 --request-threshold 100 \\
-          -m match-variable=RequestMethod operator=Equal match-value=PUT \\
-          -m match-variable=RequestUri operator=Contains match-value=/expensive/resource/
+    text: >
+        az cdn waf policy rate-limit-rule set -g group --policy-name policy
+        -n ratelimitrule --action Redirect --priority 200 --duration 5 --request-threshold 100
+        -m match-variable=RequestMethod operator=Equal match-value=PUT
+        -m match-variable=RequestUri operator=Contains match-value=/expensive/resource/
 """
 
 helps['cdn waf policy rate-limit-rule delete'] = """

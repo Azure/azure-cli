@@ -8,15 +8,7 @@
 from codecs import open
 from setuptools import setup
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
-
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
-
-VERSION = "1.0.4"
+VERSION = "1.0.6"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
@@ -24,7 +16,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -52,13 +43,10 @@ setup(
         'portalocker~=1.2',
     ],
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
     ],
     test_requires=[
         'mock'
-    ],
-    cmdclass=cmdclass
+    ]
 )

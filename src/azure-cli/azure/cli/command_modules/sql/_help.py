@@ -22,29 +22,59 @@ type: group
 short-summary: Manage a database's auditing policy.
 """
 
+helps['sql db audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the database's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that database's audit policy exists
+    text: az sql db audit-policy wait -g mygroup -s myserver -n mydb --exists
+"""
+
 helps['sql db audit-policy update'] = """
 type: command
 short-summary: Update a database's auditing policy.
 long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
 examples:
   - name: Enable by storage account name.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled --storage-account mystorage
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --bsts Enabled --storage-account mystorage
   - name: Enable by storage endpoint and key.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
-            --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
   - name: Set the list of audit actions.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb \\
             --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
-  - name: Add an audit action.
-    text: |
-        az sql db audit-policy update -g mygroup -s myserver -n mydb \\
-            --add auditActionsAndGroups FAILED_DATABASE_AUTHENTICATION_GROUP
-  - name: Remove an audit action by list index.
-    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --remove auditActionsAndGroups 0
   - name: Disable an auditing policy.
     text: az sql db audit-policy update -g mygroup -s myserver -n mydb --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql db audit-policy update -g mygroup -s myserver -n mydb
+            --event-hub-target-state Disabled
 """
 
 helps['sql db copy'] = """
@@ -56,6 +86,9 @@ examples:
     text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --service-objective S0
   - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a copy of an existing GeneralPurpose database.
     text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb -f Gen4 -c 1
+  - name: Create a database with local backup storage redundancy as a copy of an existing database
+    text: az sql db copy -g mygroup -s myserver -n originalDb --dest-name newDb --backup-storage-redundancy Local
+
 """
 
 helps['sql db create'] = """
@@ -75,7 +108,8 @@ examples:
     text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose -f Gen5 -c 2 --compute-model Serverless --auto-pause-delay 120
   - name: Create a Hyperscale Gen5 2 vcore database with 2 read replicas
     text: az sql db create -g mygroup -s myserver -n mydb -e Hyperscale -f Gen5 -c 2 --read-replicas 2
-
+  - name: Create a GeneralPurpose database with locally redundant backup storage
+    text: az sql db create -g mygroup -s myserver -n mydb -e GeneralPurpose --backup-storage-redundancy Local
 """
 
 helps['sql db delete'] = """
@@ -151,6 +185,80 @@ examples:
     text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
 """
 
+helps['sql db ltr-policy'] = """
+type: group
+short-summary: Manage SQL database long term retention policy.
+"""
+
+helps['sql db ltr-policy set'] = """
+type: command
+short-summary: Update long term retention settings for a database.
+examples:
+  - name: Set long term retention for a database.
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+"""
+
+helps['sql db ltr-policy show'] = """
+type: command
+short-summary: Show the long term retention policy for a database.
+examples:
+  - name: Show long term retention policy for a database.
+    text: az sql db ltr-policy show -g mygroup -s myserver -n mydb
+"""
+
+helps['sql db ltr-backup'] = """
+type: group
+short-summary: Manage SQL database long term retention backups.
+"""
+
+helps['sql db ltr-backup show'] = """
+type: command
+short-summary: Get a long term retention backup for a database.
+examples:
+  - name: Show long term retention backup for a database.
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup list'] = """
+type: command
+short-summary: List the long term retention backups for a location, server or database.
+examples:
+  - name: List long term retention backups for a database.
+    text: az sql db ltr-backup list -l southeastasia -s myserver -d mydb
+  - name: List long term retention backups for a server (list only the latest LTR backups, which belong to live databases).
+    text: az sql db ltr-backup list -l southeastasia -s myserver --database-state Live --only-latest-per-database True
+  - name: List long term retention backups for a server (with resource group argument).
+    text: az sql db ltr-backup list -l southeastasia -g mygroup -s myserver
+  - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
+    text: az sql db ltr-backup list -l southeastasia --database-state Live --only-latest-per-database True
+  - name: List long term retention backups for a location (with resource group argument).
+    text: az sql db ltr-backup list -l southeastasia -g mygroup
+"""
+
+helps['sql db ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for database.
+    text: az sql db ltr-backup delete -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup restore'] = """
+type: command
+short-summary: Restore a long term retention backup to a new database.
+examples:
+  - name: Restore LTR backup.
+    text: |
+        az sql db ltr-backup restore \\
+        --dest-database targetdb --dest-server myserver --dest-resource-group mygroup \\
+        --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the database is met.
+"""
+
 helps['sql db op'] = """
 type: group
 short-summary: Manage operations on a database.
@@ -161,6 +269,13 @@ type: command
 examples:
   - name: Cancel an operation.
     text: az sql db op cancel -g mygroup -s myserver -d mydb -n d2896mydb-2ba8-4c84-bac1-387c430cce40
+"""
+
+helps['sql mi op cancel'] = """
+type: command
+examples:
+  - name: Cancel an operation.
+    text: az sql mi op cancel -g mygroup --mi myManagedInstance -n d2896mydb-2ba8-4c84-bac1-387c430cce40
 """
 
 helps['sql db rename'] = """
@@ -186,6 +301,8 @@ examples:
     text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --service-objective S0
   - name: Create a database with GeneralPurpose edition, Gen4 hardware, and 1 vcore as a secondary replica of an existing GeneralPurpose database
     text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb -f Gen4 -c 1
+  - name: Create a database with with zone redundant backup storage as a secondary replica of an existing database.
+    text: az sql db replica create -g mygroup -s myserver -n originalDb --partner-server newDb --backup-storage-redundancy Zone
 """
 
 helps['sql db replica delete-link'] = """
@@ -219,6 +336,9 @@ examples:
     text: |
         az sql db restore --dest-name MyDest --edition GeneralPurpose --name MyAzureSQLDatabase --resource-group MyResourceGroup --server myserver --subscription MySubscription --time "2018-05-20T05:34:22"
     crafted: true
+  - name: Create a new database with geo-redundant backup storage by restoring from a backup. (autogenerated)
+    text: |
+        az sql db restore --dest-name MyDest --edition GeneralPurpose --name MyAzureSQLDatabase --resource-group MyResourceGroup --server myserver --subscription MySubscription --time "2018-05-20T05:34:22" --backup-storage-redundancy Geo
 """
 
 helps['sql db show'] = """
@@ -302,6 +422,8 @@ examples:
     text: az sql db update -g mygroup -s myserver -n mydb -z false
   - name: Update database to serverless compute model
     text: az sql db update -g mygroup -s myserver -n mydb --edition GeneralPurpose --capacity 2 --family Gen5 --compute-model Serverless
+  - name: Update database with locally redundant backup storage
+    text: az sql db update -g mygroup -s myserver -n mydb --backup-storage-redundancy Local
 
 """
 
@@ -460,6 +582,65 @@ type: command
 short-summary: Updates the instance failover group.
 """
 
+helps['sql instance-pool'] = """
+type: group
+short-summary: Manage instance pools.
+"""
+
+helps['sql instance-pool create'] = """
+type: command
+short-summary: Create an instance pool.
+examples:
+  - name: Example to create an instance pool (include --no-wait in the end to get an asynchronous experience)
+    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 --no-wait
+  - name: Example to create an instance pool with subnet name and vnet-name
+    text: az sql instance-pool create --license-type LicenseIncluded -l northcentralus -n myinstancepool -c 8 -e GeneralPurpose -f Gen5 -g billingPools --subnet mysubnetname --vnet-name myvnetname
+"""
+
+helps['sql instance-pool delete'] = """
+type: command
+short-summary: Delete an instance pool.
+examples:
+  - name: Delete an instance pool
+    text: az sql instance-pool delete -g mygroup -n myinstancepool --yes
+"""
+
+helps['sql instance-pool list'] = """
+type: command
+short-summary: List available instance pools.
+examples:
+  - name: List all instance pools in the current subscription.
+    text: az sql instance-pool list
+  - name: List all instance pools in a resource group.
+    text: az sql instance-pool list -g mygroup
+"""
+
+helps['sql instance-pool show'] = """
+type: command
+short-summary: Get the details for an instance pool.
+examples:
+  - name: Get the details for an instance pool
+    text: az sql instance-pool show -g mygroup -n myinstancepool
+"""
+
+helps['sql instance-pool update'] = """
+type: command
+short-summary: Update an instance pool.
+examples:
+  - name: Update an instance pool with new tags (make sure they are space separated if there are multiple tags)
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2
+  - name: Clear the tags assigned to an instance pool
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags ""
+"""
+
+helps['sql instance-pool wait'] = """
+type: command
+short-summary: Wait for an instance pool to reach a desired state.
+examples:
+  - name: Wait until an instance pool gets created.
+    text: az sql instance-pool wait -n myinstancepool -g mygroup --created
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.
@@ -490,14 +671,47 @@ type: command
 short-summary: Updates an existing managed instance Active Directory administrator.
 """
 
+helps['sql mi ad-only-auth'] = """
+type: group
+short-summary: Manage a Managed Instance's Azure Active Directly only settings.
+"""
+
+helps['sql mi ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Enable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth enable --resource-group mygroup --name myMI
+"""
+
+helps['sql mi ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Managed Instance.
+examples:
+  - name: Disable Active Directory only authentication for a managed instance
+    text: az sql mi ad-only-auth disable --resource-group mygroup --name myMI
+"""
+
+helps['sql mi ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a managed instance
+    text: az sql mi ad-only-auth get --resource-group mygroup --name myMI
+"""
+
 helps['sql mi create'] = """
 type: command
 short-summary: Create a managed instance.
 examples:
-  - name: Create a managed instance with specified parameters and with identity
-    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen4
   - name: Create a managed instance with minimal set of parameters
     text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
+  - name: Create a managed instance with specified parameters and with identity
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5
+  - name: Create managed instance with specified parameters and tags
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --tags tagName1=tagValue1 tagName2=tagValue2
+  - name: Create managed instance with specified parameters and backup storage redundancy specified
+    text: az sql mi create -g mygroup -n myinstance -l mylocation -i -u myusername -p mypassword --license-type LicenseIncluded --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --capacity 8 --storage 32GB --edition GeneralPurpose --family Gen5 --backup-storage-redundancy Local
 """
 
 helps['sql mi delete'] = """
@@ -506,6 +720,16 @@ short-summary: Delete a managed instance.
 examples:
   - name: Delete a managed instance
     text: az sql mi delete -g mygroup -n myinstance --yes
+"""
+
+helps['sql mi failover'] = """
+type: command
+short-summary: Failover a managed instance.
+examples:
+  - name: Failover a managed instance primary replica
+    text: az sql mi failover -g mygroup -n myinstance
+  - name: Failover a managed instance readable secodary replica
+    text: az sql mi failover -g mygroup -n myinstance --replica-type ReadableSecondary
 """
 
 helps['sql mi key'] = """
@@ -538,6 +762,11 @@ examples:
     text: az sql mi list -g mygroup
 """
 
+helps['sql mi op'] = """
+type: group
+short-summary: Manage operations on a managed instance.
+"""
+
 helps['sql mi show'] = """
 type: command
 short-summary: Get the details for a managed instance.
@@ -564,6 +793,10 @@ examples:
     text: az sql mi update -g mygroup -n myinstance -i -p mypassword --license-type mylicensetype --capacity vcorecapacity --storage storagesize
   - name: Update mi edition and hardware family
     text: az sql mi update -g mygroup -n myinstance --tier GeneralPurpose --family Gen5
+  - name: Add or update a tag.
+    text: az sql mi update -g mygroup -n myinstance --set tags.tagName=tagValue
+  - name: Remove a tag.
+    text: az sql mi update -g mygroup -n myinstance --remove tags.tagName
   - name: Update a managed instance. (autogenerated)
     text: az sql mi update --name myinstance --proxy-override Default --resource-group mygroup --subscription MySubscription
     crafted: true
@@ -631,7 +864,7 @@ examples:
 
 helps['sql midb short-term-retention-policy'] = """
 type: group
-short-summary: Manage SQL managed instance database backup short term retention policy.
+short-summary: Manage SQL Managed Instance database backup short term retention policy.
 """
 
 helps['sql midb short-term-retention-policy set'] = """
@@ -654,6 +887,133 @@ examples:
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
 """
 
+helps['sql midb ltr-policy'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention policy.
+"""
+
+helps['sql midb ltr-policy set'] = """
+type: command
+short-summary: Update long term retention settings for a managed database.
+examples:
+  - name: Set long term retention for a managed database.
+    text: az sql midb ltr-policy set -g mygroup --mi myinstance -n mymanageddb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+"""
+
+helps['sql midb ltr-policy show'] = """
+type: command
+short-summary: Show the long term retention policy for a managed database.
+examples:
+  - name: Show long term retention policy for a managed database.
+    text: az sql midb ltr-policy show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb ltr-backup'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention backups.
+"""
+
+helps['sql midb ltr-backup show'] = """
+type: command
+short-summary: Get a long term retention backup for a managed database.
+examples:
+  - name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show -l southeastasia --mi myinstance -d mymanageddb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup list'] = """
+type: command
+short-summary: List the long term retention backups for a location, instance or database.
+examples:
+  - name: List long term retention backups for a managed database.
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -d mymanageddb
+  - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a managed instance (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup --mi myinstance
+  - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a location (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup
+"""
+
+helps['sql midb ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -d mymanageddb --name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup restore'] = """
+type: command
+short-summary: Restore a long term retention backup to a new database.
+examples:
+  - name: Restore a managed database using LTR backup.
+    text: |
+            az sql midb ltr-backup restore \\
+                --dest-database targetmidb --dest-mi myinstance --dest-resource-group mygroup \\
+                --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql midb ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+"""
+
+helps['sql midb log-replay'] = """
+type: group
+short-summary: SQL Managed Instance database Log Replay service commands.
+"""
+
+helps['sql midb log-replay start'] = """
+type: command
+short-summary: Start Log Replay service on specified database.
+examples:
+  - name: Start Log Replay service with auto complete option.
+    text: az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb -a --last-bn "backup.bak" --storage-uri "https://test.blob.core.windows.net/testing" --storage-sas "sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2Fgjocqwerqwer41s%3D"
+  - name: Start Log Replay service without auto complete option.
+    text: az sql midb log-replay start -g mygroup --mi myinstance -n mymanageddb --storage-uri "https://test.blob.core.windows.net/testing" --storage-sas "sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2023-12-02T00:09:14Z&st=2019-11-25T16:09:14Z&spr=https&sig=92kAe4QYmXaht%2Fgjocqwerqwer41s%3D"
+"""
+
+helps['sql midb log-replay complete'] = """
+type: command
+short-summary: Complete Log Replay service on specified database.
+examples:
+  - name: Complete log replay service.
+    text: az sql midb log-replay complete -g mygroup --mi myinstance -n mymanageddb --last-backup-name "backup.bak"
+"""
+
+helps['sql midb log-replay show'] = """
+type: command
+short-summary: Get status of Log Replay service.
+examples:
+  - name: Get status of the ongoing log replay service.
+    text: az sql midb log-replay show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb log-replay stop'] = """
+type: command
+short-summary: Stop Log Replay service.
+examples:
+  - name: Stop ongoing log replay service by deleting database.
+    text: az sql midb log-replay stop -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb log-replay wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of the managed database is met after starting log replay service.
+    text: az sql midb log-replay wait --exists --resource-group mygroup --managed-instance myinstance --name mymanageddb
+  - name: Place the CLI in a waiting state until a condition of the managed database is met after stopping log replay service.
+    text: az sql midb log-replay wait --deleted --resource-group mygroup --managed-instance myinstance --name mymanageddb
+"""
+
 helps['sql server'] = """
 type: group
 short-summary: Manage SQL servers.
@@ -672,10 +1032,95 @@ short-summary: Create a new server Active Directory administrator.
 helps['sql server ad-admin update'] = """
 type: command
 short-summary: Update an existing server Active Directory administrator.
+"""
+
+helps['sql server ad-only-auth'] = """
+type: group
+short-summary: Manage Azure Active Directly only Authentication settings for this Server.
+"""
+
+helps['sql server ad-only-auth enable'] = """
+type: command
+short-summary: Enable Azure Active Directly only Authentication for this Server.
 examples:
-  - name: Update an existing server Active Directory administrator. (autogenerated)
-    text: az sql server ad-admin update --display-name MyDisplay --resource-group MyResourceGroup --server-name MyServer
-    crafted: true
+  - name: Enable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth enable --resource-group mygroup --name myServer
+"""
+
+helps['sql server ad-only-auth disable'] = """
+type: command
+short-summary: Disable Azure Active Directly only Authentication for this Server.
+examples:
+  - name: Disable Active Directory only authentication for a sql server
+    text: az sql server ad-only-auth disable --resource-group mygroup --name myServer
+"""
+
+helps['sql server ad-only-auth get'] = """
+type: command
+short-summary: Get a specific Azure Active Directly only Authentication property.
+examples:
+  - name: Get Active Directory only authentication status for a sql server
+    text: az sql server ad-only-auth get --resource-group mygroup --name myServer
+"""
+
+helps['sql server audit-policy'] = """
+type: group
+short-summary: Manage a server's auditing policy.
+"""
+
+helps['sql server audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the server's audit policy is met.
+examples:
+  - name: Place the CLI in a waiting state until it determines that server's audit policy exists
+    text: az sql server audit-policy wait -g mygroup -n myserver --exists
+"""
+
+helps['sql server audit-policy update'] = """
+type: command
+short-summary: Update a server's auditing policy.
+long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-account mystorage
+  - name: Enable by storage endpoint and key.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --bsts Enabled --storage-endpoint https://mystorage.blob.core.windows.net \\
+            --storage-key MYKEY==
+  - name: Set the list of audit actions.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver \\
+            --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on server::myserver by public'
+  - name: Disable an auditing policy.
+    text: az sql server audit-policy update -g mygroup -n myserver --state Disabled
+  - name: Disable a blob storage auditing policy.
+    text: az sql server audit-policy update -g mygroup -n myserver --bsts Disabled
+  - name: Enable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --lats Enabled --lawri myworkspaceresourceid
+  - name: Disable a log analytics auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --lats Disabled
+  - name: Enable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid \\
+            --event-hub eventhubname
+  - name: Enable an event hub auditing policy for default event hub.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
+            --event-hub-target-state Enabled \\
+            --event-hub-authorization-rule-id eventhubauthorizationruleid
+  - name: Disable an event hub auditing policy.
+    text: |
+        az sql server audit-policy update -g mygroup -n myserver
+            --event-hub-target-state Disabled
 """
 
 helps['sql server conn-policy'] = """
@@ -707,6 +1152,8 @@ short-summary: Create a server.
 examples:
   - name: Create a server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword
+  - name: Create a server with disabled public network access to server.
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword -e false
 """
 
 helps['sql server dns-alias'] = """
