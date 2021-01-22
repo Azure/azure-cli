@@ -349,7 +349,8 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
 
         # pass instance to the custom_function, if provided
         if self.custom_function_operation:
-            custom_function, custom_func_args = self._extract_handler_and_args(command_args, self.custom_function_operation)
+            custom_function, custom_func_args = self._extract_handler_and_args(
+                command_args, self.custom_function_operation)
             if self.child_collection_prop_name:
                 parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
