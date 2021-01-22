@@ -17,7 +17,7 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
            tags=None, description=None, key_frame_interval_duration=None, access_token=None, no_wait=False,
            preview_ips=None, preview_locator=None, streaming_policy_name=None, alternative_media_id=None,
            client_access_policy=None, cross_domain_policy=None, stream_options=None,
-           transcription_language=None, use_static_hostname=False, custom_hostname=None):
+           transcription_lang=None, use_static_hostname=False, custom_hostname=None):
 
     from azure.cli.command_modules.ams._client_factory import (get_mediaservices_client)
 
@@ -30,8 +30,8 @@ def create(cmd, client, resource_group_name, account_name, live_event_name, stre
     live_event_input_access_control = LiveEventInputAccessControl(ip=IPAccessControl(allow=allowed_ips))
 
     transcriptions = []
-    if transcription_language:
-        transcriptions = [{'language': transcription_language}]
+    if transcription_lang:
+        transcriptions = [{'language': transcription_lang}]
 
     live_event_input = LiveEventInput(streaming_protocol=LiveEventInputProtocol(streaming_protocol),
                                       access_token=access_token,

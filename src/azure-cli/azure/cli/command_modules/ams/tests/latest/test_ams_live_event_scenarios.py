@@ -42,7 +42,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'Central US')
         ])
 
-        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --transcription-language {liveTranscriptionLanguage} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --key-frame-interval {keyFrameInterval} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --use-static-hostname --custom-hostname {customHostnamePrefix} --stretch-mode {stretchMode}', checks=[
+        live_event = self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --auto-start --transcription-lang {liveTranscriptionLanguage} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --key-frame-interval {keyFrameInterval} --tags {tags} --stream-options Default LowLatency --preview-locator {previewLocator} --ips 1.2.3.4 5.6.7.8 192.168.0.0/28 --preview-ips 192.168.0.0/28 0.0.0.0 --access-token {accessToken} --description {description} --client-access-policy "{clientAccessPolicy}" --cross-domain-policy "{crossDomainPolicy}" --use-static-hostname --custom-hostname {customHostnamePrefix} --stretch-mode {stretchMode}', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'Central US'),
             self.check('input.streamingProtocol', '{streamingProtocol}'),
@@ -121,6 +121,7 @@ class AmsLiveEventTests(ScenarioTest):
             'location': 'southindia',
             'streamingProtocol': 'FragmentedMP4',
             'liveEventName': live_event_name,
+            'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
             'encodingType': 'Basic'
         })
 
@@ -129,7 +130,7 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'South India')
         ])
 
-        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --tags key=value --ips AllowAll', checks=[
+        self.cmd('az ams live-event create -a {amsname} -n {liveEventName} -g {rg} --streaming-protocol {streamingProtocol} --encoding-type {encodingType} --access-token {accessToken} --tags key=value --ips AllowAll', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'South India'),
             self.check('input.streamingProtocol', 'FragmentedMP4'),
@@ -139,7 +140,8 @@ class AmsLiveEventTests(ScenarioTest):
         live_event = self.cmd('az ams live-event standby -a {amsname} --name {liveEventName} -g {rg}', checks=[
             self.check('name', '{liveEventName}'),
             self.check('location', 'South India'),
-            self.check('input.streamingProtocol', 'FragmentedMP4')
+            self.check('input.streamingProtocol', 'FragmentedMP4'),
+            self.check('input.accessToken', '{accessToken}'),
         ]).get_output_in_json()
 
         self.assertNotEquals('Stopping', live_event['resourceState'])
