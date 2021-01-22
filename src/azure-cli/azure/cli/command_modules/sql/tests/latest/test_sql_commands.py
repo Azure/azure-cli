@@ -4986,16 +4986,15 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         # update the sensitivity classification
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
-        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
 
-        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                 checks=[
-                     JMESPathCheck('informationType', information_type),
-                     JMESPathCheck('labelName', label_name),
-                     JMESPathCheck('informationTypeId', information_type_id),
-                     JMESPathCheck('labelId', label_id)])
+        response = self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                            checks=[
+                                JMESPathCheck('informationType', information_type),
+                                JMESPathCheck('labelName', label_name)]).get_output_in_json()
+
+        information_type_id = response['informationTypeId']
+        label_id = response['labelId']
 
         # get the classified column
         self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
