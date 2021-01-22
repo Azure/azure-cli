@@ -17,6 +17,7 @@ class StorageQueueScenarioTests(ScenarioTest):
         from datetime import datetime, timedelta
 
         account_key = self.get_account_key(resource_group, storage_account)
+        connection_string = self.get_connection_string(resource_group, storage_account)
 
         self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
         self.set_env('AZURE_STORAGE_KEY', account_key)
@@ -29,6 +30,10 @@ class StorageQueueScenarioTests(ScenarioTest):
                  checks=JMESPathCheck('exists', True))
 
         res = self.cmd('storage queue list').get_output_in_json()
+        self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
+
+        # test list with connection-string
+        res = self.cmd('storage queue list --connection-string {}'.format(connection_string)).get_output_in_json()
         self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -121,6 +126,10 @@ class StorageQueueScenarioTests(ScenarioTest):
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
                         .format(name, group)).output
+
+    def get_connection_string(self, group, name):
+        return self.cmd('storage account show-connection-string -n {} -g {} '
+                        '--query connectionString -otsv'.format(name, group)).output.strip()
 
 
 if __name__ == '__main__':

@@ -14,8 +14,8 @@ def load_command_table(self, _):
 
     with self.command_group('network nat gateway', nat_gateway_sdk) as g:
         g.custom_command('create', 'create_nat_gateway', supports_no_wait=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_nat_gateway')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_nat_gateway')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nat_gateway')
         g.wait_command('wait')

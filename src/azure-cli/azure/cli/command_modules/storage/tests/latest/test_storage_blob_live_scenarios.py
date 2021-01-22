@@ -9,6 +9,7 @@ from azure.cli.testsdk import (LiveScenarioTest, ResourceGroupPreparer, StorageA
                                JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk.decorators import serial_test
+from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
@@ -94,77 +95,27 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
                              'The download file size is not right.')
 
-    @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centraluseuap")
-    @StorageAccountPreparer(name_prefix="restore", kind="StorageV2", sku='Standard_LRS', location="centraluseuap")
-    def test_storage_blob_restore(self, resource_group, storage_account):
-        import time
-        self.cmd('storage account blob-service-properties update --enable-change-feed --enable-delete-retention --delete-retention-days 2 --enable-versioning -n {sa}')\
-            .assert_with_checks(JMESPathCheck('changeFeed.enabled', True),
-                                JMESPathCheck('deleteRetentionPolicy.enabled', True),
-                                JMESPathCheck('deleteRetentionPolicy.days', 2))
-        time.sleep(60)
-        # Enable Restore Policy
-        self.cmd('storage account blob-service-properties update --enable-restore-policy --restore-days 1 -n {sa}')\
-            .assert_with_checks(JMESPathCheck('restorePolicy.enabled', True),
-                                JMESPathCheck('restorePolicy.days', 1))
 
-        c1 = self.create_random_name(prefix='containera', length=24)
-        c2 = self.create_random_name(prefix='containerb', length=24)
-        b1 = self.create_random_name(prefix='blob1', length=24)
-        b2 = self.create_random_name(prefix='blob2', length=24)
-        b3 = self.create_random_name(prefix='blob3', length=24)
-        b4 = self.create_random_name(prefix='blob4', length=24)
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-12-12')
+class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_blob_query_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(group=resource_group, name=storage_account)
+        container = self.create_container(account_info)
+        blob = self.create_random_name(prefix='blob', length=12)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        csv_file = os.path.join(curr_dir, 'quick_query.csv').replace('\\', '\\\\')
 
-        local_file = self.create_temp_file(256)
+        self.storage_cmd('storage blob upload -f "{}" -c {} -n {}', account_info, csv_file, container, blob)
+        query_string = "SELECT _2 from BlobStorage"
+        result = self.storage_cmd('storage blob query -c {} -n {} --query-expression "{}"',
+                                  account_info, container, blob, query_string).output
+        self.assertIsNotNone(result)
 
-        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                               .format(storage_account, resource_group)).output
-
-        # Prepare containers and blobs
-        for container in [c1, c2]:
-            self.cmd('storage container create -n {} --account-name {} --account-key {}'.format(
-                container, storage_account, account_key)) \
-                .assert_with_checks(JMESPathCheck('created', True))
-            for blob in [b1, b2, b3, b4]:
-                self.cmd('storage blob upload -c {} -f "{}" -n {} --account-name {} --account-key {}'.format(
-                    container, local_file, blob, storage_account, account_key))
-            self.cmd('storage blob list -c {} --account-name {} --account-key {}'.format(
-                container, storage_account, account_key)) \
-                .assert_with_checks(JMESPathCheck('length(@)', 4))
-
-            self.cmd('storage container delete -n {} --account-name {} --account-key {}'.format(
-                container, storage_account, account_key)) \
-                .assert_with_checks(JMESPathCheck('deleted', True))
-
-        time.sleep(30)
-
-        # Restore blobs, with specific ranges
-        time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
-
-        # c1/b1 -> c1/b2
-        start_range = '/'.join([c1, b1])
-        end_range = '/'.join([c1, b2])
-        self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {}'.format(
-            time_to_restore, start_range, end_range, storage_account, resource_group), checks=[
-            JMESPathCheck('status', 'Complete'),
-            JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
-            JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
-
-        self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
-            time_to_restore, start_range, end_range, storage_account, resource_group))
-
-        time.sleep(90)
-
-        time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
-        # c1/b2 -> c2/b3
-        start_range = '/'.join([c1, b2])
-        end_range = '/'.join([c2, b3])
-        self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {}'.format(
-            time_to_restore, start_range, end_range, storage_account, resource_group), checks=[
-            JMESPathCheck('status', 'Complete'),
-            JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
-            JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
-
-        time.sleep(120)
-        self.cmd('storage blob restore -t {} --account-name {} -g {} --no-wait'.format(
-            time_to_restore, storage_account, resource_group))
+        temp_dir = self.create_temp_dir()
+        result_file = os.path.join(temp_dir, 'result.csv')
+        self.assertFalse(os.path.exists(result_file))
+        self.storage_cmd('storage blob query -c {} -n {} --query-expression "{}" --result-file "{}"',
+                         account_info, container, blob, query_string, result_file)
+        self.assertTrue(os.path.exists(result_file))

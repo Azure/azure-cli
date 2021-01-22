@@ -35,8 +35,8 @@ class MapsScenarioTests(ScenarioTest):
                            checks=[
                                self.check('name', '{name}'),
                                self.check('resourceGroup', '{rg}'),
-                               self.check('sku.name', '{sku}'),
-                               self.check('tags', None)
+                               self.check('sku.name', '{sku}', case_sensitive=False),
+                               self.not_exists('tags')
                            ]).get_output_in_json()
 
         # Call create again, expect to get the same account.
@@ -48,8 +48,8 @@ class MapsScenarioTests(ScenarioTest):
                  checks=[
                      self.check('name', '{name3}'),
                      self.check('resourceGroup', '{rg1}'),
-                     self.check('sku.name', '{skus1}'),
-                     self.check('tags', None)
+                     self.check('sku.name', '{skus1}', case_sensitive=False),
+                     self.not_exists('tags')
                  ]).get_output_in_json()
 
         # Test 'az maps account update'
@@ -60,7 +60,7 @@ class MapsScenarioTests(ScenarioTest):
                      self.check('id', account['id']),
                      self.check('name', '{name}'),
                      self.check('resourceGroup', '{rg}'),
-                     self.check('sku.name', '{skus1}'),
+                     self.check('sku.name', '{skus1}', case_sensitive=False),
                      self.check('tags', {tag_key: tag_value})
                  ])
 
@@ -70,14 +70,14 @@ class MapsScenarioTests(ScenarioTest):
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{skus1}')
+            self.check('sku.name', '{skus1}', case_sensitive=False)
         ])
         # Search by id
         self.cmd('az maps account show --ids ' + account['id'], checks=[
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{skus1}'),
+            self.check('sku.name', '{skus1}', case_sensitive=False),
             self.check('tags', {tag_key: tag_value})
         ])
 
@@ -89,7 +89,7 @@ class MapsScenarioTests(ScenarioTest):
             self.check('[0].id', account['id']),
             self.check('[0].name', '{name}'),
             self.check('[0].resourceGroup', '{rg}'),
-            self.check('[0].sku.name', '{skus1}'),
+            self.check('[0].sku.name', '{skus1}', case_sensitive=False),
             self.check('[0].tags', {tag_key: tag_value})
         ])
 

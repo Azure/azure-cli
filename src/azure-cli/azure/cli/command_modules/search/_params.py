@@ -4,13 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands.parameters import name_type
+from azure.cli.core.commands.parameters import name_type, get_enum_type
 
 
 def load_arguments(self, _):
     with self.argument_context('search service') as c:
         c.ignore('search_management_request_options')
         c.argument('search_service_name', arg_type=name_type, help='The name of the search service.')
+
+    with self.argument_context('search service create') as c:
+        c.ignore('search_management_request_options')
+        c.argument('sku', help='Search Service SKU', arg_type=get_enum_type(["Free", "Basic", "Standard", "Standard2", "Standard3"]))
 
     with self.argument_context('search query-key') as c:
         c.ignore('search_management_request_options')

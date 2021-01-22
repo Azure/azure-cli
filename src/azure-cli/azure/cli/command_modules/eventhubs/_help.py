@@ -425,3 +425,74 @@ examples:
   - name: Update a new namespace.
     text: az eventhubs namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value --enable-auto-inflate True
 """
+
+helps['eventhubs cluster'] = """
+type: group
+short-summary: Manage Azure EventHubs Clusters
+"""
+
+helps['eventhubs cluster create'] = """
+type: command
+short-summary: Create EventHubs Cluster
+examples:
+  - name: Create a new cluster.
+    text: az eventhubs cluster create --resource-group myresourcegroup --name mycluster --location mylocation --capacity 1 --tags tag=value
+"""
+
+helps['eventhubs cluster update'] = """
+type: command
+short-summary: Update tags of EventHubs Cluster
+examples:
+  - name: Update tags of a existing cluster.
+    text: az eventhubs cluster update --resource-group myresourcegroup --name mycluster --tags tag=value
+"""
+
+helps['eventhubs cluster available-region'] = """
+type: command
+short-summary: List the quantity of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
+examples:
+  - name: List of available pre-provisioned Event Hubs Clusters, indexed by Azure region.
+    text: az eventhubs cluster available-region
+"""
+
+helps['eventhubs cluster show'] = """
+type: command
+short-summary: Get the resource description of the specified Event Hubs Cluster.
+examples:
+  - name: Get the resource description of the specified Event Hubs Cluster.
+    text: az eventhubs cluster show --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster delete'] = """
+type: command
+short-summary: Delete an existing Event Hubs Cluster.
+examples:
+  - name: Delete an existing Event Hubs Cluster.
+    text: az eventhubs cluster delete --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster list'] = """
+type: command
+short-summary: List the available Event Hubs Clusters within an ARM resource group.
+examples:
+  - name: List the available Event Hubs Clusters within an ARM resource group.
+    text: az eventhubs cluster list --resource-group myresourcegroup
+"""
+
+helps['eventhubs cluster namespace'] = """
+type: group
+short-summary: Manage Azure EventHubs Cluster for namespace
+"""
+
+helps['eventhubs cluster namespace list'] = """
+type: command
+short-summary: List of Namespaces within given Cluster.
+examples:
+  - name: List of Namespaces within given Cluster.
+    text: az eventhubs cluster namespace list --resource-group myresourcegroup --name mycluster
+"""
+
+helps['eventhubs cluster wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the Cluster operation is completed.
+"""

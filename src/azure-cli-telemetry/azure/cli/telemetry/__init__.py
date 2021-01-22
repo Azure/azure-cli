@@ -10,7 +10,7 @@ import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 
 
 def _start(config_dir):

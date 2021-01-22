@@ -59,7 +59,10 @@ from azure.cli.command_modules.network._validators import (
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace,
-    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace)
+    process_lb_outbound_rule_namespace, process_nw_config_diagnostic_namespace, process_list_delegations_namespace,
+    process_appgw_waf_policy_update, process_cross_region_lb_frontend_ip_namespace, process_cross_region_lb_create_namespace)
+
+ROUTE_TABLE_DEPRECATION_INFO = 'network vhub route-table'
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -184,7 +187,7 @@ def load_command_table(self, _):
     network_private_endpoint_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
-        min_api='2018-08-01'
+        min_api='2020-06-01'
     )
 
     network_private_endpoint_dns_zone_group_sdk = CliCommandType(
@@ -348,8 +351,20 @@ def load_command_table(self, _):
         min_api='2019-08-01'
     )
 
+    network_vrouter_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_virtual_router,
+        min_api='2019-08-01'
+    )
+
     network_vrouter_peering_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#VirtualRouterPeeringsOperations.{}',
+        client_factory=cf_virtual_router_peering,
+        min_api='2019-08-01'
+    )
+
+    network_vrouter_peering_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
         client_factory=cf_virtual_router_peering,
         min_api='2019-08-01'
     )
@@ -412,13 +427,13 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format,
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_application_gateways')
-        g.command('start', 'start')
-        g.command('stop', 'stop')
-        g.command('show-backend-health', 'backend_health', min_api='2016-09-01')
-        g.generic_update_command('update', supports_no_wait=True, custom_func_name='update_application_gateway')
+        g.command('start', 'begin_start')
+        g.command('stop', 'begin_stop')
+        g.command('show-backend-health', 'begin_backend_health', min_api='2016-09-01')
+        g.generic_update_command('update', supports_no_wait=True, setter_name='begin_create_or_update', custom_func_name='update_application_gateway')
         g.wait_command('wait')
 
     subresource_properties = [
@@ -457,6 +472,7 @@ def load_command_table(self, _):
             g.command('delete', delete_network_resource_property_entry('application_gateways', subresource), supports_no_wait=True)
             g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, validator=create_validator)
             g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
+                                     setter_name='begin_create_or_update',
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                      child_collection_prop_name=subresource, validator=create_validator)
 
@@ -466,6 +482,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ag_rewrite_rules')
         g.custom_command('delete', 'delete_ag_rewrite_rule', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_ag_rewrite_rule',
                                  child_collection_prop_name='rewrite_rule_sets.rewrite_rules',
                                  child_collection_key='name.name',
@@ -477,6 +494,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_ag_rewrite_rule_conditions')
         g.custom_command('delete', 'delete_ag_rewrite_rule_condition', supports_no_wait=True)
         g.generic_update_command('update', command_type=network_ag_sdk, supports_no_wait=True,
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_ag_rewrite_rule_condition',
                                  child_collection_prop_name='rewrite_rule_sets.rewrite_rules.conditions',
                                  child_collection_key='name.name.variable',
@@ -490,6 +508,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), supports_no_wait=True, doc_string_source='ApplicationGatewayRedirectConfiguration')
         g.generic_update_command('update', command_type=network_ag_sdk,
                                  client_factory=cf_application_gateways, supports_no_wait=True,
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
                                  child_collection_prop_name=subresource, doc_string_source='ApplicationGatewayRedirectConfiguration')
 
@@ -512,9 +531,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_ag_url_path_map_rule', supports_no_wait=True, validator=process_ag_url_path_map_rule_create_namespace)
         g.custom_command('delete', 'delete_ag_url_path_map_rule', supports_no_wait=True)
 
-    waf_config_deprecate_info = self.deprecate(redirect='network application-gateway waf-policy', hide=False)
-    with self.command_group('network application-gateway waf-config',
-                            deprecate_info=waf_config_deprecate_info) as g:
+    with self.command_group('network application-gateway waf-config') as g:
         g.custom_command('set', 'set_ag_waf_config_2017_03_01', min_api='2017-03-01', supports_no_wait=True)
         g.custom_command('set', 'set_ag_waf_config_2016_09_01', max_api='2016-09-01', supports_no_wait=True)
         g.custom_show_command('show', 'show_ag_waf_config')
@@ -551,7 +568,7 @@ def load_command_table(self, _):
                             client_factory=cf_app_gateway_waf_policy,
                             min_api='2018-12-01') as g:
         g.custom_command('create', 'create_ag_waf_policy')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_ag_waf_policies')
         g.generic_update_command('update', custom_func_name='update_ag_waf_policy')
@@ -594,7 +611,8 @@ def load_command_table(self, _):
         g.generic_update_command('update',
                                  command_type=network_ag_waf_sdk,
                                  client_factory=cf_app_gateway_waf_policy,
-                                 custom_func_name='update_waf_managed_rule_set')
+                                 custom_func_name='update_waf_managed_rule_set',
+                                 validator=process_appgw_waf_policy_update)
         g.custom_command('remove', 'remove_waf_managed_rule_set')
         g.custom_command('list', 'list_waf_managed_rule_set')
 
@@ -611,21 +629,21 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_asg')
         g.show_command('show', 'get')
         g.command('list', 'list_all')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', custom_func_name='update_asg')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_asg')
     # endregion
 
     # region DdosProtectionPlans
     with self.command_group('network ddos-protection', network_ddos_sdk, min_api='2018-02-01') as g:
         g.custom_command('create', 'create_ddos_plan')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_ddos_plans')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_ddos_plan')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_ddos_plan')
     # endregion
 
     # region DNS
-    with self.command_group('network dns', network_dns_reference_sdk) as g:
+    with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
         g.command('list-references', 'get_by_target_resources')
 
     with self.command_group('network dns zone', network_dns_zone_sdk) as g:
@@ -672,48 +690,48 @@ def load_command_table(self, _):
 
     # region ExpressRoutes
     with self.command_group('network express-route', network_er_sdk) as g:
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('get-stats', 'get_stats')
-        g.command('list-arp-tables', 'list_arp_table')
+        g.command('list-arp-tables', 'begin_list_arp_table')
         g.custom_command('list-route-tables', 'list_express_route_route_tables')
         g.custom_command('create', 'create_express_route', supports_no_wait=True)
         g.custom_command('list', 'list_express_route_circuits')
         g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
-        g.generic_update_command('update', custom_func_name='update_express_route', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('network express-route auth', network_erca_sdk) as g:
         g.custom_command('create', 'create_express_route_auth', min_api='2019-09-01')
-        g.command('create', 'create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
-        g.command('delete', 'delete')
+        g.command('create', 'begin_create_or_update', max_api='2019-08-01', validator=process_auth_create_namespace)
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
 
     with self.command_group('network express-route gateway', network_er_gateway_sdk) as g:
         g.custom_command('create', 'create_express_route_gateway')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_express_route_gateways')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_gateway', setter_arg_name='put_express_route_gateway_parameters')
 
     with self.command_group('network express-route gateway connection', network_er_connection_sdk) as g:
         g.custom_command('create', 'create_express_route_connection')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.command('list', 'list')
         g.show_command('show', 'get')
-        g.generic_update_command('update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_connection', setter_arg_name='put_express_route_connection_parameters')
 
     with self.command_group('network express-route peering', network_er_peering_sdk) as g:
         g.custom_command('create', 'create_express_route_peering', client_factory=cf_express_route_circuit_peerings)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.generic_update_command('update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='peering_parameters', custom_func_name='update_express_route_peering')
 
     with self.command_group('network express-route peering connection', network_erconn_sdk) as g:
         g.custom_command('create', 'create_express_route_peering_connection')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show')
 
     with self.command_group('network express-route peering peer-connection', network_perconn_sdk, is_preview=True) as g:
@@ -722,10 +740,12 @@ def load_command_table(self, _):
 
     with self.command_group('network express-route port', network_er_ports_sdk) as g:
         g.custom_command('create', 'create_express_route_port')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_express_route_ports')
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_express_route_port')
+        g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_express_route_port')
 
     with self.command_group('network express-route port identity', min_api='2019-08-01') as g:
         g.custom_command('assign', 'assign_express_route_port_identity', supports_no_wait=True)
@@ -738,6 +758,7 @@ def load_command_table(self, _):
 
     with self.command_group('network express-route port link', network_er_ports_sdk) as g:
         g.generic_update_command('update',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_express_route_port_link',
                                  supports_no_wait=True,
                                  min_api='2019-08-01')
@@ -750,10 +771,10 @@ def load_command_table(self, _):
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
         g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
-        g.command('delete', 'delete', min_api='2019-04-01')
+        g.command('delete', 'begin_delete', min_api='2019-04-01')
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
         g.command(
             'list-types', 'list',
             operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
@@ -765,7 +786,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
         g.custom_command('add', 'add_private_endpoint_private_dns_zone')
         g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show')
         g.command('list', 'list')
     # endregion
@@ -773,13 +794,13 @@ def load_command_table(self, _):
     # region PrivateLinkServices
     with self.command_group('network private-link-service', network_private_link_service_sdk) as g:
         g.custom_command('create', 'create_private_link_service')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_private_link_services')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_private_link_service')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_private_link_service')
 
     with self.command_group('network private-link-service connection', network_private_link_service_sdk) as g:
-        g.command('delete', 'delete_private_endpoint_connection')
+        g.command('delete', 'begin_delete_private_endpoint_connection')
         g.custom_command('update', 'update_private_endpoint_connection')
 
     # TODO: Due to service limitation.
@@ -793,9 +814,10 @@ def load_command_table(self, _):
     with self.command_group('network lb', network_lb_sdk) as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_lb_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_lbs')
-        g.generic_update_command('update')
+        g.wait_command('wait')
+        g.generic_update_command('update', setter_name='begin_create_or_update')
 
     property_map = {
         'frontend_ip_configurations': 'frontend-ip',
@@ -813,17 +835,20 @@ def load_command_table(self, _):
     with self.command_group('network lb frontend-ip', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_frontend_ip_configuration', validator=process_lb_frontend_ip_namespace)
         g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_frontend_ip_configuration',
                                  validator=process_lb_frontend_ip_namespace)
 
     with self.command_group('network lb inbound-nat-rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_inbound_nat_rule')
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_rules',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_inbound_nat_rule')
 
     with self.command_group('network lb inbound-nat-pool', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_inbound_nat_pool')
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_pools',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_inbound_nat_pool')
 
     with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
@@ -848,16 +873,19 @@ def load_command_table(self, _):
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
         g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_rule')
 
     with self.command_group('network lb probe', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_probe')
         g.generic_update_command('update', child_collection_prop_name='probes',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_probe')
 
     with self.command_group('network lb outbound-rule', network_lb_sdk, min_api='2018-07-01') as g:
         g.custom_command('create', 'create_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
         g.generic_update_command('update', child_collection_prop_name='outbound_rules',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_lb_outbound_rule', validator=process_lb_outbound_rule_namespace)
 
     with self.command_group('network lb outbound-rule', network_util, min_api='2018-07-01') as g:
@@ -866,25 +894,77 @@ def load_command_table(self, _):
         g.command('delete', delete_network_resource_property_entry('load_balancers', 'outbound_rules'))
     # endregion
 
+    # region cross-region load balancer
+    with self.command_group('network cross-region-lb', network_lb_sdk) as g:
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
+        g.command('delete', 'begin_delete')
+        g.custom_command('list', 'list_lbs')
+        g.generic_update_command('update', setter_name='begin_create_or_update')
+        g.wait_command('wait')
+
+    cross_region_lb_property_map = {
+        'frontend_ip_configurations': 'frontend-ip',
+        'load_balancing_rules': 'rule',
+        'probes': 'probe',
+    }
+
+    for subresource, alias in cross_region_lb_property_map.items():
+        with self.command_group('network cross-region-lb {}'.format(alias), network_util) as g:
+            g.command('list', list_network_resource_property('load_balancers', subresource))
+            g.show_command('show', get_network_resource_property_entry('load_balancers', subresource))
+            g.command('delete', delete_network_resource_property_entry('load_balancers', subresource))
+
+    with self.command_group('network cross-region-lb frontend-ip', network_lb_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_frontend_ip_configuration', validator=process_cross_region_lb_frontend_ip_namespace)
+        g.generic_update_command('update', child_collection_prop_name='frontend_ip_configurations',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='set_cross_region_lb_frontend_ip_configuration',
+                                 validator=process_cross_region_lb_frontend_ip_namespace)
+
+    with self.command_group('network cross-region-lb address-pool', network_lb_backend_pool_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_backend_address_pool')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('delete', 'delete_cross_region_lb_backend_address_pool')
+
+    with self.command_group('network cross-region-lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
+        g.custom_command('add', 'add_cross_region_lb_backend_address_pool_address')
+        g.custom_command('remove', 'remove_lb_backend_address_pool_address')
+        g.custom_command('list', 'list_lb_backend_address_pool_address')
+
+    with self.command_group('network cross-region-lb rule', network_lb_sdk) as g:
+        g.custom_command('create', 'create_cross_region_lb_rule')
+        g.generic_update_command('update', child_collection_prop_name='load_balancing_rules',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='set_cross_region_lb_rule')
+
+    with self.command_group('network cross-region-lb probe', network_lb_sdk) as g:
+        g.custom_command('create', 'create_lb_probe')
+        g.generic_update_command('update', child_collection_prop_name='probes',
+                                 setter_name='begin_create_or_update',
+                                 custom_func_name='set_lb_probe')
+    # endregion
+
     # region LocalGateways
     with self.command_group('network local-gateway', network_lgw_sdk) as g:
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list', table_transformer=transform_local_gateway_table_output)
         g.custom_command('create', 'create_local_gateway', supports_no_wait=True, validator=process_local_gateway_create_namespace)
-        g.generic_update_command('update', custom_func_name='update_local_gateway', supports_no_wait=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_local_gateway', supports_no_wait=True)
         g.wait_command('wait')
     # endregion
 
     # region NetworkInterfaces: (NIC)
     with self.command_group('network nic', network_nic_sdk) as g:
         g.custom_command('create', 'create_nic', transform=transform_nic_create_output, validator=process_nic_create_namespace, supports_no_wait=True)
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'list_nics')
-        g.command('show-effective-route-table', 'get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
-        g.command('list-effective-nsg', 'list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
-        g.generic_update_command('update', custom_func_name='update_nic', supports_no_wait=True)
+        g.command('show-effective-route-table', 'begin_get_effective_route_table', min_api='2016-09-01', table_transformer=transform_effective_route_table)
+        g.command('list-effective-nsg', 'begin_list_effective_network_security_groups', min_api='2016-09-01', table_transformer=transform_effective_nsg)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_nic', supports_no_wait=True)
         g.wait_command('wait')
 
     resource = 'network_interfaces'
@@ -893,6 +973,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_nic_ip_config')
         g.generic_update_command('update',
                                  child_collection_prop_name='ip_configurations', child_arg_name='ip_config_name',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='set_nic_ip_config')
         g.command('list', list_network_resource_property(resource, subresource), command_type=network_util)
         g.show_command('show', get_network_resource_property_entry(resource, subresource), command_type=network_util)
@@ -910,27 +991,29 @@ def load_command_table(self, _):
 
     # region NetworkSecurityGroups
     with self.command_group('network nsg', network_nsg_sdk) as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_nsgs')
         g.custom_command('create', 'create_nsg', transform=transform_nsg_create_output)
-        g.generic_update_command('update')
+        g.generic_update_command('update', setter_name='begin_create_or_update')
 
     with self.command_group('network nsg rule', network_nsg_rule_sdk) as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_nsg_rules', table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
         g.show_command('show', 'get', table_transformer=transform_nsg_rule_table_output)
         g.custom_command('create', 'create_nsg_rule_2017_06_01', min_api='2017-06-01')
         g.generic_update_command('update', setter_arg_name='security_rule_parameters', min_api='2017-06-01',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_nsg_rule_2017_06_01', doc_string_source='SecurityRule')
         g.custom_command('create', 'create_nsg_rule_2017_03_01', max_api='2017-03-01')
         g.generic_update_command('update', max_api='2017-03-01', setter_arg_name='security_rule_parameters',
+                                 setter_name='begin_create_or_update',
                                  custom_func_name='update_nsg_rule_2017_03_01', doc_string_source='SecurityRule')
     # endregion
 
     # region NetworkProfiles
     with self.command_group('network profile', network_profile_sdk) as g:
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.custom_command('list', 'list_network_profiles')
         g.show_command('show')
     # endregion
@@ -948,11 +1031,11 @@ def load_command_table(self, _):
 
     with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
         g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_create_namespace)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
-        g.command('stop', 'stop')
-        g.command('start', 'start')
-        g.command('query', 'query')
+        g.command('stop', 'begin_stop')
+        g.command('start', 'begin_start')
+        g.command('query', 'begin_query')
         g.command('list', 'list')
 
     with self.command_group('network watcher connection-monitor endpoint',
@@ -1001,9 +1084,9 @@ def load_command_table(self, _):
     with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)
         g.show_command('show', 'get')
-        g.command('show-status', 'get_status')
-        g.command('delete', 'delete')
-        g.command('stop', 'stop')
+        g.command('show-status', 'begin_get_status')
+        g.command('delete', 'begin_delete')
+        g.command('stop', 'begin_stop')
         g.command('list', 'list')
 
     with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
@@ -1042,18 +1125,18 @@ def load_command_table(self, _):
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if self.supported_api_version(min_api='2017-06-01') else ' ')
 
     with self.command_group('network public-ip', network_public_ip_sdk) as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get', table_transformer=public_ip_show_table_transform)
         g.custom_command('list', 'list_public_ips', table_transformer='[].' + public_ip_show_table_transform)
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
-        g.generic_update_command('update', custom_func_name='update_public_ip')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip')
 
     with self.command_group('network public-ip prefix', network_public_ip_prefix_sdk, client_factory=cf_public_ip_prefixes) as g:
         g.custom_command('create', 'create_public_ip_prefix')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_public_ip_prefixes')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_public_ip_prefix')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_public_ip_prefix')
 
     # endregion
 
@@ -1062,27 +1145,27 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_route_filter', client_factory=cf_route_filters)
         g.custom_command('list', 'list_route_filters', client_factory=cf_route_filters)
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='route_filter_parameters')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_filter_parameters')
 
     with self.command_group('network route-filter rule', network_rfr_sdk, min_api='2016-12-01') as g:
         g.custom_command('create', 'create_route_filter_rule', client_factory=cf_route_filter_rules)
         g.command('list', 'list_by_route_filter')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
-        g.generic_update_command('update', setter_arg_name='route_filter_rule_parameters')
+        g.command('delete', 'begin_delete')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_filter_rule_parameters')
         sc_path = 'azure.mgmt.network.operations#BgpServiceCommunitiesOperations.{}'
         g.command('list-service-communities', 'list', operations_tmpl=sc_path, client_factory=cf_service_community, table_transformer=transform_service_community_table_output)
 
     # endregion
 
     # region RouteTables
-    with self.command_group('network route-table', network_rt_sdk) as g:
+    with self.command_group('network route-table', network_rt_sdk, deprecate_info=self.deprecate(redirect=ROUTE_TABLE_DEPRECATION_INFO, hide=False)) as g:
         g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_route_tables')
-        g.generic_update_command('update', custom_func_name='update_route_table')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_route_table')
 
     network_rtr_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#RoutesOperations.{}',
@@ -1090,10 +1173,10 @@ def load_command_table(self, _):
     )
     with self.command_group('network route-table route', network_rtr_sdk) as g:
         g.custom_command('create', 'create_route')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.generic_update_command('update', setter_arg_name='route_parameters', custom_func_name='update_route')
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='route_parameters', custom_func_name='update_route')
 
     # endregion
 
@@ -1103,17 +1186,18 @@ def load_command_table(self, _):
 
     with self.command_group('network service-endpoint policy', network_sepp_sdk) as g:
         g.custom_command('create', 'create_service_endpoint_policy')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_service_endpoint_policies')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_service_endpoint_policy')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_service_endpoint_policy')
 
     with self.command_group('network service-endpoint policy-definition', network_sepd_sdk) as g:
         g.custom_command('create', 'create_service_endpoint_policy_definition')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.command('list', 'list_by_resource_group')
         g.show_command('show')
         g.generic_update_command('update', custom_func_name='update_service_endpoint_policy_definition',
+                                 setter_name='begin_create_or_update',
                                  setter_arg_name='service_endpoint_policy_definitions')
     # endregion
 
@@ -1140,12 +1224,12 @@ def load_command_table(self, _):
 
     # region VirtualNetworks
     with self.command_group('network vnet', network_vnet_sdk) as g:
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.custom_command('list', 'list_vnet', table_transformer=transform_vnet_table_output)
         g.show_command('show', 'get')
         g.command('check-ip-address', 'check_ip_address_availability', min_api='2016-09-01')
         g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
-        g.generic_update_command('update', custom_func_name='update_vnet', supports_local_cache=True)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet', supports_local_cache=True)
         g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
         g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
 
@@ -1153,15 +1237,15 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vnet_peering')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.generic_update_command('update', setter_name='update_vnet_peering', setter_type=network_custom)
 
     with self.command_group('network vnet subnet', network_subnet_sdk) as g:
         g.custom_command('create', 'create_subnet', supports_local_cache=True)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.generic_update_command('update', setter_arg_name='subnet_parameters',
+        g.generic_update_command('update', setter_name='begin_create_or_update', setter_arg_name='subnet_parameters',
                                  custom_func_name='update_subnet')
         g.custom_command('list-available-delegations', 'list_avail_subnet_delegations', min_api='2018-08-01', validator=process_list_delegations_namespace)
     # endregion
@@ -1169,19 +1253,19 @@ def load_command_table(self, _):
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway', network_vgw_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_gateway', supports_no_wait=True, transform=transform_vnet_gateway_create_output, validator=process_vnet_gateway_create_namespace)
-        g.generic_update_command('update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vnet_gateway', supports_no_wait=True, validator=process_vnet_gateway_update_namespace)
         g.wait_command('wait')
-        g.command('delete', 'delete', supports_no_wait=True)
+        g.command('delete', 'begin_delete', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.command('reset', 'reset')
-        g.command('list-bgp-peer-status', 'get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
-        g.command('list-advertised-routes', 'get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
-        g.command('list-learned-routes', 'get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
+        g.command('reset', 'begin_reset')
+        g.command('list-bgp-peer-status', 'begin_get_bgp_peer_status', table_transformer=transform_vnet_gateway_bgp_peer_table)
+        g.command('list-advertised-routes', 'begin_get_advertised_routes', table_transformer=transform_vnet_gateway_routes_table)
+        g.command('list-learned-routes', 'begin_get_learned_routes', table_transformer=transform_vnet_gateway_routes_table)
 
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
-        g.command('show-url', 'get_vpn_profile_package_url', min_api='2017-08-01')
+        g.command('show-url', 'begin_get_vpn_profile_package_url', min_api='2017-08-01')
 
     with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
         g.custom_command('create', 'create_vnet_gateway_revoked_cert')
@@ -1205,15 +1289,18 @@ def load_command_table(self, _):
     # region VirtualNetworkGatewayConnections
     with self.command_group('network vpn-connection', network_vpn_sdk) as g:
         g.custom_command('create', 'create_vpn_connection', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), table_transformer=deployment_validate_table_format, validator=process_vpn_connection_create_namespace, exception_handler=handle_template_based_exception)
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
         g.show_command('show', 'get', transform=transform_vpn_connection)
         g.command('list', 'list', transform=transform_vpn_connection_list)
-        g.generic_update_command('update', custom_func_name='update_vpn_connection')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_vpn_connection')
 
     with self.command_group('network vpn-connection shared-key', network_vpn_sdk) as g:
         g.show_command('show', 'get_shared_key')
-        g.command('reset', 'reset_shared_key')
-        g.generic_update_command('update', setter_name='set_shared_key')
+        g.custom_command('reset', 'reset_shared_key')
+        g.generic_update_command('update',
+                                 getter_name='get_shared_key',
+                                 custom_func_name='update_shared_key',
+                                 setter_name='begin_set_shared_key')
 
     with self.command_group('network vpn-connection ipsec-policy', network_vpn_sdk, min_api='2017-03-01') as g:
         g.custom_command('add', 'add_vpn_conn_ipsec_policy', supports_no_wait=True, doc_string_source='IpsecPolicy')
@@ -1224,17 +1311,27 @@ def load_command_table(self, _):
     # region VirtualRouter
     with self.command_group('network vrouter', network_vrouter_sdk) as g:
         g.custom_command('create', 'create_virtual_router')
-        g.generic_update_command('update', custom_func_name='update_virtual_router')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
+        g.generic_update_command('update',
+                                 getter_name='virtual_router_update_getter',
+                                 getter_type=network_vrouter_update_sdk,
+                                 setter_name='virtual_router_update_setter',
+                                 setter_type=network_vrouter_update_sdk,
+                                 custom_func_name='update_virtual_router')
+        g.custom_command('delete', 'delete_virtual_router')
+        g.custom_show_command('show', 'show_virtual_router')
         g.custom_command('list', 'list_virtual_router')
 
     with self.command_group('network vrouter peering', network_vrouter_peering_sdk) as g:
         g.custom_command('create', 'create_virtual_router_peering')
-        g.generic_update_command('update', custom_func_name='update_virtual_router_peering')
-        g.command('delete', 'delete')
-        g.show_command('show', 'get')
-        g.command('list', 'list')
+        g.generic_update_command('update',
+                                 getter_name='virtual_router_peering_update_getter',
+                                 getter_type=network_vrouter_peering_update_sdk,
+                                 setter_name='virtual_router_peering_update_setter',
+                                 setter_type=network_vrouter_peering_update_sdk,
+                                 custom_func_name='update_virtual_router_peering')
+        g.custom_command('delete', 'delete_virtual_router_peering')
+        g.custom_show_command('show', 'show_virtual_router_peering')
+        g.custom_command('list', 'list_virtual_router_peering')
     # endregion
 
     # region Bastion
@@ -1242,16 +1339,16 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_bastion_host')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
     # endregion
 
     # region Security Partner Provider
     with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_security_partner_provider')
-        g.generic_update_command('update', custom_func_name='update_security_partner_provider')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_security_partner_provider')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_security_partner_provider')
-        g.command('delete', 'delete')
+        g.command('delete', 'begin_delete')
     # endregion
 
     # region PrivateLinkResource and PrivateEndpointConnection
@@ -1269,16 +1366,16 @@ def load_command_table(self, _):
     # region Network Virtual Appliance
     with self.command_group('network virtual-appliance', network_virtual_appliances_sdk, client_factory=cf_network_virtual_appliances, is_preview=True) as g:
         g.custom_command('create', 'create_network_virtual_appliance')
-        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_network_virtual_appliance')
         g.show_command('show', 'get')
         g.custom_command('list', 'list_network_virtual_appliance')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
 
     with self.command_group('network virtual-appliance site', virtual_appliance_sites_sdk, client_factory=cf_virtual_appliance_sites, is_preview=True) as g:
         g.custom_command('create', 'create_network_virtual_appliance_site')
-        g.generic_update_command('update', custom_func_name='update_network_virtual_appliance_site')
+        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_network_virtual_appliance_site')
         g.show_command('show', 'get')
-        g.command('delete', 'delete', confirmation=True)
+        g.command('delete', 'begin_delete', confirmation=True)
         g.command('list', 'list')
 
     with self.command_group('network virtual-appliance sku', virtual_appliance_skus_sdk, is_preview=True) as g:

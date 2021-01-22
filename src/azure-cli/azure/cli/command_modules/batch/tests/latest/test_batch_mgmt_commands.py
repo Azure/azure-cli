@@ -158,9 +158,9 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_byos_account_cmd(self, resource_group):
         SecretPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                    'models.key_vault_management_client_enums#SecretPermissions')
+                                    'models._key_vault_management_client_enums#SecretPermissions')
         KeyPermissions = get_sdk(self.cli_ctx, ResourceType.MGMT_KEYVAULT,
-                                 'models.key_vault_management_client_enums#KeyPermissions')
+                                 'models._key_vault_management_client_enums#KeyPermissions')
         ALL_SECRET_PERMISSIONS = ' '.join(
             [perm.value for perm in SecretPermissions])
         ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
@@ -170,8 +170,8 @@ class BatchMgmtLiveScenarioTests(LiveScenarioTest):
             'str_n': 'clibatchteststorage1',
             'byos_n': 'clibatchtestuser1',
             'byos_l': 'southindia',
-            'kv': 'clibatchtestkeyvault1',
-            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
+            'kv': self.create_random_name('clibatchtestkv', 24),
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',  # object id for Microsoft Azure Batch
             'perm_k': ALL_KEY_PERMISSIONS,
             'perm_s': ALL_SECRET_PERMISSIONS
         })

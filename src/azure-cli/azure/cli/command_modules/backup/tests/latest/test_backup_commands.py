@@ -10,6 +10,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, record_only
 from azure.mgmt.recoveryservicesbackup.models import StorageType
+from azure_devtools.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer
 
@@ -193,7 +194,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'default': 'DefaultPolicy',
             'vault': vault_name,
             'vm1': vm1,
-            'vm2': vm2
+            'vm2': vm2,
+            'policy5': self.create_random_name('clitest-policy5', 24),
         })
 
         self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
@@ -215,6 +217,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{}'])".format(vm1), 1),
             self.check("length([?properties.friendlyName == '{}'])".format(vm2), 1)
         ])
+
+        self.kwargs['policy1_json']['name'] = self.kwargs['policy5']
+        self.kwargs['backup-management-type'] = self.kwargs['policy1_json']['properties']['backupManagementType']
+        self.kwargs['policy5_json'] = json.dumps(self.kwargs['policy1_json'])
+        self.cmd("backup policy create --backup-management-type {backup-management-type} -g {rg} -v {vault} -n {policy5} --policy '{policy5_json}'")
+
+        self.cmd('backup policy delete -g {rg} -v {vault} -n {policy5}')
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
         if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
@@ -364,7 +373,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm_name.lower(), rp2_json['id'].lower())
 
     @ResourceGroupPreparer(location="southeastasia")
-    @VaultPreparer()
+    @VaultPreparer(soft_delete=False)
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
 
@@ -417,6 +426,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
         self.assertTrue(protection_check == '')
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="southeastasia")
     @ResourceGroupPreparer(parameter_name="target_resource_group", location="southeastasia")
     @VaultPreparer()

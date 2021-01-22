@@ -163,11 +163,11 @@ def process_pr(pr):
     lines = [pr['title']]
     body = pr['body']
     content = ''
-    search_result = re.search(r'\*\*History Notes:\*\*(.*)---',
+    search_result = re.search(r'\*\*History Notes\*\*(.*)---',
                               body,
                               flags=re.DOTALL)
     if search_result is None:
-        search_result = re.search(r'\*\*History Notes:\*\*(.*)',
+        search_result = re.search(r'\*\*History Notes\*\*(.*)',
                                   body,
                                   flags=re.DOTALL)
         if search_result is not None:

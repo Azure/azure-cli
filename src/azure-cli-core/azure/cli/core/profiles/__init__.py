@@ -96,7 +96,8 @@ API_PROFILES = {
     'latest': AZURE_API_PROFILES['latest'],
     '2017-03-09-profile': AZURE_API_PROFILES['2017-03-09-profile'],
     '2018-03-01-hybrid': AZURE_API_PROFILES['2018-03-01-hybrid'],
-    '2019-03-01-hybrid': AZURE_API_PROFILES['2019-03-01-hybrid']
+    '2019-03-01-hybrid': AZURE_API_PROFILES['2019-03-01-hybrid'],
+    '2020-09-01-hybrid': AZURE_API_PROFILES['2020-09-01-hybrid']
 }
 
 

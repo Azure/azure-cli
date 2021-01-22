@@ -35,6 +35,15 @@ from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpda
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
 
+CREDENTIAL_WARNING_MESSAGE = (
+    "The output includes credentials that you must protect. Be sure that you do not include these credentials in "
+    "your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli")
+
+ROLE_ASSIGNMENT_CREATE_WARNING = (
+    "In a future release, this command will NOT create a 'Contributor' role assignment by default. "
+    "If needed, use the --role argument to explicitly create a role assignment."
+)
+
 logger = get_logger(__name__)
 
 # pylint: disable=too-many-lines
@@ -63,8 +72,9 @@ def _create_update_role_definition(cmd, role_definition, for_update):
         role_definition = shell_safe_json_parse(role_definition)
 
     if not isinstance(role_definition, dict):
-        raise CLIError('Invalid role defintion. A valid dictionary JSON representation is expected.')
+        raise CLIError('Invalid role definition. A valid dictionary JSON representation is expected.')
     # to workaround service defects, ensure property names are camel case
+    # e.g. AssignableScopes -> assignableScopes
     names = [p for p in role_definition if p[:1].isupper()]
     for n in names:
         new_name = n[:1].lower() + n[1:]
@@ -129,17 +139,28 @@ def _search_role_definitions(cli_ctx, definitions_client, name, scopes, custom_r
 
 
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
-                           scope=None, assignee_principal_type=None):
+                           scope=None, assignee_principal_type=None, description=None,
+                           condition=None, condition_version=None):
+    """Check parameters are provided correctly, then call _create_role_assignment."""
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
 
     if assignee_principal_type and not assignee_object_id:
         raise CLIError('usage error: --assignee-object-id GUID [--assignee-principal-type]')
 
+    # If condition is set and condition-version is empty, condition-version defaults to "2.0".
+    if condition and not condition_version:
+        condition_version = "2.0"
+
+    # If condition-version is set, condition must be set as well.
+    if condition_version and not condition:
+        raise CLIError('usage error: When --condition-version is set, --condition must be set as well.')
+
     try:
         return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
                                        resolve_assignee=(not assignee_object_id),
-                                       assignee_principal_type=assignee_principal_type)
+                                       assignee_principal_type=assignee_principal_type, description=description,
+                                       condition=condition, condition_version=condition_version)
     except Exception as ex:  # pylint: disable=broad-except
         if _error_caused_by_role_assignment_exists(ex):  # for idempotent
             return list_role_assignments(cmd, assignee, role, resource_group_name, scope)[0]
@@ -147,7 +168,9 @@ def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, re
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
-                            resolve_assignee=True, assignee_principal_type=None):
+                            resolve_assignee=True, assignee_principal_type=None, description=None,
+                            condition=None, condition_version=None):
+    """Prepare scope, role ID and resolve object ID from Graph API."""
     factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
@@ -158,7 +181,8 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     worker = MultiAPIAdaptor(cli_ctx)
     return worker.create_role_assignment(assignments_client, _gen_guid(), role_id, object_id, scope,
-                                         assignee_principal_type)
+                                         assignee_principal_type, description=description,
+                                         condition=condition, condition_version=condition_version)
 
 
 def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
@@ -231,6 +255,37 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     return results
 
 
+def update_role_assignment(cmd, role_assignment):
+    # Try role_assignment as a file.
+    if os.path.exists(role_assignment):
+        role_assignment = get_file_json(role_assignment)
+    else:
+        role_assignment = shell_safe_json_parse(role_assignment)
+
+    # Updating role assignment is only supported after 2020-04-01-preview, so we don't need to use MultiAPIAdaptor.
+    from azure.cli.core.profiles import get_sdk
+
+    RoleAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignment', mod='models',
+                             operation_group='role_assignments')
+    assignment = RoleAssignment.from_dict(role_assignment)
+    scope = assignment.scope
+    name = assignment.name
+
+    auth_client = _auth_client_factory(cmd.cli_ctx, scope)
+    assignments_client = auth_client.role_assignments
+
+    # Get the existing assignment to do some checks.
+    original_assignment = assignments_client.get(scope, name)
+
+    # Forbid condition version downgrading.
+    # This should be implemented on the service-side in the future.
+    if (assignment.condition_version and original_assignment.condition_version and
+            original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
+        raise CLIError("Condition version cannot be downgraded to '1.X'.")
+
+    return assignments_client.create(scope, name, parameters=assignment)
+
+
 def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -280,70 +335,79 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):  # py
     result = []
     worker = MultiAPIAdaptor(cmd.cli_ctx)
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [worker.get_role_property(d, 'role_name'),
-                        d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
 
-    for op_id in start_events:
-        e = end_events.get(op_id, None)
-        if not e:
-            continue
+    # Use the resource `name` of roleDefinitions as keys, instead of `id`, because `id` can be inherited.
+    #   name: b24988ac-6180-42a0-ab88-20f7382dd24c
+    #   id: /subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c  # pylint: disable=line-too-long
+    if start_events:
+        # Only query Role Definitions and Graph when there are events returned
+        role_defs = {d.name: worker.get_role_property(d, 'role_name') for d in list_role_definitions(cmd)}
 
-        entry = {}
-        op = e.operation_name and e.operation_name.value
-        if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
-            s, payload = start_events[op_id], None
-            entry = dict.fromkeys(
-                ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
-                None)
-            entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
+        for op_id in start_events:
+            e = end_events.get(op_id, None)
+            if not e:
+                continue
 
-            if s.http_request:
-                if s.http_request.method == 'PUT':
-                    # 'requestbody' has a wrong camel-case. Should be 'requestBody'
-                    payload = s.properties and s.properties.get('requestbody')
-                    entry['action'] = 'Granted'
-                    entry['scope'] = e.authorization.scope
-                elif s.http_request.method == 'DELETE':
-                    payload = e.properties and e.properties.get('responseBody')
-                    entry['action'] = 'Revoked'
-            if payload:
-                try:
-                    payload = json.loads(payload)
-                except ValueError:
-                    pass
+            entry = {}
+            op = e.operation_name and e.operation_name.value
+            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+                s, payload = start_events[op_id], None
+                entry = dict.fromkeys(
+                    ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
+                    None)
+                entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
+
+                if s.http_request:
+                    if s.http_request.method == 'PUT':
+                        # 'requestbody' has a wrong camel-case. Should be 'requestBody'
+                        payload = s.properties and s.properties.get('requestbody')
+                        entry['action'] = 'Granted'
+                        entry['scope'] = e.authorization.scope
+                    elif s.http_request.method == 'DELETE':
+                        payload = e.properties and e.properties.get('responseBody')
+                        entry['action'] = 'Revoked'
                 if payload:
-                    if payload.get('properties') is None:
-                        continue
-                    payload = payload['properties']
-                    entry['principalId'] = payload['principalId']
-                    if not entry['scope']:
-                        entry['scope'] = payload['scope']
-                    if entry['scope']:
-                        index = entry['scope'].lower().find('/providers/microsoft.authorization')
-                        if index != -1:
-                            entry['scope'] = entry['scope'][:index]
-                        parts = list(filter(None, entry['scope'].split('/')))
-                        entry['scopeName'] = parts[-1]
-                        if len(parts) < 3:
-                            entry['scopeType'] = 'Subscription'
-                        elif len(parts) < 5:
-                            entry['scopeType'] = 'Resource group'
-                        else:
-                            entry['scopeType'] = 'Resource'
+                    try:
+                        payload = json.loads(payload)
+                    except ValueError:
+                        pass
+                    if payload:
+                        if payload.get('properties') is None:
+                            continue
+                        payload = payload['properties']
+                        entry['principalId'] = payload['principalId']
+                        if not entry['scope']:
+                            entry['scope'] = payload['scope']
+                        if entry['scope']:
+                            index = entry['scope'].lower().find('/providers/microsoft.authorization')
+                            if index != -1:
+                                entry['scope'] = entry['scope'][:index]
+                            parts = list(filter(None, entry['scope'].split('/')))
+                            entry['scopeName'] = parts[-1]
+                            if len(parts) < 3:
+                                entry['scopeType'] = 'Subscription'
+                            elif len(parts) < 5:
+                                entry['scopeType'] = 'Resource group'
+                            else:
+                                entry['scopeType'] = 'Resource'
 
-                    entry['roleDefinitionId'] = role_defs[payload['roleDefinitionId']][1]
-                    entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
-            result.append(entry)
+                        # Look up the resource `name`, like b24988ac-6180-42a0-ab88-20f7382dd24c
+                        role_resource_name = payload['roleDefinitionId'].split('/')[-1]
+                        entry['roleDefinitionId'] = role_resource_name
+                        # In case the role definition has been deleted.
+                        entry['roleName'] = role_defs.get(role_resource_name, "N/A")
 
-    # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = {x['principalId'] for x in result if x['principalId']}
-    if principal_ids:
-        graph_client = _graph_client_factory(cmd.cli_ctx)
-        stubs = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
-        if principal_dics:
-            for e in result:
-                e['principalName'] = principal_dics.get(e['principalId'], None)
+                result.append(entry)
+
+        # Fill in logical user/sp names as guid principal-id not readable
+        principal_ids = {x['principalId'] for x in result if x['principalId']}
+        if principal_ids:
+            graph_client = _graph_client_factory(cmd.cli_ctx)
+            stubs = _get_object_stubs(graph_client, principal_ids)
+            principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
+            if principal_dics:
+                for e in result:
+                    e['principalName'] = principal_dics.get(e['principalId'], None)
 
     offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
                                                     x.operation_name.value.lower().startswith(
@@ -503,8 +567,6 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         from azure.mgmt.core.tools import is_valid_resource_id
         if scope.startswith('/subscriptions/') and not is_valid_resource_id(scope):
             raise CLIError('Invalid scope. Please use --help to view the valid format.')
-    elif scope == '':
-        raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:
@@ -886,12 +948,47 @@ def add_permission(cmd, identifier, api, api_permissions):
                    'change effective', identifier, api)
 
 
-def delete_permission(cmd, identifier, api):
+def delete_permission(cmd, identifier, api, api_permissions=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
-    existing_accesses = application.required_resource_access
-    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
-    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    required_resource_access = application.required_resource_access
+    # required_resource_access (list of RequiredResourceAccess)
+    #   RequiredResourceAccess
+    #     resource_app_id   <- api
+    #     resource_access   (list of ResourceAccess)
+    #       ResourceAccess
+    #         id            <- api_permissions
+    #         type
+
+    # Get the RequiredResourceAccess object whose resource_app_id == api
+    rra = next((a for a in required_resource_access if a.resource_app_id == api), None)
+
+    if not rra:
+        # Silently pass if the api is not required.
+        logger.warning("App %s doesn't require access to API %s.", identifier, api)
+        return None
+
+    if api_permissions:
+        # Check if the user tries to delete any ResourceAccess that is not required.
+        ra_ids = [ra.id for ra in rra.resource_access]
+        non_existing_ra_ids = [p for p in api_permissions if p not in ra_ids]
+        if non_existing_ra_ids:
+            logger.warning("App %s doesn't require access to API %s's permission %s.",
+                           identifier, api, ', '.join(non_existing_ra_ids))
+            if len(non_existing_ra_ids) == len(api_permissions):
+                # Skip the REST call if nothing to remove
+                return None
+
+        # Remove specified ResourceAccess under RequiredResourceAccess.resource_access
+        rra.resource_access = [a for a in rra.resource_access if a.id not in api_permissions]
+        # Remove the RequiredResourceAccess if its resource_access is empty
+        if not rra.resource_access:
+            required_resource_access.remove(rra)
+    else:
+        # Remove the whole RequiredResourceAccess
+        required_resource_access.remove(rra)
+
+    update_parameter = ApplicationUpdateParameters(required_resource_access=required_resource_access)
     return graph_client.applications.patch(application.object_id, update_parameter)
 
 
@@ -1309,7 +1406,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
 # pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role='Contributor',
+        cmd, name=None, years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
 
@@ -1391,8 +1488,11 @@ def create_service_principal_for_rbac(
 
     # retry while server replication is done
     if not skip_assignment:
+        if not role:
+            role = "Contributor"
+            logger.warning(ROLE_ASSIGNMENT_CREATE_WARNING)
         for scope in scopes:
-            logger.warning('Creating a role assignment under the scope of "%s"', scope)
+            logger.warning("Creating '%s' role assignment under scope '%s'", role, scope)
             for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
@@ -1413,6 +1513,8 @@ def create_service_principal_for_rbac(
                             logger.warning('  role assignment response headers: %s\n',
                                            ex.response.headers)  # pylint: disable=no-member
                     raise
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
 
     if show_auth_for_sdk:
         from azure.cli.core._profile import Profile
@@ -1683,6 +1785,8 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     }
     if cert_file:
         result['fileWithCertAndPrivateKey'] = cert_file
+
+    logger.warning(CREDENTIAL_WARNING_MESSAGE)
     return result
 
 
@@ -1743,7 +1847,7 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
         setter(asset_object_id, _get_owner_url(cli_ctx, signed_in_user_object_id))
 
 
-# for injecting test seems to produce predicatable role assignment id for playback
+# for injecting test seems to produce predictable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
 

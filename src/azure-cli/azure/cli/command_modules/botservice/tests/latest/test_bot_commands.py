@@ -16,6 +16,7 @@ except ImportError:
 import requests
 from azure.cli.command_modules.botservice.custom import prepare_webapp_deploy
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk.decorators import serial_test
 from azure.mgmt.botservice.models import ErrorException
 from knack.util import CLIError
 
@@ -160,6 +161,7 @@ class BotTests(ScenarioTest):
             ])
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
     def test_botservice_create_v4_csharp_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -204,6 +206,7 @@ class BotTests(ScenarioTest):
         self.cmd('az bot delete -g {rg} -n {botname}')
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
     def test_botservice_create_v4_js_echo_webapp_bot(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -332,6 +335,7 @@ class BotTests(ScenarioTest):
             shutil.rmtree(dir_path)
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
     def test_botservice_keep_node_modules_should_not_empty_node_modules_or_install_dependencies(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
@@ -470,6 +474,7 @@ class BotTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(random_name_length=20)
+    @serial_test()
     def test_botservice_publish_remove_node_iis_files_if_not_already_local(self, resource_group):
         self.kwargs.update({
             'botname': self.create_random_name(prefix='cli', length=15),
