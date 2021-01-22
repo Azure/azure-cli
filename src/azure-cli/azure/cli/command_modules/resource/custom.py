@@ -992,20 +992,22 @@ def _get_auth_provider_latest_api_version(cli_ctx):
     return api_version
 
 
-def _update_provider(cli_ctx, namespace, registering, wait, mgID=None, accept_terms=None):
+def _update_provider(cli_ctx, namespace, registering, wait, mg_id=None, accept_terms=None):
     import time
     target_state = 'Registered' if registering else 'Unregistered'
     rcf = _resource_client_factory(cli_ctx)
     is_rpaas = namespace.lower() in RPAAS_APIS
-    if mgID is None and registering:
+    if mg_id is None and registering:
         if is_rpaas:
             if not accept_terms:
                 from azure.cli.core.azclierror import RequiredArgumentMissingError
                 raise RequiredArgumentMissingError("--accept-terms must be specified when registering the {} RP from RPaaS.".format(namespace))
             wait = True
         r = rcf.providers.register(namespace)
-    elif mgID and registering:
-        r = rcf.providers.register_at_management_group_scope(namespace, mgID)
+    elif mg_id and registering:
+        r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
+        if r is None:
+            return
     else:
         r = rcf.providers.unregister(namespace)
 
@@ -1018,7 +1020,7 @@ def _update_provider(cli_ctx, namespace, registering, wait, mgID=None, accept_te
             rp_info = rcf.providers.get(namespace)
             if rp_info.registration_state == target_state:
                 break
-        if is_rpaas and registering and mgID is None:
+        if is_rpaas and registering and mg_id is None:
             # call accept term API
             from azure.cli.core.util import send_raw_request
             send_raw_request(cli_ctx, 'put', RPAAS_APIS[namespace.lower()], body=json.dumps({"properties": {"accepted": True}}))
@@ -1993,7 +1995,7 @@ def list_resources(cmd, resource_group_name=None,
 
 
 def register_provider(cmd, resource_provider_namespace, mg=None, wait=False, accept_terms=None):
-    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mgID=mg, accept_terms=accept_terms)
+    _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=True, wait=wait, mg_id=mg, accept_terms=accept_terms)
 
 
 def unregister_provider(cmd, resource_provider_namespace, wait=False):
