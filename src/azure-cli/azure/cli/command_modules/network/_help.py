@@ -123,6 +123,17 @@ examples:
 helps['network application-gateway create'] = """
 type: command
 short-summary: Create an application gateway.
+parameters:
+  - name: --trusted-client-certificate
+    short-summary: The application gateway trusted client certificate.
+    long-summary: |
+        Usage: --trusted-client-certificate name=client1 data=xxx
+        
+        name: Required. Name of the trusted client certificate that is unique within an Application Gateway
+        data: Required. Certificate public data.
+        
+        Multiple backend addresses can be specified by using more than one `--trusted-client-certificate` argument.
+  
 examples:
   - name: Create an application gateway with VMs as backend servers.
     text: |
@@ -1458,6 +1469,26 @@ short-summary: Place the CLI in a waiting state until a condition of the applica
 examples:
   - name: Place the CLI in a waiting state until the application gateway is created.
     text: az network application-gateway wait -g MyResourceGroup -n MyAppGateway --created
+"""
+
+helps['network application-gateway client-cert'] = """
+type: group
+short-summary: Manage trusted client certificate of application gateway.
+"""
+
+helps['network application-gateway client-cert add'] = """
+type: command
+short-summary: Add trusted client certificate of the application gateway.
+"""
+
+helps['network application-gateway client-cert remove'] = """
+type: command
+short-summary: Remove an existing trusted client certificate of the application gateway.
+"""
+
+helps['network application-gateway client-cert list'] = """
+type: command
+short-summary: List the existing trusted client certificate of the application gateway.
 """
 
 helps['network asg'] = """

@@ -37,13 +37,16 @@ from azure.cli.command_modules.network._validators import (
     validate_user_assigned_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
     process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument,
-    process_vnet_name_or_id)
+    process_vnet_name_or_id, validate_tursted_client_cert)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
-from azure.cli.command_modules.network._actions import AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB
+from azure.cli.command_modules.network._actions import (
+    AddBackendAddressCreate,
+    AddBackendAddressCreateForCrossRegionLB,
+    TrustedClientCertificateCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -156,6 +159,9 @@ def load_arguments(self, _):
         c.argument('private_link_subnet_prefix', help='The CIDR prefix to use when creating a new subnet')
         c.argument('private_link_subnet', help='The name of the subnet within the same vnet of an application gateway')
         c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
+
+    with self.argument_context('network application-gateway', arg_group='Mutual Authentication Support') as c:
+        c.argument('trusted_client_certificate', min_api='2020-06-01', nargs='+', action=TrustedClientCertificateCreate, is_preview=True)
 
     with self.argument_context('network application-gateway create') as c:
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
@@ -429,6 +435,15 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
         c.argument('application_gateway_name', app_gateway_name_type)
+
+    with self.argument_context('network application-gateway client-cert', min_api='2020-06-01') as c:
+        c.argument('application_gateway_name', app_gateway_name_type)
+        c.argument('client_cert_name', options_list='--name', help='Name of the trusted client certificate that is unique within an Application Gateway')
+
+    with self.argument_context('network application-gateway client-cert add', min_api='2020-06-01') as c:
+        c.argument('client_cert_data', options_list='--date', help='Certificate public data.', validator=validate_tursted_client_cert)
+
+
     # endregion
 
     # region WebApplicationFirewallPolicy

@@ -154,7 +154,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
                                private_link_subnet_prefix='10.0.1.0/24',
-                               private_link_primary=None):
+                               private_link_primary=None,
+                               trusted_client_certificate=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -226,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         firewall_policy, max_capacity, user_assigned_identity,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
-        private_link_subnet_id)
+        private_link_subnet_id, trusted_client_certificate)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
@@ -632,6 +633,44 @@ def remove_ag_private_link(cmd,
                        resource_group_name,
                        application_gateway_name,
                        appgw)
+
+
+# region application-gateway trusted-client-certificate
+def add_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                   client_cert_data, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    ApplicationGatewayTrustedClientCertificate = cmd.get_models('ApplicationGatewayTrustedClientCertificate')
+    cert = ApplicationGatewayTrustedClientCertificate(name=client_cert_name, date=client_cert_data)
+    appgw.trusted_client_certificates.append(cert)
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+def list_trusted_client_certificate(cmd, resource_group_name, application_gateway_name):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+    return appgw.trusted_client_certificates
+
+
+def remove_trusted_client_certificate(cmd, resource_group_name, application_gateway_name, client_cert_name,
+                                      no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx)
+    appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
+
+    for cert in appgw.trusted_client_certificates:
+        if cert.name == client_cert_name:
+            appgw.trusted_client_certificates.remove(cert)
+            break
+    else:
+        raise CLIError(f"Trusted client certificate {client_cert_name} doesn't exist")
+
+    return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
+                       application_gateway_name, appgw)
+
+
+# endregion
 
 
 def add_ag_private_link_ip(cmd,

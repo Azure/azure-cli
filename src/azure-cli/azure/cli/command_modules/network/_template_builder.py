@@ -71,7 +71,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        private_link_ip_address=None,
                                        private_link_ip_allocation_method=None,
                                        private_link_primary=None,
-                                       private_link_subnet_id=None):
+                                       private_link_subnet_id=None,
+                                       trusted_client_certificate=None):
 
     # set the default names
     frontend_public_ip_name = 'appGatewayFrontendIP'
@@ -269,6 +270,20 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
     if firewall_policy and cmd.supported_api_version(min_api='2018-12-01'):
         ag_properties.update({'firewallPolicy': {'id': firewall_policy}})
 
+    # mutual authentication support
+    if cmd.supported_api_version(min_api='2020-06-01') and trusted_client_certificate:
+        parameters = []
+        for item in trusted_client_certificate:
+            parameters.append(
+                {
+                    "name": item['name'],
+                    "properties": {
+                        "data": item['data']
+                    }
+                }
+            )
+        ag_properties.update({"trustedClientCertificates": parameters})
+
     ag = {
         'type': 'Microsoft.Network/applicationGateways',
         'name': name,
@@ -291,6 +306,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 }
             }
         )
+
     return ag
 
 
