@@ -53,9 +53,9 @@ class AzCopy:
         else:
             raise CLIError('Azcopy ({}) does not exist.'.format(self.system))
         try:
-            _urlretrieve(file_url, install_location)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            _urlretrieve(file_url, install_location)
         except IOError as err:
             raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
                            'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
