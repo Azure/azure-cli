@@ -189,7 +189,14 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
             update_cmd = ['brew', 'install', 'postgresql']
             logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
             subprocess.call(update_cmd)
-        subprocess.call(['export', 'LIBRARY_PATH=$LIBRARY_PATH:/usr/local/opt/openssl/lib/'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Fix the issue of -lssl not found during building psycopg2
+        if os.environ.get('PYTHONPATH') == None:
+            os.environ['LIBRARY_PATH'] = '/usr/local/opt/openssl/lib/'
+        else:
+            os.environ['LIBRARY_PATH'] = os.pathsep.join([
+                os.environ.get('LIBRARY_PATH'),
+                '/usr/local/opt/openssl/lib/'
+            ])
     elif system == 'Linux':
         distname, _ = get_linux_distro()
         distname = distname.lower().strip()
