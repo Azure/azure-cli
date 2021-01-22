@@ -72,7 +72,11 @@ class BaseCommandOperation:
     def apply_doc_string(self, handler):
         return self.ctx._apply_doc_string(handler, self.kwargs)  # pylint: disable=protected-access
 
-    def load_op_description(self, handler):
+    def load_op_description(self, handler=None):
+        if handler is None:
+            def handler():
+                """"""
+                pass
         self.apply_doc_string(handler)
         return extract_full_summary_from_signature(handler)
 
@@ -250,7 +254,7 @@ class WaitCommandOperation(BaseCommandOperation):
         return [(k, v) for k, v in cmd_args.items()]
 
     def description_loader(self):
-        return self.load_op_description(self.handler)
+        return self.load_op_description()
 
 
 class ShowCommandOperation(BaseCommandOperation):
@@ -482,4 +486,4 @@ class GenericUpdateCommandOperation(BaseCommandOperation):     # pylint: disable
         return dict(extract_args_from_signature(op, excluded_params=EXCLUDED_PARAMS))
 
     def description_loader(self):
-        return self.load_op_description(self.handler)
+        return self.load_op_description()
