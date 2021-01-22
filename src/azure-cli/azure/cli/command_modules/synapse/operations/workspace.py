@@ -17,7 +17,7 @@ def list_workspaces(cmd, client, resource_group_name=None):
 
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
-                     allowed_aad_tenant_ids=None, enable_data_exfiltration=None, tags=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, no_wait=False):
     identity_type = "SystemAssigned"
     identity = ManagedIdentity(type=identity_type)
     account_url = "https://{}.dfs.{}".format(storage_account, cmd.cli_ctx.cloud.suffixes.storage_endpoint)
@@ -29,10 +29,10 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
 
     if enable_managed_virtual_network:
-        if enable_data_exfiltration:
-            managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
+        if prevent_data_exfiltration:
+            managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
         else:
-            managed_virtual_network_settings = ManagedVirtualNetworkSettings(preventDataExfiltration=False)
+            managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=False)
 
     workspace_info = Workspace(
         identity=identity,
@@ -49,10 +49,10 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 
 
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
-                     allowed_aad_tenant_ids=None, tags=None, key_name=None, key_identifier=None, no_wait=False):
+                     allowed_aad_tenant_ids=None, tags=None, key_name=None, no_wait=False):
     encryption = None
-    if key_name and key_identifier:
-        workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
+    if key_name:
+        workspace_key_detail = WorkspaceKeyDetails(name=key_name)
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
 
     updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None

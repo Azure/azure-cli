@@ -58,7 +58,6 @@ def load_arguments(self, _):
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
             c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='*', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. If no argument, will disable all allowed tenant ids.")
-            c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
             c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace create') as c:
@@ -72,8 +71,9 @@ def load_arguments(self, _):
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
-        c.argument('enable_data_exfiltration', arg_type=get_three_state_flag(),
-                   help='The flag indicates whether enable data exfiltration.', options_list=['--enable-exfiltration', '--enable-data-exfiltration'])
+        c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
+                   help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
+        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
