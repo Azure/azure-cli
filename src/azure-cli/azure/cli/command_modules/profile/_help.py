@@ -11,16 +11,10 @@ helps['login'] = """
 type: command
 short-summary: Log in to Azure.
 long-summary: >-
-    By default, this command logs in with a user account. To login with a service principal, specify --service-principal.
+    By default, this command logs in with a user account. CLI will try to launch a web browser to log in interactively.
+    If a web browser is not available, CLI will fallback to device code login.
 
-
-    For user login, CLI will try to launch a web browser to log in interactively. If a web browser is not available,
-    CLI will fallback to device code login.
-
-
-    To retrieve the login credential from environment variables (EnvironmentCredential), specify --environment.
-    For details on using EnvironmentCredential, see
-    https://docs.microsoft.com/python/api/overview/azure/identity-readme#environment-variables
+    To login with a service principal, specify --service-principal.
 examples:
     - name: Log in interactively.
       text: az login
