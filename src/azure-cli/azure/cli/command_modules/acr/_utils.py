@@ -562,3 +562,13 @@ def get_scope_map_from_id(cmd, scope_map_id):
     scope_map_name = scope_info[9]
     return acr_scope_map_show(cmd, scope_map_client, registry_name, scope_map_name, resource_group_name)
 # endregion
+
+
+def resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from msrestazure.tools import parse_resource_id
+
+    res = parse_resource_id(managed_identity_resource_id)
+    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
+    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id

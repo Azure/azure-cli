@@ -139,3 +139,8 @@ UNEXPECTED_ERROR = ErrorClass(
     "UNEXPECTED_ERROR",
     "An unexpected error occurred."
 )
+
+CMK_MANAGED_IDENTITY_ERROR = ErrorClass(
+    "CMK_ERROR",
+    "The identity used for registry '{}' encryption doesn't exist."
+)

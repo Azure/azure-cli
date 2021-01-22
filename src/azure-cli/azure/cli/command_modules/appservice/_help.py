@@ -53,7 +53,7 @@ examples:
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
-        --hyper-v --sku P3V3
+        --hyper-v --sku P1V3
   - name: Create an app service plan for app service environment.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan \\
@@ -1320,11 +1320,11 @@ examples:
 
 helps['webapp config ssl import'] = """
 type: command
-short-summary: Import an SSL certificate to a web app from Key Vault.
+short-summary: Import an SSL or App Service Certificate to a web app from Key Vault.
 examples:
-  - name: Import an SSL certificate to a web app from Key Vault.
+  - name: Import an SSL or App Service Certificate certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
-  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+  - name: Import an SSL or App Service Certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
@@ -1434,6 +1434,12 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
+  - name: Create a web app with a java|11|Java SE|8 runtime using '|' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a java|11|Java SE|8 runtime using ':' delimiter.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
@@ -1958,6 +1964,12 @@ examples:
   - name: Create a web app with a specified name
     text: >
         az webapp up -n MyUniqueAppName
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using '|' delimiter
+    text: >
+        az webapp up -n MyUniqueAppName --runtime "java|11|Java SE|8"
+  - name: Create a web app with a specified name and a java|11|Java SE|8 runtime using ':' delimiter
+    text: >
+        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:8"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
     text: >
         az webapp up -l locationName
