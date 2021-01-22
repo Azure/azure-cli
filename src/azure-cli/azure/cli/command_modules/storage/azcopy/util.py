@@ -57,8 +57,8 @@ class AzCopy:
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         except IOError as err:
-            raise CLIError('Connection error while attempting to download azcopy ({}). You could also install azcopy '
-                           '{} to {} manually.'.format(err))
+            raise CLIError('Connection error while attempting to download azcopy {}. You could also install the '
+                           'specified azcopy version to {} manually. ({})'.format(AZCOPY_VERSION, install_dir, err))
 
     def check_version(self):
         try:
