@@ -74,91 +74,91 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
-    #@ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
-    #@ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
-    #def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
-    #    server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
-    #    server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
-    #    admin_login = 'admin123'
-    #    admin_passwords = ['SecretPassword123', 'SecretPassword456']
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
+        server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-    #    # test create sql server with minimal required parameters
-    #    server_1 = self.cmd('sql server create -g {} --name {} '
-    #                        '--admin-user {} --admin-password {}'
-    #                        .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
-    #                        checks=[
-    #                            JMESPathCheck('name', server_name_1),
-    #                            JMESPathCheck('location', resource_group_location),
-    #                            JMESPathCheck('resourceGroup', resource_group_1),
-    #                            JMESPathCheck('administratorLogin', admin_login),
-    #                            JMESPathCheck('identity', None)]).get_output_in_json()
+        # test create sql server with minimal required parameters
+        server_1 = self.cmd('sql server create -g {} --name {} '
+                            '--admin-user {} --admin-password {}'
+                            .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
+                            checks=[
+                                JMESPathCheck('name', server_name_1),
+                                JMESPathCheck('location', resource_group_location),
+                                JMESPathCheck('resourceGroup', resource_group_1),
+                                JMESPathCheck('administratorLogin', admin_login),
+                                JMESPathCheck('identity', None)]).get_output_in_json()
 
-    #    # test list sql server should be 1
-    #    self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
+        # test list sql server should be 1
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
-    #    # test update sql server
-    #    self.cmd('sql server update -g {} --name {} --admin-password {} -i'
-    #             .format(resource_group_1, server_name_1, admin_passwords[1]),
-    #             checks=[
-    #                 JMESPathCheck('name', server_name_1),
-    #                 JMESPathCheck('resourceGroup', resource_group_1),
-    #                 JMESPathCheck('administratorLogin', admin_login),
-    #                 JMESPathCheck('identity.type', 'SystemAssigned')])
+        # test update sql server
+        self.cmd('sql server update -g {} --name {} --admin-password {} -i'
+                 .format(resource_group_1, server_name_1, admin_passwords[1]),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-    #    # test update without identity parameter, validate identity still exists
-    #    # also use --id instead of -g/-n
-    #    self.cmd('sql server update --id {} --admin-password {}'
-    #             .format(server_1['id'], admin_passwords[0]),
-    #             checks=[
-    #                 JMESPathCheck('name', server_name_1),
-    #                 JMESPathCheck('resourceGroup', resource_group_1),
-    #                 JMESPathCheck('administratorLogin', admin_login),
-    #                 JMESPathCheck('identity.type', 'SystemAssigned')])
+        # test update without identity parameter, validate identity still exists
+        # also use --id instead of -g/-n
+        self.cmd('sql server update --id {} --admin-password {}'
+                 .format(server_1['id'], admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-    #    # test create another sql server, with identity this time
-    #    self.cmd('sql server create -g {} --name {} -l {} -i '
-    #             '--admin-user {} --admin-password {}'
-    #             .format(resource_group_2, server_name_2, resource_group_location, admin_login, admin_passwords[0]),
-    #             checks=[
-    #                 JMESPathCheck('name', server_name_2),
-    #                 JMESPathCheck('location', resource_group_location),
-    #                 JMESPathCheck('resourceGroup', resource_group_2),
-    #                 JMESPathCheck('administratorLogin', admin_login),
-    #                 JMESPathCheck('identity.type', 'SystemAssigned')])
+        # test create another sql server, with identity this time
+        self.cmd('sql server create -g {} --name {} -l {} -i '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group_2, server_name_2, resource_group_location, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('identity.type', 'SystemAssigned')])
 
-    #    # test list sql server in that group should be 1
-    #    self.cmd('sql server list -g {}'.format(resource_group_2), checks=[JMESPathCheck('length(@)', 1)])
+        # test list sql server in that group should be 1
+        self.cmd('sql server list -g {}'.format(resource_group_2), checks=[JMESPathCheck('length(@)', 1)])
 
-    #    # test list sql server in the subscription should be at least 2
-    #    self.cmd('sql server list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
+        # test list sql server in the subscription should be at least 2
+        self.cmd('sql server list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
-    #    # test show sql server
-    #    self.cmd('sql server show -g {} --name {}'
-    #             .format(resource_group_1, server_name_1),
-    #             checks=[
-    #                 JMESPathCheck('name', server_name_1),
-    #                 JMESPathCheck('resourceGroup', resource_group_1),
-    #                 JMESPathCheck('administratorLogin', admin_login)])
+        # test show sql server
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group_1, server_name_1),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login)])
 
-    #    self.cmd('sql server show --id {}'
-    #             .format(server_1['id']),
-    #             checks=[
-    #                 JMESPathCheck('name', server_name_1),
-    #                 JMESPathCheck('resourceGroup', resource_group_1),
-    #                 JMESPathCheck('administratorLogin', admin_login)])
+        self.cmd('sql server show --id {}'
+                 .format(server_1['id']),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login)])
 
-    #    self.cmd('sql server list-usages -g {} -n {}'
-    #             .format(resource_group_1, server_name_1),
-    #             checks=[JMESPathCheck('[0].resourceName', server_name_1)])
+        self.cmd('sql server list-usages -g {} -n {}'
+                 .format(resource_group_1, server_name_1),
+                 checks=[JMESPathCheck('[0].resourceName', server_name_1)])
 
-    #    # test delete sql server
-    #    self.cmd('sql server delete --id {} --yes'
-    #             .format(server_1['id']), checks=NoneCheck())
-    #    self.cmd('sql server delete -g {} --name {} --yes'
-    #             .format(resource_group_2, server_name_2), checks=NoneCheck())
+        # test delete sql server
+        self.cmd('sql server delete --id {} --yes'
+                 .format(server_1['id']), checks=NoneCheck())
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group_2, server_name_2), checks=NoneCheck())
 
-    #    # test list sql server should be 0
-    #    self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
+        # test list sql server should be 0
+        self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
