@@ -281,9 +281,13 @@ class FooRuleAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         try:
             FooRule = namespace._cmd.get_models('FooRule')
-            name, metric, operation, value = values
-            rule = FooRule(name=name, metric=metric, operation=operation, value=value)
-            super(FooRuleAddAction, self).__call__(parser, namespace, rule, option_string)
+            name, metric, operation, value = values.split()
+            return FooRule(
+                name=name,
+                metric=metric,
+                operation=operation,
+                value=value
+            )
         except ValueError:
             raise CLIError('usage error: {} NAME METRIC OPERATION VALUE'.format(option_string))
 ```
@@ -301,15 +305,13 @@ class FooRuleAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         FooRule = namespace._cmd.get_models('FooRule')
         kwargs = {}
-        for item in values:
+        for item in values.split():
             try:
                 key, value = item.split('=', 1)
                 kwargs[key] = value
             except ValueError:
                 raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-        rule = FooRule(**kwargs)
-        super(FooRuleAddAction, self).__call__(parser, namespace, rule, option_string)
-
+        return FooRule(**kwargs)
 ```
 
 The usage pattern of this implementation to create two rules would be:
