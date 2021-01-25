@@ -187,6 +187,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
         exit_code = subprocess.call(['brew', 'list', 'postgresql'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if exit_code != 0:
             update_cmd = ['brew', 'install', 'postgresql']
+            logger.warning('This extension depends on postgresql and it will be downloaded first.')
             logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
             subprocess.call(update_cmd)
         # Fix the issue of -lssl not found during building psycopg2
