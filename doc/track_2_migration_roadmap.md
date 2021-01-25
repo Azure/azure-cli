@@ -21,8 +21,8 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
 - Totally 18 services need to be migrated by the end of 06/30/2021.
 - To achieve this goal:
   - We need notify service teams ahead of time so that they have sufficient time to migrate.
-  - If there is no Track 2 SDK for those services, we need release Track 2 SDK for them first.
-  - If the Track 2 SDK for those services is in preview, we need release GA SDK for them first.
+  - If there is no Track 2 SDK for those services, we'll release stable Track 2 SDK version for them before 03/11/2021.
+  - If the Track 2 SDK for those services is in preview, we'll release stable Track 2 SDK version for them before 02/11/2021.
 
 | Module   | CAE support | Migration Status | ETA | Latest Track 2 SDK Status | Latest Track 1 SDK status  | Release frequency | CLI Module or Extension |
 | --------- |:-------------:| :-----:|:-----:|:--:|:--:|:--:|:--:|
