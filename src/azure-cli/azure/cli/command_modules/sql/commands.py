@@ -151,8 +151,8 @@ def load_command_table(self, _):
         g.custom_command('export', 'db_export')
 
     with self.command_group('sql db',
-                            import_export_operations,
-                            client_factory=get_sql_import_export_operations) as g:
+                            database_operations,
+                            client_factory=get_sql_databases_operations) as g:
 
         g.custom_command('import', 'db_import')
 
