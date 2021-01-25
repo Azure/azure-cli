@@ -409,7 +409,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('highAvailabilityReplicaCount', None),
+                           JMESPathCheck('highAvailabilityReplicaCount', '0'),
                            JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
@@ -451,7 +451,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', None)])
+                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -598,21 +598,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('edition', edition),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
 
         # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 3),
                  checks=[
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+                     JMESPathCheck('highAvailabilityReplicaCount', '3')])
 
         # Decrease read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 0),
                  checks=[
-                     JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
+                     JMESPathCheck('readScale', 'Disabled'),
+                     JMESPathCheck('highAvailabilityReplicaCount', '0')])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
@@ -5008,15 +5008,16 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         # update the sensitivity classification
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
+        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
+        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
 
-        response = self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                            checks=[
-                                JMESPathCheck('informationType', information_type),
-                                JMESPathCheck('labelName', label_name)]).get_output_in_json()
-
-        information_type_id = response['informationTypeId']
-        label_id = response['labelId']
+        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                 checks=[
+                     JMESPathCheck('informationType', information_type),
+                     JMESPathCheck('labelName', label_name),
+                     JMESPathCheck('informationTypeId', information_type_id),
+                     JMESPathCheck('labelId', label_id)])
 
         # get the classified column
         self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
