@@ -409,7 +409,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('readReplicaCount', '0'),
+                           JMESPathCheck('highAvailabilityReplicaCount', None),
                            JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
@@ -451,7 +451,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', None)])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -598,21 +598,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('edition', edition),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
 
         # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 3),
                  checks=[
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '3')])
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
 
         # Decrease read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 0),
                  checks=[
-                     JMESPathCheck('readScale', 'Disabled'),
-                     JMESPathCheck('readReplicaCount', '0')])
+                     JMESPathCheck('readScale', 'Enabled'),
+                     JMESPathCheck('highAvailabilityReplicaCount', 1)])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
