@@ -131,7 +131,7 @@ class SynapseScenarioTests(ScenarioTest):
             'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
             '--file-system {file-system} --sql-admin-login-user {login-user} '
             '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
-            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids', checks=[
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids \'""\' ', checks=[
                 self.check('name', self.kwargs['workspace']),
                 self.check('type', 'Microsoft.Synapse/workspaces'),
                 self.check('provisioningState', 'Succeeded')

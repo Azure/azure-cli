@@ -24,13 +24,19 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
     default_data_lake_storage = DataLakeStorageAccountDetails(account_url=account_url, filesystem=file_system)
     encryption = None
     managed_virtual_network_settings = None
+    tenant_ids_list = None
     if key_identifier is not None:
         workspace_key_detail = WorkspaceKeyDetails(name=key_name, key_vault_url=key_identifier)
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
 
+    if [''] == allowed_aad_tenant_ids:
+        tenant_ids_list = []
+    else:
+        tenant_ids_list = allowed_aad_tenant_ids
+
     if enable_managed_virtual_network:
         if prevent_data_exfiltration:
-            managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=True, allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids)
+            managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=True, allowed_aad_tenant_ids_for_linking=tenant_ids_list)
         else:
             managed_virtual_network_settings = ManagedVirtualNetworkSettings(prevent_data_exfiltration=False)
 
@@ -51,11 +57,18 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
 def update_workspace(cmd, client, resource_group_name, workspace_name, sql_admin_login_password=None,
                      allowed_aad_tenant_ids=None, tags=None, key_name=None, no_wait=False):
     encryption = None
+    tenant_ids_list = None
+
     if key_name:
         workspace_key_detail = WorkspaceKeyDetails(name=key_name)
         encryption = EncryptionDetails(cmk=CustomerManagedKeyDetails(key=workspace_key_detail))
 
-    updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=allowed_aad_tenant_ids) if allowed_aad_tenant_ids is not None else None
+    if allowed_aad_tenant_ids and '' in allowed_aad_tenant_ids:
+        tenant_ids_list = []
+    else:
+        tenant_ids_list = allowed_aad_tenant_ids
+
+    updated_vnet_settings = ManagedVirtualNetworkSettings(allowed_aad_tenant_ids_for_linking=tenant_ids_list) if allowed_aad_tenant_ids is not None else None
     workspace_patch_info = WorkspacePatchInfo(tags=tags, sql_admin_login_password=sql_admin_login_password, encryption=encryption, managed_virtual_network_settings=updated_vnet_settings)
     return sdk_no_wait(no_wait, client.update, resource_group_name, workspace_name, workspace_patch_info)
 
