@@ -187,7 +187,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
         exit_code = subprocess.call(['brew', 'list', 'postgresql'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         if exit_code != 0:
             update_cmd = ['brew', 'install', 'postgresql']
-            logger.warning('This extension depends on postgresql and it will be downloaded first.')
+            logger.warning('This extension depends on postgresql and it will be installed first.')
             logger.debug("Install dependencies with '%s'", " ".join(update_cmd))
             subprocess.call(update_cmd)
         # Fix the issue of -lssl not found during building psycopg2
@@ -208,14 +208,16 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
             try:
                 subprocess.check_output(['dpkg', '-s', 'libpq-dev', 'python3-dev'], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError:
+                logger.warning('This extension depends on libpq-dev, python3-dev and they will be installed first.')
                 apt_update_cmd = 'apt-get update'.split()
                 apt_install_cmd = 'apt-get install -y libpq-dev python3-dev'.split()
                 if os.geteuid() != 0:  # pylint: disable=no-member
                     apt_update_cmd.insert(0, 'sudo')
                     apt_install_cmd.insert(0, 'sudo')
-                cmd = apt_update_cmd + ['&&'] + apt_install_cmd
-                logger.debug("Install dependencies with '%s'", " ".join(cmd))
-                subprocess.call(cmd)
+                exit_code = subprocess.call(apt_update_cmd, True)
+                if exit_code == 0:
+                    logger.debug("Install dependencies with '%s'", " ".join(apt_install_cmd))
+                    subprocess.call(apt_install_cmd, True)
         elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
             try:
                 subprocess.check_output(['rpm', '-q', 'postgresql-devel', 'python-devel'], stderr=subprocess.STDOUT)
@@ -225,16 +227,19 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         yum_install_cmd.insert(0, 'sudo')
                     logger.debug("Install dependencies with '%s'", " ".join(yum_install_cmd))
+                    logger.warning('This extension depends on postgresql-devel, python3-devel and they will be installed first.')
                     subprocess.call(yum_install_cmd)
                 elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
                     zypper_refresh_cmd = ['zypper', 'refresh']
                     zypper_install_cmd = 'zypper install -y postgresql-devel python3-devel'.split()
+                    logger.warning('This extension depends on postgresql-devel, python3-devel and they will be installed first.')
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         zypper_refresh_cmd.insert(0, 'sudo')
                         zypper_install_cmd.insert(0, 'sudo')
-                    cmd = zypper_refresh_cmd + ['&&'] + zypper_install_cmd
-                    logger.debug("Install dependencies with '%s'", " ".join(cmd))
-                    subprocess.call(cmd)
+                    exit_code = subprocess.call(zypper_refresh_cmd)
+                    if exit_code == 0:
+                        logger.debug("Install dependencies with '%s'", " ".join(zypper_install_cmd))
+                        subprocess.call(zypper_install_cmd)
 
 
 def is_valid_sha256sum(a_file, expected_sum):
