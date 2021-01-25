@@ -38,6 +38,25 @@ ALWAYS_LOADED_MODULES = []
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
 
 
+def _configure_knack():
+    """Override consts defined in knack to make them Azure CLI-specific."""
+
+    # Customize status tag messages.
+    from knack.util import status_tag_messages
+    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
+    # Override the preview message.
+    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
+    # Override the experimental message.
+    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
+
+    # Allow logs from 'azure' logger to be displayed.
+    from knack.log import cli_logger_names
+    cli_logger_names.append('azure')
+
+
+_configure_knack()
+
+
 class AzCli(CLI):
 
     def __init__(self, **kwargs):
@@ -83,8 +102,6 @@ class AzCli(CLI):
 
         if not self.enable_color:
             format_styled_text.theme = 'none'
-
-        _configure_knack()
 
     def refresh_request_id(self):
         """Assign a new random GUID as x-ms-client-request-id
@@ -858,19 +875,3 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
-
-
-def _configure_knack():
-    """Override consts defined in knack to make them Azure CLI-specific."""
-
-    # Customize status tag messages.
-    from knack.util import status_tag_messages
-    ref_message = "Reference and support levels: https://aka.ms/CLI_refstatus"
-    # Override the preview message.
-    status_tag_messages['preview'] = "{} is in preview and under development. " + ref_message
-    # Override the experimental message.
-    status_tag_messages['experimental'] = "{} is experimental and under development. " + ref_message
-
-    # Allow logs from 'azure' logger to be displayed.
-    from knack.log import cli_logger_names
-    cli_logger_names.append("azure")
