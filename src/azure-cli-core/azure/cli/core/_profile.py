@@ -670,7 +670,7 @@ class Profile:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-                return Identity.get_managed_identity_credential()
+                return identity.get_managed_identity_credential()
 
             # EnvironmentCredential. Ignore user_type
             if is_environment:
@@ -689,7 +689,7 @@ class Profile:
         # MSI
         if aux_tenant_id:
             raise CLIError("Tenant shouldn't be specified for MSI account")
-        return Identity.get_managed_identity_credential(identity_id)
+        return identity.get_managed_identity_credential(identity_id)
 
     def get_login_credentials(self, resource=None, client_id=None, subscription_id=None, aux_subscriptions=None,
                               aux_tenants=None):
