@@ -19,7 +19,7 @@ This document provides the roadmap for Track 2 SDK migration in Azure CLI. When 
   - 12 services need to be migrated by the end of 0/30/2021.
   - 4 services need to be migrated by the end of 06/30/2021.
 - Totally 18 services need to be migrated by the end of 06/30/2021.
-- To achive this goal:
+- To achieve this goal:
   - We need notify service teams ahead of time so that they have sufficient time to migrate.
   - If there is no Track 2 SDK for those services, we need release Track 2 SDK for them first.
   - If the Track 2 SDK for those services is in preview, we need release GA SDK for them first.
