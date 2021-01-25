@@ -237,14 +237,14 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                 cache_behavior=cache_behavior,
                 cache_duration=cache_duration
             ))
-    if action_name == 'RequestHeader':
+    if action_name in ('RequestHeader', 'ModifyRequestHeader'):
         return DeliveryRuleRequestHeaderAction(
             parameters=HeaderActionParameters(
                 header_action=header_action,
                 header_name=header_name,
                 value=header_value
             ))
-    if action_name == 'ResponseHeader':
+    if action_name in ('ResponseHeader', 'ModifyResponseHeader'):
         return DeliveryRuleResponseHeaderAction(
             parameters=HeaderActionParameters(
                 header_action=header_action,

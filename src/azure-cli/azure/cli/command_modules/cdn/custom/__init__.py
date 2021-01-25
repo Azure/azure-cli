@@ -46,3 +46,26 @@ from .custom_waf import set_waf_rate_limit_rule                       # pylint: 
 from .custom_waf import delete_waf_rate_limit_rule                    # pylint: disable=unused-import
 from .custom_waf import show_waf_rate_limit_rule                      # pylint: disable=unused-import
 from .custom_waf import list_waf_rate_limit_rules                     # pylint: disable=unused-import
+
+from .custom_afdx import create_afd_endpoint                          # pylint: disable=unused-import
+from .custom_afdx import update_afd_endpoint                          # pylint: disable=unused-import
+from .custom_afdx import create_afd_origin_group                      # pylint: disable=unused-import
+from .custom_afdx import update_afd_origin_group                      # pylint: disable=unused-import
+from .custom_afdx import create_afd_origin                            # pylint: disable=unused-import
+from .custom_afdx import update_afd_origin                            # pylint: disable=unused-import
+from .custom_afdx import create_afd_route                             # pylint: disable=unused-import
+from .custom_afdx import create_afd_rule_set                          # pylint: disable=unused-import
+from .custom_afdx import create_afd_rule                              # pylint: disable=unused-import
+from .custom_afdx import update_afd_route                             # pylint: disable=unused-import
+from .custom_afdx import create_afd_security_policy                   # pylint: disable=unused-import
+from .custom_afdx import update_afd_security_policy                   # pylint: disable=unused-import
+from .custom_afdx import create_afd_secret                            # pylint: disable=unused-import
+from .custom_afdx import update_afd_secret                            # pylint: disable=unused-import
+from .custom_afdx import create_afd_custom_domain                     # pylint: disable=unused-import
+from .custom_afdx import update_afd_custom_domain                     # pylint: disable=unused-import
+from .custom_afdx import add_afd_rule_condition                       # pylint: disable=unused-import
+from .custom_afdx import remove_afd_rule_condition                    # pylint: disable=unused-import
+from .custom_afdx import add_afd_rule_action                          # pylint: disable=unused-import
+from .custom_afdx import remove_afd_rule_action                       # pylint: disable=unused-import
+from .custom_afdx import list_afd_rule_action                         # pylint: disable=unused-import
+from .custom_afdx import list_afd_rule_condition                      # pylint: disable=unused-import
