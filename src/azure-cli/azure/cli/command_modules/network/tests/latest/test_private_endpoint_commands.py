@@ -1561,11 +1561,11 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
             checks=self.check("privateEndpointNetworkPolicies", "Disabled"),
         )
 
-        # Create a private endpoint connection
+        # Create a private endpoint connection (force manual approval)
         pe = self.cmd(
             "az network private-endpoint create -g {dt_rg} -n {pe} --vnet-name {vnet} --subnet {subnet} "
             "--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} "
-            "--group-id {group_id}"
+            "--group-id {group_id} --manual-request"
         ).get_output_in_json()
         self.kwargs["pe_id"] = pe["id"]
         self.kwargs["pe_name"] = self.kwargs["pe_id"].split("/")[-1]
@@ -1582,13 +1582,12 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
             checks=self.check("id", "{pec_id}"),
         )
         self.cmd(
-            "az network private-endpoint-connection show --resource-name {dt_name} --name {pec_name} --resource-group {dt_rg} --type {dt_type}"
-        )
-        self.cmd(
-            "az network private-endpoint-connection show --resource-name {dt_name} -n {pec_name} -g {dt_rg} --type {dt_type}"
+            "az network private-endpoint-connection show --resource-name {dt_name} --name {pec_name} --resource-group {dt_rg} --type {dt_type}",
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
         )
 
-        # Test approval/rejection
+        # Test approval states
+        # Approved
         self.kwargs.update(
             {"approval_desc": "Approved.", "rejection_desc": "Rejected."}
         )
@@ -1601,6 +1600,8 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
                 )
             ],
         )
+
+        # Rejected
         self.cmd(
             "az network private-endpoint-connection reject --id {pec_id} "
             '--description "{rejection_desc}"',
@@ -1610,6 +1611,14 @@ class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
                 )
             ],
         )
+
+        # Approval will fail after rejection
+        with self.assertRaises(CLIError):
+            self.cmd(
+                "az network private-endpoint-connection approve --resource-name {dt_name} --resource-group {dt_rg} --name {pec_name} --type {dt_type} "
+                '--description "{approval_desc}"'
+            )
+
         self.cmd(
             "az network private-endpoint-connection list --name {dt_name} --resource-group {dt_rg} --type {dt_type}",
             checks=[self.check("length(@)", 1)],
