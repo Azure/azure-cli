@@ -64,7 +64,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
     def test_get_account_by_name(self):
         account_name = self.create_random_name(prefix='cli', length=24)
-        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION))
         account = self.cmd("az netappfiles account show --resource-group {rg} -a %s" % account_name).get_output_in_json()
         assert account['name'] == account_name
         account_from_id = self.cmd("az netappfiles account show --ids %s" % account['id']).get_output_in_json()
@@ -76,7 +76,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         account_name = self.create_random_name(prefix='cli', length=24)
         tag = "Tag1=Value1"
 
-        account = self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles account create -g {rg} -a %s -l %s" % (account_name, LOCATION)).get_output_in_json()
         account = self.cmd("az netappfiles account update --resource-group {rg} -a %s --tags %s" % (account_name, tag)).get_output_in_json()
         assert account['name'] == account_name
         assert account['tags']['Tag1'] == 'Value1'
