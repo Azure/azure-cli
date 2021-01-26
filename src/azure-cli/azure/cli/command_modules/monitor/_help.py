@@ -140,6 +140,12 @@ examples:
     crafted: true
 """
 
+helps['monitor action-group enable-receiver'] = """
+type: command
+short-summary: Enable a receiver in an action group.
+long-summary: This changes the receiver's status from Disabled to Enabled. This operation is only supported for Email or SMS receivers.
+"""
+
 helps['monitor activity-log'] = """
 type: group
 short-summary: Manage activity logs.

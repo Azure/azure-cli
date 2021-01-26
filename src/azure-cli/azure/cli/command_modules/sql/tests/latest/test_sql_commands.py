@@ -1457,7 +1457,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacedb24"
+        log_analytics_workspace_name = self.create_random_name("laws", 20)
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),
@@ -1660,7 +1660,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacesrv14"
+        log_analytics_workspace_name = self.create_random_name("laws", 20)
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),
