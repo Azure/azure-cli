@@ -19,16 +19,14 @@ class AdalRefreshTokenBasedClientApplication(ClientApplication):
 
     def _acquire_token_silent_by_finding_specific_refresh_token(
             self, authority, scopes, query,
-            rt_remover=None, break_condition=lambda response: False, **kwargs):
+            rt_remover=None, break_condition=lambda response: False,
+            force_refresh=False, correlation_id=None, claims_challenge=None, **kwargs):
         refresh_token = kwargs.get('refresh_token', None)
         client = self._build_client(self.client_credential, authority)
         if 'refresh_token' in kwargs:
             kwargs.pop('refresh_token')
-        if 'force_refresh' in kwargs:
-            kwargs.pop('force_refresh')
-        if 'correlation_id' in kwargs:
-            kwargs.pop('correlation_id')
-        response = client.obtain_token_by_refresh_token(refresh_token, scope=scopes, **kwargs)
+        response = client.obtain_token_by_refresh_token(
+            {'refresh_token': refresh_token, 'credential_type': 'RefreshToken'}, scope=scopes, **kwargs)
         if "error" in response:
             raise CLIError("Get token failed. {error}: {error_description}".format(**response))
         return response
