@@ -1849,7 +1849,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('state', state_disabled)])
 
         # create log analytics workspace
-        log_analytics_workspace_name = "clilaworkspacems03"
+        log_analytics_workspace_name = "clilaworkspacems04"
 
         log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
                                               .format(resource_group, log_analytics_workspace_name),
@@ -1896,7 +1896,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
         # create event hub namespace
-        eventhub_namespace = 'cliehnamespacems01'
+        eventhub_namespace = 'cliehnamespacems02'
 
         self.cmd('eventhubs namespace create -g {} -n {}'
                  .format(resource_group, eventhub_namespace),
@@ -1904,7 +1904,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         # create event hub
-        eventhub_name = 'cliehms01'
+        eventhub_name = 'cliehms02'
 
         self.cmd('eventhubs eventhub create -g {} -n {} --namespace-name {}'
                  .format(resource_group, eventhub_name, eventhub_namespace),
@@ -1912,7 +1912,7 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Active')])
 
         # create event hub autorization rule
-        eventhub_auth_rule = 'cliehauthrulems01'
+        eventhub_auth_rule = 'cliehauthrulems02'
 
         eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
                                          .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
