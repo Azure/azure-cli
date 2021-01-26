@@ -409,7 +409,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('highAvailabilityReplicaCount', '0'),
+                           JMESPathCheck('highAvailabilityReplicaCount', None),
                            JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
@@ -451,7 +451,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', None)])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
