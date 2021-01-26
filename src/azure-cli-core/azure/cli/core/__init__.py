@@ -36,6 +36,9 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
+# Configure the commands that need to skip command index
+# Such as: "az next" need to support searching the contents of other module commands
+SKIP_COMMAND_INDEX_FOR = ['next']
 
 
 class AzCli(CLI):
@@ -389,17 +392,14 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
-        # Configure the commands that require all modules to be loaded
-        # Such as: "az next" need to support searching the contents of other module commands
-        full_loaded_commands = ['next']
-        need_load_all_modules = False
+        need_skip_command_index = False
         if isinstance(args, list) and args:
-            need_load_all_modules = args[0] in full_loaded_commands
+            need_skip_command_index = args[0] in SKIP_COMMAND_INDEX_FOR
 
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = (self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True) and
-                             not need_load_all_modules)
+                             not need_skip_command_index)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
