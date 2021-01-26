@@ -51,7 +51,6 @@ DEPENDENCIES = [
     'jmespath',
     'knack==0.8.0rc2',
     'msal~=1.3',
-    'msal-extensions~=0.2',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'PyJWT',
