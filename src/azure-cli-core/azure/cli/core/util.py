@@ -672,7 +672,11 @@ def _get_platform_info():
 
 def is_wsl():
     platform_name, release = _get_platform_info()
-    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+    # "Official" way of detecting WSL: https://github.com/Microsoft/WSL/issues/423#issuecomment-221627364
+    # Run `uname -a` to get 'release' without python
+    #   - WSL 1: '4.4.0-19041-Microsoft'
+    #   - WSL 2: '4.19.128-microsoft-standard'
+    return platform_name == 'linux' and 'microsoft' in release
 
 
 def is_windows():
@@ -1214,3 +1218,38 @@ def scopes_to_resource(scopes):
         scope = scope[:-len("/.default")]
 
     return scope
+
+
+def _get_parent_proc_name():
+    # Un-cached function to get parent process name.
+    try:
+        import psutil
+    except ImportError:
+        return None
+
+    import os
+    parent = psutil.Process(os.getpid()).parent()
+
+    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+    if parent and parent.name().lower() == 'python.exe':
+        parent = parent.parent()
+
+    if parent:
+        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
+        grandparent = parent.parent()
+        if grandparent:
+            grandparent_name = grandparent.name().lower()
+            if grandparent_name in ("powershell.exe", "pwsh.exe"):
+                return grandparent.name()
+        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
+        return parent.name()
+    return None
+
+
+def get_parent_proc_name():
+    # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
+    # function-level cache to save the result.
+    if not hasattr(get_parent_proc_name, "return_value"):
+        parent_proc_name = _get_parent_proc_name()
+        setattr(get_parent_proc_name, "return_value", parent_proc_name)
+    return getattr(get_parent_proc_name, "return_value")

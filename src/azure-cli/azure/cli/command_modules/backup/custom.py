@@ -23,13 +23,68 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties
 
 from azure.cli.core.util import CLIError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf, backup_resource_vault_config_cf)
+    protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
+    cross_region_restore_cf, backup_crr_job_details_cf, crr_operation_status_cf, backup_crr_jobs_cf,
+    backup_protected_items_crr_cf)
 
 logger = get_logger(__name__)
+
+# Mapping of workload type
+secondary_region_map = {"eastasia": "southeastasia",
+                        "southeastasia": "eastasia",
+                        "australiaeast": "australiasoutheast",
+                        "australiasoutheast": "australiaeast",
+                        "australiacentral": "australiacentral2",
+                        "australiacentral2": "australiacentral",
+                        "brazilsouth": "southcentralus",
+                        "canadacentral": "canadaeast",
+                        "canadaeast": "canadacentral",
+                        "chinanorth": "chinaeast",
+                        "chinaeast": "chinanorth",
+                        "chinanorth2": "chinaeast2",
+                        "chinaeast2": "chinanorth2",
+                        "northeurope": "westeurope",
+                        "westeurope": "northeurope",
+                        "francecentral": "francesouth",
+                        "francesouth": "francecentral",
+                        "germanycentral": "germanynortheast",
+                        "germanynortheast": "germanycentral",
+                        "centralindia": "southindia",
+                        "southindia": "centralindia",
+                        "westindia": "southindia",
+                        "japaneast": "japanwest",
+                        "japanwest": "japaneast",
+                        "koreacentral": "koreasouth",
+                        "koreasouth": "koreacentral",
+                        "eastus": "westus",
+                        "westus": "eastus",
+                        "eastus2": "centralus",
+                        "centralus": "eastus2",
+                        "northcentralus": "southcentralus",
+                        "southcentralus": "northcentralus",
+                        "westus2": "westcentralus",
+                        "westcentralus": "westus2",
+                        "centraluseuap": "eastus2euap",
+                        "eastus2euap": "centraluseuap",
+                        "southafricanorth": "southafricawest",
+                        "southafricawest": "southafricanorth",
+                        "switzerlandnorth": "switzerlandwest",
+                        "switzerlandwest": "switzerlandnorth",
+                        "ukwest": "uksouth",
+                        "uksouth": "ukwest",
+                        "uaenorth": "uaecentral",
+                        "uaecentral": "uaenorth",
+                        "usdodeast": "usdodcentral",
+                        "usdodcentral": "usdodeast",
+                        "usgovarizona": "usgovtexas",
+                        "usgovtexas": "usgovarizona",
+                        "usgoviowa": "usgovvirginia",
+                        "usgovvirginia": "usgovtexas"}
 
 fabric_name = "Azure"
 default_policy_name = "DefaultPolicy"
@@ -91,7 +146,7 @@ def list_vaults(client, resource_group_name=None):
 
 
 def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_storage_redundancy=None,
-                          soft_delete_feature_state=None):
+                          soft_delete_feature_state=None, cross_region_restore_flag=None):
     if soft_delete_feature_state:
         soft_delete_feature_state += "d"
         vault_config_client = backup_resource_vault_config_cf(cmd.cli_ctx)
@@ -102,7 +157,11 @@ def set_backup_properties(cmd, client, vault_name, resource_group_name, backup_s
         vault_config_resource = BackupResourceVaultConfigResource(properties=vault_config)
         return vault_config_client.update(vault_name, resource_group_name, vault_config_resource)
 
-    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy)
+    if cross_region_restore_flag is not None:
+        cross_region_restore_flag = bool(cross_region_restore_flag.lower() == 'true')
+
+    backup_storage_config = BackupResourceConfig(storage_model_type=backup_storage_redundancy,
+                                                 cross_region_restore_flag=cross_region_restore_flag)
     backup_storage_config_resource = BackupResourceConfigResource(properties=backup_storage_config)
     return client.update(vault_name, resource_group_name, backup_storage_config_resource)
 
@@ -313,8 +372,9 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item,
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, container_type="AzureIaasVM",
-              item_type="VM"):
-    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type)
+              item_type="VM", use_secondary_region=None):
+    items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type,
+                       use_secondary_region)
 
     if _is_native_name(name):
         filtered_items = [item for item in items if item.name == name]
@@ -325,11 +385,13 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, container_name=None, container_type="AzureIaasVM",
-               item_type="VM"):
+               item_type="VM", use_secondary_region=None):
     filter_string = _get_filter_string({
         'backupManagementType': container_type,
         'itemType': item_type})
 
+    if use_secondary_region:
+        client = backup_protected_items_crr_cf(cmd.cli_ctx)
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = _get_list_from_paged_response(items)
     if container_name:
@@ -376,8 +438,6 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
 
 
 def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until):
-    if retain_until is None:
-        retain_until = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -390,19 +450,27 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,  # pylint: disable=redefined-builtin
-                        container_type="AzureIaasVM", item_type="VM"):
+                        container_type="AzureIaasVM", item_type="VM", use_secondary_region=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, container_type, item_type)
+                     item_name, container_type, item_type, use_secondary_region)
     _validate_item(item)
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
 
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
+        recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, None)
+        paged_rps = _get_list_from_paged_response(recovery_points)
+        filtered_rps = [rp for rp in paged_rps if rp.name.lower() == name.lower()]
+        return _get_none_one_or_many(filtered_rps)
+
     return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
-def list_recovery_points(client, resource_group_name, vault_name, item, start_date=None, end_date=None):
+def list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date=None, end_date=None,
+                         use_secondary_region=None):
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
@@ -412,6 +480,9 @@ def list_recovery_points(client, resource_group_name, vault_name, item, start_da
     filter_string = _get_filter_string({
         'startDate': query_start_date,
         'endDate': query_end_date})
+
+    if use_secondary_region:
+        client = recovery_points_crr_cf(cmd.cli_ctx)
 
     # Get recovery points
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
@@ -453,12 +524,12 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 # pylint: disable=too-many-locals
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None):
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
-                     item_name, "AzureIaasVM", "VM")
+                     item_name, "AzureIaasVM", "VM", use_secondary_region)
     _validate_item(item)
     recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                                         container_name, item_name, rp_name, "AzureIaasVM", "VM")
+                                         container_name, item_name, rp_name, "AzureIaasVM", "VM", use_secondary_region)
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
 
@@ -520,6 +591,22 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                       original_storage_account_option=use_original_storage_account,
                                                       restore_disk_lun_list=restore_disk_lun_list)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
+
+    if use_secondary_region:
+        if target_rg_id is None:
+            raise RequiredArgumentMissingError("Please provide target resource group using --target-resource-group.")
+        azure_region = secondary_region_map[vault_location]
+        aad_client = aad_properties_cf(cmd.cli_ctx)
+        aad_result = aad_client.get(azure_region)
+        rp_client = recovery_points_cf(cmd.cli_ctx)
+        crr_access_token = rp_client.get_access_token(vault_name, resource_group_name, fabric_name, container_uri,
+                                                      item_uri, rp_name, aad_result).properties
+        crr_access_token.object_type = "CrrAccessToken"
+        crr_client = cross_region_restore_cf(cmd.cli_ctx)
+        trigger_restore_properties.region = azure_region
+        result = crr_client.trigger(azure_region, crr_access_token, trigger_restore_properties, raw=True,
+                                    polling=False).result()
+        return _track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
     # Trigger restore
     result = client.trigger(vault_name, resource_group_name, fabric_name,
@@ -612,8 +699,8 @@ def resume_protection(cmd, client, resource_group_name, vault_name, item, policy
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
 
-def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None,
-              backup_management_type=None):
+def list_jobs(cmd, client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None,
+              backup_management_type=None, use_secondary_region=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
     filter_string = _get_filter_string({
@@ -623,29 +710,59 @@ def list_jobs(client, resource_group_name, vault_name, status=None, operation=No
         'endTime': query_end_date,
         'backupManagementType': backup_management_type})
 
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_jobs_cf(cmd.cli_ctx)
+        return _get_list_from_paged_response(client.list(azure_region, filter_string, resource_id=vault.id))
+
     return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
 
 
-def show_job(client, resource_group_name, vault_name, name):
+def show_job(cmd, client, resource_group_name, vault_name, name, use_secondary_region=None):
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_job_details_cf(cmd.cli_ctx)
+        return client.get(azure_region, vault.id, name)
     return client.get(vault_name, resource_group_name, name)
 
 
-def stop_job(client, resource_group_name, vault_name, name):
+def stop_job(client, resource_group_name, vault_name, name, use_secondary_region=None):
+    if use_secondary_region:
+        raise InvalidArgumentValueError("Secondary region jobs do not support cancellation as of now.")
     client.trigger(vault_name, resource_group_name, name)
 
 
-def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
+def wait_for_job(cmd, client, resource_group_name, vault_name, name, timeout=None, use_secondary_region=None):
     logger.warning("Waiting for job '%s' ...", name)
     start_timestamp = datetime.utcnow()
-    job_details = client.get(vault_name, resource_group_name, name)
-    while _job_in_progress(job_details.properties.status):
-        if timeout:
-            elapsed_time = datetime.utcnow() - start_timestamp
-            if elapsed_time.seconds > timeout:
-                logger.warning("Command timed out while waiting for job '%s'", name)
-                break
+    if use_secondary_region:
+        vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
+        vault_location = vault.location
+        azure_region = secondary_region_map[vault_location]
+        client = backup_crr_job_details_cf(cmd.cli_ctx)
+        job_details = client.get(azure_region, vault.id, name)
+        while _job_in_progress(job_details.properties.status):
+            if timeout:
+                elapsed_time = datetime.utcnow() - start_timestamp
+                if elapsed_time.seconds > timeout:
+                    logger.warning("Command timed out while waiting for job '%s'", name)
+                    break
+            job_details = client.get(azure_region, vault.id, name)
+            time.sleep(30)
+    else:
         job_details = client.get(vault_name, resource_group_name, name)
-        time.sleep(30)
+        while _job_in_progress(job_details.properties.status):
+            if timeout:
+                elapsed_time = datetime.utcnow() - start_timestamp
+                if elapsed_time.seconds > timeout:
+                    logger.warning("Command timed out while waiting for job '%s'", name)
+                    break
+            job_details = client.get(vault_name, resource_group_name, name)
+            time.sleep(30)
     return job_details
 
 # Client Utilities
@@ -898,6 +1015,28 @@ def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(1)
         operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
+    return operation_status
+
+
+def _track_backup_crr_job(cli_ctx, result, azure_region, resource_id):
+    crr_job_details_client = backup_crr_job_details_cf(cli_ctx)
+
+    operation_status = _track_backup_crr_operation(cli_ctx, result, azure_region)
+
+    if operation_status.properties:
+        job_id = operation_status.properties.job_id
+        job_details = crr_job_details_client.get(azure_region, resource_id, job_id)
+        return job_details
+
+
+def _track_backup_crr_operation(cli_ctx, result, azure_region):
+    crr_operation_statuses_client = crr_operation_status_cf(cli_ctx)
+
+    operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
+    operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
+    while operation_status.status == OperationStatusValues.in_progress.value:
+        time.sleep(1)
+        operation_status = crr_operation_statuses_client.get(azure_region, operation_id)
     return operation_status
 
 
