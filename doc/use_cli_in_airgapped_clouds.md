@@ -25,7 +25,7 @@ MSI | https://azurecliprod.blob.core.windows.net/msi/azure-cli-2.x.x.msi | Start
 
 If you need to install and use Azure CLI in your pipeline, you could upload the Azure CLI package in a storage account that is accessible in the airgapped cloud, then you can download the package from the storage account and install it in your pipeline scripts. For instance, an Azure CLI deb package can be downloaded and installed with the following command:
 
-```console
+```bash
 curl -Ls -o azure-cli.deb https://mysa.airgapped.cloud.net/packages/azure-cli.deb && dpkg -i azure-cli.deb
 ```
 
