@@ -293,7 +293,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         disk_iops_read_only=None, disk_mbps_read_only=None,
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
-                        network_access_policy=None, disk_access=None, logical_sector_size=None, tier=None):
+                        network_access_policy=None, disk_access=None, logical_sector_size=None,
+                        tier=None, enable_bursting=False):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -395,6 +396,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_access_id = disk_access
     if tier is not None:
         disk.tier = tier
+    if enable_bursting:
+        disk.bursting_enabled = enable_bursting
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -415,7 +418,7 @@ def list_managed_disks(cmd, resource_group_name=None):
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
-                        disk_mbps_read_only=None):
+                        disk_mbps_read_only=None, enable_bursting=False):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -451,6 +454,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
+    if enable_bursting:
+        instance.bursting_enabled = enable_bursting
     return instance
 # endregion
 
