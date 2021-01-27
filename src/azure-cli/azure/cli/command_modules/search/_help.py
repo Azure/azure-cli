@@ -27,6 +27,21 @@ type: group
 short-summary: Manage Azure Search services.
 """
 
+helps['search privateendpointconnection'] = """
+type: group
+short-summary: Manage Azure Search private endpoint connections.
+"""
+
+helps['search privatelinkresource'] = """
+type: group
+short-summary: Manage Azure Search private link resources.
+"""
+
+helps['search sharedprivatelinkresource'] = """
+type: group
+short-summary: Manage Azure Search shared private link resources.
+"""
+
 helps['search service create'] = """
 type: command
 short-summary: Creates a Search service in the given resource group.

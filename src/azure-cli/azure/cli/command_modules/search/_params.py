@@ -16,6 +16,18 @@ def load_arguments(self, _):
         c.ignore('search_management_request_options')
         c.argument('sku', help='Search Service SKU', arg_type=get_enum_type(["Free", "Basic", "Standard", "Standard2", "Standard3"]))
 
+    with self.argument_context('search privateendpointconnection') as c:
+        c.ignore('search_management_request_options')
+        c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
+
+    with self.argument_context('search privatelinkresource') as c:
+        c.ignore('search_management_request_options')
+        c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
+
+    with self.argument_context('search sharedprivatelinkresource') as c:
+        c.ignore('search_management_request_options')
+        c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
+
     with self.argument_context('search query-key') as c:
         c.ignore('search_management_request_options')
         c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
