@@ -53,6 +53,9 @@ parameters:
     short-summary: 'Indicate whether delete retention policy is enabled for the blob service.'
   - name: --delete-retention-days
     short-summary: 'Indicate the number of days that the deleted blob should be retained. The value must be in range [1,365]. It must be provided when `--enable-delete-retention` is true.'
+  - name: --default-service-version
+    short-summary: Indicate the default version to use for requests to the Blob service if an incoming request's version is not specified. 
+    long-summary: Possible values include version 2008-10-27 and all more recent versions.
 examples:
   - name: Enable the change feed for the storage account 'mystorageaccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-change-feed true -n mystorageaccount -g MyResourceGroup
