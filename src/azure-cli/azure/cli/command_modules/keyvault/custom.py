@@ -1570,7 +1570,7 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
                 f.write(cert)
             else:
                 import base64
-                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'
