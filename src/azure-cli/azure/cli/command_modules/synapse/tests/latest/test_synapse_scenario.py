@@ -112,6 +112,107 @@ class SynapseScenarioTests(ScenarioTest):
                  expect_failure=True)
 
     @record_only()
+    def test_workspace_with_cmk(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspacecmk',
+            'rg': 'testrg',
+            'storage-account': 'teststorageforsynapsecmk',
+            'file-system': self.create_random_name(prefix='fs', length=16),
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16),
+            'key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newcmk',
+            'new-key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newkey',
+            'managed-identity': '00000000-0000-1111-2222-333333333333'
+        })
+
+        # create workspace supporting cmk, data exfiltration
+        workspace_cmk = self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids \'""\' ', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ]).get_output_in_json()
+
+        self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # active workspace
+        self.cmd(
+            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+        import time
+        time.sleep(120)
+
+        # create workspace key
+        self.cmd(
+            'az synapse workspace key create --name newkey --key-identifier {new-key-identifier}  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'newkey'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # list workspace key
+        self.cmd(
+            'az synapse workspace key list --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('[0].name', 'default'),
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('[0].keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show workspace key
+        self.cmd(
+            'az synapse workspace key show --name default --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity show-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # grant sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity grant-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Enabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # invoke sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity revoke-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # switch active key
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ', checks=[
+                self.check('encryption.cmk.key.name', 'newkey')
+            ])
+
+        # update allowed tenant ids
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --allowed-tenant-ids 72f988bf-86f1-41af-91ab-2d7cd011db47 ', checks=[
+                self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
+            ])
+
+    @record_only()
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus',

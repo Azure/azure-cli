@@ -35,7 +35,7 @@ def create_metric_alert(client, resource_group_name, rule_name, scopes, conditio
         else:
             criteria = MetricAlertMultipleResourceMultipleMetricCriteria(all_of=condition)
             target_resource_type = resource_type
-            target_resource_region = 'global'
+            target_resource_region = target_resource_region if target_resource_region else 'global'
 
     kwargs = {
         'description': description,

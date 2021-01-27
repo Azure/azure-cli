@@ -341,9 +341,8 @@ def load_arguments(self, _):
         c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
 
     with self.argument_context('monitor action-group create') as c:
-        from .validators import process_action_group_detail_for_creation
         from .actions import ActionGroupReceiverParameterAction
-        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
+        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction)
         c.extra('short_name')
         c.extra('tags')
         c.ignore('action_group')
@@ -354,8 +353,8 @@ def load_arguments(self, _):
         c.ignore('action_group')
 
     with self.argument_context('monitor action-group enable-receiver') as c:
-        c.argument('receiver_name', options_list=['--name', '-n'])
-        c.argument('action_group_name', options_list=['--action-group'])
+        c.argument('receiver_name', options_list=['--name', '-n'], help='The name of the receiver to resubscribe.')
+        c.argument('action_group_name', options_list=['--action-group'], help='The name of the action group.')
     # endregion
 
     # region ActivityLog Alerts
@@ -435,7 +434,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', options_list='--retention-time', type=int, required=True)
+        c.argument('retention_in_days', options_list='--retention-time', help='The data table data retention in days, between 30 and 730. Setting this property to null will default to the workspace', type=int, required=True)
     # endregion
 
     # region Log Analytics Workspace Data Export

@@ -13,11 +13,13 @@ def load_command_table(self, _):
     from ._client_factory import cf_synapse_client_bigdatapool_factory
     from ._client_factory import cf_synapse_client_sqlpool_factory
     from ._client_factory import cf_synapse_client_ipfirewallrules_factory
+    from ._client_factory import cf_synapse_client_cmk_factory
     from ._client_factory import cf_synapse_client_sqlpool_sensitivity_labels_factory
     from ._client_factory import cf_synapse_client_restorable_dropped_sqlpools_factory
     from ._client_factory import cf_synapse_client_sqlpool_transparent_data_encryptions_factory
     from ._client_factory import cf_synapse_client_sqlpool_security_alert_policies_factory
     from ._client_factory import cf_synapse_client_sqlpool_blob_auditing_policies_factory
+    from ._client_factory import cf_synapse_client_managed_identity_sqlcontrol_factory
     from ._client_factory import cf_synapse_client_workspace_aad_admins_factory
     from ._client_factory import cf_synapse_client_sqlserver_blob_auditing_policies_factory
     from ._client_factory import cf_synapse_client_integrationruntimes_factory
@@ -88,6 +90,14 @@ def load_command_table(self, _):
     synapse_firewallrules_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IpFirewallRulesOperations.{}',
         client_factory=cf_synapse_client_ipfirewallrules_factory)
+
+    synapse_cmk_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#KeysOperations.{}',
+        client_factory=cf_synapse_client_cmk_factory)
+
+    synapse_managedidentitysqlcontrol_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.synapse.operations#WorkspaceManagedIdentitySqlControlSettingsOperations.{}',
+        client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory)
 
     synapse_integrationruntimes_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.synapse.operations#IntegrationRuntimesOperations.{}',
@@ -309,6 +319,26 @@ def load_command_table(self, _):
                   client_factory=cf_synapse_client_integrationruntimeconnectioninfos_factory)
         g.command('get-status', 'get', command_type=synapse_integrationruntimestatus_sdk,
                   client_factory=cf_synapse_client_integrationruntimestatus_factory)
+        g.wait_command('wait')
+
+    # Management Plane Commands --Keys
+    with self.command_group('synapse workspace key', command_type=synapse_cmk_sdk,
+                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_cmk_factory),
+                            client_factory=cf_synapse_client_cmk_factory) as g:
+        g.command('list', 'list_by_workspace')
+        g.show_command('show', 'get')
+        g.custom_command('create', 'create_workspace_key', supports_no_wait=True)
+        g.custom_command('update', 'update_workspace_key', supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.wait_command('wait')
+
+    # Management Plane Commands --Managed-Identity
+    with self.command_group('synapse workspace managed-identity', command_type=synapse_managedidentitysqlcontrol_sdk,
+                            custom_command_type=get_custom_sdk('workspace', cf_synapse_client_managed_identity_sqlcontrol_factory),
+                            client_factory=cf_synapse_client_managed_identity_sqlcontrol_factory) as g:
+        g.show_command('show-sql-access', 'get')
+        g.custom_command('grant-sql-access', 'grant_sql_access_to_managed_identity', supports_no_wait=True)
+        g.custom_command('revoke-sql-access', 'revoke_sql_access_to_managed_identity', supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('synapse integration-runtime-node', command_type=synapse_integrationruntimenodes_sdk,
