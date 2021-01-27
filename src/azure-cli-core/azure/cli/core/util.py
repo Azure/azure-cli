@@ -1274,6 +1274,10 @@ def log_cmd_history(command, args):
     if not az_next_is_installed:
         return
 
+    # For commands that do not require logging, we can pass in the parameter "--no-log" to control
+    if '--no-log' in args:
+        return
+
     if not args or not command:
         return
 
