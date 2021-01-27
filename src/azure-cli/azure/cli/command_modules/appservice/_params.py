@@ -35,6 +35,8 @@ LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
+ASE_KINDS = ['ASEv2', 'ASEv3']
+ASE_OS_PREFERENCE_TYPES = ['Windows', 'Linux']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -45,10 +47,10 @@ def load_arguments(self, _):
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     sku_arg_type = CLIArgumentType(
-        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
+        help='The pricing tiers, e.g., F1(Free), D1(Shared), B1(Basic Small), B2(Basic Medium), B3(Basic Large), S1(Standard Small), P1V2(Premium V2 Small), P1V3(Premium V3 Small), P2V3(Premium V3 Medium), P3V3(Premium V3 Large), PC2 (Premium Container Small), PC3 (Premium Container Medium), PC4 (Premium Container Large), I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large), I1v2 (Isolated V2 Small), I2v2 (Isolated V2 Medium), I3v2 (Isolated V2 Large)',
         arg_type=get_enum_type(
             ['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'P1V3', 'P2V3', 'P3V3', 'PC2', 'PC3',
-             'PC4', 'I1', 'I2', 'I3']))
+             'PC4', 'I1', 'I2', 'I3', 'I1v2', 'I2v2', 'I3v2']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                                            id_part='name',
@@ -131,7 +133,7 @@ def load_arguments(self, _):
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\" or \":\". "
                                                                      "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -389,6 +391,8 @@ def load_arguments(self, _):
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
         c.argument('disable', help='disable auto swap', action='store_true')
         c.argument('target_slot', help="target slot to swap, default to 'production'")
+        c.argument('preserve_vnet', help="preserve Virtual Network to the slot during swap, default to 'true'",
+                   arg_type=get_three_state_flag(return_label=True))
     with self.argument_context('webapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use web app's name to refer to the production slot")
@@ -607,7 +611,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\", \" \", \":\". "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|7.2\". Allowed delimiters: \"|\" or \":\". "
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
@@ -776,6 +780,8 @@ def load_arguments(self, _):
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
         c.argument('disable', help='disable auto swap', action='store_true')
         c.argument('target_slot', help="target slot to swap, default to 'production'")
+        c.argument('preserve_vnet', help="preserve Virtual Network to the slot during swap, default to 'true'",
+                   arg_type=get_three_state_flag(return_label=True))
     with self.argument_context('functionapp deployment slot create') as c:
         c.argument('configuration_source',
                    help="source slot to clone configurations from. Use function app's name to refer to the production slot")
@@ -865,6 +871,8 @@ def load_arguments(self, _):
                    help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.SET],
                                                                  scopes=['appservice']))
+        c.argument('kind', options_list=['--kind', '-k'], arg_type=get_enum_type(ASE_KINDS),
+                   default='ASEv2', help="Specify App Service Environment version")
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
@@ -884,6 +892,8 @@ def load_arguments(self, _):
                    help='Scale of front ends to app service plan instance ratio.', default=15)
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
                    help='Size of front end servers.')
+        c.argument('os_preference', arg_type=get_enum_type(ASE_OS_PREFERENCE_TYPES),
+                   help='Determine if app service environment should start with Linux workers. Applies to ASEv2 only.')
     with self.argument_context('appservice ase delete') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
@@ -898,6 +908,14 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase list-plans') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
+    with self.argument_context('appservice ase create-inbound-services') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
+        c.argument('subnet', help='Name or ID of existing subnet for inbound traffic to ASEv3. \
+                   To create vnet and/or subnet use `az network vnet [subnet] create`')
+        c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
+        c.argument('skip_dns', arg_type=get_three_state_flag(),
+                   help='Do not create Private DNS Zone and DNS records.')
 
     # App Service Domain Commands
     with self.argument_context('appservice domain create') as c:

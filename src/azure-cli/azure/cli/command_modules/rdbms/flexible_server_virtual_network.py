@@ -213,7 +213,7 @@ def create_vnet(cmd, servername, location, resource_group_name, delegation_servi
                                                    VirtualNetwork(name=vnet_name, location=location,
                                                                   address_space=AddressSpace(
                                                                       address_prefixes=[vnet_address_prefix])))
-    delegation = Delegation(name=delegation_service_name, serv_name=delegation_service_name)
+    delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
     subnet = Subnet(name=subnet_name, location=location, address_prefix=subnet_prefix, delegations=[delegation])
 
     logger.warning('Creating new subnet "%s" in resource group "%s" and delegating it to "%s"...', subnet_name,

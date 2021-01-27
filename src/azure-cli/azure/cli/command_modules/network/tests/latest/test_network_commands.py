@@ -3552,6 +3552,72 @@ class NetworkVirtualRouter(ScenarioTest):
         self.cmd('network vrouter delete -g {rg} -n {vrouter}')
 
 
+class NetworkVirtualHubRouter(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_virtual_hub_router', location='centraluseuap')
+    def test_network_virtual_hub_router_scenario(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vnet': 'vnet2',
+            'subnet1': 'subnet1',
+            'subnet2': 'subnet2',
+            'vrouter': 'vrouter2',
+            'peer': 'peer1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} '
+                 '--location {location} '
+                 '--subnet-name {subnet1} '
+                 '--address-prefix 10.0.0.0/24')
+
+        # a cleanup program runs in short peoridically to assign subnets a NSG within that subscription
+        # which will block subnet is assigned to the virtual router
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet1} --remove networkSecurityGroup')
+        vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet1_id': vnet['subnets'][0]['id']
+        })
+
+        self.cmd('network routeserver create -g {rg} -l {location} -n {vrouter} '
+                 '--hosted-subnet {subnet1_id}',
+                 checks=[
+                     self.check('type', 'Microsoft.Network/virtualHubs'),
+                     self.check('ipConfigurations', None),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('network routeserver update -g {rg} --name {vrouter}  --allow-b2b-traffic', checks=[
+            self.check('allowBranchToBranchTraffic', True)
+        ])
+
+        self.cmd('network routeserver list -g {rg}')
+
+        self.cmd('network routeserver show -g {rg} -n {vrouter}', checks=[
+            self.check('virtualRouterAsn', 65515),
+            self.check('length(virtualRouterIps)', 2),
+        ])
+
+        self.cmd('network routeserver peering create -g {rg} --vrouter-name {vrouter} -n {peer} '
+                 '--peer-asn 11000 --peer-ip 10.0.0.120')
+
+        self.cmd('network routeserver peering list -g {rg} --vrouter-name {vrouter}')
+
+        self.cmd('network routeserver peering show -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        self.cmd('network routeserver peering list-advertised-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        self.cmd('network routeserver peering list-learned-routes -g {rg} --vrouter-name {vrouter} -n {peer}')
+
+        # unable to update unless the ASN's range is required
+        # self.cmd('network routeserver peering update -g {rg} --vrouter-name {vrouter} -n {peer} --peer-ip 10.0.0.0')
+
+        self.cmd('network routeserver peering delete -g {rg} --vrouter-name {vrouter} -n {peer} -y')
+
+        self.cmd('network routeserver delete -g {rg} -n {vrouter} -y')
+
+
 class NetworkSubnetScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_subnet_set_test')

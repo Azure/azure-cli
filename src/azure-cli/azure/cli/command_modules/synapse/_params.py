@@ -48,7 +48,7 @@ def _configure_security_or_audit_policy_storage_params(arg_ctx):
 
 def load_arguments(self, _):
     # synapse workspace
-    for scope in ['show', 'create', 'update', 'delete']:
+    for scope in ['show', 'create', 'update', 'delete', 'activate']:
         with self.argument_context('synapse workspace ' + scope) as c:
             c.argument('workspace_name', arg_type=name_type, id_part='name', help='The workspace name.')
 
@@ -57,6 +57,8 @@ def load_arguments(self, _):
             c.argument('sql_admin_login_password', options_list=['--sql-admin-login-password', '-p'],
                        help='The sql administrator login password.')
             c.argument('tags', arg_type=tags_type)
+            c.argument('allowed_aad_tenant_ids', options_list=['--allowed-tenant-ids'], nargs='+', help="The approved Azure AD tenants which outbound data traffic allowed to. The Azure AD tenant of the current user will be included by default. Use ""(\'""\' in PowerShell) to disable all allowed tenant ids.")
+            c.argument('key_name', help='The workspace customer-managed key display name. All existing keys can be found using "az synapse workspace key list" cmdlet.')
 
     with self.argument_context('synapse workspace create') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -69,6 +71,9 @@ def load_arguments(self, _):
                                                                    '--enable-managed-virtual-network'],
                    arg_type=get_three_state_flag(),
                    help='The flag indicates whether enable managed virtual network.')
+        c.argument('prevent_data_exfiltration', arg_type=get_three_state_flag(),
+                   help='The flag indicates whether enable data exfiltration.', options_list=['--prevent-exfiltration', '--prevent-data-exfiltration'])
+        c.argument('key_identifier', help='The customer-managed key used to encrypt all data at rest in the workspace. Key identifier should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.', options_list=['--key-identifier', '--cmk'])
 
     with self.argument_context('synapse workspace check-name') as c:
         c.argument('name', arg_type=name_type, help='The name you wanted to check.')
@@ -310,6 +315,32 @@ def load_arguments(self, _):
             c.argument('start_ip_address', help='The start IP address of the firewall rule. Must be IPv4 format.')
             c.argument('end_ip_address', help='The end IP address of the firewall rule. Must be IPv4 format. '
                                               'Must be greater than or equal to startIpAddress.')
+
+    # synapse workspace key
+    with self.argument_context('synapse workspace key') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    with self.argument_context('synapse workspace key list') as c:
+        c.argument('workspace_name', id_part=None, help='The workspace name.')
+
+    for scope in ['show', 'create', 'delete', 'update']:
+        with self.argument_context('synapse workspace key ' + scope) as c:
+            c.argument('key_name', arg_type=name_type, id_part='child_name_1', help='The workspace customer-managed key display name. All existing keys can be found using /"az synapse workspace key list/" cmdlet.')
+
+    with self.argument_context('synapse workspace key create') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+
+    with self.argument_context('synapse workspace key update') as c:
+        c.argument('key_identifier', help='The Key Vault Url of the workspace encryption key. should be in the format of: https://{keyvaultname}.vault.azure.net/keys/{keyname}.')
+        c.argument('is_active', arg_type=get_three_state_flag(), help='Set True to change the workspace state from pending to success state.')
+
+    # synapse workspace managed-identity
+    with self.argument_context('synapse workspace managed-identity') as c:
+        c.argument('workspace_name', id_part='name', help='The workspace name.')
+
+    for scope in ['grant-sql-access', 'revoke-sql-access', ' show-sql-access']:
+        with self.argument_context('synapse workspace managed-identity ' + scope) as c:
+            c.argument('workspace_name', id_part='name', help='The workspace name.')
 
     # synapse spark job
     for scope in ['job', 'session', 'statement']:
