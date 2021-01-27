@@ -206,7 +206,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
             if in_cloud_console():
                 raise CLIError("This extension is not supported in Cloud Shell as you do not have permission to install extra dependencies.")
             try:
-                subprocess.check_output(['dpkg', '-s', 'libpq-dev', 'python3-dev'], stderr=subprocess.STDOUT)
+                subprocess.check_output(['dpkg', '-s', 'libpq-dev', 'python3-dev'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except subprocess.CalledProcessError:
                 logger.warning('This extension depends on libpq-dev, python3-dev and they will be installed first.')
                 apt_update_cmd = 'apt-get update'.split()
@@ -220,10 +220,10 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
                     subprocess.call(apt_install_cmd, True)
         elif installer == 'RPM' or any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora', 'opensuse', 'suse', 'sles']):
             try:
-                subprocess.check_output(['rpm', '-q', 'postgresql-devel', 'python-devel'], stderr=subprocess.STDOUT)
+                subprocess.check_output(['rpm', '-q', 'postgresql-devel', 'python3-devel'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except subprocess.CalledProcessError:
                 if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
-                    yum_install_cmd = 'yum install -y postgresql-devel python3-devel'.split()
+                    yum_install_cmd = 'yum install -y gcc postgresql-devel python3-devel'.split()
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         yum_install_cmd.insert(0, 'sudo')
                     logger.debug("Install dependencies with '%s'", " ".join(yum_install_cmd))
@@ -231,7 +231,7 @@ def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
                     subprocess.call(yum_install_cmd)
                 elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
                     zypper_refresh_cmd = ['zypper', 'refresh']
-                    zypper_install_cmd = 'zypper install -y postgresql-devel python3-devel'.split()
+                    zypper_install_cmd = 'zypper install -y gcc postgresql-devel python3-devel'.split()
                     logger.warning('This extension depends on postgresql-devel, python3-devel and they will be installed first.')
                     if os.geteuid() != 0:  # pylint: disable=no-member
                         zypper_refresh_cmd.insert(0, 'sudo')
