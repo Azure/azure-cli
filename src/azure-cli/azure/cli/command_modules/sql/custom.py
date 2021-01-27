@@ -1345,7 +1345,7 @@ def db_update(
         family=None,
         capacity=None,
         read_scale=None,
-        read_replica_count=None,
+        high_availability_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None,
@@ -1426,8 +1426,8 @@ def db_update(
     if read_scale is not None:
         instance.read_scale = read_scale
 
-    if read_replica_count is not None:
-        instance.read_replica_count = read_replica_count
+    if high_availability_replica_count is not None:
+        instance.high_availability_replica_count = high_availability_replica_count
 
     # Set storage_account_type even if storage_acount_type is None
     # Otherwise, empty value defaults to current storage_account_type
