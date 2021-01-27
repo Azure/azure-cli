@@ -191,6 +191,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server create -g {} --name {} '
                  '--admin-user {} --admin-password {} -e {}'
                  .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'false'),
@@ -202,6 +203,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test get sql server to verify publicNetworkAccess == 'Disabled' for the above server as expected
+        #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
                  checks=[
@@ -213,6 +215,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -227,25 +230,44 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test update sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
-        self.cmd('sql server update -g {} -n {} --enable-public-network {}'
-                 .format(resource_group, server_name, 'false'),
+        #   note: we test for exception thrown here since this server does not have private links so updating server
+        #         to disable public network access will throw an error
+        try:
+            self.cmd('sql server update -g {} -n {} --enable-public-network {}'
+                     .format(resource_group, server_name, 'false'))
+        except Exception as e:
+            expectedmessage = "Unable to set Deny Public Network Access to Yes since there is no private endpoint enabled to access the server"
+            if expectedmessage in str(e):
+                pass
+
+        # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        #   note: although server does not have private links, creating server with disabled public network is allowed
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} -e {}'
+                 .format(resource_group, server_name_2, admin_login, admin_passwords[0], 'false'),
                  checks=[
-                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test update sql server with no enable-public-network passed in, verify publicNetworkAccess == Disabled
-        self.cmd('sql server update -g {} -n {} -i'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+        #   note: we test for exception thrown here since this server does not have private links so updating server
+        #         to disable public network access will throw an error
+        try:
+            self.cmd('sql server update -g {} -n {} -i'
+                     .format(resource_group, server_name_2))
+        except Exception as e:
+            expectedmessage = "Unable to set Deny Public Network Access to Yes since there is no private endpoint enabled to access the server"
+            if expectedmessage in str(e):
+                pass
 
         # test update sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server update -g {} -n {} -e {}'
-                 .format(resource_group, server_name, 'true'),
+                 .format(resource_group, server_name_2, 'true'),
                  checks=[
-                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('name', server_name_2),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
 
@@ -387,7 +409,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('readReplicaCount', '0'),
+                           JMESPathCheck('highAvailabilityReplicaCount', None),
                            JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
@@ -429,7 +451,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', None)])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -576,21 +598,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('edition', edition),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
 
         # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 3),
                  checks=[
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '3')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '3')])
 
         # Decrease read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 0),
                  checks=[
                      JMESPathCheck('readScale', 'Disabled'),
-                     JMESPathCheck('readReplicaCount', '0')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '0')])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
@@ -5167,16 +5189,15 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         # update the sensitivity classification
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
-        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
 
-        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                 checks=[
-                     JMESPathCheck('informationType', information_type),
-                     JMESPathCheck('labelName', label_name),
-                     JMESPathCheck('informationTypeId', information_type_id),
-                     JMESPathCheck('labelId', label_id)])
+        response = self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                            checks=[
+                                JMESPathCheck('informationType', information_type),
+                                JMESPathCheck('labelName', label_name)]).get_output_in_json()
+
+        information_type_id = response['informationTypeId']
+        label_id = response['labelId']
 
         # get the classified column
         self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'

@@ -347,7 +347,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
 
-    arg_ctx.argument('read_replica_count',
+    arg_ctx.argument('high_availability_replica_count',
                      arg_type=read_replicas_param_type)
 
     creation_arg_group = 'Creation'
@@ -460,7 +460,7 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count',
+            'high_availability_replica_count',
             'storage_account_type'
         ])
 
