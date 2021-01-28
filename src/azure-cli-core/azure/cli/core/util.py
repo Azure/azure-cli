@@ -1332,12 +1332,13 @@ def log_latest_error_info(error_info, error_type):
         return
 
     base_dir = os.path.join(get_config_dir(), 'recommendation')
-
     ensure_dir(base_dir)
 
-    from .telemetry import _remove_cmd_chars
+    # Format the error info for parsing
+    error_info = error_info.replace("'", '|').replace('"', '|').replace('\r\n', ' ').replace('\n', ' ')
+
     with open(os.path.join(base_dir, 'exception_history.log'), 'w+') as fd:
-        print(_remove_cmd_chars(error_info), file=fd)
+        print(error_info, file=fd)
 
 
 def clean_exception_history(command):
