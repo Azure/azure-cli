@@ -4020,7 +4020,7 @@ def perform_onedeploy(cmd,
 
 # Class for OneDeploy parameters
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
-class OneDeployParams(object):
+class OneDeployParams:
     def __init__(self):
         self.cmd = None
         self.resource_group_name = None
@@ -4036,17 +4036,6 @@ class OneDeployParams(object):
         self.timeout = None
         self.slot = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
-
-
-#def _validate_onedeploy_params(params):
-#    if params.src_path and params.src_url:
-#        raise CLIError('Only one of --src-path and --src-url can be specified')
-
-#    if not params.src_path and not params.src_url:
-#        raise CLIError('Either of --src-path or --src-url must be specified')
-
-#    if params.src_url and not params.artifact_type:
-#        raise CLIError('Deployment type is mandatory when deploying from URLs. Use --type')
 
 
 def _build_onedeploy_url(params):
@@ -4078,11 +4067,9 @@ def _get_onedeploy_status_url(params):
 
 def _get_basic_headers(params):
     import urllib3
-    from azure.cli.core.util import (
-        get_az_user_agent,
-    )
 
-    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name, params.webapp_name, params.slot)
+    user_name, password = _get_site_credential(params.cmd.cli_ctx, params.resource_group_name,
+                                               params.webapp_name, params.slot)
 
     if params.src_path:
         content_type = 'application/octet-stream'
@@ -4101,7 +4088,6 @@ def _get_basic_headers(params):
 
 def _get_onedeploy_request_body(params):
     import os
-    import json
 
     if params.src_path:
         logger.info('Deploying from local path: %s', params.src_path)
@@ -4109,7 +4095,8 @@ def _get_onedeploy_request_body(params):
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
                 body = fs.read()
         except Exception as e:
-            raise CLIError("Either '{}' is not a valid local file path or you do not have permissions to access it".format(params.src_path)) from e
+            raise CLIError("Either '{}' is not a valid local file path or you do not have permissions to access it"
+                           .format(params.src_path)) from e
     elif params.src_url:
         logger.info('Deploying from URL: %s', params.src_url)
         body = json.dumps({
@@ -4164,7 +4151,8 @@ def _make_onedeploy_request(params):
     if response.status_code == 202:
         if poll_async_deployment_for_debugging:
             logger.info('Polloing the status of async deployment')
-            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name, deployment_status_url, headers, params.timeout)
+            response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
+                                                         deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
         return
 
@@ -4177,18 +4165,17 @@ def _make_onedeploy_request(params):
 
     # check if there's an ongoing process
     if response.status_code == 409:
-        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}".format(deployment_status_url))
+        raise CLIError("Another deployment is in progress. You can track the ongoing deployment at {}"
+                       .format(deployment_status_url))
 
     # check if an error occured during deployment
     if response.status_code:
-        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}".format(response.status_code, response.text))
+        raise CLIError("An error occured during deployment. Status Code: {}, Details: {}"
+                       .format(response.status_code, response.text))
 
 
 # OneDeploy
 def _perform_onedeploy_internal(params):
-
-    # Do basic paramter validation
-    # _validate_onedeploy_params(params)
 
     # Update artifact type, if required
     _update_artifact_type(params)
