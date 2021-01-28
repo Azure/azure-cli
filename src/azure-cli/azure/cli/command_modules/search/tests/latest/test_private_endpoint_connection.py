@@ -66,15 +66,15 @@ class AzureSearchServicesTests(ScenarioTest):
                          self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}')])
 
         # update private endpoint
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_rejected} --description "{private_endpoint_connection_description_rejected}"',
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_rejected} --description "{private_endpoint_connection_description_rejected}" --actions-required "No action required"',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_rejected}'),
                          self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_rejected}')])
 
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_pending} --description "{private_endpoint_connection_description_pending}"',
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_pending} --description "{private_endpoint_connection_description_pending}" --actions-required "No action required"',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_pending}'),
                          self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_pending}')])
 
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_approved} --description "{private_endpoint_connection_description_approved}"',
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_approved} --description "{private_endpoint_connection_description_approved}" --actions-required "No action required"',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}'),
                          self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_approved}')])
 
