@@ -68,11 +68,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'eastus2euap'
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(engine_type='postgres', location=postgres_location)
-    def test_postgres_flexible_server_mgmt(self, resource_group, server):
-        self._test_flexible_server_mgmt('postgres', resource_group, server)
+    # @AllowLargeResponse()
+    # @ResourceGroupPreparer(location=postgres_location)
+    # @ServerPreparer(engine_type='postgres', location=postgres_location)
+    # def test_postgres_flexible_server_mgmt(self, resource_group, server):
+    #     self._test_flexible_server_mgmt('postgres', resource_group, server)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -136,8 +136,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
                      .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('name', 'flexibleserverdb')])
 
-        # self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
-        #          .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
+                 .format(database_engine, resource_group, server_name))
 
         self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
                  .format(database_engine, resource_group, server_name),
