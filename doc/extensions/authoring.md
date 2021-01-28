@@ -21,8 +21,8 @@ Development of extensions have been simplified by the public release of the azde
 
 Run `azdev extension create <NAME>` to create skeleton code for a new extension. As an example (for a fictional widget API):
 
-```
-azdev extension create  widget --local-sdk <PATH TO SDK ZIP> --operation-name WidgetOperations --client-name WidgetManagementClient --sdk-property widget_name --github-alias myalias
+```azurecli
+azdev extension create widget --local-sdk <PATH TO SDK ZIP> --operation-name WidgetOperations --client-name WidgetManagementClient --sdk-property widget_name --github-alias myalias
 ```
 
 The fields `--operation-name`, `--client-name` and `--sdk-property` will come from a review of your Python SDK.
