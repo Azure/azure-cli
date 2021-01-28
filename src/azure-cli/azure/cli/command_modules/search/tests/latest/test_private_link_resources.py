@@ -20,7 +20,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
@@ -35,6 +35,7 @@ class AzureSearchServicesTests(ScenarioTest):
         self.assertTrue('plr' in _private_link_resource_types)
         self.assertTrue('Sql' in _private_link_resource_types)
         self.assertTrue('table' in _private_link_resource_types)
+
 
 if __name__ == '__main__':
     unittest.main()

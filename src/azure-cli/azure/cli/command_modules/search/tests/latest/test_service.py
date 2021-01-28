@@ -83,9 +83,9 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         _search_service = self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --ip-rules {ip_rules}',
-                 checks=[self.check('name', '{name}'),
-                         self.check('sku.name', '{sku_name}'),
-                         self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('sku.name', '{sku_name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
 
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 3)
 
@@ -98,7 +98,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
@@ -180,9 +180,9 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         _search_service = self.cmd('az search service create -n {name} -g {rg} --sku {sku_name} --ip-rules {ip_rules}',
-            checks=[self.check('name', '{name}'),
-                    self.check('sku.name', '{sku_name}'),
-                    self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('sku.name', '{sku_name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
 
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 2)
 
@@ -191,8 +191,8 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         _search_service = self.cmd('az search service update -n {name} -g {rg} --ip-rules {ip_rules}',
-            checks=[self.check('name', '{name}'),
-                    self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
+                                   checks=[self.check('name', '{name}'),
+                                           self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 3)
 
         self.kwargs.update({
@@ -214,7 +214,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
@@ -224,7 +224,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --public-network-access {public_network_access}',
+            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
@@ -233,10 +233,9 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --public-network-access {public_network_access}',
+            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
-
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
     def test_service_update_msi(self, resource_group):
@@ -269,7 +268,6 @@ class AzureSearchServicesTests(ScenarioTest):
             'az search service update -n {name} -g {rg} --identity-type {identity_type}',
             checks=[self.check('name', '{name}'),
                     self.check('identity.type', '{identity_type}')])
-
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test')
     def test_service_create_delete_show(self, resource_group):

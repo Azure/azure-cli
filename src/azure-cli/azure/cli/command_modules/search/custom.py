@@ -14,6 +14,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
 
+
 def create_search_service(cmd, resource_group_name, search_service_name, sku, location=None, partition_count=0,
                           replica_count=0, public_network_access="enabled", ip_rules=None, identity_type=None):
     """
@@ -64,6 +65,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
 
     return _client.begin_create_or_update(resource_group_name, search_service_name, _search)
 
+
 def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
                           ip_rules=None, identity_type=None):
     """
@@ -105,27 +107,28 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
 
     return instance
 
+
 def update_private_endpoint_connection(cmd, resource_group_name, search_service_name, private_endpoint_connection_name,
                                        private_link_service_connection_status,
-                                       private_link_service_connection_description="N/A",
-                                       private_link_service_connection_actions_required="No action required"):
+                                       private_link_service_connection_description,
+                                       private_link_service_connection_actions_required):
     """
     Updates an existing private endpoint connection in a Search service in the given resource group.
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
     :param private_endpoint_connection_name: Name of the private endpoint connection resource.
-        Ex - {the name of the private endpoint resource}.{a guid}.
+        Ex - {the name of the private endpoint resource}.{guid}.
     :param private_link_service_connection_status: The updated status of the private endpoint connection resource.
         Possible values include: "Pending", "Approved", "Rejected", "Disconnected".
-    :param private_link_service_connection_description: Custom request description when updating
+    :param private_link_service_connection_description: Custom description when updating
         the private endpoint connection resource.
     :param private_link_service_connection_actions_required: Custom 'actions required' message when updating
         the private endpoint connection resource.
     """
 
-    from azure.mgmt.search.models import PrivateEndpointConnection, PrivateEndpointConnectionProperties, \
-                                         PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
+    from azure.mgmt.search.models import PrivateEndpointConnection, PrivateEndpointConnectionProperties,\
+        PrivateEndpointConnectionPropertiesPrivateLinkServiceConnectionState
     from azure.cli.command_modules.search._client_factory import cf_search_private_endpoint_connections
 
     _client = cf_search_private_endpoint_connections(cmd.cli_ctx, None)
@@ -135,13 +138,14 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
         description=private_link_service_connection_description,
         actions_required=private_link_service_connection_actions_required
     )
-    _private_endpoint_connection_properties = PrivateEndpointConnectionProperties(\
+    _private_endpoint_connection_properties = PrivateEndpointConnectionProperties(
         private_link_service_connection_state=_private_link_service_connection_state)
     _private_endpoint_connection.id = private_endpoint_connection_name
     _private_endpoint_connection.properties = _private_endpoint_connection_properties
 
-    return _client.update(resource_group_name, search_service_name, private_endpoint_connection_name, \
-        _private_endpoint_connection)
+    return _client.update(resource_group_name, search_service_name, private_endpoint_connection_name,
+                          _private_endpoint_connection)
+
 
 def create_or_update_shared_private_link_resource(cmd, resource_group_name, search_service_name,
                                                   shared_private_link_resource_name, shared_private_link_resource_id,

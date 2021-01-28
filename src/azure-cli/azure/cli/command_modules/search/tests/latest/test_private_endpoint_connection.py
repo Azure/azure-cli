@@ -30,16 +30,16 @@ class AzureSearchServicesTests(ScenarioTest):
 
         # create search service
         _search_service = self.cmd(
-            'az search service create -n {search_service_name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
+            'az search service create -n {search_service_name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
             checks=[self.check('name', '{search_service_name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
         _search_service_resource_id = _search_service['id']
-        
+
         self.kwargs.update({
             '_search_service_resource_id': _search_service_resource_id,
         })
-        
+
         # create vnet
         self.cmd('az network vnet create --resource-group {rg} --name {vnet_name} --address-prefix 10.0.0.0/16')
         self.cmd('az network vnet subnet create --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
@@ -49,61 +49,48 @@ class AzureSearchServicesTests(ScenarioTest):
         self.cmd('az network private-endpoint create --resource-group {rg} --name {private_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} --private-connection-resource-id {_search_service_resource_id} --connection-name {private_endpoint_connection_name} --group-id searchService')
 
         _search_service = self.cmd('az search service show -n {search_service_name} -g {rg}').get_output_in_json()
-        self.assertTrue(_search_service['name']==self.kwargs['search_service_name'])
-        self.assertTrue(len(_search_service['privateEndpointConnections'])==1)
+        self.assertTrue(_search_service['name'] == self.kwargs['search_service_name'])
+        self.assertTrue(len(_search_service['privateEndpointConnections']) == 1)
 
         # list private endpoints
         _private_endpoint_connections = self.cmd('az search privateendpointconnection list -g {rg} --service-name {search_service_name}').get_output_in_json()
-        self.assertTrue(len(_private_endpoint_connections)==1)
+        self.assertTrue(len(_private_endpoint_connections) == 1)
 
         # get private endpoint
         _private_endpoint_connection_name = _private_endpoint_connections[0]['name']
         self.kwargs.update({
             '_private_endpoint_connection_name': _private_endpoint_connection_name,
         })
-        self.cmd('az search privateendpointconnection show --private-endpoint-connection-name {_private_endpoint_connection_name} -g {rg} --service-name {search_service_name}',
-            checks=[
-                self.check('name', '{_private_endpoint_connection_name}'),
-                self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}')
-            ])
+        self.cmd('az search privateendpointconnection show --name {_private_endpoint_connection_name} -g {rg} --service-name {search_service_name}',
+                 checks=[self.check('name', '{_private_endpoint_connection_name}'),
+                         self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}')])
 
         # update private endpoint
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --private-endpoint-connection-name {_private_endpoint_connection_name} --private-link-service-connection-status {private_endpoint_connection_status_rejected} --private-link-service-connection-description "{private_endpoint_connection_description_rejected}"',
-            checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_rejected}'),
-                self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_rejected}'),
-            ]
-        )
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_rejected} --description "{private_endpoint_connection_description_rejected}"',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_rejected}'),
+                         self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_rejected}')])
 
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --private-endpoint-connection-name {_private_endpoint_connection_name} --private-link-service-connection-status {private_endpoint_connection_status_pending} --private-link-service-connection-description "{private_endpoint_connection_description_pending}"',
-            checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_pending}'),
-                self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_pending}'),
-            ]
-        )
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_pending} --description "{private_endpoint_connection_description_pending}"',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_pending}'),
+                         self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_pending}')])
 
-        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --private-endpoint-connection-name {_private_endpoint_connection_name} --private-link-service-connection-status {private_endpoint_connection_status_approved} --private-link-service-connection-description "{private_endpoint_connection_description_approved}"',
-            checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}'),
-                self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_approved}'),
-            ]
-        )
+        self.cmd('az search privateendpointconnection update --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} --status {private_endpoint_connection_status_approved} --description "{private_endpoint_connection_description_approved}"',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_approved}'),
+                         self.check('properties.privateLinkServiceConnectionState.description', '{private_endpoint_connection_description_approved}')])
 
         # delete private endpoint
-        self.cmd('az search privateendpointconnection delete --service-name {search_service_name} -g {rg} --private-endpoint-connection-name {_private_endpoint_connection_name} -y',
-            checks=[
-                self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_disconnected}')
-            ]
-        )
+        self.cmd('az search privateendpointconnection delete --service-name {search_service_name} -g {rg} --name {_private_endpoint_connection_name} -y',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', '{private_endpoint_connection_status_disconnected}')])
 
         # get private endpoint
         with self.assertRaises(SystemExit) as ex:
-            self.cmd('az search privateendpointconnection show --private-endpoint-connection-name {_private_endpoint_connection_name} -g {rg} --service-name {search_service_name}')
+            self.cmd('az search privateendpointconnection show --name {_private_endpoint_connection_name} -g {rg} --service-name {search_service_name}')
         self.assertEqual(ex.exception.code, 3)
 
         # list private endpoints
         _private_endpoint_connections = self.cmd('az search privateendpointconnection list -g {rg} --service-name {search_service_name}').get_output_in_json()
-        self.assertTrue(len(_private_endpoint_connections)==0)
+        self.assertTrue(len(_private_endpoint_connections) == 0)
+
 
 if __name__ == '__main__':
     unittest.main()

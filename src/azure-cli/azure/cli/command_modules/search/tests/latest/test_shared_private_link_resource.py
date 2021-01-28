@@ -38,31 +38,26 @@ class AzureSearchServicesTests(ScenarioTest):
         self.kwargs.update({'_account_resource_id': _account_resource_id})
 
         # create shared private link resource
-        _tpe_resource = self.cmd('az search sharedprivatelinkresource createorupdate --service-name {search_service_name} -g {rg} --shared-private-link-resource-id {_account_resource_id} --shared-private-link-resource-name {shared_private_link_resource_name} --shared-private-link-resource-group-id {shared_private_link_resource_group_id}',
-            checks=[
-                self.check('name', '{shared_private_link_resource_name}'),
-                self.check('properties.provisioningState', '{shared_private_link_resource_request_provisioning_state_default}'),
-                self.check('properties.requestMessage', '{shared_private_link_resource_request_message_default}'),
-                self.check('properties.status', '{shared_private_link_resource_request_status_default}')
-            ]
-        ).get_output_in_json()
+        _tpe_resource = self.cmd('az search sharedprivatelinkresource createorupdate --service-name {search_service_name} -g {rg} --id {_account_resource_id} --name {shared_private_link_resource_name} --group-id {shared_private_link_resource_group_id}',
+                                 checks=[self.check('name', '{shared_private_link_resource_name}'),
+                                         self.check('properties.provisioningState', '{shared_private_link_resource_request_provisioning_state_default}'),
+                                         self.check('properties.requestMessage', '{shared_private_link_resource_request_message_default}'),
+                                        self.check('properties.status', '{shared_private_link_resource_request_status_default}')]).get_output_in_json()
 
         # update shared private link resource
-        self.cmd('az search sharedprivatelinkresource createorupdate --service-name {search_service_name} -g {rg} --shared-private-link-resource-id {_account_resource_id} --shared-private-link-resource-name {shared_private_link_resource_name} --shared-private-link-resource-group-id {shared_private_link_resource_group_id} --shared-private-link-resource-request-message "{shared_private_link_resource_request_message}"',
-            checks=[
-                self.check('properties.requestMessage', '{shared_private_link_resource_request_message}')
-            ])
+        self.cmd('az search sharedprivatelinkresource createorupdate --service-name {search_service_name} -g {rg} --id {_account_resource_id} --name {shared_private_link_resource_name} --group-id {shared_private_link_resource_group_id} --request-message "{shared_private_link_resource_request_message}"',
+                 checks=[self.check('properties.requestMessage', '{shared_private_link_resource_request_message}')])
 
         # list shared private link resources
         _tpe_resources = self.cmd('az search sharedprivatelinkresource list --service-name {search_service_name} -g {rg}').get_output_in_json()
         self.assertTrue(len(_tpe_resources) == 1)
 
         # get shared private link resource
-        _tpe_resource = self.cmd('az search sharedprivatelinkresource show --service-name {search_service_name} -g {rg} --shared-private-link-resource-name {shared_private_link_resource_name}').get_output_in_json()
+        _tpe_resource = self.cmd('az search sharedprivatelinkresource show --service-name {search_service_name} -g {rg} --name {shared_private_link_resource_name}').get_output_in_json()
         self.assertTrue(_tpe_resource['properties']['privateLinkResourceId'] == _account_resource_id)
 
         # delete shared private link resource
-        self.cmd('az search sharedprivatelinkresource delete --service-name {search_service_name} -g {rg} --shared-private-link-resource-name {shared_private_link_resource_name} -y')
+        self.cmd('az search sharedprivatelinkresource delete --service-name {search_service_name} -g {rg} --name {shared_private_link_resource_name} -y')
 
         # list shared private link resources
         _tpe_resources = self.cmd('az search sharedprivatelinkresource list --service-name {search_service_name} -g {rg}').get_output_in_json()
@@ -70,7 +65,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         # get shared private link resource
         with self.assertRaises(SystemExit) as ex:
-            self.cmd('az search sharedprivatelinkresource show --service-name {search_service_name} -g {rg} --shared-private-link-resource-name {shared_private_link_resource_name}')
+            self.cmd('az search sharedprivatelinkresource show --service-name {search_service_name} -g {rg} --name {shared_private_link_resource_name}')
         self.assertEqual(ex.exception.code, 3)
 
 
