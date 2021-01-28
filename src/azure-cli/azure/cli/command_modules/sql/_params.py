@@ -347,7 +347,7 @@ def _configure_db_dw_params(arg_ctx):
     arg_ctx.argument('read_scale',
                      arg_type=read_scale_param_type)
 
-    arg_ctx.argument('read_replica_count',
+    arg_ctx.argument('high_availability_replica_count',
                      arg_type=read_replicas_param_type)
 
     creation_arg_group = 'Creation'
@@ -460,7 +460,7 @@ def _configure_db_dw_create_params(
             'min_capacity',
             'compute_model',
             'read_scale',
-            'read_replica_count',
+            'high_availability_replica_count',
             'storage_account_type'
         ])
 
@@ -1406,6 +1406,49 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
+
+        c.argument('blob_storage_target_state',
+                   blob_storage_target_state_param_type)
+
+        c.argument('log_analytics_target_state',
+                   log_analytics_target_state_param_type)
+
+        c.argument('log_analytics_workspace_resource_id',
+                   log_analytics_workspace_resource_id_param_type)
+
+        c.argument('event_hub_target_state',
+                   event_hub_target_state_param_type)
+
+        c.argument('event_hub_authorization_rule_id',
+                   event_hub_authorization_rule_id_param_type)
+
+        c.argument('event_hub', event_hub_param_type)
+
+    #####
+    #           sql server ms-support audit-policy
+    ######
+    with self.argument_context('sql server ms-support audit-policy update') as c:
+        c.argument('storage_account',
+                   options_list=['--storage-account'],
+                   arg_group=storage_arg_group,
+                   help='Name of the storage account.')
+
+        c.argument('storage_account_access_key',
+                   options_list=['--storage-key'],
+                   arg_group=storage_arg_group,
+                   help='Access key for the storage account.')
+
+        c.argument('storage_endpoint',
+                   arg_group=storage_arg_group,
+                   help='The storage account endpoint.')
+        _configure_security_policy_storage_params(c)
+
+        policy_arg_group = 'Policy'
+
+        c.argument('state',
+                   arg_group=policy_arg_group,
+                   help='Auditing policy state',
+                   arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('blob_storage_target_state',
                    blob_storage_target_state_param_type)
