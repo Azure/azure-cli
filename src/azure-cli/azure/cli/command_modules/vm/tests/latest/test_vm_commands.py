@@ -4665,7 +4665,7 @@ class DiskAccessTest(ScenarioTest):
 
 class DiskBurstingTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_disk_access_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_disk_busrting_', location='eastus')
     def test_disk_bursting(self, resource_group):
         self.kwargs.update({
             'disk1': 'mydisk1',
