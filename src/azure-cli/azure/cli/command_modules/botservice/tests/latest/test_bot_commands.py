@@ -809,6 +809,97 @@ class BotLiveOnlyTests(LiveScenarioTest):
                      self.check('type', 'abs')
                  })
 
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_create_enable_encryption_then_disable(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'keyvaultname': self.create_random_name(prefix='keyVault', length=15),
+            'keyName': self.create_random_name(prefix='keyName', length=15),
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
+        self.cmd(
+            'az keyvault update --name {keyvaultname} -g {rg} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd(
+            'az keyvault set-policy --name {keyvaultname} --key-permissions get wrapKey unwrapKey --object-id a5c54cac-9ebb-45c5-81e5-29dabf2eb5ee')
+
+        resultAzKey = self.cmd(
+            'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software',
+            checks={
+                self.check('key', object)
+            })
+        resultAzKey = resultAzKey.get_output_in_json()
+        cmk_url = resultAzKey['key']['kid'];
+
+        resultsCreate = self.cmd(
+            'az bot create -k registration -g {rg} -n {botname} --appid {app_id} --cmk-key-url ' + cmk_url,
+            checks={
+                self.check('resourceGroup', '{rg}'),
+                self.check('id', '{botname}'),
+                self.check('type', 'abs')
+            })
+        resultsCreate = resultsCreate.get_output_in_json()
+        assert resultsCreate['properties']['cmekKeyVaultUrl'] == cmk_url
+        assert resultsCreate['properties']['isCmekEnabled'] == True
+
+        results = self.cmd('az bot update -g {rg} -n {botname} '
+                           '--encryption-off',
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        assert not results['properties']['cmekKeyVaultUrl']
+        assert results['properties']['isCmekEnabled'] == False
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_update_enable_cmk(self, resource_group):
+        self.kwargs.update({
+            'botname': self.create_random_name(prefix='cli', length=15),
+            'app_id': str(uuid.uuid4()),
+            'display_name': 'clitestbot',
+            'keyvaultname': self.create_random_name(prefix='keyVault', length=15),
+            'keyName': self.create_random_name(prefix='keyName', length=15),
+        })
+
+        self.cmd('az bot delete -g {rg} -n {botname}')
+
+        resultsCreate = self.cmd('az bot create -k registration -g {rg} -n {botname} --appid {app_id}',
+                                 checks={
+                                     self.check('resourceGroup', '{rg}'),
+                                     self.check('id', '{botname}'),
+                                     self.check('type', 'abs')
+                                 })
+        resultsCreate = resultsCreate.get_output_in_json()
+        assert resultsCreate['properties']['cmekKeyVaultUrl'] is None
+        assert resultsCreate['properties']['isCmekEnabled'] == False
+
+        self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
+        self.cmd(
+            'az keyvault update --name {keyvaultname} -g {rg} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd(
+            'az keyvault set-policy --name {keyvaultname} --key-permissions get wrapKey unwrapKey --object-id a5c54cac-9ebb-45c5-81e5-29dabf2eb5ee')
+
+        resultAzKey = self.cmd(
+            'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software')
+        resultAzKey = resultAzKey.get_output_in_json()
+        cmk_url = resultAzKey['key']['kid'];
+
+        results = self.cmd('az bot update -g {rg} -n {botname} '
+                           '--cmk-key-url ' + cmk_url,
+                           checks=[
+                               self.check('name', '{botname}'),
+                               self.check('resourceGroup', '{rg}')])
+        results = results.get_output_in_json()
+
+        # The "developerAppInsightsApiKey" is a secret and is always null when retrieved.
+        assert results['properties']['cmekKeyVaultUrl'] == cmk_url
+        assert results['properties']['isCmekEnabled'] == True
+
 
 class BotLocalErrorsTests(unittest.TestCase):
     def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):
