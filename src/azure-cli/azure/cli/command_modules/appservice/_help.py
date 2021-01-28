@@ -2429,3 +2429,13 @@ helps['staticwebapp users update'] = """
     - name: Updates a user entry with the listed roles.
       text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
 """
+
+helps['webapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure Web Apps.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az webapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+"""
