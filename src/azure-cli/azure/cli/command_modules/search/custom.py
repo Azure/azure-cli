@@ -55,7 +55,8 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
         _ip_rules = []
         _ip_rules_array = re.split(';|,', ip_rules)
         for _ip_rule in _ip_rules_array:
-            _ip_rules.append(IpRule(value=_ip_rule))
+            if _ip_rule:
+                _ip_rules.append(IpRule(value=_ip_rule))
         _search.network_rule_set = NetworkRuleSet(ip_rules=_ip_rules)
     if identity_type:
         _identity = Identity(type=identity_type)
@@ -63,7 +64,7 @@ def create_search_service(cmd, resource_group_name, search_service_name, sku, lo
 
     return _client.begin_create_or_update(resource_group_name, search_service_name, _search)
 
-def update_search_service(instance, partition_count=0, replica_count=0, public_network_access="enabled",
+def update_search_service(instance, partition_count=0, replica_count=0, public_network_access=None,
                           ip_rules=None, identity_type=None):
     """
     Update partition and replica of the given search service.
@@ -72,8 +73,10 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
     :param replica_count: Number of replicas in the search service.
     :param public_network_access: Public accessibility to the search service;
                                   allowed values are "enabled" or "disabled".
-    :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma or semicolon;
-                     These IP rules are applicable only when public_network_access is "enabled".
+    :param ip_rules: Public IP(v4) addresses or CIDR ranges to the search service, seperated by comma(',') or
+                     semicolon(';'); If spaces (ex - ' '), ',' or ';' is provided, any existing IP rule will be
+                     nullified and no public IP rule is applied. These IP rules are applicable only when
+                     public_network_access is "enabled".
     :param identity_type: The identity type. Possible values include: "None", "SystemAssigned".
     """
     from azure.mgmt.search.models import NetworkRuleSet, IpRule, Identity
@@ -85,14 +88,16 @@ def update_search_service(instance, partition_count=0, replica_count=0, public_n
         instance.replica_count = replica_count
     if partition_count > 0:
         instance.partition_count = partition_count
-    if (public_network_access.lower() not in ["enabled", "disabled"]):
-        raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
-    instance.public_network_access = public_network_access
+    if public_network_access:
+        if (public_network_access.lower() not in ["enabled", "disabled"]):
+            raise ValueError("SearchService.PublicNetworkAccess: only [""enabled"", ""disabled""] are allowed")
+        instance.public_network_access = public_network_access
     if ip_rules:
         _ip_rules = []
         _ip_rules_array = re.split(';|,', ip_rules)
         for _ip_rule in _ip_rules_array:
-            _ip_rules.append(IpRule(value=_ip_rule))
+            if _ip_rule:
+                _ip_rules.append(IpRule(value=_ip_rule))
         instance.network_rule_set = NetworkRuleSet(ip_rules=_ip_rules)
     if identity_type:
         _identity = Identity(type=identity_type)

@@ -46,7 +46,7 @@ def load_command_table(self, _):
         g.command('list', 'list_by_resource_group')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='update_search_service', setter_arg_name='service')
+        g.generic_update_command('update', custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
         g.custom_command('create', 'create_search_service')
 
     with self.command_group('search privateendpointconnection', search_private_endpoint_connections_sdk) as g:
