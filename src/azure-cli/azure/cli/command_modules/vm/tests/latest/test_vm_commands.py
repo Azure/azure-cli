@@ -4672,13 +4672,12 @@ class DiskBurstingTest(ScenarioTest):
             'disk2': 'mydisk2'
         })
 
-        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1024 --location CentralUSEUAP --enable-bursting')
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 1024 --location centraluseuap --enable-bursting')
         self.cmd('disk show -g {rg} -n {disk1}', checks=[
             self.check('name', '{disk1}'),
             self.check('burstingEnabled', True)
         ])
-
-        self.cmd('disk create -g {rg} -n {disk2} --size-gb 1024 --location CentralUSEUAP')
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 1024 --location centraluseuap')
         self.cmd('disk show -g {rg} -n {disk2}', checks=[
             self.check('name', '{disk2}'),
             self.check('burstingEnabled', None)
