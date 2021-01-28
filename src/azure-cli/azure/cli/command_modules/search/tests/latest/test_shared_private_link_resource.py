@@ -42,7 +42,7 @@ class AzureSearchServicesTests(ScenarioTest):
                                  checks=[self.check('name', '{shared_private_link_resource_name}'),
                                          self.check('properties.provisioningState', '{shared_private_link_resource_request_provisioning_state_default}'),
                                          self.check('properties.requestMessage', '{shared_private_link_resource_request_message_default}'),
-                                        self.check('properties.status', '{shared_private_link_resource_request_status_default}')]).get_output_in_json()
+                                         self.check('properties.status', '{shared_private_link_resource_request_status_default}')]).get_output_in_json()
 
         # update shared private link resource
         self.cmd('az search sharedprivatelinkresource createorupdate --service-name {search_service_name} -g {rg} --id {_account_resource_id} --name {shared_private_link_resource_name} --group-id {shared_private_link_resource_group_id} --request-message "{shared_private_link_resource_request_message}"',

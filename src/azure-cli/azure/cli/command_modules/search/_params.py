@@ -15,11 +15,11 @@ def load_arguments(self, _):
     with self.argument_context('search service create') as c:
         c.ignore('search_management_request_options')
         c.argument('sku', help='Search Service SKU', arg_type=get_enum_type(["Free", "Basic", "Standard", "Standard2", "Standard3"]))
-        c.argument('public_network_access', options_list=['--public_network_access', '--public-access'])
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-access'])
 
     with self.argument_context('search service update') as c:
         c.ignore('search_management_request_options')
-        c.argument('public_network_access', options_list=['--public_network_access', '--public-access'])
+        c.argument('public_network_access', options_list=['--public-network-access', '--public-access'])
 
     with self.argument_context('search privateendpointconnection') as c:
         c.ignore('search_management_request_options')
