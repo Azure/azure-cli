@@ -833,7 +833,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
                 self.check('key', object)
             })
         resultAzKey = resultAzKey.get_output_in_json()
-        cmk_url = resultAzKey['key']['kid'];
+        cmk_url = resultAzKey['key']['kid']
 
         resultsCreate = self.cmd(
             'az bot create -k registration -g {rg} -n {botname} --appid {app_id} --cmk-key-url ' + cmk_url,
@@ -844,7 +844,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
             })
         resultsCreate = resultsCreate.get_output_in_json()
         assert resultsCreate['properties']['cmekKeyVaultUrl'] == cmk_url
-        assert resultsCreate['properties']['isCmekEnabled'] == True
+        assert resultsCreate['properties']['isCmekEnabled'] is True
 
         results = self.cmd('az bot update -g {rg} -n {botname} '
                            '--encryption-off',
@@ -854,7 +854,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         results = results.get_output_in_json()
 
         assert not results['properties']['cmekKeyVaultUrl']
-        assert results['properties']['isCmekEnabled'] == False
+        assert results['properties']['isCmekEnabled'] is False
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_update_enable_cmk(self, resource_group):
@@ -876,7 +876,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
                                  })
         resultsCreate = resultsCreate.get_output_in_json()
         assert resultsCreate['properties']['cmekKeyVaultUrl'] is None
-        assert resultsCreate['properties']['isCmekEnabled'] == False
+        assert resultsCreate['properties']['isCmekEnabled'] is False
 
         self.cmd('az keyvault create --location westus2 --name {keyvaultname} -g {rg}')
         self.cmd(
@@ -887,7 +887,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
         resultAzKey = self.cmd(
             'az keyvault key create --vault-name {keyvaultname} --name {keyName} --protection software')
         resultAzKey = resultAzKey.get_output_in_json()
-        cmk_url = resultAzKey['key']['kid'];
+        cmk_url = resultAzKey['key']['kid']
 
         results = self.cmd('az bot update -g {rg} -n {botname} '
                            '--cmk-key-url ' + cmk_url,
@@ -898,7 +898,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
 
         # The "developerAppInsightsApiKey" is a secret and is always null when retrieved.
         assert results['properties']['cmekKeyVaultUrl'] == cmk_url
-        assert results['properties']['isCmekEnabled'] == True
+        assert results['properties']['isCmekEnabled'] is True
 
 
 class BotLocalErrorsTests(unittest.TestCase):
