@@ -52,6 +52,8 @@ parameters:
     short-summary: If enabled, AES encryption will be enabled for SMB communication
   - name: --ldap-signing
     short-summary: Specifies whether or not the LDAP traffic needs to be signed
+  - name: --security-operators
+    short-summary: Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier
 examples:
   - name: Add an active directory to the account
     text: >
@@ -496,6 +498,10 @@ parameters:
     short-summary: Kerberos5p Read and write access
   - name: --has-root-access
     short-summary: Has root access to volume
+  - name: --smb-encryption
+    short-summary: Enables encryption for in-flight smb3 data. Only applicable for SMB/DualProtocol volume. To be used with swagger version 2020-08-01 or later. Default value is False
+  - name: --smb-continuously-avl
+    short-summary: Enables continuously available share property for smb volume. Only applicable for SMB volume. Default value is False
 examples:
   - name: Create an ANF volume
     text: >

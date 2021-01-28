@@ -1224,7 +1224,7 @@ examples:
   - name: Create a connected registry in registry mode with access to repos app/hello-world and service/mycomponent. It'll create a sync token and scope-map with the right repo permissions.
     text: |
         az acr connected-registry create --registry mycloudregistry --name myconnectedregistry \\
-            --repository "app/hello-world service/mycomponent"
+            --repository "app/hello-world" "service/mycomponent"
   - name: Create a mirror connected registry with only read permissions and pass the sync token
     text: |
         az acr connected-registry create --registry mycloudregistry  --name mymirroracr \\
@@ -1232,7 +1232,7 @@ examples:
   - name: Create a mirror connected registry with client tokens, that syncs every day at midninght and sync window of 4 hours.
     text: |
         az acr connected-registry create -r mycloudregistry -n mymirroracr -p myconnectedregistry \\
-            --repository app/mycomponent -m mirror -s "0 12 * * *" -w PT4H \\
+            --repository "app/mycomponent" -m mirror -s "0 12 * * *" -w PT4H \\
             --client-tokens myTokenName1 myTokenName2
 """
 

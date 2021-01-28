@@ -323,7 +323,15 @@ def should_create_new_rg(cmd, rg_name, is_linux):
 def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
-    return client.check_name_availability(name, 'Microsoft.Web/sites')
+    availability = client.check_name_availability(name, 'Site')
+
+    # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
+    if "." in name:
+        availability.name_available = False
+        availability.reason = "Invalid"
+        availability.message = ("Site names only allow alphanumeric characters and hyphens, "
+                                "cannot start or end in a hyphen, and must be less than 64 chars.")
+    return availability
 
 
 def get_app_details(cmd, name):
