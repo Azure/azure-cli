@@ -126,10 +126,10 @@ def flexible_server_create(cmd, client,
 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
-                            source_server, restore_point_in_time,
+                            source_server, restore_point_in_time=None,
                             location=None, zone=None, no_wait=False):
     provider = 'Microsoft.DBforPostgreSQL'
-   
+
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             source_server_id = resource_id(

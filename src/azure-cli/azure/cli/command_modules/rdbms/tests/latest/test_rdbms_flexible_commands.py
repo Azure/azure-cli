@@ -114,8 +114,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        # self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-        #          .format(database_engine, resource_group, server_name, location))
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
+                 .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
@@ -135,6 +135,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if database_engine == 'mysql':
             self.cmd('{} flexible-server db show -g {} -s {} -d flexibleserverdb'
                      .format(database_engine, resource_group, server_name), checks=[JMESPathCheck('name', 'flexibleserverdb')])
+
+        # self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
+        #          .format(database_engine, resource_group, server_name))
 
         self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
                  .format(database_engine, resource_group, server_name),
