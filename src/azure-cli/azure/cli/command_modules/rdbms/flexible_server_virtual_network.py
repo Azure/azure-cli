@@ -46,7 +46,7 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
                 if not subnet_result.delegations:
                     logger.info('Adding "%s" delegation to the existing subnet.', )
                     subnet_result.delegations = [delegation]
-                    subnet.service_endpoints = [service_endpoint]
+                    subnet_result.service_endpoints = [service_endpoint]
                     subnet_result = nw_client.subnets.begin_create_or_update(resource_group, vnet_name, subnet_name,
                                                                              subnet_result).result()
                 else:
@@ -117,7 +117,7 @@ def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, deleg
     return subnet_result.id
 
 
-def _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegation, nw_client,
+def _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegation, service_endpoint, nw_client,
                                 delegation_service_name, server_name, VirtualNetwork, Subnet,
                                 AddressSpace, loc, vnet_add, subnet_add):
     if (len(vnet.split('\\')) == 1) and (len(subnet.split('\\')) == 1):
@@ -130,7 +130,7 @@ def _create_with_resource_names(cmd, vnet, subnet, resource_group_name, delegati
             if not subnet_result.delegations:
                 logger.info('Adding "%s" delegation to the existing subnet.', )
                 subnet_result.delegations = [delegation]
-                subnet.service_endpoints = [service_endpoint]
+                subnet_result.service_endpoints = [service_endpoint]
                 subnet_result = nw_client.subnets.begin_create_or_update(resource_group_name, vnet, subnet,
                                                                          subnet_result).result()
             else:
