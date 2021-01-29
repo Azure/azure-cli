@@ -152,6 +152,18 @@ type: group
 short-summary: Manage Azure Kubernetes Services.
 """
 
+helps["aks check-acr"] = """
+type: command
+short-summary: Validate an ACR is accesible from an AKS cluster.
+parameters:
+  - name: --acr
+    short-summary: The FQDN of the ACR.
+examples:
+  - name: Validate the ACR is accesible from the AKS cluster.
+    text: az aks check-acr --name MyManagedCluster --resource-group MyResourceGroup --acr myacr.azurecr.io
+    crafted: true
+"""
+
 helps['aks browse'] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
@@ -308,7 +320,7 @@ parameters:
                          Learn more at aka.ms/aks/policy.
             virtual-node - enable AKS Virtual Node.
                          Requires --aci-subnet-name to provide the name of an existing subnet for the Virtual Node to use.
-                         aci-subnet-name must be in the same vent which is specified by --vnet-subnet-id (required as well).
+                         aci-subnet-name must be in the same vnet which is specified by --vnet-subnet-id (required as well).
   - name: --disable-rbac
     type: bool
     short-summary: Disable Kubernetes Role-Based Access Control.

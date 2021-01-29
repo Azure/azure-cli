@@ -32,6 +32,12 @@ examples:
         az synapse workspace create --name fromcli4 --resource-group rg \\
           --storage-account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/testadlsgen2 --file-system testfilesystem \\
           --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US"
+  - name: Create a Synapse workspace using customer-managed key
+    text: |-
+        az synapse workspace create --name fromcli4 --resource-group rg \\
+          --storage-account testadlsgen2 --file-system testfilesystem \\
+          --sql-admin-login-user cliuser1 --sql-admin-login-password Password123! --location "East US" \\
+          --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname} --key-name testcmk
 """
 
 helps['synapse workspace list'] = """
@@ -157,6 +163,96 @@ short-summary: Place the CLI in a waiting state until a condition of a Spark poo
 helps['synapse sql'] = """
 type: group
 short-summary: Manage SQL pools.
+"""
+
+helps['synapse sql ad-admin'] = """
+type: group
+short-summary: Manage SQL Active Directory administrator.
+"""
+
+helps['synapse sql ad-admin show'] = """
+type: command
+short-summary: Get the SQL Azure Active Directory administrator.
+examples:
+  - name: Get the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin show --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql ad-admin create'] = """
+type: command
+short-summary: Create the SQL Azure Active Directory administrator.
+examples:
+  - name: Create the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin create --workspace-name testsynapseworkspace --resource-group rg \\
+        --display-name youraccount@yourdomain --object-id 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse sql ad-admin update'] = """
+type: command
+short-summary: Update the SQL Azure Active Directory administrator.
+examples:
+  - name: Update the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin update --workspace-name testsynapseworkspace --resource-group rg \\
+        --display-name youraccount@yourdomain --object-id 00000000-0000-0000-0000-000000000000
+"""
+
+helps['synapse sql ad-admin delete'] = """
+type: command
+short-summary: Delete the SQL Azure Active Directory administrator.
+examples:
+  - name: Delete the SQL Azure Active admin.
+    text: |-
+        az synapse sql ad-admin delete --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql ad-admin wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
+"""
+
+helps['synapse sql audit-policy'] = """
+type: group
+short-summary: Manage SQL auditing policy.
+"""
+
+helps['synapse sql audit-policy show'] = """
+type: command
+short-summary: Get a SQL's auditing policy.
+examples:
+  - name: Get a SQL's auditing policy.
+    text: |-
+        az synapse sql audit-policy show --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse sql audit-policy update'] = """
+type: command
+short-summary: Update a SQL's auditing policy.
+long-summary: If the policy is being enabled, `--storage-account` or both `--storage-endpoint` and `--storage-key` must be specified.
+examples:
+  - name: Enable by storage account name.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-account mystorageaccount
+  - name: Enable by storage endpoint and key.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Enabled --storage-endpoint https://mystorage.blob.core.windows.net --storage-key MYKEY==
+  - name: Set the list of audit actions.
+    text: |
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --actions FAILED_DATABASE_AUTHENTICATION_GROUP 'UPDATE on database::mydb by public'
+  - name: Disable an auditing policy.
+    text: |-
+        az synapse sql audit-policy update --workspace-name testsynapseworkspace --resource-group rg \\
+        --state Disabled
+"""
+
+helps['synapse sql audit-policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition is met.
 """
 
 helps['synapse sql pool'] = """
@@ -333,7 +429,7 @@ examples:
         --resource-group rg
 """
 
-helps['sql db classification recommendation enable'] = """
+helps['synapse sql pool classification recommendation enable'] = """
 type: command
 short-summary: Enable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
 examples:
@@ -343,7 +439,7 @@ examples:
         --resource-group rg --schema dbo --table mytable --column mycolumn
 """
 
-helps['sql db classification recommendation disable'] = """
+helps['synapse sql pool classification recommendation disable'] = """
 type: command
 short-summary: Disable sensitivity recommendations for a given column(recommendations are enabled by default on all columns).
 examples:
@@ -454,6 +550,105 @@ examples:
         --state Disabled
 """
 
+helps['synapse workspace key'] = """
+type: group
+short-summary:  Manage workspace's keys.
+"""
+
+helps['synapse workspace key create'] = """
+type: command
+short-summary: Create a workspace's key.
+examples:
+  - name: Create a workspace's key.
+    text: |-
+        az synapse workspace key create --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key update'] = """
+type: command
+short-summary: Update a workspace's key or update the state of key to change the workspace state from pending to success state when the workspace is first being provisioned.
+examples:
+  - name: Update a workspace's key.
+    text: |-
+        az synapse workspace key update --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg --key-identifier https://{keyvaultname}.vault.azure.net/keys/{keyname}
+"""
+
+helps['synapse workspace key delete'] = """
+type: command
+short-summary: Delete a workspace's key. The key at active status can't be deleted.
+examples:
+  - name: Delete a workspace's key.
+    text: |-
+        az synapse workspace key delete --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key show'] = """
+type: command
+short-summary: Show a workspace's key by name.
+examples:
+  - name: Show a workspace's key.
+    text: |-
+        az synapse workspace key show --name newkey --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace key list'] = """
+type: command
+short-summary: List keys under specified workspace.
+examples:
+  - name: List keys under specified workspace.
+    text: |-
+        az synapse workspace key list --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse workspace key wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a workspace key is met.
+"""
+
+helps['synapse workspace managed-identity'] = """
+type: group
+short-summary:  Manage workspace's managed-identity.
+"""
+
+helps['synapse workspace managed-identity show-sql-access'] = """
+type: command
+short-summary: Show workspace's sql-access state to managed-identity.
+examples:
+  - name: Show workspace's sql-access state to managed-identity.
+    text: |-
+        az synapse workspace managed-identity show-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity revoke-sql-access'] = """
+type: command
+short-summary: Revoke workspace's sql-access to managed-identity.
+examples:
+  - name: Revoke workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity revoke-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity grant-sql-access'] = """
+type: command
+short-summary: Grant workspace's sql-access to managed-identity.
+examples:
+  - name: Grant workspace's sql-access to managed-identity.
+    text: |-
+        az synapse workspace managed-identity grant-sql-access --workspace-name testsynapseworkspace \\
+        --resource-group rg
+"""
+
+helps['synapse workspace managed-identity wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of sql-access state to managed-identity is met.
+"""
+
 helps['synapse workspace firewall-rule'] = """
 type: group
 short-summary:  Manage a workspace's firewall rules.
@@ -467,6 +662,16 @@ examples:
     text: |-
         az synapse workspace firewall-rule create --name allowAll --workspace-name testsynapseworkspace \\
         --resource-group rg --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255
+"""
+
+helps['synapse workspace firewall-rule update'] = """
+type: command
+short-summary: Update a firewall rule.
+examples:
+  - name: Update a firewall rule.
+    text: |-
+        az synapse workspace firewall-rule update --name allowAll --workspace-name testsynapseworkspace \\
+        --resource-group rg --start-ip-address 172.0.0.0
 """
 
 helps['synapse workspace firewall-rule show'] = """
@@ -1245,4 +1450,178 @@ examples:
     text: |-
         az synapse notebook delete --workspace-name testsynapseworkspace \\
           --name testnotebook
+"""
+
+helps['synapse integration-runtime'] = """
+type: group
+short-summary: Manage Synapse's integration runtimes.
+"""
+
+helps['synapse integration-runtime create'] = """
+type: command
+short-summary: Create an integration runtime.
+examples:
+  - name: Create an integration runtime.
+    text: |-
+        az synapse integration-runtime create --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime --type Managed
+"""
+
+helps['synapse integration-runtime update'] = """
+type: command
+short-summary: Update an integration runtime.
+examples:
+  - name: Update an integration runtime.
+    text: |-
+        az synapse integration-runtime update --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime --auto-update On --update-delay-offset '\"PT03H\"'
+"""
+
+helps['synapse integration-runtime show'] = """
+type: command
+short-summary: Get an integration runtime.
+examples:
+  - name: Get an integration runtime.
+    text: |-
+        az synapse integration-runtime show --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime list'] = """
+type: command
+short-summary: List integration runtimes.
+examples:
+  - name: List integration runtimes.
+    text: |-
+        az synapse integration-runtime list --workspace-name testsynapseworkspace --resource-group rg
+"""
+
+helps['synapse integration-runtime delete'] = """
+type: command
+short-summary: Delete an integration runtime.
+examples:
+  - name: Delete an integration runtime.
+    text: |-
+        az synapse integration-runtime delete --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of a integration runtime is met.
+"""
+
+helps['synapse integration-runtime upgrade'] = """
+type: command
+short-summary: Upgrade self-hosted integration runtime.
+examples:
+  - name: Upgrade self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime upgrade --workspace-name testsynapseworkspace --resource-group rg \\
+          --name testintegrationruntime
+"""
+
+helps['synapse integration-runtime list-auth-key'] = """
+type: command
+short-summary: Get keys for a self-hosted integration runtime.
+examples:
+  - name: Get keys for a self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime list-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime regenerate-auth-key'] = """
+type: command
+short-summary: Regenerate self-hosted integration runtime key.
+examples:
+  - name: Regenerate self-hosted integration runtime key.
+    text: |-
+        az synapse integration-runtime regenerate-auth-key --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --key-name authKey1
+"""
+
+helps['synapse integration-runtime get-monitoring-data'] = """
+type: command
+short-summary: Get metric data for a self-hosted integration runtime.
+examples:
+  - name: Get metric data for a self-hosted integration runtime.
+    text: |-
+        az synapse integration-runtime get-monitoring-data --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime sync-credentials'] = """
+type: command
+short-summary: Synchronize credentials among integration runtime nodes.
+examples:
+  - name: Synchronize credentials among integration runtime nodes.
+    text: |-
+        az synapse integration-runtime sync-credentials --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-connection-info'] = """
+type: command
+short-summary: Get the integration runtime connection infomation.
+examples:
+  - name: Get the integration runtime connection infomation.
+    text: |-
+        az synapse integration-runtime get-connection-info --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime get-status'] = """
+type: command
+short-summary: Gets detailed status information for an integration runtime.
+examples:
+  - name: Gets detailed status information for an integration runtime.
+    text: |-
+        az synapse integration-runtime get-status --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime
+"""
+
+helps['synapse integration-runtime-node'] = """
+type: group
+short-summary: Manage Synapse's self-hosted integration runtime nodes.
+"""
+
+helps['synapse integration-runtime-node show'] = """
+type: command
+short-summary: Get self-hosted integration runtime node information.
+examples:
+  - name: Get self-hosted integration runtime node information.
+    text: |-
+        az synapse integration-runtime-node show --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node update'] = """
+type: command
+short-summary: Update self-hosted integration runtime node.
+examples:
+  - name: Update self-hosted integration runtime node.
+    text: |-
+        az synapse integration-runtime-node update --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node delete'] = """
+type: command
+short-summary: Remove a self-hosted integration runtime node.
+examples:
+  - name: Remove a self-hosted integration runtime node.
+    text: |-
+        az synapse integration-runtime-node delete --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
+"""
+
+helps['synapse integration-runtime-node get-ip-address'] = """
+type: command
+short-summary: Get self-hosted integration runtime node ip.
+examples:
+  - name: Get self-hosted integration runtime node ip.
+    text: |-
+        az synapse integration-runtime-node get-ip-address --workspace-name testsynapseworkspace --resource-group rg \\
+          --name selfhostedintegrationruntime --node-name testnode
 """

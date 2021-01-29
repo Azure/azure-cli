@@ -3,6 +3,187 @@
 Release History
 ===============
 
+2.18.0
+++++++
+
+**ACR**
+
+* `az acr create / update`: Add `--allow-trusted-services`. This parameter determines whether trusted azure services are allowed to access network restricted registries. The default is to allow. (#16530)
+
+**AKS**
+
+* `az aks check-acr`: Add new check-acr command (#16490)
+
+**App Service**
+
+* Fix #13907: `az webapp config ssl import`: Change command to also import App Service Certificate (#16320)
+* Fix #16125: `az webapp ssh`: If using a windows client, open browser to scm link (#16432)
+* Fix #13291: `az webapp deployment slot swap`: The command should support preserve vnet. (#16424)
+* [BREAKING CHANGE] Fix regression where you can't use a runtime version with a space in the name (#16528)
+
+**ARM**
+
+* `az deployment` : Add support for `--query-string` (#16447)
+* `az ts`: Error handling improvement for `--template-file` without `--version` prohibited (#16446)
+
+**Backup**
+
+* `az backup protection backup-now`: Set default retention period to 30 days (#16500)
+
+**Compute**
+
+* Fix issue of none storage_profile (#16260)
+* Better error handling of external tokens (#16406)
+* Fix a vmss reimage issue (#16483)
+* `az vm/vmss extension set`: New parameter `--enable-auto-upgrade` (#16243)
+
+**Container**
+
+* `az container exec`: Remove eol check to avoid closing terminal before it even started on linux (#16000)
+
+**DMS**
+
+* `az dms project task create`: Added task type parameter to help distinguish if a scenario is an online migration or an offline migration. (#15746)
+* `az dms project task cutover`: Add new command which allows tasks with an online migration task type to cutover and end the migration. (#15746)
+* `az dms project create/az dms project task create`: Enable MySQL and PostgreSQL projects/tasks to be created. (#15746)
+
+**IoT**
+
+* Add --tags to IoT Hub create and update (#16336)
+
+**Monitor**
+
+* [BREAKING CHANGE] `az monitor log-analytics workspace data-export`: Remove deprecated `--export-all-tables` parameter and require `--tables` parameter (#16402)
+
+**RDBMS**
+
+* Remove the preview tag for server key and ad admin commands for Postgres and MySql (#16412)
+
+**Role**
+
+* Fix #11594: `az role assignment create`: Only show supported values for `--assignee-principal-type` (#16056)
+
+**Storage**
+
+* Fix #16072: Upload file with big size (#16372)
+* Fix #12291: `az storage blob generate-sas` does not properly encode `--full-uri` (#15748)
+* GA PITR and blob service properties in SRP (#16540)
+
+2.17.1
+++++++
+
+**RDBMS**
+
+* Hotfix: `az mysql create`: Revert incorrect parameter name 'serv_name' to 'service_name'
+
+2.17.0
+++++++
+
+**ACR**
+
+* Support zone redundancy (#15975)
+* `az acr connected-registry`: add support for private preview of connected registry feature. (#16238)
+* `az acr scope-map update`: Deprecated the --add and --remove argument names, replaced with --add-repo and --remove-repo. (#16238)
+* `az acr scope-map create/update`: Introduced gateway permissions to support private preview of connected registry feature. (#16238)
+* `az acr token create`: Introduced synchronization tokens to support private preview of connected registry feature. (#16238)
+
+**AKS**
+
+* Fix: add arguments removed by a previous PR (#16080)
+* `az aks get-credentials`: Clarify documentation for get-credentials (#16011)
+
+**App Service**
+
+* Allow customer to create Python 3.9 function app (#16296)
+* Fix #14583: az webapp up should generate default name if name isn't provided (#16267)
+* Fix: Better error handling when trying to create duplicate ASP in diff location (#16143)
+
+**ARM**
+
+* `az ts`:  Add support for --tags (#16149)
+* `az ts`: Support deleting a single version (#16295)
+* `az provider register`: Add --accept-terms for registering RPaaS (#16194)
+* Fix parsing JSON files with multi-line strings (#15502)
+
+**ARO**
+
+* `az aro delete`: Add RBAC validation on cluster deletion (#16101)
+* `az aro update`: Add RBAC validation on cluster update (#16213)
+* Ensure worker_profile is not None before getting the subnets from (#16309)
+
+**Backup**
+
+* `az backup job list`: Solve -o table bug and added backup_management_type as command input (#16304)
+
+**Batch**
+
+* Upgrade data plane to [azure batch 10.0.0](https://pypi.org/project/azure-batch/10.0.0/) (#16156)
+* [BREAKING CHANGE] az batch job task-counts: Change the output from a JSON object returning task counts to a complex JSON object that includes task counts (`taskCounts`) as well as task slot counts (`taskSlotCounts`). (#16156)
+
+**Compute**
+
+* New license type RHEL_ELS_6 (#16012)
+* Adopt track2 SDK, azure-mgmt-compute==18.0.0 (#15750)
+
+**Container**
+
+* Fix misspelling in `az container create` CLI example text. (#16252)
+
+**DataBoxEdge**
+
+* New command module: support for data-box-edge devices and management (#16193)
+
+**IoT**
+
+* Update device key generation (#16129)
+* Update identity-enabled hub tests to fix endpoint RBAC issues (#16128)
+
+**Key Vault**
+
+* `az keyvault key import`: Support `--kty` for importing BYOK keys (#16223)
+
+**Monitor**
+
+* `az monitor metrics alert create`: Improve error message to give more actionable insight (#16255)
+
+**Network**
+
+* `az network private-endpoint create`: Add more declaration of '--subnet' and '--private-connection-resource-id' (#16174)
+* Change validator of application-gateway ssl-cert create (#16256)
+* Migrate network to track2 SDK (#16245)
+* Fix bug for "az network traffic-manager profile create" when using "--routing-method MultiValue" (#16300)
+
+**Profile**
+
+* Fix "missing secret or certificate in order to authenticate through a service principal" (#16219)
+
+**Role**
+
+* `az ad sp create-for-rbac`: Deprecate creating Contributor role assignment by default (#16081)
+
+**Security**
+
+* Add secure score commands (#16198)
+* Fix update alert command and support new value (#16291)
+
+**SQL**
+
+* `az sql dw update`: do not accept backup-storage-redundancy argument (#16326)
+* `az sql db update`: update backup storage redundancy as requested from command (#16326)
+
+**Storage**
+
+* Fix issue #15965: Clarify how to remove multiple legal hold tags with `az storage container legal-hold [clear|set]` (#16167)
+* `az storage account encryption-scope`: GA support (#16270)
+* Fix issue #9959: Trying to download a snapshot version of a file share fails with ResourceNotFound (#16275)
+
+**Synapse**
+
+* Add new cmdlets az synapse sql ad-admin show, create, update, delete (#16241)
+* Add new cmdlet az synapse workspace firewall-rule update (#16241)
+* Add new cmdlets az synapse sql audit-policy show, update (#16241)
+* Add integration runtime related cmdlets (#15498)
+
 2.16.0
 ++++++
 

@@ -1198,7 +1198,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
                hsm_name=None, identifier=None,  # pylint: disable=unused-argument
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
-               byok_string=None, kty='RSA', release_policy=None, exportable=None):
+               byok_string=None, kty='RSA', release_policy=None, exportable=None, curve=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.
         Supports importing BYOK keys into HSM for premium key vaults. """
     if is_azure_stack_profile(cmd):
@@ -1249,6 +1249,7 @@ def import_key(cmd, client, key_name=None, vault_base_url=None,  # pylint: disab
 
         key_obj.kty = kty + '-HSM'
         key_obj.t = byok_data
+        key_obj.crv = curve
 
     if is_azure_stack_profile(cmd):
         return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
@@ -1588,7 +1589,7 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
                 f.write(cert)
             else:
                 import base64
-                encoded = base64.encodestring(cert)  # pylint:disable=deprecated-method
+                encoded = base64.encodebytes(cert)
                 if isinstance(encoded, bytes):
                     encoded = encoded.decode("utf-8")
                 encoded = '-----BEGIN CERTIFICATE-----\n' + encoded + '-----END CERTIFICATE-----\n'

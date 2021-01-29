@@ -43,7 +43,7 @@ def load_arguments(self, _):
     )
     filter_parameters_arg_type = CLIArgumentType(
         validator=validate_filter_parameters,
-        help="Space-separated filter parameters in 'name[=value]' format.",
+        help="Space-separated filter parameters in 'name[=value]' format. The value must be an escaped JSON string.",
         nargs='*'
     )
     datatime_filter_arg_type = CLIArgumentType(

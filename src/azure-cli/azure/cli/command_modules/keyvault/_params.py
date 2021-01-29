@@ -22,7 +22,7 @@ from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_pr
 
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type,
-    get_vault_base_url_type, get_hsm_base_url_type,
+    get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
     validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
@@ -76,6 +76,12 @@ def load_arguments(self, _):
         ec = "EC"  #: Elliptic Curve.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
         oct = 'oct'
+
+    class CLIJsonWebKeyCurveName(str, Enum):
+        p_256 = "P-256"  #: The NIST P-256 elliptic curve, AKA SECG curve SECP256R1.
+        p_256k = "P-256K"  #: The SECG SECP256K1 elliptic curve.
+        p_384 = "P-384"  #: The NIST P-384 elliptic curve, AKA SECG curve SECP384R1.
+        p_521 = "P-521"  #: The NIST P-521 elliptic curve, AKA SECG curve SECP521R1.
 
     (KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -362,8 +368,10 @@ def load_arguments(self, _):
                    help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
-        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport),
+        c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
                    help='The type of key to import (only for BYOK).')
+        c.argument('curve', arg_type=get_enum_type(CLIJsonWebKeyCurveName), validator=validate_key_import_type,
+                   help='The curve name of the key to import (only for BYOK).')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
