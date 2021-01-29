@@ -20,8 +20,8 @@ DEFAULT_SUBNET_PREFIX = '10.0.0.0/24'
 # pylint: disable=too-many-locals, too-many-statements
 def prepare_vnet(cmd, server_name, vnet, subnet, resource_group_name, loc, delegation_service_name, vnet_address_pref, subnet_address_pref):
     Delegation, Subnet, VirtualNetwork, AddressSpace, ServiceEndpoint = cmd.get_models('Delegation', 'Subnet', 'VirtualNetwork',
-                                                                      'AddressSpace', 'ServiceEndpointPropertiesFormat',
-                                                                      resource_type=ResourceType.MGMT_NETWORK)
+                                                                                       'AddressSpace', 'ServiceEndpointPropertiesFormat',
+                                                                                       resource_type=ResourceType.MGMT_NETWORK)
     delegation = Delegation(name=delegation_service_name, service_name=delegation_service_name)
     service_endpoint = ServiceEndpoint(service='Microsoft.Storage')
     nw_client = network_client_factory(cmd.cli_ctx)
@@ -207,8 +207,8 @@ def _get_resource(client, resource_group_name, *subresources):
 
 def create_vnet(cmd, servername, location, resource_group_name, delegation_service_name):
     Subnet, VirtualNetwork, AddressSpace, Delegation, ServiceEndpoint = cmd.get_models('Subnet', 'VirtualNetwork', 'AddressSpace',
-                                                                      'Delegation', 'ServiceEndpointPropertiesFormat',
-                                                                      resource_type=ResourceType.MGMT_NETWORK)
+                                                                                       'Delegation', 'ServiceEndpointPropertiesFormat',
+                                                                                       resource_type=ResourceType.MGMT_NETWORK)
     client = network_client_factory(cmd.cli_ctx)
     vnet_name, subnet_name, vnet_address_prefix, subnet_prefix = _create_vnet_metadata(servername[6:])
 
