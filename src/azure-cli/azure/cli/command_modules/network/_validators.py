@@ -239,7 +239,7 @@ def validate_cert(namespace):
 def validate_tursted_client_cert(namespace):
     if namespace.client_cert_data is None or namespace.client_cert_name is None:
         raise CLIError('To use this cmd, you must specify both name and data')
-
+    namespace.client_cert_data = read_base_64_file(namespace.client_cert_data)
 
 def validate_ssl_cert(namespace):
     params = [namespace.cert_data, namespace.cert_password]

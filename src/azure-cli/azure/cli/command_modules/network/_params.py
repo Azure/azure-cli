@@ -44,9 +44,8 @@ from azure.cli.command_modules.network._completers import (
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
 from azure.cli.command_modules.network._actions import (
-    AddBackendAddressCreate,
-    AddBackendAddressCreateForCrossRegionLB,
-    TrustedClientCertificateCreate)
+    AddBackendAddressCreate, AddBackendAddressCreateForCrossRegionLB, TrustedClientCertificateCreate,
+    SslProfilesCreate)
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -161,7 +160,10 @@ def load_arguments(self, _):
         c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway', arg_group='Mutual Authentication Support') as c:
-        c.argument('trusted_client_certificate', min_api='2020-06-01', nargs='+', action=TrustedClientCertificateCreate, is_preview=True)
+        c.argument('trusted_client_certificates', min_api='2020-06-01', nargs='+', action=TrustedClientCertificateCreate, is_preview=True)
+
+    with self.argument_context('network application-gateway', arg_group='SSL Profile') as c:
+        c.argument('ssl_profile', min_api='2020-06-01', nargs='+', action=SslProfilesCreate, is_preview=True)
 
     with self.argument_context('network application-gateway create') as c:
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
@@ -441,7 +443,18 @@ def load_arguments(self, _):
         c.argument('client_cert_name', options_list='--name', help='Name of the trusted client certificate that is unique within an Application Gateway')
 
     with self.argument_context('network application-gateway client-cert add', min_api='2020-06-01') as c:
-        c.argument('client_cert_data', options_list='--date', help='Certificate public data.', validator=validate_tursted_client_cert)
+        c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_tursted_client_cert)
+
+    with self.argument_context('network application-gateway ssl-profile', min_api='2020-06-01') as c:
+        c.argument('application_gateway_name', app_gateway_name_type)
+        c.argument('ssl_profile_name', options_list='--name', help='Name of the SSL profile that is unique within an Application Gateway.')
+        c.argument('policy_name', help='Name of Ssl Policy.')
+        c.argument('policy_type', help='Type of Ssl Policy.')
+        c.argument('min_protocol_version', help='Minimum version of Ssl protocol to be supported on application gateway.')
+        c.argument('cipher_suites', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
+        c.argument('disabled_ssl_protocols', help='Space-separated list of protocols to disable.')
+        c.argument('trusted_client_certificates', help='Array of references to application gateway trusted client certificates.')
+        c.argument('client_auth_configuration', help='Client authentication configuration of the application gateway resource.')
 
 
     # endregion

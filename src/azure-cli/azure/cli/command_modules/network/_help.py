@@ -124,16 +124,31 @@ helps['network application-gateway create'] = """
 type: command
 short-summary: Create an application gateway.
 parameters:
-  - name: --trusted-client-certificate
+  - name: --trusted-client-certificates
     short-summary: The application gateway trusted client certificate.
     long-summary: |
-        Usage: --trusted-client-certificate name=client1 data=xxx
+        Usage: --trusted-client-certificates name=client1 data=xxx
         
         name: Required. Name of the trusted client certificate that is unique within an Application Gateway
         data: Required. Certificate public data.
         
-        Multiple backend addresses can be specified by using more than one `--trusted-client-certificate` argument.
-  
+        Multiple trusted client certificates can be specified by using more than one `--trusted-client-certificates` argument.
+  - name: --ssl-profile
+    short-summary: The application gateway ssl profiles.
+    long-summary: |
+        Usage: --ssl-profile name=sslprofile1 data=xxx TODO
+        
+        name: Required. Name of the SSL profile that is unique within an Application Gateway.
+        polic-name: Name of Ssl Policy.
+        policy-type: Type of Ssl Policy.
+        min-protocol-version: Minimum version of Ssl protocol to be supported on application gateway.
+        cipher-suites: Ssl cipher suites to be enabled in the specified order to application gateway.
+        disabled-ssl-protocols: Space-separated list of protocols to disable.
+        trusted-client-certificates: Array of references to application gateway trusted client certificates.
+        client-auth-configuration: Client authentication configuration of the application gateway resource.
+        
+        Multiple ssl profiles can be specified by using more than one `--ssl-profile` argument.
+        
 examples:
   - name: Create an application gateway with VMs as backend servers.
     text: |
@@ -1489,6 +1504,26 @@ short-summary: Remove an existing trusted client certificate of the application 
 helps['network application-gateway client-cert list'] = """
 type: command
 short-summary: List the existing trusted client certificate of the application gateway.
+"""
+
+helps['network application-gateway ssl-profile'] = """
+type: group
+short-summary: Manage ssl profiles of application gateway.
+"""
+
+helps['network application-gateway ssl-profile add'] = """
+type: command
+short-summary: Add ssl profiles of the application gateway.
+"""
+
+helps['network application-gateway ssl-profile remove'] = """
+type: command
+short-summary: Remove an existing ssl profiles of the application gateway.
+"""
+
+helps['network application-gateway ssl-profile list'] = """
+type: command
+short-summary: List the existing ssl profiles of the application gateway.
 """
 
 helps['network asg'] = """
