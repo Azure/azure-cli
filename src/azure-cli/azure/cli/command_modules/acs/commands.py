@@ -97,6 +97,8 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.wait_command('wait')
+        g.command('stop', 'stop', supports_no_wait=True)
+        g.command('start', 'start', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)

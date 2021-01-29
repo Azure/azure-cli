@@ -2160,7 +2160,7 @@ helps['appservice ase create'] = """
     type: command
     short-summary: Create app service environment.
     examples:
-    - name: Create Resource Group, vNet and app service environment with default values.
+    - name: Create Resource Group, vNet and app service environment v2 with default values.
       text: |
           az group create -g MyResourceGroup --location westeurope
 
@@ -2169,26 +2169,53 @@ helps['appservice ase create'] = """
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet
-    - name: Create External app service environments with large front-ends and scale factor of 10 in existing resource group and vNet.
+    - name: Create External app service environments v2 with large front-ends and scale factor of 10 in existing resource group and vNet.
       text: |
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --front-end-sku I3 --front-end-scale-factor 10 \\
             --virtual-ip-type External
-    - name: Create vNet and app service environment, but do not create network security group and route table in existing resource group.
+    - name: Create vNet and app service environment v2, but do not create network security group and route table in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/24
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-network-security-group --ignore-route-table
-    - name: Create vNet and app service environment in a smaller than recommended subnet in existing resource group.
+    - name: Create vNet and app service environment v2 in a smaller than recommended subnet in existing resource group.
       text: |
           az network vnet create -g MyResourceGroup -n MyVirtualNetwork \\
             --address-prefixes 10.0.0.0/16 --subnet-name MyAseSubnet --subnet-prefixes 10.0.0.0/26
 
           az appservice ase create -n MyAseName -g MyResourceGroup --vnet-name MyVirtualNetwork \\
             --subnet MyAseSubnet --ignore-subnet-size-validation
+    - name: Create Resource Group, vNet and app service environment v3 with default values.
+      text: |
+          az group create -g ASEv3ResourceGroup --location westeurope
+
+          az network vnet create -g ASEv3ResourceGroup -n MyASEv3VirtualNetwork \\
+            --address-prefixes 10.0.0.0/16 --subnet-name Inbound --subnet-prefixes 10.0.0.0/24
+
+          az network vnet subnet create -g ASEv3ResourceGroup --vnet-name MyASEv3VirtualNetwork \\
+            --name Outbound --address-prefixes 10.0.1.0/24
+
+          az appservice ase create -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Outbound --kind asev3
 """
+
+helps['appservice ase create-inbound-services'] = """
+    type: command
+    short-summary: Create the inbound services needed in preview for ASEv3 (private endpoint and DNS) or Private DNS Zone for Internal ASEv2.
+    examples:
+    - name: Create private endpoint, Private DNS Zone, A records and ensure subnet network policy.
+      text: |
+          az appservice ase create-inbound-services -n MyASEName -g ASEResourceGroup \\
+            --vnet-name MyASEVirtualNetwork --subnet MyAseSubnet
+    - name: Create private endpoint and ensure subnet network policy (ASEv3), but do not create DNS Zone and records.
+      text: |
+          az appservice ase create-inbound-services -n MyASEv3Name -g ASEv3ResourceGroup \\
+            --vnet-name MyASEv3VirtualNetwork --subnet Inbound --skip-dns
+"""
+
 
 helps['appservice ase update'] = """
     type: command

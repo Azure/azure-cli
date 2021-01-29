@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn==5.2.0',
     'azure-mgmt-cognitiveservices~=6.3.0',
-    'azure-mgmt-compute~=18.0',
+    'azure-mgmt-compute~=18.1',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry==3.0.0rc16',
@@ -93,21 +93,21 @@ DEPENDENCIES = [
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault==8.0.0',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=0.7.0',
+    'azure-mgmt-loganalytics~=8.0.0',
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=2.1,>=2.1.0',
-    'azure-mgmt-monitor~=0.11.0',
+    'azure-mgmt-monitor~=2.0.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.14.0',
+    'azure-mgmt-netapp~=0.15.0',
     'azure-mgmt-network~=17.0.0',
     'azure-mgmt-policyinsights~=0.5.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=3.1.0rc1',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.6.0',
+    'azure-mgmt-recoveryservicesbackup~=0.11.0',
     'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
@@ -119,12 +119,12 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.5.0',
     'azure-mgmt-signalr~=0.4.0',
-    'azure-mgmt-sql~=0.21.0',
+    'azure-mgmt-sql~=0.26.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-storage~=16.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.48.0',
-    'azure-mgmt-synapse~=0.5.0',
+    'azure-mgmt-synapse~=0.6.0',
     'azure-multiapi-storage~=0.5.2',
     'azure-loganalytics~=0.1.0',
     'azure-storage-common~=1.4',
@@ -137,17 +137,13 @@ DEPENDENCIES = [
     'pytz==2019.1',
     'scp~=0.13.2',
     'sshtunnel~=0.1.4',
-    'urllib3[secure]~=1.18',
+    'urllib3[secure]>=1.25.9,<2.0.0',
     'vsts-cd-manager~=1.0.0,>=1.0.2',
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0'
 ]
-
-# dependencies for specific OSes
-if not sys.platform.startswith('cygwin'):
-    DEPENDENCIES.append('psutil~=5.7')
 
 TESTS_REQUIRE = [
     'mock~=4.0'
