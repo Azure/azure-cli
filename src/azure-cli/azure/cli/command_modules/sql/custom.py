@@ -3715,7 +3715,8 @@ def managed_instance_update(
         tier=None,
         family=None,
         minimal_tls_version=None,
-        tags=None):
+        tags=None,
+        maintenance_configuration_id=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -3753,6 +3754,8 @@ def managed_instance_update(
 
     if tags is not None:
         instance.tags = tags
+
+    instance.maintenance_configuration_id = maintenance_configuration_id
 
     return instance
 
