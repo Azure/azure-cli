@@ -74,8 +74,19 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from azure.cli.core._debug import change_ssl_cert_verification_track2
         self._credential_kwargs = {}
         self._credential_kwargs.update(change_ssl_cert_verification_track2())
-        # Turn on NetworkTraceLoggingPolicy to show DEBUG logs
-        self._credential_kwargs['logging_enable'] = True
+
+        # Turn on NetworkTraceLoggingPolicy to show DEBUG logs.
+        # WARNING: This argument is only for development purpose. It will make credentials be printed to
+        #   - console log, when --debug is specified
+        #   - file log, when logging.enable_log_file is enabled, even without --debug
+        # Credentials include and are not limited to:
+        #   - Authorization code
+        #   - Device code
+        #   - Refresh token
+        #   - Access token
+        #   - Service principal secret
+        #   - Service principal certificate
+        # self._credential_kwargs['logging_enable'] = True
 
     def _load_msal_cache(self):
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
