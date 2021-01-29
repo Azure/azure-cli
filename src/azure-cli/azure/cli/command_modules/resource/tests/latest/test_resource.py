@@ -668,11 +668,11 @@ class ProviderRegistrationTest(ScenarioTest):
     def test_provider_registration_mg(self):
         self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate', 'mg': self.create_random_name('azure-cli-management', 30)})
 
-        self.cmd('account management-group create --name {mg}')
+        self.cmd('account management-group create --name {mg}', checks=[])
 
-        # result = self.cmd('provider register -n {prov} --m {mg}')
-        # self.assertTrue(result is not None)
-
+        result = self.cmd('provider register -n {prov} --m {mg}')
+        self.assertTrue(result.output is '')
+        
         # clean
         self.cmd('account management-group delete -n {mg}')            
 
