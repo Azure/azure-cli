@@ -1410,7 +1410,6 @@ def validate_or_policy(namespace):
 
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
-    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
 
     # usage check
     if not container and blob:
@@ -1464,18 +1463,7 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         service = 'blob'
         url = 'https://{}.{}.{}'.format(namespace.account_name, service, storage_endpoint)
 
-    # Add sas in url
-    if namespace.sas_token:
-        sas_token = namespace.sas_token.lstrip('?')
-    else:
-        try:
-            sas_token = _generate_sas_token(cmd, namespace.account_name, namespace.account_key, service)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.debug("Cannot generate sas token. %s", ex)
-            sas_token = None
-    if sas_token:
-        return '{}?{}'.format(url, sas_token)
-    return url
+    return service, url
 
 
 def _is_valid_uri(uri):
@@ -1489,14 +1477,34 @@ def _is_valid_uri(uri):
     return False
 
 
+def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
+    from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+
+    if sas_token:
+        sas_token = sas_token.lstrip('?')
+    else:
+        try:
+            sas_token = _generate_sas_token(cmd, account_name, account_key, service,
+                                            resource_types=resource_types, permissions=permissions)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Cannot generate sas token. %s", ex)
+            sas_token = None
+    if sas_token:
+        return'{}?{}'.format(url, sas_token)
+    return url
+
+
 def validate_azcopy_credential(cmd, namespace):
     # Get destination uri
     if not _is_valid_uri(namespace.destination):
         namespace.url = namespace.destination
-        namespace.destination = get_url_with_sas(
+        service, namespace.destination = get_url_with_sas(
             cmd, namespace, url=namespace.destination,
             container=namespace.destination_container, blob=namespace.destination_blob,
             share=namespace.destination_share, file_path=namespace.destination_file_path)
+        namespace.destination = _add_sas_for_url(cmd, url=namespace.destination, account_name=namespace.account_name,
+                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                                 service=service, resource_types='co', permissions='wac')
 
     if not _is_valid_uri(namespace.source):
         # determine if source account is same with destination
@@ -1512,10 +1520,13 @@ def validate_azcopy_credential(cmd, namespace):
 
         # Get source uri
         namespace.url = namespace.source
-        namespace.source = get_url_with_sas(
+        service, namespace.source = get_url_with_sas(
             cmd, namespace, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
+        namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
+                                            account_key=namespace.account_key, sas_token=namespace.sas_token,
+                                            service=service, resource_types='sco', permissions='rl')
 
 
 def validate_text_configuration(cmd, ns):
