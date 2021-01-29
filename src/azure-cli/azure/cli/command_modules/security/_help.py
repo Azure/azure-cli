@@ -783,3 +783,63 @@ examples:
     text: >
         az security regulatory-compliance-assessments show --standard-name 'Azure-CIS-1.1.0' --control-name '1.1' -n '94290b00-4d0c-d7b4-7cea-064a9554e681'
 """
+
+helps['security secure-scores'] = """
+type: group
+short-summary: secure scores.
+"""
+
+helps['security secure-scores list'] = """
+type: command
+short-summary: List of secure-scores details and state results.
+examples:
+  - name: Get secure scores list.
+    text: >
+        az security secure-scores list
+"""
+
+helps['security secure-scores show'] = """
+type: command
+short-summary: Shows a secure score details for selected initiative.
+examples:
+  - name: Get secure score details.
+    text: >
+        az security secure-scores show -n 'ascScore'
+"""
+
+helps['security secure-score-controls'] = """
+type: group
+short-summary: secure score controls.
+"""
+
+helps['security secure-score-controls list'] = """
+type: command
+short-summary: List supported of secure score controls details and state for scope.
+examples:
+  - name: Get secure score controls list.
+    text: >
+        az security secure-score-controls list
+"""
+
+helps['security secure-score-controls list_by_score'] = """
+type: command
+short-summary: List supported of secure score controls details and state for selected score.
+examples:
+  - name: Get secure score controls list.
+    text: >
+        az security secure-score-controls list_by_score -n 'ascScore'
+"""
+
+helps['security secure-score-control-definitions'] = """
+type: group
+short-summary: secure score control definitions.
+"""
+
+helps['security secure-score-control-definitions list'] = """
+type: command
+short-summary: Get details of secure score control definitions.
+examples:
+  - name: Get secure score control definitions.
+    text: >
+        az security secure-score-control-definitions list
+"""

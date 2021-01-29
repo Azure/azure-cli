@@ -32,7 +32,7 @@ class MonitorCloneVMScenarios(ScenarioTest):
             'vm3_id': vm3_json['id']
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm1_id} {vm2_id} --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm1_id} {vm2_id} --action {ag1} --region eastus --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
             self.check('description', 'High CPU'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -76,7 +76,7 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
         })
 
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -125,7 +125,7 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
         })
 
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --region westus --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
@@ -170,7 +170,7 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
         })
 
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ip1_id} --action {ag1} --description "Test" --condition "total TCPBytesForwardedDDoS > 5"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ip1_id} --region westus --action {ag1} --description "Test" --condition "total TCPBytesForwardedDDoS > 5"', checks=[
             self.check('description', 'Test'),
             self.check('severity', 2),
             self.check('windowSize', '0:05:00'),
@@ -178,7 +178,7 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
             self.check('length(scopes)', 1)
         ])
 
-        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --action {ag1} --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --region westus --action {ag1} --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
             self.check('description', 'Test2'),
             self.check('severity', 2),
             self.check('windowSize', '0:05:00'),
@@ -202,7 +202,7 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
             'sa2': self.create_random_name('sa', 24),
             'ag1': 'ag1',
             'rg': resource_group,
-            'ext_sub': 'f64d4ee8-be94-457d-ba26-3fa6b6506cef',
+            'ext_sub': '1c638cf4-608f-4ee6-b680-c329e824c3a8',
             'ext_rg': self.create_random_name('test_rg', 24),
         })
 

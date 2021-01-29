@@ -155,7 +155,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     )
 
     with self.command_group('storage account encryption-scope', encryption_scope_sdk,
-                            custom_command_type=encryption_scope_custom_type, is_preview=True,
+                            custom_command_type=encryption_scope_custom_type,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
 
         g.custom_command('create', 'create_encryption_scope')
@@ -242,7 +242,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
-                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01') as g:
         from ._transformers import transform_restore_policy_output
         g.show_command('show', 'get_service_properties', transform=transform_restore_policy_output)
         g.generic_update_command('update',
@@ -346,9 +346,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path',
                                        exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
-                                       validator=process_blob_upload_batch_parameters)
+                                       validator=process_blob_upload_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('download-batch', 'storage_blob_download_batch',
-                                       validator=process_blob_download_batch_parameters)
+                                       validator=process_blob_download_batch_parameters,
+                                       exception_handler=file_related_exception_handler)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
                                        validator=process_blob_delete_batch_parameters)
         g.storage_command_oauth(
@@ -361,7 +363,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=storage_blob_custom_type) as g:
-        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
+        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', supports_no_wait=True)
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',

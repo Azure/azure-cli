@@ -123,9 +123,10 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
                 az_error = azclierror.ClientRequestError(error_msg)
 
         elif isinstance(ex, HttpOperationError):
-            message, status_code = extract_http_operation_error(ex)
+            message, _ = extract_http_operation_error(ex)
             if message:
                 error_msg = message
+            status_code = str(getattr(ex.response, 'status_code', 'Unknown Code'))
             AzCLIErrorType = get_error_type_by_status_code(status_code)
             az_error = AzCLIErrorType(error_msg)
 
@@ -172,12 +173,12 @@ def extract_http_operation_error(ex):
         if isinstance(response, str):
             error = response
         else:
-            error = response['error']
+            error = response.get('error', response.get('Error', None))
         # ARM should use ODATA v4. So should try this first.
         # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
         if isinstance(error, dict):
-            status_code = error.get('code', 'Unknown Code')
-            message = error.get('message', ex)
+            status_code = error.get('code', error.get('Code', 'Unknown Code'))
+            message = error.get('message', error.get('Message', ex))
             error_msg = "{}: {}".format(status_code, message)
         else:
             error_msg = error
@@ -500,15 +501,15 @@ def read_file_content(file_path, allow_binary=False):
     raise CLIError('Failed to decode file {} - unknown decoding'.format(file_path))
 
 
-def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
+def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True):
     """ Allows the passing of JSON or Python dictionary strings. This is needed because certain
     JSON strings in CMD shell are not received in main's argv. This allows the user to specify
     the alternative notation, which does not have this problem (but is technically not JSON). """
     try:
         if not preserve_order:
-            return json.loads(json_or_dict_string)
+            return json.loads(json_or_dict_string, strict=strict)
         from collections import OrderedDict
-        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict)
+        return json.loads(json_or_dict_string, object_pairs_hook=OrderedDict, strict=strict)
     except ValueError as json_ex:
         try:
             import ast
@@ -622,6 +623,14 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
         # support autorest 3
         handler_args['polling'] = False
 
+    # Support track2 SDK.
+    # In track2 SDK, there is no parameter 'polling' in SDK, but just use '**kwargs'.
+    # So we check the name of the operation to see if it's a long running operation.
+    # The name of long running operation in SDK is like 'begin_xxx_xxx'.
+    op_name = handler.__name__
+    if op_name and op_name.startswith('begin_') and no_wait_enabled:
+        handler_args['polling'] = False
+
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
@@ -663,7 +672,11 @@ def _get_platform_info():
 
 def is_wsl():
     platform_name, release = _get_platform_info()
-    return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+    # "Official" way of detecting WSL: https://github.com/Microsoft/WSL/issues/423#issuecomment-221627364
+    # Run `uname -a` to get 'release' without python
+    #   - WSL 1: '4.4.0-19041-Microsoft'
+    #   - WSL 2: '4.19.128-microsoft-standard'
+    return platform_name == 'linux' and 'microsoft' in release
 
 
 def is_windows():
@@ -1205,3 +1218,38 @@ def scopes_to_resource(scopes):
         scope = scope[:-len("/.default")]
 
     return scope
+
+
+def _get_parent_proc_name():
+    # Un-cached function to get parent process name.
+    try:
+        import psutil
+    except ImportError:
+        return None
+
+    import os
+    parent = psutil.Process(os.getpid()).parent()
+
+    # On Windows, when CLI is run inside a virtual env, there will be 2 python.exe.
+    if parent and parent.name().lower() == 'python.exe':
+        parent = parent.parent()
+
+    if parent:
+        # On Windows, powershell.exe launches cmd.exe to launch python.exe.
+        grandparent = parent.parent()
+        if grandparent:
+            grandparent_name = grandparent.name().lower()
+            if grandparent_name in ("powershell.exe", "pwsh.exe"):
+                return grandparent.name()
+        # if powershell.exe or pwsh.exe is not the grandparent, simply return the parent's name.
+        return parent.name()
+    return None
+
+
+def get_parent_proc_name():
+    # This function wraps _get_parent_proc_name, as psutil calls are time-consuming, so use a
+    # function-level cache to save the result.
+    if not hasattr(get_parent_proc_name, "return_value"):
+        parent_proc_name = _get_parent_proc_name()
+        setattr(get_parent_proc_name, "return_value", parent_proc_name)
+    return getattr(get_parent_proc_name, "return_value")

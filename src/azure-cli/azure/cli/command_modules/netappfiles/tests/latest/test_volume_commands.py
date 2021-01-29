@@ -25,23 +25,35 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         subs = self.cmd("az account show").get_output_in_json()
         return subs['id']
 
-    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None, protocols=None, pool_payload=POOL_DEFAULT, volume_payload=VOLUME_DEFAULT):
+    def create_volume(self, account_name, pool_name, volume_name1, rg, tags=None, volume_name2=None, protocols=None,
+                      pool_payload=POOL_DEFAULT, volume_payload=VOLUME_DEFAULT):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
-        file_path = volume_name1  # creation_token
         subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
-        tag = "--tags %s" % tags if tags is not None else ""
+        file_path = volume_name1  # creation_token
         protocol_types = "--protocol-types %s" % protocols if protocols is not None else ""
+        tag = "--tags %s" % tags if tags is not None else ""
 
-        self.setup_vnet(rg, vnet_name, subnet_name, '10.0.0.0', RG_LOCATION)
-        self.cmd("az netappfiles account create -g %s -a '%s' -l %s" % (rg, account_name, RG_LOCATION)).get_output_in_json()
-        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, RG_LOCATION, pool_payload, tag)).get_output_in_json()
-        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s %s" % (rg, account_name, pool_name, volume_name1, RG_LOCATION, volume_payload, file_path, vnet_name, subnet_name, protocol_types, tag)).get_output_in_json()
+        self.prepare_for_volume_creation(rg, account_name, pool_name, vnet_name, subnet_name, pool_payload, tags)
+
+        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s "
+                           "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s %s" %
+                           (rg, account_name, pool_name, volume_name1, RG_LOCATION, volume_payload, file_path,
+                            vnet_name, subnet_name, protocol_types, tag)).get_output_in_json()
 
         if volume_name2:
             file_path = volume_name2
             self.cmd("az netappfiles volume create -g %s -a %s -p %s -v %s -l %s %s --file-path %s --vnet %s --subnet %s --tags %s" % (rg, account_name, pool_name, volume_name2, RG_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_name, tags)).get_output_in_json()
 
         return volume1
+
+    def prepare_for_volume_creation(self, rg, account_name, pool_name, vnet_name, subnet_name,
+                                    pool_payload=POOL_DEFAULT, tags=None):
+        tag = "--tags %s" % tags if tags is not None else ""
+        self.setup_vnet(rg, vnet_name, subnet_name, '10.0.0.0', RG_LOCATION)
+        self.cmd("az netappfiles account create -g %s -a '%s' -l %s" %
+                 (rg, account_name, RG_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" %
+                 (rg, account_name, pool_name, RG_LOCATION, pool_payload, tag)).get_output_in_json()
 
     def wait_for_replication_status(self, target_state, rg_r, account_name_r, pool_name_r, volume_name_r):
         # python isn't good at do-while loops but loop until we get the target state
@@ -324,3 +336,19 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # Make sure that the volume was changed to pool2
         volume = self.cmd("az netappfiles volume show -g {rg} -a %s -p %s -v %s" % (account_name, pool2_name, volume_name)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool2_name + '/' + volume_name
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
+    def test_volume_parameters(self):
+        vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
+        subnet_name = self.create_random_name(prefix='cli-subnet-', length=16)
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        self.prepare_for_volume_creation('{rg}', account_name, pool_name, vnet_name, subnet_name)
+        volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
+                          "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s "
+                          "--smb-encryption %s --smb-continuously-avl %s" %
+                          (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
+                           subnet_name, True, True)).get_output_in_json()
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
