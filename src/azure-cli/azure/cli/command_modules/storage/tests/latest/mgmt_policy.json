@@ -5,30 +5,30 @@
             "type": "Lifecycle",
             "definition": {
                 "filters": {
-                    "blobTypes": [
-                        "blockBlob"
-                    ],
-                    "prefixMatch": [
-                        "olcmtestcontainer"
-                    ]
+                  "blobTypes": [
+                    "blockBlob",
+                    "appendBlob"
+                  ],
+                  "prefixMatch": [
+                    "olcmtestcontainer1"
+                  ]
                 },
                 "actions": {
-                    "baseBlob": {
-                        "tierToCool": {
-                            "daysAfterModificationGreaterThan": 1000
-                        },
-                        "tierToArchive": {
-                            "daysAfterModificationGreaterThan": 90
-                        },
-                        "delete": {
-                            "daysAfterModificationGreaterThan": 1000
-                        }
-                    },
-                    "snapshot": {
-                        "delete": {
-                            "daysAfterCreationGreaterThan": 5000
-                        }
+                  "baseBlob": {
+                    "delete": {
+                      "daysAfterModificationGreaterThan": 90
                     }
+                  },
+                  "snapshot": {
+                    "delete": {
+                      "daysAfterCreationGreaterThan": 90
+                    }
+                  },
+                  "version": {
+                      "delete": {
+                          "daysAfterCreationGreaterThan": 90
+                      }
+                  }
                 }
             }
         }

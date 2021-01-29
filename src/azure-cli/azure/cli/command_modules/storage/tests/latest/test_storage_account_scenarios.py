@@ -628,16 +628,23 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(ex.exception.code, 3)
 
     @ResourceGroupPreparer()
-    def test_management_policy(self, resource_group):
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_management_policy(self, resource_group, storage_account):
         import os
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
-        storage_account = self.create_random_name(prefix='cli', length=24)
-
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'policy': policy_file}
-        self.cmd('storage account create -g {rg} -n {sa} --kind StorageV2')
-        self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"')
+        self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
+                 checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
+                         JMESPathCheck('policy.rules[0].enabled', True),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 90.0),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.delete.daysAfterCreationGreaterThan', 90.0),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.delete.daysAfterCreationGreaterThan', 90.0),
+                         JMESPathCheck('policy.rules[0].definition.filters.blobTypes[0]', "blockBlob"),
+                         JMESPathCheck('policy.rules[0].definition.filters.blobTypes[1]', "appendBlob"),
+                         JMESPathCheck('policy.rules[0].definition.filters.prefixMatch[0]', "olcmtestcontainer1")])
+
         self.cmd('storage account management-policy update --account-name {sa} -g {rg}'
                  ' --set "policy.rules[0].name=newname"')
         self.cmd('storage account management-policy show --account-name {sa} -g {rg}',
