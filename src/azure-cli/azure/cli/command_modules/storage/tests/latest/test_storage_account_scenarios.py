@@ -638,11 +638,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account management-policy create --account-name {sa} -g {rg} --policy @"{policy}"',
                  checks=[JMESPathCheck('policy.rules[0].name', 'olcmtest'),
                          JMESPathCheck('policy.rules[0].enabled', True),
-                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 90.0),
-                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.delete.daysAfterCreationGreaterThan', 90.0),
-                         JMESPathCheck('policy.rules[0].definition.actions.version.delete.daysAfterCreationGreaterThan', 90.0),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToCool.daysAfterModificationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.tierToArchive.daysAfterModificationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.baseBlob.delete.daysAfterModificationGreaterThan', 1000),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToCool.daysAfterCreationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.tierToArchive.daysAfterCreationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.snapshot.delete.daysAfterCreationGreaterThan', 1000),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.tierToCool.daysAfterCreationGreaterThan', 30),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.tierToArchive.daysAfterCreationGreaterThan', 90),
+                         JMESPathCheck('policy.rules[0].definition.actions.version.delete.daysAfterCreationGreaterThan', 1000),
                          JMESPathCheck('policy.rules[0].definition.filters.blobTypes[0]', "blockBlob"),
-                         JMESPathCheck('policy.rules[0].definition.filters.blobTypes[1]', "appendBlob"),
                          JMESPathCheck('policy.rules[0].definition.filters.prefixMatch[0]', "olcmtestcontainer1")])
 
         self.cmd('storage account management-policy update --account-name {sa} -g {rg}'

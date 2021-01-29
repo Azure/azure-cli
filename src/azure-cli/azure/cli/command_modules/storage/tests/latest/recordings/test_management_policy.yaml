@@ -1,10 +1,13 @@
 interactions:
 - request:
     body: '{"properties": {"policy": {"rules": [{"name": "olcmtest", "type": "Lifecycle",
-      "definition": {"actions": {"baseBlob": {"delete": {"daysAfterModificationGreaterThan":
-      90.0}}, "snapshot": {"delete": {"daysAfterCreationGreaterThan": 90.0}}, "version":
-      {"delete": {"daysAfterCreationGreaterThan": 90.0}}}, "filters": {"prefixMatch":
-      ["olcmtestcontainer1"], "blobTypes": ["blockBlob", "appendBlob"]}}}]}}}'
+      "definition": {"actions": {"baseBlob": {"tierToCool": {"daysAfterModificationGreaterThan":
+      30.0}, "tierToArchive": {"daysAfterModificationGreaterThan": 90.0}, "delete":
+      {"daysAfterModificationGreaterThan": 1000.0}}, "snapshot": {"tierToCool": {"daysAfterCreationGreaterThan":
+      30.0}, "tierToArchive": {"daysAfterCreationGreaterThan": 90.0}, "delete": {"daysAfterCreationGreaterThan":
+      1000.0}}, "version": {"tierToCool": {"daysAfterCreationGreaterThan": 30.0},
+      "tierToArchive": {"daysAfterCreationGreaterThan": 90.0}, "delete": {"daysAfterCreationGreaterThan":
+      1000.0}}}, "filters": {"prefixMatch": ["olcmtestcontainer1"], "blobTypes": ["blockBlob"]}}}]}}}'
     headers:
       Accept:
       - application/json
@@ -15,7 +18,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '400'
+      - '733'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -26,16 +29,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"delete":{"daysAfterCreationGreaterThan":90.0}},"baseBlob":{"delete":{"daysAfterModificationGreaterThan":90.0}},"snapshot":{"delete":{"daysAfterCreationGreaterThan":90.0}}},"filters":{"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:39:39.0845646Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterModificationGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:56:46.7803938Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '780'
+      - '1096'
       content-type:
       - application/json
       date:
-      - Fri, 29 Jan 2021 03:39:39 GMT
+      - Fri, 29 Jan 2021 03:56:46 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +54,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1197'
     status:
       code: 200
       message: OK
@@ -74,16 +77,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"delete":{"daysAfterCreationGreaterThan":90.0}},"baseBlob":{"delete":{"daysAfterModificationGreaterThan":90.0}},"snapshot":{"delete":{"daysAfterCreationGreaterThan":90.0}}},"filters":{"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:39:39.0845646Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"olcmtest","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterModificationGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:56:46.7803938Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '780'
+      - '1096'
       content-type:
       - application/json
       date:
-      - Fri, 29 Jan 2021 03:39:38 GMT
+      - Fri, 29 Jan 2021 03:56:47 GMT
       expires:
       - '-1'
       pragma:
@@ -103,10 +106,13 @@ interactions:
       message: OK
 - request:
     body: '{"properties": {"policy": {"rules": [{"enabled": true, "name": "newname",
-      "type": "Lifecycle", "definition": {"actions": {"baseBlob": {"delete": {"daysAfterModificationGreaterThan":
-      90.0}}, "snapshot": {"delete": {"daysAfterCreationGreaterThan": 90.0}}, "version":
-      {"delete": {"daysAfterCreationGreaterThan": 90.0}}}, "filters": {"prefixMatch":
-      ["olcmtestcontainer1"], "blobTypes": ["blockBlob", "appendBlob"]}}}]}}}'
+      "type": "Lifecycle", "definition": {"actions": {"baseBlob": {"tierToCool": {"daysAfterModificationGreaterThan":
+      30.0}, "tierToArchive": {"daysAfterModificationGreaterThan": 90.0}, "delete":
+      {"daysAfterModificationGreaterThan": 1000.0}}, "snapshot": {"tierToCool": {"daysAfterCreationGreaterThan":
+      30.0}, "tierToArchive": {"daysAfterCreationGreaterThan": 90.0}, "delete": {"daysAfterCreationGreaterThan":
+      1000.0}}, "version": {"tierToCool": {"daysAfterCreationGreaterThan": 30.0},
+      "tierToArchive": {"daysAfterCreationGreaterThan": 90.0}, "delete": {"daysAfterCreationGreaterThan":
+      1000.0}}}, "filters": {"prefixMatch": ["olcmtestcontainer1"], "blobTypes": ["blockBlob"]}}}]}}}'
     headers:
       Accept:
       - application/json
@@ -117,7 +123,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '416'
+      - '749'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -128,16 +134,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"delete":{"daysAfterCreationGreaterThan":90.0}},"baseBlob":{"delete":{"daysAfterModificationGreaterThan":90.0}},"snapshot":{"delete":{"daysAfterCreationGreaterThan":90.0}}},"filters":{"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:39:40.4127139Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterModificationGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:56:48.2021945Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '779'
+      - '1095'
       content-type:
       - application/json
       date:
-      - Fri, 29 Jan 2021 03:39:40 GMT
+      - Fri, 29 Jan 2021 03:56:47 GMT
       expires:
       - '-1'
       pragma:
@@ -153,7 +159,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -176,16 +182,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default?api-version=2019-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"delete":{"daysAfterCreationGreaterThan":90.0}},"baseBlob":{"delete":{"daysAfterModificationGreaterThan":90.0}},"snapshot":{"delete":{"daysAfterCreationGreaterThan":90.0}}},"filters":{"blobTypes":["blockBlob","appendBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:39:40.4127139Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/managementPolicies/default","name":"DefaultManagementPolicy","type":"Microsoft.Storage/storageAccounts/managementPolicies","properties":{"policy":{"rules":[{"enabled":true,"name":"newname","type":"Lifecycle","definition":{"actions":{"version":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}},"baseBlob":{"tierToCool":{"daysAfterModificationGreaterThan":30.0},"tierToArchive":{"daysAfterModificationGreaterThan":90.0},"delete":{"daysAfterModificationGreaterThan":1000.0}},"snapshot":{"tierToCool":{"daysAfterCreationGreaterThan":30.0},"tierToArchive":{"daysAfterCreationGreaterThan":90.0},"delete":{"daysAfterCreationGreaterThan":1000.0}}},"filters":{"blobTypes":["blockBlob"],"prefixMatch":["olcmtestcontainer1"]}}}]},"lastModifiedTime":"2021-01-29T03:56:48.2021945Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '779'
+      - '1095'
       content-type:
       - application/json
       date:
-      - Fri, 29 Jan 2021 03:39:40 GMT
+      - Fri, 29 Jan 2021 03:56:48 GMT
       expires:
       - '-1'
       pragma:
@@ -233,7 +239,7 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 29 Jan 2021 03:39:41 GMT
+      - Fri, 29 Jan 2021 03:56:49 GMT
       expires:
       - '-1'
       pragma:
@@ -245,7 +251,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '14998'
     status:
       code: 200
       message: OK
@@ -278,7 +284,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 29 Jan 2021 03:39:42 GMT
+      - Fri, 29 Jan 2021 03:56:50 GMT
       expires:
       - '-1'
       pragma:

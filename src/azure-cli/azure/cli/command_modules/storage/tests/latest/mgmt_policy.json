@@ -6,28 +6,45 @@
             "definition": {
                 "filters": {
                   "blobTypes": [
-                    "blockBlob",
-                    "appendBlob"
+                    "blockBlob"
                   ],
                   "prefixMatch": [
                     "olcmtestcontainer1"
                   ]
                 },
                 "actions": {
-                  "baseBlob": {
-                    "delete": {
+	                  "baseBlob": {
+                    "tierToCool": {
+                      "daysAfterModificationGreaterThan": 30
+                    },
+                    "tierToArchive": {
                       "daysAfterModificationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterModificationGreaterThan": 1000
                     }
                   },
                   "snapshot": {
-                    "delete": {
+                    "tierToCool": {
+                      "daysAfterCreationGreaterThan": 30
+                    },
+                    "tierToArchive": {
                       "daysAfterCreationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterCreationGreaterThan": 1000
                     }
                   },
                   "version": {
-                      "delete": {
-                          "daysAfterCreationGreaterThan": 90
-                      }
+                    "tierToCool": {
+                      "daysAfterCreationGreaterThan": 30
+                    },
+                    "tierToArchive": {
+                      "daysAfterCreationGreaterThan": 90
+                    },
+                    "delete": {
+                      "daysAfterCreationGreaterThan": 1000
+                    }
                   }
                 }
             }
