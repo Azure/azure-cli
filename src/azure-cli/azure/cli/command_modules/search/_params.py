@@ -7,7 +7,7 @@
 from azure.cli.core.commands.parameters import name_type, get_enum_type
 
 
-def load_arguments(self, _):
+def load_arguments(self, _): # pylint: disable=too-many-statements
     with self.argument_context('search service') as c:
         c.ignore('search_management_request_options')
         c.argument('search_service_name', arg_type=name_type, help='The name of the search service.')
@@ -71,5 +71,4 @@ def load_arguments(self, _):
     with self.argument_context('search admin-key') as c:
         c.ignore('search_management_request_options')
         c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
-        c.argument('key_kind', options_list=['--key-kind'],
-                   help='The type (primary or secondary) of the admin key.')
+        c.argument('key_kind', options_list=['--key-kind'], help='The type (primary or secondary) of the admin key.')
