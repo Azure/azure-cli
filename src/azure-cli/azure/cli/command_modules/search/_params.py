@@ -47,16 +47,17 @@ def load_arguments(self, _):
     with self.argument_context('search shared-private-link-resource') as c:
         c.ignore('search_management_request_options')
         c.argument('search_service_name', options_list=['--service-name'], help='The name of the search service.')
-        c.argument('shared_private_link_resource_name', options_list=['--name', '-n'])
 
     with self.argument_context('search shared-private-link-resource create') as c:
         c.ignore('search_management_request_options')
+        c.argument('shared_private_link_resource_name', options_list=['--name', '-n'])
         c.argument('shared_private_link_resource_group_id', options_list=['--group-id'])
         c.argument('shared_private_link_resource_id', options_list=['--resource-id'])
         c.argument('shared_private_link_resource_request_message', options_list=['--request-message'])
 
     with self.argument_context('search shared-private-link-resource update') as c:
         c.ignore('search_management_request_options')
+        c.argument('shared_private_link_resource_name', options_list=['--name', '-n'])
         c.argument('shared_private_link_resource_group_id', options_list=['--group-id'])
         c.argument('shared_private_link_resource_id', options_list=['--resource-id'])
         c.argument('shared_private_link_resource_request_message', options_list=['--request-message'])
