@@ -113,7 +113,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
                                        private_link_service_connection_description,
                                        private_link_service_connection_actions_required):
     """
-    Updates an existing private endpoint connection in a Search service in the given resource group.
+    Update an existing private endpoint connection in a Search service in the given resource group.
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.
@@ -147,12 +147,45 @@ def update_private_endpoint_connection(cmd, resource_group_name, search_service_
                           _private_endpoint_connection)
 
 
-def create_or_update_shared_private_link_resource(cmd, resource_group_name, search_service_name,
-                                                  shared_private_link_resource_name, shared_private_link_resource_id,
-                                                  shared_private_link_resource_group_id,
-                                                  shared_private_link_resource_request_message="Please approve"):
+def create_shared_private_link_resource(cmd, resource_group_name, search_service_name,
+                                        shared_private_link_resource_name, shared_private_link_resource_id,
+                                        shared_private_link_resource_group_id,
+                                        shared_private_link_resource_request_message="Please approve"):
     """
-    Creates or updates shared privatelink resources in a Search service in the given resource group.
+    Create shared privatelink resources in a Search service in the given resource group.
+
+    :param resource_group_name: Name of resource group.
+    :param search_service_name: Name of the search service.
+    :param shared_private_link_resource_name: Name of the shared private link resource.
+    :param shared_private_link_resource_id: Fully qualified resource ID for the resource.
+        Ex - /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/
+        {resourceProviderNamespace}/{resourceType}/{resourceName}.
+    :param shared_private_link_resource_group_id: The group id of the resource. Ex, blob, sql or vault.
+    :param shared_private_link_resource_request_message: Custom request message when creating or updating the shared
+        privatelink resources.
+    """
+    from azure.mgmt.search.models import SharedPrivateLinkResource, SharedPrivateLinkResourceProperties
+    from azure.cli.command_modules.search._client_factory import cf_search_shared_private_link_resources
+
+    _client = cf_search_shared_private_link_resources(cmd.cli_ctx, None)
+    _shared_private_link_resource = SharedPrivateLinkResource()
+    _shared_private_link_resource.name = shared_private_link_resource_name
+    _shared_private_link_resource.properties = SharedPrivateLinkResourceProperties(
+        private_link_resource_id=shared_private_link_resource_id,
+        group_id=shared_private_link_resource_group_id,
+        request_message=shared_private_link_resource_request_message
+    )
+
+    return _client.begin_create_or_update(resource_group_name, search_service_name, shared_private_link_resource_name,
+                                          _shared_private_link_resource)
+
+
+def update_shared_private_link_resource(cmd, resource_group_name, search_service_name,
+                                        shared_private_link_resource_name, shared_private_link_resource_id,
+                                        shared_private_link_resource_group_id,
+                                        shared_private_link_resource_request_message):
+    """
+    Update shared privatelink resources in a Search service in the given resource group.
 
     :param resource_group_name: Name of resource group.
     :param search_service_name: Name of the search service.

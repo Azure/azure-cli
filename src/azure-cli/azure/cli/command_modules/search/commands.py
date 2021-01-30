@@ -49,20 +49,21 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_search_service', setter_name='begin_create_or_update', setter_arg_name='service')
         g.custom_command('create', 'create_search_service')
 
-    with self.command_group('search privateendpointconnection', search_private_endpoint_connections_sdk) as g:
+    with self.command_group('search private-endpoint-connection', search_private_endpoint_connections_sdk) as g:
         g.command('list', 'list_by_service')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('update', 'update_private_endpoint_connection')
 
-    with self.command_group('search privatelinkresource', search_private_link_resources_sdk) as g:
+    with self.command_group('search private-link-resource', search_private_link_resources_sdk) as g:
         g.command('list', 'list_supported')
 
-    with self.command_group('search sharedprivatelinkresource', search_shared_private_link_resources_sdk) as g:
+    with self.command_group('search shared-private-link-resource', search_shared_private_link_resources_sdk) as g:
         g.command('list', 'list_by_service')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True)
-        g.custom_command('createorupdate', 'create_or_update_shared_private_link_resource')
+        g.custom_command('create', 'create_shared_private_link_resource')
+        g.custom_command('update', 'update_shared_private_link_resource')
 
     with self.command_group('search admin-key', search_admin_keys_sdk) as g:
         g.show_command('show', 'get')
