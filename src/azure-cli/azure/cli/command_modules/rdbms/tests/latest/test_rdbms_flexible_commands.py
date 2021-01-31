@@ -68,11 +68,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     postgres_location = 'eastus2euap'
     mysql_location = 'eastus2euap'
 
-    # @AllowLargeResponse()
-    # @ResourceGroupPreparer(location=postgres_location)
-    # @ServerPreparer(engine_type='postgres', location=postgres_location)
-    # def test_postgres_flexible_server_mgmt(self, resource_group, server):
-    #     self._test_flexible_server_mgmt('postgres', resource_group, server)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @ServerPreparer(engine_type='postgres', location=postgres_location)
+    def test_postgres_flexible_server_mgmt(self, resource_group, server):
+        self._test_flexible_server_mgmt('postgres', resource_group, server)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=mysql_location)
@@ -114,8 +114,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                        JMESPathCheck('storageProfile.storageMb', storage_size_mb),
                        JMESPathCheck('storageProfile.backupRetentionDays', backup_retention)]
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access none'
-                 .format(database_engine, resource_group, server_name, location))
         current_time = datetime.utcnow()
 
         if database_engine == 'postgres':
