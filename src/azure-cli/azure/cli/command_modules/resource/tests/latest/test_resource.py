@@ -666,15 +666,10 @@ class ProviderRegistrationTest(ScenarioTest):
             self.assertTrue(result['registrationState'], 'Registered')
 
     def test_provider_registration_mg(self):
-        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate', 'mg': self.create_random_name('azure-cli-management', 30)})
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
 
-        self.cmd('account management-group create --name {mg}')
-
-        result = self.cmd('provider register -n {prov} --m {mg}')
-        self.assertTrue(result.output, '')
-
-        # clean
-        self.cmd('account management-group delete -n {mg}')
+        result = self.cmd('provider register -n {prov} --m testmg')
+        self.assertTrue(result, None)
 
 
 class ProviderOperationTest(ScenarioTest):
