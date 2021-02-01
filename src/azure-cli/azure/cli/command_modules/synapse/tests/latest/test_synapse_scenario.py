@@ -112,6 +112,107 @@ class SynapseScenarioTests(ScenarioTest):
                  expect_failure=True)
 
     @record_only()
+    def test_workspace_with_cmk(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspacecmk',
+            'rg': 'testrg',
+            'storage-account': 'teststorageforsynapsecmk',
+            'file-system': self.create_random_name(prefix='fs', length=16),
+            'login-user': 'cliuser1',
+            'login-password': self.create_random_name(prefix='Pswd1', length=16),
+            'key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newcmk',
+            'new-key-identifier': 'https://testcmksoftdelete.vault.azure.net/keys/newkey',
+            'managed-identity': '00000000-0000-1111-2222-333333333333'
+        })
+
+        # create workspace supporting cmk, data exfiltration
+        workspace_cmk = self.cmd(
+            'az synapse workspace create --name {workspace} --resource-group {rg} --storage-account {storage-account} '
+            '--file-system {file-system} --sql-admin-login-user {login-user} '
+            '--sql-admin-login-password {login-password} --key-identifier {key-identifier} '
+            ' --location {location} --enable-managed-vnet True --prevent-exfiltration True --allowed-tenant-ids \'""\' ', checks=[
+                self.check('name', self.kwargs['workspace']),
+                self.check('type', 'Microsoft.Synapse/workspaces'),
+                self.check('provisioningState', 'Succeeded')
+            ]).get_output_in_json()
+
+        self.kwargs['managed-identity'] = workspace_cmk['identity']['principalId']
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # active workspace
+        self.cmd(
+            'az synapse workspace key update --name default --key-identifier {key-identifier} --is-active True  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+        import time
+        time.sleep(120)
+
+        # create workspace key
+        self.cmd(
+            'az synapse workspace key create --name newkey --key-identifier {new-key-identifier}  --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'newkey'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys')
+            ])
+
+        # set access policy
+        self.cmd(
+            'az keyvault set-policy --name testcmksoftdelete --object-id {managed-identity} --key-permissions get unwrapKey wrapKey ')
+
+        # list workspace key
+        self.cmd(
+            'az synapse workspace key list --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('[0].name', 'default'),
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('[0].keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show workspace key
+        self.cmd(
+            'az synapse workspace key show --name default --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('name', 'default'),
+                self.check('type', 'Microsoft.Synapse/workspaces/keys'),
+                self.check('keyVaultUrl', self.kwargs['key-identifier']),
+            ])
+
+        # show sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity show-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # grant sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity grant-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Enabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # invoke sql access to managed identity
+        self.cmd(
+            'az synapse workspace managed-identity revoke-sql-access --resource-group {rg} --workspace-name {workspace}', checks=[
+                self.check('grantSqlControlToManagedIdentity.actualState', 'Disabled'),
+                self.check('type', 'Microsoft.Synapse/workspaces/managedIdentitySqlControlSettings')
+            ])
+
+        # switch active key
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --key-name newkey ', checks=[
+                self.check('encryption.cmk.key.name', 'newkey')
+            ])
+
+        # update allowed tenant ids
+        self.cmd(
+            'az synapse workspace update --resource-group {rg} --name {workspace} --allowed-tenant-ids 72f988bf-86f1-41af-91ab-2d7cd011db47 ', checks=[
+                self.check('managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[0]', "72f988bf-86f1-41af-91ab-2d7cd011db47")
+            ])
+
+    @record_only()
     def test_sql_pool(self):
         self.kwargs.update({
             'location': 'eastus',
@@ -259,8 +360,9 @@ class SynapseScenarioTests(ScenarioTest):
                  ])
 
         # classification update
-        self.cmd('az synapse sql pool classification show --name {sql-pool} --workspace-name {workspace} '
-                 '--resource-group {rg} --schema {schema} --table {table} --column {column}')
+        self.cmd('az synapse sql pool classification update --name {sql-pool} --workspace-name {workspace} '
+                 '--resource-group {rg} --schema {schema} --table {table} --column {column} '
+                 '--label {label} --information-type {information-type}')
 
         # classification delete
         self.cmd('az synapse sql pool classification delete --name {sql-pool} --workspace-name {workspace} '
@@ -333,17 +435,105 @@ class SynapseScenarioTests(ScenarioTest):
             'location': 'eastus',
             'workspace': 'testsynapseworkspace',
             'rg': 'rg',
-            'sql-pool': 'sqlpoolcli1',  # self.create_random_name(prefix='testsqlpool', length=15),
-            'storage-account': 'zzystorageforsynapse'
+            'sql-pool': 'sqlpoolcli1',
+            'storage-account': 'teststorageforsynapse'
         })
 
-        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
-                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+        # test show command
+        self.cmd('az synapse sql pool audit-policy show '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
 
+        # test validator
+        self.cmd('az synapse sql pool audit-policy update '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
+
+        # test for updating state from Disabled to Enabled with storage and retention days
+        self.cmd('az synapse sql pool audit-policy update --state Enabled --storage-account {storage-account} '
+                 '--retention-days 7 --name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
         self.cmd('az synapse sql pool audit-policy show '
                  '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
                  checks=[
                      self.check('state', 'Enabled')
+                 ])
+
+        # test for updating state from Enabled to Disabled
+        self.cmd('az synapse sql pool audit-policy update --state Disabled '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql pool audit-policy show '
+                 '--name {sql-pool} --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
+
+    @record_only()
+    def test_sql_aad_admin(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspace',
+            'rg': 'rg',
+            'user-name': 'fakeuser',
+            'object-id': '00000000-0000-0000-0000-000000000000',
+            'user-email': 'fakeuser@fakedomain.com'
+        })
+        # Test create cmdlet
+        self.cmd('az synapse sql ad-admin create --workspace-name {workspace} --resource-group {rg} '
+                 '--display-name {user-name} --object-id {object-id}',
+                 checks=[
+                     self.check('login', self.kwargs['user-name'])
+                 ])
+
+        # Test show cmdlet
+        self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('login', self.kwargs['user-name']),
+                     self.check('name', 'activeDirectory')
+                 ])
+
+        # Test update cmdlet
+        self.cmd('az synapse sql ad-admin update --workspace-name {workspace} --resource-group {rg} '
+                 '--display-name {user-email}',
+                 checks=[
+                     self.check('login', self.kwargs['user-email'])
+                 ])
+        # Test delete cmdlet
+        self.cmd('az synapse sql ad-admin delete --workspace-name {workspace} --resource-group {rg} -y')
+        self.cmd('az synapse sql ad-admin show --workspace-name {workspace} --resource-group {rg}', expect_failure=True)
+
+    @record_only()
+    def test_sql_audit_policy(self):
+        self.kwargs.update({
+            'location': 'eastus',
+            'workspace': 'testsynapseworkspace',
+            'rg': 'rg',
+            'storage-account': 'teststorageforsynapse'
+        })
+        # test show command
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
+                 ])
+
+        # test validator of this command
+        self.cmd('az synapse sql audit-policy update --workspace-name {workspace} --resource-group {rg}',
+                 expect_failure=True)
+
+        # test for updating state from Disabled to Enabled with storage and retention days
+        self.cmd('az synapse sql audit-policy update --state Enabled --storage-account {storage-account} '
+                 '--retention-days 7 --workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Enabled')
+                 ])
+
+        # test for updating state from Enabled to Disabled
+        self.cmd('az synapse sql audit-policy update --state Disabled '
+                 '--workspace-name {workspace} --resource-group {rg}')
+        self.cmd('az synapse sql audit-policy show --workspace-name {workspace} --resource-group {rg}',
+                 checks=[
+                     self.check('state', 'Disabled')
                  ])
 
     @record_only()
@@ -354,7 +544,8 @@ class SynapseScenarioTests(ScenarioTest):
             'rg': 'rg',
             'ruleName': self.create_random_name(prefix='rule', length=8),
             'startIpAddress': "0.0.0.0",
-            'endIpAddress': "255.255.255.255"
+            'endIpAddress': "255.255.255.255",
+            'secondIpAddress': "192.0.0.1"
         })
 
         # create a firewall rule
@@ -373,6 +564,16 @@ class SynapseScenarioTests(ScenarioTest):
             '--resource-group {rg}',
             checks=[
                 self.check('name', self.kwargs['ruleName']),
+                self.check('type', 'Microsoft.Synapse/workspaces/firewallRules'),
+                self.check('provisioningState', 'Succeeded')
+            ])
+        # update a firewall rule
+        self.cmd(
+            'az synapse workspace firewall-rule update --name {ruleName} --workspace-name {workspace} '
+            '--resource-group {rg} --start-ip-address {secondIpAddress}',
+            checks=[
+                self.check('name', self.kwargs['ruleName']),
+                self.check('startIpAddress', self.kwargs['secondIpAddress']),
                 self.check('type', 'Microsoft.Synapse/workspaces/firewallRules'),
                 self.check('provisioningState', 'Succeeded')
             ])
@@ -968,3 +1169,101 @@ class SynapseScenarioTests(ScenarioTest):
         self.cmd(
             'az synapse notebook show --workspace-name {workspace} --name {name}',
             expect_failure=True)
+
+    @record_only()
+    def test_integration_runtime(self):
+        self.kwargs.update({
+            'rg': 'rg',
+            'workspace': 'testsynapseworkspace',
+            'name': 'integrationruntime',
+            'type': 'Managed',
+            'selfhosted-integration-runtime': 'SelfHostedIntegrationRuntime',
+            'node': 'testnode'})
+
+        # create integration runtime
+        self.cmd(
+            'az synapse integration-runtime create --resource-group {rg} --workspace-name {workspace} --name {name} --type {type}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # get integration runtime
+        self.cmd(
+            'az synapse integration-runtime show --resource-group {rg} --workspace-name {workspace} --name {name}',
+            checks=[
+                self.check('name', self.kwargs['name'])
+            ])
+
+        # list integration runtime
+        self.cmd(
+            'az synapse integration-runtime list --resource-group {rg} --workspace-name {workspace}',
+            checks=[
+                self.check('[0].type', 'Microsoft.Synapse/workspaces/integrationruntimes')
+            ])
+
+        # delete integration runtime
+        self.cmd(
+            'az synapse integration-runtime delete --resource-group {rg} --workspace-name {workspace} --name {name} -y')
+        self.cmd(
+            'az synapse integration-runtime show --resource-group {rg} --workspace-name {workspace} --name {name}',
+            expect_failure=True)
+
+        # upgrade self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime upgrade --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get keys for a self-hosted integration runtime
+        key = self.cmd(
+            'az synapse integration-runtime list-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}').get_output_in_json()
+        assert key['authKey1'] is not None
+        assert key['authKey2'] is not None
+
+        # regenerate self-hosted integration runtime key
+        key = self.cmd(
+            'az synapse integration-runtime regenerate-auth-key --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--key-name authKey1').get_output_in_json()
+        assert key['authKey1'] is not None
+        assert key['authKey2'] is None
+
+        # get metric data for a self-hosted integration runtime
+        self.cmd(
+            'az synapse integration-runtime get-monitoring-data --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-integration-runtime'])
+            ])
+
+        # get self-hosted integration runtime node information
+        self.cmd(
+            'az synapse integration-runtime-node show --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}',
+            checks=[
+                self.check('nodeName', self.kwargs['node'])
+            ])
+
+        # update self-hosted integration runtime node
+        self.cmd(
+            'az synapse integration-runtime-node update --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}',
+            checks=[
+                self.check('nodeName', self.kwargs['node'])
+            ])
+
+        # get self-hosted integration runtime node ip
+        self.cmd(
+            'az synapse integration-runtime-node get-ip-address --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime} '
+            '--node-name {node}')
+
+        # sync credentials among integration runtime nodes
+        self.cmd(
+            'az synapse integration-runtime sync-credentials --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get connection info
+        self.cmd(
+            'az synapse integration-runtime get-connection-info --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}')
+
+        # get status
+        self.cmd(
+            'az synapse integration-runtime get-status --resource-group {rg} --workspace-name {workspace} --name {selfhosted-integration-runtime}',
+            checks=[
+                self.check('name', self.kwargs['selfhosted-integration-runtime'])
+            ])

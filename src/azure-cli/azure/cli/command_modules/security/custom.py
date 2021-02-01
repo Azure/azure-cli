@@ -76,9 +76,19 @@ def update_security_alert(client, location, resource_name, status, resource_grou
     client.config.asc_location = location
 
     if resource_group_name:
-        client.update_resource_group_level_alert_state(resource_name, status, resource_group_name)
+        if status == "Dismiss":
+            client.update_resource_group_level_alert_state_to_dismiss(resource_name, resource_group_name)
+        if status == "Activate":
+            client.update_resource_group_level_alert_state_to_reactivate(resource_name, resource_group_name)
+        if status == "Resolve":
+            client.update_resource_group_level_state_to_resolve(resource_name, resource_group_name)
     else:
-        client.update_subscription_level_alert_state(resource_name, status)
+        if status == "Dismiss":
+            client.update_subscription_level_alert_state_to_dismiss(resource_name)
+        if status == "Activate":
+            client.update_subscription_level_alert_state_to_reactivate(resource_name)
+        if status == "Resolve":
+            client.update_subscription_level_state_to_resolve(resource_name)
 
 
 # --------------------------------------------------------------------------------------------

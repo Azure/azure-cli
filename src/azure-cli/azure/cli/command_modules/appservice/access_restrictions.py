@@ -157,7 +157,7 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
     if not service_endpoint_exists:
         web_service_endpoint = ServiceEndpointPropertiesFormat(service="Microsoft.Web")
         subnet_obj.service_endpoints.append(web_service_endpoint)
-        poller = vnet_client.subnets.create_or_update(
+        poller = vnet_client.subnets.begin_create_or_update(
             subnet_resource_group, subnet_vnet_name,
             subnet_name, subnet_parameters=subnet_obj)
         # Ensure subnet is updated to avoid update conflict

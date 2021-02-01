@@ -84,6 +84,7 @@ def load_command_table(self, _):
         g.custom_command('disable-addons', 'aks_disable_addons', supports_no_wait=True)
         g.custom_command('enable-addons', 'aks_enable_addons', supports_no_wait=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
+        g.custom_command('check-acr', 'aks_check_acr')
         g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
@@ -96,6 +97,8 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.wait_command('wait')
+        g.command('stop', 'stop', supports_no_wait=True)
+        g.command('start', 'start', supports_no_wait=True)
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)

@@ -182,7 +182,10 @@ def validate_client_parameters(cmd, namespace):
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        try:
+            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        except Exception:  # pylint: disable=broad-except
+            pass
 
 
 def validate_encryption_key(cmd, namespace):
@@ -1566,3 +1569,9 @@ def get_not_none_validator(attribute_name):
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none
+
+
+def validate_policy(namespace):
+    if namespace.id is not None:
+        logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
+                       "policy.")

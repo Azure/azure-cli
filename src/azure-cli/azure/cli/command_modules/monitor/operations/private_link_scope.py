@@ -14,8 +14,8 @@ def show_private_link_scope(client, resource_group_name, scope_name):
 
 
 def delete_private_link_scope(client, resource_group_name, scope_name):
-    return client.delete(resource_group_name=resource_group_name,
-                         scope_name=scope_name)
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               scope_name=scope_name)
 
 
 def list_private_link_scope(client, resource_group_name=None):
@@ -25,16 +25,19 @@ def list_private_link_scope(client, resource_group_name=None):
 
 
 def create_private_link_scope(client, resource_group_name, scope_name, location='Global', tags=None):
+    from azure.mgmt.monitor.models import AzureMonitorPrivateLinkScope
+    private_link_scope = AzureMonitorPrivateLinkScope(location=location, tags=tags)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
-                                   location=location,
-                                   tags=tags)
+                                   azure_monitor_private_link_scope_payload=private_link_scope)
 
 
 def update_private_link_scope(client, resource_group_name, scope_name, tags):
+    from azure.mgmt.monitor.models import TagsResource
+    tags = TagsResource(tags=tags)
     return client.update_tags(resource_group_name=resource_group_name,
                               scope_name=scope_name,
-                              tags=tags)
+                              private_link_scope_tags=tags)
 # endregion
 
 
@@ -46,9 +49,9 @@ def show_private_link_scope_resource(client, resource_group_name, scope_name, re
 
 
 def delete_private_link_scope_resource(client, resource_group_name, scope_name, resource_name):
-    return client.delete(resource_group_name=resource_group_name,
-                         scope_name=scope_name,
-                         name=resource_name)
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               scope_name=scope_name,
+                               name=resource_name)
 
 
 def list_private_link_scope_resource(client, resource_group_name, scope_name):
@@ -58,10 +61,12 @@ def list_private_link_scope_resource(client, resource_group_name, scope_name):
 
 def create_private_link_scope_resource(client, resource_group_name, scope_name, resource_name,
                                        linked_resource_id):
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   scope_name=scope_name,
-                                   name=resource_name,
-                                   linked_resource_id=linked_resource_id)
+    from azure.mgmt.monitor.models import ScopedResource
+    scoped_resource = ScopedResource(linked_resource_id=linked_resource_id)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         scope_name=scope_name,
+                                         name=resource_name,
+                                         parameters=scoped_resource)
 
 # endregion
 
@@ -87,9 +92,9 @@ def show_private_endpoint_connection(client, resource_group_name, scope_name, pr
 
 
 def delete_private_endpoint_connection(client, resource_group_name, scope_name, private_endpoint_connection_name):
-    return client.delete(resource_group_name=resource_group_name,
-                         scope_name=scope_name,
-                         private_endpoint_connection_name=private_endpoint_connection_name)
+    return client.begin_delete(resource_group_name=resource_group_name,
+                               scope_name=scope_name,
+                               private_endpoint_connection_name=private_endpoint_connection_name)
 
 
 def list_private_endpoint_connection(client, resource_group_name, scope_name):
@@ -110,10 +115,12 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
         return None
     private_endpoint_connection.private_link_service_connection_state.status = new_status
     private_endpoint_connection.private_link_service_connection_state.description = description
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   scope_name=scope_name,
-                                   private_endpoint_connection_name=private_endpoint_connection_name,
-                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
+    from azure.mgmt.monitor.models import PrivateEndpointConnection
+    private_endpoint_connection = PrivateEndpointConnection(private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         scope_name=scope_name,
+                                         private_endpoint_connection_name=private_endpoint_connection_name,
+                                         parameters=private_endpoint_connection)
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, scope_name,
