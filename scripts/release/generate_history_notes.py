@@ -115,25 +115,25 @@ def modify_history_file(file: fileinput.FileInput, new_history: str):
 
 
 def construct_cli_history(component: str):
-    history = '**{}**\n\n'.format(component)
+    history = ['**{}**\n'.format(component)]
     non_breaking_change_notes = []
     for note in history_notes[component]:
         if 'BREAKING CHANGE' in note.upper():
-            history += '* {}\n'.format(note)
+            history.append('* {}'.format(note))
         else:
             non_breaking_change_notes.append(note)
     for note in non_breaking_change_notes:
-        history += '* {}\n'.format(note)
-    history += '\n'
-    return history
+        history.append('* {}'.format(note))
+    history.append('\n')
+    return '\n'.join(history)
 
 
 def construct_core_history(component: str):
-    history = ''
+    history = []
     for note in history_notes[component]:
-        history += '* {}\n'.format(note)
-    history += '\n'
-    return history
+        history.append('* {}'.format(note))
+    history.append('\n')
+    return '\n'.join(history)
 
 
 def get_commits():
