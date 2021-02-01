@@ -29,12 +29,14 @@ def _is_not_platform_specific(item):
 
 
 def _is_compatible_with_cli_version(item):
-    is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(item['metadata'])
+    is_compatible, cli_core_version, min_required, max_required, min_ext_required = ext_compat_with_cli(
+        item['metadata'])
     if is_compatible:
         return True
     logger.debug("Skipping '%s' as not compatible with this version of the CLI. "
-                 "Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", item['filename'], is_compatible, cli_core_version, min_required, max_required)
+                 "Extension compatibility result: is_compatible=%s cli_core_version=%s ext_version=%s "
+                 "min_core_required=%s max_core_required=%s min_ext_required=%s", item['filename'], is_compatible,
+                 cli_core_version, item['metadata'].get('version'), min_required, max_required, min_ext_required)
     return False
 
 
