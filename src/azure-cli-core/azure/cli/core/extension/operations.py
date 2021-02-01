@@ -101,7 +101,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
     if extension_name == 'rdbms-connect':
-        _install_deps_for_rdbms_connect()
+        _install_deps_for_psycopg2()
     ext_file = None
     if is_url:
         # Download from URL
@@ -169,7 +169,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     return extension_name
 
 
-def _install_deps_for_rdbms_connect():  # pylint: disable=too-many-statements
+def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
     # Below system dependencies are required to install the psycopg2 dependency for Linux and macOS
     import platform
     import subprocess
