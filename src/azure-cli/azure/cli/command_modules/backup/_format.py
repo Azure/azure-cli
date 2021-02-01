@@ -71,6 +71,16 @@ def transform_recovery_point(result):
                         ('Consistency', result['properties']['recoveryPointType'])])
 
 
+def transform_log_chain(result):
+    columns = []
+    columns.append(('Name', result['name']))
+    columns.append(('Resource Group', result['resourceGroup']))
+    if result['properties']['timeRanges']:
+        columns.append(('Start Time UTC', result['properties']['timeRanges'][0]['startTime']))
+        columns.append(('End Time UTC', result['properties']['timeRanges'][0]['endTime']))
+    return OrderedDict(columns)
+
+
 def transform_protectable_item(result):
     columns = []
     columns.append(('Name', result['name']))
@@ -100,6 +110,10 @@ def transform_policy_list(policy_list):
 
 def transform_recovery_point_list(recovery_point_list):
     return [transform_recovery_point(rp) for rp in recovery_point_list]
+
+
+def transform_log_chain_list(log_chain_list):
+    return [transform_log_chain(rp) for rp in log_chain_list]
 
 
 def transform_protectable_item_list(protectable_item_list):
