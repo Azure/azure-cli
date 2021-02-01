@@ -130,7 +130,7 @@ def load_arguments(self, _):
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(),
                    help='[Vault Only] Property to specify whether Azure Resource Manager is permitted to retrieve '
                         'secrets from the key vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag())
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), deprecate_info=c.deprecate(
             message_func=lambda x: 'Warning! The ability to create new key vaults with soft delete disabled will be '
                                    'deprecated by December 2020. All key vaults will be required to have soft delete '
