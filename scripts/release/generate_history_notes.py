@@ -55,6 +55,7 @@ def get_component_dict():
                         component_dict[key] = comp
                 else:
                     component_dict[key] = comp
+    print('Component name mappings:')
     print(component_dict)
 
 def generate_history_notes():
