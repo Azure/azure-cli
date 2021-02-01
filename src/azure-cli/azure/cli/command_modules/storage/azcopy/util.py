@@ -110,7 +110,7 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client, service='blob'):
-    azcopy_creds = storage_client_auth_for_azcopy(cmd, client, service)
+    azcopy_creds = storage_client_auth_for_azcopy(client, service)
     if azcopy_creds is not None:
         return azcopy_creds
 
@@ -123,7 +123,7 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
     return AzCopyCredentials(token_info=token_info)
 
 
-def storage_client_auth_for_azcopy(cmd, client, service):
+def storage_client_auth_for_azcopy(client, service):
     if service not in SERVICES:
         raise Exception('{} not one of: {}'.format(service, str(SERVICES)))
 
