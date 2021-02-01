@@ -14,6 +14,8 @@
 from __future__ import print_function
 
 # from .generated.custom import *  # noqa: F403
+from azure.cli.core.azclierror import ValidationError
+
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import
 except ImportError:
@@ -294,7 +296,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=False):
+                        tier=None, enable_bursting=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -417,7 +419,7 @@ def list_managed_disks(cmd, resource_group_name=None):
 def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
                         disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None,
                         network_access_policy=None, disk_access=None, max_shares=None, disk_iops_read_only=None,
-                        disk_mbps_read_only=None, enable_bursting=False):
+                        disk_mbps_read_only=None, enable_bursting=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -3324,8 +3326,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                             source=source, replica_count=replica_count,
                                             storage_account_type=storage_account_type)
     if cmd.supported_api_version(min_api='2019-07-01', operation_group='gallery_image_versions'):
-        if managed_image is None and os_snapshot is None:
-            raise CLIError('usage error: Please provide --managed-image or --os-snapshot')
+        if managed_image is None and os_snapshot is None and vhd is None:
+            raise CLIError('usage error: Please provide --managed-image or --os-snapshot or --vhd')
         GalleryImageVersionStorageProfile = cmd.get_models('GalleryImageVersionStorageProfile')
         GalleryArtifactVersionSource = cmd.get_models('GalleryArtifactVersionSource')
         GalleryOSDiskImage = cmd.get_models('GalleryOSDiskImage')
@@ -3348,7 +3350,8 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                                                              lun=data_snapshot_luns[i]))
         # from vhd
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
-            # TODO: parameter validation
+            if vhd and vhd_storage_account is None or vhd is None and vhd_storage_account:
+                raise ValidationError('--vhd and --vhd-storage-account should be used together.')
             if vhd and vhd_storage_account:
                 if not is_valid_resource_id(vhd_storage_account):
                     vhd_storage_account = resource_id(
