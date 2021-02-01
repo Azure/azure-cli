@@ -670,11 +670,11 @@ class ProviderRegistrationTest(ScenarioTest):
 
         self.cmd('account management-group create --name {mg}')
 
-        # result = self.cmd('provider register -n {prov} --m {mg}')
-        # self.assertTrue(result is not None)
+        result = self.cmd('provider register -n {prov} --m {mg}')
+        self.assertTrue(result.output, '')
 
         # clean
-        self.cmd('account management-group delete -n {mg}')            
+        self.cmd('account management-group delete -n {mg}')
 
 
 class ProviderOperationTest(ScenarioTest):
