@@ -294,7 +294,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         image_reference=None, image_reference_lun=None,
                         gallery_image_reference=None, gallery_image_reference_lun=None,
                         network_access_policy=None, disk_access=None, logical_sector_size=None,
-                        tier=None, enable_bursting=False):
+                        tier=None, enable_bursting=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -396,7 +396,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_access_id = disk_access
     if tier is not None:
         disk.tier = tier
-    disk.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        disk.bursting_enabled = enable_bursting
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -453,7 +454,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
-    instance.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        instance.bursting_enabled = enable_bursting
     return instance
 # endregion
 
