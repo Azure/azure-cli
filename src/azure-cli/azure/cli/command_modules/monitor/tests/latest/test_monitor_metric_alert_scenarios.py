@@ -258,17 +258,17 @@ class MonitorTests(ScenarioTest):
         self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} --region westus --action {ag1} '
                  '--condition "avg Percentage CPU > 90" --description "High CPU"',
                  checks=[
-                    self.check('description', 'High CPU'),
-                    self.check('severity', 2),
-                    self.check('autoMitigate', None),
-                    self.check('windowSize', '0:05:00'),
-                    self.check('evaluationFrequency', '0:01:00'),
-                    self.check('length(scopes)', 1),
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 1),
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer()
-    def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server):
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1')
+    def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',
             'alert2': 'alert2',
@@ -279,36 +279,15 @@ class MonitorTests(ScenarioTest):
             'sub': self.get_subscription_id()
         })
         db_name = 'cliautomationdb01'
-        firewall_rule_1 = 'allowAllIps'
-        start_ip_address_1 = '0.0.0.0'
-        end_ip_address_1 = '0.0.0.0'
-        # create server firewall rule
-        self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
-                 '--start-ip-address {} --end-ip-address {}'
-                 .format(firewall_rule_1, resource_group, server,
-                         start_ip_address_1, end_ip_address_1))
         # create dbs
-        sql_db = self.cmd('sql db create -g {} --server {} --name {}'.format(
-            resource_group, server, db_name)).get_output_in_json()
-        self.kwargs['sql_db_id'] = sql_db['id']
-        self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sql_db_id} --action {ag1} '
-                 '--condition "avg cpu_percent > 90" '
-                 '--description "High CPU"',
-                 checks=[
-                    self.check('description', 'High CPU'),
-                    self.check('severity', 2),
-                    self.check('autoMitigate', None),
-                    self.check('windowSize', '0:05:00'),
-                    self.check('evaluationFrequency', '0:01:00'),
-                    self.check('length(scopes)', 1),
-                 ])
-        db_name_1 = db_name + '1'
         sql_db_1 = self.cmd('sql db create -g {} --server {} --name {}'.format(
-            resource_group, server, db_name_1)).get_output_in_json()
+            resource_group, server1, db_name)).get_output_in_json()
         self.kwargs['sql_db_1_id'] = sql_db_1['id']
-        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {sql_db_id} {sql_db_1_id} --action {ag1} '
-                 '--condition "avg cpu_percent > 90" --region westus '
+
+        # create single scope metrics alert
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sql_db_1_id} --action {ag1} '
+                 '--condition "avg cpu_percent > 90" '
                  '--description "High CPU"',
                  checks=[
                      self.check('description', 'High CPU'),
@@ -316,7 +295,7 @@ class MonitorTests(ScenarioTest):
                      self.check('autoMitigate', None),
                      self.check('windowSize', '0:05:00'),
                      self.check('evaluationFrequency', '0:01:00'),
-                     self.check('length(scopes)', 2),
+                     self.check('length(scopes)', 1),
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
