@@ -677,8 +677,8 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
 
 # region application-gateway ssl-profile
 def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
-                     policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                     trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
+                    policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
+                    trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     (SubResource,

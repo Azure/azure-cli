@@ -128,16 +128,16 @@ parameters:
     short-summary: The application gateway trusted client certificate.
     long-summary: |
         Usage: --trusted-client-certificates name=client1 data=client.cer
-        
+
         name: Required. Name of the trusted client certificate that is unique within an Application Gateway
         data: Required. Certificate public data.
-        
+
         Multiple trusted client certificates can be specified by using more than one `--trusted-client-certificates` argument.
   - name: --ssl-profile
     short-summary: The application gateway ssl profiles.
     long-summary: |
-        Usage: --ssl-profile name=MySslProfile client-auth-configuration=True disabled-ssl-protocols=TLSv1_0,TLSv1_1 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-        
+        Usage: --ssl-profile name=MySslProfile client-auth-configuration=True cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom min-protocol-version=TLSv1_0
+
         name: Required. Name of the SSL profile that is unique within an Application Gateway.
         polic-name: Name of Ssl Policy.
         policy-type: Type of Ssl Policy.
@@ -146,9 +146,9 @@ parameters:
         disabled-ssl-protocols: Space-separated list of protocols to disable.
         trusted-client-certificates: Array of references to application gateway trusted client certificates.
         client-auth-configuration: Client authentication configuration of the application gateway resource.
-        
+
         Multiple ssl profiles can be specified by using more than one `--ssl-profile` argument.
-        
+
 examples:
   - name: Create an application gateway with VMs as backend servers.
     text: |

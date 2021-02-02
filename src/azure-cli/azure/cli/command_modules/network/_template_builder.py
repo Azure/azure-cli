@@ -57,7 +57,7 @@ def _build_appgw_private_link_ip_configuration(name,
     }
 
 
-# pylint: disable=too-many-locals, too-many-statements
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches
 def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_tier, capacity, servers, frontend_port,
                                        private_ip_address, private_ip_allocation,
                                        cert_data, cert_password, key_vault_secret_id,

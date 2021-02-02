@@ -619,8 +619,8 @@ class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
         # create an ag with ssl profile
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
         self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
-                 '--ssl-profile name={name} client-auth-configuration=True disabled-ssl-protocols=TLSv1_0,TLSv1_1 '
-                 'cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+                 '--ssl-profile name={name} client-auth-configuration=True min-protocol-version=TLSv1_0 '
+                 'cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 policy-type=Custom',
                  checks=[self.check('length(applicationGateway.sslProfiles)', 1)])
 
         self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '

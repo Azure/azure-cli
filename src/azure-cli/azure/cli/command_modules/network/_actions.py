@@ -7,8 +7,9 @@ from collections import defaultdict
 
 import argparse
 from knack.util import CLIError
-from ._validators import read_base_64_file
 from azure.cli.core.azclierror import UnrecognizedArgumentError
+from ._validators import read_base_64_file
+
 
 # pylint: disable=protected-access
 class AddBackendAddressCreate(argparse._AppendAction):
@@ -112,19 +113,20 @@ class SslProfilesCreate(argparse._AppendAction):
             v = properties[k]
             if kl == 'name':
                 d['name'] = v[0]
-            elif kl == 'min-protocol-version':
+            elif kl == 'policy-type':
                 d['policy_type'] = v[0]
             elif kl == 'min-protocol-version':
                 d['min_protocol_version'] = v[0]
             elif kl == 'cipher-suites':
-                d['cipher-suites'] = _split(v[0])
+                d['cipher_suites'] = _split(v[0])
             elif kl == 'disabled-ssl-protocols':
-                d['disabled-ssl-protocols'] = _split(v[0])
+                d['disabled_ssl_protocols'] = _split(v[0])
             elif kl == 'client-auth-configuration':
-                d['client_auth_configuration'] = True if v[0] == 'True' else False
+                d['client_auth_configuration'] = bool(v[0])
             elif kl == 'trusted-client-certificates':
                 d['trusted_client_certificates'] = _split(v[0])
             else:
                 raise UnrecognizedArgumentError('key error: key must be one of policy-type, min-protocol-version, '
-                                                'cipher-suites,client-auth-configuration, trusted-client-certificates.')
+                                                'cipher-suites, client-auth-configuration, trusted-client-certificates,'
+                                                'disabled-ssl-protocols.')
         return d
