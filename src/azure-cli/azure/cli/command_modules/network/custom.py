@@ -718,7 +718,7 @@ def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
             appgw.ssl_profiles.remove(profile)
             break
     else:
-        raise CLIError(f"Ssl profiles {ssl_profile_name} doesn't exist")
+        raise UserFault(f"Ssl profiles {ssl_profile_name} doesn't exist")
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)

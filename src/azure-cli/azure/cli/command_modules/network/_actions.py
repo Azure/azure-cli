@@ -8,6 +8,7 @@ from collections import defaultdict
 import argparse
 from knack.util import CLIError
 from ._validators import read_base_64_file
+from azure.cli.core.azclierror import UserFault
 
 # pylint: disable=protected-access
 class AddBackendAddressCreate(argparse._AppendAction):
@@ -74,7 +75,7 @@ class TrustedClientCertificateCreate(argparse._AppendAction):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise UserFault('usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
@@ -84,7 +85,7 @@ class TrustedClientCertificateCreate(argparse._AppendAction):
             elif kl == 'data':
                 d['data'] = read_base_64_file(v[0])
             else:
-                raise CLIError('key error: key must be one of name and data.')
+                raise UserFault('key error: key must be one of name and data.')
         return d
 
 
@@ -104,7 +105,7 @@ class SslProfilesCreate(argparse._AppendAction):
                 properties[k].append(v)
             properties = dict(properties)
         except ValueError:
-            raise CLIError('usage error: {} [KEY=VALUE ...]'.format(option_string))
+            raise UserFault('usage error: {} [KEY=VALUE ...]'.format(option_string))
         d = {}
         for k in properties:
             kl = k.lower()
@@ -124,6 +125,6 @@ class SslProfilesCreate(argparse._AppendAction):
             elif kl == 'trusted-client-certificates':
                 d['trusted_client_certificates'] = _split(v[0])
             else:
-                raise CLIError('key error: key must be one of policy-type, min-protocol-version, cipher-suites, '
+                raise UserFault('key error: key must be one of policy-type, min-protocol-version, cipher-suites, '
                                'client-auth-configuration, trusted-client-certificates.')
         return d
