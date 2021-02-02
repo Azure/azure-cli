@@ -254,7 +254,7 @@ class CLIInternalError(ClientError):
 
 # Client error for az next
 class RecommendationError(ClientError):
-    """ The client error raised by "az next", it is needed in "az next" to skip error records """
+    """ The client error raised by `az next`. It is needed in `az next` to skip error records. """
     pass
 
 # endregion
