@@ -798,6 +798,7 @@ class BotTests(ScenarioTest):
         except AssertionError:
             raise AssertionError('should have thrown an error for registration-type bot.')
 
+
 class BotLiveOnlyTests(LiveScenarioTest):
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_create_should_remove_invalid_char_from_name_when_registration(self, resource_group):
@@ -978,6 +979,7 @@ class BotLiveOnlyTests(LiveScenarioTest):
 
         assert not results['properties']['cmekKeyVaultUrl']
         assert results['properties']['isCmekEnabled'] is False
+
 
 class BotLocalErrorsTests(unittest.TestCase):
     def test_botservice_prepare_deploy_should_fail_if_code_dir_doesnt_exist(self):

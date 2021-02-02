@@ -704,10 +704,8 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
     if app_insights_api_key:
         bot_props.developer_app_insights_api_key = app_insights_api_key
 
-
     if cmek_key_vault_url is not None and encryption_off is not None:
         error_msg = "Both --encryption-off and a --cmk-key-vault-key-url (encryption ON) were passed. Please use only one: --cmk-key-vault-key-url or --encryption_off"
-        recommendation = "Try to use --cmk-key-vault-key-url URL"
         raise MutuallyExclusiveArgumentError(error_msg)
 
     if cmek_key_vault_url is not None:
