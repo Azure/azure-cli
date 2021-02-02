@@ -283,8 +283,11 @@ def show_protectable_instance(items, server_name, protectable_item_type):
     return cust_help.get_none_one_or_many(filtered_items)
 
 
-def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None):
+def list_protectable_items(client, resource_group_name, vault_name, workload_type, container_uri=None,
+                           protectable_item_type=None):
     workload_type = _check_map(workload_type, workload_type_map)
+    if protectable_item_type is not None:
+        protectable_item_type = _check_map(protectable_item_type, protectable_item_type_map)
 
     filter_string = cust_help.get_filter_string({
         'backupManagementType': "AzureWorkload",
@@ -293,9 +296,15 @@ def list_protectable_items(client, resource_group_name, vault_name, workload_typ
     # Items list
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = cust_help.get_list_from_paged_response(items)
+
+    if protectable_item_type is not None:
+        # Protectable Item Type filter
+        paged_items = [item for item in paged_items if
+                          item.properties.protectable_item_type.lower() == protectable_item_type.lower()]
     if container_uri:
         return [item for item in paged_items if
                 cust_help.get_protection_container_uri_from_id(item.id).lower() == container_uri.lower()]
+    
     return paged_items
 
 
