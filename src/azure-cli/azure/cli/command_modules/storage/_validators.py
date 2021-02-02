@@ -1028,6 +1028,21 @@ def get_datetime_type(to_string):
     return datetime_type
 
 
+def get_api_version_type():
+    """ Examples of accepted forms: 2017-12-31 """
+    from datetime import datetime
+
+    def api_version_type(string):
+        """ Validates api version format. Examples of accepted form: 2017-12-31 """
+        accepted_format = '%Y-%m-%d'
+        try:
+            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+        except ValueError:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
+    return api_version_type
+
+
 def ipv4_range_type(string):
     """ Validates an IPv4 address or address range. """
     import re
