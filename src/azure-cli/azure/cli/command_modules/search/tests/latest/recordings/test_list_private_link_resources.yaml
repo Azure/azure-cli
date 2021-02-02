@@ -11,7 +11,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - python/3.8.6 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
         azure-mgmt-resource/12.0.0 Azure-SDK-For-Python AZURECLI/2.18.0
@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure_search_cli_test000001?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-01-28T07:11:12Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2021-01-30T00:14:41Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:11:15 GMT
+      - Sat, 30 Jan 2021 00:14:44 GMT
       expires:
       - '-1'
       pragma:
@@ -45,8 +45,8 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus", "sku": {"name": "standard"}, "properties": {"replicaCount":
-      1, "partitionCount": 1, "hostingMode": "default", "publicNetworkAccess": "enabled"}}'
+    body: '{"location": "westus", "sku": {"name": "basic"}, "properties": {"replicaCount":
+      1, "partitionCount": 1, "hostingMode": "default", "publicNetworkAccess": "Disabled"}}'
     headers:
       Accept:
       - application/json
@@ -57,11 +57,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '167'
+      - '165'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: PUT
@@ -69,26 +69,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:11:55 GMT
+      - Sat, 30 Jan 2021 00:14:48 GMT
       elapsed-time:
-      - '6071'
+      - '2777'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
@@ -110,7 +110,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -118,26 +118,281 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:12:26 GMT
+      - Sat, 30 Jan 2021 00:15:18 GMT
+      elapsed-time:
+      - '165'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:15:49 GMT
+      elapsed-time:
+      - '322'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:16:20 GMT
+      elapsed-time:
+      - '195'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:16:50 GMT
+      elapsed-time:
+      - '295'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:17:20 GMT
+      elapsed-time:
+      - '212'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:17:50 GMT
       elapsed-time:
       - '193'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -161,7 +416,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -169,26 +424,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:12:56 GMT
+      - Sat, 30 Jan 2021 00:18:21 GMT
       elapsed-time:
-      - '389'
+      - '158'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -212,7 +467,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -220,26 +475,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:13:26 GMT
+      - Sat, 30 Jan 2021 00:18:51 GMT
       elapsed-time:
-      - '178'
+      - '206'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -263,7 +518,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -271,26 +526,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:13:56 GMT
+      - Sat, 30 Jan 2021 00:19:22 GMT
       elapsed-time:
-      - '183'
+      - '388'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -314,7 +569,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -322,842 +577,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:14:26 GMT
-      elapsed-time:
-      - '159'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:14:57 GMT
-      elapsed-time:
-      - '230'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:15:27 GMT
-      elapsed-time:
-      - '303'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:15:57 GMT
-      elapsed-time:
-      - '187'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:16:27 GMT
-      elapsed-time:
-      - '194'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:16:58 GMT
-      elapsed-time:
-      - '308'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:17:29 GMT
-      elapsed-time:
-      - '159'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:17:59 GMT
-      elapsed-time:
-      - '179'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:18:29 GMT
-      elapsed-time:
-      - '166'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:18:59 GMT
-      elapsed-time:
-      - '190'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:19:29 GMT
-      elapsed-time:
-      - '168'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:20:00 GMT
-      elapsed-time:
-      - '183'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:20:30 GMT
-      elapsed-time:
-      - '179'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:21:00 GMT
-      elapsed-time:
-      - '176'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:21:30 GMT
-      elapsed-time:
-      - '194'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:22:01 GMT
-      elapsed-time:
-      - '160'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:22:31 GMT
+      - Sat, 30 Jan 2021 00:19:52 GMT
       elapsed-time:
       - '167'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1181,7 +620,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1189,26 +628,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:23:14 GMT
+      - Sat, 30 Jan 2021 00:20:23 GMT
       elapsed-time:
-      - '1416'
+      - '200'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1232,7 +671,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1240,26 +679,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:23:44 GMT
+      - Sat, 30 Jan 2021 00:20:53 GMT
       elapsed-time:
-      - '248'
+      - '285'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1283,7 +722,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1291,26 +730,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:24:14 GMT
+      - Sat, 30 Jan 2021 00:21:23 GMT
       elapsed-time:
-      - '223'
+      - '247'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1334,7 +773,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1342,179 +781,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:24:54 GMT
-      elapsed-time:
-      - '603'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:25:25 GMT
-      elapsed-time:
-      - '189'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:25:55 GMT
-      elapsed-time:
-      - '524'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --sku
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '637'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:26:25 GMT
+      - Sat, 30 Jan 2021 00:21:54 GMT
       elapsed-time:
       - '194'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1538,7 +824,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1546,26 +832,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:26:55 GMT
+      - Sat, 30 Jan 2021 00:22:24 GMT
       elapsed-time:
-      - '422'
+      - '173'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1589,7 +875,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1597,26 +883,26 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '637'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:27:25 GMT
+      - Sat, 30 Jan 2021 00:22:54 GMT
       elapsed-time:
-      - '160'
+      - '244'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1640,7 +926,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g --sku
+      - -n -g --sku --public-access
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
@@ -1648,26 +934,281 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"running","statusDetails":"","provisioningState":"succeeded","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '629'
+      - '635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:27:57 GMT
+      - Sat, 30 Jan 2021 00:23:25 GMT
       elapsed-time:
-      - '487'
+      - '208'
       etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 02a06c9e-6138-11eb-ac26-c8348e613252
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:23:55 GMT
+      elapsed-time:
+      - '233'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:24:25 GMT
+      elapsed-time:
+      - '170'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:24:55 GMT
+      elapsed-time:
+      - '189'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:25:26 GMT
+      elapsed-time:
+      - '203'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --public-access
+      User-Agent:
+      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
+        US","properties":{"replicaCount":1,"partitionCount":1,"status":"running","statusDetails":"","provisioningState":"succeeded","hostingMode":"default","publicNetworkAccess":"Disabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 30 Jan 2021 00:25:56 GMT
+      elapsed-time:
+      - '164'
+      etag:
+      - W/"datetime'2021-01-30T00%3A14%3A48.9013062Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 279247bb-6290-11eb-a711-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1687,38 +1228,49 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - search service show
+      - search private-link-resource list
       Connection:
       - keep-alive
       ParameterSetName:
-      - -n -g
+      - --service-name -g
       User-Agent:
       - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/privateLinkResources?api-version=2020-08-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","location":"West
-        US","properties":{"replicaCount":1,"partitionCount":1,"status":"running","statusDetails":"","provisioningState":"succeeded","hostingMode":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[]},"sku":{"name":"standard"}}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002/privateLinkResources/searchService","name":"searchService","type":"Microsoft.Search/searchServices/privateLinkResources","properties":{"groupId":"searchService","requiredMembers":["searchService"],"requiredZoneNames":["privatelink.search.windows.net"],"shareablePrivateLinkResourceTypes":[{"name":"blob","properties":{"type":"Microsoft.Storage/storageAccounts","groupId":"blob","description":"Azure
+        Cognitive Search indexers can connect to blobs in Azure Storage for reading
+        data (data source), for writing intermediate results of indexer execution
+        (annotation cache, preview) or for storing any knowledge store projections
+        (preview)"}},{"name":"table","properties":{"type":"Microsoft.Storage/storageAccounts","groupId":"table","description":"Azure
+        Cognitive Search indexers can connect to tables in Azure Storage for reading
+        data (data source), for writing book-keeping information about intermediate
+        results of indexer execution (annotation cache, preview) or for storing any
+        knowledge store projections (preview)"}},{"name":"Sql","properties":{"type":"Microsoft.DocumentDB/databaseAccounts","groupId":"Sql","description":"Azure
+        Cognitive Search indexers can connect to CosmosDB using the SQL head for reading
+        data (data source)."}},{"name":"plr","properties":{"type":"Microsoft.Sql/servers","groupId":"sqlServer","description":"Azure
+        Cognitive Search indexers can connect to AzureSQL databases in a SQL server
+        for reading data (data source)."}},{"name":"vault","properties":{"type":"Microsoft.KeyVault/vaults","groupId":"vault","description":"Azure
+        Cognitive Search can access keys in Azure Key Vault to encrypt search index
+        and synonym map data"}}]}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '629'
+      - '1883'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Jan 2021 07:27:57 GMT
+      - Sat, 30 Jan 2021 00:25:57 GMT
       elapsed-time:
-      - '160'
-      etag:
-      - W/"datetime'2021-01-28T07%3A11%3A55.168343Z'"
+      - '69'
       expires:
       - '-1'
       pragma:
       - no-cache
       request-id:
-      - 58018ddb-613a-11eb-b54c-c8348e613252
+      - b87dfbd9-6291-11eb-bc18-c8348e613252
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       transfer-encoding:
@@ -1730,94 +1282,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g -y
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Thu, 28 Jan 2021 07:28:02 GMT
-      elapsed-time:
-      - '1220'
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      request-id:
-      - 584e5f4a-613a-11eb-bb33-c8348e613252
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - search service show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - AZURECLI/2.18.0 azsdk-python-mgmt-search/8.0.0 Python/3.8.6 (Windows-10-10.0.19041-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2020-08-01
-  response:
-    body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Search/searchServices/test000002''
-        under resource group ''azure_search_cli_test000001'' was not found. For more
-        details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '303'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 28 Jan 2021 07:28:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-    status:
-      code: 404
-      message: Not Found
 version: 1
