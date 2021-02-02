@@ -37,7 +37,7 @@ ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples']
 # Configure the commands that need to skip command index
-# Such as: "az next" need to support searching the contents of other module commands
+# `az next` needs to search commands from all modules and extensions.
 SKIP_COMMAND_INDEX_FOR = ['next']
 
 
