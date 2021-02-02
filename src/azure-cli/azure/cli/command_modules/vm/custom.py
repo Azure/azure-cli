@@ -2600,7 +2600,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
 
     elif orchestration_mode.lower() == flexible_str.lower():
         if platform_fault_domain_count is None:
-            raise CLIError("usage error: --platform-fault-domain-count is required in VM mode")
+            raise CLIError("usage error: --platform-fault-domain-count is required in Flexible mode")
         vmss_resource = {
             'type': 'Microsoft.Compute/virtualMachineScaleSets',
             'name': vmss_name,
@@ -2620,7 +2620,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 'id': proximity_placement_group
             }
     else:
-        raise CLIError('usage error: --orchestration-mode (ScaleSet | VM)')
+        raise CLIError('usage error: --orchestration-mode (Uniform | Flexible)')
 
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
