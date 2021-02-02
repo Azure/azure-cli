@@ -17,7 +17,6 @@ import logging
 
 import six
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -1260,6 +1259,7 @@ def log_cmd_history(command, args):
     import os
     from knack.util import ensure_dir
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
+    from azure.cli.core._environment import get_config_dir
 
     if command == 'next':
         return
@@ -1313,6 +1313,7 @@ def log_latest_error_info(error_info, error_type):
     import os
     from knack.util import ensure_dir
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
+    from azure.cli.core._environment import get_config_dir
 
     # Determine whether "az next" has been installed.
     # At present, exception log is only recorded when "az next" is installed
@@ -1347,6 +1348,7 @@ def clean_exception_history(command):
         return
 
     import os
+    from azure.cli.core._environment import get_config_dir
     base_dir = os.path.join(get_config_dir(), 'recommendation')
     exception_file_path = os.path.join(base_dir, 'exception_history.log')
 
