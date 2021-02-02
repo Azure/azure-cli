@@ -144,7 +144,8 @@ def validate_client_parameters(cmd, namespace):
                            ' ,'.join(account_key_args))
         return
 
-    if not n.connection_string:
+    # When there is no input for credential, we will read environment variable
+    if not n.connection_string and not n.account_key:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
