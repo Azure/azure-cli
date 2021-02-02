@@ -170,10 +170,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         restore_server_name = 'restore-' + server_name
         restore_time = (current_time + timedelta(minutes=10)).replace(tzinfo=tzutc()).isoformat()
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
-                 checks=[JMESPathCheck('name', restore_server_name),
-                         JMESPathCheck('resourceGroup', resource_group)])
+
+        if database_engine == 'postgres':
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {} --zone 2'
+                     .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
+                     checks=[JMESPathCheck('name', restore_server_name),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('availabilityZone', 2)])
+        else:
+            self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --restore-time {}'
+                     .format(database_engine, resource_group, restore_server_name, server_name, restore_time),
+                     checks=[JMESPathCheck('name', restore_server_name),
+                             JMESPathCheck('resourceGroup', resource_group)])
 
         self.cmd('{} flexible-server restart -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
