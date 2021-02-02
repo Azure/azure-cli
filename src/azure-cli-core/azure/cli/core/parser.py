@@ -304,7 +304,7 @@ class AzCliCommandParser(CLICommandParser):
             from azure.cli.core.util import should_disable_connection_verify
             try:
                 response = requests.get(
-                    'https://azurecliextensionsync.blob.core.windows.net/cmd-index/extensionCommandTree.json',
+                    'https://aka.ms/azExtCmdTree',
                     verify=(not should_disable_connection_verify()),
                     timeout=10)
             except Exception as ex:  # pylint: disable=broad-except
