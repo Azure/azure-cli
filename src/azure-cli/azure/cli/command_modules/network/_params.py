@@ -147,6 +147,7 @@ def load_arguments(self, _):
         c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.')
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
+        c.argument('ssl_profile_id', help='SSL profile resource of the application gateway.', min_api='2020-06-01', is_preview=True)
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
         c.argument('enable_private_link',
@@ -449,12 +450,12 @@ def load_arguments(self, _):
         c.argument('application_gateway_name', app_gateway_name_type)
         c.argument('ssl_profile_name', options_list='--name', help='Name of the SSL profile that is unique within an Application Gateway.')
         c.argument('policy_name', help='Name of Ssl Policy.')
-        c.argument('policy_type', help='Type of Ssl Policy.')
+        c.argument('policy_type', help='Type of Ssl Policy.', choices=['Custom', 'Predefined'])
         c.argument('min_protocol_version', help='Minimum version of Ssl protocol to be supported on application gateway.')
-        c.argument('cipher_suites', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
-        c.argument('disabled_ssl_protocols', help='Space-separated list of protocols to disable.')
-        c.argument('trusted_client_certificates', help='Array of references to application gateway trusted client certificates.')
-        c.argument('client_auth_configuration', help='Client authentication configuration of the application gateway resource.')
+        c.argument('cipher_suites', nargs='+', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
+        c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
+        c.argument('trusted_client_certificates', nargs='+', help='Array of references to application gateway trusted client certificates.')
+        c.argument('client_auth_configuration', help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
 
     # endregion

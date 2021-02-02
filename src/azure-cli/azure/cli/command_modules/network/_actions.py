@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import argparse
 from knack.util import CLIError
-
+from ._validators import read_base_64_file
 
 # pylint: disable=protected-access
 class AddBackendAddressCreate(argparse._AppendAction):
@@ -82,7 +82,7 @@ class TrustedClientCertificateCreate(argparse._AppendAction):
             if kl == 'name':
                 d['name'] = v[0]
             elif kl == 'data':
-                d['data'] = v[0]
+                d['data'] = read_base_64_file(v[0])
             else:
                 raise CLIError('key error: key must be one of name and data.')
         return d
@@ -120,7 +120,7 @@ class SslProfilesCreate(argparse._AppendAction):
             elif kl == 'disabled-ssl-protocols':
                 d['disabled-ssl-protocols'] = _split(v[0])
             elif kl == 'client-auth-configuration':
-                d['client_auth_configuration'] = v[0]
+                d['client_auth_configuration'] = True if v[0] == 'True' else False
             elif kl == 'trusted-client-certificates':
                 d['trusted_client_certificates'] = _split(v[0])
             else:

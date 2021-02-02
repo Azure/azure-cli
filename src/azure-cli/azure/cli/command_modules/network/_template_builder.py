@@ -73,7 +73,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        private_link_primary=None,
                                        private_link_subnet_id=None,
                                        trusted_client_certificates=None,
-                                       ssl_profile=None):
+                                       ssl_profile=None,
+                                       ssl_profile_id=None):
 
     # set the default names
     frontend_public_ip_name = 'appGatewayFrontendIP'
@@ -198,6 +199,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 'keyVaultSecretId': key_vault_secret_id,
             }
         }
+    if ssl_profile_id and cmd.supported_api_version(min_api='2020-06-01'):
+        http_listener['properties'].update({'sslProfile': {'id': ssl_profile_id}})
 
     backend_http_settings = {
         'name': http_settings_name,
@@ -296,18 +299,18 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                 }
             }
             if 'policy_name' in item:
-                parameter.properties.sslPolicy.update({"policyName": item['policy_name']})
+                parameter['properties']['sslPolicy'].update({"policyName": item['policy_name']})
             if 'policy_type' in item:
-                parameter.properties.sslPolicy.update({"policyType": item['policy_type']})
+                parameter['properties']['sslPolicy'].update({"policyType": item['policy_type']})
             if 'min_protocol_version' in item:
-                parameter.properties.sslPolicy.update({"minProtocolVersion": item['min_protocol_version']})
+                parameter['properties']['sslPolicy'].update({"minProtocolVersion": item['min_protocol_version']})
             if 'cipher_suites' in item:
-                parameter.properties.sslPolicy.update({"cipherSuites": item['cipher_suites']})
+                parameter['properties']['sslPolicy'].update({"cipherSuites": item['cipher_suites']})
             if 'client_auth_configuration' in item:
-                parameter.properties.update(
+                parameter['properties'].update(
                     {"clientAuthConfiguration": {"verifyClientCertIssuerDN": item['client_auth_configuration']}})
             if 'trusted_client_certificates' in item:
-                parameter.properties.update(
+                parameter['properties'].update(
                     {"trustedClientCertificates": [{"id": id['trusted_client_certificates']} for id in item]})
 
             parameters.append(parameter)

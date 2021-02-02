@@ -156,7 +156,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                private_link_subnet_prefix='10.0.1.0/24',
                                private_link_primary=None,
                                trusted_client_certificates=None,
-                               ssl_profile=None):
+                               ssl_profile=None,
+                               ssl_profile_id=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import (
@@ -228,7 +229,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         firewall_policy, max_capacity, user_assigned_identity,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
-        private_link_subnet_id, trusted_client_certificates, ssl_profile)
+        private_link_subnet_id, trusted_client_certificates, ssl_profile, ssl_profile_id)
 
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
@@ -677,7 +678,7 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
 # region application-gateway ssl-profile
 def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_profile_name, policy_name=None,
                      policy_type=None, min_protocol_version=None, cipher_suites=None, disabled_ssl_protocols=None,
-                     trusted_client_certificates=None, client_auth_configuration=False, no_wait=False):
+                     trusted_client_certificates=None, client_auth_configuration=None, no_wait=False):
     ncf = network_client_factory(cmd.cli_ctx)
     appgw = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     (SubResource,
@@ -692,7 +693,8 @@ def add_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_prof
     ssl_policy = ApplicationGatewaySslPolicy(policy_name=policy_name, policy_type=policy_type,
                                              min_protocol_version=min_protocol_version,
                                              cipher_suites=cipher_suites, disabled_ssl_protocols=disabled_ssl_protocols)
-    client_auth = ApplicationGatewayClientAuthConfiguration(verify_client_cert_issuer_dn=client_auth_configuration)
+    client_auth = ApplicationGatewayClientAuthConfiguration(
+        verify_client_cert_issuer_dn=client_auth_configuration) if client_auth_configuration else None
     ssl_profile = ApplicationGatewaySslProfile(trusted_client_certificates=sr_trusted_client_certificates,
                                                ssl_policy=ssl_policy, client_auth_configuration=client_auth,
                                                name=ssl_profile_name)

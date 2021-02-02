@@ -573,6 +573,68 @@ class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
         ])
 
 
+class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_trusted_client_cert')
+    def test_network_app_gateway_with_trusted_client_cert(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': 'gateway',
+            'ip': 'ip1',
+            'cert': os.path.join(TEST_DIR, 'client.cer'),
+            'cert1': os.path.join(TEST_DIR, 'client1.cer'),
+            'cname': 'cert_name',
+            'cname1': 'cert_name1',
+        })
+
+        # create an ag with trusted client cert
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
+                 '--trusted-client-certificates name={cname} data={cert}',
+                 checks=[self.check('length(applicationGateway.trustedClientCertificates)', 1)])
+
+        self.cmd('network application-gateway client-cert add -g {rg} --gateway-name {gw} '
+                 '--name {cname1} --data {cert1}',
+                 checks=[self.check('length(trustedClientCertificates)', 2)])
+
+        self.cmd('network application-gateway client-cert list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway client-cert remove -g {rg} --gateway-name {gw} --name {cname1}',
+                 checks=[self.check('length(trustedClientCertificates)', 1)])
+
+
+class NetworkAppGatewaySslProfileScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_ssl_profile')
+    def test_network_app_gateway_with_ssl_profile(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': 'gateway',
+            'ip': 'ip1',
+            'name': 'name',
+            'name1': 'name1',
+        })
+
+        # create an ag with ssl profile
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
+                 '--ssl-profile name={name} client-auth-configuration=True disabled-ssl-protocols=TLSv1_0,TLSv1_1 '
+                 'cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+                 checks=[self.check('length(applicationGateway.sslProfiles)', 1)])
+
+        self.cmd('network application-gateway ssl-profile add -g {rg} --gateway-name {gw} --name {name1} '
+                 '--client-auth-configuration True --min-protocol-version TLSv1_0 '
+                 '--cipher-suites TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 --policy-type Custom',
+                 checks=[self.check('length(sslProfiles)', 2)])
+
+        self.cmd('network application-gateway ssl-profile list -g {rg} --gateway-name {gw}',
+                 checks=[self.check('length(@)', 2)])
+
+        self.cmd('network application-gateway ssl-profile remove -g {rg} --gateway-name {gw} --name {name} ',
+                 checks=[self.check('length(sslProfiles)', 1)])
+
+
 class NetworkAppGatewayZoneScenario(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_zone', location='westus2')

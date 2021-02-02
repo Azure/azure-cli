@@ -127,7 +127,7 @@ parameters:
   - name: --trusted-client-certificates
     short-summary: The application gateway trusted client certificate.
     long-summary: |
-        Usage: --trusted-client-certificates name=client1 data=xxx
+        Usage: --trusted-client-certificates name=client1 data=client.cer
         
         name: Required. Name of the trusted client certificate that is unique within an Application Gateway
         data: Required. Certificate public data.
@@ -136,7 +136,7 @@ parameters:
   - name: --ssl-profile
     short-summary: The application gateway ssl profiles.
     long-summary: |
-        Usage: --ssl-profile name=sslprofile1 data=xxx TODO
+        Usage: --ssl-profile name=MySslProfile client-auth-configuration=True disabled-ssl-protocols=TLSv1_0,TLSv1_1 cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
         
         name: Required. Name of the SSL profile that is unique within an Application Gateway.
         polic-name: Name of Ssl Policy.
@@ -1494,16 +1494,25 @@ short-summary: Manage trusted client certificate of application gateway.
 helps['network application-gateway client-cert add'] = """
 type: command
 short-summary: Add trusted client certificate of the application gateway.
+examples:
+  - name: Add trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert add --gateway-name MyAppGateway -g MyResourceGroup --name MyCert --data Cert.cer
 """
 
 helps['network application-gateway client-cert remove'] = """
 type: command
 short-summary: Remove an existing trusted client certificate of the application gateway.
+examples:
+  - name: Remove a trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert remove --gateway-name MyAppGateway -g MyResourceGroup --name MyCert
 """
 
 helps['network application-gateway client-cert list'] = """
 type: command
 short-summary: List the existing trusted client certificate of the application gateway.
+examples:
+  - name: list all the trusted client certificate for an existing application gateway.
+    text: az network application-gateway client-cert list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
 helps['network application-gateway ssl-profile'] = """
@@ -1514,16 +1523,25 @@ short-summary: Manage ssl profiles of application gateway.
 helps['network application-gateway ssl-profile add'] = """
 type: command
 short-summary: Add ssl profiles of the application gateway.
+examples:
+  - name: Add ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
 helps['network application-gateway ssl-profile remove'] = """
 type: command
 short-summary: Remove an existing ssl profiles of the application gateway.
+examples:
+  - name: Remove ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile remove --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
 """
 
 helps['network application-gateway ssl-profile list'] = """
 type: command
 short-summary: List the existing ssl profiles of the application gateway.
+examples:
+  - name: List all the ssl profile for an existing application gateway.
+    text: az network application-gateway ssl-profile list --gateway-name MyAppGateway -g MyResourceGroup
 """
 
 helps['network asg'] = """
@@ -4584,7 +4602,7 @@ helps['network public-ip create'] = """
 type: command
 short-summary: Create a public IP address.
 long-summary: >
-    [Coming breaking change] In the coming release, the default behavior will be changed as follows when sku is Standard and zone is not provided: For zonal regions, you will get a zone-redundant IP indicated by zones:["1","2","3"]; For non-zonal regions, you will get a non zone-redundant IP indicated by zones:[].
+    [Coming breaking change] In the coming release, the default behavior will be changed as follows when sku is Standard and zone is not provided: zones = [], which means the Standard Public IP has no zones. If you want to create a zone-redundant Public IP address, please specify all the zones in the region. For example, Zone = ['1', '2', '3'].
 examples:
   - name: Create a basic public IP resource.
     text: az network public-ip create -g MyResourceGroup -n MyIp
