@@ -505,17 +505,15 @@ class AzCliCommandParser(CLICommandParser):
             if not caused_by_extension_not_installed:
                 recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
                 recommender.set_help_examples(self.get_examples(command_name_inferred))
-                recommended_command = recommender.recommend_a_command()
-                if recommended_command:
-                    az_error.set_recommendation("Try this: '{}'".format(recommended_command))
+                recommendations = recommender.provide_recommendations()
+                if recommendations:
+                    az_error.set_aladdin_recommendation(recommendations)
 
                 # remind user to check extensions if we can not find a command to recommend
                 if isinstance(az_error, CommandNotFoundError) \
                         and not az_error.recommendations and self.prog == 'az' \
                         and use_dynamic_install == 'no':
                     az_error.set_recommendation(EXTENSION_REFERENCE)
-
-                az_error.set_recommendation(OVERVIEW_REFERENCE.format(command=self.prog))
 
             az_error.print_error()
             az_error.send_telemetry()
