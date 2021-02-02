@@ -219,6 +219,17 @@ class TestExtensions(TestExtensionsBase):
             is_compatible, _, _, _, _ = ext_compat_with_cli(azext_metadata)
             self.assertFalse(is_compatible)
 
+    def test_ext_compat_with_cli_require_ext_min_version(self):
+        expected_cli_version = '0.0.5'
+        expected_min_ext_required = '0.2.0'
+        azext_metadata = {'name': 'myext', 'version': '0.1.0'}
+        with mock.patch('azure.cli.core.__version__', expected_cli_version), \
+            mock.patch('azure.cli.core.extension.EXTENSION_VERSION_REQUIREMENTS',
+                       {'myext': {'minExtVersion': expected_min_ext_required}}):
+            is_compatible, _, _, _, min_ext_required = ext_compat_with_cli(azext_metadata)
+            self.assertFalse(is_compatible)
+            self.assertEqual(min_ext_required, expected_min_ext_required)
+
 
 class TestWheelExtension(TestExtensionsBase):
 
