@@ -124,7 +124,7 @@ helps['network application-gateway create'] = """
 type: command
 short-summary: Create an application gateway.
 parameters:
-  - name: --trusted-client-certificates
+  - name: --trusted-client-cert
     short-summary: The application gateway trusted client certificate.
     long-summary: |
         Usage: --trusted-client-certificates name=client1 data=client.cer

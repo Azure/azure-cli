@@ -161,7 +161,7 @@ def load_arguments(self, _):
         c.argument('private_link_primary', arg_type=get_three_state_flag(), help='Whether the IP configuration is primary or not')
 
     with self.argument_context('network application-gateway', arg_group='Mutual Authentication Support') as c:
-        c.argument('trusted_client_certificates', min_api='2020-06-01', nargs='+', action=TrustedClientCertificateCreate, is_preview=True)
+        c.argument('trusted_client_cert', min_api='2020-06-01', nargs='+', action=TrustedClientCertificateCreate, is_preview=True)
 
     with self.argument_context('network application-gateway', arg_group='SSL Profile') as c:
         c.argument('ssl_profile', min_api='2020-06-01', nargs='+', action=SslProfilesCreate, is_preview=True)
@@ -439,24 +439,23 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway identity', min_api='2019-04-01') as c:
         c.argument('application_gateway_name', app_gateway_name_type)
 
-    with self.argument_context('network application-gateway client-cert', min_api='2020-06-01') as c:
+    with self.argument_context('network application-gateway client-cert', min_api='2020-06-01', id_part=None) as c:
         c.argument('application_gateway_name', app_gateway_name_type)
         c.argument('client_cert_name', options_list='--name', help='Name of the trusted client certificate that is unique within an Application Gateway')
 
     with self.argument_context('network application-gateway client-cert add', min_api='2020-06-01') as c:
         c.argument('client_cert_data', options_list='--data', type=file_type, completer=FilesCompleter(), help='Certificate public data.', validator=validate_trusted_client_cert)
 
-    with self.argument_context('network application-gateway ssl-profile', min_api='2020-06-01') as c:
+    with self.argument_context('network application-gateway ssl-profile', min_api='2020-06-01', id_part=None) as c:
         c.argument('application_gateway_name', app_gateway_name_type)
         c.argument('ssl_profile_name', options_list='--name', help='Name of the SSL profile that is unique within an Application Gateway.')
         c.argument('policy_name', help='Name of Ssl Policy.')
         c.argument('policy_type', help='Type of Ssl Policy.', choices=['Custom', 'Predefined'])
         c.argument('min_protocol_version', help='Minimum version of Ssl protocol to be supported on application gateway.')
         c.argument('cipher_suites', nargs='+', help='Ssl cipher suites to be enabled in the specified order to application gateway.')
-        c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
-        c.argument('trusted_client_certificates', nargs='+', help='Array of references to application gateway trusted client certificates.')
-        c.argument('client_auth_configuration', help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
-
+        c.argument('disabled_ssl_protocols', options_list=['--disabled-ssl-protocols', '--disabled-protocols'], nargs='+', help='Space-separated list of protocols to disable.')
+        c.argument('trusted_client_certificates', options_list=['--trusted-client-certificates', '--trusted-client-cert'], nargs='+', help='Array of references to application gateway trusted client certificates.')
+        c.argument('client_auth_configuration', options_list=['--client-auth-configuration', '--client-auth-config'], help='Client authentication configuration of the application gateway resource.', choices=['True', 'False'])
 
     # endregion
 

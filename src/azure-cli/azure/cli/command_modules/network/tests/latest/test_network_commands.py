@@ -590,7 +590,7 @@ class NetworkAppGatewayTrustedClientCertScenarioTest(ScenarioTest):
         # create an ag with trusted client cert
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
         self.cmd('network application-gateway create -g {rg} -n {gw} --sku Standard_v2 --public-ip-address {ip} '
-                 '--trusted-client-certificates name={cname} data={cert}',
+                 '--trusted-client-cert name={cname} data={cert}',
                  checks=[self.check('length(applicationGateway.trustedClientCertificates)', 1)])
 
         self.cmd('network application-gateway client-cert add -g {rg} --gateway-name {gw} '
