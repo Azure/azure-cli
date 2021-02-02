@@ -1035,6 +1035,22 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['containerDeleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['containerDeleteRetentionPolicy']['days'], None)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_account_default_service_properties(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        self.cmd('storage account blob-service-properties show -n {sa} -g {rg}', checks=[
+            self.check('defaultServiceVersion', None)])
+
+        with self.assertRaisesRegexp(InvalidArgumentValueError, 'Valid example: 2008-10-27'):
+            self.cmd('storage account blob-service-properties update --default-service-version 2018 -n {sa} -g {rg}')
+
+        self.cmd('storage account blob-service-properties update --default-service-version 2018-11-09 -n {sa} -g {rg}',
+                 checks=[self.check('defaultServiceVersion', '2018-11-09')])
+
+        self.cmd('storage account blob-service-properties show -n {sa} -g {rg}',
+                 checks=[self.check('defaultServiceVersion', '2018-11-09')])
+
 
 class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')

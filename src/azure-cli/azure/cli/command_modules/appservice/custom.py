@@ -47,7 +47,8 @@ from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_pa
 from azure.cli.core.util import get_az_user_agent, send_raw_request
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (ResourceNotFoundError, RequiredArgumentMissingError, ValidationError,
-                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError)
+                                       CLIInternalError, UnclassifiedUserFault, AzureResponseError,
+                                       ArgumentUsageError, MutuallyExclusiveArgumentError)
 
 from .tunnel import TunnelServer
 
@@ -97,7 +98,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     node_default_version = NODE_EXACT_VERSION_DEFAULT
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-    name_validation = client.check_name_availability(name, 'Site')
+    name_validation = get_site_availability(cmd, name)
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
             raise CLIError(name_validation.message)
@@ -153,7 +154,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
 
     elif plan_info.is_xenon:  # windows container webapp
-        site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        if deployment_container_image_name:
+            site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
         # set the needed app settings for container image validation
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
@@ -1696,23 +1698,24 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
     sku = _normalize_sku(sku)
     _validate_asp_sku(app_service_environment, sku)
     if is_linux and hyper_v:
-        raise CLIError('usage error: --is-linux | --hyper-v')
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
     client = web_client_factory(cmd.cli_ctx)
     if app_service_environment:
         if hyper_v:
-            raise CLIError('Windows containers is not yet supported in app service environment')
+            raise ArgumentUsageError('Windows containers is not yet supported in app service environment')
         ase_list = client.app_service_environments.list()
         ase_found = False
         ase = None
         for ase in ase_list:
-            if ase.name.lower() == app_service_environment.lower():
+            if ase.name.lower() == app_service_environment.lower() or ase.id.lower() == app_service_environment.lower():
                 ase_def = HostingEnvironmentProfile(id=ase.id)
                 location = ase.location
                 ase_found = True
                 break
         if not ase_found:
-            raise CLIError("App service environment '{}' not found in subscription.".format(ase.id))
+            err_msg = "App service environment '{}' not found in subscription.".format(app_service_environment)
+            raise ResourceNotFoundError(err_msg)
     else:  # Non-ASE
         ase_def = None
         if location is None:
@@ -2619,7 +2622,13 @@ class _StackRuntimeHelper:
     @staticmethod
     def remove_delimiters(runtime):
         import re
-        runtime = re.split('[| :]', runtime)  # delimiters allowed: '|', ' ', ':'
+        # delimiters allowed: '|', ':'
+        if '|' in runtime:
+            runtime = re.split('[|]', runtime)
+        elif ':' in runtime:
+            runtime = re.split('[:]', runtime)
+        else:
+            runtime = [runtime]
         return '|'.join(filter(None, runtime))
 
     def resolve(self, display_name):
@@ -3710,7 +3719,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                            "Please check if you have configured defaults for plan name and re-run command."
                            .format(plan, current_plan))
         plan = plan or plan_details['name']
-        plan_info = client.app_service_plans.get(rg_name, plan)
+        plan_info = client.app_service_plans.get(plan_details['resource_group'], plan)
         sku = plan_info.sku.name if isinstance(plan_info, AppServicePlan) else 'Free'
         current_os = 'Linux' if plan_info.reserved else 'Windows'
         # Raise error if current OS of the app is different from the current one
@@ -4086,7 +4095,7 @@ def _validate_app_service_environment_id(cli_ctx, ase, resource_group_name):
 
 def _validate_asp_sku(app_service_environment, sku):
     # Isolated SKU is supported only for ASE
-    if sku in ['I1', 'I2', 'I3']:
+    if sku.upper() in ['I1', 'I2', 'I3', 'I1V2', 'I2V2', 'I3V2']:
         if not app_service_environment:
             raise CLIError("The pricing tier 'Isolated' is not allowed for this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")

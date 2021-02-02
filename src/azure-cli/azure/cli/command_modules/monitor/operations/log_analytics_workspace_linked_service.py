@@ -13,7 +13,7 @@ def create_log_analytics_workspace_linked_service(client, resource_group_name, w
 
     linked_service = LinkedService(resource_id=resource_id,
                                    write_access_resource_id=write_access_resource_id)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name,
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
                        workspace_name, linked_service_name, linked_service)
 
 

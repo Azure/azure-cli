@@ -273,6 +273,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Server major version.')
                 c.argument('zone', options_list=['--zone, -z'],
                            help='Availability zone into which to provision the resource.')
+                c.argument('iops', type=int, options_list=['--iops'],
+                           help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
+                                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
+                                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
 
             c.argument('vnet_resource_id', options_list=['--vnet'], help='Name of an existing virtual network or name of a new one to create. The name must be between 2 to 64 characters. The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens.')
             c.argument('vnet_address_prefix', options_list=['--address-prefixes'], help='The IP address prefix to use when creating a new virtual network in CIDR format. Default value is 10.0.0.0/16.')
@@ -296,7 +300,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.ignore('database_name')
 
         with self.argument_context('{} flexible-server delete'.format(command_group)) as c:
-            c.argument('server_name', id_part='name', options_list=['--name', '-n'], arg_type=server_name_getter_arg_type)
+            c.argument('resource_group_name', required=True)
+            c.argument('server_name', id_part='name', options_list=['--name', '-n'], required=True, arg_type=server_name_getter_arg_type)
             c.argument('yes', options_list=['--yes', '-y'], action='store_true',
                        help='Do not prompt for confirmation.')
 
@@ -339,6 +344,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
                            help='Name or ID of the subnet that allows access to an Azure Flexible Server MySQL Server. ')
                 c.argument('replication_role', options_list=['--replication-role'],
                            help='The replication role of the server.')
+                c.argument('iops', type=int, options_list=['--iops'],
+                           help='Number of IOPS to be allocated for this server. You will get certain amount of free IOPS based '
+                                'on compute and storage provisioned. The default value for IOPS is free IOPS. '
+                                'To learn more about IOPS based on compute and storage, refer to IOPS in Azure Database for MySQL Flexible Server')
             elif command_group == 'postgres':
                 c.argument('tier', options_list=['--tier'],
                            help='Compute tier of the server. Accepted values: Burstable, GeneralPurpose, Memory Optimized')

@@ -182,7 +182,10 @@ def validate_client_parameters(cmd, namespace):
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
                        'Setting the corresponding environment variables can avoid inputting credentials in '
                        'your command. Please use --help to get more information.')
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        try:
+            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        except Exception:  # pylint: disable=broad-except
+            pass
 
 
 def validate_encryption_key(cmd, namespace):
@@ -1025,6 +1028,21 @@ def get_datetime_type(to_string):
     return datetime_type
 
 
+def get_api_version_type():
+    """ Examples of accepted forms: 2017-12-31 """
+    from datetime import datetime
+
+    def api_version_type(string):
+        """ Validates api version format. Examples of accepted form: 2017-12-31 """
+        accepted_format = '%Y-%m-%d'
+        try:
+            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+        except ValueError:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
+    return api_version_type
+
+
 def ipv4_range_type(string):
     """ Validates an IPv4 address or address range. """
     import re
@@ -1566,3 +1584,9 @@ def get_not_none_validator(attribute_name):
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError('Argument {} should be specified'.format('/'.join(options_list)))
     return validate_not_none
+
+
+def validate_policy(namespace):
+    if namespace.id is not None:
+        logger.warning("\nPlease do not specify --expiry and --permissions if they are already specified in your "
+                       "policy.")
