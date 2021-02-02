@@ -6496,6 +6496,113 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
 # endregion
 
 
+# region VirtualHub
+def create_virtual_hub(cmd, client,
+                       resource_group_name,
+                       virtual_hub_name,
+                       hosted_subnet=None,
+                       location=None,
+                       tags=None):
+    from azure.core.exceptions import HttpResponseError
+    from azure.cli.core.commands import LongRunningOperation
+
+    try:
+        client.get(resource_group_name, virtual_hub_name)
+        raise CLIError('The VirtualHub "{}" under resource group "{}" exists'.format(
+            virtual_hub_name, resource_group_name))
+    except HttpResponseError:
+        pass
+
+    SubResource = cmd.get_models('SubResource')
+
+    VirtualHub, HubIpConfiguration = cmd.get_models('VirtualHub', 'HubIpConfiguration')
+
+    hub = VirtualHub(tags=tags, location=location,
+                     virtual_wan=None,
+                     sku='Standard')
+    vhub_poller = client.begin_create_or_update(resource_group_name, virtual_hub_name, hub)
+    LongRunningOperation(cmd.cli_ctx)(vhub_poller)
+
+    ip_config = HubIpConfiguration(subnet=SubResource(id=hosted_subnet))
+    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    try:
+        vhub_ip_poller = vhub_ip_config_client.begin_create_or_update(
+            resource_group_name, virtual_hub_name, 'Default', ip_config)
+        LongRunningOperation(cmd.cli_ctx)(vhub_ip_poller)
+    except Exception as ex:
+        logger.error(ex)
+        try:
+            vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
+        except HttpResponseError:
+            pass
+        client.begin_delete(resource_group_name, virtual_hub_name)
+        raise ex
+
+    return client.get(resource_group_name, virtual_hub_name)
+
+
+def virtual_hub_update_setter(client, resource_group_name, virtual_hub_name, parameters):
+    return client.begin_create_or_update(resource_group_name, virtual_hub_name, parameters)
+
+
+def update_virtual_hub(cmd, instance,
+                       tags=None,
+                       allow_branch_to_branch_traffic=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('tags', tags)
+        c.set_param('allow_branch_to_branch_traffic', allow_branch_to_branch_traffic)
+    return instance
+
+
+def delete_virtual_hub(cmd, client, resource_group_name, virtual_hub_name, no_wait=False):
+    from azure.cli.core.commands import LongRunningOperation
+    vhub_ip_config_client = network_client_factory(cmd.cli_ctx).virtual_hub_ip_configuration
+    poller = vhub_ip_config_client.begin_delete(resource_group_name, virtual_hub_name, 'Default')
+    LongRunningOperation(cmd.cli_ctx)(poller)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name)
+
+
+def list_virtual_hub(client, resource_group_name=None):
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+
+
+def create_virtual_hub_bgp_connection(cmd, client, resource_group_name, virtual_hub_name, connection_name,
+                                      peer_asn, peer_ip, no_wait=False):
+    BgpConnection = cmd.get_models('BgpConnection')
+    vhub_bgp_conn = BgpConnection(name=connection_name, peer_asn=peer_asn, peer_ip=peer_ip)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name,
+                       virtual_hub_name, connection_name, vhub_bgp_conn)
+
+
+def virtual_hub_bgp_connection_update_setter(client, resource_group_name,
+                                             virtual_hub_name, connection_name,
+                                             parameters):
+    return client.begin_create_or_update(resource_group_name, virtual_hub_name, connection_name, parameters)
+
+
+def update_virtual_hub_bgp_connection(cmd, instance, peer_asn=None, peer_ip=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('peer_asn', peer_asn)
+        c.set_param('peer_ip', peer_ip)
+    return instance
+
+
+def delete_virtual_hub_bgp_connection(client, resource_group_name,
+                                      virtual_hub_name, connection_name, no_wait=False):
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, virtual_hub_name, connection_name)
+
+
+def list_virtual_hub_bgp_connection_learned_routes(client, resource_group_name, virtual_hub_name, connection_name):
+    return client.begin_list_learned_routes(resource_group_name, virtual_hub_name, connection_name)
+
+
+def list_virtual_hub_bgp_connection_advertised_routes(client, resource_group_name, virtual_hub_name, connection_name):
+    return client.begin_list_advertised_routes(resource_group_name, virtual_hub_name, connection_name)
+# endregion
+
+
 # region VirtualRouter
 def create_virtual_router(cmd,
                           resource_group_name,

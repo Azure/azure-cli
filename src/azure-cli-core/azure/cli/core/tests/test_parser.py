@@ -239,7 +239,7 @@ class TestParser(unittest.TestCase):
         # assert the right type of error msg is logged for command vs argument parsing
         self.assertEqual(len(logger_msgs), 5)
         for msg in logger_msgs[:3]:
-            self.assertIn("CommandNotFoundError", msg)
+            self.assertIn("misspelled or not recognized by the system", msg)
         for msg in logger_msgs[3:]:
             self.assertIn("not a valid value for '--opt'.", msg)
 
