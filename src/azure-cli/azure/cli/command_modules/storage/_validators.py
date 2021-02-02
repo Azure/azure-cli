@@ -146,7 +146,7 @@ def validate_client_parameters(cmd, namespace):
         return
 
     # When there is no input for credential, we will read environment variable
-    if not n.connection_string and not n.account_key:
+    if not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
@@ -159,7 +159,7 @@ def validate_client_parameters(cmd, namespace):
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
         n.account_name = get_config_value(cmd, 'storage', 'account', None)
-    if not n.account_key:
+    if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
         n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
