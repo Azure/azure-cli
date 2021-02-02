@@ -23,7 +23,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.azclierror import UserFault
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 logger = get_logger(__name__)
 
@@ -666,7 +666,7 @@ def remove_trusted_client_certificate(cmd, resource_group_name, application_gate
             appgw.trusted_client_certificates.remove(cert)
             break
     else:
-        raise UserFault(f"Trusted client certificate {client_cert_name} doesn't exist")
+        raise ResourceNotFoundError(f"Trusted client certificate {client_cert_name} doesn't exist")
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
@@ -718,7 +718,7 @@ def remove_ssl_profile(cmd, resource_group_name, application_gateway_name, ssl_p
             appgw.ssl_profiles.remove(profile)
             break
     else:
-        raise UserFault(f"Ssl profiles {ssl_profile_name} doesn't exist")
+        raise ResourceNotFoundError(f"Ssl profiles {ssl_profile_name} doesn't exist")
 
     return sdk_no_wait(no_wait, ncf.application_gateways.begin_create_or_update, resource_group_name,
                        application_gateway_name, appgw)
