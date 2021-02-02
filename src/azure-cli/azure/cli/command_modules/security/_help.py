@@ -106,10 +106,10 @@ short-summary: View Sql Vulnerability Assessment scan summaries.
 examples:
   - name: View Sql Vulnerability Assessment scan summary on an Azure virtual machine.
     text: >
-        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --scan-id MyScanId
+        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId
   - name: View Sql Vulnerability Assessment scan summary on an On-Premise machine.
     text: >
-        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
+        az security va sql scans show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
 """
 
 helps['security va sql scans list'] = """
@@ -118,10 +118,10 @@ short-summary: List all Sql Vulnerability Assessment scan summaries.
 examples:
   - name: List all Sql Vulnerability Assessment scan summaries on an Azure virtual machine.
     text: >
-        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName
+        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName
   - name: List all Sql Vulnerability Assessment scan summaries on an On-Premise machine.
     text: >
-        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
+        az security va sql scans list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
 """
 
 helps['security va sql results'] = """
@@ -135,10 +135,10 @@ short-summary: View Sql Vulnerability Assessment scan results.
 examples:
   - name: View Sql Vulnerability Assessment scan results on an Azure virtual machine.
     text: >
-        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --scan-id MyScanId --rule-id VA9999
+        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId --rule-id VA9999
   - name: View Sql Vulnerability Assessment scan results on an On-Premise machine.
     text: >
-        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId --rule-id VA9999
+        az security va sql results show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId --rule-id VA9999
 """
 
 helps['security va sql results list'] = """
@@ -147,10 +147,10 @@ short-summary: View all Sql Vulnerability Assessment scan results.
 examples:
   - name: View all Sql Vulnerability Assessment scan results on an Azure virtual machine.
     text: >
-        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --scan-id MyScanId
+        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --scan-id MyScanId
   - name: View all Sql Vulnerability Assessment scan results on an On-Premise machine.
     text: >
-        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
+        az security va sql results list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --scan-id MyScanId
 """
 
 helps['security va sql baseline'] = """
@@ -164,10 +164,10 @@ short-summary: View Sql Vulnerability Assessment rule baseline.
 examples:
   - name: View Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
     text: >
-        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --rule-id VA9999
+        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999
   - name: View Sql Vulnerability Assessment rule baseline on an On-Premise machine.
     text: >
-        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
+        az security va sql baseline show --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
 """
 
 helps['security va sql baseline list'] = """
@@ -176,10 +176,10 @@ short-summary: View Sql Vulnerability Assessment baseline for all rules.
 examples:
   - name: View Sql Vulnerability Assessment baseline for all rules on an Azure virtual machine.
     text: >
-        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName
+        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName
   - name: View Sql Vulnerability Assessment baseline for all rules on an On-Premise machine.
     text: >
-        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
+        az security va sql baseline list --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID
 """
 
 helps['security va sql baseline delete'] = """
@@ -188,10 +188,10 @@ short-summary: Delete Sql Vulnerability Assessment rule baseline.
 examples:
   - name: Delete Sql Vulnerability Assessment rule baseline on an Azure virtual machine.
     text: >
-        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --rule-id VA9999
+        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999
   - name: Delete Sql Vulnerability Assessment rule baseline on an On-Premise machine.
     text: >
-        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
+        az security va sql baseline delete --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999
 """
 
 helps['security va sql baseline update'] = """
@@ -200,16 +200,16 @@ short-summary: Update Sql Vulnerability Assessment rule baseline. Replaces the c
 examples:
   - name: Update Sql Vulnerability Assessment rule baseline on an Azure virtual machine. Replaces the current rule baseline with latest scan results.
     text: >
-        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --rule-id VA9999 --latest
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999 --latest
   - name: Update Sql Vulnerability Assessment rule baseline on an Azure virtual machine. Replaces the current rule baseline with provided results.
     text: >
-        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
   - name: Update Sql Vulnerability Assessment rule baseline on an On-Premise machine. Replaces the current rule baseline with latest scan results.
     text: >
-        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --latest
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --latest
   - name: Update Sql Vulnerability Assessment rule baseline on an On-Premise machine. Replaces the current rule baseline with provided results.
     text: >
-        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
+        az security va sql baseline update --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --rule-id VA9999 --baseline Line1_Col1 Line1_Col2 --baseline Line2_Col1 Line2_Col2
 """
 
 helps['security va sql baseline set'] = """
@@ -218,16 +218,16 @@ short-summary: Sets Sql Vulnerability Assessment baseline. Replaces the current 
 examples:
   - name: Sets Sql Vulnerability Assessment baseline on an Azure virtual machine. Replaces the current baseline with latest scan results.
     text: >
-        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --latest
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --latest
   - name: Sets Sql Vulnerability Assessment baseline on an Azure virtual machine. Replaces the current baseline with provided results.
     text: >
-        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.Compute/VirtualMachines/MyVmName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
   - name: Sets Sql Vulnerability Assessment baseline on an On-Premise machine. Replaces the current baseline with latest scan results.
     text: >
-        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --latest
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --latest
   - name: Sets Sql Vulnerability Assessment baseline on an On-Premise machine. Replaces the current baseline with provided results.
     text: >
-        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id MyWorkspaceId --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
+        az security va sql baseline set --vm-resource-id subscriptions/MySubscription/ResourceGroups/MyResourceGroup/Providers/Microsoft.OperationalInsights/Workspaces/MyWorkspaceName --workspace-id 00000000-0000-0000-0000-000000000000 --server-name MyServerName --database-name MyDbName --vm-name MyVmName --agent-id MyAgentId --vm-uuid MyVmUUID --baseline rule=VA9999 Line1_col1 Line1_col2 Line1_col3 --baseline rule=VA8888 Line1_col1 Line1_col2 --baseline rule=VA9999 Line2_col1 Line2_col2 Line2_col3
 """
 
 helps['security auto-provisioning-setting'] = """

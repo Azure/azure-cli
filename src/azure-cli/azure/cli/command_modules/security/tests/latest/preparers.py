@@ -13,6 +13,8 @@ sqlvm_name_prefix = 'clisqlvm'
 sqlvm_domain_prefix = 'domainvm'
 sqlvm_group_prefix = 'sqlgroup'
 sqlvm_max_length = 15
+sql_server_image = 'MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest'
+sql_server_vm_size = 'Standard_DS2_v2'
 
 la_workspace_name_prefix = 'laworkspace'
 la_workspace_max_length = 15
@@ -32,9 +34,8 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {}'
-                    ' --image MicrosoftSQLServer:SQL2017-WS2016:Enterprise:latest --size Standard_DS2_v2')
-        execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password))
+        template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image {} --size {}')
+        execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password, sql_server_image, sql_server_vm_size))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
