@@ -665,6 +665,12 @@ class ProviderRegistrationTest(ScenarioTest):
             result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'], 'Registered')
 
+    def test_provider_registration_mg(self):
+        self.kwargs.update({'prov': 'Microsoft.ClassicInfrastructureMigrate'})
+
+        result = self.cmd('provider register -n {prov} --m testmg')
+        self.assertTrue(result, None)
+
 
 class ProviderOperationTest(ScenarioTest):
 
