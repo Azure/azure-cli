@@ -51,6 +51,9 @@ examples:
   - name: Create an empty managed disk.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10
+  - name: Create an empty managed disk with bursting enabled.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 1024 --location centraluseuap --enable-bursting
   - name: Create a managed disk by copying an existing disk or snapshot.
     text: >
         az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
@@ -1060,14 +1063,14 @@ examples:
           --image debian --secrets "$vm_secrets"
   - name: Create a CentOS VM with a system assigned identity. The VM will have a 'Contributor' role with access to a storage account.
     text: >
-        az vm create -n MyVm -g rg1 --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        az vm create -n MyVm -g rg1 --image centos --assign-identity [system] --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
   - name: Create a debian VM with a user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        az vm create -n MyVm -g rg1 --image debian --assign-identity /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
   - name: Create a debian VM with both system and user assigned identity.
     text: >
-        az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-  - name: Create a VM in an availability zone in the current resource group's region
+        az vm create -n MyVm -g rg1 --image debian --assign-identity [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+  - name: Create a VM in an availability zone in the current resource group's region.
     supported-profiles: latest
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1

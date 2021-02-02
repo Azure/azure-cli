@@ -191,6 +191,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server create -g {} --name {} '
                  '--admin-user {} --admin-password {} -e {}'
                  .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'false'),
@@ -202,6 +203,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test get sql server to verify publicNetworkAccess == 'Disabled' for the above server as expected
+        #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
                  checks=[
@@ -213,6 +215,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -227,25 +230,44 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test update sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
-        self.cmd('sql server update -g {} -n {} --enable-public-network {}'
-                 .format(resource_group, server_name, 'false'),
+        #   note: we test for exception thrown here since this server does not have private links so updating server
+        #         to disable public network access will throw an error
+        try:
+            self.cmd('sql server update -g {} -n {} --enable-public-network {}'
+                     .format(resource_group, server_name, 'false'))
+        except Exception as e:
+            expectedmessage = "Unable to set Deny Public Network Access to Yes since there is no private endpoint enabled to access the server"
+            if expectedmessage in str(e):
+                pass
+
+        # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        #   note: although server does not have private links, creating server with disabled public network is allowed
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} -e {}'
+                 .format(resource_group, server_name_2, admin_login, admin_passwords[0], 'false'),
                  checks=[
-                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test update sql server with no enable-public-network passed in, verify publicNetworkAccess == Disabled
-        self.cmd('sql server update -g {} -n {} -i'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('identity.type', 'SystemAssigned'),
-                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+        #   note: we test for exception thrown here since this server does not have private links so updating server
+        #         to disable public network access will throw an error
+        try:
+            self.cmd('sql server update -g {} -n {} -i'
+                     .format(resource_group, server_name_2))
+        except Exception as e:
+            expectedmessage = "Unable to set Deny Public Network Access to Yes since there is no private endpoint enabled to access the server"
+            if expectedmessage in str(e):
+                pass
 
         # test update sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server update -g {} -n {} -e {}'
-                 .format(resource_group, server_name, 'true'),
+                 .format(resource_group, server_name_2, 'true'),
                  checks=[
-                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('name', server_name_2),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
 
@@ -387,7 +409,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                            JMESPathCheck('status', 'Online'),
                            JMESPathCheck('zoneRedundant', False),
                            JMESPathCheck('readScale', 'Disabled'),
-                           JMESPathCheck('readReplicaCount', '0'),
+                           JMESPathCheck('highAvailabilityReplicaCount', None),
                            JMESPathCheck('backupStorageRedundancy', 'Local')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
@@ -429,7 +451,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1'),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', None)])
 
         # Update by id
         self.cmd('sql db update --id {} --set tags.key2=value2'
@@ -576,21 +598,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('edition', edition),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '1')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '1')])
 
         # Increase read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 3),
                  checks=[
                      JMESPathCheck('readScale', 'Enabled'),
-                     JMESPathCheck('readReplicaCount', '3')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '3')])
 
         # Decrease read replicas
         self.cmd('sql db update -g {} --server {} --name {} --read-replicas {}'
                  .format(resource_group, server, database_name, 0),
                  checks=[
                      JMESPathCheck('readScale', 'Disabled'),
-                     JMESPathCheck('readReplicaCount', '0')])
+                     JMESPathCheck('highAvailabilityReplicaCount', '0')])
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
@@ -1497,7 +1519,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql db audit-policy show -g {} -s {} -n {}'
                  .format(resource_group, server, database_name),
                  checks=[
@@ -1699,7 +1721,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('retentionDays', retention_days),
                      JMESPathCheck('auditActionsAndGroups', audit_actions_expected)])
 
-        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled s false
+        # get audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
@@ -1765,6 +1787,187 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
         # get audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
         self.cmd('sql server audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+
+class SqlServerMSSupportScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @SqlServerPreparer(location='westeurope')
+    @StorageAccountPreparer(location='westus')
+    @StorageAccountPreparer(parameter_name='storage_account_2',
+                            resource_group_parameter_name='resource_group_2')
+    def test_sql_server_ms_support_mgmt(self, resource_group, resource_group_2,
+                                        resource_group_location, server,
+                                        storage_account, storage_account_2):
+
+        state_enabled = 'Enabled'
+        state_disabled = 'Disabled'
+
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
+
+        # get MS support audit policy
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('blobStorageTargetState', state_disabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # update MS support audit policy - enable
+        self.cmd('sql server ms-support audit-policy update -g {} -n {}'
+                 ' --state {} --blob-storage-target-state {} --storage-key {} --storage-endpoint={}'
+                 .format(resource_group, server, state_enabled, state_enabled, key, storage_endpoint),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageEndpoint', storage_endpoint)])
+
+        # get MS support audit policy
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # update MS support audit policy - specify storage account and resource group. use secondary key
+        storage_endpoint_2 = self._get_storage_endpoint(storage_account_2, resource_group_2)
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --blob-storage-target-state {} --storage-account {}'
+                 .format(resource_group, server, state_enabled, storage_account_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageEndpoint', storage_endpoint_2)])
+
+        # update MS support audit policy - disable
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
+                 .format(resource_group, server, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled)])
+
+        # create log analytics workspace
+        log_analytics_workspace_name = "clilaworkspacems04"
+
+        log_analytics_workspace_id = self.cmd('monitor log-analytics workspace create -g {} -n {}'
+                                              .format(resource_group, log_analytics_workspace_name),
+                                              checks=[
+                                                  JMESPathCheck('resourceGroup', resource_group),
+                                                  JMESPathCheck('name', log_analytics_workspace_name),
+                                                  JMESPathCheck('provisioningState', 'Succeeded')]).get_output_in_json()['id']
+
+        # update MS support audit policy - enable log analytics target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {}'
+                 ' --log-analytics-target-state {} --log-analytics-workspace-resource-id {}'
+                 .format(resource_group, server, state_enabled, state_enabled, log_analytics_workspace_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify logAnalyticsTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_enabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update MS support audit policy - disable log analytics target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --log-analytics-target-state {}'
+                 .format(resource_group, server, state_enabled, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify logAnalyticsTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        # create event hub namespace
+        eventhub_namespace = 'cliehnamespacems02'
+
+        self.cmd('eventhubs namespace create -g {} -n {}'
+                 .format(resource_group, eventhub_namespace),
+                 checks=[
+                     JMESPathCheck('provisioningState', 'Succeeded')])
+
+        # create event hub
+        eventhub_name = 'cliehms02'
+
+        self.cmd('eventhubs eventhub create -g {} -n {} --namespace-name {}'
+                 .format(resource_group, eventhub_name, eventhub_namespace),
+                 checks=[
+                     JMESPathCheck('status', 'Active')])
+
+        # create event hub autorization rule
+        eventhub_auth_rule = 'cliehauthrulems02'
+
+        eventhub_auth_rule_id = self.cmd('eventhubs namespace authorization-rule create -g {} -n {} --namespace-name {} --rights Listen Manage Send'
+                                         .format(resource_group, eventhub_auth_rule, eventhub_namespace)).get_output_in_json()['id']
+
+        # update MS support audit policy - enable event hub target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                 ' --event-hub-authorization-rule-id {} --event-hub {}'
+                 .format(resource_group, server, state_enabled, state_enabled,
+                         eventhub_auth_rule_id, eventhub_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify eventHubTargetState is enabled and isAzureMonitorTargetEnabled is true
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('blobStorageTargetState', state_enabled),
+                     JMESPathCheck('logAnalyticsTargetState', state_disabled),
+                     JMESPathCheck('eventHubTargetState', state_enabled),
+                     JMESPathCheck('isAzureMonitorTargetEnabled', True)])
+
+        # update MS support audit policy - disable event hub target
+        self.cmd('sql server ms-support audit-policy update -g {} -n {} --state {} --event-hub-target-state {}'
+                 .format(resource_group, server, state_enabled, state_disabled),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled)])
+
+        # get MS support audit policy - verify eventHubTargetState is disabled and isAzureMonitorTargetEnabled is false
+        self.cmd('sql server ms-support audit-policy show -g {} -n {}'
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -3464,15 +3667,13 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
-
-        subnet = '/subscriptions/8fb1ad69-28b1-4046-b50f-43999c131722/resourceGroups/toki/providers/Microsoft.Network/virtualNetworks/vcCliTestVnet1/subnets/vcCliTestSubnet1'
-
+        subnet = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/resourceGroups/fmwtest/providers/Microsoft.Network/virtualNetworks/vnet-fmwnopolicy/subnets/ManagedInstance'
         license_type = 'LicenseIncluded'
-        loc = 'westeurope'
+        loc = 'eastus2euap'
         v_cores = 8
         storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "toki"
+        resource_group_1 = "fmwtest"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
         # proxy_override_update = "Redirect"
@@ -3484,7 +3685,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         tag2 = "tagName2=tagValue2"
         backup_storage_redundancy = "Local"
         backup_storage_redundancy_internal = "LRS"
-
         user = admin_login
 
         # test create sql managed_instance
@@ -3509,6 +3709,27 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('minimalTlsVersion', tls1_2),
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('storageAccountType', backup_storage_redundancy_internal)]).get_output_in_json()
+
+        maintenance_configuration_id = '/subscriptions/a295933f-f7f5-4994-a109-8fa51241a5d6/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_EastUS2EUAP_MI_2'
+        managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+
+        # test create sql managed_instance with FMW
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --maint-config-id "{}"'
+                 .format(resource_group_1, managed_instance_name_2, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, maintenance_configuration_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('name', managed_instance_name_2),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', families[0]),
+                     JMESPathCheck('collation', collation),
+                     JMESPathCheck('proxyOverride', proxy_override),
+                     JMESPathCheck('publicDataEndpointEnabled', 'True'),
+                     JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -4986,16 +5207,15 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         # update the sensitivity classification
         information_type = 'Name'
         label_name = 'Confidential - GDPR'
-        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-        label_id = 'b258e133-6800-46b2-a53d-705fb5202bf3'
 
-        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                 checks=[
-                     JMESPathCheck('informationType', information_type),
-                     JMESPathCheck('labelName', label_name),
-                     JMESPathCheck('informationTypeId', information_type_id),
-                     JMESPathCheck('labelId', label_id)])
+        response = self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                            .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                            checks=[
+                                JMESPathCheck('informationType', information_type),
+                                JMESPathCheck('labelName', label_name)]).get_output_in_json()
+
+        information_type_id = response['informationTypeId']
+        label_id = response['labelId']
 
         # get the classified column
         self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom as custom
 import azure.cli.command_modules.backup.custom_afs as custom_afs
 import azure.cli.command_modules.backup.custom_help as custom_help
@@ -18,12 +18,15 @@ fabric_name = "Azure"
 
 
 def show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type=None,
-                   status="Registered"):
-    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status)
+                   status="Registered", use_secondary_region=None):
+    return common.show_container(cmd, client, name, resource_group_name, vault_name, backup_management_type, status,
+                                 use_secondary_region)
 
 
-def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered"):
-    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status)
+def list_containers(client, resource_group_name, vault_name, backup_management_type, status="Registered",
+                    use_secondary_region=None):
+    return common.list_containers(client, resource_group_name, vault_name, backup_management_type, status,
+                                  use_secondary_region)
 
 
 def show_policy(client, resource_group_name, vault_name, name):
@@ -47,45 +50,47 @@ def create_policy(client, resource_group_name, vault_name, name, policy, backup_
 
 
 def show_item(cmd, client, resource_group_name, vault_name, container_name, name, backup_management_type=None,
-              workload_type=None):
+              workload_type=None, use_secondary_region=None):
 
     return common.show_item(cmd, client, resource_group_name, vault_name, container_name, name,
-                            backup_management_type, workload_type)
+                            backup_management_type, workload_type, use_secondary_region)
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               backup_management_type=None):
+               backup_management_type=None, use_secondary_region=None):
     return common.list_items(cmd, client, resource_group_name, vault_name, workload_type,
-                             container_name, backup_management_type)
+                             container_name, backup_management_type, use_secondary_region)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
-                        workload_type=None, backup_management_type=None):
+                        workload_type=None, backup_management_type=None, use_secondary_region=None):
 
     return common.show_recovery_point(cmd, client, resource_group_name, vault_name, container_name,
-                                      item_name, name, workload_type, backup_management_type)
+                                      item_name, name, workload_type, backup_management_type, use_secondary_region)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
-                         backup_management_type=None, workload_type=None, start_date=None, end_date=None):
+                         backup_management_type=None, workload_type=None, start_date=None, end_date=None,
+                         use_secondary_region=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
-                     backup_management_type, workload_type)
+                     backup_management_type, workload_type, use_secondary_region)
     custom_help.validate_item(item)
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
-        return custom.list_recovery_points(client, resource_group_name, vault_name, item, start_date, end_date)
+        return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
+                                           use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.list_recovery_points(client, resource_group_name, vault_name, item, start_date,
-                                               end_date)
+                                               end_date, use_secondary_region)
     if item.properties.backup_management_type.lower() == "azureworkload":
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
-                                                 start_date, end_date)
+                                                 start_date, end_date, use_secondary_region=use_secondary_region)
 
     return None
 
@@ -311,10 +316,10 @@ def disable_auto_for_azure_wl(client, resource_group_name, vault_name, item_name
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None, restore_as_unmanaged_disks=None):
+                  diskslist=None, restore_as_unmanaged_disks=None, use_secondary_region=None):
     return custom.restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name,
                                 storage_account, target_resource_group, restore_to_staging_storage_account,
-                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks)
+                                restore_only_osdisk, diskslist, restore_as_unmanaged_disks, use_secondary_region)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
