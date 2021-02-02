@@ -104,6 +104,7 @@ def validate_bypass(namespace):
 
 
 def get_config_value(cmd, section, key, default):
+    logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
 
 
@@ -144,7 +145,8 @@ def validate_client_parameters(cmd, namespace):
                            ' ,'.join(account_key_args))
         return
 
-    if not n.connection_string:
+    # When there is no input for credential, we will read environment variable
+    if not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
@@ -157,7 +159,7 @@ def validate_client_parameters(cmd, namespace):
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
         n.account_name = get_config_value(cmd, 'storage', 'account', None)
-    if not n.account_key:
+    if not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
         n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
@@ -1026,6 +1028,21 @@ def get_datetime_type(to_string):
         raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 
     return datetime_type
+
+
+def get_api_version_type():
+    """ Examples of accepted forms: 2017-12-31 """
+    from datetime import datetime
+
+    def api_version_type(string):
+        """ Validates api version format. Examples of accepted form: 2017-12-31 """
+        accepted_format = '%Y-%m-%d'
+        try:
+            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+        except ValueError:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
+    return api_version_type
 
 
 def ipv4_range_type(string):

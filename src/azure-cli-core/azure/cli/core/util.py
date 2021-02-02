@@ -781,10 +781,10 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     start = timeit.default_timer()
     success = None
     try:
-        s = requests.Session()
-        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
-        s.head(url, timeout=timeout)
-        success = True
+        with requests.Session() as s:
+            s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+            s.head(url, timeout=timeout)
+            success = True
     except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
         logger.info('Connectivity problem detected.')
         logger.debug(ex)
