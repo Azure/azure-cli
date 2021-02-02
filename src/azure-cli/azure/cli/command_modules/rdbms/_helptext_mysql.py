@@ -269,7 +269,7 @@ type: command
 short-summary: Update a flexible server.
 examples:
   - name: Update a flexible server's sku, using local context for server and resource group.
-    text: az mysql flexible-server update --sku-name Standard_D4s_v3
+    text: az mysql flexible-server update --sku-name Standard_D4ds_v4 --tier GeneralPurpose
   - name: Update a flexible server's tags.
     text: az mysql flexible-server update --resource-group testGroup --name testServer --tags "k1=v1" "k2=v2"
     crafted: true
