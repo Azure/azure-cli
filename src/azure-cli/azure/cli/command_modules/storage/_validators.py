@@ -104,6 +104,7 @@ def validate_bypass(namespace):
 
 
 def get_config_value(cmd, section, key, default):
+    logger.info("Try to get %s %s value from environment variables or config file.", section, key)
     return cmd.cli_ctx.config.get(section, key, default)
 
 
