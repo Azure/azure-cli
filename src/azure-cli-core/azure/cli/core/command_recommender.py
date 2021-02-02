@@ -267,7 +267,7 @@ class CommandRecommender():  # pylint: disable=too-few-public-methods
             return replace_parameter_values(command, source_kwargs, param_mappings)
 
         # do not recommend commands if it is disabled by config
-        if self.cli_ctx and self.cli_ctx.config.getboolean('core', 'disable_error_recommendation', False):
+        if self.cli_ctx and self.cli_ctx.config.get('core', 'error_recommendation', 'on').upper() == 'OFF':
             return []
 
         # get recommendations from Aladdin service
