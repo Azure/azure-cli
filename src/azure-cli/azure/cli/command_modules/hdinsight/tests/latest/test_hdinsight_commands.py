@@ -602,4 +602,5 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_compute_isolation():
         return '--version 3.6 -l southcentralus ' \
-               '--enable-compute-isolation --workernode-size Standard_E8S_V3 --headnode-size Standard_E8S_V3'
+               '--enable-compute-isolation --host-sku ESv3-Type2 ' \
+               '--workernode-size Standard_E8S_V3 --headnode-size Standard_E8S_V3'
