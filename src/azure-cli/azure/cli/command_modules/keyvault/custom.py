@@ -2054,6 +2054,12 @@ def _create_update_role_definition(client, role_definition, for_update):
 
     if not isinstance(role_definition, dict):
         raise InvalidArgumentValueError('Invalid role definition. A valid dictionary JSON representation is expected.')
+    # to workaround service defects, ensure property names are camel case
+    # e.g. NotActions -> notActions
+    names = [p for p in role_definition if p[:1].isupper()]
+    for n in names:
+        new_name = n[:1].lower() + n[1:]
+        role_definition[new_name] = role_definition.pop(n)
 
     role_scope = '/'  # Managed HSM only supports '/'
     role_definition_name = None
@@ -2099,13 +2105,13 @@ def _reconstruct_role_definition(role_definition):
         })
 
     ret = {
-        'assignable_scopes': role_definition.assignable_scopes,
+        'assignableScopes': role_definition.assignable_scopes,
         'description': role_definition.description,
         'id': role_definition.id,
         'name': role_definition.name,
         'permissions': ret_permissions,
-        'role_name': role_definition.role_name,
-        'role_type': role_definition.role_type,
+        'roleName': role_definition.role_name,
+        'roleType': role_definition.role_type,
         'type': role_definition.type,
     }
 

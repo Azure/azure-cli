@@ -56,7 +56,9 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
-    DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.administration', 'KeyVaultAccessControlClient')
+    DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE = (
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.administration',
+        'KeyVaultAccessControlClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
