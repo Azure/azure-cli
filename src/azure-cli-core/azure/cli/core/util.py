@@ -1315,6 +1315,9 @@ def log_latest_error_info(error_info, error_type):
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
     from azure.cli.core._environment import get_config_dir
 
+    if not error_info or (error_type and error_type == 'RecommendationError'):
+        return
+ 
     # Determine whether "az next" has been installed.
     # At present, exception log is only recorded when "az next" is installed
     try:
@@ -1323,13 +1326,6 @@ def log_latest_error_info(error_info, error_type):
         az_next_is_installed = False
 
     if not az_next_is_installed:
-        return
-
-    if not error_info:
-        return
-
-    # az next exception will not be recorded
-    if error_type and error_type == 'RecommendationError':
         return
 
     base_dir = os.path.join(get_config_dir(), 'recommendation')
