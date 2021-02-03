@@ -7,6 +7,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, StorageAccountPreparer, record_only
 from azure.cli.command_modules.backup.tests.latest.preparers import VMPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
+from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServerPreparer
 
 
 class MonitorTests(ScenarioTest):
@@ -234,11 +235,73 @@ class MonitorTests(ScenarioTest):
                  '--add-action webhook {}'.format(resource_group, rule1, webhook1, webhook2))
         _check_webhooks(result['actions'], [webhook2])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1')
+    @VMPreparer(parameter_name='vm1')
+    def test_metric_alert_single_scope(self, resource_group, vm1):
+        from msrestazure.tools import resource_id
+        self.kwargs.update({
+            'alert': 'alert1',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'ag2': 'ag2',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id(),
+            'vm_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=vm1,
+                namespace='Microsoft.Compute',
+                type='virtualMachines')
+        })
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} --region westus --action {ag1} '
+                 '--condition "avg Percentage CPU > 90" --description "High CPU"',
+                 checks=[
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 1),
+                 ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1')
+    def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
+        self.kwargs.update({
+            'alert': 'alert1',
+            'alert2': 'alert2',
+            'plan': 'plan1',
+            'app': self.create_random_name('app', 15),
+            'ag1': 'ag1',
+            'webhooks': '{{test=banoodle}}',
+            'sub': self.get_subscription_id()
+        })
+        db_name = 'cliautomationdb01'
+        # create dbs
+        sql_db_1 = self.cmd('sql db create -g {} --server {} --name {}'.format(
+            resource_group, server1, db_name)).get_output_in_json()
+        self.kwargs['sql_db_1_id'] = sql_db_1['id']
+
+        # create single scope metrics alert
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sql_db_1_id} --action {ag1} '
+                 '--condition "avg cpu_percent > 90" '
+                 '--description "High CPU"',
+                 checks=[
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 1),
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     def test_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
-
         from msrestazure.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
@@ -262,14 +325,16 @@ class MonitorTests(ScenarioTest):
                 type='virtualMachines')
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --region westus --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
-            self.check('description', 'High CPU'),
-            self.check('severity', 2),
-            self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
-            self.check('length(scopes)', 2),
-        ])
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm_id} {vm_id_2} --region westus '
+                 '--action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"',
+                 checks=[
+                     self.check('description', 'High CPU'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(scopes)', 2)
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_dynamic_metric_alert')
     @VMPreparer(parameter_name='vm1')
