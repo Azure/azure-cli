@@ -194,6 +194,19 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(_prepare_client_kwargs_track2(cli_ctx))
         client_kwargs['credential_scopes'] = resource_to_scopes(resource)
 
+        # Track 2 currently lacks the ability to take external credentials.
+        #   https://github.com/Azure/azure-sdk-for-python/issues/8313
+        # As a temporary workaround, manually add external tokens to 'x-ms-authorization-auxiliary' header.
+        #   https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/authenticate-multi-tenant
+        if aux_subscriptions or aux_tenants:
+            _, _, _, external_tenant_tokens = cred.get_all_tokens(*resource_to_scopes(resource))
+
+            # external_tenant_tokens can be [] if no external tenant is involved.
+            if external_tenant_tokens:
+                # Hard-code scheme to 'Bearer' as _BearerTokenCredentialPolicyBase._update_headers does.
+                client_kwargs['headers']['x-ms-authorization-auxiliary'] = \
+                    ', '.join("Bearer {}".format(t[1]) for t in external_tenant_tokens)
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
