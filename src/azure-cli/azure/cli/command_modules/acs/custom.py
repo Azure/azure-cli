@@ -1505,7 +1505,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr):
         kubectl_server_minor_version = int(kubectl_version["serverVersion"]["minor"])
         kubectl_server_patch = int(kubectl_version["serverVersion"]["gitVersion"].split(".")[-1])
         if kubectl_server_minor_version < 17 or (kubectl_server_minor_version == 17 and kubectl_server_patch < 14):
-            logger.warning('There is a known issue for Kuberentes versions < 1.17.14 when connecting to '
+            logger.warning('There is a known issue for Kubernetes versions < 1.17.14 when connecting to '
                            'ACR using MSI. See https://github.com/kubernetes/kubernetes/pull/96355 for'
                            'more information.')
     except subprocess.CalledProcessError as err:
