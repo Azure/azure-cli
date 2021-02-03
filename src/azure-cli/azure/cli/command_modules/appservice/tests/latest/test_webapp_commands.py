@@ -1416,6 +1416,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP)
+    @live_only()
     def test_webapp_ssl_import_national_clouds(self, resource_group):
         plan_name = self.create_random_name(prefix='ssl-test-plan', length=24)
         webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
