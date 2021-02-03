@@ -88,7 +88,7 @@ def upgrade_version(cmd, update_all=None, yes=None):  # pylint: disable=too-many
                 az_update_cmd.insert(0, 'sudo')
             exit_code = subprocess.call(apt_update_cmd)
             if exit_code == 0:
-                logger.debug("Update azure cli with '%s'", " ".join(apt_update_cmd))
+                logger.debug("Update azure cli with '%s'", " ".join(az_update_cmd))
                 exit_code = subprocess.call(az_update_cmd)
         elif installer == 'RPM':
             from azure.cli.core.util import get_linux_distro
