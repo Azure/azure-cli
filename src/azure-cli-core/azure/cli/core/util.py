@@ -1261,7 +1261,7 @@ def log_cmd_history(command, args):
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
     from azure.cli.core._environment import get_config_dir
 
-    if command == 'next':
+    if not args or not command or command == 'next' or '--no-log' in args:
         return
 
     # Determine whether "az next" has been installed.
@@ -1272,13 +1272,6 @@ def log_cmd_history(command, args):
         az_next_is_installed = False
 
     if not az_next_is_installed:
-        return
-
-    # For commands that do not require logging, we can pass in the parameter "--no-log" to control
-    if '--no-log' in args:
-        return
-
-    if not args or not command:
         return
 
     base_dir = os.path.join(get_config_dir(), 'recommendation')
