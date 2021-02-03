@@ -27,7 +27,7 @@ class VulnerabilityAssessmentForSqlTests(LiveScenarioTest):
         la_workspace_key = _get_log_analytics_workspace_key(resource_group, laworkspace)
         _set_vm_registry(resource_group, sqlvm)
         _install_oms_agent_on_vm(self, sqlvm, resource_group, la_workspace_id, la_workspace_key)
-        _restart_monitoring_service(resource_group, sqlvm) # Force start scan
+        _restart_monitoring_service(resource_group, sqlvm)  # Force start scan
         time.sleep(60 * 3)  # Graceful sleep
 
         # API parameters
