@@ -51,6 +51,9 @@ examples:
   - name: Create an empty managed disk.
     text: >
         az disk create -g MyResourceGroup -n MyDisk --size-gb 10
+  - name: Create an empty managed disk with bursting enabled.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 1024 --location centraluseuap --enable-bursting
   - name: Create a managed disk by copying an existing disk or snapshot.
     text: >
         az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
