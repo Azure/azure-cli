@@ -56,6 +56,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_PRIVATE_KEYVAULT = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1', 'KeyVaultClient')
     DATA_KEYVAULT_ADMINISTRATION_BACKUP = ('azure.keyvault.administration', 'KeyVaultBackupClient')
     DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL = ('azure.keyvault.administration', 'KeyVaultAccessControlClient')
+    DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE = ('azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.administration', 'KeyVaultAccessControlClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
@@ -171,6 +172,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_PRIVATE_KEYVAULT: '7.2',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.2-preview',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.2-preview',
+        ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-12-12',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2020-02-10',

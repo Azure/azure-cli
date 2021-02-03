@@ -2035,6 +2035,113 @@ def list_role_definitions(client, scope=None, hsm_name=None):  # pylint: disable
 # endregion
 
 
+def create_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=False)
+
+
+def update_role_definition(client, hsm_name, role_definition):  # pylint: disable=unused-argument
+    return _create_update_role_definition(client, role_definition, for_update=True)
+
+
+def _create_update_role_definition(client, role_definition, for_update):
+    from azure.cli.core.util import get_file_json, shell_safe_json_parse
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.administration import KeyVaultPermission
+
+    if os.path.exists(role_definition):
+        role_definition = get_file_json(role_definition)
+    else:
+        role_definition = shell_safe_json_parse(role_definition)
+
+    if not isinstance(role_definition, dict):
+        raise InvalidArgumentValueError('Invalid role definition. A valid dictionary JSON representation is expected.')
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    role_definition_name = None
+    role_name = role_definition.get('roleName', None)
+    description = role_definition.get('description', None)
+    permissions = [KeyVaultPermission(
+        allowed_actions=role_definition.get('actions', None),
+        denied_actions=role_definition.get('notActions', None),
+        allowed_data_actions=role_definition.get('dataActions', None),
+        denied_data_actions=role_definition.get('notDataActions', None)
+    )]
+
+    if for_update:
+        role_definition_name = role_definition.get('name', None)
+        role_id = role_definition.get('id', None)
+
+        if role_definition_name is None and role_id is None:
+            raise InvalidArgumentValueError('Please provide "name" or "id" property in'
+                                            ' your role definition JSON content.')
+
+        role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    result_role_definition = client.set_role_definition(
+        role_scope=role_scope,
+        permissions=permissions,
+        role_definition_name=role_definition_name,
+        role_name=role_name,
+        description=description
+    )
+
+    return _reconstruct_role_definition(result_role_definition)
+
+
+def _reconstruct_role_definition(role_definition):
+    ret_permissions = []
+    permissions = role_definition.permissions
+    for permission in permissions:
+        ret_permissions.append({
+            'actions': permission.allowed_actions,
+            'notActions': permission.denied_actions,
+            'dataActions': permission.allowed_data_actions,
+            'notDataActions': permission.denied_data_actions
+        })
+
+    ret = {
+        'assignable_scopes': role_definition.assignable_scopes,
+        'description': role_definition.description,
+        'id': role_definition.id,
+        'name': role_definition.name,
+        'permissions': ret_permissions,
+        'role_name': role_definition.role_name,
+        'role_type': role_definition.role_type,
+        'type': role_definition.type,
+    }
+
+    return ret
+
+
+def _get_role_definition_name(role_definition_name, role_id):
+    if role_definition_name is None and role_id is None:
+        raise InvalidArgumentValueError('Please specify either --role-definition-name or --role-id.')
+
+    if role_definition_name is None:
+        if '/' not in role_id:
+            raise InvalidArgumentValueError('The role resource id is invalid: {}'.format(role_id))
+        role_definition_name = role_id.split('/')[-1]
+
+    return role_definition_name
+
+
+def delete_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    client.delete_role_definition(role_scope, role_definition_name)
+
+
+def show_role_definition(client, hsm_name, role_definition_name=None, role_id=None):  # pylint: disable=unused-argument
+    # Get role definition name
+    role_definition_name = _get_role_definition_name(role_definition_name, role_id)
+
+    role_scope = '/'  # Managed HSM only supports '/'
+    result_role_definition = client.get_role_definition(role_scope, role_definition_name)
+
+    return _reconstruct_role_definition(result_role_definition)
+
+
 # region full backup/restore
 def construct_storage_uri(endpoint, storage_account_name, blob_container_name):
     return 'https://{}.blob.{}/{}'.format(storage_account_name, endpoint, blob_container_name)

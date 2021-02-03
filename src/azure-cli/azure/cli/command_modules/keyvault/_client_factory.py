@@ -41,6 +41,9 @@ KEYVAULT_TEMPLATE_STRINGS = {
         'azure.keyvault.administration._backup_client#KeyVaultBackupClient{obj_name}',
     ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         'azure.keyvault.administration._access_control_client#KeyVaultAccessControlClient{obj_name}',
+    ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE:
+        'azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.'
+        'administration._access_control_client#KeyVaultAccessControlClient{obj_name}'
 }
 
 
@@ -89,6 +92,9 @@ def get_client_factory(resource_type, client_name=''):
         return data_plane_azure_keyvault_administration_backup_client
     if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL:
         return data_plane_azure_keyvault_administration_access_control_client
+    if resource_type == ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE:
+        return data_plane_azure_keyvault_administration_access_control_private_client
+
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
 
@@ -219,6 +225,22 @@ def data_plane_azure_keyvault_administration_access_control_client(cli_ctx, comm
     from azure.keyvault.administration import KeyVaultAccessControlClient
 
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL))
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
+    vault_url = \
+        command_args.get('hsm_name', None) or \
+        command_args.get('vault_base_url', None) or \
+        command_args.get('identifier', None)
+    if not vault_url:
+        raise RequiredArgumentMissingError('Please specify --hsm-name or --id')
+    return KeyVaultAccessControlClient(
+        vault_url=vault_url, credential=credential, api_version=version)
+
+
+def data_plane_azure_keyvault_administration_access_control_private_client(cli_ctx, command_args):
+    from azure.cli.command_modules.keyvault.vendored_sdks.azure_keyvault_t1.administration import KeyVaultAccessControlClient  # pylint: disable = line-too-long
+
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL_PRIVATE))
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
     vault_url = \
