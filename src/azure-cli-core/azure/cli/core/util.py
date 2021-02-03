@@ -1310,7 +1310,7 @@ def log_latest_error_info(error_info, error_type):
 
     if not error_info or (error_type and error_type == 'RecommendationError'):
         return
- 
+
     # Determine whether "az next" has been installed.
     # At present, exception log is only recorded when "az next" is installed
     try:
