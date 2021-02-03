@@ -99,9 +99,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             location = self.mysql_location
         location_result = 'East US 2 EUAP'
 
-        # flexible-server create with user input
+        # # flexible-server create with user input
         random_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         random_name2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        random_name3 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         storage_size_mb = storage_size * 1024
         backup_retention = 7
 
@@ -121,6 +122,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      .format(resource_group, location, random_name))
             self.cmd('postgres flexible-server create -g {} -l {} -n {} --tier MemoryOptimized --sku-name Standard_E2s_v3 --public-access none'
                      .format(resource_group, location, random_name2))
+                
         elif database_engine == 'mysql':
             self.cmd('mysql flexible-server create -g {} -l {} -n {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
                      .format(resource_group, location, random_name))
@@ -145,6 +147,31 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('storageProfile.backupRetentionDays', backup_retention + 10)])
 
+        
+        if database_engine == 'postgres':
+            self.cmd('{} flexible-server create -g {} -l {} -n {} --high-availability Enabled --tier GeneralPurpose --sku-name Standard_D2s_v3 --public-access none'
+                 .format(database_engine, resource_group, location, random_name3))
+
+            self.cmd('{} flexible-server show -g {} -n {}'
+                    .format(database_engine, resource_group, random_name3),
+                    checks=[JMESPathCheck('haEnabled', 'Enabled')])
+
+            self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
+                    .format(database_engine, resource_group, random_name3),
+                    checks=[JMESPathCheck('haEnabled', 'Disabled')])
+            
+            self.cmd('{} flexible-server update -g {} -n {} --high-availability Enabled'
+                    .format(database_engine, resource_group, random_name3),
+                    checks=[JMESPathCheck('haEnabled', 'Enabled')])
+        
+        elif database_engine == 'mysql':
+            self.cmd('{} flexible-server create -g {} -l westus2 -n {} --high-availability Enabled --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none'
+                 .format(database_engine, resource_group, random_name3))
+
+            self.cmd('{} flexible-server show -g {} -n {}'
+                    .format(database_engine, resource_group, random_name3),
+                    checks=[JMESPathCheck('haEnabled', 'Enabled')])
+
         if database_engine == 'postgres':
             tier = 'Burstable'
             sku_name = 'Standard_B1ms'
@@ -162,7 +189,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                      .format(database_engine, resource_group, server_name),
                      checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', 1),
                              JMESPathCheck('maintenanceWindow.startHour', 1),
-                             JMESPathCheck('maintenanceWindow.startMinute', 30)])
+                             JMESPathCheck('maintenanceWindow.startMinute', 30)])    
+
 
         self.cmd('{} flexible-server update -g {} -n {} --tags key=3'
                  .format(database_engine, resource_group, server_name),
