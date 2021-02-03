@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
-from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy
+from ..azcopy.util import AzCopy, client_auth_for_azcopy, login_auth_for_azcopy, _generate_sas_token
 
 
 # pylint: disable=too-many-statements, too-many-locals, unused-argument
@@ -54,7 +54,10 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
         flags.append('--include-path=' + include_path)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
-    azcopy.remove(_add_url_sas(target, azcopy.creds.sas_token), flags=flags)
+    sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service=service,
+                                    resource_types='co',
+                                    permissions='rdl')
+    azcopy.remove(_add_url_sas(target, sas_token), flags=flags)
 
 
 def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, include_pattern=None,
@@ -67,7 +70,9 @@ def storage_blob_sync(cmd, client, source, destination, exclude_pattern=None, in
         flags.append('--exclude-pattern=' + exclude_pattern)
     if exclude_path is not None:
         flags.append('--exclude-path=' + exclude_path)
-    azcopy.sync(source, _add_url_sas(destination, azcopy.creds.sas_token), flags=flags)
+    sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service='blob', resource_types='co',
+                                    permissions='rwdlac')
+    azcopy.sync(source, _add_url_sas(destination, sas_token), flags=flags)
 
 
 def storage_run_command(cmd, command_args):
