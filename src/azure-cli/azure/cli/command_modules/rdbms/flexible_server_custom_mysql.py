@@ -32,16 +32,14 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                            administrator_login_password=None, version=None,
                            backup_retention=None, tags=None, public_access=None, database_name=None,
                            subnet_arm_resource_id=None, high_availability=None, zone=None, assign_identity=False,
-                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None):
+                           vnet_resource_id=None, vnet_address_prefix=None, subnet_address_prefix=None, iops=None):
     # validator
     if location is None:
         location = DEFAULT_LOCATION_MySQL
-    sku_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, version=version)
-    storage_mb *= 1024
 
     from azure.mgmt.rdbms import mysql_flexibleservers
-    # try:
     db_context = DbContext(
         azure_sdk=mysql_flexibleservers, cf_firewall=cf_mysql_flexible_firewall_rules, cf_db=cf_mysql_flexible_db,
         logging_name='MySQL', command_group='mysql', server_client=client)
@@ -82,6 +80,10 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
     else:
         delegated_subnet_arguments = None
 
+    # calculate IOPS
+    iops = _determine_iops(storage_mb, iops_info, iops, tier, sku_name)
+
+    storage_mb *= 1024  # storage input comes in GiB value
     administrator_login_password = generate_password(administrator_login_password)
     if server_result is None:
         # Create mysql server
@@ -91,7 +93,7 @@ def flexible_server_create(cmd, client, resource_group_name=None, server_name=No
                                        sku_name, tier, storage_mb, administrator_login,
                                        administrator_login_password,
                                        version, tags, delegated_subnet_arguments, assign_identity, public_access,
-                                       high_availability, zone)
+                                       high_availability, zone, iops)
 
         # Adding firewall rule
         if public_access is not None and str(public_access).lower() != 'none':
@@ -157,6 +159,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
+# pylint: disable=too-many-branches
 def flexible_server_update_custom_func(cmd, instance,
                                        sku_name=None,
                                        tier=None,
@@ -170,10 +173,11 @@ def flexible_server_update_custom_func(cmd, instance,
                                        assign_identity=False,
                                        ha_enabled=None,
                                        replication_role=None,
-                                       maintenance_window=None):
+                                       maintenance_window=None,
+                                       iops=None):
     # validator
     location = ''.join(instance.location.lower().split())
-    sku_info = get_mysql_list_skus_info(cmd, location)
+    sku_info, iops_info = get_mysql_list_skus_info(cmd, location)
     mysql_arguments_validator(tier, sku_name, storage_mb, backup_retention, sku_info, instance=instance)
 
     from importlib import import_module
@@ -182,14 +186,98 @@ def flexible_server_update_custom_func(cmd, instance,
     module = import_module(server_module_path)  # replacement not needed for update in flex servers
     ServerForUpdate = getattr(module, 'ServerForUpdate')
 
-    if sku_name:
-        instance.sku.name = sku_name
-
-    if tier:
-        instance.sku.tier = tier
-
     if storage_mb:
         instance.storage_profile.storage_mb = storage_mb * 1024
+
+    sku_rank = {'Standard_B1s': 1, 'Standard_B1ms': 2, 'Standard_B2s': 3, 'Standard_D2ds_v4': 4,
+                'Standard_D4ds_v4': 5, 'Standard_D8ds_v4': 6,
+                'Standard_D16ds_v4': 7, 'Standard_D32ds_v4': 8, 'Standard_D48ds_v4': 9, 'Standard_D64ds_v4': 10,
+                'Standard_E2ds_v4': 11,
+                'Standard_E4ds_v4': 12, 'Standard_E8ds_v4': 13, 'Standard_E16ds_v4': 14, 'Standard_E32ds_v4': 15,
+                'Standard_E48ds_v4': 16,
+                'Standard_E64ds_v4': 17}
+    if location == 'eastus2euap':
+        sku_rank.update({
+            'Standard_D2s_v3': 4,
+            'Standard_D4s_v3': 5, 'Standard_D8s_v3': 6,
+            'Standard_D16s_v3': 7, 'Standard_D32s_v3': 8, 'Standard_D48s_v3': 9, 'Standard_D64s_v3': 10,
+            'Standard_E2s_v3': 11,
+            'Standard_E4s_v3': 12, 'Standard_E8s_v3': 13, 'Standard_E16s_v3': 14, 'Standard_E32s_v3': 15,
+            'Standard_E48s_v3': 16,
+            'Standard_E64s_v3': 17
+        })
+
+    if iops:
+        if (tier is not None and sku_name is None) or (tier is None and sku_name is not None):
+            raise CLIError('Argument Error. If you pass --tier, --sku_name is a mandatory parameter and vice-versa.')
+
+        if tier is None and sku_name is None:
+            iops = _determine_iops(instance.storage_profile.storage_mb // 1024, iops_info, iops, instance.sku.tier, instance.sku.name)
+
+        else:
+            new_sku_rank = sku_rank[sku_name]
+            old_sku_rank = sku_rank[instance.sku.name]
+            supplied_iops = iops
+            max_allowed_iops_new_sku = iops_info[tier][sku_name]
+            default_iops = 100
+            free_iops = (instance.storage_profile.storage_mb // 1024) * 3
+
+            # Downgrading SKU
+            if new_sku_rank < old_sku_rank:
+                if supplied_iops > max_allowed_iops_new_sku:
+                    iops = max_allowed_iops_new_sku
+                    logger.warning('The max IOPS for your sku is %s. Provisioning the server with %s...', iops, iops)
+                elif supplied_iops < default_iops:
+                    if free_iops < default_iops:
+                        iops = default_iops
+                        logger.warning('The min IOPS is %s. Provisioning the server with %s...', default_iops,
+                                       default_iops)
+                    else:
+                        iops = min(max_allowed_iops_new_sku, free_iops)
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+            else:  # Upgrading SKU
+                if supplied_iops > max_allowed_iops_new_sku:
+                    iops = max_allowed_iops_new_sku
+                    logger.warning(
+                        'The max IOPS for your sku is %s. Provisioning the server with %s...', iops, iops)
+                elif supplied_iops <= max_allowed_iops_new_sku:
+                    iops = max(supplied_iops, min(free_iops, max_allowed_iops_new_sku))
+                    if iops != supplied_iops:
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+                elif supplied_iops < default_iops:
+                    if free_iops < default_iops:
+                        iops = default_iops
+                        logger.warning(
+                            'The min IOPS is %s. Updating the server with %s...', default_iops, default_iops)
+                    else:
+                        iops = min(max_allowed_iops_new_sku, free_iops)
+                        logger.warning('Updating the server with %s free IOPS...', iops)
+            instance.sku.name = sku_name
+            instance.sku.tier = tier
+        instance.storage_profile.storage_iops = iops
+
+    # pylint: disable=too-many-boolean-expressions
+    if (iops is None and tier is None and sku_name) or (iops is None and sku_name is None and tier):
+        raise CLIError('Argument Error. If you pass --tier, --sku_name is a mandatory parameter and vice-versa.')
+
+    if iops is None and sku_name and tier:
+        new_sku_rank = sku_rank[sku_name]
+        old_sku_rank = sku_rank[instance.sku.name]
+        instance.sku.name = sku_name
+        instance.sku.tier = tier
+        max_allowed_iops_new_sku = iops_info[tier][sku_name]
+        iops = instance.storage_profile.storage_iops
+
+        if new_sku_rank < old_sku_rank:  # Downgrading
+            if instance.storage_profile.storage_iops > max_allowed_iops_new_sku:
+                iops = max_allowed_iops_new_sku
+                logger.warning('Updating the server with max %s IOPS...', iops)
+        else:  # Upgrading
+            if instance.storage_profile.storage_iops < (instance.storage_profile.storage_mb // 1024) * 3:
+                iops = min(max_allowed_iops_new_sku, (instance.storage_profile.storage_mb // 1024) * 3)
+                logger.warning('Updating the server with free %s IOPS...', iops)
+
+        instance.storage_profile.storage_iops = iops
 
     if backup_retention:
         instance.storage_profile.backup_retention_days = backup_retention
@@ -354,7 +442,7 @@ def flexible_list_skus(cmd, client, location):
 def _create_server(db_context, cmd, resource_group_name, server_name, location, backup_retention, sku_name, tier,
                    storage_mb, administrator_login, administrator_login_password, version, tags,
                    delegated_subnet_arguments,
-                   assign_identity, public_network_access, ha_enabled, availability_zone):
+                   assign_identity, public_network_access, ha_enabled, availability_zone, iops):
     logging_name, server_client = db_context.logging_name, db_context.server_client
     logger.warning('Creating %s Server \'%s\' in group \'%s\'...', logging_name, server_name, resource_group_name)
 
@@ -373,7 +461,8 @@ def _create_server(db_context, cmd, resource_group_name, server_name, location, 
         public_network_access=public_network_access,
         storage_profile=mysql_flexibleservers.models.StorageProfile(
             backup_retention_days=backup_retention,
-            storage_mb=storage_mb),
+            storage_mb=storage_mb,
+            storage_iops=iops),
         location=location,
         create_mode="Default",
         delegated_subnet_arguments=delegated_subnet_arguments,
@@ -483,6 +572,30 @@ def _create_mysql_connection_string(host, database_name, user_name, password):
         'password': password if password is not None else '{password}'
     }
     return 'mysql {dbname} --host {host} --user {username} --password={password}'.format(**connection_kwargs)
+
+
+def _determine_iops(storage_gb, iops_info, iops, tier, sku_name):
+    default_iops = 100
+    max_supported_iops = iops_info[tier][sku_name]
+    free_storage_iops = storage_gb * 3
+
+    if iops is None:
+        return default_iops
+    if iops < default_iops:
+        if iops <= free_storage_iops:
+            iops = max(default_iops, min(max_supported_iops, free_storage_iops))
+            logger.warning('Your IOPS input is below the free IOPS provided. Provisioning the server with free %s IOPS...', iops)
+        elif iops > free_storage_iops:
+            iops = default_iops
+            logger.warning('The min IOPS is %s. Provisioning the server with %s...', iops, iops)
+    elif iops > max_supported_iops:
+        iops = max_supported_iops
+        logger.warning('The max IOPS for your sku is %s. Provisioning the server with %s IOPS...', iops, iops)
+    elif default_iops <= iops <= free_storage_iops:
+        iops = min(free_storage_iops, max_supported_iops)
+        logger.warning('Your IOPS input is below the free IOPS provided. Provisioning the server with %s free IOPS...', iops)
+
+    return iops
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods, useless-object-inheritance
