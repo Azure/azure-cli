@@ -4145,10 +4145,11 @@ def _make_onedeploy_request(params):
 
     # For debugging purposes only, you can change the async deployment into a sync deployment by polling the API status
     # For that, set poll_async_deployment_for_debugging=True
-    poll_async_deployment_for_debugging = False
+    poll_async_deployment_for_debugging = True
 
     # check the status of async deployment
     if response.status_code == 202:
+        response_body = None
         if poll_async_deployment_for_debugging:
             logger.info('Polloing the status of async deployment')
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
