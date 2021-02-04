@@ -108,7 +108,7 @@ def load_arguments(self, _):
                         'you want to view analytics about your bot in the Analytics blade.')
         c.argument('icon_url', help='Icon URL for bot avatar. Accepts PNG files with file size limit of 30KB.')
         c.argument('cmek_key_vault_url', options_list=['--cmk-key-vault-key-url', '--cmk'], help='The key vault key url to enable Customer Managed Keys encryption')
-        c.argument('encryption_off', options_list=['--encryption-off'], help='Set encryption to Microsoft-Managed Keys', action='store_true')
+        c.argument('encryption_off', options_list=['--cmk-off'], help='Set encryption to Microsoft-Managed Keys', action='store_true')
 
     with self.argument_context('bot prepare-publish') as c:
         c.argument('proj_file_path', options_list=['--proj-file-path', c.deprecate(target='--proj-name',
