@@ -398,7 +398,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_access_id = disk_access
     if tier is not None:
         disk.tier = tier
-    disk.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        disk.bursting_enabled = enable_bursting
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.begin_create_or_update, resource_group_name, disk_name, disk)
@@ -455,7 +456,8 @@ def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=No
             subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
             namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
         instance.disk_access_id = disk_access
-    instance.bursting_enabled = enable_bursting
+    if enable_bursting is not None:
+        instance.bursting_enabled = enable_bursting
     return instance
 # endregion
 
