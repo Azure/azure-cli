@@ -869,6 +869,25 @@ examples:
         az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
 """
 
+helps['storage blob rewrite'] = """
+type: command
+short-summary:  Create a new Block Blob where the content of the blob is read from a given URL.
+long-summary: The content of an existing blob is overwritten with the new blob.
+parameters:
+  - name: --source-url -u
+    type: string
+    short-summary: >
+        A URL of up to 2 KB in length that specifies a file or blob.
+        The value should be URL-encoded as it would appear in a request URI.
+        If the source is in another account, the source must either be public
+        or must be authenticated via a shared access signature. If the source
+        is public, no authentication is required.
+        Examples:
+        `https://myaccount.blob.core.windows.net/mycontainer/myblob`
+        `https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>`
+        `https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken`
+"""
+
 helps['storage blob service-properties'] = """
 type: group
 short-summary: Manage storage blob service properties.

@@ -21,7 +21,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -173,6 +173,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Indicate whether the storage account permits requests to be authorized with the account access key via '
              'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+
+    t_blob_tier = self.get_sdk('_generated.models._azure_blob_storage_enums#AccessTierOptional',
+                               resource_type=ResourceType.DATA_STORAGE_BLOB)
+    tier_type = CLIArgumentType(
+        arg_type=get_enum_type(t_blob_tier), options_list='--tier',
+        help='The tier value to set the blob to. For page blob, the tier correlates to the size of the blob '
+             'and number of allowed IOPS. Possible values are P10, P15, P20, P30, P4, P40, P50, P6, P60, P70, P80 '
+             'and this is only applicable to page blobs on premium storage accounts; For block blob, possible '
+             'values are Archive, Cool and Hot. This is only applicable to block blobs on standard storage accounts.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -640,6 +649,44 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
                    help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
+    with self.argument_context('storage blob rewrite', resource_type=ResourceType.DATA_STORAGE_BLOB, 
+                               min_api='2020-04-08') as c:
+        t_blob_content_settings = self.get_sdk('_models#ContentSettings', resource_type=ResourceType.DATA_STORAGE_BLOB)
+        t_blob_tier = self.get_sdk('_models#StandardBlobTier',
+                                   resource_type=ResourceType.DATA_STORAGE_BLOB)
+        c.register_blob_arguments()
+        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
+        c.register_precondition_options(prefix='source_')
+        c.register_precondition_options()
+
+        c.argument('if_match', options_list=['--destination-if-match'])
+        c.argument('if_modified_since', options_list=['--destination-if-modified-since'])
+        c.argument('if_none_match', options_list=['--destination-if-none-match'])
+        c.argument('if_unmodified_since', options_list=['--destination-if-unmodified-since'])
+        c.argument('if_tags_match_condition', options_list=['--destination-tags-condition'])
+
+        c.extra('overwrite', arg_type=get_three_state_flag(), arg_group="Additional Flags",
+                   help='Whether the blob to be uploaded should overwrite the current data. If True, upload_blob '
+                        'will overwrite the existing data. If set to False, the operation will fail with '
+                        'ResourceExistsError.', is_preview=True)
+        c.extra('include_source_blob_properties',  arg_type=get_three_state_flag(),
+                help='Indicate if properties from the source blob should be copied. Defaults to True.')
+        c.extra('tags', arg_type=tags_type, arg_group="Additional Flags")
+        c.extra('source_content_md5',
+                help='Specify the md5 that is used to verify the integrity of the source bytes.')
+        c.extra('destination_lease', options_list='--destination-lease-id',
+                help='The lease ID specified for this header must match the lease ID of the estination blob. '
+                'If the request does not include the lease ID or it is not valid, the operation fails with status '
+                'code 412 (Precondition Failed).')
+        c.extra('standard_blob_tier', arg_type=get_enum_type(t_blob_tier), options_list='--tier',
+                help='A standard blob tier value to set the blob to. For this version of the library, '
+                     'this is only applicable to block blobs on standard storage accounts.')
+        c.argument('encryption_scope',
+                   help='A predefined encryption scope used to encrypt the data on the service. An encryption scope '
+                   'can be created using the Management API and referenced here by name. If a default encryption scope '
+                   'has been defined at the container, this value will override it if the container-level scope is '
+                   'configured to allow overrides. Otherwise an error will be raised.')
+
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=True)
@@ -653,8 +700,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
-        from azure.cli.command_modules.storage._validators import (blob_tier_validator,
-                                                                   blob_rehydrate_priority_validator)
+        from azure.cli.command_modules.storage._validators import (blob_rehydrate_priority_validator)
         c.register_blob_arguments()
 
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
