@@ -3348,7 +3348,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             for i, s in enumerate(data_snapshots):
                 data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
                                                              lun=data_snapshot_luns[i]))
-        # from vhd
+        # from vhd, only support os image now
         if cmd.supported_api_version(min_api='2020-09-30', operation_group='gallery_image_versions'):
             if vhd and vhd_storage_account is None or vhd is None and vhd_storage_account:
                 raise ValidationError('--vhd and --vhd-storage-account should be used together.')
@@ -3357,7 +3357,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                     vhd_storage_account = resource_id(
                         subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                         namespace='Microsoft.Storage', type='storageAccounts', name=vhd_storage_account)
-                source = GalleryArtifactVersionSource(id=vhd_storage_account, uri=vhd)
+                os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=vhd_storage_account, uri=vhd))
 
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
