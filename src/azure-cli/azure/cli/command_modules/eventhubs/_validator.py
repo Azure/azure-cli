@@ -64,3 +64,9 @@ def validate_rights(namespace):
     if 'Manage' in namespace.rights:
         if 'Listen' not in namespace.rights or 'Send' not in namespace.rights:
             raise CLIError('Error : Assigning \'Manage\' to --rights requires \'Listen\' and \'Send\' to be included with. e.g. --rights Manage Send Listen')
+
+
+def validate_clustercapcity(namespace):
+    if namespace.capacity:
+        if namespace.capacity != 1:
+            raise CLIError('Error : Allowed values for Capacity of Cluster is \'1\'')

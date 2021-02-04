@@ -128,55 +128,48 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
-    from azure.mgmt.servicebus.models import SBQueue
-    returnobj = SBQueue()
-
-    if lock_duration:
-        returnobj.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
 
     if max_size_in_megabytes:
-        returnobj.max_size_in_megabytes = max_size_in_megabytes
+        instance.max_size_in_megabytes = max_size_in_megabytes
 
     if requires_duplicate_detection:
-        returnobj.requires_duplicate_detection = requires_duplicate_detection
+        instance.requires_duplicate_detection = requires_duplicate_detection
 
     if requires_session:
-        returnobj.requires_session = requires_session
+        instance.requires_session = requires_session
 
-    if default_message_time_to_live:
-        returnobj.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
-        returnobj.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
+        instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
-    if duplicate_detection_history_time_window:
-        returnobj.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
 
     if max_delivery_count:
-        returnobj.max_delivery_count = max_delivery_count
+        instance.max_delivery_count = max_delivery_count
 
     if status:
-        returnobj.status = status
+        instance.status = status
 
-    if auto_delete_on_idle:
-        returnobj.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if enable_partitioning:
-        returnobj.enable_partitioning = enable_partitioning
+        instance.enable_partitioning = enable_partitioning
 
     if enable_express:
-        returnobj.enable_express = enable_express
+        instance.enable_express = enable_express
 
     if forward_to:
-        returnobj.forward_to = forward_to
+        instance.forward_to = forward_to
 
     if forward_dead_lettered_messages_to:
-        returnobj.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+        instance.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
 
     if enable_batched_operations:
-        returnobj.enable_batched_operations = enable_batched_operations
+        instance.enable_batched_operations = enable_batched_operations
 
-    return returnobj
+    return instance
 
 
 # Topic Region
@@ -215,40 +208,34 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
 
-    from azure.mgmt.servicebus.models import SBTopic
-    topic_params = SBTopic()
-
-    if default_message_time_to_live:
-        topic_params.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if max_size_in_megabytes:
-        topic_params.max_size_in_megabytes = max_size_in_megabytes
+        instance.max_size_in_megabytes = max_size_in_megabytes
 
     if requires_duplicate_detection:
-        topic_params.requires_duplicate_detection = requires_duplicate_detection
+        instance.requires_duplicate_detection = requires_duplicate_detection
 
-    if duplicate_detection_history_time_window:
-        topic_params.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
 
     if enable_batched_operations:
-        topic_params.enable_batched_operations = enable_batched_operations
+        instance.enable_batched_operations = enable_batched_operations
 
     if status:
-        topic_params.status = status
+        instance.status = status
 
     if support_ordering:
-        topic_params.support_ordering = support_ordering
+        instance.support_ordering = support_ordering
 
-    if auto_delete_on_idle:
-        topic_params.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if enable_partitioning:
-        topic_params.enable_partitioning = enable_partitioning
+        instance.enable_partitioning = enable_partitioning
 
     if enable_express:
-        topic_params.enable_express = enable_express
+        instance.enable_express = enable_express
 
-    return topic_params
+    return instance
 
 
 # Subscription Region
@@ -285,42 +272,38 @@ def cli_sbsubscription_update(instance, lock_duration=None,
                               dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
-    from azure.mgmt.servicebus.models import SBSubscription
-    subscription_params = SBSubscription()
 
-    if lock_duration:
-        subscription_params.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
 
     if requires_session:
-        subscription_params.requires_session = requires_session
+        instance.requires_session = requires_session
 
-    if default_message_time_to_live:
-        subscription_params.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
-        subscription_params.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
+        instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
     if max_delivery_count:
-        subscription_params.max_delivery_count = max_delivery_count
+        instance.max_delivery_count = max_delivery_count
 
     if status:
-        subscription_params.status = status
+        instance.status = status
 
-    if lock_duration:
-        subscription_params.enable_batched_operations = enable_batched_operations
+    if enable_batched_operations:
+        instance.enable_batched_operations = enable_batched_operations
 
-    subscription_params.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if forward_to:
-        subscription_params.forward_to = forward_to
+        instance.forward_to = forward_to
 
     if forward_dead_lettered_messages_to:
-        subscription_params.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+        instance.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
 
-    if dead_lettering_on_filter_evaluation_exceptions:
-        subscription_params.dead_lettering_on_filter_evaluation_exceptions = dead_lettering_on_filter_evaluation_exceptions
+    if dead_lettering_on_filter_evaluation_exceptions is not None:
+        instance.dead_lettering_on_filter_evaluation_exceptions = dead_lettering_on_filter_evaluation_exceptions
 
-    return subscription_params
+    return instance
 
 
 # Rule Region
@@ -436,50 +419,50 @@ iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
 
-def return_valid_duration(objinstance, duration_property, update_value):
+def return_valid_duration(instance_value, update_value):
     from datetime import timedelta
     from isodate import parse_duration
+    from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
-        if iso8601pattern.match(update_value):
-            for attr, value in vars(objinstance).items():
-                if attr == duration_property:
-                    if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return update_value
+        value_toreturn = update_value
+    else:
+        value_toreturn = str(instance_value)
 
-                    if parse_duration(update_value) > timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return None
+    if iso8601pattern.match(value_toreturn):
+        if parse_duration(value_toreturn) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+            return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
+        return value_toreturn
 
-        if timedeltapattern.match(update_value):
-            day, minute, seconds = update_value.split(":")
-            for attr, value in vars(objinstance).items():
-                if attr == duration_property:
-                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
-
-                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
-                        return None
+    if timedeltapattern.match(value_toreturn):
+        day, minute, seconds = value_toreturn.split(":")
+        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS,
+                                                                                            minutes=DURATION_MIN,
+                                                                                            seconds=DURATION_SECS):
+            return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+        return timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)
 
 
+# to check the timespan value
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
+    from knack.util import CLIError
+    from azure.cli.command_modules.servicebus.constants import DURATION_SECS, DURATION_MIN, DURATION_DAYS
     if update_value is not None:
         if iso8601pattern.match(update_value):
-            if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                return update_value
-
-            if parse_duration(update_value) > timedelta(days=10675199, minutes=10085, seconds=477581):
-                return None
+            if parse_duration(update_value) > timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+                raise CLIError(
+                    'duration value should be less than (days:min:secs) 10675199:10085:477581')
 
         if timedeltapattern.match(update_value):
             day, minute, seconds = update_value.split(":")
-            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) <= timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS):
+                update_value = timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+            else:
+                raise CLIError(
+                    'duration value should be less than timedelta(days=DURATION_DAYS, minutes=DURATION_MIN, seconds=DURATION_SECS)')
 
-            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
-                return None
-    else:
-        return None
+    return update_value
 
 
 # NetwrokRuleSet Region

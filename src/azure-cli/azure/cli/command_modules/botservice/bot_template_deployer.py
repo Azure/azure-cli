@@ -60,7 +60,7 @@ class BotTemplateDeployer:
 
     @staticmethod
     def create_app(cmd, logger, client, resource_group_name, resource_name, description, kind, appid, password,  # pylint:disable=too-many-statements
-                   location, sku_name, language, bot_template_type):
+                   location, sku_name, language, bot_template_type, cmek_key_vault_url=None):
         kind = 'sdk' if kind == 'webapp' else kind
         (zip_url, template_name) = BotTemplateDeployer.__retrieve_bot_template_link(language,
                                                                                     bot_template_type)
@@ -94,6 +94,10 @@ class BotTemplateDeployer:
         }
         if description:
             paramsdict['description'] = description
+
+        if cmek_key_vault_url is not None:
+            paramsdict['cmekKeyVaultUrl'] = cmek_key_vault_url
+            paramsdict['isCmekEnabled'] = True
 
         params = {k: {'value': v} for k, v in paramsdict.items()}
 

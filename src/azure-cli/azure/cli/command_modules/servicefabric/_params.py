@@ -7,9 +7,19 @@
 import argparse
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import resource_group_name_type, get_enum_type, get_three_state_flag
+from azure.cli.core.commands.parameters import (
+    resource_group_name_type,
+    get_enum_type,
+    get_three_state_flag,
+    tags_type
+)
 from azure.cli.core.util import get_json_object
-from azure.cli.command_modules.servicefabric._validators import validate_create_service, validate_update_application, validate_create_application
+from azure.cli.command_modules.servicefabric._validators import (
+    validate_create_service,
+    validate_update_application,
+    validate_create_application,
+    validate_create_managed_cluster
+)
 from knack.arguments import CLIArgumentType
 
 
@@ -17,7 +27,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     # PARAMETER REGISTRATION
     application_parameters = CLIArgumentType(
         options_list=['--parameters', '--application-parameters'],
-        action=addAppParamsAction,
+        action=AddAppParamsAction,
         nargs='+',
         help='Specify the application parameters as key/value pairs. These parameters must exist in the application manifest. '
         'for example: --application-parameters param1=value1 param2=value2')
@@ -49,9 +59,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('parameter_file', help='The path to the template parameter file.')
         c.argument('template_file', help='The path to the template file.')
         c.argument('vm_password', help='The password of the Vm')
-        c.argument('certificate_output_folder', help='The folder of the new certificate file to be created.')
+        c.argument('certificate_output_folder', options_list=['--certificate-output-folder', '--cert-out-folder'], help='The folder of the new certificate file to be created.')
         c.argument('certificate_password', help='The password of the certificate file.')
-        c.argument('certificate_subject_name', help='The subject name of the certificate to be created.')
+        c.argument('certificate_subject_name', options_list=['--certificate-subject-name', '--cert-subject-name'], help='The subject name of the certificate to be created.')
         c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name, if not given it will be cluster resource group name')
         c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
         c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
@@ -77,18 +87,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf client certificate') as c:
         c.argument('certificate_common_name', help='client certificate common name.')
-        c.argument('admin_client_thumbprints', nargs='+', help='Space-separated list of client certificate thumbprint that only has admin permission, ')
-        c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
+        c.argument('admin_client_thumbprints', options_list=['--admin-client-thumbprints', '--admin-client-tps'], nargs='+', help='Space-separated list of client certificate thumbprint that only has admin permission, ')
+        c.argument('certificate_issuer_thumbprint', options_list=['--certificate-issuer-thumbprint', '--cert-issuer-tp'], help='client certificate issuer thumbprint.')
 
     with self.argument_context('sf cluster certificate') as c:
         c.argument('thumbprint', help='The cluster certificate thumbprint to be removed')
 
     with self.argument_context('sf cluster client-certificate') as c:
         c.argument('is_admin', help='Client authentication type.')
-        c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
-        c.argument('certificate_common_name', help='client certificate common name.')
-        c.argument('admin_client_thumbprints', nargs='+', help='client certificate thumbprint that only has admin permission.')
-        c.argument('readonly_client_thumbprints', nargs='+', help='Space-separated list of client certificate thumbprint that has read only permission.')
+        c.argument('certificate_issuer_thumbprint', options_list=['--certificate-issuer-thumbprint', '--cert-issuer-tp'], help='client certificate issuer thumbprint.')
+        c.argument('certificate_common_name', options_list=['--certificate-common-name', '--cert-common-name'], help='client certificate common name.')
+        c.argument('admin_client_thumbprints', options_list=['--admin-client-thumbprints', '--admin-client-tps'], nargs='+', help='client certificate thumbprint that only has admin permission.')
+        c.argument('readonly_client_thumbprints', options_list=['--readonly-client-thumbprints', '--readonly-client-tps'], nargs='+', help='Space-separated list of client certificate thumbprint that has read only permission.')
 
     with self.argument_context('sf cluster client-certificate add') as c:
         c.argument('thumbprint', help='client certificate thumbprint.')
@@ -97,8 +107,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('thumbprints', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
 
     with self.argument_context('sf cluster node') as c:
-        c.argument('number_of_nodes_to_add', help='number of nodes to add.')
-        c.argument('number_of_nodes_to_remove', help='number of nodes to remove.')
+        c.argument('number_of_nodes_to_add', options_list=['--number-of-nodes-to-add', '--nodes-to-add'], help='number of nodes to add.')
+        c.argument('number_of_nodes_to_remove', options_list=['--number-of-nodes-to-remove', '--nodes-to-remove'], help='number of nodes to remove.')
 
     with self.argument_context('sf cluster node-type') as c:
         c.argument('capacity', help='The capacity tag applied to nodes in the node type. The cluster resource manager uses these tags to understand how much capacity a node has.')
@@ -111,7 +121,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('parameter', help='parameter name')
         c.argument('section', help='section name')
         c.argument('value', help='Specify the value')
-        c.argument('settings_section_description', help='Specify the value')
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], help='Specify the value')
 
     with self.argument_context('sf cluster upgrade-type set') as c:
         c.argument('version', help='cluster code version')
@@ -122,22 +132,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('auto_add_node', help='Add node count automatically when changing reliability.')
 
     with self.argument_context('sf cluster setting set') as c:
-        c.argument('settings_section_description', type=get_json_object,
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
                         'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]')
 
     with self.argument_context('sf cluster setting remove') as c:
-        c.argument('settings_section_description', type=get_json_object,
+        c.argument('settings_section_description', options_list=['--settings-section-description', '--settings-section'], type=get_json_object,
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
                         'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout"}]')
 
     with self.argument_context('sf cluster client-certificate remove') as c:
-        c.argument('client_certificate_common_names', type=get_json_object,
+        c.argument('client_certificate_common_names', options_list=['--client-certificate-common-names', '--client-cert-cn'], type=get_json_object,
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
                         'For example: [{"certificateCommonName": "test.com","certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
 
     with self.argument_context('sf cluster client-certificate add') as c:
-        c.argument('client_certificate_common_names', type=get_json_object,
+        c.argument('client_certificate_common_names', options_list=['--client-certificate-common-names', '--client-cert-cn'], type=get_json_object,
                    help='JSON encoded parameters configuration. Use @{file} to load from a file. '
                         'For example: [{"isAdmin":true, "certificateCommonName": "test.com", '
                         '"certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
@@ -162,11 +172,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('maximum_nodes', arg_type=maximum_nodes)
         c.argument('force_restart', arg_type=get_three_state_flag(),
                    help='Indicates that the service host restarts even if the upgrade is a configuration-only change.')
-        c.argument('service_type_health_policy_map',
+        c.argument('service_type_health_policy_map', options_list=['--service-type-health-policy-map', '--service-type-policy'],
                    help='Specify the map of the health policy to use for different service types as a hash table in the following format: {\"ServiceTypeName\" : \"MaxPercentUnhealthyPartitionsPerService,MaxPercentUnhealthyReplicasPerPartition,MaxPercentUnhealthyServices\"}. For example: @{ \"ServiceTypeName01\" = \"5,10,5\"; \"ServiceTypeName02\" = \"5,5,5\" }')
 
     with self.argument_context('sf application update', arg_group='Upgrade description') as c:
-        c.argument('upgrade_replica_set_check_timeout',
+        c.argument('upgrade_replica_set_check_timeout', options_list=['--upgrade-replica-set-check-timeout', '--replica-check-timeout', '--rep-check-timeout'],
                    help='Specify the maximum time, in seconds, that Service Fabric waits for a service to reconfigure into a safe state, if not already in a safe state, before Service Fabric proceeds with the upgrade.')
         c.argument('failure_action', arg_type=get_enum_type(['Rollback', 'Manual']),
                    help='Specify the action to take if the monitored upgrade fails. The acceptable values for this parameter are Rollback or Manual.')
@@ -176,20 +186,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the duration, in seconds, that Service Fabric waits before it performs the initial health check after it finishes the upgrade on the upgrade domain.')
         c.argument('health_check_stable_duration', options_list=['--hc-stable-duration', '--health-check-stable-duration'],
                    help='Specify the duration, in seconds, that Service Fabric waits in order to verify that the application is stable before moving to the next upgrade domain or completing the upgrade. This wait duration prevents undetected changes of health right after the health check is performed.')
-        c.argument('upgrade_domain_timeout', options_list=['--ud_timeout', '--upgrade-domain-timeout'],
+        c.argument('upgrade_domain_timeout', options_list=['--ud-timeout', '--upgrade-domain-timeout'],
                    help='Specify the maximum time, in seconds, that Service Fabric takes to upgrade a single upgrade domain. After this period, the upgrade fails.')
         c.argument('upgrade_timeout',
                    help='Specify the maximum time, in seconds, that Service Fabric takes for the entire upgrade. After this period, the upgrade fails.')
         c.argument('consider_warning_as_error', options_list=['--warning-as-error', '--consider-warning-as-error'], arg_type=get_three_state_flag(),
                    help='Indicates whether to treat a warning health event as an error event during health evaluation.')
-        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-porcent-unhealthy-partitions'],
+        c.argument('default_service_type_max_percent_unhealthy_partitions_per_service', options_list=['--max-porcent-unhealthy-partitions', '--max-unhealthy-parts'],
                    help='Specify the maximum percent of unhelthy partitions per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-porcent-unhealthy-replicas'],
+        c.argument('default_service_type_max_percent_unhealthy_replicas_per_partition', options_list=['--max-porcent-unhealthy-replicas', '--max-unhealthy-reps'],
                    help='Specify the maximum percent of unhelthy replicas per service allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-porcent-unhealthy-services'],
+        c.argument('default_service_type_max_percent_unhealthy_services', options_list=['--max-porcent-unhealthy-services', '--max-unhealthy-servs'],
                    help='Specify the maximum percent of unhelthy services allowed by the health policy for the default service type to use for the monitored upgrade. Allowed values are form 0 to 100.')
-        c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-porcent-unhealthy-apps'],
-                   help='Specify the mximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
+        c.argument('max_percent_unhealthy_deployed_applications', options_list=['--max-porcent-unhealthy-apps', '--max-unhealthy-apps'],
+                   help='Specify the maximum percentage of the application instances deployed on the nodes in the cluster that have a health state of error before the application health state for the cluster is error. Allowed values are form 0 to 100.')
 
     with self.argument_context('sf application create', validator=validate_create_application) as c:
         c.argument('application_type_name', options_list=['--type-name', '--application-type-name'], help='Specify the application type name.')
@@ -211,8 +221,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Specify the name of the service. The application name must be a prefix of the service name, for example: appName~serviceName')
         c.argument('state', arg_type=get_enum_type(['stateless', 'stateful']), help='Specify if the service is stateless or stateful.')
         c.argument('instance_count', help='Specify the instance count for the stateless service. If -1 is used, it means it will run on all the nodes.')
-        c.argument('min_replica_set_size', help='Specify the min replica set size for the stateful service.')
-        c.argument('target_replica_set_size', help='Specify the target replica set size for the stateful service.')
+        c.argument('min_replica_set_size', options_list=['--min-replica-set-size', '--min-replica'], help='Specify the min replica set size for the stateful service.')
+        c.argument('target_replica_set_size', options_list=['--target-replica-set-size', '--target-replica'], help='Specify the target replica set size for the stateful service.')
         c.argument('default_move_cost', arg_type=get_enum_type(['Zero', 'Low', 'Medium', 'High']),
                    help='Specify the default cost for a move. Higher costs make it less likely that the Cluster Resource Manager will move the replica when trying to balance the cluster.')
         c.argument('partition_scheme', arg_type=get_enum_type(['singleton', 'uniformInt64', 'named']),
@@ -221,17 +231,138 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    'UniformInt64 means that each partition owns a range of int64 keys. '
                    'Named is usually for services with data that can be bucketed, within a bounded set. Some common examples of data fields used as named partition keys would be regions, postal codes, customer groups, or other business boundaries.')
 
+    # managed cluster
+
+    with self.argument_context('sf managed-cluster create', validator=validate_create_managed_cluster) as c:
+        c.argument('admin_password', help='Admin password used for the virtual machines.')
+        c.argument('admin_user_name', help='Admin user used for the virtual machines.', default='vmadmin')
+        c.argument('dns_name', help='Cluster\'s dns name.')
+        c.argument('sku', help='Cluster\'s Sku, the options are Basic: it will have a minimum of 3 seed nodes and only allows 1 node type and Standard: it will have a minimum of 5 seed nodes and allows multiple node types.', default='Basic')
+        c.argument('client_connection_port', options_list=['--client-connection-port', '--client-port'], help='Port used for client connections to the cluster.', default=19000)
+        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'], help='Port used for http connections to the cluster.', default=19080)
+        c.argument('client_cert_is_admin', options_list=['--client-cert-is-admin', '--cert-is-admin'], arg_type=get_three_state_flag(), help='Client authentication type.')
+        c.argument('client_cert_thumbprint', options_list=['--client-cert-thumbprint', '--cert-thumbprint'], help='Client certificate thumbprint.')
+        c.argument('client_cert_common_name', options_list=['--client-cert-common-name', '--cert-common-name'], help='Client certificate common name.')
+        c.argument('client_cert_issuer_thumbprint', options_list=['--client-cert-issuer-thumbprint', '--cert-issuer-thumbprint', '--cert-issuer-tp'], nargs='+', help='Space-separated list of issuer thumbprints.')
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-cluster update') as c:
+        c.argument('client_connection_port', options_list=['--client-connection-port', '--client-port'], help='Port used for client connections to the cluster.')
+        c.argument('gateway_connection_port', options_list=['--gateway-connection-port', '--gateway-port'], help='Port used for http connections to the cluster.')
+        c.argument('dns_name', help='Cluster\'s dns name')
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-cluster client-certificate add') as c:
+        c.argument('is_admin', arg_type=get_three_state_flag(), help='Client authentication type.')
+        c.argument('thumbprint', help='Client certificate thumbprint.')
+        c.argument('common_name', help='Client certificate common name.')
+        c.argument('issuer_thumbprint', nargs='+', help='Space-separated list of issuer thumbprints.')
+
+    with self.argument_context('sf managed-cluster client-certificate delete') as c:
+        c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
+        c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
+
+    # managed node type
+
+    capacity = CLIArgumentType(
+        options_list=['--capacity'],
+        action=AddNodeTypeCapacityAction,
+        nargs='+',
+        help='Capacity tags applied to the nodes in the node type as key/value pairs, the cluster resource manager uses these tags to understand how much resource a node has. Updating this will override the current values.'
+             'for example: --capacity ClientConnections=65536 param2=value2')
+
+    placement_property = CLIArgumentType(
+        options_list=['--placement-property'],
+        action=AddNodeTypePlacementPropertyAction,
+        nargs='+',
+        help='Placement tags applied to nodes in the node type as key/value pairs, which can be used to indicate where certain services (workload) should run. Updating this will override the current values.'
+             'for example: --placement-property NodeColor=Green SomeProperty=5')
+
+    with self.argument_context('sf managed-node-type') as c:
+        c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
+        c.argument('instance_count', help='essage = "The number of nodes in the node type.')
+        c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
+        c.argument('disk_size', help='Disk size for each vm in the node type in GBs.', default=100)
+        c.argument('application_start_port', options_list=['--application-start-port', '--app-start-port'], help='Application start port of a range of ports.')
+        c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
+        c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
+        c.argument('ephemeral_end_port', help='Ephemeral end port of a range of ports.')
+        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.', default='Standard_D2')
+        c.argument('vm_image_publisher', help='The publisher of the Azure Virtual Machines Marketplace image.', default='MicrosoftWindowsServer')
+        c.argument('vm_image_offer', help='The offer type of the Azure Virtual Machines Marketplace image.', default='WindowsServer')
+        c.argument('vm_image_sku', help='The SKU of the Azure Virtual Machines Marketplace image.', default='2019-Datacenter')
+        c.argument('vm_image_version', help='The version of the Azure Virtual Machines Marketplace image. ', default='latest')
+        c.argument('capacity', arg_type=capacity)
+        c.argument('placement_property', arg_type=placement_property)
+
+    with self.argument_context('sf managed-node-type node') as c:
+        c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
+        c.argument('force', arg_type=get_three_state_flag(), help='Using this flag will force the operation even if service fabric is unable to disable the nodes. Use with caution as this might cause data loss if stateful workloads are running on the node.')
+
+    with self.argument_context('sf managed-node-type vm-extension') as c:
+        c.argument('extension_name', help='extension name.')
+        c.argument('force_update_tag', help='If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.')
+        c.argument('publisher', help='The name of the extension handler publisher.')
+        c.argument('extension_type', help='Specifies the type of the extension; an example is \"CustomScriptExtension\".')
+        c.argument('type_handler_version', help='Specifies the version of the script handler.')
+        c.argument('auto_upgrade_minor_version', options_list=['--auto-upgrade-minor-version', '--auto-upgrade'], arg_type=get_three_state_flag(), help='Indicates whether the extension should use a newer minor version if one is available at deployment time. Once deployed, however, the extension will not upgrade minor versions unless redeployed, even with this property set to true.')
+        c.argument('setting', help='Json formatted public settings for the extension.')
+        c.argument('protected_setting', help='The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.')
+        c.argument('provision_after_extension', options_list=['--provision-after-extension', '--provision-after'], help='Collection of extension names after which this extension needs to be provisioned.')
+
+    with self.argument_context('sf managed-node-type vm-secret') as c:
+        c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
+        c.argument('certificate_url', help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>}/')
+        c.argument('certificate_store', help='Specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account.')
+
+
+def paramToDictionary(values):
+    params = {}
+    for item in values:
+        key, value = item.split('=', 1)
+        params[key] = value
+    return params
+
 
 # pylint: disable=protected-access
 # pylint: disable=too-few-public-methods
-class addAppParamsAction(argparse._AppendAction):
+class AddAppParamsAction(argparse._AppendAction):
 
     def __call__(self, parser, namespace, values, option_string=None):
-        params = {}
-        for item in values:
-            try:
-                key, value = item.split('=', 1)
-                params[key] = value
-            except ValueError:
-                raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
-        namespace.application_parameters = params
+        try:
+            namespace.application_parameters = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+
+class ManagedClusterClientCertAddAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        ClientCertificate = namespace._cmd.get_models('ClientCertificate')
+        try:
+            kwargs = paramToDictionary(values.split())
+            return ClientCertificate(**kwargs)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+
+# pylint: disable=protected-access
+# pylint: disable=too-few-public-methods
+class AddNodeTypeCapacityAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            namespace.capacity = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))
+
+
+# pylint: disable=protected-access
+# pylint: disable=too-few-public-methods
+class AddNodeTypePlacementPropertyAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        try:
+            namespace.placement_property = paramToDictionary(values)
+        except ValueError:
+            raise CLIError('usage error: {} KEY=VALUE [KEY=VALUE ...]'.format(option_string))

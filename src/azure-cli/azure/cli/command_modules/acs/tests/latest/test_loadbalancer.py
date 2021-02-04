@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import unittest
 
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterLoadBalancerProfile
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
+from azure.mgmt.containerservice.v2020_09_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.acs import _loadbalancer as loadbalancer
 

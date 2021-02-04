@@ -44,6 +44,10 @@ def get_sql_server_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_blob_auditing_policies
 
 
+def get_sql_server_dev_ops_audit_settings_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_dev_ops_audit_settings
+
+
 def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).sensitivity_labels
 
@@ -140,6 +144,10 @@ def get_sql_subscription_usages_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).subscription_usages
 
 
+def get_sql_server_azure_ad_only_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_azure_ad_only_authentications
+
+
 def get_sql_virtual_network_rules_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).virtual_network_rules
 
@@ -154,6 +162,10 @@ def get_sql_managed_instances_operations(cli_ctx, _):
 
 def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_instance_administrators
+
+
+def get_sql_managed_instance_azure_ad_only_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_azure_ad_only_authentications
 
 
 def get_sql_managed_databases_operations(cli_ctx, _):
@@ -190,3 +202,7 @@ def get_sql_database_long_term_retention_policies_operations(cli_ctx, _):
 
 def get_sql_database_long_term_retention_backups_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).long_term_retention_backups
+
+
+def get_sql_managed_database_restore_details_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_database_restore_details

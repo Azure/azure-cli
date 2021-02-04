@@ -662,6 +662,11 @@ backup item show:
     backup_management_type:
       rule_exclusions:
       - option_length_too_long
+backup job list:
+  parameters:
+    backup_management_type:
+      rule_exclusions:
+      - option_length_too_long
 backup policy create:
   parameters:
     backup_management_type:
@@ -686,6 +691,11 @@ backup policy set:
       rule_exclusions:
       - option_length_too_long
 backup protectable-item show:
+  parameters:
+    protectable_item_type:
+      rule_exclusions:
+      - option_length_too_long
+backup protectable-item list:
   parameters:
     protectable_item_type:
       rule_exclusions:
@@ -783,6 +793,9 @@ backup vault backup-properties set:
       rule_exclusions:
       - option_length_too_long
     soft_delete_feature_state:
+      rule_exclusions:
+      - option_length_too_long
+    cross_region_restore_flag:
       rule_exclusions:
       - option_length_too_long
 batch account create:
@@ -1186,6 +1199,16 @@ config set:
 config unset:
   parameters:
     key:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist show:
+  parameters:
+    name:
+      rule_exclusions:
+      - no_positional_parameters
+config param-persist delete:
+  parameters:
+    name:
       rule_exclusions:
       - no_positional_parameters
 consumption budget create:

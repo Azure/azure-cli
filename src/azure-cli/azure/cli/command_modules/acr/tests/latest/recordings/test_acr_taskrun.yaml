@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {"adminUserEnabled":
-      false, "publicNetworkAccess": "Enabled"}}'
+      false, "publicNetworkAccess": "Enabled", "networkRuleBypassOptions": "AzureServices"}}'
     headers:
       Accept:
       - application/json
@@ -12,30 +12,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '128'
+      - '173'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -n -g -l --sku
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:40:15.4004379Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:40:16.2442327+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:51.84938+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:51.84938+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:48:51.84938Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:48:53.315175+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '1212'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:40:16 GMT
+      - Tue, 22 Dec 2020 21:48:53 GMT
       expires:
       - '-1'
       pragma:
@@ -51,7 +51,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -107,15 +107,15 @@ interactions:
       - --resource-group --template-file --parameters --parameters --parameters --parameters
         --parameters
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-14T10:40:19.0494568Z","duration":"PT0S","correlationId":"107e5e97-e9d0-4ec7-8bad-7f3ebbee86da","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-22T21:48:54.5266837Z","duration":"PT0S","correlationId":"8b73fee6-93a4-46a1-8fc2-5c7776b08782","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -124,7 +124,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:40:18 GMT
+      - Tue, 22 Dec 2020 21:48:54 GMT
       expires:
       - '-1'
       pragma:
@@ -194,18 +194,18 @@ interactions:
       - --resource-group --template-file --parameters --parameters --parameters --parameters
         --parameters
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-07-14T10:40:22.2581311Z","duration":"PT1.7801193S","correlationId":"cbb087a1-180f-40e5-85d7-d05bc56f43cb","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-12-22T21:48:55.8115215Z","duration":"PT0.8588769S","correlationId":"d0071fbd-aa47-4f84-8b77-531ce683de3c","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample/operationStatuses/08586068836649996137?api-version=2020-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample/operationStatuses/08585929331505249756?api-version=2020-06-01
       cache-control:
       - no-cache
       content-length:
@@ -213,7 +213,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:40:23 GMT
+      - Tue, 22 Dec 2020 21:48:56 GMT
       expires:
       - '-1'
       pragma:
@@ -223,7 +223,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1191'
+      - '1199'
     status:
       code: 201
       message: Created
@@ -242,10 +242,10 @@ interactions:
       - --resource-group --template-file --parameters --parameters --parameters --parameters
         --parameters
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586068836649996137?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585929331505249756?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -257,7 +257,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:40:53 GMT
+      - Tue, 22 Dec 2020 21:49:26 GMT
       expires:
       - '-1'
       pragma:
@@ -286,10 +286,10 @@ interactions:
       - --resource-group --template-file --parameters --parameters --parameters --parameters
         --parameters
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586068836649996137?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08585929331505249756?api-version=2020-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -301,7 +301,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:23 GMT
+      - Tue, 22 Dec 2020 21:49:56 GMT
       expires:
       - '-1'
       pragma:
@@ -330,13 +330,13 @@ interactions:
       - --resource-group --template-file --parameters --parameters --parameters --parameters
         --parameters
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/10.1.0
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-resource/10.3.0 Azure-SDK-For-Python AZURECLI/2.16.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2020-10-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-07-14T10:41:04.4494659Z","duration":"PT43.9714541S","correlationId":"cbb087a1-180f-40e5-85d7-d05bc56f43cb","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[],"outputs":{"taskRunName":{"type":"String","value":"testTaskRun"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Resources/deployments/taskrunquickbuildsample","name":"taskrunquickbuildsample","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13112214626039113742","parameters":{"location":{"type":"String","value":"westus"},"registryName":{"type":"String","value":"clireg000002"},"taskRunName":{"type":"String","value":"testTaskRun"},"sourceLocation":{"type":"String","value":"https://github.com/Azure-Samples/acr-build-helloworld-node.git"},"dockerFilePath":{"type":"String","value":"Dockerfile"},"image":{"type":"String","value":"testtaskrun:v1"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-12-22T21:49:28.7816841Z","duration":"PT33.8290395S","correlationId":"d0071fbd-aa47-4f84-8b77-531ce683de3c","providers":[{"namespace":"Microsoft.ContainerRegistry","resourceTypes":[{"resourceType":"registries/taskRuns","locations":["westus"]}]}],"dependencies":[],"outputs":{"taskRunName":{"type":"String","value":"testTaskRun"}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -345,7 +345,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:24 GMT
+      - Tue, 22 Dec 2020 21:49:56 GMT
       expires:
       - '-1'
       pragma:
@@ -373,24 +373,24 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:40:15.4004379Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:40:16.2442327+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:51.84938+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:51.84938+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:48:51.84938Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:48:53.315175+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '1212'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:27 GMT
+      - Tue, 22 Dec 2020 21:49:58 GMT
       expires:
       - '-1'
       pragma:
@@ -422,24 +422,24 @@ interactions:
       ParameterSetName:
       - -r -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/taskRuns","properties":{"provisioningState":"Succeeded","runRequest":{"type":"DockerBuildRequest","imageNames":["testtaskrun:v1"],"isPushEnabled":true,"noCache":false,"dockerFilePath":"Dockerfile","platform":{"os":"linux","architecture":"amd64"},"sourceLocation":"https://github.com/Azure-Samples/acr-build-helloworld-node.git","isArchiveEnabled":true},"runResult":{"type":"Microsoft.ContainerRegistry/registries/runs","properties":{"runId":"cf1","status":"Succeeded","lastUpdatedTime":"2020-07-14T10:40:55+00:00","runType":"QuickRun","createTime":"2020-07-14T10:40:25.9391688+00:00","startTime":"2020-07-14T10:40:26.1594893+00:00","finishTime":"2020-07-14T10:40:55.3426032+00:00","outputImages":[{"registry":"clireg000002.azurecr.io","repository":"testtaskrun","tag":"v1","digest":"sha256:eb65fe1a58e9ed8a21cf05a0ba6071e7732a73c9a1868d8d0cebd7f1fdfad111"}],"platform":{"os":"linux","architecture":"amd64"},"agentConfiguration":{"cpu":2},"provisioningState":"Succeeded","isArchiveEnabled":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/runs/cf1","name":"cf1"}},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun","name":"testTaskRun"}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/taskRuns","properties":{"provisioningState":"Succeeded","runRequest":{"type":"DockerBuildRequest","imageNames":["testtaskrun:v1"],"isPushEnabled":true,"noCache":false,"dockerFilePath":"Dockerfile","platform":{"os":"linux","architecture":"amd64"},"sourceLocation":"https://github.com/Azure-Samples/acr-build-helloworld-node.git","isArchiveEnabled":true},"runResult":{"type":"Microsoft.ContainerRegistry/registries/runs","properties":{"runId":"cf1","status":"Succeeded","lastUpdatedTime":"2020-12-22T21:49:25+00:00","runType":"QuickRun","createTime":"2020-12-22T21:48:56.8498276+00:00","startTime":"2020-12-22T21:48:57.0873972+00:00","finishTime":"2020-12-22T21:49:25.5996602+00:00","outputImages":[{"registry":"clireg000002.azurecr.io","repository":"testtaskrun","tag":"v1","digest":"sha256:ee7c93f047492a3a8e6c89b4a88b77b895a8716d808cda92c500e794f64096e1"}],"platform":{"os":"linux","architecture":"amd64"},"agentConfiguration":{"cpu":2},"provisioningState":"Succeeded","isArchiveEnabled":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/runs/cf1","name":"cf1"}},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun","name":"testTaskRun","systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:56.7456527+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:56.7456527+00:00"}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1589'
+      - '1835'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:28 GMT
+      - Tue, 22 Dec 2020 21:49:58 GMT
       expires:
       - '-1'
       pragma:
@@ -471,24 +471,24 @@ interactions:
       ParameterSetName:
       - -r -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:40:15.4004379Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:40:16.2442327+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:51.84938+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:51.84938+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:48:51.84938Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:48:53.315175+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '1212'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:30 GMT
+      - Tue, 22 Dec 2020 21:49:59 GMT
       expires:
       - '-1'
       pragma:
@@ -520,24 +520,24 @@ interactions:
       ParameterSetName:
       - -r -n -g
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/taskRuns","properties":{"provisioningState":"Succeeded","runRequest":{"type":"DockerBuildRequest","imageNames":["testtaskrun:v1"],"isPushEnabled":true,"noCache":false,"dockerFilePath":"Dockerfile","platform":{"os":"linux","architecture":"amd64"},"sourceLocation":"https://github.com/Azure-Samples/acr-build-helloworld-node.git","isArchiveEnabled":true},"runResult":{"type":"Microsoft.ContainerRegistry/registries/runs","properties":{"runId":"cf1","status":"Succeeded","lastUpdatedTime":"2020-07-14T10:40:55+00:00","runType":"QuickRun","createTime":"2020-07-14T10:40:25.9391688+00:00","startTime":"2020-07-14T10:40:26.1594893+00:00","finishTime":"2020-07-14T10:40:55.3426032+00:00","outputImages":[{"registry":"clireg000002.azurecr.io","repository":"testtaskrun","tag":"v1","digest":"sha256:eb65fe1a58e9ed8a21cf05a0ba6071e7732a73c9a1868d8d0cebd7f1fdfad111"}],"platform":{"os":"linux","architecture":"amd64"},"agentConfiguration":{"cpu":2},"provisioningState":"Succeeded","isArchiveEnabled":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/runs/cf1","name":"cf1"}},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun","name":"testTaskRun"}'
+      string: '{"type":"Microsoft.ContainerRegistry/registries/taskRuns","properties":{"provisioningState":"Succeeded","runRequest":{"type":"DockerBuildRequest","imageNames":["testtaskrun:v1"],"isPushEnabled":true,"noCache":false,"dockerFilePath":"Dockerfile","platform":{"os":"linux","architecture":"amd64"},"sourceLocation":"https://github.com/Azure-Samples/acr-build-helloworld-node.git","isArchiveEnabled":true},"runResult":{"type":"Microsoft.ContainerRegistry/registries/runs","properties":{"runId":"cf1","status":"Succeeded","lastUpdatedTime":"2020-12-22T21:49:25+00:00","runType":"QuickRun","createTime":"2020-12-22T21:48:56.8498276+00:00","startTime":"2020-12-22T21:48:57.0873972+00:00","finishTime":"2020-12-22T21:49:25.5996602+00:00","outputImages":[{"registry":"clireg000002.azurecr.io","repository":"testtaskrun","tag":"v1","digest":"sha256:ee7c93f047492a3a8e6c89b4a88b77b895a8716d808cda92c500e794f64096e1"}],"platform":{"os":"linux","architecture":"amd64"},"agentConfiguration":{"cpu":2},"provisioningState":"Succeeded","isArchiveEnabled":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/runs/cf1","name":"cf1"}},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/taskRuns/testTaskRun","name":"testTaskRun","systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:56.7456527+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:56.7456527+00:00"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1577'
+      - '1823'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:31 GMT
+      - Tue, 22 Dec 2020 21:50:00 GMT
       expires:
       - '-1'
       pragma:
@@ -569,24 +569,24 @@ interactions:
       ParameterSetName:
       - -r -n -g -y
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2020-11-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-07-14T10:40:15.4004379Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-07-14T10:40:16.2442327+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Standard","tier":"Standard"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"westus","tags":{},"systemData":{"createdBy":"oladewal@microsoft.com","createdByType":"User","createdAt":"2020-12-22T21:48:51.84938+00:00","lastModifiedBy":"oladewal@microsoft.com","lastModifiedByType":"User","lastModifiedAt":"2020-12-22T21:48:51.84938+00:00"},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-12-22T21:48:51.84938Z","provisioningState":"Succeeded","adminUserEnabled":false,"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-12-22T21:48:53.315175+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","networkRuleBypassOptions":"AzureServices","zoneRedundancy":"Disabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '902'
+      - '1212'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 14 Jul 2020 10:41:32 GMT
+      - Tue, 22 Dec 2020 21:50:00 GMT
       expires:
       - '-1'
       pragma:
@@ -620,8 +620,8 @@ interactions:
       ParameterSetName:
       - -r -n -g -y
       User-Agent:
-      - python/3.8.0 (Windows-10-10.0.19041-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc14
-        Azure-SDK-For-Python AZURECLI/2.9.0
+      - python/3.7.9 (Windows-10-10.0.19041-SP0) msrest/0.6.18 msrest_azure/0.6.3
+        azure-mgmt-containerregistry/3.0.0rc16 Azure-SDK-For-Python AZURECLI/2.16.0
       accept-language:
       - en-US
     method: DELETE
@@ -635,7 +635,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 14 Jul 2020 10:41:33 GMT
+      - Tue, 22 Dec 2020 21:50:01 GMT
       expires:
       - '-1'
       pragma:
@@ -647,7 +647,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14997'
+      - '14999'
     status:
       code: 200
       message: OK

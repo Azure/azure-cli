@@ -12,9 +12,9 @@ class TestData:
     Model for testing results
     """
     def __init__(self, artifact_dir):
-        # Value of the list should be (module_name, failed, passed, pass_rate)
+        # Value of the list should be (module_name, passed, failed, pass_rate)
         self.modules = []
-        # ('Total', failed, passed, pass_rate)
+        # ('Total', passed, failed, pass_rate)
         self.total = None
         self.artifact_dir = artifact_dir
 

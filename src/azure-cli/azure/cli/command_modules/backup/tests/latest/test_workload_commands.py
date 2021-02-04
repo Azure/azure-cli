@@ -11,22 +11,22 @@ import os
 
 
 id_sql = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.Compute/virtualMachines/pstestwlvm1bca8'
-id_hana = '/subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGroups/IDCDemo/providers/Microsoft.Compute/virtualMachines/HANADemoIDC3'
-item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb1'
+id_hana = '/subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/akneema/providers/Microsoft.Compute/virtualMachines/akneema-hana-ccy'
+item_id_sql = '/Subscriptions/da364f0f-307b-41c9-9d47-b7413ec45535/resourceGroups/pstestwlRG1bca8/providers/Microsoft.RecoveryServices/vaults/pstestwlRSV1bca8/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;pstestwlrg1bca8;pstestwlvm1bca8/protectedItems/sqldatabase;mssqlserver;testdb'
 item_id_hana = '/Subscriptions/e3d2d341-4ddb-4c5d-9121-69b7e719485e/resourceGroups/IDCDemo/providers/Microsoft.RecoveryServices/vaults/IDCDemoVault/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;IDCDemo;HANADemoIDC3/protectedItems/SAPHanaDatabase;h22;h22'
 sub_sql = 'da364f0f-307b-41c9-9d47-b7413ec45535'
-sub_hana = 'e3d2d341-4ddb-4c5d-9121-69b7e719485e'
+sub_hana = 'da364f0f-307b-41c9-9d47-b7413ec45535'
 rg_sql = 'pstestwlRG1bca8'
-rg_hana = 'IDCDemo'
+rg_hana = 'akneema'
 vault_sql = 'pstestwlRSV1bca8'
-vault_hana = 'IDCDemoVault'
+vault_hana = 'akneema-vault-ccy'
 container_sql = 'VMAppContainer;Compute;pstestwlRG1bca8;pstestwlvm1bca8'
-container_hana = 'VMAppContainer;Compute;IDCDemo;HANADemoIDC3'
+container_hana = 'VMAppContainer;Compute;akneema;akneema-hana-ccy'
 container_friendly_sql = 'pstestwlvm1bca8'
-container_friendly_hana = 'HANADemoIDC3'
+container_friendly_hana = 'akneema-hana-ccy'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item_auto_hana = 'SAPHanaSystem;H22'
-item1_sql = 'SQLDataBase;MSSQLSERVER;testdb1'
+item1_sql = 'SQLDataBase;MSSQLSERVER;testdb'
 item2_sql = 'msdb'
 item1_hana = 'SAPHanaDatabase;H22;h22'
 item2_hana = 'SYSTEMDB'
@@ -211,10 +211,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_hana,
             'name': container_hana,
             'fname': container_friendly_hana,
-            'policy': 'DemoBackup',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'DemoBackup',
+            'default': 'hana-policy-ccy',
             'rg': rg_hana,
             'item': item1_hana,
             'id': id_hana,
@@ -350,14 +350,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': container_friendly_hana,
-            'policy': 'HourlyLogBackup',
+            'fname': 'hxehost',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'HourlyLogBackup',
-            'rg': "idcdemo",
-            'item': "saphanadatabase;h22;h22_restored_sarath",
-            'fitem': "h22_restored_sarath",
+            'default': 'hana-policy-ccy',
+            'rg': rg_hana,
+            'item': "saphanadatabase;hxe;systemdb",
+            'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana_2,
             'pit': 'SAPHanaDatabase'
@@ -404,17 +404,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container1} --backup-management-type AzureWorkload --workload-type SAPHanaDatabase', checks=[
-            self.check("length(@)", 6),
+            self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} -c {container1_fullname} --backup-management-type AzureWorkload --workload-type SAPHanaDatabase', checks=[
-            self.check("length(@)", 6),
+            self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
         self.cmd('backup item list -g {rg} -v {vault} --backup-management-type AzureWorkload --workload-type SAPHanaDatabase', checks=[
-            self.check("length(@)", 8),
+            self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{fitem}'])", 1)
         ])
 
@@ -426,7 +426,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         item1_json = self.cmd('backup item show -g {rg} -v {vault} -c {container1} -n {item} --backup-management-type AzureWorkload --workload-type SAPHanaDatabase').get_output_in_json()
-        self.assertIn("HourlyLogBackup".lower(), item1_json['properties']['policyId'].lower())
+        self.assertIn("hana-policy-ccy".lower(), item1_json['properties']['policyId'].lower())
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {container1} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
@@ -446,7 +446,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql,
             'item_id': item_id_sql,
             'pit': 'SQLDataBase',
-            'protectable_item_name': 'newdb',
+            'protectable_item_name': 'testdb',
             'pit_hana': 'SAPHanaDatabase'
         })
 
@@ -456,12 +456,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{name}'])", 1)])
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --query properties.friendlyName --backup-management-type AzureWorkload').get_output_in_json()
-
-        self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
-            self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 0)
-        ])
-
-        self.cmd('backup protectable-item initialize -g {rg} --vault-name {vault} --workload-type {wt} --container-name {name}')
 
         self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
             self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 1)
@@ -485,17 +479,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': container_friendly_hana,
-            'policy': 'HourlyLogBackup',
+            'fname': 'hxehost',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'HourlyLogBackup',
+            'default': 'hana-policy-ccy',
             'rg': rg_hana,
             'item': item1_hana,
             'id': id_hana,
             'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase',
-            'protectable_item_name': 'NEWDB',
+            'protectable_item_name': 'SYSTEMDB',
             'pit_hana': 'SAPHanaDatabase'
         })
 
@@ -505,12 +499,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{name}'])", 1)])
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --query properties.friendlyName --backup-management-type AzureWorkload').get_output_in_json()
-
-        self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
-            self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 0)
-        ])
-
-        self.cmd('backup protectable-item initialize -g {rg} --vault-name {vault} --workload-type {wt} --container-name {name}')
 
         self.cmd('backup protectable-item list -g {rg} --vault-name {vault} --workload-type {wt}', checks=[
             self.check("length([?properties.friendlyName == '{protectable_item_name}'])", 1)
@@ -569,10 +557,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'name': container_hana,
             'rg': resource_group,
             'fname': container_friendly_hana,
-            'policy': 'HourlyLogBackup',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'item': 'saphanadatabase;h22;h22_restored_sarath',
+            'item': 'saphanadatabase;hxe;systemdb',
             'pit': 'HANADatabase',
             'item_id': item_id_hana,
             'id': id_hana
@@ -610,7 +598,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql,
             'item_id': item_id_sql,
             'pit': "SQLDataBase",
-            'entityFriendlyName': 'MSSQLSERVER/msdb [sarathvm]'
+            'entityFriendlyName': 'msdb [sarathvm]'
         })
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
@@ -625,9 +613,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
-        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --retain-until 1-7-2020 --enable-compression false', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
-            self.check("properties.operation", "Backup"),
+        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
+            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
@@ -663,18 +650,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': container_friendly_hana,
-            'policy': 'HourlyLogBackup',
+            'fname': 'hxehost',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'HourlyLogBackup',
-            'rg': "idcdemo",
-            'item': "saphanadatabase;h22;h22_restored_sarath",
-            'fitem': "h22_restored_sarath",
+            'default': 'hana-policy-ccy',
+            'rg': rg_hana,
+            'item': "saphanadatabase;hxe;systemdb",
+            'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana,
             'pit': "SAPHanaDatabase",
-            'entityFriendlyName': 'H22/H22_RESTORED_SARATH [HANADemoIDC3]'
+            'entityFriendlyName': 'SYSTEMDB [hxehost]'
         })
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
@@ -689,9 +676,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
-        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --retain-until 1-7-2020 --enable-compression false', checks=[
+        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -i {item} -c {name} --backup-type Full --enable-compression false', checks=[
             self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
-            self.check("properties.operation", "Backup"),
+            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
@@ -762,18 +749,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs.update({
             'vault': vault_hana,
             'name': container_hana,
-            'fname': container_friendly_hana,
-            'policy': 'HourlyLogBackup',
+            'fname': 'hxehost',
+            'policy': 'hana-policy-ccy',
             'wt': 'SAPHANA',
             'sub': sub_hana,
-            'default': 'HourlyLogBackup',
+            'default': 'hana-policy-ccy',
             'rg': resource_group,
-            'item': "saphanadatabase;h22;h22_restored_sarath",
-            'fitem': "h22_restored_sarath",
+            'item': "saphanadatabase;hxe;systemdb",
+            'fitem': "systemdb",
             'id': id_hana,
             'item_id': item_id_hana,
             'pit': 'SAPHanaDatabase',
-            'entityFriendlyName': 'H22/H22_RESTORED_SARATH [HANADemoIDC3]',
+            'entityFriendlyName': 'SYSTEMDB [hxehost]',
             'tpit': 'HANAInstance',
             'titem': 'H22'
         })
@@ -790,9 +777,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
-        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -c {name} -i {item} --backup-type Full --retain-until 1-7-2020 --enable-compression false', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
-            self.check("properties.operation", "Backup"),
+        self.kwargs['backup_job'] = self.cmd('backup protection backup-now -v {vault} -g {rg} -c {name} -i {item} --backup-type Full --enable-compression false', checks=[
+            self.check("properties.operation", "Backup (Full)"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
@@ -818,7 +804,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             f.write(self.kwargs['rc'])
 
         self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -833,7 +818,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             f.write(self.kwargs['rc'])
 
         self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -874,7 +858,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql,
             'item_id': item_id_sql,
             'pit': 'SQLDataBase',
-            'entityFriendlyName': 'MSSQLSERVER/msdb [sarathvm]',
+            'entityFriendlyName': 'msdb',
             'tpit': 'SQLInstance',
             'titem': 'MSSQLSERVER'
         })
@@ -901,7 +885,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             f.write(self.kwargs['rc'])
 
         self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
@@ -916,7 +899,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             f.write(self.kwargs['rc'])
 
         self.kwargs['backup_job'] = self.cmd('backup restore restore-azurewl --vault-name {vault} -g {rg} --recovery-config recoveryconfig.json', checks=[
-            self.check("properties.entityFriendlyName", '{entityFriendlyName}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')

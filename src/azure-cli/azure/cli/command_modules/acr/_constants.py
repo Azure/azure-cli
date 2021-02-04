@@ -23,6 +23,8 @@ ACR_CACHED_BUILDER_IMAGES = ('cloudfoundry/cnb:bionic',)
 
 ACR_NULL_CONTEXT = '/dev/null'
 
+ACR_TASK_QUICKTASK = 'quicktask'
+
 
 def get_classic_sku(cmd):
     SkuName = cmd.get_models('SkuName')

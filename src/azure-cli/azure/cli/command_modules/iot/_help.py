@@ -399,9 +399,9 @@ examples:
   - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
     text: >
         az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku F1 --partition-count 2
-  - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
+  - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region, with tags.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus --tags a=b c=d
 """
 
 helps['iot hub delete'] = """
@@ -764,6 +764,28 @@ examples:
     text: |
         az iot hub update --name MyIotHub --set properties.allocationPolicy="GeoLatency"
     crafted: true
+  - name: Update units of an IoT Hub to 2 and add tags
+    text: >
+        az iot hub update -n MyIotHub --unit 2 --tags a=b c=d
+  - name: Update pricing tier for an IoT Hub as S2
+    text: >
+        az iot hub update -n MyIotHub --sku S2
+  - name: Update the retention days of IoT Hub device-to-cloud events as 3 days
+    text: >
+        az iot hub update -n MyIotHub --retention-day 3
+  - name: Update the IoT Hub cloud-to-device messaging settings
+    text: >
+        az iot hub update --name MyIotHub --c2d-max-delivery-count 30 --c2d-ttl 5
+  - name: Update the IoT Hub feedback queue settings
+    text: >
+        az iot hub update --name MyIoTHub --feedback-max-delivery-count 20 --feedback-lock-duration 100 --feedback-ttl 4
+  - name: Update the IoT Hub file upload settings
+    text: >
+        az iot hub update -n MyIoTHub --fileupload-sas-ttl 5 --fileupload-storage-auth-type identityBased
+  - name: Update the IoT Hub file upload notification settings
+    text: >
+        az iot hub update -n MyIoTHub --fileupload-notification-max-delivery-count 50
+        --fileupload-notification-ttl 48 --fileupload-notifications
 """
 
 helps['iot central'] = """

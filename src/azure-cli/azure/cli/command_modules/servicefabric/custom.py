@@ -23,6 +23,7 @@ from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
+from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -809,10 +810,10 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
 
     if address_prefix is None:
         raise CLIError("Failed to generate the address prefix")
-    poller = network_client.subnets.create_or_update(resource_group_name,
-                                                     virtual_network.name,
-                                                     subnet_name,
-                                                     Subnet(address_prefix=address_prefix))
+    poller = network_client.subnets.begin_create_or_update(resource_group_name,
+                                                           virtual_network.name,
+                                                           subnet_name,
+                                                           Subnet(address_prefix=address_prefix))
 
     subnet = LongRunningOperation(cli_ctx)(poller)
 
@@ -824,11 +825,11 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                   node_type_name.lower(), index)
     if len(lb_name) >= 24:
         lb_name = '{}{}'.format(lb_name[0:21], index)
-    poller = network_client.public_ip_addresses.create_or_update(resource_group_name,
-                                                                 public_address_name,
-                                                                 PublicIPAddress(public_ip_allocation_method='Dynamic',
-                                                                                 location=location,
-                                                                                 dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
+    poller = network_client.public_ip_addresses.begin_create_or_update(resource_group_name,
+                                                                       public_address_name,
+                                                                       PublicIPAddress(public_ip_allocation_method='Dynamic',
+                                                                                       location=location,
+                                                                                       dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
 
     publicIp = LongRunningOperation(cli_ctx)(poller)
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -905,7 +906,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
                                                                        frontend_port_range_start=DEFAULT_FRONTEND_PORT_RANGE_START,
                                                                        frontend_port_range_end=DEFAULT_FRONTEND_PORT_RANGE_END)])
 
-    poller = network_client.load_balancers.create_or_update(
+    poller = network_client.load_balancers.begin_create_or_update(
         resource_group_name, lb_name, new_load_balancer)
     LongRunningOperation(cli_ctx)(poller)
 
@@ -1260,24 +1261,6 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, se
 
     for t in threads:
         t.join()
-
-
-def _get_resource_group_by_name(cli_ctx, resource_group_name):
-    try:
-        resouce_client = resource_client_factory(cli_ctx).resource_groups
-        return resouce_client.get(resource_group_name)
-    except Exception as ex:  # pylint: disable=broad-except
-        error = getattr(ex, 'Azure Error', ex)
-        if error != 'ResourceGroupNotFound':
-            return None
-        raise
-
-
-def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
-    ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
-    client = resource_client_factory(cli_ctx).resource_groups
-    parameters = ResourceGroup(location=location, tags=tags)
-    client.create_or_update(rg_name, parameters)
 
 
 # pylint: disable=inconsistent-return-statements

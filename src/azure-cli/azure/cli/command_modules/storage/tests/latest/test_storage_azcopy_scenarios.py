@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import shutil
+from datetime import datetime, timedelta
 from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                api_version_constraint)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
@@ -222,15 +223,14 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage remove --share-name {} --recursive',
                          account_info, s2)
         self.storage_cmd('storage file list -s {}', account_info, s2) \
-            .assert_with_checks(JMESPathCheck('length(@)', 1)) \
-            .assert_with_checks(JMESPathCheck('[0].type', 'dir'))
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_url(self, resource_group, first_account, second_account, test_dir):
-
+        import os
         first_account_info = self.get_account_info(resource_group, first_account)
         second_account_info = self.get_account_info(resource_group, second_account)
 
@@ -243,16 +243,18 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         first_container_url = '{}/{}'.format(first_account_url, first_container)
         second_container_url = '{}/{}'.format(second_account_url, second_container)
 
-        import os
+        # test validation
+        self.cmd('storage copy -s "{}" -d "{}" --destination-container test'
+                 .format(os.path.join(test_dir, 'readme'), first_container_url), expect_failure=True)
+
         # Upload a single file
         content_type = "application/json"
         self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
             os.path.join(test_dir, 'readme'), first_container_url, content_type))
         self.storage_cmd('storage blob list -c {}', first_account_info, first_container)\
             .assert_with_checks(JMESPathCheck('length(@)', 1))
-        self.cmd('storage blob show -n {} -c {} --account-name {}'
-                 .format('readme', first_container, first_account),
-                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
+        self.storage_cmd('storage blob show -n {} -c {} ', first_account_info, 'readme', first_container)\
+            .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', content_type))
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
@@ -331,10 +333,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         first_container = self.create_container(first_account_info)
         second_container = self.create_container(second_account_info)
 
+        first_account_url = 'https://{}.blob.core.windows.net'.format(first_account)
+
         import os
+        # test validation
+        self.cmd(
+            'storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} '
+            '--destination {} '.format(
+                os.path.join(test_dir, 'readme'), first_account, first_container, first_account_url),
+            expect_failure=True)
+
         # Upload a single file
-        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {}'.format(
-            os.path.join(test_dir, 'readme'), first_account, first_container))
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {}'
+                 .format(os.path.join(test_dir, 'readme'), first_account, first_container))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
 
@@ -403,6 +414,80 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(second_account), checks=JMESPathCheck('length(@)', 2))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, second_account), checks=JMESPathCheck('length(@)', 22))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
+    @StorageTestFilesPreparer()
+    def test_storage_azcopy_blob_source_with_credential(self, resource_group, first_account, second_account, test_dir):
+
+        first_account_info = self.get_account_info(resource_group, first_account)
+        second_account_info = self.get_account_info(resource_group, second_account)
+
+        first_container = self.create_container(first_account_info)
+        second_container = self.create_container(second_account_info)
+
+        import os
+        # Upload a single file with destination account key
+        self.storage_cmd('storage copy --source-local-path "{}" --destination-container {}', first_account_info,
+                         os.path.join(test_dir, 'readme'), first_container)
+        self.storage_cmd('storage blob list -c {} ', first_account_info, first_container, first_account)\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Upload entire directory with destination connection string
+        first_connection_string = self.cmd('storage account show-connection-string -n {} -o tsv'.format(
+            first_account)).output.strip()
+        self.cmd('storage copy --source-local-path "{}" --destination-container {} --recursive --connection-string {}'
+                 .format(os.path.join(test_dir, 'apple'), first_container, first_connection_string))
+        self.storage_cmd('storage blob list -c {}', first_account_info, first_container)\
+            .assert_with_checks(JMESPathCheck('length(@)', 11))
+
+        # Download a single file with source account key
+        local_folder = self.create_temp_dir()
+        self.cmd('storage copy --source-account-name {} --source-account-key {} --source-container {} --source-blob {} '
+                 '--destination-local-path "{}"'.format(first_account, first_account_info[1].strip(), first_container,
+                                                        'readme', local_folder))
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download entire directory with source connection string
+        self.cmd('storage copy --source-connection-string {} --source-container {} --source-blob {} '
+                 '--destination-local-path "{}" --recursive'.format(first_connection_string, first_container,
+                                                                    'apple/', local_folder))
+        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download a set of files with source sas token
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        first_sas_token = self.cmd(
+            'storage container generate-sas --connection-string {} -n {} --expiry {} --permissions {} -o tsv'.format(
+                first_connection_string, first_container, expiry, 'rwalcd')).output.strip()
+        self.cmd('storage copy --source-account-name {} --source-sas {} --source-container {} --include-path {} '
+                 '--include-pattern {} --destination-local-path "{}" --recursive'
+                 .format(first_account, first_sas_token, first_container, 'apple', 'file*', local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Copy a single blob to another single blob with sas token
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        second_sas_token = self.storage_cmd(
+            'storage container generate-sas -n {} --expiry {} --permissions {} -o tsv', second_account_info,
+            second_container, expiry, 'acdlrw').output.strip()
+        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --source-sas {} '
+                 '--account-name {} --destination-container {} --sas-token {} '
+                 '--preserve-s2s-access-tier false'
+                 .format(first_account, first_container, 'readme', first_sas_token,
+                         second_account, second_container, second_sas_token))
+        self.storage_cmd('storage blob list -c {} ', second_account_info, second_container).assert_with_checks(
+            JMESPathCheck('length(@)', 1))
+
+        # Copy an entire storage account data to another blob account with account key
+        self.storage_cmd('storage copy --source-account-name {} --source-account-key {} --recursive '
+                         '--preserve-s2s-access-tier false', second_account_info, first_account,
+                         first_account_info[1].strip())
+        self.storage_cmd('storage container list ', second_account_info).assert_with_checks(
+            JMESPathCheck('length(@)', 2))
+        self.storage_cmd('storage blob list -c {} ', second_account_info, first_container)\
+            .assert_with_checks(JMESPathCheck('length(@)', 11))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

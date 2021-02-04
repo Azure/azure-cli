@@ -4,6 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 
+def create_log_analytics_workspace_linked_storage_accounts(client, resource_group_name, workspace_name,
+                                                           data_source_type, storage_account_ids):
+    from azure.mgmt.loganalytics.models import LinkedStorageAccountsResource
+    linked_storage_accounts = LinkedStorageAccountsResource(storage_account_ids=storage_account_ids)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   data_source_type=data_source_type,
+                                   parameters=linked_storage_accounts)
+
+
 def add_log_analytics_workspace_linked_storage_accounts(client, resource_group_name, workspace_name,
                                                         data_source_type, storage_account_ids):
     linked_storage_accounts = client.get(resource_group_name=resource_group_name,
@@ -13,7 +23,7 @@ def add_log_analytics_workspace_linked_storage_accounts(client, resource_group_n
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
                                    data_source_type=data_source_type,
-                                   storage_account_ids=linked_storage_accounts.storage_account_ids)
+                                   parameters=linked_storage_accounts)
 
 
 def remove_log_analytics_workspace_linked_storage_accounts(client, resource_group_name, workspace_name,
@@ -28,4 +38,4 @@ def remove_log_analytics_workspace_linked_storage_accounts(client, resource_grou
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
                                    data_source_type=data_source_type,
-                                   storage_account_ids=linked_storage_accounts.storage_account_ids)
+                                   parameters=linked_storage_accounts)

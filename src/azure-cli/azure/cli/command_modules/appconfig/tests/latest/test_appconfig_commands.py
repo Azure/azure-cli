@@ -19,7 +19,6 @@ from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants,
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
 
 
 class AppConfigMgmtScenarioTest(ScenarioTest):
@@ -395,6 +394,34 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
+        # add a key-value with null label
+        kv_with_null_label = 'KvWithNullLabel'
+        self.kwargs.update({
+            'key': kv_with_null_label
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} -y',
+                 checks=[self.check('key', kv_with_null_label),
+                         self.check('label', None)])
+
+        # List key-values with null label
+        null_label_pattern = "\\0"
+        self.kwargs.update({
+            'null_label': null_label_pattern
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{null_label}"').get_output_in_json()
+        assert len(list_keys) == 2
+
+        # List key-values with multiple labels
+        multi_labels = entry_label + ',' + null_label_pattern
+        self.kwargs.update({
+            'multi_labels': multi_labels
+        })
+        list_keys = self.cmd(
+            'appconfig kv list --connection-string {connection_string} --label "{multi_labels}"').get_output_in_json()
+        assert len(list_keys) == 3
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @KeyVaultPreparer()
@@ -432,14 +459,15 @@ class AppConfigKVScenarioTest(ScenarioTest):
                  checks=[self.check('[0].key', secret_name),
                          self.check('[0].value', secret_value)])
 
-        exported_file_path = 'export_keyvault.json'
+        exported_file_path = os.path.join(TEST_DIR, 'export_keyvault.json')
+
         self.kwargs.update({
             'import_source': 'file',
             'exported_file_path': exported_file_path,
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -613,7 +641,6 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
 class AppConfigAppServiceImportExportLiveScenarioTest(LiveScenarioTest):
 
-    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_appconfig_to_appservice_import_export(self, resource_group, location):
         config_store_name = self.create_random_name(prefix='ImportExportTest', length=24)
@@ -872,7 +899,7 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
         # Add duplicate features with different labels in src config store
         entry_feature = 'Beta'
-        internal_feature_key = FEATURE_FLAG_PREFIX + entry_feature
+        internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
         self.kwargs.update({
             'feature': entry_feature,
             'label': entry_label
@@ -1526,7 +1553,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         assert len(response_dict) == 4
 
         # List all features with null labels
-        null_label_pattern = ""
+        null_label_pattern = "\\0"
         self.kwargs.update({
             'label': null_label_pattern
         })
@@ -1643,13 +1670,22 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
-        # Invalid Pattern - contains multiple **
-        invalid_pattern = '**ta'
+        # Invalid Pattern - starts with *
+        invalid_pattern = '*Beta'
         self.kwargs.update({
             'feature': invalid_pattern
         })
 
-        with self.assertRaisesRegexp(CLIError, "Regular expression error in parsing"):
+        with self.assertRaisesRegexp(CLIError, "Bad Request"):
+            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+
+        # Invalid Pattern - contains multiple **
+        invalid_pattern = 'Beta**'
+        self.kwargs.update({
+            'feature': invalid_pattern
+        })
+
+        with self.assertRaisesRegexp(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
 
         # Delete Beta (label v2) feature flag using connection-string
@@ -1755,7 +1791,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
                          self.check('conditions', default_conditions)])
 
         first_filter_name = 'FirstFilter'
-        first_filter_params = 'Name1=Value1 Name2=Value2 Name1=Value1.1 Name3 Name4={\\"key\\":\\"value\\"}'
+        first_filter_params = 'Name1=[\\"Value1\\",\\"Value1.1\\"] Name2=\\"Value2\\" Name3 Name4={\\"key\\":\\"value\\"}'
         first_filter_params_output = {
             "Name1": [
                 "Value1",
@@ -1763,7 +1799,9 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             ],
             "Name2": "Value2",
             "Name3": "",
-            "Name4": "{\"key\":\"value\"}"
+            "Name4": {
+                "key": "value"
+            }
         }
 
         # Add filters
@@ -1778,7 +1816,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         # Add another unique filter
         second_filter_name = 'SecondFilter'
-        second_filter_params = 'Foo=Bar=value name=Foo=Bar {\\"Value\\":\\"50\\",\\"SecondValue\\":\\"75\\"}=ParamNameIsJsonString'
+        second_filter_params = 'Foo=\\"Bar=value\\" name=\\"Foo=Bar\\" {\\"Value\\":\\"50\\",\\"SecondValue\\":\\"75\\"}=\\"ParamNameIsJsonString\\"'
         second_filter_params_output = {
             "Foo": "Bar=value",
             "name": "Foo=Bar",
@@ -1858,6 +1896,73 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         # List Filters when no filters present
         self.cmd('appconfig feature filter list -n {config_store_name} --feature {feature} --label {label}',
                  checks=NoneCheck())
+
+        # Error on adding filter parameters with invalid JSON escaped string
+        invalid_filter_name = 'InvalidFilter'
+        invalid_filter_params = 'Name1=Value1'
+        self.kwargs.update({
+            'filter_name': invalid_filter_name,
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, "Filter parameter value must be a JSON escaped string"):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Error on adding duplicate filter parameters
+        invalid_filter_params = 'Name1=10 Name1=20'
+        self.kwargs.update({
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Error on filter parameter with empty name
+        invalid_filter_params = '=value'
+        self.kwargs.update({
+            'filter_parameters': invalid_filter_params
+        })
+        with self.assertRaisesRegexp(CLIError, 'Parameter name cannot be empty.'):
+            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+
+        # Test more inputs for filter param value
+        filter_name = 'NewFilter'
+        filter_params = 'ArrayParam=[1,2,\\"three\\"] BoolParam=true NullParam=null'
+        filter_params_output = {
+            "ArrayParam": [
+                1,
+                2,
+                "three"
+            ],
+            # This is the output in python object format - our backend stores the bool and null values in correct JSON format
+            "BoolParam": True,
+            "NullParam": None
+        }
+
+        self.kwargs.update({
+            'filter_name': filter_name,
+            'filter_parameters': filter_params
+        })
+
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+                 checks=[self.check('name', filter_name),
+                         self.check('parameters', filter_params_output)])
+
+        # Different ways to set empty string as filter param value
+        filter_params = 'EmptyStr1 EmptyStr2= EmptyStr3="" EmptyStr4=\\"\\"'
+        filter_params_output = {
+            "EmptyStr1": "",
+            "EmptyStr2": "",
+            "EmptyStr3": "",
+            "EmptyStr4": ""
+        }
+
+        self.kwargs.update({
+            'filter_name': filter_name,
+            'filter_parameters': filter_params
+        })
+
+        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+                 checks=[self.check('name', filter_name),
+                         self.check('parameters', filter_params_output)])
 
 
 class AppConfigKeyValidationScenarioTest(ScenarioTest):
@@ -1944,6 +2049,159 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with open(actual_export_file_path) as json_file:
             actual_export = json.load(json_file)
         assert expected_export == actual_export
+
+
+class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
+
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_aad_auth(self, resource_group, location):
+        config_store_name = self.create_random_name(prefix='AadTest', length=15)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Get connection string and add a key-value and feature flag using the default "key" auth mode
+        credential_list = self.cmd(
+            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
+        self.kwargs.update({
+            'connection_string': credential_list[0]['connectionString']
+        })
+
+        # Add a key-value
+        entry_key = "Color"
+        entry_value = "Red"
+        self.kwargs.update({
+            'key': entry_key,
+            'value': entry_value
+        })
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', entry_value)])
+
+        # add a feature flag
+        entry_feature = 'Beta'
+        default_description = None
+        default_conditions = "{{u\'client_filters\': []}}" if sys.version_info[0] < 3 else "{{\'client_filters\': []}}"
+        default_locked = False
+        default_state = "off"
+        self.kwargs.update({
+            'feature': entry_feature,
+            'description': default_description
+        })
+        self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('key', entry_feature),
+                         self.check('description', default_description),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # Get information about account logged in with 'az login'
+        appconfig_id = self.cmd('appconfig show -n {config_store_name} -g {rg}').get_output_in_json()['id']
+        account_info = self.cmd('account show').get_output_in_json()
+        endpoint = "https://" + config_store_name + ".azconfig.io"
+        self.kwargs.update({
+            'appconfig_id': appconfig_id,
+            'user_id': account_info['user']['name'],
+            'endpoint': endpoint
+        })
+
+        # Before assigning data reader role, read operation should fail with AAD auth.
+        # The exception really depends on the which identity is used to run this testcase.
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
+            self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}')
+
+        # Assign data reader role to current user
+        self.cmd('role assignment create --assignee {user_id} --role "App Configuration Data Reader" --scope {appconfig_id}')
+        time.sleep(900)  # It takes around 15 mins for RBAC permissions to propagate
+
+        # After asssigning data reader role, read operation should succeed
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key}',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', entry_value)])
+
+        # Since the logged in account also has "Contributor" role, providing --name instead of --endpoint should succeed
+        self.cmd('appconfig feature show --name {config_store_name} --auth-mode login --feature {feature}',
+                 checks=[self.check('locked', default_locked),
+                         self.check('key', entry_feature),
+                         self.check('description', default_description),
+                         self.check('state', default_state),
+                         self.check('conditions', default_conditions)])
+
+        # Write operations should fail with "Forbidden" error
+        updated_value = "Blue"
+        self.kwargs.update({
+            'value': updated_value
+        })
+        with self.assertRaisesRegex(CLIError, "Operation returned an invalid status 'Forbidden'"):
+            self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y')
+
+        # Export from appconfig to file should succeed
+        exported_file_path = os.path.join(TEST_DIR, 'export_aad_1.json')
+        expected_exported_file_path = os.path.join(TEST_DIR, 'expected_export_aad_1.json')
+        self.kwargs.update({
+            'import_source': 'file',
+            'imported_format': 'json',
+            'separator': '/',
+            'exported_file_path': exported_file_path
+        })
+        self.cmd(
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+        with open(expected_exported_file_path) as json_file:
+            expected_exported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert expected_exported_kvs == exported_kvs
+
+        # Assign data owner role to current user
+        self.cmd('role assignment create --assignee {user_id} --role "App Configuration Data Owner" --scope {appconfig_id}')
+        time.sleep(900)  # It takes around 15 mins for RBAC permissions to propagate
+
+        # After assigning data owner role, write operation should succeed
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', updated_value)])
+
+        # Add a KeyVault reference
+        keyvault_key = "HostSecrets"
+        keyvault_id = "https://fake.vault.azure.net/secrets/fakesecret"
+        appconfig_keyvault_value = "{{\"uri\":\"https://fake.vault.azure.net/secrets/fakesecret\"}}"
+        self.kwargs.update({
+            'key': keyvault_key,
+            'secret_identifier': keyvault_id
+        })
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} -y',
+                 checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
+                         self.check('key', keyvault_key),
+                         self.check('value', appconfig_keyvault_value)])
+
+        # Import to appconfig should succeed
+        imported_file_path = os.path.join(TEST_DIR, 'import_aad.json')
+        exported_file_path = os.path.join(TEST_DIR, 'export_aad_2.json')
+        expected_exported_file_path = os.path.join(TEST_DIR, 'expected_export_aad_2.json')
+        self.kwargs.update({
+            'imported_file_path': imported_file_path,
+            'exported_file_path': exported_file_path
+        })
+        self.cmd(
+            'appconfig kv import --endpoint {endpoint} --auth-mode login -s {import_source} --path "{imported_file_path}" --format {imported_format} --separator {separator} -y')
+
+        # Export from appconfig to file should succeed
+        self.cmd(
+            'appconfig kv export --endpoint {endpoint} --auth-mode login -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
+        with open(expected_exported_file_path) as json_file:
+            expected_exported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert expected_exported_kvs == exported_kvs
 
 
 def _create_config_store(test, kwargs):

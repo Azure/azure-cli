@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck
 from ..storage_test_util import StorageScenarioMixin
 
 
@@ -85,8 +85,9 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
                                ' --expiry {}', account_info, source_container, start,
                                expiry).output.strip()
 
-        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {}',
-                         account_info, target_container, sas, source_container)
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {} '
+                         '--source-if-unmodified-since "2020-06-29T06:32Z" --destination-if-modified-since '
+                         '"2020-06-29T06:32Z" ', account_info, target_container, sas, source_container)
 
         from time import sleep, time
         start = time()
@@ -131,3 +132,25 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
             actual_content = f.read()
 
         self.assertEqual(expect_content, actual_content)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='storageV2')
+    def test_storage_blob_copy_requires_sync(self, resource_group, storage_account):
+        source_file = self.create_temp_file(16, full_random=True)
+        account_info = self.get_account_info(resource_group, storage_account)
+
+        source_container = self.create_container(account_info)
+        target_container = self.create_container(account_info)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n src', account_info,
+                         source_container, source_file)
+        source_uri = self.storage_cmd('storage blob url -c {} -n src', account_info, source_container).output
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-uri {}', account_info,
+                         target_container, source_uri)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n pagesrc --type page', account_info,
+                         source_container, source_file)
+        source_uri = self.storage_cmd('storage blob url -c {} -n pagesrc', account_info, source_container).output
+        # expect failure with page blob
+        self.storage_cmd_negative('storage blob copy start -b dst -c {} --source-uri {} --requires-sync', account_info,
+                                  target_container, source_uri)

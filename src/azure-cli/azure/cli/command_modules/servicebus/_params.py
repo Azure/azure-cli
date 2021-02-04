@@ -174,7 +174,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
     # Region Subscription Rules
-    # Rules Create
+    # Region Rules Create
 
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')

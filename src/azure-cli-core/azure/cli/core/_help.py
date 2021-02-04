@@ -7,8 +7,6 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
-                                               UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -178,10 +176,39 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
         show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
+        from azure.cli.core.commands.constants import (SURVEY_PROMPT_STYLED, UX_SURVEY_PROMPT_STYLED)
+        from azure.cli.core.style import print_styled_text
         if show_link:
-            print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
+            print_styled_text(SURVEY_PROMPT_STYLED)
             if not nouns:
-                print(UX_SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else UX_SURVEY_PROMPT)
+                print_styled_text(UX_SURVEY_PROMPT_STYLED)
+
+    def get_examples(self, command, parser, is_group):
+        """Get examples of a certain command from the help file.
+        Get the text of the example, strip the newline character and
+        return a list of commands which start with the given command name.
+        """
+        nouns = command.split(' ')[1:]
+        self.update_loaders_with_help_file_contents(nouns)
+
+        delimiters = ' '.join(nouns)
+        help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
+            else self.group_help_cls(self, delimiters, parser)
+        help_file.load(parser)
+
+        def strip_command(command):
+            command = command.replace('\\\n', '')
+            contents = [item for item in command.split(' ') if item]
+            return ' '.join(contents).strip()
+
+        examples = []
+        for example in help_file.examples:
+            examples.append({
+                'command': strip_command(example.command),
+                'description': example.name
+            })
+
+        return examples
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders

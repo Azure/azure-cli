@@ -81,10 +81,21 @@ class ProfileCommandTest(unittest.TestCase):
         }
         self.assertEqual(result, expected_result)
 
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_raw_token_managed_identity(self, get_raw_token_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
         # test get token with Managed Identity
+        tenant_id = '00000000-0000-0000-0000-000000000000'
         get_raw_token_mock.return_value = (['bearer', 'token123', {'expires_on': '1593497681'}], None, tenant_id)
-        result = get_access_token(cmd, tenant=tenant_id)
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, tenant_id)
+
+        import datetime
+        # Force POSIX timestamp to be converted to datetime in UTC during testing.
+        with mock.patch('azure.cli.command_modules.profile.custom._fromtimestamp', datetime.datetime.utcfromtimestamp):
+            result = get_access_token(cmd)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/', None, None)
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',

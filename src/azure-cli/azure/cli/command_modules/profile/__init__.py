@@ -76,7 +76,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('account get-access-token') as c:
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
-            c.argument('tenant', options_list=['--tenant', '-t'], is_preview=True, help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
+            c.argument('tenant', options_list=['--tenant', '-t'], help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
