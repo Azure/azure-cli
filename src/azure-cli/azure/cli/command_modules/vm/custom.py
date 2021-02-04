@@ -14,7 +14,7 @@
 from __future__ import print_function
 
 # from .generated.custom import *  # noqa: F403
-from azure.cli.core.azclierror import ValidationError
+
 
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-import,unused-wildcard-import,wildcard-import
@@ -38,6 +38,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
