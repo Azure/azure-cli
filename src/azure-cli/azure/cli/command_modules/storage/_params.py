@@ -21,7 +21,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_delete_retention_days, validate_container_delete_retention_days,
                           validate_file_delete_retention_days,
                           validate_fs_public_access, validate_logging_version, validate_or_policy, validate_policy,
-                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator)
+                          get_api_version_type, blob_download_file_path_validator, blob_tier_validator,
+                          validate_source_url)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -658,6 +659,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group="Content Control")
         c.register_precondition_options(prefix='source_')
         c.register_precondition_options()
+        c.register_source_uri_arguments(validator=validate_source_url, blob_only=False)
 
         c.argument('if_match', options_list=['--destination-if-match'])
         c.argument('if_modified_since', options_list=['--destination-if-modified-since'])

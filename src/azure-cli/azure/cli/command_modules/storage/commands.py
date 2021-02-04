@@ -303,7 +303,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('query', 'query_blob',
                                        is_preview=True, min_api='2019-12-12')
         g.storage_command_oauth('rewrite', 'upload_blob_from_url',
-                                       is_preview=True, min_api='2020-04-08')
+                                 is_preview=True, min_api='2020-04-08')
 
     blob_lease_client_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.blob._lease#BlobLeaseClient.{}',
