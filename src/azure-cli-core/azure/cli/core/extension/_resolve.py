@@ -90,13 +90,16 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
     download_url, digest = chosen.get('downloadUrl'), chosen.get('sha256Digest')
     if not download_url:
         raise NoExtensionCandidatesError("No download url found.")
-    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
-        cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
+    azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
     config_index_url = cli_ctx.config.get('extension', 'index_url', None) if cli_ctx else None
-    if ext_endpoint and not config_index_url:
+    if azmirror_endpoint and not config_index_url:
+        # when extension index and wheels are mirrored in airgapped clouds from public cloud
+        # the content of the index.json is not updated, so we need to modify the wheel url got
+        # from the index.json here.
         import posixpath
         whl_name = download_url.split('/')[-1]
-        download_url = posixpath.join(ext_endpoint, whl_name)
+        download_url = posixpath.join(azmirror_endpoint, 'extensions', whl_name)
     return download_url, digest
 
 

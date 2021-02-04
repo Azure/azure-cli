@@ -20,14 +20,20 @@ TRIES = 3
 
 
 def get_index_url(cli_ctx=None):
+    """Use extension index url in the order of:
+    1. Environment variable: AZURE_EXTENSION_INDEX_URL
+    2. Config setting: extension.index_url
+    3. Index file in azmirror storage account cloud endpoint
+    4. DEFAULT_INDEX_URL
+    """
     import posixpath
     if cli_ctx:
         url = cli_ctx.config.get('extension', 'index_url', None)
         if url:
             return url
-    ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
-        cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
-    return posixpath.join(ext_endpoint, 'index.json') if ext_endpoint else DEFAULT_INDEX_URL
+    azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+        cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
+    return posixpath.join(azmirror_endpoint, 'extensions', 'index.json') if azmirror_endpoint else DEFAULT_INDEX_URL
 
 
 # pylint: disable=inconsistent-return-statements
