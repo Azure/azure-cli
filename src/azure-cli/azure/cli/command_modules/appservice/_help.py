@@ -931,6 +931,16 @@ examples:
     text: az functionapp vnet-integration remove -g MyResourceGroup -n MyFunctionapp -s [slot]
 """
 
+helps['functionapp deploy'] = """
+    type: command
+    short-summary: Deploys a provided artifact to Azure functionapp.
+    examples:
+    - name: Deploy a war file asynchronously.
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type war --async IsAsync
+    - name: Deploy a static text file to wwwroot/staticfiles/test.txt
+      text: az functionapp deploy --resource-group ResouceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+"""
+
 helps['webapp'] = """
 type: group
 short-summary: Manage web apps.
