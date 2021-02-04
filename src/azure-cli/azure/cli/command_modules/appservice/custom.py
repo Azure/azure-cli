@@ -2579,7 +2579,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
     if not found_cert:
-        webapp_certs = client.certificates.list()
+        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
