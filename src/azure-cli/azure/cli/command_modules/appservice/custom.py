@@ -63,7 +63,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src, get_current_stack_from_runtime, generate_default_app_name)
 from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
                          FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
-                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS)
+                         NODE_EXACT_VERSION_DEFAULT, RUNTIME_STACKS, FUNCTIONS_NO_V2_REGIONS, PUBLIC_CLOUD)
 
 logger = get_logger(__name__)
 
@@ -2439,17 +2439,24 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
 
-    if kv_subscription.lower() != client.config.subscription_id.lower():
-        diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                           subscription_id=kv_subscription)
-        ascs = diff_subscription_client.app_service_certificate_orders.list()
-    else:
-        ascs = client.app_service_certificate_orders.list()
-
+    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
+    # subscription
     kv_secret_name = None
-    for asc in ascs:
-        if asc.name == key_vault_certificate_name:
-            kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+    cloud_type = cmd.cli_ctx.cloud.name
+    if cloud_type.lower() == PUBLIC_CLOUD.lower():
+        if kv_subscription.lower() != client.config.subscription_id.lower():
+            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                               subscription_id=kv_subscription)
+            ascs = diff_subscription_client.app_service_certificate_orders.list()
+        else:
+            ascs = client.app_service_certificate_orders.list()
+
+        kv_secret_name = None
+        for asc in ascs:
+            if asc.name == key_vault_certificate_name:
+                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+
+    # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
