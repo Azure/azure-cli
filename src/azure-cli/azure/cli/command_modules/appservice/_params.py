@@ -644,7 +644,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp deploy') as c:
-        c.argument('name', options_list=['--name'], help='Name of the webapp to connect to')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the webapp to connect to')
         c.argument('src_path', options_list=['--src-path'], help='Path of the file to be deployed. Example: /mnt/apps/myapp.war')
         c.argument('src_url', options_list=['--src-url'], help='url to download the package from. Example: http://mysite.com/files/myapp.war?key=123')
         c.argument('target_path', options_list=['--target-path'], help='Target path relative to wwwroot to which the file will be deployed to.')

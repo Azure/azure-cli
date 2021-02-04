@@ -4154,10 +4154,10 @@ def _make_onedeploy_request(params):
             response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
                                                          deployment_status_url, headers, params.timeout)
             logger.info('Async deployment complete. Server response: %s', response_body)
-        return
+        return response_body
 
     if response.status_code == 200:
-        return
+        return response
 
     # API not available yet!
     if response.status_code == 404:
@@ -4182,9 +4182,9 @@ def _perform_onedeploy_internal(params):
 
     # Now make the OneDeploy API call
     logger.info("Initiating deployment")
-    _make_onedeploy_request(params)
-
-    return logger.info("Deployment has completed successfully")
+    response = _make_onedeploy_request(params)
+    logger.info("Deployment has completed successfully")
+    return response
 
 
 def _wait_for_webapp(tunnel_server):
