@@ -412,7 +412,7 @@ class AzCliCommandParser(CLICommandParser):
                         if len(ext_name) > 1:
                             from knack.prompting import prompt_choice_list, NoTTYException
                             prompt_msg = "The command requires the latest version of one of the following " \
-                                    "extensions. You need to pick one to install:"
+                                "extensions. You need to pick one to install:"
                             try:
                                 choice_idx = prompt_choice_list(prompt_msg, ext_name)
                                 ext_name = ext_name[choice_idx]
