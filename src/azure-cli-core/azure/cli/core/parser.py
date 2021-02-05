@@ -302,9 +302,9 @@ class AzCliCommandParser(CLICommandParser):
             import requests
             from azure.cli.core.util import should_disable_connection_verify
             try:
-                ext_endpoint = cli_ctx.cloud.endpoints.extension_storage_account_resource_id if cli_ctx and \
-                    cli_ctx.cloud.endpoints.has_endpoint_set('extension_storage_account_resource_id') else None
-                url = posixpath.join(ext_endpoint, 'extensionCommandTree.json') if ext_endpoint else \
+                azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
+                    cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
+                url = posixpath.join(azmirror_endpoint, 'extensions', 'extensionCommandTree.json') if azmirror_endpoint else \
                     'https://aka.ms/azExtCmdTree'
                 response = requests.get(
                     url,
