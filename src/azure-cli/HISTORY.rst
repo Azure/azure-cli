@@ -28,7 +28,7 @@ Release History
 
 * az appservice ase/plan ASEv3 support (#16516)
 * Fix #16026 and #16118 for az appservice plan (#16516)
-* Add support for os-preference to fix #16509 (#16575)
+* Fix #16509: Add support for os-preference (#16575)
 * Improve behavior of appservice ase create-inbound-services to allow skipping DNS services and support DNS for ASEv2 (#16575)
 * `az webapp up/az webapp create`: Fix nonetype errors (#16605)
 * `az webapp up/create`: better error handling of app name with period (#16623)
