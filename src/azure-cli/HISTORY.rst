@@ -74,7 +74,7 @@ Release History
 
 **Monitor**
 
-* `az monitor metrics alert create`: fix resource is not found error (#16741)
+* `az monitor metrics alert create`: Fix 'resource is not found' error (#16741)
 
 **NetAppFiles**
 
