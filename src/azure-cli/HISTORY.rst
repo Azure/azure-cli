@@ -26,13 +26,13 @@ Release History
 
 **App Service**
 
-* az appservice ase/plan ASEv3 support (#16516)
+* `az appservice ase/plan`: Support ASEv3 (#16516)
 * Fix #16026 and #16118 for az appservice plan (#16516)
 * Fix #16509: Add support for os-preference (#16575)
 * Improve behavior of appservice ase create-inbound-services to allow skipping DNS services and support DNS for ASEv2 (#16575)
 * `az webapp up/az webapp create`: Fix nonetype errors (#16605)
 * `az webapp up/create`: better error handling of app name with period (#16623)
-* Fix #16681: `az webapp config ssl import`: fixing bug that causes failures on national clouds (#16701)
+* Fix #16681: `az webapp config ssl import`: Fix bug that causes failures on national clouds (#16701)
 
 **ARM**
 
@@ -86,6 +86,7 @@ Release History
 * `az network application-gateway create`: Add parameter `--ssl-profile-id` (#16762)
 * `az network application-gateway client-cert`: Manage trusted client certificate of application gateway (#16762)
 * `az network application-gateway ssl-profile`: Manage ssl profiles of application gateway (#16762)
+* Add support for private endpoint connections to DigitalTwins (#16668)
 
 **Profile**
 
@@ -122,7 +123,7 @@ Release History
 
 **Synapse**
 
-* `az synapse workspace create `: Add key-identifier parameter to support to create workspace using customer-managed key. (#16224)
+* `az synapse workspace create `: Add parameter `--key-identifier` to support to create workspace using customer-managed key. (#16224)
 * `az synapse workspace key`: Add CRUD cmdlets to support to manage keys under specified synapse workspace. (#16224)
 * `az synapse workspace managed-identity`: Add cmdlets to support CRUD managed identity to sql access setting. (#16224)
 * `az synapse workspace`: Add data exfiltration protection support, add parameter `--allowed-tenant-ids`. (#16224)
