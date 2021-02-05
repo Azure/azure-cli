@@ -3257,6 +3257,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
 
 
 class WebappOneDeployScenarioTest(ScenarioTest):
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_OneDeploy', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_one_deploy(self, resource_group):
         webapp_name = self.create_random_name('webapp-oneDeploy-test', 40)
