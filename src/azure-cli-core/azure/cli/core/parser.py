@@ -397,6 +397,7 @@ class AzCliCommandParser(CLICommandParser):
             caused_by_extension_not_installed = False
             command_name_inferred = self.prog
             error_msg = None
+            use_dynamic_install = 'no'
             if not self.command_source:
                 candidates = []
                 args = self.prog.split() + self._raw_arguments
@@ -410,9 +411,9 @@ class AzCliCommandParser(CLICommandParser):
                     if isinstance(ext_name, list):
                         if len(ext_name) > 1:
                             from knack.prompting import prompt_choice_list, NoTTYException
+                            prompt_msg = "The command requires the latest version of one of the following " \
+                                "extensions. You need to pick one to install:"
                             try:
-                                prompt_msg = "The command requires the latest version of one of the following " \
-                                    "extensions. You need to pick one to install:"
                                 choice_idx = prompt_choice_list(prompt_msg, ext_name)
                                 ext_name = ext_name[choice_idx]
                                 use_dynamic_install = 'yes_without_prompt'
