@@ -51,7 +51,7 @@ Release History
 **Compute**
 
 * [BREAKING CHANGE] vmss create: rename orchestration mode values (#16726)
-* New command group sshkey (#16331)
+* New command group sshkey. Allow referencing a SSH key resource when creating a VM (#16331)
 * `az disk create/update`: Add parameter `--enable-bursting` to support disk bursting (#16702)
 
 **DigitalTwins**
