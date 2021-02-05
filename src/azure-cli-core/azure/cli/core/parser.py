@@ -304,8 +304,8 @@ class AzCliCommandParser(CLICommandParser):
             try:
                 azmirror_endpoint = cli_ctx.cloud.endpoints.azmirror_storage_account_resource_id if cli_ctx and \
                     cli_ctx.cloud.endpoints.has_endpoint_set('azmirror_storage_account_resource_id') else None
-                url = posixpath.join(azmirror_endpoint, 'extensions', 'extensionCommandTree.json') if azmirror_endpoint else \
-                    'https://aka.ms/azExtCmdTree'
+                url = posixpath.join(azmirror_endpoint, 'extensions', 'extensionCommandTree.json') if \
+                    azmirror_endpoint else 'https://aka.ms/azExtCmdTree'
                 response = requests.get(
                     url,
                     verify=(not should_disable_connection_verify()),
