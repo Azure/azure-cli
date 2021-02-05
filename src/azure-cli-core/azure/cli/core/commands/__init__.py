@@ -25,7 +25,6 @@ from azure.cli.core.commands.constants import (
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
-from azure.cli.core.commands.alias_util import find_alias_and_transform_args
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
 from azure.cli.core.local_context import LocalContextAction
@@ -113,30 +112,31 @@ def _expand_file_prefixed_files(args):
     return list([_expand_file_prefix(arg) for arg in args])
 
 
-def _transform_args_with_built_in_alias(cli_ctx, args):
-    if not args:
-        return
-    if len(args) == 1 and args[0] == 'az':
-        return
+def _process_args_with_built_in_alias(cli_ctx, args):
+    # [] or ['az'] can just return
+    if not args or (len(args) == 1 and args[0] == 'az'):
+        return args
+
+    # Check core config
     transform_built_in_alias = cli_ctx.config.getboolean('core', 'transform_built_in_alias', fallback=True)
     if not transform_built_in_alias:
         return args
-    import configobj
-    alias_fp = os.path.join(os.path.dirname(__file__), 'built_in_alias')
-    alias_config = configobj.ConfigObj(alias_fp, interpolation=None)
+
+    # process args
+    from azure.cli.core.commands.alias_util import find_alias_and_transform_args
     if args[0] == 'az':
         args_transformed = ['az']
-        args_transformed.extend(find_alias_and_transform_args(args[1:], alias_config))
+        args_transformed.extend(find_alias_and_transform_args(args[1:], None))
         return args_transformed
-    return find_alias_and_transform_args(args, alias_config)
+    return find_alias_and_transform_args(args, None)
 
 
 def _pre_command_table_create(cli_ctx, args):
     cli_ctx.refresh_request_id()
-    args_transformed = _transform_args_with_built_in_alias(cli_ctx, args)
-    if args_transformed != args:
-        logger.warning('`{}` is alias of `{}`'.format(' '.join(args), ' '.join(args_transformed)))
-    return _expand_file_prefixed_files(args_transformed)
+    real_args = _process_args_with_built_in_alias(cli_ctx, args)
+    if real_args != args:
+        logger.warning('`{}` is an alias of `{}`'.format(' '.join(args), ' '.join(real_args)))
+    return _expand_file_prefixed_files(real_args)
 
 
 # pylint: disable=too-many-instance-attributes
