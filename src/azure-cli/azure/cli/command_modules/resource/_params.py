@@ -569,3 +569,10 @@ def load_arguments(self, _):
 
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
+
+    with self.argument_context('bicep build') as c:
+        c.argument('file', arg_type=CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(),
+                                                    type=file_type, help="a Bicep file path in the file system"))
+
+    with self.argument_context('bicep install') as c:
+        c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')

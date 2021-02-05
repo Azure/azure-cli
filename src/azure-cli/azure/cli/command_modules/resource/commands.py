@@ -431,3 +431,10 @@ def load_command_table(self, _):
     with self.command_group('account management-group subscription', resource_managementgroups_subscriptions_sdk, client_factory=cf_management_group_subscriptions) as g:
         g.custom_command('add', 'cli_managementgroups_subscription_add')
         g.custom_command('remove', 'cli_managementgroups_subscription_remove')
+
+    with self.command_group('bicep') as g:
+        g.custom_command('install', 'install_bicep_cli')
+        g.custom_command('upgrade', 'upgrade_bicep_cli')
+        g.custom_command('build', 'build_bicep_file')
+        g.custom_command('version', 'show_bicep_cli_version')
+        g.custom_command('list-versions', 'list_bicep_cli_versions')

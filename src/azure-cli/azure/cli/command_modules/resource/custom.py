@@ -45,6 +45,13 @@ from msrest.pipeline import SansIOHTTPPolicy
 
 from ._validators import MSI_LOCAL_ID
 from ._formatters import format_what_if_operation_result
+from ._bicep import (
+    run_bicep_command,
+    is_bicep_file,
+    ensure_bicep_installation,
+    get_bicep_latest_release_tag,
+    get_bicep_available_release_tags
+)
 
 logger = get_logger(__name__)
 
@@ -315,7 +322,11 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
-        template_content = read_file_content(template_file)
+        template_content = (
+            run_bicep_command("build", "--stdout", template_file)
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
@@ -884,7 +895,11 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
         template_link = TemplateLink(id=template_spec, mode="Incremental")
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
-        template_content = read_file_content(template_file)
+        template_content = (
+            run_bicep_command("build", "--stdout", template_file)
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
@@ -3163,3 +3178,20 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
 
         return _ResourceUtils.resolve_api_version(rcf, namespace, parent, resource_type,
                                                   latest_include_preview=latest_include_preview)
+
+def install_bicep_cli(cmd, version=None):
+    # The parameter version is actually a git tag here.
+    ensure_bicep_installation(release_tag=version, check_upgrade=False)
+
+def upgrade_bicep_cli(cmd):
+    latest_release_tag = get_bicep_latest_release_tag()
+    ensure_bicep_installation(release_tag=latest_release_tag)
+
+def build_bicep_file(cmd, file):
+    run_bicep_command("build", file)
+
+def show_bicep_cli_version(cmd):
+    print(run_bicep_command("--version"))
+
+def list_bicep_cli_versions(cmd):
+    return get_bicep_available_release_tags()
